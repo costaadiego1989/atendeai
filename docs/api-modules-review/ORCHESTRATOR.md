@@ -36,8 +36,8 @@
 | payment | [MODULE-payment.md](./MODULE-payment.md) | 2026-05-03 | Rascunho inicial |
 | platform-admin | [MODULE-platform-admin.md](./MODULE-platform-admin.md) | 2026-05-03 | Rascunho inicial |
 | prospecting | [MODULE-prospecting.md](./MODULE-prospecting.md) | 2026-05-03 | Rascunho inicial |
-| recovery | [MODULE-recovery.md](./MODULE-recovery.md) | 2026-05-03 | Rascunho inicial |
-| sales | [MODULE-sales.md](./MODULE-sales.md) | 2026-05-03 | Rascunho inicial |
+| recovery | [MODULE-recovery.md](./MODULE-recovery.md) | 2026-05-04 | Playbooks docs (LGPD, métricas, modelo configurável); código inalterado nesta revisão |
+| sales | [MODULE-sales.md](./MODULE-sales.md) | 2026-05-04 | Logs criação link + remarketing overdue WhatsApp; SKU opcional no link |
 | scheduling | [MODULE-scheduling.md](./MODULE-scheduling.md) | 2026-05-04 | Logs; idempotência payment.confirmed; TZ lembretes; hold pré-pagamento configurable + auto-cancel logs |
 | social | [MODULE-social.md](./MODULE-social.md) | 2026-05-03 | Rascunho inicial |
 | support | [MODULE-support.md](./MODULE-support.md) | 2026-05-03 | `appModule` + log criação; UI FAB contextual por rota (`ModuleFeedbackFab`) |
