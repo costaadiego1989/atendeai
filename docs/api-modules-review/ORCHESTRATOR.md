@@ -9,6 +9,7 @@
 2. Ajustar secções **Última análise**, **Riscos / acoplamento** e **Observabilidade** se o impacto for relevante.
 3. Atualizar a **tabela de estado** abaixo (data + nota de uma linha).
 4. Registar decisões duradouras no bloco **Decisões globais** (fim deste ficheiro).
+5. Para cenários de teste rastreáveis por módulo (API): ver [TESTING-MODULE-MATRIX.md](./TESTING-MODULE-MATRIX.md) e `src/api/modules/<módulo>/TEST-SPEC.md`.
 
 **Convenções das fichas**
 
@@ -31,7 +32,7 @@
 | catalog | [MODULE-catalog.md](./MODULE-catalog.md) | 2026-05-03 | Rascunho inicial |
 | commerce | [MODULE-commerce.md](./MODULE-commerce.md) | 2026-05-03 | Rascunho inicial |
 | contact | [MODULE-contact.md](./MODULE-contact.md) | 2026-05-03 | Rascunho inicial |
-| inventory | [MODULE-inventory.md](./MODULE-inventory.md) | 2026-05-03 | Rascunho inicial |
+| inventory | [MODULE-inventory.md](./MODULE-inventory.md) | 2026-05-04 | Sync horário; `lastSyncedAt` conexão; unit specs INV-*; TEST-SPEC no código |
 | messaging | [MODULE-messaging.md](./MODULE-messaging.md) | 2026-05-03 | `BillingQuotaMessagingHandlers` (consumidores quota billing → WhatsApp dono) |
 | payment | [MODULE-payment.md](./MODULE-payment.md) | 2026-05-03 | Rascunho inicial |
 | platform-admin | [MODULE-platform-admin.md](./MODULE-platform-admin.md) | 2026-05-03 | Rascunho inicial |
