@@ -20,6 +20,7 @@
 
 - Webhooks externos: importante **trace propagado ou id de correlacionamento WhatsApp meta** onde possível (`wamid` etc.) em structured logs (sem payloads completos quando sensíveis). **Feito:** `ProcessWebhookUseCase` emite eventos `messaging.webhook.*` com `external_message_id`, `tenant_id` e trace OTEL quando o span HTTP existir.
 - Processors outbound: log com `queueJobId`, `tenantId`, `conversationId`. **Feito:** `ProcessOutboundMessageUseCase` inclui esses campos nos eventos `messaging.outbound.*`; `OutboundMessageProcessor` envia `queueJobId` do Bull.
+- Fila **follow-up** (Bull `follow-up`): **Feito:** `FollowUpWorker` emite `messaging.follow_up.job_started`, `messaging.follow_up.job_completed` e `messaging.follow_up.worker_failed` com `queue_job_id`, `tenant_id`, `conversation_id` e intervalo.
 
 ## KISS / DRY
 
