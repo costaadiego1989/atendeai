@@ -38,7 +38,7 @@
 | prospecting | [MODULE-prospecting.md](./MODULE-prospecting.md) | 2026-05-03 | Rascunho inicial |
 | recovery | [MODULE-recovery.md](./MODULE-recovery.md) | 2026-05-03 | Rascunho inicial |
 | sales | [MODULE-sales.md](./MODULE-sales.md) | 2026-05-03 | Rascunho inicial |
-| scheduling | [MODULE-scheduling.md](./MODULE-scheduling.md) | 2026-05-03 | Rascunho inicial |
+| scheduling | [MODULE-scheduling.md](./MODULE-scheduling.md) | 2026-05-04 | Logs; idempotência payment.confirmed; TZ lembretes; hold pré-pagamento configurable + auto-cancel logs |
 | social | [MODULE-social.md](./MODULE-social.md) | 2026-05-03 | Rascunho inicial |
 | support | [MODULE-support.md](./MODULE-support.md) | 2026-05-03 | `appModule` + log criação; UI FAB contextual por rota (`ModuleFeedbackFab`) |
 | tenant | [MODULE-tenant.md](./MODULE-tenant.md) | 2026-05-03 | Read API `profile-sections` + onboarding checklist; ACLs canal com StructuredLogEmitter + tenantId |
