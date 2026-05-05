@@ -7,6 +7,10 @@
     "src/api",
     "src/web"
   ],
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.0.0",
+    "@rollup/rollup-linux-x64-musl": "^4.0.0"
+  },
   "scripts": {
     "install:all": "npm install",
     "build": "npm run build:api",
