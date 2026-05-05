@@ -1,0 +1,125 @@
+import { apiClient, BASE_URL } from '@/shared/api/client';
+import type {
+  BillingPlan,
+  BillingSubscriptionCatalog,
+  TenantBillingAccess,
+  UsageData,
+} from '@/shared/types';
+
+interface BackendUsageResponse {
+  tenantId: string;
+  plan: string;
+  scheduledPlan?: string;
+  currentPeriod: {
+    start?: string;
+    end?: string;
+  };
+  usage: {
+    messages: { used: number; quota: number };
+    aiTokens: { used: number; quota: number };
+    contacts: { used: number; quota: number };
+  };
+}
+
+interface BackendPlansResponse {
+  tenantId: string;
+  plans: BillingPlan[];
+}
+
+interface BackendSubscriptionCatalogResponse extends BillingSubscriptionCatalog {}
+
+function mapUsageData(input: BackendUsageResponse): UsageData {
+  return {
+    tenantId: input.tenantId,
+    plan: input.plan,
+    scheduledPlan: input.scheduledPlan,
+    billingCycle: {
+      start: input.currentPeriod.start ?? '',
+      end: input.currentPeriod.end ?? '',
+    },
+    messages: input.usage.messages,
+    aiTokens: input.usage.aiTokens,
+    contacts: input.usage.contacts,
+  };
+}
+
+export const billingService = {
+  async getUsage(tenantId: string): Promise<UsageData> {
+    const response = await apiClient.get<BackendUsageResponse>(`/tenants/${tenantId}/usage`);
+    return mapUsageData(response);
+  },
+
+  downloadUsageExportCsv(tenantId: string, fallbackFileName = 'uso-periodo-atual.csv'): void {
+    const anchor = document.createElement('a');
+    anchor.href = `${BASE_URL}/tenants/${tenantId}/usage/export.csv`;
+    anchor.download = fallbackFileName;
+    anchor.rel = 'noopener';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  },
+
+  async listPlans(tenantId: string): Promise<BillingPlan[]> {
+    const response = await apiClient.get<BackendPlansResponse>(
+      `/tenants/${tenantId}/subscription/plans`,
+    );
+    return response.plans;
+  },
+
+  async changePlan(
+    tenantId: string,
+    targetPlan: 'ESSENCIAL' | 'PROFISSIONAL' | 'ESCALA',
+  ): Promise<{
+    tenantId: string;
+    plan: string;
+    currentPlan: string;
+    targetPlan: string;
+    status: string;
+    mode: 'NO_CHANGE' | 'CHECKOUT_REQUIRED' | 'DOWNGRADE_SCHEDULED';
+    checkoutUrl?: string;
+    effectiveAt?: string;
+  }> {
+    return apiClient.patch(`/tenants/${tenantId}/subscription/plan`, { targetPlan });
+  },
+
+  async cancelSubscription(
+    tenantId: string,
+  ): Promise<{ tenantId: string; status: string }> {
+    return apiClient.post(`/tenants/${tenantId}/subscription/cancel`);
+  },
+
+  async getSubscriptionCatalog(
+    tenantId: string,
+  ): Promise<BillingSubscriptionCatalog> {
+    return apiClient.get<BackendSubscriptionCatalogResponse>(
+      `/tenants/${tenantId}/subscription/catalog`,
+    );
+  },
+
+  async replaceSubscriptionModules(
+    tenantId: string,
+    moduleCodes: string[],
+  ): Promise<{ tenantId: string; subscription: TenantBillingAccess }> {
+    return apiClient.put(`/tenants/${tenantId}/subscription/modules`, {
+      moduleCodes,
+    });
+  },
+
+  async listPublicPlans(): Promise<BillingPlan[]> {
+    const response = await apiClient.get<{ plans: BillingPlan[] }>('/public/billing/plans');
+    const plans = response.plans ?? [];
+    return plans
+      .filter((plan) => plan.active)
+      .sort((left, right) => left.sortOrder - right.sortOrder);
+  },
+
+  async getPublicNiches(): Promise<any[]> {
+    const response = await apiClient.get<any>('/public/billing/niches');
+    return response.niches || [];
+  },
+
+  async getPublicModules(): Promise<any[]> {
+    const response = await apiClient.get<any>('/public/billing/modules');
+    return response.modules || [];
+  },
+};

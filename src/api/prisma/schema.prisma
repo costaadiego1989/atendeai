@@ -1,0 +1,1253 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PRISMA_DATABASE_URL")
+  schemas  = ["tenant_schema", "contact_schema", "catalog_schema", "inventory_schema", "recovery_schema", "messaging_schema", "ai_schema", "billing_schema", "sales_schema", "prospecting_schema", "shared_schema", "payment_schema", "commerce_schema", "social_schema", "scheduling_schema"]
+}
+
+// --- Tenant Module ---
+model Tenant {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyName     String           @map("company_name") @db.VarChar(255)
+  cnpj            String           @unique @db.VarChar(18)
+  plan            String           @default("TRIAL") @db.VarChar(20)
+  planStatus      String           @default("ACTIVE") @map("plan_status") @db.VarChar(20)
+  apiKey          String           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  businessType    String?          @map("business_type") @db.VarChar(100)
+  ownerBirthDate  DateTime?        @map("owner_birth_date") @db.Date
+  description     String?          @db.Text
+  services        String?          @db.Text
+  zipcode         String?          @db.VarChar(20)
+  street          String?          @db.Text
+  neighborhood    String?          @db.VarChar(100)
+  city            String?          @db.VarChar(100)
+  state           String?          @db.VarChar(50)
+  catalogUrl      String?          @map("catalog_url") @db.Text
+  catalogFiles    Json?            @default("[]") @map("catalog_files")
+  operatingHours  Json?            @map("operating_hours")
+  promotions      Json?            @default("[]")
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  users          User[]
+  whatsappConfig  WhatsAppConfig?
+  aiConfig        AIConfig?
+  agentRules      TenantAgentRule[]
+  salesCommissionDefaults TenantSalesCommissionDefaults?
+
+  @@map("tenants")
+  @@schema("tenant_schema")
+}
+
+model TenantFinancialAccount {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @unique @map("tenant_id") @db.Uuid
+  provider       String   @default("ASAAS") @db.VarChar(20)
+  asaasAccountId String   @map("asaas_account_id") @db.VarChar(80)
+  walletId       String   @map("wallet_id") @db.VarChar(80)
+  status         String   @default("PENDING") @db.VarChar(30)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("tenant_financial_accounts")
+  @@schema("tenant_schema")
+}
+
+model User {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  name         String   @db.VarChar(255)
+  email        String   @unique @db.VarChar(255)
+  cpf          String?  @db.VarChar(14)
+  phone        String   @db.VarChar(20)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  mustChangePassword Boolean @default(false) @map("must_change_password")
+  role         String   @default("AGENT") @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  salesProfile TenantUserSalesProfile?
+
+  @@map("users")
+  @@schema("tenant_schema")
+}
+
+model WhatsAppConfig {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @unique @map("tenant_id") @db.Uuid
+  provider       String   @default("BUBBLEWHATS") @db.VarChar(30)
+  credentials    Json     @default("{}")
+  whatsappNumber String   @map("whatsapp_number") @db.VarChar(20)
+  webhookSecret  String?  @map("webhook_secret") @db.VarChar(255)
+  status         String   @default("PENDING_VERIFICATION") @db.VarChar(30)
+  configuredAt   DateTime @default(now()) @map("configured_at") @db.Timestamptz
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("whatsapp_configs")
+  @@schema("tenant_schema")
+}
+
+model InstagramConfig {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @unique @map("tenant_id") @db.Uuid
+  metaAccessToken    String   @map("meta_access_token") @db.Text
+  instagramAccountId String   @map("instagram_account_id") @db.VarChar(255)
+  webhookSecret      String   @map("webhook_secret") @db.VarChar(255)
+  status             String   @default("PENDING_VERIFICATION") @db.VarChar(30)
+  configuredAt       DateTime @default(now()) @map("configured_at") @db.Timestamptz
+
+  @@map("instagram_configs")
+  @@schema("tenant_schema")
+}
+
+model AIConfig {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String   @unique @map("tenant_id") @db.Uuid
+  systemPrompt         String   @map("system_prompt")
+  tone                 String   @default("FRIENDLY") @db.VarChar(30)
+  language             String   @default("pt-BR") @db.VarChar(10)
+  maxTokensPerResponse Int      @default(500) @map("max_tokens_per_response")
+  confidenceThreshold  Decimal  @default(0.70) @map("confidence_threshold") @db.Decimal(3, 2)
+  escalationMessage    String?  @map("escalation_message")
+  businessRules        Json?    @default("[]") @map("business_rules")
+  salesInstructions    String?  @map("sales_instructions") @db.Text
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  tenant               Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("ai_configs")
+  @@schema("tenant_schema")
+}
+
+
+
+model TenantAgentRule {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  moduleId         String   @map("module_id") @db.VarChar(50)
+  customPrompt     String   @map("custom_prompt") @db.Text
+  isActive         Boolean  @default(true) @map("is_active")
+  fallbackToGlobal Boolean  @default(true) @map("fallback_to_global")
+  revision         Int      @default(1)
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  updatedByUserId  String?  @map("updated_by_user_id") @db.Uuid
+  updatedByUserName String? @map("updated_by_user_name") @db.VarChar(255)
+  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, moduleId], name: "uq_tenant_agent_rules")
+  @@map("tenant_agent_rules")
+  @@schema("tenant_schema")
+}
+
+model TenantAgentRuleHistory {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  moduleId         String   @map("module_id") @db.VarChar(50)
+  customPrompt     String   @map("custom_prompt") @db.Text
+  revision         Int
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedByUserId  String?  @map("updated_by_user_id") @db.Uuid
+  updatedByUserName String? @map("updated_by_user_name") @db.VarChar(255)
+
+  @@index([tenantId, moduleId], name: "idx_agent_rule_history_lookup")
+  @@map("tenant_agent_rule_history")
+  @@schema("tenant_schema")
+}
+
+model TenantPDFResume {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  fileName  String   @map("file_name") @db.VarChar(255)
+  fileUrl   String?  @map("file_url") @db.Text
+  checksum  String?  @db.VarChar(128)
+  summaries Json     @default("[]")
+  status    String   @default("PROCESSING") @db.VarChar(20)
+  error     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, status], name: "idx_tenant_pdf_resumes_tenant_status")
+  @@map("tenant_pdf_resumes")
+  @@schema("tenant_schema")
+}
+
+model TenantSalesCommissionDefaults {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @unique @map("tenant_id") @db.Uuid
+  basePercent           Decimal? @map("base_percent") @db.Decimal(9, 4)
+  baseFixedAmount       Decimal? @map("base_fixed_amount") @db.Decimal(12, 2)
+  commissionCombineMode String   @default("STACKED") @map("commission_combine_mode") @db.VarChar(20)
+  effectiveFrom         DateTime @default(now()) @map("effective_from") @db.Timestamptz
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_sales_commission_defaults")
+  @@schema("tenant_schema")
+}
+
+model TenantUserSalesProfile {
+  id                        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                  String   @map("tenant_id") @db.Uuid
+  userId                    String   @unique @map("user_id") @db.Uuid
+  commissionPercentOverride Decimal? @map("commission_percent_override") @db.Decimal(9, 4)
+  commissionFixedOverride   Decimal? @map("commission_fixed_override") @db.Decimal(12, 2)
+  monthlySalesCountTarget   Int?     @map("monthly_sales_count_target")
+  monthlySalesAmountTarget  Decimal? @map("monthly_sales_amount_target") @db.Decimal(12, 2)
+  createdAt                 DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                 DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId], name: "uq_tenant_user_sales_profile")
+  @@index([tenantId], name: "idx_tusp_tenant")
+  @@map("tenant_user_sales_profiles")
+  @@schema("tenant_schema")
+}
+
+// --- Contact Module ---
+model Contact {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  name            String         @db.VarChar(255)
+  phone           String         @db.VarChar(20)
+  email           String?        @db.VarChar(255)
+  stage           String         @default("LEAD") @db.VarChar(20)
+  tags            Json?          @default("[]")
+  notes           String?
+  lastInteraction DateTime?      @map("last_interaction") @db.Timestamptz
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  conversations   Conversation[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, phone])
+  @@index([tenantId, stage], name: "idx_contacts_tenant_stage")
+  @@index([tenantId, phone], name: "idx_contacts_tenant_phone")
+  @@map("contacts")
+  @@schema("contact_schema")
+}
+
+model ContactFinancialProfile {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  contactId      String   @map("contact_id") @db.Uuid
+  provider       String   @default("ASAAS") @db.VarChar(20)
+  asaasCustomerId String  @map("asaas_customer_id") @db.VarChar(80)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, contactId], name: "uq_contact_financial_profiles_tenant_contact")
+  @@map("contact_financial_profiles")
+  @@schema("contact_schema")
+}
+
+// --- Catalog Module ---
+model CatalogCategory {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String        @map("tenant_id") @db.Uuid
+  parentCategoryId String?  @map("parent_category_id") @db.Uuid
+  name        String        @db.VarChar(255)
+  description String?       @db.Text
+  path        String[]      @default([])
+  level       Int           @default(0)
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  items       CatalogItem[]
+  parent      CatalogCategory? @relation("CatalogCategoryTree", fields: [parentCategoryId], references: [id])
+  children    CatalogCategory[] @relation("CatalogCategoryTree")
+
+  @@index([tenantId, active], name: "idx_catalog_categories_tenant_active")
+  @@index([tenantId, parentCategoryId, active], name: "idx_catalog_categories_parent")
+  @@unique([tenantId, name], name: "uq_catalog_categories_tenant_name")
+  @@map("catalog_categories")
+  @@schema("catalog_schema")
+}
+
+model CatalogItem {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String           @map("tenant_id") @db.Uuid
+  categoryId        String?          @map("category_id") @db.Uuid
+  type              String           @db.VarChar(30)
+  name              String           @db.VarChar(255)
+  description       String?          @db.Text
+  basePrice         Decimal?         @map("base_price") @db.Decimal(12, 2)
+  currency          String           @default("BRL") @db.VarChar(10)
+  tags              Json?            @default("[]")
+  active            Boolean          @default(true)
+  source            String           @default("MANUAL") @db.VarChar(30)
+  externalReference String?          @map("external_reference") @db.VarChar(255)
+  imageUrl          String?          @map("image_url") @db.Text
+  attributes        Json             @default("{}")
+  variants          Json             @default("[]")
+  optionGroups      Json             @default("[]") @map("option_groups")
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  category          CatalogCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([tenantId, type, active], name: "idx_catalog_items_tenant_type_active")
+  @@index([tenantId, categoryId], name: "idx_catalog_items_tenant_category")
+  @@map("catalog_items")
+  @@schema("catalog_schema")
+}
+
+model CatalogAuditLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  userName  String?  @map("user_name") @db.VarChar(255)
+  event     String   @db.VarChar(50) // ITEM_CREATED, ITEM_UPDATED, ITEM_DEACTIVATED, CATEGORY_CREATED, etc.
+  entityId  String   @map("entity_id") @db.Uuid
+  entityType String  @map("entity_type") @db.VarChar(30) // ITEM, CATEGORY
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([tenantId])
+  @@index([entityId])
+  @@map("catalog_audit_log")
+  @@schema("catalog_schema")
+}
+
+// --- Inventory Module ---
+model InventoryItem {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  catalogItemId     String?  @map("catalog_item_id") @db.Uuid
+  sku               String   @db.VarChar(100)
+  externalReference String?  @map("external_reference") @db.VarChar(255)
+  name              String   @db.VarChar(255)
+  availableQuantity Int      @default(0) @map("available_quantity")
+  availabilityStatus String  @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
+  currentPrice      Decimal? @map("current_price") @db.Decimal(12, 2)
+  currency          String   @default("BRL") @db.VarChar(10)
+  source            String   @default("MANUAL_SNAPSHOT") @db.VarChar(30)
+  lastSyncedAt      DateTime @default(now()) @map("last_synced_at") @db.Timestamptz
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, availabilityStatus], name: "idx_inventory_items_tenant_status")
+  @@index([tenantId, catalogItemId], name: "idx_inventory_items_tenant_catalog")
+  @@map("inventory_items")
+  @@schema("inventory_schema")
+}
+
+model InventoryConnection {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  sourceType   String   @map("source_type") @db.VarChar(30)
+  providerName String   @map("provider_name") @db.VarChar(255)
+  status       String   @default("ACTIVE") @db.VarChar(20)
+  config       Json     @default("{}")
+  lastSyncedAt DateTime? @map("last_synced_at") @db.Timestamptz
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, sourceType], name: "idx_inventory_connections_tenant_source")
+  @@map("inventory_connections")
+  @@schema("inventory_schema")
+}
+
+model RecoveryCase {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  contactId         String?  @map("contact_id") @db.Uuid
+  debtorName        String   @map("debtor_name") @db.VarChar(255)
+  debtorCompanyName String?  @map("debtor_company_name") @db.VarChar(255)
+  debtorDocument    String?  @map("debtor_document") @db.VarChar(30)
+  phone             String   @db.VarChar(30)
+  externalReference String?  @map("external_reference") @db.VarChar(255)
+  paymentReference  String?  @unique @map("payment_reference") @db.VarChar(255)
+  source            String   @default("MANUAL") @db.VarChar(20)
+  chargeType        String?  @map("charge_type") @db.VarChar(50)
+  chargeTitle       String?  @map("charge_title") @db.VarChar(255)
+  chargeDescription String?  @map("charge_description") @db.Text
+  referencePeriod   String?  @map("reference_period") @db.VarChar(30)
+  relatedEntityType String?  @map("related_entity_type") @db.VarChar(50)
+  relatedEntityId   String?  @map("related_entity_id") @db.VarChar(255)
+  relatedEntityLabel String? @map("related_entity_label") @db.VarChar(255)
+  amountDue         Decimal? @map("amount_due") @db.Decimal(12, 2)
+  dueDate           DateTime? @map("due_date") @db.Date
+  status            String   @default("READY_TO_CONTACT") @db.VarChar(30)
+  assignedTags      Json?    @default("[]") @map("assigned_tags")
+  lastContactedAt   DateTime? @map("last_contacted_at") @db.Timestamptz
+  nextActionAt      DateTime? @map("next_action_at") @db.Timestamptz
+  paidAt            DateTime? @map("paid_at") @db.Timestamptz
+  suggestedReply    String?  @map("suggested_reply") @db.Text
+  suggestedNextAction String? @map("suggested_next_action") @db.Text
+  guidanceGeneratedAt DateTime? @map("guidance_generated_at") @db.Timestamptz
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, status], name: "idx_recovery_cases_tenant_status")
+  @@index([tenantId, source], name: "idx_recovery_cases_tenant_source")
+  @@map("recovery_cases")
+  @@schema("recovery_schema")
+}
+
+model CommerceAuditLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  userName  String?  @map("user_name") @db.VarChar(255)
+  event     String   @db.VarChar(50) // SESSION_STARTED, CHECKOUT_CREATED, ORDER_PAID, ORDER_STATUS_CHANGED, SHIPPING_UPDATED
+  entityId  String   @map("entity_id") @db.Uuid
+  entityType String  @map("entity_type") @db.VarChar(30) // SESSION, ORDER, SHIPPING_POLICY
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([tenantId])
+  @@index([entityId])
+  @@map("commerce_audit_log")
+  @@schema("commerce_schema")
+}
+
+model CommerceAbandonmentConfig {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @unique @map("tenant_id") @db.Uuid
+  active            Boolean  @default(true)
+  message           String?  @db.Text
+  useAiMessage      Boolean  @default(true) @map("use_ai_message")
+  mode              String   @default("SINGLE") @db.VarChar(20)
+  maxTouches        Int      @default(3) @map("max_touches")
+  intervalMinutes   Int      @default(60) @map("interval_minutes")
+  minimumIntervalMinutes Int @default(30) @map("minimum_interval_minutes")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("commerce_abandonment_configs")
+  @@schema("commerce_schema")
+}
+
+// --- Messaging Module ---
+model Conversation {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String    @map("tenant_id") @db.Uuid
+  contactId String    @map("contact_id") @db.Uuid
+  channel   String    @default("WHATSAPP") @db.VarChar(20)
+  status    String    @default("ACTIVE") @db.VarChar(30)
+  startedAt DateTime  @default(now()) @map("started_at") @db.Timestamptz
+  closedAt  DateTime? @map("closed_at") @db.Timestamptz
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  contact   Contact   @relation(fields: [contactId], references: [id])
+  messages  Message[]
+
+  @@index([tenantId, status], name: "idx_conversations_tenant_status")
+  @@index([contactId, status], name: "idx_conversations_contact")
+  @@map("conversations")
+  @@schema("messaging_schema")
+}
+
+model Message {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId String       @map("conversation_id") @db.Uuid
+  direction      String       @db.VarChar(10)
+  contentType    String       @default("TEXT") @map("content_type") @db.VarChar(20)
+  content        Json
+  sentBy         String       @map("sent_by") @db.VarChar(10)
+  deliveryStatus String       @default("PENDING") @map("delivery_status") @db.VarChar(20)
+  externalId     String?      @map("external_id") @db.VarChar(255)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId, createdAt], name: "idx_messages_conversation")
+  @@map("messages")
+  @@schema("messaging_schema")
+}
+
+model MessagingWebhookReceipt {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  receiptKey        String   @unique @map("receipt_key") @db.VarChar(255)
+  channel           String   @db.VarChar(20)
+  provider          String   @db.VarChar(50)
+  externalMessageId String   @map("external_message_id") @db.VarChar(255)
+  externalAccountId String?  @map("external_account_id") @db.VarChar(255)
+  fromPhone         String?  @map("from_phone") @db.VarChar(30)
+  toPhone           String?  @map("to_phone") @db.VarChar(30)
+  signature         String?  @db.Text
+  payload           Json
+  status            String   @default("RECEIVED") @db.VarChar(20)
+  ignoreReason      String?  @map("ignore_reason") @db.VarChar(100)
+  processedAt       DateTime? @map("processed_at") @db.Timestamptz
+  ignoredAt         DateTime? @map("ignored_at") @db.Timestamptz
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([status, createdAt], name: "idx_messaging_webhook_receipts_status")
+  @@map("messaging_webhook_receipts")
+  @@schema("messaging_schema")
+}
+
+model AISession {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId String?     @map("conversation_id") @db.Uuid
+  tenantId       String      @map("tenant_id") @db.Uuid
+  contactId      String?     @map("contact_id") @db.Uuid
+  intent         String?     @db.VarChar(50)
+  sentiment      String?     @db.VarChar(20)
+  confidence     Decimal?    @db.Decimal(3, 2)
+  status         String      @default("ACTIVE") @db.VarChar(30)
+  totalTokens    Int         @default(0) @map("total_tokens")
+  metadata       Json?       @default("{}")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  messages       AIMessage[]
+
+  @@index([conversationId], name: "idx_ai_sessions_conversation")
+  @@index([tenantId, contactId])
+  @@map("ai_sessions")
+  @@schema("ai_schema")
+}
+
+model AIMessage {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId    String    @map("session_id") @db.Uuid
+  role         String    @db.VarChar(20) // user, assistant, system
+  content      String    @db.Text
+  tokens       Int       @default(0)
+  diagnostics  Json?     @default("{}")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  
+  session      AISession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("ai_messages")
+  @@schema("ai_schema")
+}
+
+// --- Billing Module ---
+model Subscription {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @unique @map("tenant_id") @db.Uuid
+  plan              String   @default("TRIAL") @db.VarChar(20)
+  status            String   @default("PENDING") @db.VarChar(20)
+  scheduledPlan     String?  @map("scheduled_plan") @db.VarChar(20)
+  messagesQuota     Int      @map("messages_quota")
+  aiTokensQuota     Int      @map("ai_tokens_quota")
+  contactsQuota     Int      @map("contacts_quota")
+  billingCycleStart DateTime @map("billing_cycle_start") @db.Date
+  billingCycleEnd   DateTime @map("billing_cycle_end") @db.Date
+  asaasCustomerId   String?  @map("asaas_customer_id") @db.VarChar(50)
+  asaasSubscriptionId String?  @map("asaas_subscription_id") @db.VarChar(50)
+  lastQuotaAlertAt  DateTime? @map("last_quota_alert_at") @db.Timestamptz
+  baseMonthlyPrice  Decimal  @default(0) @map("base_monthly_price") @db.Decimal(12, 2)
+  addonsMonthlyPrice Decimal @default(0) @map("addons_monthly_price") @db.Decimal(12, 2)
+  totalMonthlyPrice Decimal  @default(0) @map("total_monthly_price") @db.Decimal(12, 2)
+  pricingVersion    String?  @map("pricing_version") @db.VarChar(50)
+  pricingSnapshot   Json     @default("{}") @map("pricing_snapshot")
+  config            Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("subscriptions")
+  @@schema("billing_schema")
+}
+
+model BillingAuditLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  event     String   @db.VarChar(50) // PLAN_CHANGED, SUBSCRIPTION_CANCELLED, CYCLE_RENEWED, QUOTA_EXCEEDED
+  oldPlan   String?  @map("old_plan") @db.VarChar(20)
+  newPlan   String?  @map("new_plan") @db.VarChar(20)
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([tenantId])
+  @@map("billing_audit_log")
+  @@schema("billing_schema")
+}
+
+model BillingPlanCatalog {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String   @unique @db.VarChar(20)
+  displayName   String   @map("display_name") @db.VarChar(100)
+  description   String?  @db.Text
+  monthlyPrice  Decimal  @map("monthly_price") @db.Decimal(12, 2)
+  messagesQuota Int      @map("messages_quota")
+  aiTokensQuota Int      @map("ai_tokens_quota")
+  contactsQuota Int      @map("contacts_quota")
+  pricingVersion String? @map("pricing_version") @db.VarChar(50)
+  sortOrder     Int      @default(0) @map("sort_order")
+  active        Boolean  @default(true)
+  features      Json     @default("[]")
+  isStandard    Boolean  @default(false) @map("is_standard")
+  config        Json     @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("billing_plan_catalog")
+  @@schema("billing_schema")
+}
+
+model BillingModule {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code         String   @unique @db.VarChar(50)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  description  String?  @db.Text
+  category     String?  @db.VarChar(50)
+  billingMode  String   @default("ADDON") @map("billing_mode") @db.VarChar(20)
+  monthlyPrice Decimal  @default(0) @map("monthly_price") @db.Decimal(10, 2)
+  pricingVersion String? @map("pricing_version") @db.VarChar(50)
+  salesPitch   String?  @map("sales_pitch") @db.Text
+  quotaImpact  Json     @default("{}") @map("quota_impact")
+  includedInPlans Json  @default("[]") @map("included_in_plans")
+  config       Json     @default("{}")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("billing_modules")
+  @@schema("billing_schema")
+}
+
+model BusinessNiche {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code         String   @unique @db.VarChar(50)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  description  String?  @db.Text
+  pains        Json     @default("[]")
+  iconName     String?  @map("icon_name") @db.VarChar(50)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("business_niches")
+  @@schema("billing_schema")
+}
+
+model NicheModule {
+  nicheCode    String   @map("niche_code") @db.VarChar(50)
+  moduleCode   String   @map("module_code") @db.VarChar(50)
+  isRecommended Boolean @default(true) @map("is_recommended")
+  isPrimary    Boolean  @default(false) @map("is_primary")
+  marketingHeadline String? @map("marketing_headline") @db.VarChar(255)
+  salesPitch   String?  @map("sales_pitch") @db.Text
+  sortOrder    Int      @default(0) @map("sort_order")
+
+  @@id([nicheCode, moduleCode])
+  @@map("niche_modules")
+  @@schema("billing_schema")
+}
+
+model SubscriptionModule {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subscriptionId String   @map("subscription_id") @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  moduleCode     String   @map("module_code") @db.VarChar(50)
+  status         String   @default("ACTIVE") @db.VarChar(20)
+  monthlyPrice   Decimal  @default(0) @map("monthly_price") @db.Decimal(12, 2)
+  pricingVersion String?  @map("pricing_version") @db.VarChar(50)
+  pricingSnapshot Json    @default("{}") @map("pricing_snapshot")
+  quotaImpact    Json     @default("{}") @map("quota_impact")
+  metadata       Json     @default("{}")
+  startedAt      DateTime @default(now()) @map("started_at") @db.Timestamptz
+  endedAt        DateTime? @map("ended_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([subscriptionId, moduleCode], name: "uq_subscription_modules_subscription_module")
+  @@index([tenantId, status], name: "idx_subscription_modules_tenant_status")
+  @@index([moduleCode], name: "idx_subscription_modules_module_code")
+  @@map("subscription_modules")
+  @@schema("billing_schema")
+}
+
+model UsageRecord {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  periodStart  DateTime @map("period_start") @db.Date
+  periodEnd    DateTime @map("period_end") @db.Date
+  messagesUsed Int      @default(0) @map("messages_used")
+  aiTokensUsed Int      @default(0) @map("ai_tokens_used")
+  contactsUsed Int      @default(0) @map("contacts_used")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, periodStart])
+  @@map("usage_records")
+  @@schema("billing_schema")
+}
+
+// --- Sales Module ---
+model SalesMetric {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @map("tenant_id") @db.Uuid
+  date                  DateTime @db.Date
+  totalMessages         Int      @default(0) @map("total_messages")
+  purchaseIntents       Int      @default(0) @map("purchase_intents")
+  paymentLinksGenerated Int      @default(0) @map("payment_links_generated")
+  estimatedRevenue      Decimal  @default(0) @map("estimated_revenue") @db.Decimal(12, 2)
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, date])
+  @@map("sales_metrics")
+  @@schema("sales_schema")
+}
+
+model PaymentLink {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  providerLinkId String? @map("provider_link_id") @db.VarChar(80)
+  externalId  String   @unique @map("external_id") @db.VarChar(120)
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  label       String?  @db.VarChar(120)
+  value       Decimal  @db.Decimal(12, 2)
+  url         String   @db.Text
+  billingType String   @default("PIX") @map("billing_type") @db.VarChar(20)
+  status      String   @default("ACTIVE") @db.VarChar(20)
+  source      String   @default("MANUAL") @db.VarChar(20)
+  resourceType String  @default("PAYMENT_LINK") @map("resource_type") @db.VarChar(20)
+  contactId   String?  @map("contact_id") @db.Uuid
+  conversationId String? @map("conversation_id") @db.Uuid
+  catalogItemId String? @map("catalog_item_id") @db.Uuid
+  catalogItemSku String? @map("catalog_item_sku") @db.VarChar(80)
+  catalogItemName String? @map("catalog_item_name") @db.VarChar(255)
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz
+  recurrenceEnabled Boolean @default(false) @map("recurrence_enabled")
+  recurrenceFrequency String? @map("recurrence_frequency") @db.VarChar(20)
+  recurrenceStartDate DateTime? @map("recurrence_start_date") @db.Date
+  recurrenceEndDate DateTime? @map("recurrence_end_date") @db.Date
+  recurrenceTotalValue Decimal? @map("recurrence_total_value") @db.Decimal(12, 2)
+  recurrenceNextRunAt DateTime? @map("recurrence_next_run_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  @@index([tenantId, recurrenceEnabled, recurrenceNextRunAt], name: "idx_sales_payment_links_recurring_due")
+  @@map("payment_links")
+  @@schema("sales_schema")
+}
+
+model ConversationSaleEvent {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  conversationId     String    @map("conversation_id") @db.Uuid
+  attributedUserId   String    @map("attributed_user_id") @db.Uuid
+  saleAmount         Decimal?  @map("sale_amount") @db.Decimal(12, 2)
+  currency           String?   @db.VarChar(10)
+  lifecycleStatus    String    @default("ACTIVE") @map("lifecycle_status") @db.VarChar(20)
+  aiValidationStatus String    @default("PENDING") @map("ai_validation_status") @db.VarChar(20)
+  markedByUserId     String    @map("marked_by_user_id") @db.Uuid
+  markedAt           DateTime  @default(now()) @map("marked_at") @db.Timestamptz
+  aiValidatedAt      DateTime? @map("ai_validated_at") @db.Timestamptz
+  notes              String?   @db.Text
+  metadata           Json      @default("{}")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, attributedUserId, markedAt], name: "idx_cse_tenant_attr_marked")
+  @@index([tenantId, conversationId], name: "idx_cse_tenant_conversation")
+  @@map("conversation_sale_events")
+  @@schema("sales_schema")
+}
+
+model SalesPromotion {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  title           String    @db.VarChar(255)
+  description     String    @db.Text
+  discountType    String    @map("discount_type") @db.VarChar(20)
+  discountValue   Decimal   @map("discount_value") @db.Decimal(12, 2)
+  minimumOrder    Decimal?  @map("minimum_order") @db.Decimal(12, 2)
+  imageUrl        String?   @map("image_url") @db.Text
+  startsAt        DateTime  @map("starts_at") @db.Timestamptz
+  expiresAt       DateTime? @map("expires_at") @db.Timestamptz
+  active          Boolean   @default(true)
+  catalogItemId   String?   @map("catalog_item_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  coupons         SalesCoupon[]
+  targets         SalesPromotionTarget[]
+
+  @@index([tenantId, active], name: "idx_sales_promotions_tenant_active")
+  @@map("sales_promotions")
+  @@schema("sales_schema")
+}
+
+model SalesPromotionTarget {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  promotionId   String         @map("promotion_id") @db.Uuid
+  targetType    String         @map("target_type") @db.VarChar(20)
+  targetId      String         @map("target_id") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+
+  promotion     SalesPromotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionId, targetType, targetId], name: "uq_sales_promotion_targets_target")
+  @@index([targetType, targetId], name: "idx_sales_promotion_targets_lookup")
+  @@map("sales_promotion_targets")
+  @@schema("sales_schema")
+}
+
+model SalesCoupon {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  promotionId     String?   @map("promotion_id") @db.Uuid
+  code            String    @db.VarChar(50)
+  description     String?   @db.Text
+  discountType    String    @map("discount_type") @db.VarChar(20)
+  discountValue   Decimal   @map("discount_value") @db.Decimal(12, 2)
+  maxUses         Int       @default(0) @map("max_uses")
+  usedCount       Int       @default(0) @map("used_count")
+  startsAt        DateTime  @map("starts_at") @db.Timestamptz
+  expiresAt       DateTime? @map("expires_at") @db.Timestamptz
+  active          Boolean   @default(true)
+  catalogItemId   String?   @map("catalog_item_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  promotion       SalesPromotion? @relation(fields: [promotionId], references: [id])
+  targets         SalesCouponTarget[]
+
+  @@unique([tenantId, code], name: "uq_sales_coupons_tenant_code")
+  @@index([tenantId, active], name: "idx_sales_coupons_tenant_active")
+  @@map("sales_coupons")
+  @@schema("sales_schema")
+}
+
+model SalesCouponTarget {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  couponId      String      @map("coupon_id") @db.Uuid
+  targetType    String      @map("target_type") @db.VarChar(20)
+  targetId      String      @map("target_id") @db.Uuid
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  coupon        SalesCoupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, targetType, targetId], name: "uq_sales_coupon_targets_target")
+  @@index([targetType, targetId], name: "idx_sales_coupon_targets_lookup")
+  @@map("sales_coupon_targets")
+  @@schema("sales_schema")
+}
+
+// --- Prospecting Module ---
+model ProspectCampaign {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  name             String   @db.VarChar(255)
+  objective        String   @db.Text
+  audienceType     String   @map("audience_type") @db.VarChar(30)
+  channel          String   @db.VarChar(20)
+  targetContactIds Json?    @default("[]") @map("target_contact_ids")
+  messageTemplate  String?  @map("message_template") @db.Text
+  dailyLimit       Int      @default(50) @map("daily_limit")
+  status           String   @default("DRAFT") @db.VarChar(20)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, id])
+  @@index([tenantId, status], name: "idx_prospect_campaigns_tenant_status")
+  @@map("prospect_campaigns")
+  @@schema("prospecting_schema")
+}
+
+model ProspectExecution {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  campaignId   String   @map("campaign_id") @db.Uuid
+  contactId    String   @map("contact_id") @db.VarChar(255)
+  channel      String   @db.VarChar(20)
+  status       String   @default("PENDING") @db.VarChar(20)
+  attemptCount Int      @default(0) @map("attempt_count")
+  stopReason   String?  @map("stop_reason") @db.VarChar(30)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, campaignId, contactId])
+  @@index([tenantId, campaignId], name: "idx_prospect_executions_tenant_campaign")
+  @@map("prospect_executions")
+  @@schema("prospecting_schema")
+}
+
+model ProspectSearch {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  businessTypeQuery String   @map("business_type_query") @db.VarChar(255)
+  city              String   @db.VarChar(100)
+  state             String?  @db.VarChar(50)
+  neighborhood      String?  @db.Text
+  source            String   @default("GOOGLE_PLACES") @db.VarChar(30)
+  maxResults        Int      @default(50) @map("max_results")
+  status            String   @default("PENDING") @db.VarChar(20)
+  discoveredCount   Int      @default(0) @map("discovered_count")
+  failureReason     String?  @map("failure_reason") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, id])
+  @@index([tenantId, status], name: "idx_prospect_searches_tenant_status")
+  @@map("prospect_searches")
+  @@schema("prospecting_schema")
+}
+
+model ProspectSearchResult {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  searchId     String   @map("search_id") @db.Uuid
+  source       String   @db.VarChar(30)
+  externalId   String?  @map("external_id") @db.VarChar(255)
+  businessName String   @map("business_name") @db.VarChar(255)
+  city         String   @db.VarChar(100)
+  state        String?  @db.VarChar(50)
+  phone        String?  @db.VarChar(30)
+  whatsappPhone String? @map("whatsapp_phone") @db.Text
+  instagramUrl String?  @map("instagram_url") @db.Text
+  email        String?  @db.VarChar(255)
+  website      String?  @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, searchId], name: "idx_prospect_search_results_tenant_search")
+  @@map("prospect_search_results")
+  @@schema("prospecting_schema")
+}
+
+model ProspectAdsInsightQuery {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  source          String   @default("GOOGLE_ADS_AUDIENCE") @db.VarChar(30)
+  segment         String   @db.VarChar(255)
+  city            String?  @db.VarChar(100)
+  state           String?  @db.VarChar(50)
+  country         String   @default("BR") @db.VarChar(10)
+  ageRange        String?  @map("age_range") @db.VarChar(50)
+  gender          String?  @db.VarChar(30)
+  interest        String?  @db.VarChar(255)
+  status          String   @default("PENDING") @db.VarChar(20)
+  discoveredCount Int      @default(0) @map("discovered_count")
+  failureReason   String?  @map("failure_reason") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, status], name: "idx_prospect_ads_insight_queries_tenant_status")
+  @@map("prospect_ads_insight_queries")
+  @@schema("prospecting_schema")
+}
+
+model ProspectAdsInsightResult {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  queryId     String   @map("query_id") @db.Uuid
+  resultType  String   @map("result_type") @db.VarChar(40)
+  title       String   @db.VarChar(255)
+  subtitle    String?  @db.Text
+  metricValue Float?   @map("metric_value")
+  score       Float?
+  metadata    Json?    @db.JsonB
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, queryId], name: "idx_prospect_ads_insight_results_tenant_query")
+  @@map("prospect_ads_insight_results")
+  @@schema("prospecting_schema")
+}
+
+model ProspectLeadCapture {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  source             String   @default("GOOGLE_ADS_LEAD_FORM") @db.VarChar(40)
+  externalLeadId     String   @map("external_lead_id") @db.VarChar(255)
+  googleAdsCustomerId String? @map("google_ads_customer_id") @db.VarChar(64)
+  campaignName       String?  @map("campaign_name") @db.VarChar(255)
+  formName           String?  @map("form_name") @db.VarChar(255)
+  fullName           String?  @map("full_name") @db.VarChar(255)
+  phone              String?  @db.VarChar(40)
+  email              String?  @db.VarChar(255)
+  city               String?  @db.VarChar(100)
+  state              String?  @db.VarChar(50)
+  instagramHandle    String?  @map("instagram_handle") @db.VarChar(255)
+  document           String?  @db.VarChar(30)
+  interests          Json?    @db.JsonB
+  rawPayload         Json?    @map("raw_payload") @db.JsonB
+  submissionAt       DateTime @map("submission_at") @db.Timestamptz
+  importStatus       String   @default("NEW") @map("import_status") @db.VarChar(30)
+  contactId          String?  @map("contact_id") @db.VarChar(255)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, externalLeadId], name: "uq_prospect_lead_captures_tenant_external")
+  @@index([tenantId, importStatus], name: "idx_prospect_lead_captures_tenant_status")
+  @@index([tenantId, campaignName], name: "idx_prospect_lead_captures_tenant_campaign")
+  @@map("prospect_lead_captures")
+  @@schema("prospecting_schema")
+}
+
+model OutboxEvent {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId     String   @unique @map("event_id") @db.VarChar(255)
+  eventType   String   @map("event_type") @db.VarChar(255)
+  queue       String   @map("queue_name") @db.VarChar(255)
+  sourceModule String  @map("source_module") @db.VarChar(100)
+  payload     Json
+  eventTimestamp DateTime @map("event_timestamp") @db.Timestamptz
+  attemptCount Int      @default(0) @map("attempt_count")
+  processingAt DateTime? @map("processing_at") @db.Timestamptz
+  publishedAt DateTime? @map("published_at") @db.Timestamptz
+  lastError   String?   @map("last_error") @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([publishedAt, createdAt], name: "idx_outbox_pending")
+  @@index([processingAt], name: "idx_outbox_processing")
+  @@map("outbox_events")
+  @@schema("shared_schema")
+}
+
+model InboxEvent {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  consumerName String    @map("consumer_name") @db.VarChar(255)
+  eventId      String    @map("event_id") @db.VarChar(255)
+  eventType    String    @map("event_type") @db.VarChar(255)
+  queue        String    @map("queue_name") @db.VarChar(255)
+  payload      Json
+  status       String    @default("RECEIVED") @db.VarChar(20)
+  processingAt DateTime? @map("processing_at") @db.Timestamptz
+  processedAt  DateTime? @map("processed_at") @db.Timestamptz
+  failedAt     DateTime? @map("failed_at") @db.Timestamptz
+  lastError    String?   @map("last_error") @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([consumerName, eventId], name: "uq_inbox_consumer_event")
+  @@index([status, createdAt], name: "idx_inbox_status")
+  @@index([processingAt], name: "idx_inbox_processing")
+  @@map("inbox_events")
+  @@schema("shared_schema")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  email     String    @db.VarChar(255)
+  tokenHash String    @unique @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz
+  usedAt    DateTime? @map("used_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([userId, expiresAt], name: "idx_password_reset_tokens_user_exp")
+  @@index([email, expiresAt], name: "idx_password_reset_tokens_email_exp")
+  @@map("password_reset_tokens")
+  @@schema("shared_schema")
+}
+
+model PaymentWebhookReceipt {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  receiptKey     String   @unique @map("receipt_key") @db.VarChar(255)
+  provider       String   @db.VarChar(50)
+  eventType      String   @map("event_type") @db.VarChar(100)
+  paymentId      String   @map("payment_id") @db.VarChar(100)
+  tenantId       String?  @map("tenant_id") @db.Uuid
+  rawReference   String?  @map("raw_reference") @db.VarChar(255)
+  signature      String?  @db.Text
+  payload        Json
+  status         String   @default("RECEIVED") @db.VarChar(20)
+  ignoreReason   String?  @map("ignore_reason") @db.VarChar(100)
+  processedAt    DateTime? @map("processed_at") @db.Timestamptz
+  ignoredAt      DateTime? @map("ignored_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([status, createdAt], name: "idx_payment_webhook_receipts_status")
+  @@map("payment_webhook_receipts")
+  @@schema("payment_schema")
+}
+
+// --- Social Engagement Module ---
+model SocialAccount {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  platform          String   @db.VarChar(20) // INSTAGRAM, LINKEDIN
+  externalAccountId String   @map("external_account_id") @db.VarChar(255)
+  username          String?  @db.VarChar(255)
+  displayName       String?  @map("display_name") @db.VarChar(255)
+  profilePictureUrl String?  @map("profile_picture_url") @db.Text
+  accessToken       String   @map("access_token") @db.Text
+  refreshToken      String?  @map("refresh_token") @db.Text
+  tokenExpiresAt    DateTime? @map("token_expires_at") @db.Timestamptz
+  pageId            String?  @map("page_id") @db.VarChar(255)
+  webhookSecret     String?  @map("webhook_secret") @db.VarChar(255)
+  status            String   @default("ACTIVE") @db.VarChar(20) // ACTIVE, DISCONNECTED, TOKEN_EXPIRED
+  connectedAt       DateTime @default(now()) @map("connected_at") @db.Timestamptz
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, platform, externalAccountId], name: "uq_social_accounts_tenant_platform_ext")
+  @@index([tenantId, platform], name: "idx_social_accounts_tenant_platform")
+  @@map("social_accounts")
+  @@schema("social_schema")
+}
+
+model SocialPost {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  socialAccountId   String   @map("social_account_id") @db.Uuid
+  platform          String   @db.VarChar(20)
+  externalPostId    String   @map("external_post_id") @db.VarChar(255)
+  postType          String?  @map("post_type") @db.VarChar(30) // IMAGE, VIDEO, CAROUSEL, REEL, STORY
+  caption           String?  @db.Text
+  mediaUrl          String?  @map("media_url") @db.Text
+  permalink         String?  @db.Text
+  commentCount      Int      @default(0) @map("comment_count")
+  postedAt          DateTime? @map("posted_at") @db.Timestamptz
+  discoveredAt      DateTime @default(now()) @map("discovered_at") @db.Timestamptz
+
+  @@unique([tenantId, externalPostId], name: "uq_social_posts_tenant_ext")
+  @@index([tenantId, socialAccountId], name: "idx_social_posts_tenant_account")
+  @@map("social_posts")
+  @@schema("social_schema")
+}
+
+model SocialComment {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  socialAccountId   String   @map("social_account_id") @db.Uuid
+  postId            String   @map("post_id") @db.Uuid
+  platform          String   @db.VarChar(20)
+  externalCommentId String   @map("external_comment_id") @db.VarChar(255)
+  parentCommentId   String?  @map("parent_comment_id") @db.Uuid // for threaded replies
+  authorExternalId  String?  @map("author_external_id") @db.VarChar(255)
+  authorUsername    String?  @map("author_username") @db.VarChar(255)
+  authorName        String?  @map("author_name") @db.VarChar(255)
+  text              String   @db.Text
+  sentiment         String?  @db.VarChar(20) // POSITIVE, NEGATIVE, NEUTRAL, QUESTION
+  status            String   @default("PENDING") @db.VarChar(20) // PENDING, REPLIED, IGNORED, AUTO_REPLIED
+  isHidden          Boolean  @default(false) @map("is_hidden")
+  receivedAt        DateTime @default(now()) @map("received_at") @db.Timestamptz
+  repliedAt         DateTime? @map("replied_at") @db.Timestamptz
+
+  @@unique([tenantId, externalCommentId], name: "uq_social_comments_tenant_ext")
+  @@index([tenantId, postId, status], name: "idx_social_comments_tenant_post_status")
+  @@index([tenantId, status], name: "idx_social_comments_tenant_status")
+  @@map("social_comments")
+  @@schema("social_schema")
+}
+
+model SocialCommentReply {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  commentId         String   @map("comment_id") @db.Uuid
+  externalReplyId   String?  @map("external_reply_id") @db.VarChar(255)
+  text              String   @db.Text
+  repliedBy         String   @map("replied_by") @db.VarChar(20) // AI, HUMAN
+  ruleId            String?  @map("rule_id") @db.Uuid // which auto-reply rule triggered this
+  userId            String?  @map("user_id") @db.Uuid // if HUMAN
+  status            String   @default("SENT") @db.VarChar(20) // SENT, FAILED, DELETED
+  errorMessage      String?  @map("error_message") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([tenantId, commentId], name: "idx_social_comment_replies_tenant_comment")
+  @@map("social_comment_replies")
+  @@schema("social_schema")
+}
+
+model SocialAutoReplyRule {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  name          String   @db.VarChar(255)
+  isActive      Boolean  @default(true) @map("is_active")
+  priority      Int      @default(0)
+  platform      String   @default("INSTAGRAM") @db.VarChar(20) // INSTAGRAM, ALL
+  conditions    Json     @default("{}") // keywords, excludeKeywords, postIds, timeWindow, etc.
+  actions       Json     @default("{}") // replyToComment, sendInboxMessage config
+  limits        Json     @default("{}") // maxRepliesPerPost, maxRepliesPerHour, cooldownPerUser
+  totalFired    Int      @default(0) @map("total_fired")
+  lastFiredAt   DateTime? @map("last_fired_at") @db.Timestamptz
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, isActive], name: "idx_social_auto_reply_rules_tenant_active")
+  @@map("social_auto_reply_rules")
+  @@schema("social_schema")
+}
+
+model SocialInboxThread {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  socialAccountId     String   @map("social_account_id") @db.Uuid
+  platform            String   @db.VarChar(20)
+  recipientExternalId String   @map("recipient_external_id") @db.VarChar(255)
+  recipientUsername   String?  @map("recipient_username") @db.VarChar(255)
+  originCommentId     String?  @map("origin_comment_id") @db.Uuid // the comment that started this thread
+  lastMessageText     String?  @map("last_message_text") @db.Text
+  lastMessageAt       DateTime? @map("last_message_at") @db.Timestamptz
+  messageCount        Int      @default(0) @map("message_count")
+  status              String   @default("ACTIVE") @db.VarChar(20) // ACTIVE, CLOSED
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([tenantId, platform, recipientExternalId], name: "uq_social_inbox_threads_tenant_recipient")
+  @@index([tenantId, status], name: "idx_social_inbox_threads_tenant_status")
+  @@map("social_inbox_threads")
+  @@schema("social_schema")
+}
+
+model SocialAuditLog {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  event       String   @db.VarChar(50) // COMMENT_RECEIVED, AUTO_REPLY_SENT, INBOX_MESSAGE_SENT, RULE_CREATED, ACCOUNT_CONNECTED
+  entityId    String?  @map("entity_id") @db.Uuid
+  entityType  String?  @map("entity_type") @db.VarChar(30) // COMMENT, REPLY, RULE, ACCOUNT, INBOX_THREAD
+  platform    String?  @db.VarChar(20)
+  ruleId      String?  @map("rule_id") @db.Uuid
+  metadata    Json?    @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([tenantId])
+  @@index([entityId])
+  @@map("social_audit_log")
+  @@schema("social_schema")
+}
+
+model SchedulingRecurringReservation {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  branchId           String?   @map("branch_id") @db.Uuid
+  professionalId     String    @map("professional_id") @db.VarChar(80)
+  contactId          String?   @map("contact_id") @db.Uuid
+  categoryId         String?   @map("category_id") @db.VarChar(80)
+  conversationId     String?   @map("conversation_id") @db.Uuid
+  period             String    @db.VarChar(20)
+  interval           Int       @default(1)
+  maxOccurrences     Int       @map("max_occurrences")
+  occurrencesCreated Int       @default(0) @map("occurrences_created")
+  startsAt           String    @map("starts_at") @db.VarChar(5)
+  endsAt             String    @map("ends_at") @db.VarChar(5)
+  firstDate          DateTime  @map("first_date") @db.Date
+  endDate            DateTime? @map("end_date") @db.Date
+  nextDate           DateTime? @map("next_date") @db.Date
+  nextRunAt          DateTime? @map("next_run_at") @db.Timestamptz
+  isFree             Boolean   @default(true) @map("is_free")
+  isOnline           Boolean   @default(false) @map("is_online")
+  paymentTimeoutHours Int?     @map("payment_timeout_hours")
+  notes              String?   @db.Text
+  status             String    @default("ACTIVE") @db.VarChar(20)
+  lastError          String?   @map("last_error") @db.Text
+  leaseUntil         DateTime? @map("lease_until") @db.Timestamptz
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  completedAt        DateTime? @map("completed_at") @db.Timestamptz
+  cancelledAt        DateTime? @map("cancelled_at") @db.Timestamptz
+  runs               SchedulingRecurringReservationRun[]
+
+  @@index([status, nextRunAt, leaseUntil], name: "idx_scheduling_recurring_reservations_due")
+  @@index([tenantId, professionalId, status], name: "idx_scheduling_recurring_reservations_tenant_professional")
+  @@map("scheduling_recurring_reservations")
+  @@schema("scheduling_schema")
+}
+
+model SchedulingRecurringReservationRun {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recurrenceId     String   @map("recurrence_id") @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  occurrenceNumber Int      @map("occurrence_number")
+  targetDate       DateTime @map("target_date") @db.Date
+  slotId           String?  @map("slot_id") @db.VarChar(80)
+  status           String   @default("PROCESSING") @db.VarChar(20)
+  errorMessage     String?  @map("error_message") @db.Text
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  completedAt      DateTime? @map("completed_at") @db.Timestamptz
+  recurrence       SchedulingRecurringReservation @relation(fields: [recurrenceId], references: [id])
+
+  @@unique([recurrenceId, occurrenceNumber], name: "uq_scheduling_recurring_reservation_runs_occurrence")
+  @@map("scheduling_recurring_reservation_runs")
+  @@schema("scheduling_schema")
+}

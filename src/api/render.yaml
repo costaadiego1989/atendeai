@@ -1,0 +1,155 @@
+services:
+  # Main API Service
+  - type: web
+    name: atendeai-api
+    env: docker
+    dockerFilePath: Dockerfile
+    dockerCommand: node dist/main
+    plan: starter
+    envVars:
+      - key: PRISMA_DATABASE_URL
+        fromDatabase:
+          name: atendeai-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: port
+      - fromGroup: atendeai-env
+
+  # Messaging Worker
+  - type: worker
+    name: atendeai-messaging-worker
+    env: docker
+    dockerFilePath: Dockerfile
+    dockerCommand: node dist/messaging-worker
+    plan: starter
+    envVars:
+      - key: PRISMA_DATABASE_URL
+        fromDatabase:
+          name: atendeai-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: port
+      - fromGroup: atendeai-env
+
+  # Prospect Search Worker
+  - type: worker
+    name: atendeai-prospect-search-worker
+    env: docker
+    dockerFilePath: Dockerfile
+    dockerCommand: node dist/prospect-search-worker
+    plan: starter
+    envVars:
+      - key: PRISMA_DATABASE_URL
+        fromDatabase:
+          name: atendeai-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: port
+      - fromGroup: atendeai-env
+
+  # Alerts Worker
+  - type: worker
+    name: atendeai-alerts-worker
+    env: docker
+    dockerFilePath: Dockerfile
+    dockerCommand: node dist/alerts-worker
+    plan: starter
+    envVars:
+      - key: PRISMA_DATABASE_URL
+        fromDatabase:
+          name: atendeai-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: port
+      - fromGroup: atendeai-env
+
+  # Scheduling Worker
+  - type: worker
+    name: atendeai-scheduling-worker
+    env: docker
+    dockerFilePath: Dockerfile
+    dockerCommand: node dist/scheduling-worker
+    plan: starter
+    envVars:
+      - key: PRISMA_DATABASE_URL
+        fromDatabase:
+          name: atendeai-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: atendeai-redis
+          property: port
+      - fromGroup: atendeai-env
+
+  # RabbitMQ (Private Service)
+  - type: pvtweb
+    name: atendeai-rabbitmq
+    env: docker
+    dockerContext: .
+    dockerCommand: rabbitmq-server
+    plan: starter
+    envVars:
+      - key: RABBITMQ_DEFAULT_USER
+        value: guest
+      - key: RABBITMQ_DEFAULT_PASS
+        value: guest
+
+databases:
+  - name: atendeai-db
+    plan: starter
+    databaseName: atendeai
+    user: atendeai
+
+redis:
+  - name: atendeai-redis
+    plan: starter
+    ipAllowList: [] # Only allow internal traffic
+
+envVarGroups:
+  - name: atendeai-env
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: EVENT_BUS_TRANSPORT
+        value: bullmq
+      - key: RABBITMQ_URL
+        value: amqp://guest:guest@atendeai-rabbitmq:5672
+      # Shared keys from .env will be added here manually in Render UI or via Blueprint

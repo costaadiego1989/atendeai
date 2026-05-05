@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 200 20% 2%;
+    --foreground: 180 10% 96%;
+
+    --card: 190 15% 6%;
+    --card-foreground: 180 10% 96%;
+
+    --popover: 190 15% 6%;
+    --popover-foreground: 180 10% 96%;
+
+    --primary: 168 100% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 190 15% 8%;
+    --secondary-foreground: 180 10% 96%;
+
+    --muted: 200 10% 14%;
+    --muted-foreground: 200 10% 58%;
+
+    --accent: 168 100% 36%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 96%;
+
+    --border: 180 10% 100% / 0.06;
+    --input: 180 10% 100% / 0.06;
+    --ring: 168 100% 36%;
+
+    --radius: 0.75rem;
+
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3);
+    --shadow-glow: 0 0 40px -8px hsl(168 100% 36% / 0.4);
+    --shadow-glow-lg: 0 0 80px -15px hsl(168 100% 36% / 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+    letter-spacing: -0.03em;
+  }
+}
+
+@layer utilities {
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(168 100% 36%), hsl(168 80% 55%), hsl(180 70% 45%));
+  }
+
+  .text-gradient-enterprise {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(168 100% 50%), hsl(180 80% 60%));
+  }
+
+  .enterprise-border {
+    border: 1px solid hsl(168 100% 36% / 0.08);
+  }
+
+  .enterprise-card {
+    background: linear-gradient(135deg, hsl(190 15% 7% / 0.8), hsl(190 15% 5% / 0.6));
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(168 100% 36% / 0.06);
+  }
+
+  .glass-surface {
+    background: hsl(200 20% 4% / 0.6);
+    backdrop-filter: blur(40px) saturate(1.5);
+    border: 1px solid hsl(168 100% 36% / 0.05);
+  }
+}
+
+/* Marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+/* Tabular nums */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}

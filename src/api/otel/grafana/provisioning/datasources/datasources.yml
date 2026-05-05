@@ -1,0 +1,31 @@
+apiVersion: 1
+
+datasources:
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    access: proxy
+    url: http://tempo:3200
+    isDefault: false
+    jsonData:
+      httpMethod: GET
+      tracesToLogs:
+        datasourceUid: loki-main
+        filterByTraceID: true
+        spanStartTimeShift: '-1m'
+        spanEndTimeShift: '1m'
+        tags: [{ key: 'trace_id', value: 'traceId' }]
+
+  - name: Loki
+    type: loki
+    uid: loki-main
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+
+  - name: CollectorPrometheus
+    type: prometheus
+    uid: collector-prom
+    access: proxy
+    url: http://otel-collector:9464
+    isDefault: false

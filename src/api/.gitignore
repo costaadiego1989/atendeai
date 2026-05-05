@@ -1,0 +1,17 @@
+node_modules
+/dist
+.env
+.env.test
+.env.production
+.env.local
+
+# NestJS build output
+/dist
+
+# Prisma
+/prism/generated
+/generated/prisma
+
+# OS files
+.DS_Store
+Thumbs.db

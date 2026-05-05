@@ -1,0 +1,10 @@
+ALTER TABLE recovery_schema.recovery_cases
+ADD COLUMN IF NOT EXISTS debtor_company_name VARCHAR(255),
+ADD COLUMN IF NOT EXISTS debtor_document VARCHAR(30),
+ADD COLUMN IF NOT EXISTS charge_type VARCHAR(50),
+ADD COLUMN IF NOT EXISTS charge_title VARCHAR(255),
+ADD COLUMN IF NOT EXISTS charge_description TEXT,
+ADD COLUMN IF NOT EXISTS reference_period VARCHAR(30),
+ADD COLUMN IF NOT EXISTS related_entity_type VARCHAR(50),
+ADD COLUMN IF NOT EXISTS related_entity_id VARCHAR(255),
+ADD COLUMN IF NOT EXISTS related_entity_label VARCHAR(255);

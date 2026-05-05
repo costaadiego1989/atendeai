@@ -1,0 +1,2 @@
+ALTER TABLE tenant_schema.users
+ADD COLUMN IF NOT EXISTS cpf VARCHAR(14);

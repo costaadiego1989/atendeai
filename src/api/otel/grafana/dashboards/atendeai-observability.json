@@ -1,0 +1,58 @@
+{
+  "uid": "atendeai-obs-main",
+  "title": "AtendeAi Observability",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["atendeai", "obs"],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Traces explorer (abra Explore → Tempo)",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "options": {},
+      "targets": []
+    },
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "Structured stdout / OTLP-derived (Loki)",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "loki", "uid": "loki-main" },
+      "options": {},
+      "targets": [
+        {
+          "expr": "{}",
+          "refId": "A",
+          "queryType": "",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-main"
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "HTTP server request duration seconds (histogram sum rate)",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "collector-prom"
+      },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_sum[5m]))",
+          "legendFormat": "sum rate duration",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,288 @@
+import { ReactNode, useState } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { TrialBanner } from '@/components/TrialBanner';
+import {
+  Archive,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Bot,
+  Building2,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Contact2,
+  CreditCard,
+  History,
+  LayoutDashboard,
+  LifeBuoy,
+  Link as LinkIcon,
+  LogOut,
+  MessageSquare,
+  Search,
+  ShoppingCart,
+  ShieldHalf,
+  Tag,
+  UserPlus,
+  Webhook,
+  Share2,
+} from 'lucide-react';
+import { ActiveBranchSelector } from '@/components/ActiveBranchSelector';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { authService } from '@/modules/auth/services/auth-service';
+import { GlobalConversationNotifier } from '@/modules/messaging/components/GlobalConversationNotifier';
+import { ModuleFeedbackFab } from '@/modules/support/components/ModuleFeedbackFab';
+import { UserProfileSheet } from '@/modules/users/components/UserProfileSheet';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { useUIStore } from '@/shared/stores/ui-store';
+
+interface NavItem {
+  label: string;
+  path: string;
+  icon: typeof LayoutDashboard;
+}
+
+const mainNav: NavItem[] = [
+  { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
+  { label: 'Conversas', path: '/app/conversations', icon: MessageSquare },
+  { label: 'Engajamento', path: '/app/social', icon: Share2 },
+  { label: 'Contatos', path: '/app/contacts', icon: Contact2 },
+  { label: 'Agenda', path: '/app/scheduling', icon: Calendar },
+  { label: 'Cobranças', path: '/app/recovery', icon: History },
+];
+
+const salesNav: NavItem[] = [
+  { label: 'Catálogo', path: '/app/catalog', icon: BookOpen },
+  { label: 'Estoque', path: '/app/inventory', icon: Archive },
+  { label: 'Checkout', path: '/app/checkout', icon: ShoppingCart },
+  { label: 'Métricas', path: '/app/sales/metrics', icon: BarChart3 },
+  { label: 'Links Pagamento', path: '/app/sales/payment-links', icon: LinkIcon },
+  { label: 'Promoções & Cupons', path: '/app/sales/promotions', icon: Tag },
+];
+
+const prospectingNav: NavItem[] = [
+  { label: 'Prospectar clientes', path: '/app/prospecting/searches', icon: Search },
+];
+
+const settingsNav: NavItem[] = [
+  { label: 'Dados da empresa', path: '/app/settings/company', icon: Building2 },
+  { label: 'Integrações', path: '/app/settings/integrations', icon: Webhook },
+  { label: 'Canais', path: '/app/settings/channels', icon: MessageSquare },
+  { label: 'Alertas', path: '/app/settings/alerts', icon: Bell },
+  { label: 'Suporte técnico', path: '/app/settings/support', icon: LifeBuoy },
+  { label: 'IA Comercial', path: '/app/settings/ai', icon: Bot },
+  { label: 'Equipe', path: '/app/team', icon: UserPlus },
+  { label: 'Uso / Billing', path: '/app/billing/usage', icon: CreditCard },
+];
+
+function NavSection({
+  title,
+  items,
+  collapsed,
+  currentPath,
+}: {
+  title: string;
+  items: NavItem[];
+  collapsed: boolean;
+  currentPath: string;
+}) {
+  return (
+    <div className="mb-2">
+      {!collapsed && (
+        <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted">
+          {title}
+        </p>
+      )}
+      {items.map((item) => {
+        const active = currentPath.startsWith(item.path) && item.path !== '#';
+
+        return (
+          <Link
+            key={`${item.path}-${item.label}`}
+            to={item.path}
+            className={cn(
+              'mx-2 flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors',
+              active
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
+              item.path === '#' && 'pointer-events-none opacity-40',
+            )}
+            title={collapsed ? item.label : undefined}
+          >
+            <item.icon className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>{item.label}</span>}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+export function AppLayout({ children }: { children?: ReactNode }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { user, tenant, activeBranchId, clearSession } = useAuthStore();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } finally {
+      clearSession();
+      navigate('/login', { replace: true });
+    }
+  };
+
+  const content = children ?? <Outlet />;
+  const platformNavItems = ((): NavItem[] => {
+    const show =
+      import.meta.env.VITE_SHOW_PLATFORM_ADMIN_NAV === 'true' &&
+      !!(import.meta.env.VITE_PLATFORM_ADMIN_API_KEY as string | undefined)?.trim();
+    if (!show) return [];
+    return [{ label: 'Plataforma · Tenants', path: '/app/platform/tenants', icon: ShieldHalf }];
+  })();
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-transparent">
+      <GlobalConversationNotifier />
+
+      <aside
+        className={cn(
+          'flex shrink-0 flex-col border-r border-sidebar-border bg-sidebar/40 backdrop-blur-xl transition-all duration-200',
+          sidebarCollapsed ? 'w-[60px]' : 'w-[240px]',
+        )}
+      >
+        <div className="flex h-14 items-center border-b border-sidebar-border/50 px-4">
+          {!sidebarCollapsed ? (
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center">
+                <img
+                  src="/logo.png"
+                  alt="AtendeAi"
+                  className="h-full w-full object-contain drop-shadow-sm"
+                />
+              </div>
+              <span className="text-base font-bold text-sidebar-accent-foreground">
+                AtendeAi
+              </span>
+            </div>
+          ) : (
+            <div className="mx-auto flex h-10 w-10 items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="AtendeAi"
+                className="h-full w-full object-contain drop-shadow-sm"
+              />
+            </div>
+          )}
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-3">
+          <NavSection
+            title="Principal"
+            items={mainNav}
+            collapsed={sidebarCollapsed}
+            currentPath={location.pathname}
+          />
+          <Separator className="my-2 bg-sidebar-border" />
+          <NavSection
+            title="Comercial"
+            items={salesNav}
+            collapsed={sidebarCollapsed}
+            currentPath={location.pathname}
+          />
+          <NavSection
+            title="Prospecção"
+            items={prospectingNav}
+            collapsed={sidebarCollapsed}
+            currentPath={location.pathname}
+          />
+          {platformNavItems.length > 0 ? (
+            <>
+              <Separator className="my-2 bg-sidebar-border" />
+              <NavSection
+                title="Plataforma (interno)"
+                items={platformNavItems}
+                collapsed={sidebarCollapsed}
+                currentPath={location.pathname}
+              />
+            </>
+          ) : null}
+          <Separator className="my-2 bg-sidebar-border" />
+          <NavSection
+            title="Configuracoes"
+            items={settingsNav}
+            collapsed={sidebarCollapsed}
+            currentPath={location.pathname}
+          />
+        </nav>
+
+        <div className="mt-auto space-y-1 border-t border-sidebar-border p-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => void handleLogout()}
+            className={cn(
+              'w-full px-3 py-2 text-[13px] font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+              sidebarCollapsed ? 'justify-center' : 'justify-start',
+            )}
+            title="Sair do sistema"
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            {!sidebarCollapsed && <span>Sair</span>}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="w-full justify-center text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TrialBanner />
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 bg-background/40 px-5 backdrop-blur-md">
+          <ActiveBranchSelector />
+
+          <div className="flex items-center gap-2">
+            <DarkModeToggle />
+
+            {user && (
+              <button
+                onClick={() => setIsProfileOpen(true)}
+                className="flex items-center gap-2 rounded-lg p-1.5 text-left transition-colors hover:bg-muted/60"
+              >
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="bg-primary/10 text-[11px] font-semibold text-primary">
+                    {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden text-[13px] font-medium text-foreground md:inline">{user.name}</span>
+              </button>
+            )}
+          </div>
+        </header>
+
+        <main className="relative flex-1 overflow-y-auto">
+          {content}
+          <ModuleFeedbackFab />
+        </main>
+
+        <UserProfileSheet open={isProfileOpen} onOpenChange={setIsProfileOpen} />
+      </div>
+    </div>
+  );
+}

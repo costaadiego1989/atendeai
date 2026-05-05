@@ -1,0 +1,211 @@
+x-app-base: &app-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  env_file:
+    - .env
+  environment:
+    PRISMA_DATABASE_URL: postgresql://${DATABASE_USER:-atendeai}:${DATABASE_PASSWORD:-atendeai_dev}@postgres:5432/${DATABASE_NAME:-atendeai}?schema=public
+    DATABASE_HOST: postgres
+    DATABASE_PORT: 5432
+    DATABASE_USER: ${DATABASE_USER:-atendeai}
+    DATABASE_PASSWORD: ${DATABASE_PASSWORD:-atendeai_dev}
+    DATABASE_NAME: ${DATABASE_NAME:-atendeai}
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    EVENT_BUS_MODE: immediate
+    EVENT_BUS_TRANSPORT: bullmq
+    RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+    RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-atendeai.events}
+    RABBITMQ_DLX: ${RABBITMQ_DLX:-atendeai.events.dlx}
+    RABBITMQ_QUEUE_PREFIX: ${RABBITMQ_QUEUE_PREFIX:-atendeai}
+    NODE_ENV: ${NODE_ENV:-development}
+    OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+    OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-atendeai}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: atendeai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-atendeai}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-atendeai_dev}
+      POSTGRES_DB: ${DATABASE_NAME:-atendeai}
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-schemas.sql:/docker-entrypoint-initdb.d/01-schemas.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USER:-atendeai} -d ${DATABASE_NAME:-atendeai}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: atendeai-redis
+    restart: unless-stopped
+    ports:
+      - '6377:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: atendeai-rabbitmq
+    restart: unless-stopped
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --- Observabilidade ( OTLP collector → Tempo + métricas; Grafana UI ) ---
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: atendeai-tempo
+    restart: unless-stopped
+    command: ['-config.file=/etc/tempo.yaml']
+    volumes:
+      - ./otel/tempo.yaml:/etc/tempo.yaml:ro
+    ports:
+      - '${TEMPO_HTTP_PORT:-3200}:3200'
+
+  # Logs (OTLP collector → HTTP push). Se `docker pull` falhar com EOF no Hub,
+  # no Docker Desktop: Settings → Docker Engine → `"max-concurrent-downloads": 1` e aplique,
+  # depois `docker system prune -f` e tente `docker pull grafana/loki:2.9.13`.
+  # Tag 2.9.x tende a ser menor que 3.x (outras blobs; às vezes o pull funciona onde 3.3 falha).
+  loki:
+    image: grafana/loki:2.9.13
+    container_name: atendeai-loki
+    restart: unless-stopped
+    command: ['-config.file=/etc/loki/local-config.yaml']
+    ports:
+      - '${LOKI_HTTP_PORT:-3100}:3100'
+    volumes:
+      - loki_data:/loki
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.111.0
+    container_name: atendeai-otel-collector
+    restart: unless-stopped
+    command: ['--config=/etc/otel-collector.yaml']
+    volumes:
+      - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
+    ports:
+      - '${OTEL_GRPC_PORT:-4317}:4317'
+      - '${OTEL_HTTP_PORT:-4318}:4318'
+      - '${OTEL_PROMETHEUS_PORT:-9464}:9464'
+    depends_on:
+      - tempo
+      - loki
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: atendeai-grafana
+    restart: unless-stopped
+    ports:
+      - '${GRAFANA_HTTP_PORT:-3001}:3000'
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./otel/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./otel/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - tempo
+      - otel-collector
+      - loki
+
+  migrate:
+    <<: *app-base
+    container_name: atendeai-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npx prisma migrate deploy
+    restart: 'no'
+
+  api:
+    <<: *app-base
+    container_name: atendeai-api
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: node dist/main
+    ports:
+      - '${APP_PORT:-3000}:3000'
+
+  messaging-worker:
+    <<: *app-base
+    container_name: atendeai-messaging-worker
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: node dist/messaging-worker
+
+  prospect-search-worker:
+    <<: *app-base
+    container_name: atendeai-prospect-search-worker
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: node dist/prospect-search-worker
+
+  alerts-worker:
+    <<: *app-base
+    container_name: atendeai-alerts-worker
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: node dist/alerts-worker
+
+  scheduling-worker:
+    <<: *app-base
+    container_name: atendeai-scheduling-worker
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: node dist/scheduling-worker
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  loki_data:

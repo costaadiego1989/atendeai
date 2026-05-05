@@ -1,0 +1,114 @@
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useRef } from "react";
+import { BrainCircuit, Search, CreditCard, BarChart3, ArrowRight, MessageSquare, Target, Receipt, TrendingUp, Package, Calendar } from "lucide-react";
+
+const pillars = [
+  {
+    icon: Package,
+    accent: MessageSquare,
+    title: "Varejo & Estoque",
+    desc: "Perfeito para lojas físicas ou digitais. A IA sincroniza seu estoque em tempo real, responde disponibilidade, sugere produtos complementares e fecha a venda direto no chat.",
+    highlights: ["Sincronização Realtime", "Upsell Inteligente", "Reserva de Itens"],
+  },
+  {
+    icon: BrainCircuit,
+    accent: Target,
+    title: "Serviços & Catálogo",
+    desc: "Ideal para prestadores de serviços e empresas com catálogos complexos. Qualifique leads, explique propostas e orquestre o atendimento com tom profissional e guardrails rígidos.",
+    highlights: ["Qualificação Avançada", "Catálogo Dinâmico", "Guardrails CRM"],
+  },
+  {
+    icon: Calendar,
+    accent: Receipt,
+    title: "Agendamento Online",
+    desc: "Para clínicas, escritórios e consultórios. A IA consulta sua agenda, marca horários, envia lembretes e evita No-Show, tudo de forma autônoma e humanizada.",
+    highlights: ["Gestão de Agenda", "Lembretes Automáticos", "Zero Atrito"],
+  },
+  {
+    icon: CreditCard,
+    accent: TrendingUp,
+    title: "Saúde Financeira",
+    desc: "Recuperação de carrinhos abandonados, boletos e PIX com fluxos de abordagem baseados em comportamento. Transforme dívidas em receita com negociação automática.",
+    highlights: ["Recovery de Checkout", "Vendas Ativas", "Links Direct-to-Pay"],
+  },
+];
+
+const PlatformSection = () => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+
+  return (
+    <section ref={ref} className="px-6 py-[16vh] relative overflow-hidden">
+      <motion.div style={{ y: bgY }} className="absolute inset-0 -top-[20%] -bottom-[20%]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(168_100%_36%/0.06)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(200_60%_30%/0.05)_0%,transparent_50%)]" />
+      </motion.div>
+
+      <motion.div
+        animate={{ rotate: [0, 360] }}
+        transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[conic-gradient(from_0deg,transparent,hsl(168_100%_36%/0.03),transparent,hsl(168_100%_36%/0.05),transparent)] blur-[60px]"
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-16"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-xs font-semibold tracking-widest uppercase enterprise-border rounded-full bg-primary/5 text-primary">
+            <BrainCircuit className="w-3.5 h-3.5" />
+            Plataforma completa
+          </div>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter mb-4">
+            Uma <span className="text-gradient-primary">máquina de vendas</span> completa
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Atendimento, prospecção, cobrança e conversão, conectados em um único fluxo inteligente.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {pillars.map((p, i) => {
+            const Icon = p.icon;
+            const AccentIcon = p.accent;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.15 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -5, transition: { duration: 0.25 } }}
+                className="group relative enterprise-card rounded-2xl p-8 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <AccentIcon className="w-24 h-24 text-primary" />
+                </div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 group-hover:from-primary/25 group-hover:to-primary/10 transition-all duration-300">
+                    <Icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-foreground">{p.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-5 text-sm">{p.desc}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {p.highlights.map((h, j) => (
+                      <span key={j} className="text-xs font-medium px-2.5 py-1 rounded-full enterprise-border bg-primary/5 text-primary">
+                        {h}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default PlatformSection;

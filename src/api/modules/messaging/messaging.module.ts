@@ -1,0 +1,198 @@
+import { Module } from '@nestjs/common';
+import { PrismaConversationRepository } from './infrastructure/persistence/repositories/PrismaConversationRepository';
+import { CONVERSATION_REPOSITORY } from './domain/repositories/IConversationRepository';
+import { ProcessInboundMessageUseCase } from './application/use-cases/ProcessInboundMessageUseCase';
+import { IProcessInboundMessageUseCase } from './application/use-cases/interfaces/IProcessInboundMessageUseCase';
+import { ListConversationsUseCase } from './application/use-cases/ListConversationsUseCase';
+import { IListConversationsUseCase } from './application/use-cases/interfaces/IListConversationsUseCase';
+import { GetMessageHistoryUseCase } from './application/use-cases/GetMessageHistoryUseCase';
+import { IGetMessageHistoryUseCase } from './application/use-cases/interfaces/IGetMessageHistoryUseCase';
+import { MarkConversationReadUseCase } from './application/use-cases/MarkConversationReadUseCase';
+import { IMarkConversationReadUseCase } from './application/use-cases/interfaces/IMarkConversationReadUseCase';
+import { SendHumanMessageUseCase } from './application/use-cases/SendHumanMessageUseCase';
+import { ISendHumanMessageUseCase } from './application/use-cases/interfaces/ISendHumanMessageUseCase';
+import { EnsureConversationForContactUseCase } from './application/use-cases/EnsureConversationForContactUseCase';
+import { IEnsureConversationForContactUseCase } from './application/use-cases/interfaces/IEnsureConversationForContactUseCase';
+import { UpdateConversationStatusUseCase } from './application/use-cases/UpdateConversationStatusUseCase';
+import { IUpdateConversationStatusUseCase } from './application/use-cases/interfaces/IUpdateConversationStatusUseCase';
+import { SuggestAgentReplyUseCase } from './application/use-cases/SuggestAgentReplyUseCase';
+import { SUGGEST_AGENT_REPLY_USE_CASE } from './application/use-cases/interfaces/ISuggestAgentReplyUseCase';
+import { MarkConversationSaleUseCase } from './application/use-cases/MarkConversationSaleUseCase';
+import { MARK_CONVERSATION_SALE_USE_CASE } from './application/use-cases/interfaces/IMarkConversationSaleUseCase';
+import { VoidConversationSaleUseCase } from './application/use-cases/VoidConversationSaleUseCase';
+import { VOID_CONVERSATION_SALE_USE_CASE } from './application/use-cases/interfaces/IVoidConversationSaleUseCase';
+import { GetConversationSaleAttributionUseCase } from './application/use-cases/GetConversationSaleAttributionUseCase';
+import { GET_CONVERSATION_SALE_ATTRIBUTION_USE_CASE } from './application/use-cases/interfaces/IGetConversationSaleAttributionUseCase';
+import { UpdateConversationSaleAttributionUseCase } from './application/use-cases/UpdateConversationSaleAttributionUseCase';
+import { UPDATE_CONVERSATION_SALE_ATTRIBUTION_USE_CASE } from './application/use-cases/interfaces/IUpdateConversationSaleAttributionUseCase';
+import { ConversationSaleAiValidationService } from './application/services/ConversationSaleAiValidationService';
+import { SuggestAgentReplyService } from './application/services/SuggestAgentReplyService';
+import { SendAIMessageUseCase } from './application/use-cases/SendAIMessageUseCase';
+import { ProcessOutboundMessageUseCase } from './application/use-cases/ProcessOutboundMessageUseCase';
+import { ProcessWebhookUseCase } from './application/use-cases/ProcessWebhookUseCase';
+import { AIResponseGeneratedHandler } from './application/handlers/AIResponseGeneratedHandler';
+import { MessagingBusinessRulesHandler } from './application/handlers/MessagingBusinessRulesHandler';
+import { WebhookController } from './presentation/controllers/WebhookController';
+import { MessagingController } from './presentation/controllers/MessagingController';
+import { ContactModule } from '../contact/contact.module';
+import { TenantModule } from '../tenant/tenant.module';
+import { AuthModule } from '../auth/auth.module';
+import { AIModule } from '../ai/ai.module';
+import { AgentRulesModule } from '../agent-rules/agent-rules.module';
+import { BillingModule } from '../billing/billing.module';
+import { BubbleWhatsAdapter } from './infrastructure/acl/BubbleWhatsAdapter';
+import { Dialog360Adapter } from './infrastructure/acl/Dialog360Adapter';
+import { TwilioAdapter } from './infrastructure/acl/TwilioAdapter';
+import { MESSAGING_GATEWAY_REGISTRY } from './domain/ports/IMessagingGatewayRegistry';
+import { MESSAGE_QUEUE } from './domain/ports/IMessageQueue';
+import { BullMQMessageQueue } from './infrastructure/queue/BullMQMessageQueue';
+import { FollowUpService } from './application/services/FollowUpService';
+import { FollowUpAuditService } from './application/services/FollowUpAuditService';
+import { AIEscalationRequestedHandler } from './application/handlers/AIEscalationRequestedHandler';
+import { InstagramGraphAdapter } from './infrastructure/acl/InstagramGraphAdapter';
+import { MessagingGatewayRegistry } from './infrastructure/acl/MessagingGatewayRegistry';
+import { PrismaMessagingWebhookReceiptStore } from './infrastructure/persistence/repositories/PrismaMessagingWebhookReceiptStore';
+import { PrismaConversationIntelligenceRepository } from './infrastructure/persistence/repositories/PrismaConversationIntelligenceRepository';
+import {
+  CONVERSATION_INTELLIGENCE_REPOSITORY,
+} from './domain/repositories/IConversationIntelligenceRepository';
+import { ConversationIntelligenceService } from './application/services/ConversationIntelligenceService';
+import {
+  MESSAGING_FACADE,
+  MessagingFacade,
+} from './application/facades/MessagingFacade';
+import { MessagingRealtimeEventsHandler } from './application/handlers/MessagingRealtimeEventsHandler';
+import { WebSocketMessagingRealtimePublisher } from './infrastructure/realtime/WebSocketMessagingRealtimePublisher';
+import { MESSAGING_REALTIME_PUBLISHER } from './application/ports/IMessagingRealtimePublisher';
+import { TrialWelcomeNotificationHandler } from './application/handlers/TrialWelcomeNotificationHandler';
+import { BillingQuotaMessagingHandlers } from './application/handlers/BillingQuotaMessagingHandlers';
+import { SchedulingIntegrationHandlers } from './application/handlers/SchedulingIntegrationHandlers';
+import { SalesIntegrationHandlers } from './application/handlers/SalesIntegrationHandlers';
+import { CommerceIntegrationHandlers } from './application/handlers/CommerceIntegrationHandlers';
+import { CommerceModule } from '@modules/commerce/commerce.module';
+
+@Module({
+  imports: [
+    ContactModule,
+    TenantModule,
+    AuthModule,
+    AIModule,
+    AgentRulesModule,
+    BillingModule,
+    CommerceModule,
+  ],
+  controllers: [WebhookController, MessagingController],
+  providers: [
+    BubbleWhatsAdapter,
+    Dialog360Adapter,
+    TwilioAdapter,
+    InstagramGraphAdapter,
+    MessagingGatewayRegistry,
+    ProcessInboundMessageUseCase,
+    SalesIntegrationHandlers,
+    SchedulingIntegrationHandlers,
+    CommerceIntegrationHandlers,
+    {
+      provide: CONVERSATION_REPOSITORY,
+      useClass: PrismaConversationRepository,
+    },
+    {
+      provide: CONVERSATION_INTELLIGENCE_REPOSITORY,
+      useClass: PrismaConversationIntelligenceRepository,
+    },
+    {
+      provide: MESSAGING_GATEWAY_REGISTRY,
+      useExisting: MessagingGatewayRegistry,
+    },
+    {
+      provide: MESSAGE_QUEUE,
+      useClass: BullMQMessageQueue,
+    },
+    {
+      provide: IProcessInboundMessageUseCase,
+      useExisting: ProcessInboundMessageUseCase,
+    },
+    {
+      provide: IListConversationsUseCase,
+      useClass: ListConversationsUseCase,
+    },
+    {
+      provide: IGetMessageHistoryUseCase,
+      useClass: GetMessageHistoryUseCase,
+    },
+    {
+      provide: IMarkConversationReadUseCase,
+      useClass: MarkConversationReadUseCase,
+    },
+    {
+      provide: ISendHumanMessageUseCase,
+      useClass: SendHumanMessageUseCase,
+    },
+    {
+      provide: IEnsureConversationForContactUseCase,
+      useClass: EnsureConversationForContactUseCase,
+    },
+    {
+      provide: IUpdateConversationStatusUseCase,
+      useClass: UpdateConversationStatusUseCase,
+    },
+    {
+      provide: SUGGEST_AGENT_REPLY_USE_CASE,
+      useClass: SuggestAgentReplyUseCase,
+    },
+    {
+      provide: MARK_CONVERSATION_SALE_USE_CASE,
+      useExisting: MarkConversationSaleUseCase,
+    },
+    {
+      provide: VOID_CONVERSATION_SALE_USE_CASE,
+      useExisting: VoidConversationSaleUseCase,
+    },
+    {
+      provide: GET_CONVERSATION_SALE_ATTRIBUTION_USE_CASE,
+      useExisting: GetConversationSaleAttributionUseCase,
+    },
+    {
+      provide: UPDATE_CONVERSATION_SALE_ATTRIBUTION_USE_CASE,
+      useExisting: UpdateConversationSaleAttributionUseCase,
+    },
+    SuggestAgentReplyService,
+    ConversationSaleAiValidationService,
+    MarkConversationSaleUseCase,
+    VoidConversationSaleUseCase,
+    GetConversationSaleAttributionUseCase,
+    UpdateConversationSaleAttributionUseCase,
+    SendAIMessageUseCase,
+    ProcessOutboundMessageUseCase,
+    ProcessWebhookUseCase,
+    AIResponseGeneratedHandler,
+    MessagingRealtimeEventsHandler,
+    MessagingBusinessRulesHandler,
+    FollowUpService,
+    FollowUpAuditService,
+    ConversationIntelligenceService,
+    AIEscalationRequestedHandler,
+    PrismaMessagingWebhookReceiptStore,
+    WebSocketMessagingRealtimePublisher,
+    MessagingFacade,
+    TrialWelcomeNotificationHandler,
+    BillingQuotaMessagingHandlers,
+    {
+      provide: MESSAGING_REALTIME_PUBLISHER,
+      useExisting: WebSocketMessagingRealtimePublisher,
+    },
+    {
+      provide: MESSAGING_FACADE,
+      useExisting: MessagingFacade,
+    },
+  ],
+  exports: [
+    CONVERSATION_REPOSITORY,
+    CONVERSATION_INTELLIGENCE_REPOSITORY,
+    MESSAGE_QUEUE,
+    FollowUpService,
+    FollowUpAuditService,
+    MESSAGING_FACADE,
+  ],
+})
+export class MessagingModule { }

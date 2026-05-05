@@ -1,0 +1,22 @@
+{
+  "name": "atendeai",
+  "private": true,
+  "description": "AtendeAi Enterprise Monorepo",
+  "workspaces": [
+    "src/app",
+    "src/api",
+    "src/web"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "build:app": "npm run build --workspace=src/app",
+    "build:api": "npm run build --workspace=src/api",
+    "build:web": "npm run build --workspace=src/web",
+    "dev:app": "npm run dev --workspace=src/app",
+    "dev:api": "npm run dev --workspace=src/api",
+    "dev:web": "npm run dev --workspace=src/web"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

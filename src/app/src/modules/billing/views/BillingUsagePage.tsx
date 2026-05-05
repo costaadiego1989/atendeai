@@ -1,0 +1,757 @@
+import {
+  AlertTriangle,
+  Bot,
+  CalendarClock,
+  CreditCard,
+  Download,
+  Gauge,
+  Loader2,
+  MessageSquare,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { BillingHeader } from '../components/BillingHeader';
+import { BillingUsageProgressCard } from '@/modules/billing/components/BillingUsageProgressCard';
+import { useBillingPageViewModel } from '@/modules/billing/view-models/useBillingPageViewModel';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { KPICard } from '@/shared/ui/KPICard';
+import { PageSkeleton } from '@/shared/ui/Skeletons';
+import { PricingComparisonTable } from '../components/PricingComparisonTable';
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/shared/lib/formatters';
+import type {
+  BillingAdvisorField,
+  BillingAdvisorQuestion,
+} from '@/modules/billing/view-models/billing-commercial-helpers';
+
+const volumeOptions_DEPRECATED: Array<{ value: string; label: string; description: string }> = [
+  {
+    value: 'LOW',
+    label: 'Operação inicial',
+    description: 'Ate a primeira faixa comercial de conversas ou base.',
+  },
+  {
+    value: 'MEDIUM',
+    label: 'Operação em crescimento',
+    description: 'Ja precisa folga real para vendas, CRM e IA.',
+  },
+  {
+    value: 'HIGH',
+    label: 'Operação intensa',
+    description: 'Precisa teto alto para escalar time e automação.',
+  },
+];
+
+const operationOptions: Array<{
+  value: string;
+  label: string;
+  description: string;
+}> = [
+    {
+      value: 'LEAN',
+      label: 'Enxuta',
+      description: 'Ideal para times pequenos e ativação gradual de módulos.',
+    },
+    {
+      value: 'AUTOMATED',
+      label: 'Automatizada',
+      description: 'Quer usar IA, checkout, cobrança e playbooks do nicho.',
+    },
+    {
+      value: 'GOVERNED',
+      label: 'Estruturada',
+      description: 'Precisa governança, integrações e operação mais crítica.',
+    },
+  ];
+
+interface AdvisorPillGroupProps<T extends string> {
+  label: string;
+  value: T;
+  options: Array<{ value: T; label: string; description: string }>;
+  onChange: (value: T) => void;
+}
+
+function AdvisorPillGroup<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: AdvisorPillGroupProps<T>) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
+        {label}
+      </p>
+      <div className="grid gap-2">
+        {options.map((option) => {
+          const active = option.value === value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onChange(option.value)}
+              className={cn(
+                'rounded-2xl border px-4 py-3 text-left transition-all',
+                active
+                  ? 'border-primary/40 bg-primary/[0.08] shadow-[0_0_0_1px_rgba(20,184,166,0.12)]'
+                  : 'border-border/70 bg-card/80 hover:border-primary/20 hover:bg-muted/40',
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-semibold text-foreground">{option.label}</span>
+                {active && (
+                  <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
+                    Selecionado
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {option.description}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+interface AdvisorQuestionRowProps {
+  question: BillingAdvisorQuestion;
+  onChange: (field: BillingAdvisorField, value: string) => void;
+}
+
+function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
+  return (
+    <div className="rounded-2xl border border-border/70 bg-card/60 p-4">
+      <div className="mb-3">
+        <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
+          {question.label}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{question.helper}</p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {question.options.map((option) => {
+          const active = option.value === question.value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onChange(question.field, option.value)}
+              className={cn(
+                'min-h-[132px] rounded-xl border px-4 py-3 text-left transition-all',
+                active
+                  ? 'border-primary/40 bg-primary/[0.08] shadow-[0_0_0_1px_rgba(20,184,166,0.12)]'
+                  : 'border-border/70 bg-card/80 hover:border-primary/20 hover:bg-muted/40',
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-semibold text-foreground">{option.label}</span>
+                {active && (
+                  <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
+                    Selecionado
+                  </Badge>
+                )}
+              </div>
+              <Badge variant="outline" className="mt-3 border-border/60 bg-background/40 text-[10px]">
+                Sugere{' '}
+                {option.planHint === 'PROFISSIONAL'
+                  ? 'Profissional'
+                  : option.planHint === 'ESCALA'
+                    ? 'Escala'
+                    : 'Essencial'}
+              </Badge>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {option.description}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default function BillingUsagePage() {
+  const vm = useBillingPageViewModel();
+
+  if (vm.isLoading) {
+    return <PageSkeleton />;
+  }
+
+  if (vm.hasError || !vm.usage || !vm.billingPlans) {
+    return (
+      <div className="page-container animate-fade-in">
+        <EmptyState
+          icon={CreditCard}
+          title="Erro no carregamento"
+          description="não foi possivel recuperar os dados de faturamento. Verifique sua conexao ou contate o suporte."
+        />
+      </div>
+    );
+  }
+
+  const {
+    usage,
+    billingPlans,
+    currentPlanDefinition,
+    selectedPlan,
+    selectedPlanRelation,
+    messagePercent,
+    aiPercent,
+    contactsPercent,
+    tenantNiche,
+    recommendation,
+    advisorAnswers,
+    advisorQuestions,
+    recommendedModules,
+    optionalModules,
+    currentAddonInvestment,
+    subscriptionPricing,
+    shouldShowCommercialAdvisor,
+  } = vm;
+
+  return (
+    <div className="page-container animate-fade-in">
+      <BillingHeader
+        onConfirmCancel={vm.confirmCancel}
+        cancelOpen={vm.cancelOpen}
+        setCancelOpen={vm.setCancelOpen}
+        isPendingCancel={vm.cancelSubscriptionMutation.isPending}
+      />
+
+      {usage.scheduledPlan && (
+        <Card className="mb-8 overflow-hidden border-amber-500/20 bg-amber-500/[0.03]">
+          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-amber-500/10 p-2.5">
+                <CalendarClock className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-bold text-amber-900">Transicao de plano agendada</p>
+                <p className="max-w-xl text-sm text-amber-800/80">
+                  Seu plano sera alterado para <span className="font-bold">{usage.scheduledPlan}</span>{' '}
+                  automaticamente em{' '}
+                  {new Date(usage.billingCycle.end).toLocaleDateString('pt-BR')}.
+                </p>
+              </div>
+            </div>
+            <Badge className="border-amber-200 bg-amber-100 text-amber-700 hover:bg-amber-100">
+              Proximo ciclo
+            </Badge>
+          </CardContent>
+        </Card>
+      )}
+
+      {(messagePercent >= 80 || aiPercent >= 80 || contactsPercent >= 80) && (
+        <Card className="mb-8 overflow-hidden border-destructive/20 bg-destructive/[0.03]">
+          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-destructive/10 p-2.5">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <p className="font-bold text-destructive">Atencao operacional: limite proximo</p>
+                <p className="max-w-xl text-sm text-destructive-foreground/80">
+                  Voce atingiu pelo menos 80% de um dos limites do seu plano. Para evitar interrupcoes,
+                  vale revisar o plano base e os módulos da Operação.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="destructive" className="w-fit" onClick={vm.openPlansComparison}>
+              Ver planos
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <KPICard
+          title="Plano atual"
+          value={currentPlanDefinition?.displayName ?? usage.plan}
+          subtitle={
+            <div className="mt-2 flex flex-col gap-1.5">
+              <span className="text-xs">
+                Ciclo encerra em {new Date(usage.billingCycle.end).toLocaleDateString('pt-BR')}
+              </span>
+              {tenantNiche && (
+                <Badge
+                  variant="outline"
+                  className="w-fit border-border/50 bg-muted/50 text-[10px]"
+                >
+                  Nicho: {tenantNiche.displayName}
+                </Badge>
+              )}
+            </div>
+          }
+          icon={CreditCard}
+        />
+        <KPICard
+          title="Investimento atual"
+          value={formatCurrency(subscriptionPricing?.totalMonthlyPrice ?? currentPlanDefinition?.monthlyPrice ?? 0) ?? 'R$ 0,00'}
+          subtitle={
+            currentAddonInvestment > 0
+              ? `${formatCurrency(subscriptionPricing?.baseMonthlyPrice ?? currentPlanDefinition?.monthlyPrice ?? 0) ?? 'R$ 0,00'} de plano base + ${formatCurrency(currentAddonInvestment) ?? 'R$ 0,00'} em módulos`
+              : 'Sem add-ons cobrados hoje'
+          }
+          icon={Sparkles}
+        />
+        <KPICard
+          title="Volume de mensagens"
+          value={`${usage.messages.used.toLocaleString('pt-BR')} / ${usage.messages.quota.toLocaleString('pt-BR')}`}
+          subtitle={`${messagePercent.toFixed(1)}% do limite atingido`}
+          icon={MessageSquare}
+        />
+        <KPICard
+          title="Base de CRM"
+          value={`${usage.contacts.used.toLocaleString('pt-BR')} / ${usage.contacts.quota.toLocaleString('pt-BR')}`}
+          subtitle={`${contactsPercent.toFixed(1)}% da capacidade contratada`}
+          icon={Users}
+        />
+      </div>
+
+      <div className="mb-10 grid gap-6 lg:grid-cols-3">
+        <BillingUsageProgressCard
+          title="Mensagens (WhatsApp)"
+          subtitle="Taxa de ocupação da franquia de disparos."
+          value={messagePercent}
+          icon={MessageSquare}
+        />
+        <BillingUsageProgressCard
+          title="Processamento IA"
+          subtitle="Consumo de tokens na orquestração de respostas."
+          value={aiPercent}
+          icon={Bot}
+        />
+        <BillingUsageProgressCard
+          title="Gestao de contatos"
+          subtitle="Utilização do limite de armazenamento da base."
+          value={contactsPercent}
+          icon={Users}
+        />
+      </div>
+
+      <div className="mb-10 flex flex-wrap items-center justify-end gap-3">
+        <Button variant="outline" size="sm" onClick={vm.exportUsageCsv}>
+          <Download className="mr-2 h-4 w-4" />
+          Exportar uso (CSV)
+        </Button>
+      </div>
+
+      {shouldShowCommercialAdvisor && advisorAnswers && recommendation && (
+        <div className="mb-10 grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
+          <Card className="border-border/60 bg-card/90">
+            <CardHeader className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
+                  Teste guiado
+                </Badge>
+                {tenantNiche && (
+                  <Badge variant="outline" className="border-border/60 bg-muted/40">
+                    Nicho atual: {tenantNiche.displayName}
+                  </Badge>
+                )}
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Assistente de escolha do plano</CardTitle>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  Ajuste o perfil da Operação e deixe o sistema indicar o plano base mais coerente
+                  para o teste da assinatura. O valor dos módulos continua separado.
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4">
+                {advisorQuestions.map((question) => (
+                  <AdvisorQuestionRow
+                    key={question.field}
+                    question={question}
+                    onChange={vm.setAdvisorField}
+                  />
+                ))}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 border-t border-border/70 pt-4">
+                <Button onClick={vm.openRecommendedPlan}>
+                  Ver e contratar plano indicado
+                </Button>
+                <Button variant="ghost" onClick={vm.resetAdvisorAnswers}>
+                  Recalcular com uso atual
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-primary/20 bg-primary/[0.03]">
+            <CardHeader className="space-y-4">
+              <Badge className="w-fit border-none bg-primary/10 text-primary hover:bg-primary/20">
+                Recomendação comercial
+              </Badge>
+              <div className="space-y-2">
+                <CardTitle className="text-2xl leading-tight">
+                  {recommendation.headline}
+                </CardTitle>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {recommendation.summary}
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="rounded-2xl border border-primary/20 bg-background/40 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+                      Plano base indicado
+                    </p>
+                    <p className="mt-2 text-3xl font-black text-foreground">
+                      {recommendation.recommendedPlan?.displayName ?? 'Sem plano disponivel'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+                      Valor do plano
+                    </p>
+                    <p className="mt-2 text-2xl font-black text-foreground">
+                      {formatCurrency(recommendation.recommendedPlan?.monthlyPrice ?? 0) ?? 'R$ 0,00'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Somente plano base</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {recommendation.quotaBenefits.map((benefit) => (
+                  <div
+                    key={benefit}
+                    className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/[0.04] px-4 py-3"
+                  >
+                    <ShieldCheck className="mt-0.5 h-4 w-4 text-primary" />
+                    <p className="text-sm leading-relaxed text-muted-foreground">{benefit}</p>
+                  </div>
+                ))}
+                {recommendation.reasons.map((reason) => (
+                  <div
+                    key={reason}
+                    className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card/80 px-4 py-3"
+                  >
+                    <Gauge className="mt-0.5 h-4 w-4 text-primary" />
+                    <p className="text-sm leading-relaxed text-muted-foreground">{reason}</p>
+                  </div>
+                ))}
+                {recommendation.nicheBenefits.map((benefit) => (
+                  <div
+                    key={benefit}
+                    className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card/80 px-4 py-3"
+                  >
+                    <Sparkles className="mt-0.5 h-4 w-4 text-primary" />
+                    <p className="text-sm leading-relaxed text-muted-foreground">{benefit}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-2xl border border-border/70 bg-card/80 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                  Add-ons do nicho
+                </p>
+                <p className="mt-2 text-lg font-bold text-foreground">
+                  {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'}
+                </p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Estimativa das recomendacoes do nicho caso voce decida ativar os módulos depois.
+                  Não estamos somando isso no preço do plano base.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {shouldShowCommercialAdvisor &&
+        (tenantNiche || recommendedModules.length > 0 || optionalModules.length > 0) && (
+        <div className="mb-10 space-y-6">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  Pacote recomendado para o nicho
+                </h2>
+                {tenantNiche && (
+                  <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
+                    {tenantNiche.displayName}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-muted-foreground">
+                Aqui o sistema separa o que ja esta no plano do que pode ser ativado como add-on.
+              </p>
+            </div>
+            {recommendation && recommendation.estimatedAddonInvestment > 0 && (
+              <div className="rounded-2xl border border-border/60 bg-card/80 px-4 py-3 text-right">
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                  Potencial em add-ons
+                </p>
+                <p className="mt-1 text-lg font-bold text-foreground">
+                  {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'} / mes
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {recommendedModules.map((module) => (
+              <Card
+                key={module.code}
+                className="group border-border/50 transition-all hover:border-primary/30"
+              >
+                <CardContent className="flex gap-4 p-5">
+                  <div className="h-fit rounded-lg bg-primary/10 p-2.5 transition-colors group-hover:bg-primary/20">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold leading-none text-foreground">{module.displayName}</p>
+                      <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
+                        Prioritario
+                      </Badge>
+                    </div>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      {module.marketingHeadline || module.salesPitch || module.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <Badge variant="outline">
+                        {module.includedInPlan || module.subscribed ? 'Ja disponivel' : 'Add-on'}
+                      </Badge>
+                      {!module.includedInPlan && (
+                        <Badge variant="outline">
+                          {formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mes
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {optionalModules.map((module) => (
+              <Card key={module.code} className="border-dashed border-border/60 bg-card/70">
+                <CardContent className="flex gap-4 p-5">
+                  <div className="h-fit rounded-lg bg-muted p-2.5">
+                    <Sparkles className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold leading-none text-foreground">{module.displayName}</p>
+                      <Badge variant="outline">Opcional</Badge>
+                    </div>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      {module.recommendationSalesPitch || module.salesPitch || module.description}
+                    </p>
+                    <Badge variant="outline">
+                      {module.includedInPlan || module.subscribed
+                        ? 'Ja disponivel'
+                        : `${formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mes`}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div id="plans-comparison" className="space-y-6">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+              Planos e escalabilidade
+            </h2>
+            <p className="text-muted-foreground">
+              O comparativo abaixo mostra apenas o plano base. Add-ons entram depois, conforme a
+              Operação contratar.
+            </p>
+          </div>
+          {recommendation?.recommendedPlan && (
+            <Badge className="w-fit border-none bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20">
+              Plano indicado hoje: {recommendation.recommendedPlan.displayName}
+            </Badge>
+          )}
+        </div>
+
+        <PricingComparisonTable
+          plans={billingPlans}
+          currentPlanCode={usage.plan}
+          onSelectPlan={vm.setSelectedPlan}
+          isLoading={vm.changePlanMutation.isPending}
+          recommendedPlanCode={recommendation?.recommendedPlan?.code ?? null}
+        />
+      </div>
+
+      <Sheet open={Boolean(selectedPlan)} onOpenChange={(open) => !open && vm.setSelectedPlan(null)}>
+        <SheetContent side="right" className="w-[560px] overflow-y-auto sm:max-w-[560px]">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="text-2xl">Confirmar alteração de plano</SheetTitle>
+            <SheetDescription className="text-base text-muted-foreground">
+              {selectedPlanRelation === 'upgrade'
+                ? `Voce esta realizando o upgrade para o plano ${selectedPlan?.displayName}.`
+                : `Voce esta agendando um downgrade para o plano ${selectedPlan?.displayName}.`}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-6">
+            <div
+              className={cn(
+                'rounded-xl border p-5',
+                selectedPlanRelation === 'upgrade'
+                  ? 'border-primary/20 bg-primary/[0.02]'
+                  : 'border-amber-500/20 bg-amber-500/[0.02]',
+              )}
+            >
+              <p className="flex items-center gap-2 font-semibold text-foreground">
+                {selectedPlanRelation === 'upgrade' ? (
+                  <CreditCard className="h-4 w-4 text-primary" />
+                ) : (
+                  <CalendarClock className="h-4 w-4 text-amber-600" />
+                )}
+                {selectedPlanRelation === 'upgrade'
+                  ? 'Cobrança imediata'
+                  : 'Alteração no proximo ciclo'}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {selectedPlanRelation === 'upgrade'
+                  ? 'O upgrade e processado agora. Voce sera redirecionado para o checkout seguro do Asaas.'
+                  : 'A mudanca ocorrera apenas ao final do ciclo atual. não ha reembolso proporcional para downgrades.'}
+              </p>
+            </div>
+
+            {selectedPlan && (
+              <div className="grid gap-4">
+                <p className="text-sm font-medium">
+                  Novos limites do plano {selectedPlan.displayName}:
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-border/80 bg-muted/30 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                      Mensagens
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-foreground">
+                      {selectedPlan.messagesQuota.toLocaleString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/80 bg-muted/30 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                      IA (tokens)
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-foreground">
+                      {selectedPlan.aiTokensQuota.toLocaleString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/80 bg-muted/30 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                      Contatos
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-foreground">
+                      {selectedPlan.contactsQuota.toLocaleString('pt-BR')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-2xl border border-border/70 bg-card/70 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                Importante
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                O valor abaixo e apenas do plano base. Se voce ativar add-ons do nicho depois, eles
+                serao somados separadamente na assinatura.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between border-t pt-6">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Valor do plano base
+                </span>
+                <span className="text-2xl font-black text-foreground">
+                  {formatCurrency(selectedPlan?.monthlyPrice ?? 0) ?? 'R$ 0,00'}
+                  <span className="text-sm font-medium text-muted-foreground"> /mes</span>
+                </span>
+                {(recommendation?.estimatedAddonInvestment ?? 0) > 0 && (
+                  <span className="text-[10px] font-medium uppercase tracking-tight text-muted-foreground">
+                    Add-ons sugeridos para o nicho podem acrescentar{' '}
+                    {formatCurrency(recommendation?.estimatedAddonInvestment ?? 0) ?? 'R$ 0,00'} /mes
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => vm.setSelectedPlan(null)}>
+                  Voltar
+                </Button>
+                <Button
+                  className="px-8"
+                  onClick={vm.confirmSelectedPlan}
+                  disabled={vm.changePlanMutation.isPending}
+                >
+                  {vm.changePlanMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Confirmar plano
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={vm.waitingCheckoutOpen} onOpenChange={vm.setWaitingCheckoutOpen}>
+        <SheetContent side="right" className="w-[560px] overflow-y-auto sm:max-w-[560px]">
+          <SheetHeader className="mb-8">
+            <SheetTitle className="text-2xl">Aguardando confirmação</SheetTitle>
+            <SheetDescription className="text-base">
+              O checkout do Asaas foi iniciado em uma nova aba.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex flex-col items-center gap-6 rounded-2xl border border-primary/20 bg-primary/[0.02] px-6 py-12 text-center">
+            <div className="relative">
+              <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
+              <div className="relative rounded-full bg-primary/10 p-5">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xl font-bold text-foreground">Sincronizando faturamento...</p>
+              <p className="leading-relaxed text-muted-foreground">
+                Assim que processarmos a confirmação do pagamento pelo gateway, seu plano{' '}
+                <span className="font-bold text-foreground">{vm.pendingCheckoutPlanCode}</span> sera
+                ativado instantaneamente.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 grid gap-3">
+            <Button className="w-full" variant="default" onClick={vm.refreshBillingStatus}>
+              Ja efetuei o pagamento, atualizar agora
+            </Button>
+            <Button className="w-full" variant="ghost" onClick={() => vm.setWaitingCheckoutOpen(false)}>
+              Verificar mais tarde
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
