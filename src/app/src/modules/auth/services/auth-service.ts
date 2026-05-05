@@ -102,6 +102,9 @@ function unwrapResponse<T>(payload: T | ApiEnvelope<T>): T {
 }
 
 function mapTenant(tenant: BackendTenant): Tenant {
+  if (!tenant) {
+    throw new Error('Tenant data is missing in the session response');
+  }
   const branches = tenant.branches?.map((branch) => ({
     id: branch.id,
     name: branch.name,
@@ -109,7 +112,7 @@ function mapTenant(tenant: BackendTenant): Tenant {
     active: branch.active,
     createdAt: '',
     updatedAt: '',
-  }));
+  })) ?? [];
 
   return {
     id: tenant.id,
@@ -129,6 +132,10 @@ function mapTenant(tenant: BackendTenant): Tenant {
 }
 
 function mapUser(user: BackendUser): User {
+  if (!user) {
+    throw new Error('User data is missing in the session response');
+  }
+
   return {
     id: user.id,
     tenantId: user.tenantId,
@@ -143,6 +150,11 @@ function mapUser(user: BackendUser): User {
 }
 
 function mapSession(input: LoginResponse | CurrentSessionResponse): AuthSession {
+  if (!input || !input.user || !input.tenant) {
+    console.error('[mapSession] Missing data:', { input });
+    throw new Error('Incomplete session data received from server');
+  }
+
   return {
     user: mapUser(input.user),
     tenant: mapTenant(input.tenant),

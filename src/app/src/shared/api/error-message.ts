@@ -126,7 +126,8 @@ export function getFriendlyErrorMessage(
   options?: FriendlyErrorOptions,
 ): string {
   if (error instanceof Error && !(error instanceof HttpError)) {
-    return error.message || options.fallbackMessage;
+    console.error('[Unexpected Error]', error);
+    return 'Ocorreu um erro inesperado no processamento dos dados.';
   }
 
   if (!(error instanceof HttpError)) {
