@@ -16,7 +16,8 @@
     "dev:app": "npm run dev --workspace=src/app",
     "dev:api": "npm run dev --workspace=src/api",
     "dev:web": "npm run dev --workspace=src/web",
-    "prisma:generate": "npm run prisma:generate --workspace=src/api"
+    "prisma:generate": "npm run prisma:generate --workspace=src/api",
+    "start:prod": "npm run start:prod --workspace=src/api"
   },
   "engines": {
     "node": ">=18.0.0"
