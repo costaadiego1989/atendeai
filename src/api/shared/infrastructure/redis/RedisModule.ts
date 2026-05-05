@@ -14,53 +14,50 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
       useFactory: (config: ConfigService) => {
         const redisUrl = config.get<string>('REDIS_URL');
         const redisHost = config.get<string>('REDIS_HOST');
-        const connectionString = (redisUrl?.includes('://') ? redisUrl : null) || (redisHost?.includes('://') ? redisHost : null);
+
+        // Limpeza agressiva de aspas e espaços
+        const clean = (s?: string) => s?.replace(/['"]/g, '').trim();
+        const url = clean(redisUrl);
+        const host = clean(redisHost);
+
+        const connectionString = (url?.includes('://') ? url : null) || 
+                                (host?.includes('://') ? host : null);
 
         if (connectionString) {
           try {
-            const parsed = new URL(connectionString.trim());
-            const redis = new Redis({
+            const parsed = new URL(connectionString);
+            const options = {
               host: parsed.hostname,
               port: Number(parsed.port) || 6379,
-              password: parsed.password || undefined,
-              username: parsed.username || undefined,
+              password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
               db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
               maxRetriesPerRequest: null,
-              tls: parsed.protocol === 'rediss:' ? {} : undefined,
-              keepAlive: 10000,
-              reconnectOnError: (err) => {
-                const targetError = 'READONLY';
-                if (err.message.includes(targetError)) {
-                  return true;
-                }
-                return false;
-              },
-            });
+              keepAlive: 30000,
+              retryStrategy: (times: number) => Math.min(times * 50, 2000),
+            };
 
-            redis.on('error', (err) => {
-              console.error('[RedisModule] Redis Error:', err);
-            });
-
+            const redis = new Redis(options);
+            redis.on('error', (err) => console.error('[RedisModule] Connection Error:', err.message));
             return redis;
           } catch (e) {
-            return new Redis(connectionString.trim(), {
+            // Se falhar o parse, tenta limpar o host manualmente
+            const fallbackHost = connectionString.replace(/^redis[s]?:\/\//, '').split(':')[0];
+            return new Redis({
+              host: fallbackHost,
+              port: 6379,
               maxRetriesPerRequest: null,
-              keepAlive: 10000,
+              keepAlive: 30000,
             });
           }
         }
 
         const redis = new Redis({
-          host: redisHost || 'localhost',
+          host: host || 'localhost',
           port: config.get<number>('REDIS_PORT', 6379),
           maxRetriesPerRequest: null,
-          keepAlive: 10000,
+          keepAlive: 30000,
         });
-
-        redis.on('error', (err) => {
-          console.error('[RedisModule] Redis Error:', err);
-        });
-
+        redis.on('error', (err) => console.error('[RedisModule] Error:', err.message));
         return redis;
       },
     },

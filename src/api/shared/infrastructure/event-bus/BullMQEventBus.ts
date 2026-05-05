@@ -33,7 +33,7 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
     this.connection = new Redis({
       ...this.getConnectionOptions(),
       maxRetriesPerRequest: null,
-      keepAlive: 10000,
+      keepAlive: 30000,
     });
 
     this.connection.on('error', (err) => {
@@ -213,29 +213,41 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
   private getConnectionOptions(): any {
     const redisUrl = this.configService.get<string>('REDIS_URL');
     const redisHost = this.configService.get<string>('REDIS_HOST');
-    const connectionString = (redisUrl?.includes('://') ? redisUrl : null) || (redisHost?.includes('://') ? redisHost : null);
+
+    const clean = (s?: string) => s?.replace(/['"]/g, '').trim();
+    const url = clean(redisUrl);
+    const host = clean(redisHost);
+
+    const connectionString = (url?.includes('://') ? url : null) || 
+                            (host?.includes('://') ? host : null);
 
     if (connectionString) {
       try {
-        const parsed = new URL(connectionString.trim());
+        const parsed = new URL(connectionString);
         return {
           host: parsed.hostname,
           port: Number(parsed.port) || 6379,
-          password: parsed.password || undefined,
-          username: parsed.username || undefined,
+          password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
           db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
           tls: parsed.protocol === 'rediss:' ? {} : undefined,
-          keepAlive: 10000,
+          keepAlive: 30000,
         };
       } catch (e) {
-        return connectionString.trim();
+        // Fallback manual
+        const fallbackHost = connectionString.replace(/^redis[s]?:\/\//, '').split(':')[0];
+        return {
+          host: fallbackHost,
+          port: 6379,
+          maxRetriesPerRequest: null,
+          keepAlive: 30000,
+        };
       }
     }
 
     return {
-      host: redisHost || 'localhost',
+      host: host || 'localhost',
       port: this.configService.get<number>('REDIS_PORT', 6379),
-      keepAlive: 10000,
+      keepAlive: 30000,
     };
   }
 
