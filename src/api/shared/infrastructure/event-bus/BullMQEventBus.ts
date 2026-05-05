@@ -33,6 +33,11 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
     this.connection = new Redis({
       ...this.getConnectionOptions(),
       maxRetriesPerRequest: null,
+      keepAlive: 10000,
+    });
+
+    this.connection.on('error', (err) => {
+      this.logger.error(`Redis Connection Error: ${err.message}`);
     });
   }
 
@@ -220,6 +225,7 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
           username: parsed.username || undefined,
           db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
           tls: parsed.protocol === 'rediss:' ? {} : undefined,
+          keepAlive: 10000,
         };
       } catch (e) {
         return connectionString.trim();
@@ -229,6 +235,7 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
     return {
       host: redisHost || 'localhost',
       port: this.configService.get<number>('REDIS_PORT', 6379),
+      keepAlive: 10000,
     };
   }
 

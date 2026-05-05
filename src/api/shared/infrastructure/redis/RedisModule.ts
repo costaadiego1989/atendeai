@@ -19,7 +19,7 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
         if (connectionString) {
           try {
             const parsed = new URL(connectionString.trim());
-            return new Redis({
+            const redis = new Redis({
               host: parsed.hostname,
               port: Number(parsed.port) || 6379,
               password: parsed.password || undefined,
@@ -27,19 +27,41 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
               db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
               maxRetriesPerRequest: null,
               tls: parsed.protocol === 'rediss:' ? {} : undefined,
+              keepAlive: 10000,
+              reconnectOnError: (err) => {
+                const targetError = 'READONLY';
+                if (err.message.includes(targetError)) {
+                  return true;
+                }
+                return false;
+              },
             });
+
+            redis.on('error', (err) => {
+              console.error('[RedisModule] Redis Error:', err);
+            });
+
+            return redis;
           } catch (e) {
             return new Redis(connectionString.trim(), {
               maxRetriesPerRequest: null,
+              keepAlive: 10000,
             });
           }
         }
 
-        return new Redis({
+        const redis = new Redis({
           host: redisHost || 'localhost',
           port: config.get<number>('REDIS_PORT', 6379),
           maxRetriesPerRequest: null,
+          keepAlive: 10000,
         });
+
+        redis.on('error', (err) => {
+          console.error('[RedisModule] Redis Error:', err);
+        });
+
+        return redis;
       },
     },
   ],
