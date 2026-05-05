@@ -36,10 +36,16 @@ pnpm-debug.log*
 .cursor/
 .specs/
 .windsurf/
+.cursor/skills
+docs/api-modules-review
 
 # Docs and Scripts
 docs/
+/docs
 scripts/
+/scripts
+.cursor/skills
+docs/api-modules-review
 
 # OS
 Thumbs.db
