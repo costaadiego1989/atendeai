@@ -1,10 +1,11 @@
 function resolveApiOrigin() {
-  const configuredOrigin = (
-    import.meta.env.VITE_API_ORIGIN as string | undefined
-  )?.replace(/\/$/, '');
+  const apiOrigin = (import.meta.env.VITE_API_ORIGIN as string | undefined);
+  const apiUrl = (import.meta.env.VITE_API_URL as string | undefined);
 
-  if (configuredOrigin) {
-    return configuredOrigin;
+  let rawOrigin = apiOrigin || apiUrl;
+
+  if (rawOrigin) {
+    return rawOrigin.replace(/\/$/, '').replace(/\/api\/v1$/, '');
   }
 
   if (typeof window === 'undefined') {
@@ -197,8 +198,8 @@ export const apiClient = {
         body instanceof FormData
           ? body
           : body
-          ? JSON.stringify(body)
-          : undefined,
+            ? JSON.stringify(body)
+            : undefined,
     });
   },
 
