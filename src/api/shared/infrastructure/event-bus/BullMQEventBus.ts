@@ -30,10 +30,17 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
   private readonly connection: Redis;
 
   constructor(private readonly configService: ConfigService) {
-    this.connection = new Redis({
-      ...this.getConnectionOptions(),
-      maxRetriesPerRequest: null,
-    });
+    const connectionOptions = this.getConnectionOptions();
+    if (typeof connectionOptions === 'string') {
+      this.connection = new Redis(connectionOptions, {
+        maxRetriesPerRequest: null,
+      });
+    } else {
+      this.connection = new Redis({
+        ...connectionOptions,
+        maxRetriesPerRequest: null,
+      });
+    }
   }
 
   async publish<T extends IntegrationEvent>(event: T): Promise<void> {
@@ -205,7 +212,12 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
     return queue;
   }
 
-  private getConnectionOptions(): { host: string; port: number } {
+  private getConnectionOptions(): any {
+    const url = this.configService.get<string>('REDIS_URL');
+    if (url) {
+      return url;
+    }
+
     return {
       host: this.configService.get<string>('REDIS_HOST', 'localhost'),
       port: this.configService.get<number>('REDIS_PORT', 6379),

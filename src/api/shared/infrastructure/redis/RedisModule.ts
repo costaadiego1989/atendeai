@@ -12,6 +12,12 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
       provide: REDIS_CLIENT,
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
+        const url = config.get<string>('REDIS_URL');
+        if (url) {
+          return new Redis(url, {
+            maxRetriesPerRequest: null,
+          });
+        }
         return new Redis({
           host: config.get<string>('REDIS_HOST', 'localhost'),
           port: config.get<number>('REDIS_PORT', 6379),
