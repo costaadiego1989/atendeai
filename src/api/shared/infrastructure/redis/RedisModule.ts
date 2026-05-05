@@ -17,9 +17,22 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
         const connectionString = (redisUrl?.includes('://') ? redisUrl : null) || (redisHost?.includes('://') ? redisHost : null);
 
         if (connectionString) {
-          return new Redis(connectionString, {
-            maxRetriesPerRequest: null,
-          });
+          try {
+            const parsed = new URL(connectionString.trim());
+            return new Redis({
+              host: parsed.hostname,
+              port: Number(parsed.port) || 6379,
+              password: parsed.password || undefined,
+              username: parsed.username || undefined,
+              db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
+              maxRetriesPerRequest: null,
+              tls: parsed.protocol === 'rediss:' ? {} : undefined,
+            });
+          } catch (e) {
+            return new Redis(connectionString.trim(), {
+              maxRetriesPerRequest: null,
+            });
+          }
         }
 
         return new Redis({

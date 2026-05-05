@@ -30,17 +30,10 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
   private readonly connection: Redis;
 
   constructor(private readonly configService: ConfigService) {
-    const connectionOptions = this.getConnectionOptions();
-    if (typeof connectionOptions === 'string') {
-      this.connection = new Redis(connectionOptions, {
-        maxRetriesPerRequest: null,
-      });
-    } else {
-      this.connection = new Redis({
-        ...connectionOptions,
-        maxRetriesPerRequest: null,
-      });
-    }
+    this.connection = new Redis({
+      ...this.getConnectionOptions(),
+      maxRetriesPerRequest: null,
+    });
   }
 
   async publish<T extends IntegrationEvent>(event: T): Promise<void> {
@@ -218,7 +211,19 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
     const connectionString = (redisUrl?.includes('://') ? redisUrl : null) || (redisHost?.includes('://') ? redisHost : null);
 
     if (connectionString) {
-      return connectionString;
+      try {
+        const parsed = new URL(connectionString.trim());
+        return {
+          host: parsed.hostname,
+          port: Number(parsed.port) || 6379,
+          password: parsed.password || undefined,
+          username: parsed.username || undefined,
+          db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
+          tls: parsed.protocol === 'rediss:' ? {} : undefined,
+        };
+      } catch (e) {
+        return connectionString.trim();
+      }
     }
 
     return {
