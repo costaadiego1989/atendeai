@@ -213,13 +213,16 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
   }
 
   private getConnectionOptions(): any {
-    const url = this.configService.get<string>('REDIS_URL');
-    if (url) {
-      return url;
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+    const redisHost = this.configService.get<string>('REDIS_HOST');
+    const connectionString = (redisUrl?.includes('://') ? redisUrl : null) || (redisHost?.includes('://') ? redisHost : null);
+
+    if (connectionString) {
+      return connectionString;
     }
 
     return {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
+      host: redisHost || 'localhost',
       port: this.configService.get<number>('REDIS_PORT', 6379),
     };
   }
