@@ -9,12 +9,14 @@
   ],
   "scripts": {
     "install:all": "npm install",
+    "build": "npm run build:api",
     "build:app": "npm run build --workspace=src/app",
     "build:api": "npm run build --workspace=src/api",
     "build:web": "npm run build --workspace=src/web",
     "dev:app": "npm run dev --workspace=src/app",
     "dev:api": "npm run dev --workspace=src/api",
-    "dev:web": "npm run dev --workspace=src/web"
+    "dev:web": "npm run dev --workspace=src/web",
+    "prisma:generate": "npm run prisma:generate --workspace=src/api"
   },
   "engines": {
     "node": ">=18.0.0"
