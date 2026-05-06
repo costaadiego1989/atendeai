@@ -38,10 +38,12 @@ import { DEVICE_ID_COOKIE_NAME } from '@shared/infrastructure/http/interceptors/
 import { RequiresActivePlan } from '@shared/infrastructure/auth/decorators/requires-active-plan.decorator';
 import { SubscriptionActiveGuard } from '@shared/infrastructure/auth/guards/SubscriptionActiveGuard';
 
+const isProd = process.env['NODE_ENV'] === 'production' || process.env['RENDER'] === 'true';
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env['NODE_ENV'] === 'production',
-  sameSite: 'lax' as const,
+  secure: isProd,
+  sameSite: isProd ? ('none' as const) : ('lax' as const),
   path: '/',
 };
 
