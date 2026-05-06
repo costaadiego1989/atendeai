@@ -33,7 +33,12 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
               db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
               maxRetriesPerRequest: null,
               keepAlive: 30000,
-              retryStrategy: (times: number) => Math.min(times * 50, 2000),
+              enableReadyCheck: false,
+              connectTimeout: 10000,
+              retryStrategy: (times: number) => {
+                const delay = Math.min(times * 100, 3000);
+                return delay;
+              },
             };
 
             const redis = new Redis(options);
@@ -56,6 +61,9 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
           port: config.get<number>('REDIS_PORT', 6379),
           maxRetriesPerRequest: null,
           keepAlive: 30000,
+          enableReadyCheck: false,
+          connectTimeout: 10000,
+          retryStrategy: (times: number) => Math.min(times * 100, 3000),
         });
         redis.on('error', (err) => console.error('[RedisModule] Error:', err.message));
         return redis;
