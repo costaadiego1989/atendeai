@@ -1,12 +1,13 @@
 import { Plus, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/shared/lib/formatters';
-import { formatCurrencyInput } from '@/shared/lib/masks';
+import { formatCurrencyInput, formatPhone } from '@/shared/lib/masks';
+import { TagInput } from '@/shared/ui/TagInput';
 import type { Contact } from '@/shared/types';
 import type { ProposalFormState, ProposalItemDraft } from '../types';
 
@@ -16,10 +17,16 @@ type Props = {
   form: ProposalFormState;
   contacts: Contact[];
   contactLabelMap: Record<string, string>;
+  contactSearch: string;
+  filteredContacts: Contact[];
+  selectedContact: Contact | null;
   isPending: boolean;
   currentUserName?: string;
   onOpenChange: (open: boolean) => void;
   onFieldChange: <K extends keyof ProposalFormState>(field: K, value: ProposalFormState[K]) => void;
+  onContactSearchChange: (value: string) => void;
+  onSelectContact: (contact: Contact) => void;
+  onClearSelectedContact: () => void;
   onItemChange: (itemId: string, field: keyof ProposalItemDraft, value: string) => void;
   onAddItem: () => void;
   onRemoveItem: (itemId: string) => void;
@@ -45,10 +52,16 @@ export function ProposalEditorSheet({
   form,
   contacts,
   contactLabelMap,
+  contactSearch,
+  filteredContacts,
+  selectedContact,
   isPending,
   currentUserName,
   onOpenChange,
   onFieldChange,
+  onContactSearchChange,
+  onSelectContact,
+  onClearSelectedContact,
   onItemChange,
   onAddItem,
   onRemoveItem,
@@ -73,27 +86,72 @@ export function ProposalEditorSheet({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <Label>Contato</Label>
-              <Select
-                value={form.contactId}
-                onValueChange={(value) => onFieldChange('contactId', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um contato" />
-                </SelectTrigger>
-                <SelectContent>
-                  {contacts.length ? (
-                    contacts.map((contact) => (
-                      <SelectItem key={contact.id} value={contact.id}>
-                        {contactLabelMap[contact.id] ?? contact.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="__empty" disabled>
-                      Nenhum contato disponível
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+              {selectedContact ? (
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        {selectedContact.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatPhone(selectedContact.phone)}
+                      </p>
+                      {selectedContact.email ? (
+                        <p className="text-xs text-muted-foreground">{selectedContact.email}</p>
+                      ) : null}
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={onClearSelectedContact}>
+                      Trocar contato
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border/60 bg-muted/10 p-3">
+                  <div className="space-y-2">
+                    <Input
+                      value={contactSearch}
+                      onChange={(event) => onContactSearchChange(event.target.value)}
+                      placeholder="Buscar por nome, telefone ou email"
+                    />
+                    {contacts.length ? (
+                      filteredContacts.length ? (
+                        <div className="space-y-2">
+                          {filteredContacts.map((contact) => (
+                            <button
+                              key={contact.id}
+                              type="button"
+                              onClick={() => onSelectContact(contact)}
+                              className="flex w-full items-center justify-between rounded-xl border border-border/60 bg-background px-3 py-2 text-left transition-colors hover:bg-muted/30"
+                            >
+                              <div>
+                                <p className="text-sm font-medium text-foreground">
+                                  {contactLabelMap[contact.id] ?? contact.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatPhone(contact.phone)}
+                                  {contact.email ? ` • ${contact.email}` : ''}
+                                </p>
+                              </div>
+                              <Badge
+                                variant="outline"
+                                className="rounded-full px-2.5 py-1 text-[11px]"
+                              >
+                                {contact.stage}
+                              </Badge>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Nenhum contato encontrado para esta busca.
+                        </p>
+                      )
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Nenhum contato disponível.</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -117,12 +175,16 @@ export function ProposalEditorSheet({
 
             <div className="space-y-2 md:col-span-2">
               <Label>Benefícios</Label>
-              <Textarea
-                rows={3}
+              <TagInput
                 value={form.benefits}
-                onChange={(event) => onFieldChange('benefits', event.target.value)}
-                placeholder="Liste os benefícios comerciais e operacionais."
+                onChange={(value) =>
+                  onFieldChange('benefits', typeof value === 'string' ? value : value.join(', '))
+                }
+                placeholder="Adicione benefícios e pressione Enter"
               />
+              <p className="text-xs text-muted-foreground">
+                Pressione Enter ou vírgula para adicionar um benefício. Clique no x para remover.
+              </p>
             </div>
 
             <div className="space-y-2">

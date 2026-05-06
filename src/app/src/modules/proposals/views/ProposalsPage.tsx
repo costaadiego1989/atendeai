@@ -121,6 +121,9 @@ export default function ProposalsPage() {
         form={vm.editorForm}
         contacts={vm.contacts}
         contactLabelMap={vm.contactLabelMap}
+        contactSearch={vm.contactSearch}
+        filteredContacts={vm.filteredContacts}
+        selectedContact={vm.selectedContact}
         isPending={vm.createMutation.isPending || vm.updateMutation.isPending}
         currentUserName={vm.user?.name}
         onOpenChange={(open) => {
@@ -129,6 +132,9 @@ export default function ProposalsPage() {
           }
         }}
         onFieldChange={vm.setEditorField}
+        onContactSearchChange={vm.setContactSearch}
+        onSelectContact={vm.selectContact}
+        onClearSelectedContact={vm.clearSelectedContact}
         onItemChange={vm.updateEditorItem}
         onAddItem={vm.addEditorItem}
         onRemoveItem={vm.removeEditorItem}

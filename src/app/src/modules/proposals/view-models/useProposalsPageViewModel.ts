@@ -69,6 +69,10 @@ function buildContactLabelMap(contacts: Contact[]) {
   }, {});
 }
 
+function normalizeSearchTerm(value: string) {
+  return value.trim().toLowerCase();
+}
+
 function proposalMatchesSearch(proposal: ProposalRecord, search: string, contactName?: string) {
   if (!search) {
     return true;
@@ -123,6 +127,7 @@ export function useProposalsPageViewModel() {
   const [editorOpen, setEditorOpenState] = useState(false);
   const [editorMode, setEditorModeState] = useState<'create' | 'edit'>('create');
   const [editorForm, setEditorFormState] = useState<ProposalFormState>(createProposalFormState());
+  const [contactSearch, setContactSearchState] = useState('');
   const [scheduleTarget, setScheduleTargetState] = useState<ProposalRecord | null>(null);
   const [scheduleAt, setScheduleAtState] = useState(getDefaultScheduleValue());
   const [deleteTarget, setDeleteTargetState] = useState<ProposalRecord | null>(null);
@@ -148,6 +153,33 @@ export function useProposalsPageViewModel() {
 
   const contacts = contactsQuery.data?.data ?? [];
   const contactLabelMap = useMemo(() => buildContactLabelMap(contacts), [contacts]);
+  const selectedContact = useMemo(
+    () => contacts.find((contact) => contact.id === editorForm.contactId) ?? null,
+    [contacts, editorForm.contactId],
+  );
+  const filteredContacts = useMemo(() => {
+    const normalized = normalizeSearchTerm(contactSearch);
+
+    if (!normalized) {
+      return contacts.slice(0, 8);
+    }
+
+    const normalizedDigits = contactSearch.replace(/\D/g, '');
+
+    return contacts
+      .filter((contact) => {
+        const haystack = `${contact.name} ${contact.phone} ${contact.email ?? ''} ${contact.document ?? ''}`.toLowerCase();
+        const phoneDigits = contact.phone.replace(/\D/g, '');
+        const documentDigits = (contact.document ?? '').replace(/\D/g, '');
+
+        return (
+          haystack.includes(normalized) ||
+          (normalizedDigits.length > 0 &&
+            (phoneDigits.includes(normalizedDigits) || documentDigits.includes(normalizedDigits)))
+        );
+      })
+      .slice(0, 8);
+  }, [contactSearch, contacts]);
 
   const filteredProposals = useMemo(() => {
     const searchTerm = normalizeText(search);
@@ -196,6 +228,7 @@ export function useProposalsPageViewModel() {
   const openCreateEditor = () => {
     setEditorModeState('create');
     setEditorFormState(createProposalFormState());
+    setContactSearchState('');
     setEditorOpenState(true);
   };
 
@@ -203,6 +236,7 @@ export function useProposalsPageViewModel() {
     const metadataFinalPrice = parseMetadataFinalPrice(proposal.metadata);
     setEditorModeState('edit');
     setSelectedProposalIdState(proposal.id);
+    setContactSearchState(contactLabelMap[proposal.contactId] ?? '');
     setEditorFormState({
       contactId: proposal.contactId,
       title: proposal.title,
@@ -490,6 +524,22 @@ export function useProposalsPageViewModel() {
     setScheduleAtState(toLocalDatetimeInput(proposal.scheduledAt ?? getDefaultScheduleValue()));
   }
 
+  function selectContact(contact: Contact) {
+    setEditorFormState((current) => ({
+      ...current,
+      contactId: contact.id,
+    }));
+    setContactSearchState(contact.name);
+  }
+
+  function clearSelectedContact() {
+    setEditorFormState((current) => ({
+      ...current,
+      contactId: '',
+    }));
+    setContactSearchState('');
+  }
+
   return {
     tenant,
     user,
@@ -513,6 +563,12 @@ export function useProposalsPageViewModel() {
     summary,
     contactLabelMap,
     contacts,
+    contactSearch,
+    setContactSearch(value: string) {
+      setContactSearchState(value);
+    },
+    filteredContacts,
+    selectedContact,
     editorOpen,
     editorMode,
     openCreateEditor,
@@ -521,6 +577,7 @@ export function useProposalsPageViewModel() {
       setEditorOpenState(false);
       setEditorFormState(createProposalFormState());
       setEditorModeState('create');
+      setContactSearchState('');
     },
     editorForm,
     setEditorField,
@@ -528,6 +585,8 @@ export function useProposalsPageViewModel() {
     addEditorItem,
     removeEditorItem,
     submitEditor,
+    selectContact,
+    clearSelectedContact,
     createMutation,
     updateMutation,
     pdfMutation,
