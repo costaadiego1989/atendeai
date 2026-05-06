@@ -1,4 +1,5 @@
-import { Search } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,7 @@ export default function ProposalsPage() {
         <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/70">
-              <Search className="h-4 w-4 text-primary" />
+              <Filter className="h-4 w-4 text-primary" />
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">Filtro de propostas</p>
@@ -41,7 +42,17 @@ export default function ProposalsPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-[320px]">
+            <Badge
+              variant="secondary"
+              className="hidden h-9 items-center whitespace-nowrap rounded-md border-border/60 bg-muted/30 px-3.5 lg:inline-flex"
+            >
+              <span className="mr-1.5 font-bold text-foreground">{vm.filteredProposals.length}</span>
+              <span className="font-normal text-muted-foreground">
+                {vm.filteredProposals.length === 1 ? 'resultado' : 'resultados'}
+              </span>
+            </Badge>
+
+            <div className="relative flex-1 sm:min-w-[320px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
@@ -52,7 +63,7 @@ export default function ProposalsPage() {
             </div>
 
             <Select value={vm.statusFilter} onValueChange={vm.setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
