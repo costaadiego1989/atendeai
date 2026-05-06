@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { resolveAppBaseUrl } from "@/services/runtime-env";
 
 const formSchema = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
@@ -112,7 +113,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
 
       setStep(3);
 
-      const appUrl = import.meta.env.VITE_APP_URL || 'http://localhost:8080';
+      const appUrl = resolveAppBaseUrl();
 
       setTimeout(() => {
         toast.success("Trial ativado com sucesso! Redirecionando...");

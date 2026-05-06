@@ -1,3 +1,5 @@
+import { resolvePublicApiBaseUrl } from "@/services/runtime-env";
+
 export interface PlanAPI {
   code: string;
   displayName: string;
@@ -41,7 +43,7 @@ export interface TrialSignupData {
   password: string;
 }
 
-const API_BASE_URL = "http://localhost:3000/api/v1";
+const API_BASE_URL = `${resolvePublicApiBaseUrl()}/api/v1`;
 
 class PublicService {
   async getPlans(): Promise<{ plans: PlanAPI[] }> {
