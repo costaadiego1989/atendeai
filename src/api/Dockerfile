@@ -44,7 +44,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
 # Migrate (`npx prisma migrate deploy`) precisa do CLI; ele é devDependency e foi removido no prune.
-RUN npm install prisma@6.19.2 --omit=dev --no-audit --no-fund \
+RUN npm install prisma@6.19.2 --omit=dev --no-save --package-lock=false --no-audit --no-fund \
   && npm cache clean --force
 
 EXPOSE 3000
