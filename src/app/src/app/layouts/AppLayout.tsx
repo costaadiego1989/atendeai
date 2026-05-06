@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Contact2,
   CreditCard,
+  FileText,
   History,
   LayoutDashboard,
   LifeBuoy,
@@ -58,6 +59,7 @@ const mainNav: NavItem[] = [
 const salesNav: NavItem[] = [
   { label: 'Catálogo', path: '/app/catalog', icon: BookOpen },
   { label: 'Estoque', path: '/app/inventory', icon: Archive },
+  { label: 'Propostas', path: '/app/proposals', icon: FileText },
   { label: 'Checkout', path: '/app/checkout', icon: ShoppingCart },
   { label: 'Métricas', path: '/app/sales/metrics', icon: BarChart3 },
   { label: 'Links Pagamento', path: '/app/sales/payment-links', icon: LinkIcon },
