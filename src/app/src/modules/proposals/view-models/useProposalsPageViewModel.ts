@@ -154,6 +154,31 @@ function buildProposalPayload(
   };
 }
 
+function downloadFile(url: string, fileName: string) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function getProposalPdfFileName(proposal: ProposalRecord) {
+  const safeTitle = proposal.title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return `proposta-${safeTitle || proposal.id}.pdf`;
+}
+
 export function useProposalsPageViewModel() {
   const queryClient = useQueryClient();
   const tenant = useAuthStore((state) => state.tenant);
@@ -367,11 +392,19 @@ export function useProposalsPageViewModel() {
 
   const pdfMutation = useMutation({
     mutationFn: (proposal: ProposalRecord) => proposalsService.generateProposalPdf(proposal.id),
-    onSuccess: async () => {
+    onSuccess: async (result, proposal) => {
       await invalidateProposals();
+      const pdfUrl = result.pdfUrl ?? proposal.pdfUrl ?? null;
+
+      if (pdfUrl) {
+        downloadFile(pdfUrl, getProposalPdfFileName(proposal));
+      }
+
       toast({
         title: 'PDF gerado',
-        description: 'A proposta foi atualizada com o arquivo PDF mais recente.',
+        description: pdfUrl
+          ? 'O PDF foi gerado e o download foi iniciado.'
+          : 'A proposta foi atualizada com o arquivo PDF mais recente.',
       });
     },
     onError: (error) => {
@@ -622,6 +655,11 @@ export function useProposalsPageViewModel() {
       setDeleteTargetState(proposal);
     },
     generatePdf(proposal: ProposalRecord) {
+      if (proposal.pdfUrl) {
+        downloadFile(proposal.pdfUrl, getProposalPdfFileName(proposal));
+        return;
+      }
+
       pdfMutation.mutate(proposal);
     },
     confirmSchedule() {
