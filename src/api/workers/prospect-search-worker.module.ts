@@ -28,6 +28,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { RedisModule } from '@shared/infrastructure/redis/RedisModule';
 import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule';
 import { ObservabilityModule } from '@shared/infrastructure/observability/observability.module';
+import { parseRedisConnectionFromEnv } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Module({
   imports: [
@@ -36,10 +37,7 @@ import { ObservabilityModule } from '@shared/infrastructure/observability/observ
       envFilePath: '.env',
     }),
     BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379', 10),
-      },
+      connection: parseRedisConnectionFromEnv(),
     }),
     DatabaseModule,
     ObservabilityModule,

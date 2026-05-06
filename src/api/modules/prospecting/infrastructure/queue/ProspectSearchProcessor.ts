@@ -11,6 +11,7 @@ import {
   IExecuteProspectSearchUseCase,
 } from '../../application/use-cases/interfaces/IExecuteProspectSearchUseCase';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class ProspectSearchProcessor implements OnModuleInit, OnModuleDestroy {
@@ -22,13 +23,10 @@ export class ProspectSearchProcessor implements OnModuleInit, OnModuleDestroy {
     @Inject(IExecuteProspectSearchUseCase)
     private readonly executeProspectSearchUseCase: IExecuteProspectSearchUseCase,
     private readonly structuredLog: StructuredLogEmitter,
-  ) {}
+  ) { }
 
   onModuleInit() {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.worker = new Worker(
       'prospect-searches',
@@ -39,6 +37,7 @@ export class ProspectSearchProcessor implements OnModuleInit, OnModuleDestroy {
             : job.id !== undefined && job.id !== null
               ? String(job.id)
               : '';
+
         this.structuredLog.emit({
           level: 'info',
           event: 'prospecting.search.job_started',
@@ -48,10 +47,12 @@ export class ProspectSearchProcessor implements OnModuleInit, OnModuleDestroy {
             bull_job_id: bullJobId,
           },
         });
+
         try {
           await this.executeProspectSearchUseCase.execute({
             searchId: job.data.searchId,
           });
+
           this.structuredLog.emit({
             level: 'info',
             event: 'prospecting.search.job_completed',
@@ -61,6 +62,7 @@ export class ProspectSearchProcessor implements OnModuleInit, OnModuleDestroy {
               bull_job_id: bullJobId,
             },
           });
+
         } catch (err) {
           this.structuredLog.emit({
             level: 'error',

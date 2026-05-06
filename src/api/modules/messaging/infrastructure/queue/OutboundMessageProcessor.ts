@@ -9,6 +9,7 @@ import { Worker, Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import { ProcessOutboundMessageUseCase } from '../../application/use-cases/ProcessOutboundMessageUseCase';
 import { buildQueueTelemetry } from '@shared/infrastructure/queue/QueueJobTelemetry';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class OutboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
@@ -21,10 +22,7 @@ export class OutboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.worker = new Worker(
       'outbound-messages',

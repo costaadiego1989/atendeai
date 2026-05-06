@@ -5,6 +5,7 @@ import {
   IProspectSearchQueue,
   ProspectSearchQueueJob,
 } from '../../domain/ports/IProspectSearchQueue';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class BullMQProspectSearchQueue
@@ -13,10 +14,7 @@ export class BullMQProspectSearchQueue
   private readonly queue: Queue<ProspectSearchQueueJob>;
 
   constructor(private readonly configService: ConfigService) {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.queue = new Queue('prospect-searches', {
       connection,

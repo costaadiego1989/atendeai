@@ -22,6 +22,7 @@ import { FollowUpWorker } from '@modules/messaging/application/workers/FollowUpW
 import { AIModule } from '@modules/ai/ai.module';
 import { StorageModule } from '@shared/infrastructure/storage/StorageModule';
 import { BullModule } from '@nestjs/bullmq';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Module({
   imports: [
@@ -33,10 +34,7 @@ import { BullModule } from '@nestjs/bullmq';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        },
+        connection: parseRedisConnection(config),
       }),
     }),
     DatabaseModule,

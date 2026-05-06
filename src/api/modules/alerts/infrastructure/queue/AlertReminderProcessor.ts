@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { Job, Worker } from 'bullmq';
 import { ProcessAlertReminderUseCase } from '../../application/use-cases/ProcessAlertReminderUseCase';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class AlertReminderProcessor implements OnModuleInit, OnModuleDestroy {
@@ -20,10 +21,7 @@ export class AlertReminderProcessor implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.worker = new Worker(
       'alert-reminders',

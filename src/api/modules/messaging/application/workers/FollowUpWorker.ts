@@ -16,6 +16,7 @@ import {
   IConversationIntelligenceRepository,
 } from '../../domain/repositories/IConversationIntelligenceRepository';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class FollowUpWorker implements OnModuleInit, OnModuleDestroy {
@@ -72,10 +73,7 @@ export class FollowUpWorker implements OnModuleInit, OnModuleDestroy {
         });
       },
       {
-        connection: {
-          host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-          port: this.configService.get<number>('REDIS_PORT', 6379),
-        },
+        connection: parseRedisConnection(this.configService),
         concurrency: 10,
       },
     );

@@ -27,6 +27,7 @@ import { ObservabilityModule } from './shared/infrastructure/observability/obser
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './shared/infrastructure/http/filters/GlobalExceptionFilter';
 import { StructuredLogEmitter } from './shared/infrastructure/observability/StructuredLogEmitter';
+import { parseRedisConnection } from './shared/infrastructure/redis/redis-connection.helper';
 
 @Module({
   imports: [
@@ -39,10 +40,7 @@ import { StructuredLogEmitter } from './shared/infrastructure/observability/Stru
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        },
+        connection: parseRedisConnection(config),
       }),
     }),
     ObservabilityModule,

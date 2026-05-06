@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Job, Worker } from 'bullmq';
 import { ExpirePendingSchedulingReservationUseCase } from '../../application/use-cases/ExpirePendingSchedulingReservationUseCase';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class SchedulingReservationExpirationProcessor
@@ -26,10 +27,7 @@ export class SchedulingReservationExpirationProcessor
   ) {}
 
   onModuleInit() {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.worker = new Worker(
       'scheduling-reservation-expirations',

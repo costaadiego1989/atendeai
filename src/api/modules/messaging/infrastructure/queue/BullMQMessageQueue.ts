@@ -5,16 +5,14 @@ import {
   IMessageQueue,
   MessageQueueJob,
 } from '../../domain/ports/IMessageQueue';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class BullMQMessageQueue implements IMessageQueue, OnModuleDestroy {
   private readonly queue: Queue<MessageQueueJob>;
 
   constructor(private readonly configService: ConfigService) {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.queue = new Queue('outbound-messages', {
       connection,

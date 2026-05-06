@@ -5,6 +5,7 @@ import {
   AlertReminderQueueJob,
   IAlertReminderQueue,
 } from '../../domain/ports/IAlertReminderQueue';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
 export class BullMQAlertReminderQueue
@@ -13,10 +14,7 @@ export class BullMQAlertReminderQueue
   private readonly queue: Queue<AlertReminderQueueJob>;
 
   constructor(private readonly configService: ConfigService) {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.queue = new Queue('alert-reminders', {
       connection,

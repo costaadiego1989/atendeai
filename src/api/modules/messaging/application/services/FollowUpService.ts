@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Queue, Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import { FollowUpAuditService } from './FollowUpAuditService';
+import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 export interface FollowUpJobData {
   conversationId: string;
@@ -19,10 +20,7 @@ export class FollowUpService implements OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly followUpAuditService: FollowUpAuditService,
   ) {
-    const connection = {
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-    };
+    const connection = parseRedisConnection(this.configService);
 
     this.queue = new Queue('follow-up', { connection });
   }
