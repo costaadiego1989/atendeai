@@ -156,7 +156,7 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
         await handler(job.data as T);
       },
       {
-        connection: this.getConnectionOptions(),
+        connection: this.connection,
         concurrency: options?.concurrency ?? 5,
       },
     );
@@ -203,7 +203,7 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
     let queue = this.queues.get(queueName);
     if (!queue) {
       queue = new Queue(queueName, {
-        connection: this.getConnectionOptions(),
+        connection: this.connection,
       });
       this.queues.set(queueName, queue);
     }
