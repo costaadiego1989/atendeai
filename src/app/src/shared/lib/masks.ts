@@ -1,5 +1,9 @@
-function digitsOnly(value: string): string {
-  return value.replace(/\D/g, '');
+function digitsOnly(value: string | number | null | undefined): string {
+  if (value == null) {
+    return '';
+  }
+
+  return String(value).replace(/\D/g, '');
 }
 
 export function normalizeBrazilPhone(value: string): string {
@@ -87,7 +91,7 @@ export function formatCep(value: string): string {
   return digits.replace(/(\d{5})(\d+)/, '$1-$2');
 }
 
-export function formatCurrencyInput(value: string): string {
+export function formatCurrencyInput(value: string | number | null | undefined): string {
   const digits = digitsOnly(value);
 
   if (!digits) return '';
@@ -99,7 +103,7 @@ export function formatCurrencyInput(value: string): string {
   });
 }
 
-export function parseCurrencyInput(value: string): string | undefined {
+export function parseCurrencyInput(value: string | number | null | undefined): string | undefined {
   const digits = digitsOnly(value);
 
   if (!digits) return undefined;
