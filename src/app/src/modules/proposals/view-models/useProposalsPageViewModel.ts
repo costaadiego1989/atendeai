@@ -1,0 +1,566 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/components/ui/use-toast';
+import { contactsService } from '@/modules/contacts/services/contacts-service';
+import { getFriendlyErrorMessage } from '@/shared/api/error-message';
+import { formatCurrencyInput, parseCurrencyInput } from '@/shared/lib/masks';
+import { formatCurrency } from '@/shared/lib/formatters';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import type { Contact } from '@/shared/types';
+import { proposalsService } from '../services/proposals-service';
+import {
+  createProposalFormState,
+  createProposalItemDraft,
+  type ProposalFormState,
+  type ProposalRecord,
+  type ProposalStatus,
+} from '../types';
+
+type ProposalStatusFilter = ProposalStatus | 'ALL';
+
+const STATUS_OPTIONS: Array<{ value: ProposalStatusFilter; label: string }> = [
+  { value: 'ALL', label: 'Todas' },
+  { value: 'DRAFT', label: 'Rascunho' },
+  { value: 'SCHEDULED', label: 'Agendadas' },
+  { value: 'SENT', label: 'Enviadas' },
+  { value: 'ACCEPTED', label: 'Aceitas' },
+  { value: 'REJECTED', label: 'Rejeitadas' },
+  { value: 'EXPIRED', label: 'Expiradas' },
+  { value: 'CANCELLED', label: 'Canceladas' },
+];
+
+function normalizeText(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function toLocalDatetimeInput(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const pad = (input: number) => String(input).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function toDateInput(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const pad = (input: number) => String(input).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function buildContactLabelMap(contacts: Contact[]) {
+  return contacts.reduce<Record<string, string>>((acc, contact) => {
+    acc[contact.id] = contact.name;
+    return acc;
+  }, {});
+}
+
+function proposalMatchesSearch(proposal: ProposalRecord, search: string, contactName?: string) {
+  if (!search) {
+    return true;
+  }
+
+  const haystack = [
+    proposal.title,
+    proposal.description ?? '',
+    proposal.benefits ?? '',
+    proposal.status,
+    proposal.contactId,
+    contactName ?? '',
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return haystack.includes(search);
+}
+
+function getDefaultScheduleValue() {
+  const date = new Date(Date.now() + 15 * 60 * 1000);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function parseMetadataFinalPrice(metadata: ProposalRecord['metadata']) {
+  const value =
+    metadata && typeof metadata === 'object'
+      ? (metadata as Record<string, unknown>).finalPrice
+      : undefined;
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : 0;
+  }
+
+  return 0;
+}
+
+export function useProposalsPageViewModel() {
+  const queryClient = useQueryClient();
+  const tenant = useAuthStore((state) => state.tenant);
+  const user = useAuthStore((state) => state.user);
+  const activeBranchId = useAuthStore((state) => state.activeBranchId);
+  const [search, setSearchState] = useState('');
+  const [statusFilter, setStatusFilterState] = useState<ProposalStatusFilter>('ALL');
+  const [selectedProposalId, setSelectedProposalIdState] = useState<string | null>(null);
+  const [editorOpen, setEditorOpenState] = useState(false);
+  const [editorMode, setEditorModeState] = useState<'create' | 'edit'>('create');
+  const [editorForm, setEditorFormState] = useState<ProposalFormState>(createProposalFormState());
+  const [scheduleTarget, setScheduleTargetState] = useState<ProposalRecord | null>(null);
+  const [scheduleAt, setScheduleAtState] = useState(getDefaultScheduleValue());
+  const [deleteTarget, setDeleteTargetState] = useState<ProposalRecord | null>(null);
+
+  const proposalsQuery = useQuery({
+    queryKey: ['proposals', tenant?.id],
+    enabled: Boolean(tenant?.id),
+    queryFn: () => proposalsService.listProposals(tenant!.id),
+    staleTime: 30_000,
+  });
+
+  const contactsQuery = useQuery({
+    queryKey: ['proposal-contacts', tenant?.id, activeBranchId],
+    enabled: Boolean(tenant?.id),
+    queryFn: () =>
+      contactsService.listContacts(tenant!.id, {
+        page: 1,
+        limit: 200,
+        branchId: activeBranchId ?? undefined,
+      }),
+    staleTime: 30_000,
+  });
+
+  const contacts = contactsQuery.data?.data ?? [];
+  const contactLabelMap = useMemo(() => buildContactLabelMap(contacts), [contacts]);
+
+  const filteredProposals = useMemo(() => {
+    const searchTerm = normalizeText(search);
+    return (proposalsQuery.data ?? [])
+      .filter((proposal) => statusFilter === 'ALL' || proposal.status === statusFilter)
+      .filter((proposal) =>
+        proposalMatchesSearch(proposal, searchTerm, contactLabelMap[proposal.contactId]),
+      )
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }, [contactLabelMap, proposalsQuery.data, search, statusFilter]);
+
+  useEffect(() => {
+    if (!selectedProposalId && filteredProposals.length > 0) {
+      setSelectedProposalIdState(filteredProposals[0].id);
+    }
+  }, [filteredProposals, selectedProposalId]);
+
+  const selectedProposal =
+    (selectedProposalId
+      ? (proposalsQuery.data ?? []).find((proposal) => proposal.id === selectedProposalId)
+      : null) ?? filteredProposals[0] ?? null;
+
+  const totalValue = useMemo(
+    () => filteredProposals.reduce((sum, proposal) => sum + Number(proposal.totalAmount ?? 0), 0),
+    [filteredProposals],
+  );
+
+  const summary = useMemo(() => {
+    const byStatus = (status: ProposalStatus) =>
+      filteredProposals.filter((proposal) => proposal.status === status).length;
+
+    return {
+      total: filteredProposals.length,
+      draft: byStatus('DRAFT'),
+      scheduled: byStatus('SCHEDULED'),
+      sent: byStatus('SENT'),
+      accepted: byStatus('ACCEPTED'),
+      totalValue,
+    };
+  }, [filteredProposals, totalValue]);
+
+  const invalidateProposals = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['proposals', tenant?.id] });
+  };
+
+  const openCreateEditor = () => {
+    setEditorModeState('create');
+    setEditorFormState(createProposalFormState());
+    setEditorOpenState(true);
+  };
+
+  const openEditEditor = (proposal: ProposalRecord) => {
+    const metadataFinalPrice = parseMetadataFinalPrice(proposal.metadata);
+    setEditorModeState('edit');
+    setSelectedProposalIdState(proposal.id);
+    setEditorFormState({
+      contactId: proposal.contactId,
+      title: proposal.title,
+      description: proposal.description ?? '',
+      benefits: proposal.benefits ?? '',
+      validUntil: toDateInput(proposal.validUntil),
+      finalPrice: metadataFinalPrice ? formatCurrencyInput(String(metadataFinalPrice * 100)) : '',
+      items: proposal.items.length
+        ? proposal.items.map((item) => ({
+            id:
+              typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+                ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            name: item.name,
+            quantity: String(item.quantity ?? 1),
+            unitPrice: formatCurrencyInput(String((item.unitPrice ?? 0) * 100)),
+            description: item.description ?? '',
+          }))
+        : [createProposalItemDraft()],
+    });
+    setEditorOpenState(true);
+  };
+
+  const createMutation = useMutation({
+    mutationFn: () => {
+      if (!tenant?.id || !user?.id) {
+        throw new Error('Sessão inválida para criar proposta.');
+      }
+
+      return proposalsService.createProposal({
+        tenantId: tenant.id,
+        userId: user.id,
+        contactId: editorForm.contactId,
+        title: editorForm.title,
+        description: editorForm.description || undefined,
+        benefits: editorForm.benefits || undefined,
+        validUntil: editorForm.validUntil || undefined,
+        finalPrice: Number(parseCurrencyInput(editorForm.finalPrice) ?? 0) || undefined,
+        items: editorForm.items
+          .map((item) => ({
+            name: item.name.trim(),
+            quantity: Number(item.quantity || 0),
+            unitPrice: Number(parseCurrencyInput(item.unitPrice) ?? 0),
+            description: item.description.trim() || undefined,
+          }))
+          .filter((item) => item.name && item.quantity > 0),
+      });
+    },
+    onSuccess: async (result) => {
+      await invalidateProposals();
+      setEditorOpenState(false);
+      setSelectedProposalIdState(result.id);
+      toast({
+        title: 'Proposta criada',
+        description: 'O PDF foi gerado automaticamente e a proposta já está pronta para envio.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao criar proposta',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível criar a proposta agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: () => {
+      if (!selectedProposal) {
+        throw new Error('Nenhuma proposta selecionada.');
+      }
+
+      return proposalsService.updateProposal(selectedProposal.id, {
+        tenantId: tenant?.id ?? selectedProposal.tenantId,
+        userId: user?.id ?? selectedProposal.userId,
+        contactId: editorForm.contactId,
+        title: editorForm.title,
+        description: editorForm.description || undefined,
+        benefits: editorForm.benefits || undefined,
+        validUntil: editorForm.validUntil || undefined,
+        finalPrice: Number(parseCurrencyInput(editorForm.finalPrice) ?? 0) || undefined,
+        items: editorForm.items
+          .map((item) => ({
+            name: item.name.trim(),
+            quantity: Number(item.quantity || 0),
+            unitPrice: Number(parseCurrencyInput(item.unitPrice) ?? 0),
+            description: item.description.trim() || undefined,
+          }))
+          .filter((item) => item.name && item.quantity > 0),
+      });
+    },
+    onSuccess: async () => {
+      await invalidateProposals();
+      setEditorOpenState(false);
+      toast({
+        title: 'Proposta atualizada',
+        description: 'As alterações foram salvas com sucesso.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao atualizar proposta',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível salvar as alterações agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const pdfMutation = useMutation({
+    mutationFn: (proposal: ProposalRecord) => proposalsService.generateProposalPdf(proposal.id),
+    onSuccess: async () => {
+      await invalidateProposals();
+      toast({
+        title: 'PDF gerado',
+        description: 'A proposta foi atualizada com o arquivo PDF mais recente.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao gerar PDF',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível gerar o PDF agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const scheduleMutation = useMutation({
+    mutationFn: () => {
+      if (!scheduleTarget) {
+        throw new Error('Nenhuma proposta selecionada para agendamento.');
+      }
+
+      return proposalsService.scheduleProposalDelivery(scheduleTarget.id, scheduleAt);
+    },
+    onSuccess: async () => {
+      await invalidateProposals();
+      setScheduleTargetState(null);
+      toast({
+        title: 'Envio agendado',
+        description: 'A fila vai disparar a proposta no horário definido.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao agendar envio',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível agendar a entrega agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      if (!deleteTarget) {
+        throw new Error('Nenhuma proposta selecionada para exclusão.');
+      }
+
+      return proposalsService.deleteProposal(deleteTarget.id);
+    },
+    onSuccess: async () => {
+      const deletedId = deleteTarget?.id ?? null;
+      await invalidateProposals();
+      setDeleteTargetState(null);
+      if (selectedProposalId === deletedId) {
+        setSelectedProposalIdState(
+          filteredProposals.find((proposal) => proposal.id !== deletedId)?.id ?? null,
+        );
+      }
+      toast({
+        title: 'Proposta excluida',
+        description: 'A proposta foi removida da lista.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao excluir proposta',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível excluir a proposta agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  function setEditorField<K extends keyof ProposalFormState>(field: K, value: ProposalFormState[K]) {
+    setEditorFormState((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateEditorItem(itemId: string, field: keyof ProposalItemDraft, value: string) {
+    setEditorFormState((current) => ({
+      ...current,
+      items: current.items.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              [field]:
+                field === 'unitPrice'
+                  ? formatCurrencyInput(value)
+                  : value,
+            }
+          : item,
+      ),
+    }));
+  }
+
+  function addEditorItem() {
+    setEditorFormState((current) => ({
+      ...current,
+      items: [...current.items, createProposalItemDraft()],
+    }));
+  }
+
+  function removeEditorItem(itemId: string) {
+    setEditorFormState((current) => {
+      if (current.items.length === 1) {
+        return current;
+      }
+
+      return {
+        ...current,
+        items: current.items.filter((item) => item.id !== itemId),
+      };
+    });
+  }
+
+  function submitEditor() {
+    if (!tenant?.id || !user?.id) {
+      toast({
+        title: 'Sessão inválida',
+        description: 'Entre novamente para criar ou editar propostas.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!editorForm.contactId) {
+      toast({
+        title: 'Escolha um contato',
+        description: 'A proposta precisa estar associada a um contato.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!editorForm.title.trim()) {
+      toast({
+        title: 'Título obrigatório',
+        description: 'Informe o título da proposta para continuar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const validItems = editorForm.items.filter(
+      (item) => item.name.trim() && Number(item.quantity) > 0 && Number(parseCurrencyInput(item.unitPrice) ?? 0) > 0,
+    );
+
+    if (!validItems.length) {
+      toast({
+        title: 'Adicione pelo menos um item',
+        description: 'A proposta precisa ter ao menos um item com quantidade e valor válidos.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (editorMode === 'create') {
+      createMutation.mutate();
+      return;
+    }
+
+    updateMutation.mutate();
+  }
+
+  function openScheduleDialog(proposal: ProposalRecord) {
+    setScheduleTargetState(proposal);
+    setScheduleAtState(toLocalDatetimeInput(proposal.scheduledAt ?? getDefaultScheduleValue()));
+  }
+
+  return {
+    tenant,
+    user,
+    search,
+    setSearch(value: string) {
+      setSearchState(value);
+    },
+    statusFilter,
+    setStatusFilter(value: ProposalStatusFilter) {
+      setStatusFilterState(value);
+    },
+    statusOptions: STATUS_OPTIONS,
+    proposalsQuery,
+    filteredProposals,
+    selectedProposal,
+    selectedProposalId,
+    setSelectedProposalId: setSelectedProposalIdState,
+    selectProposal(proposalId: string) {
+      setSelectedProposalIdState(proposalId);
+    },
+    summary,
+    contactLabelMap,
+    contacts,
+    editorOpen,
+    editorMode,
+    openCreateEditor,
+    openEditEditor,
+    closeEditor() {
+      setEditorOpenState(false);
+      setEditorFormState(createProposalFormState());
+      setEditorModeState('create');
+    },
+    editorForm,
+    setEditorField,
+    updateEditorItem,
+    addEditorItem,
+    removeEditorItem,
+    submitEditor,
+    createMutation,
+    updateMutation,
+    pdfMutation,
+    scheduleTarget,
+    setScheduleTarget: setScheduleTargetState,
+    scheduleAt,
+    setScheduleAt: setScheduleAtState,
+    openScheduleDialog,
+    scheduleMutation,
+    deleteTarget,
+    setDeleteTarget: setDeleteTargetState,
+    deleteMutation,
+    scheduleProposal(proposal: ProposalRecord) {
+      openScheduleDialog(proposal);
+    },
+    requestDelete(proposal: ProposalRecord) {
+      setDeleteTargetState(proposal);
+    },
+    generatePdf(proposal: ProposalRecord) {
+      pdfMutation.mutate(proposal);
+    },
+    confirmSchedule() {
+      scheduleMutation.mutate();
+    },
+    confirmDelete() {
+      deleteMutation.mutate();
+    },
+    resetFilters() {
+      setSearchState('');
+      setStatusFilterState('ALL');
+    },
+    hasFilters: Boolean(search || statusFilter !== 'ALL'),
+    formatCurrency,
+  };
+}
+
+export type ProposalsPageViewModel = ReturnType<typeof useProposalsPageViewModel>;
