@@ -6,7 +6,7 @@ export const BILLING_PLAN_SEED = [
   {
     code: 'ESSENCIAL',
     displayName: 'Essencial',
-    description: 'Entrada para validar WhatsApp, CRM e IA em uma operacao pequena.',
+    description: 'Entrada para validar WhatsApp, CRM e IA em uma operação pequena.',
     monthlyPrice: 297,
     messagesQuota: 1000,
     aiTokensQuota: 300000,
@@ -44,11 +44,11 @@ export const BILLING_PLAN_SEED = [
     contactsQuota: 7500,
     sortOrder: 2,
     features: [
-      'Ate 3 filiais ativas incluidas',
-      'Ate 3 numeros de WhatsApp conectados',
+      'Até 3 filiais ativas incluidas',
+      'Até 3 números de WhatsApp conectados',
       'IA com contexto comercial por nicho',
-      'Automacoes operacionais',
-      'relatórios por periodo e filtros',
+      'Automações operacionais',
+      'Relatórios por periodo e filtros',
     ],
     config: {
       limits: {
@@ -76,8 +76,8 @@ export const BILLING_PLAN_SEED = [
     contactsQuota: 30000,
     sortOrder: 3,
     features: [
-      'Ate 10 filiais ativas incluidas',
-      'Ate 10 numeros de WhatsApp conectados',
+      'Até 10 filiais ativas incluidas',
+      'Até 10 números de WhatsApp conectados',
       'governança e roteamento multi-time',
       'Mais margem para integrações e picos',
       'Dashboards avancados por necessidade do negocio',
