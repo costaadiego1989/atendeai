@@ -12,6 +12,7 @@ import {
   createProposalFormState,
   createProposalItemDraft,
   type ProposalFormState,
+  type ProposalItemDraft,
   type ProposalRecord,
   type ProposalStatus,
 } from '../types';
