@@ -16,7 +16,8 @@ function resolveApiOrigin() {
   const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
 
   if (localHosts.has(hostname)) {
-    return `${protocol}//${hostname}:3000`;
+    const formattedHostname = hostname.includes(':') ? `[${hostname}]` : hostname;
+    return `${protocol}//${formattedHostname}:3000`;
   }
 
   return '';

@@ -160,7 +160,10 @@ class MessagingRealtimeService {
         const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
 
         if (localHosts.has(windowUrl.hostname)) {
-          return `${windowUrl.protocol}//${windowUrl.hostname}:3000`;
+          const formattedHostname = windowUrl.hostname.includes(':')
+            ? `[${windowUrl.hostname}]`
+            : windowUrl.hostname;
+          return `${windowUrl.protocol}//${formattedHostname}:3000`;
         }
       } catch {
         return windowOrigin;

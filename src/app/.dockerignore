@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+*.log
+npm-debug.log*
+Dockerfile
+playwright-report
+test-results
+vite.config.ts.timestamp-*
