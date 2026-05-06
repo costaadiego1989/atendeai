@@ -21,6 +21,7 @@ import CatalogPage from '@/modules/catalog/views/CatalogPage';
 import ContactsListPage from '@/modules/contacts/views/ContactsListPage';
 import ContactDetailPage from '@/modules/contacts/views/ContactDetailPage';
 import InventoryPage from '@/modules/inventory/views/InventoryPage';
+import ProposalsPage from '@/modules/proposals/views/ProposalsPage';
 import SchedulingPage from '@/modules/scheduling/views/SchedulingPage';
 import RecoveryPage from '@/modules/recovery/views/RecoveryPage';
 import CheckoutPage from '@/modules/checkout/views/CheckoutPage';
@@ -100,6 +101,7 @@ function AppRoutes() {
         <Route path="contacts" element={<ContactsListPage />} />
         <Route path="contacts/:contactId" element={<ContactDetailPage />} />
         <Route path="catalog" element={<CatalogPage />} />
+        <Route path="proposals" element={<ProposalsPage />} />
         <Route
           path="inventory"
           element={withModuleAccess('ESTOQUE_IA', <InventoryPage />)}
