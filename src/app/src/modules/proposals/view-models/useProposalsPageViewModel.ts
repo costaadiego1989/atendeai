@@ -116,6 +116,37 @@ function parseMetadataFinalPrice(metadata: ProposalRecord['metadata']) {
   return 0;
 }
 
+function buildProposalItems(items: ProposalFormState['items']) {
+  return (Array.isArray(items) ? items : [])
+    .map((item) => ({
+      name: item.name.trim(),
+      quantity: Number(item.quantity || 0),
+      unitPrice: Number(parseCurrencyInput(item.unitPrice) ?? 0),
+      description: item.description.trim() || undefined,
+    }))
+    .filter((item) => item.name && item.quantity > 0);
+}
+
+function buildProposalPayload(
+  tenantId: string,
+  userId: string,
+  form: ProposalFormState,
+) {
+  const finalPrice = Number(parseCurrencyInput(form.finalPrice) ?? 0);
+
+  return {
+    tenantId,
+    userId,
+    contactId: form.contactId,
+    title: form.title,
+    description: form.description || undefined,
+    benefits: form.benefits || undefined,
+    validUntil: form.validUntil || undefined,
+    finalPrice: finalPrice > 0 ? finalPrice : undefined,
+    items: buildProposalItems(form.items),
+  };
+}
+
 export function useProposalsPageViewModel() {
   const queryClient = useQueryClient();
   const tenant = useAuthStore((state) => state.tenant);
@@ -262,28 +293,9 @@ export function useProposalsPageViewModel() {
 
   const createMutation = useMutation({
     mutationFn: () => {
-      if (!tenant?.id || !user?.id) {
-        throw new Error('Sessão inválida para criar proposta.');
-      }
-
-      return proposalsService.createProposal({
-        tenantId: tenant.id,
-        userId: user.id,
-        contactId: editorForm.contactId,
-        title: editorForm.title,
-        description: editorForm.description || undefined,
-        benefits: editorForm.benefits || undefined,
-        validUntil: editorForm.validUntil || undefined,
-        finalPrice: Number(parseCurrencyInput(editorForm.finalPrice) ?? 0) || undefined,
-        items: editorForm.items
-          .map((item) => ({
-            name: item.name.trim(),
-            quantity: Number(item.quantity || 0),
-            unitPrice: Number(parseCurrencyInput(item.unitPrice) ?? 0),
-            description: item.description.trim() || undefined,
-          }))
-          .filter((item) => item.name && item.quantity > 0),
-      });
+      return proposalsService.createProposal(
+        buildProposalPayload(tenant!.id, user!.id, editorForm),
+      );
     },
     onSuccess: async (result) => {
       await invalidateProposals();
@@ -311,24 +323,14 @@ export function useProposalsPageViewModel() {
         throw new Error('Nenhuma proposta selecionada.');
       }
 
-      return proposalsService.updateProposal(selectedProposal.id, {
-        tenantId: tenant?.id ?? selectedProposal.tenantId,
-        userId: user?.id ?? selectedProposal.userId,
-        contactId: editorForm.contactId,
-        title: editorForm.title,
-        description: editorForm.description || undefined,
-        benefits: editorForm.benefits || undefined,
-        validUntil: editorForm.validUntil || undefined,
-        finalPrice: Number(parseCurrencyInput(editorForm.finalPrice) ?? 0) || undefined,
-        items: editorForm.items
-          .map((item) => ({
-            name: item.name.trim(),
-            quantity: Number(item.quantity || 0),
-            unitPrice: Number(parseCurrencyInput(item.unitPrice) ?? 0),
-            description: item.description.trim() || undefined,
-          }))
-          .filter((item) => item.name && item.quantity > 0),
-      });
+      return proposalsService.updateProposal(
+        selectedProposal.id,
+        buildProposalPayload(
+          tenant?.id ?? selectedProposal.tenantId,
+          user?.id ?? selectedProposal.userId,
+          editorForm,
+        ),
+      );
     },
     onSuccess: async () => {
       await invalidateProposals();
