@@ -133,6 +133,13 @@ function buildProposalPayload(
   form: ProposalFormState,
 ) {
   const finalPrice = Number(parseCurrencyInput(form.finalPrice) ?? 0);
+  const metadata =
+    finalPrice > 0
+      ? {
+          finalPrice,
+          manualFinalPrice: true,
+        }
+      : undefined;
 
   return {
     tenantId,
@@ -142,7 +149,7 @@ function buildProposalPayload(
     description: String(form.description ?? '').trim() || undefined,
     benefits: String(form.benefits ?? '').trim() || undefined,
     validUntil: String(form.validUntil ?? '').trim() || undefined,
-    finalPrice: finalPrice > 0 ? finalPrice : undefined,
+    metadata,
     items: buildProposalItems(form.items),
   };
 }

@@ -29,7 +29,7 @@ export interface ProposalPayload {
   title: string;
   description?: string;
   benefits?: string;
-  finalPrice?: number;
+  metadata?: Record<string, unknown>;
   items: Array<{
     name: string;
     quantity: number;
@@ -132,9 +132,7 @@ export const proposalsService = {
       description: input.description?.trim() || undefined,
       benefits: input.benefits?.trim() || undefined,
       validUntil: toIsoString(input.validUntil),
-      metadata: input.finalPrice
-        ? { finalPrice: input.finalPrice, manualFinalPrice: true }
-        : undefined,
+      metadata: input.metadata,
       items: input.items.map(normalizeFormItem),
     });
   },
@@ -148,9 +146,7 @@ export const proposalsService = {
       description: input.description?.trim() || undefined,
       benefits: input.benefits?.trim() || undefined,
       validUntil: toIsoString(input.validUntil),
-      metadata: input.finalPrice
-        ? { finalPrice: input.finalPrice, manualFinalPrice: true }
-        : undefined,
+      metadata: input.metadata,
       items: input.items?.map(normalizeFormItem),
     });
   },
