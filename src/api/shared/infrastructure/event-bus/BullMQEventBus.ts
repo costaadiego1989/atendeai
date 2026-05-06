@@ -28,7 +28,6 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
   private readonly queues = new Map<string, Queue>();
   private readonly workers: Worker[] = [];
   private readonly consumerQueues = new Map<string, Set<string>>();
-  private readonly connection: Redis;
 
   constructor(
     private readonly configService: ConfigService,
