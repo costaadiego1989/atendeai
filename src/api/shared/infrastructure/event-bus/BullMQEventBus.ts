@@ -1,10 +1,11 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
 import { IEventBus } from '../../application/ports/IEventBus';
 import { IntegrationEvent } from '../../application/ports/IntegrationEvent';
 import { buildQueueTelemetry } from '../queue/QueueJobTelemetry';
+import { REDIS_CLIENT } from '../redis/RedisModule';
 
 export interface SerializedIntegrationEvent {
   eventId: string;
@@ -29,13 +30,10 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
   private readonly consumerQueues = new Map<string, Set<string>>();
   private readonly connection: Redis;
 
-  constructor(private readonly configService: ConfigService) {
-    this.connection = new Redis({
-      ...this.getConnectionOptions(),
-      maxRetriesPerRequest: null,
-      keepAlive: 30000,
-    });
-
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject(REDIS_CLIENT) private readonly connection: Redis,
+  ) {
     this.connection.on('error', (err) => {
       this.logger.error(`Redis Connection Error: ${err.message}`);
     });
@@ -208,47 +206,6 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
       this.queues.set(queueName, queue);
     }
     return queue;
-  }
-
-  private getConnectionOptions(): any {
-    const redisUrl = this.configService.get<string>('REDIS_URL');
-    const redisHost = this.configService.get<string>('REDIS_HOST');
-
-    const clean = (s?: string) => s?.replace(/['"]/g, '').trim();
-    const url = clean(redisUrl);
-    const host = clean(redisHost);
-
-    const connectionString = (url?.includes('://') ? url : null) || 
-                            (host?.includes('://') ? host : null);
-
-    if (connectionString) {
-      try {
-        const parsed = new URL(connectionString);
-        return {
-          host: parsed.hostname,
-          port: Number(parsed.port) || 6379,
-          password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
-          db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
-          tls: parsed.protocol === 'rediss:' ? {} : undefined,
-          keepAlive: 30000,
-        };
-      } catch (e) {
-        // Fallback manual
-        const fallbackHost = connectionString.replace(/^redis[s]?:\/\//, '').split(':')[0];
-        return {
-          host: fallbackHost,
-          port: 6379,
-          maxRetriesPerRequest: null,
-          keepAlive: 30000,
-        };
-      }
-    }
-
-    return {
-      host: host || 'localhost',
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-      keepAlive: 30000,
-    };
   }
 
   private extractString(
