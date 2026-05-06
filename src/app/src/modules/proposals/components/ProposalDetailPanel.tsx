@@ -1,11 +1,11 @@
-import { CalendarClock, Download, FileText, Send, Trash2, UserRound } from 'lucide-react';
+import { CalendarClock, FileText, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/formatters';
 import type { ProposalRecord } from '../types';
+import { ProposalActionsMenu } from './ProposalActionsMenu';
 
 type Props = {
   proposal: ProposalRecord | null;
@@ -76,34 +76,13 @@ export function ProposalDetailPanel({
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => onEdit(proposal)}>
-                <FileText className="h-4 w-4" />
-                Editar
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => onGeneratePdf(proposal)}
-              >
-                <Download className="h-4 w-4" />
-                Baixar PDF
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => onSchedule(proposal)}>
-                <Send className="h-4 w-4" />
-                Agendar
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-destructive hover:text-destructive"
-                onClick={() => onDelete(proposal)}
-              >
-                <Trash2 className="h-4 w-4" />
-                Excluir
-              </Button>
-            </div>
+            <ProposalActionsMenu
+              proposal={proposal}
+              onEdit={onEdit}
+              onGeneratePdf={onGeneratePdf}
+              onSchedule={onSchedule}
+              onDelete={onDelete}
+            />
           </div>
 
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
@@ -222,13 +201,13 @@ export function ProposalDetailPanel({
             com o link do PDF no horário escolhido.
           </p>
           {proposal.pdfUrl ? (
-            <Button
-              variant="link"
-              className="mt-2 h-auto p-0 text-primary"
+            <button
+              type="button"
+              className="mt-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
               onClick={() => onGeneratePdf(proposal)}
             >
               Baixar PDF gerado
-            </Button>
+            </button>
           ) : null}
         </div>
       </CardContent>

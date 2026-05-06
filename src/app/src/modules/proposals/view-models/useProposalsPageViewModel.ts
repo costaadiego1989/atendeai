@@ -159,14 +159,33 @@ function downloadFile(url: string, fileName: string) {
     return;
   }
 
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  const fallbackDownload = (targetUrl: string) => {
+    const link = document.createElement('a');
+    link.href = targetUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  void fetch(url)
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF (${response.status})`);
+      }
+
+      return response.blob();
+    })
+    .then((blob) => {
+      const objectUrl = URL.createObjectURL(blob);
+      fallbackDownload(objectUrl);
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1_000);
+    })
+    .catch(() => {
+      fallbackDownload(url);
+    });
 }
 
 function getProposalPdfFileName(proposal: ProposalRecord) {

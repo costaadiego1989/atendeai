@@ -1,12 +1,12 @@
-import { CalendarClock, Eye, FileDown, Pencil, Send, Trash2, UserRound } from 'lucide-react';
+import { CalendarClock, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { TableSkeleton } from '@/shared/ui/Skeletons';
 import { formatCurrency, formatDateTime } from '@/shared/lib/formatters';
 import type { ProposalRecord } from '../types';
+import { ProposalActionsMenu } from './ProposalActionsMenu';
 
 type Props = {
   items: ProposalRecord[];
@@ -151,78 +151,19 @@ export function ProposalList({
               </div>
             </button>
 
-            <div className="flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center justify-between gap-3 px-4 py-4">
               <div className="text-sm text-muted-foreground">
                 {proposal.items.length} item(s) em {proposal.status.toLowerCase()}
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-xl"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onSelect(proposal.id);
-                  }}
-                >
-                  <Eye className="h-4 w-4" />
-                  Abrir
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-xl"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onEdit(proposal);
-                  }}
-                >
-                  <Pencil className="h-4 w-4" />
-                  Editar
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-xl"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onGeneratePdf(proposal);
-                  }}
-                >
-                  <FileDown className="h-4 w-4" />
-                  Baixar PDF
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-xl"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onSchedule(proposal);
-                  }}
-                >
-                  <Send className="h-4 w-4" />
-                  Agendar
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 rounded-xl text-destructive hover:text-destructive"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onDelete(proposal);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Excluir
-                </Button>
-              </div>
+              <ProposalActionsMenu
+                proposal={proposal}
+                onOpen={onSelect}
+                onEdit={onEdit}
+                onGeneratePdf={onGeneratePdf}
+                onSchedule={onSchedule}
+                onDelete={onDelete}
+              />
             </div>
           </Card>
         );
