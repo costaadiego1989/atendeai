@@ -119,10 +119,10 @@ function parseMetadataFinalPrice(metadata: ProposalRecord['metadata']) {
 function buildProposalItems(items: ProposalFormState['items']) {
   return (Array.isArray(items) ? items : [])
     .map((item) => ({
-      name: item.name.trim(),
+      name: String(item.name ?? '').trim(),
       quantity: Number(item.quantity || 0),
       unitPrice: Number(parseCurrencyInput(item.unitPrice) ?? 0),
-      description: item.description.trim() || undefined,
+      description: String(item.description ?? '').trim() || undefined,
     }))
     .filter((item) => item.name && item.quantity > 0);
 }
@@ -138,10 +138,10 @@ function buildProposalPayload(
     tenantId,
     userId,
     contactId: form.contactId,
-    title: form.title,
-    description: form.description || undefined,
-    benefits: form.benefits || undefined,
-    validUntil: form.validUntil || undefined,
+    title: String(form.title ?? ''),
+    description: String(form.description ?? '').trim() || undefined,
+    benefits: String(form.benefits ?? '').trim() || undefined,
+    validUntil: String(form.validUntil ?? '').trim() || undefined,
     finalPrice: finalPrice > 0 ? finalPrice : undefined,
     items: buildProposalItems(form.items),
   };
@@ -293,8 +293,12 @@ export function useProposalsPageViewModel() {
 
   const createMutation = useMutation({
     mutationFn: () => {
+      if (!tenant?.id || !user?.id) {
+        throw new Error('Sessão inválida para criar proposta.');
+      }
+
       return proposalsService.createProposal(
-        buildProposalPayload(tenant!.id, user!.id, editorForm),
+        buildProposalPayload(tenant.id, user.id, editorForm),
       );
     },
     onSuccess: async (result) => {
@@ -323,13 +327,16 @@ export function useProposalsPageViewModel() {
         throw new Error('Nenhuma proposta selecionada.');
       }
 
+      const tenantId = tenant?.id ?? selectedProposal.tenantId;
+      const userId = user?.id ?? selectedProposal.userId;
+
+      if (!tenantId || !userId) {
+        throw new Error('Sessão inválida para atualizar proposta.');
+      }
+
       return proposalsService.updateProposal(
         selectedProposal.id,
-        buildProposalPayload(
-          tenant?.id ?? selectedProposal.tenantId,
-          user?.id ?? selectedProposal.userId,
-          editorForm,
-        ),
+        buildProposalPayload(tenantId, userId, editorForm),
       );
     },
     onSuccess: async () => {
