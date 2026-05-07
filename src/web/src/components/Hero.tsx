@@ -7,20 +7,20 @@ const WA_LINK = "https://wa.me/5521993001883";
 
 const conversation = [
   { from: "client-typing", text: "" },
-  { from: "client", text: "Olá! Gostaria de agendar com o Dr. Rafael Veiga." },
+  { from: "client", text: "Olá. Quero agendar um horário e entender os valores." },
   { from: "typing", text: "" },
-  { from: "bot", text: "Olá! 😊 Sou a assistente do Dr. Rafael. Temos vagas para esta semana. Qual o melhor dia para você?" },
+  { from: "bot", text: "Olá. Posso te ajudar com agenda, proposta e pagamento no mesmo fluxo. Qual serviço você precisa?" },
   { from: "client-typing", text: "" },
-  { from: "client", text: "Teria horário na Quinta-feira?" },
+  { from: "client", text: "Quero uma proposta e, se fizer sentido, já pagar por aqui." },
   { from: "typing", text: "" },
-  { from: "bot", text: "Tenho sim! Na Quinta temos 10:00, 14:30 e 16:00. Algum desses te atende?" },
+  { from: "bot", text: "Perfeito. Eu monto a proposta, registro o aceite e já libero o link de pagamento para você seguir sem sair da conversa." },
   { from: "client-typing", text: "" },
-  { from: "client", text: "14:30 fica perfeito!" },
+  { from: "client", text: "Pode seguir." },
   { from: "typing", text: "" },
-  { from: "bot", text: "Ótimo! Para finalizar sua reserva, gerei seu link de checkout seguro abaixo:" },
-  { from: "bot", text: "🔗 pay.atendeai.io/v/dr-rafael" },
+  { from: "bot", text: "Proposta enviada. Assim que você aceitar, o pagamento fica liberado na mesma jornada." },
+  { from: "bot", text: "Link seguro: app.atendeai.com/proposal/..." },
   { from: "typing", text: "" },
-  { from: "bot", text: "✅ Pix confirmado! Tudo certo para Quinta às 14:30 com o Dr. Rafael Veiga. Te esperamos! 👋" },
+  { from: "bot", text: "Pagamento confirmado. Atendimento, proposta e operação comercial registrados com sucesso." },
 ];
 
 const TypingIndicator = ({ isClient = false }: { isClient?: boolean }) => (
@@ -37,9 +37,9 @@ const TypingIndicator = ({ isClient = false }: { isClient?: boolean }) => (
 );
 
 const stats = [
-  { value: "24/7", label: "Disponível", icon: Zap },
-  { value: "<3s", label: "Tempo resposta", icon: BarChart3 },
-  { value: "100%", label: "Automatizado", icon: Shield },
+  { value: "WA + IG", label: "Canais conectados", icon: Zap },
+  { value: "Planos", label: "Base mensal", icon: BarChart3 },
+  { value: "Módulos", label: "Por nicho e operação", icon: Shield },
 ];
 
 const Hero = () => {
@@ -109,7 +109,6 @@ const Hero = () => {
         />
       </div>
 
-      {/* Abstract floating shapes for texture */}
       <motion.div
         className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-primary/5 blur-[160px]"
         animate={{
@@ -129,19 +128,16 @@ const Hero = () => {
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Grid overlay */}
       <div className="absolute inset-0 opacity-[0.02]" style={{
         backgroundImage: `linear-gradient(hsl(168 100% 36%) 1px, transparent 1px), linear-gradient(90deg, hsl(168 100% 36%) 1px, transparent 1px)`,
         backgroundSize: '80px 80px',
       }} />
 
-      {/* Noise texture */}
       <div className="absolute inset-0 opacity-[0.015]" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E")`,
       }} />
 
       <motion.div style={{ y: contentY }} className="relative z-10 max-w-6xl w-full flex flex-col lg:flex-row items-center gap-16">
-        {/* Left content */}
         <div className="flex-1 text-center lg:text-left">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -150,7 +146,7 @@ const Hero = () => {
             className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 text-xs font-semibold tracking-widest uppercase enterprise-border rounded-full bg-primary/5 text-primary"
           >
             <Bot className="w-3.5 h-3.5 text-[#00C59E] drop-shadow-[0_0_8px_rgba(0,197,158,0.8)]" />
-            Máquina de vendas inteligente
+            Plataforma comercial com IA
           </motion.div>
 
           <motion.h1
@@ -159,7 +155,7 @@ const Hero = () => {
             transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter mb-6 leading-[0.95]"
           >
-            A inteligência comercial que <span className="text-gradient-primary">vende por você</span> no WhatsApp
+            A operação comercial com IA que <span className="text-gradient-primary">atende, vende, agenda e cobra</span> no WhatsApp
           </motion.h1>
 
           <motion.p
@@ -168,7 +164,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8 text-pretty leading-relaxed"
           >
-            Um cérebro operacional que conhece seu estoque, agenda e catálogo. Automatize o atendimento, qualifique leads, recupere vendas e ou automatize seu checkout com IA.
+            Centralize atendimento, CRM, propostas, pagamentos, agenda e recuperação de receita em uma única plataforma com IA, automação e handoff humano.
           </motion.p>
 
           <motion.div
@@ -184,19 +180,18 @@ const Hero = () => {
               className="inline-flex items-center gap-2.5 h-14 px-8 bg-primary text-primary-foreground font-bold rounded-xl shadow-[var(--shadow-glow)] transition-all duration-300 hover:shadow-[var(--shadow-glow-lg)] hover:scale-[1.02] active:scale-[0.98] text-base"
             >
               <Sparkles className="w-5 h-5" />
-              Ganhe 7 dias grátis
+              Começar 7 dias grátis
               <ArrowRight className="w-5 h-5" />
             </a>
             <a
-              href="#como-funciona"
+              href="#planos"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <WhatsAppIcon className="w-4 h-4 text-primary" />
-              Ver como funciona
+              Ver planos e módulos
             </a>
           </motion.div>
 
-          {/* Stats row */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -218,7 +213,6 @@ const Hero = () => {
           </motion.div>
         </div>
 
-        {/* Right: Chat simulation */}
         <motion.div
           initial={{ opacity: 0, x: 30, rotateY: -5 }}
           animate={{ opacity: 1, x: 0, rotateY: 0 }}
