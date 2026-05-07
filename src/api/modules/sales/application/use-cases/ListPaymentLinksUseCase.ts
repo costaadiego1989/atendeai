@@ -50,6 +50,7 @@ export class ListPaymentLinksUseCase {
       items: result.items.map((item) => ({
         id: item.id,
         branchId: item.branchId ?? undefined,
+        externalId: item.externalId,
         name: item.name,
         description: item.description ?? undefined,
         label: item.label ?? undefined,
