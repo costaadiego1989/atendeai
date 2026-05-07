@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Zap, Gift, Users, CreditCard, HelpCircle, Sparkles } from "lucide-react";
-import WhatsAppIcon from "./WhatsAppIcon";
 import logo from "@/assets/logo.png";
 
 const WA_LINK = "https://wa.me/5521993001883";
@@ -9,7 +8,7 @@ const WA_LINK = "https://wa.me/5521993001883";
 const navItems = [
   { label: "Como funciona", href: "#como-funciona", icon: Zap },
   { label: "Benefícios", href: "#beneficios", icon: Gift },
-  { label: "Sobre nós", href: "#sobre", icon: Users },
+  { label: "Sobre a plataforma", href: "#sobre", icon: Users },
   { label: "Planos", href: "#planos", icon: CreditCard },
   { label: "FAQ", href: "#faq", icon: HelpCircle },
 ];
