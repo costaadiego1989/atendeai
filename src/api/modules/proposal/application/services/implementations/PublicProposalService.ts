@@ -31,6 +31,11 @@ type PublicProposalResponse = {
   validUntil?: string | null;
   status: string;
   approvalStatus: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  signature?: {
+    signerName?: string | null;
+    signedAt?: string | null;
+    hasSignature: boolean;
+  };
   payment?: {
     id?: string;
     paymentId?: string;
@@ -58,6 +63,13 @@ export class PublicProposalService {
   }
 
   async accept(token: string): Promise<PublicProposalResponse> {
+    return this.acceptWithSignature(token, {});
+  }
+
+  async acceptWithSignature(
+    token: string,
+    input: { signerName?: string | null; signatureDataUrl?: string | null },
+  ): Promise<PublicProposalResponse> {
     const proposal = await this.resolveProposalOrThrow(token);
     const metadata = normalizeProposalMetadata(proposal.metadata);
 
@@ -102,8 +114,31 @@ export class PublicProposalService {
       };
     }
 
+    const signerName =
+      typeof input.signerName === 'string' ? input.signerName.trim() : '';
+    const signatureDataUrl =
+      typeof input.signatureDataUrl === 'string'
+        ? input.signatureDataUrl.trim()
+        : '';
+
+    if (!signerName) {
+      throw new BadRequestException(
+        'Informe o nome do signatário para concluir o aceite.',
+      );
+    }
+
+    if (!signatureDataUrl.startsWith('data:image/')) {
+      throw new BadRequestException(
+        'A assinatura digital é obrigatória para concluir o aceite.',
+      );
+    }
+
     metadata.commercial.approval.status = 'ACCEPTED';
     metadata.commercial.approval.acceptedAt = new Date().toISOString();
+    metadata.commercial.approval.signerName = signerName;
+    metadata.commercial.approval.signatureDataUrl = signatureDataUrl;
+    metadata.commercial.approval.signedAt =
+      metadata.commercial.approval.acceptedAt;
     proposal.updateStatus('ACCEPTED');
     proposal.setMetadata(metadata);
     await this.proposalRepository.update(proposal);
@@ -157,6 +192,11 @@ export class PublicProposalService {
       validUntil: proposal.validUntil ? proposal.validUntil.toISOString() : null,
       status: proposal.status,
       approvalStatus: metadata.commercial.approval.status,
+      signature: {
+        signerName: metadata.commercial.approval.signerName ?? null,
+        signedAt: metadata.commercial.approval.signedAt ?? null,
+        hasSignature: Boolean(metadata.commercial.approval.signatureDataUrl),
+      },
       payment: metadata.commercial.payment
         ? {
             id: metadata.commercial.payment.id,

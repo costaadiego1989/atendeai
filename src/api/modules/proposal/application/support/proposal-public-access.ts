@@ -15,6 +15,9 @@ export interface ProposalApprovalMetadata {
   status: ProposalAcceptanceStatus;
   acceptedAt?: string | null;
   rejectedAt?: string | null;
+  signerName?: string | null;
+  signatureDataUrl?: string | null;
+  signedAt?: string | null;
 }
 
 export interface ProposalPaymentMetadata {
@@ -101,6 +104,9 @@ export function normalizeProposalMetadata(
         status: approvalSource?.status || 'PENDING',
         acceptedAt: approvalSource?.acceptedAt ?? null,
         rejectedAt: approvalSource?.rejectedAt ?? null,
+        signerName: approvalSource?.signerName ?? null,
+        signatureDataUrl: approvalSource?.signatureDataUrl ?? null,
+        signedAt: approvalSource?.signedAt ?? null,
       },
       payment: paymentSource
         ? {
