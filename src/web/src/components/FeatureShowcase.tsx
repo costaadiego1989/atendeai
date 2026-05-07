@@ -1,15 +1,14 @@
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import {
   LayoutDashboard,
   MessageSquare,
-  Package,
+  FileText,
   RefreshCcw,
   ShoppingCart,
   Calendar,
   CreditCard,
   Search,
-  Bell,
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
@@ -22,12 +21,6 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 
-interface ApiFeature {
-  title: string;
-  description: string;
-  items: string[];
-}
-
 interface FeatureSectionProps {
   title: string;
   description: string;
@@ -36,10 +29,11 @@ interface FeatureSectionProps {
   index: number;
   highlight: string;
   benefits: string[];
-  apiFeatures: ApiFeature;
+  detailTitle: string;
+  detailDescription: string;
 }
 
-const FeatureSection = ({ title, description, image, icon: Icon, index, highlight, benefits, apiFeatures }: FeatureSectionProps) => {
+const FeatureSection = ({ title, description, image, icon: Icon, index, highlight, benefits, detailTitle, detailDescription }: FeatureSectionProps) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -52,7 +46,6 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
   return (
     <div ref={ref} className="min-h-[80vh] flex items-center py-12 lg:py-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-32 items-center">
-        {/* Content Side */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -101,21 +94,21 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
                   <div className="w-3.5 h-3.5 text-[#00C59E]">
                     <Icon className="w-full h-full" />
                   </div>
-                  <span className="text-[9px] font-black text-[#00C59E] uppercase tracking-[0.3em]">Documentação Técnica</span>
+                  <span className="text-[9px] font-black text-[#00C59E] uppercase tracking-[0.3em]">Resumo do módulo</span>
                 </div>
 
                 <DialogTitle className="text-4xl font-black tracking-tighter text-white leading-tight mb-4">
-                  {apiFeatures.title}
+                  {detailTitle}
                 </DialogTitle>
 
                 <DialogDescription className="text-base text-white/50 leading-relaxed font-medium text-pretty">
-                  {apiFeatures.description}
+                  {detailDescription}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-10">
                 <div>
-                  <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-6">Principais Benefícios:</p>
+                  <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-6">Principais benefícios:</p>
                   <div className="space-y-4">
                     {benefits.map((benefit: string, i: number) => (
                       <div key={i} className="flex items-start gap-4 group">
@@ -140,16 +133,13 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
               </div>
             </DialogContent>
           </Dialog>
-
         </motion.div>
 
-        {/* Visual Side */}
         <div className={`relative ${!isEven ? "lg:order-1" : ""}`}>
           <motion.div
             style={{ y }}
             className="relative z-10"
           >
-            {/* Mac-style Window Frame */}
             <div className="enterprise-card rounded-2xl overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_30px_60px_-30px_rgba(0,0,0,0.6)] border-primary/10">
               <div className="h-8 bg-muted/30 border-b border-primary/5 px-4 flex items-center gap-2">
                 <div className="flex gap-1.5">
@@ -168,7 +158,6 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
               </div>
             </div>
 
-            {/* Premium floating stats card */}
             <motion.div
               style={{ y: useTransform(scrollYProgress, [0, 1], [50, -50]) }}
               className="absolute -right-8 -bottom-8 z-20 glass-surface p-5 rounded-2xl hidden xl:block border-primary/10 shadow-2xl"
@@ -179,13 +168,12 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
                 </div>
                 <div>
                   <p className="text-[10px] text-primary font-bold uppercase tracking-widest mb-0.5">{highlight}</p>
-                  <p className="text-sm font-bold text-foreground">Sistema Ativo</p>
+                  <p className="text-sm font-bold text-foreground">Módulo ativo</p>
                 </div>
               </div>
             </motion.div>
           </motion.div>
 
-          {/* Intense light flares */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] h-[160%] -z-1 pointer-events-none">
             <motion.div
               animate={{
@@ -193,7 +181,7 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
                 scale: [1, 1.1, 1]
               }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className={`absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(168_100%_36%/0.2),transparent_70%)]`}
+              className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(168_100%_36%/0.2),transparent_70%)]"
             />
           </div>
         </div>
@@ -205,208 +193,121 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
 const FeatureShowcase = () => {
   const sections = [
     {
-      title: "Cérebro Operacional",
-      description: "Uma visão 360º de toda a sua operação comercial. Acompanhe métricas, funis de conversão e a performance da sua IA em tempo real.",
+      title: "Atendimento com IA e handoff humano",
+      description: "Concentre a operação comercial em uma inbox única com IA, contexto do negócio e transbordo para o time sempre que a conversa precisar.",
       image: "/images/snapshots/dashboard.png",
       icon: LayoutDashboard,
-      highlight: "Hub Central",
+      highlight: "Inbox operacional",
       benefits: [
-        "Métricas em tempo real",
-        "Visão unificada multitenant",
-        "Gráficos de performance comercial"
+        "Inbox única para atendimento e operação",
+        "IA assistida com histórico do contato",
+        "Handoff humano sem perder contexto"
       ],
-      apiFeatures: {
-        title: "API de Métricas e Multitenancy",
-        description: "Explore o coração da operação com dados processados em real-time a partir da nossa API corporativa.",
-        items: [
-          "Métricas de Vendas (Receita, conversões, tickets) unificadas",
-          "Gestão e hierarquia corporativa multitenant com múltiplos usuários e filiais",
-          "Painel centralizado de Integrações (WhatsApp, Meta Ads, Calendários)",
-          "Controle de regras de restrições de permissão e acesso de usuários"
-        ]
-      }
+      detailTitle: "Atendimento, contexto e operação no mesmo lugar",
+      detailDescription: "A plataforma reúne atendimento, histórico, IA e operação comercial sem exigir vários sistemas paralelos.",
     },
     {
-      title: "Atendimento Omnichannel",
-      description: "Conecte WhatsApp e Instagram em um único fluxo inteligente. A IA conversa com tom humano, respeita guardrails e escala para o seu time apenas quando necessário.",
+      title: "CRM, qualificação e histórico do contato",
+      description: "Organize leads, clientes, oportunidades e próximos passos com playbooks mais consistentes e menos retrabalho no comercial.",
       image: "/images/snapshots/messaging.png",
       icon: MessageSquare,
-      highlight: "Conversacional",
+      highlight: "CRM comercial",
       benefits: [
-        "Integração WhatsApp & Instagram",
-        "IA com contexto empresarial",
-        "Handoff humano transparente"
+        "Histórico da conversa e do relacionamento",
+        "Qualificação por contexto e necessidade",
+        "Mais clareza para operar funil e retorno"
       ],
-      apiFeatures: {
-        title: "API de Mensageria Unificada",
-        description: "Comunicação transparente através de webhooks processados de forma escalável e elástica.",
-        items: [
-          "Recepção assíncrona de Webhooks do WhatsApp Cloud API e Instagram Graph",
-          "Envio automatizado de Mensagens de Texto, Áudios, Imagens, Documentos e Templates interativos",
-          "Transbordo inteligente (Handoff Automático) transferindo a conversa da IA para um Humano Livre",
-          "Resolução unificada de incidentes com Caixa de Entrada Dinâmica"
-        ]
-      }
+      detailTitle: "Contatos mais organizados, menos achismo",
+      detailDescription: "O CRM deixa de ser uma lista solta e passa a apoiar atendimento, venda, cobrança, agenda e pós-venda.",
     },
     {
-      title: "Sincronização de Estoque",
-      description: "O AtendeAí conhece seu estoque. Ele responde disponibilidade, sugere alternativas e sincroniza as vendas físicas e digitais sem erros.",
+      title: "Propostas, aceite e pagamento",
+      description: "Monte propostas comerciais, envie jornadas públicas de aceite e siga para pagamento sem depender de arquivos soltos ou processos manuais.",
       image: "/images/snapshots/stock.png",
-      icon: Package,
-      highlight: "Inventário Realtime",
+      icon: FileText,
+      highlight: "Propostas",
       benefits: [
-        "Sincronização bidirecional",
-        "Previsão de demanda com IA",
-        "Alertas de ruptura"
+        "Orçamentos e propostas organizados",
+        "Aceite em jornada pública",
+        "Pagamento conectado ao fluxo comercial"
       ],
-      apiFeatures: {
-        title: "API de Inventário & Catálogo",
-        description: "Controle e auditoria de cada SKU validado fisicamente e em todos os micro-stores.",
-        items: [
-          "Criação e manipulação programática de Catálogos Corporativos",
-          "Fluxos validados de Movimentações (Entrada, Saída, Ajustes) salvos em relatórios imutáveis",
-          "Observabilidade proativa baseada em alertas de limite mínimo de unidades nas filiais",
-          "Pesquisa semântica direta executada pela IA para responder aos usuários no chat ao vivo"
-        ]
-      }
+      detailTitle: "Do orçamento ao pagamento no mesmo fluxo",
+      detailDescription: "A proposta deixa de ser um anexo perdido e passa a participar da jornada comercial até o pagamento.",
     },
     {
-      title: "Checkout Conversacional",
-      description: "Não perca o cliente na troca de abas. O checkout acontece direto na conversa, de forma fluida, segura e extremamente rápida.",
+      title: "Checkout, links de pagamento e promoções",
+      description: "Venda por conversa com carrinho, checkout, links de pagamento, cupons e campanhas sem empurrar o cliente para um fluxo quebrado.",
       image: "/images/snapshots/checkout.png",
       icon: ShoppingCart,
-      highlight: "Conversão Direta",
+      highlight: "Conversão",
       benefits: [
-        "Carrinho integrado ao chat",
-        "Calculo de frete e taxas",
-        "Finalização sem fricção"
+        "Checkout conversacional e links rápidos",
+        "Cupons, promoções e campanhas",
+        "Entrega, frete e acompanhamento do pedido"
       ],
-      apiFeatures: {
-        title: "API de Comércio Interativo",
-        description: "Ecossistema fechado de compras que remove o atrito tradicional dos e-commerces convencionais.",
-        items: [
-          "Construção de Carrinhos via IA sem expor o cliente ao fluxo de Checkout web tradicional",
-          "Motor integrado de checagem e alocação de SKUs para prevenir duplas vendas no catálogo",
-          "Gestão Completa do Pedido (Pagamento Pendente, Envio, Entrega, Cancelamento)",
-          "Plataforma fluida capaz de absorver ordens diretamente via disparos das integrações externas"
-        ]
-      }
+      detailTitle: "Pagamento mais perto da conversa",
+      detailDescription: "A plataforma ajuda a fechar pedido e receber com menos fricção, menos troca de canal e mais contexto comercial.",
     },
     {
-      title: "Recuperação de Vendas",
-      description: "O motor de recovery mais potente do mercado. Identificamos abandonos e agimos imediatamente com scripts persuasivos via IA.",
+      title: "Cobrança, recovery e receita recuperada",
+      description: "Organize carteira, negociações, promessas e recebimentos com visão mais clara do que é nova venda e do que é recuperação de receita.",
       image: "/images/snapshots/recovery.png",
       icon: RefreshCcw,
-      highlight: "Revenue Recovery",
+      highlight: "Recovery",
       benefits: [
-        "Recuperação de Boletos & PIX",
-        "Abordagem comportamental",
-        "Dashboards de receita recuperada"
+        "Carteira de cobrança com histórico",
+        "Régua de follow-up e promessas",
+        "Relatórios de receita recuperada"
       ],
-      apiFeatures: {
-        title: "API de Conversão e Retenção",
-        description: "Recupere o faturamento deixado na mesa com algoritmos otimizados de persuasão.",
-        items: [
-          "Identificação e Listagem Automática (Tracking) de intenções de abandono de Carrinho no chat",
-          "Deduplicação Inteligente de disparos de recuperação nos Canais adequados (WhatsApp)",
-          "Resgate autônomo de Links de Pagamento pendentes, expirados e vencimentos próximos",
-          "Dashboards estatísticos rastreando individualmente o Retorno Sob o Esforço (ROAS) de remarketing"
-        ]
-      }
+      detailTitle: "Cobrança com operação, não improviso",
+      detailDescription: "O recovery entra como processo controlado, com métricas, status e ações claras para o time.",
     },
     {
-      title: "Pagamentos Irresistíveis",
-      description: "Gere links de pagamento profissionais no contexto da venda. Suporte a PIX, Cartão e Boleto com confirmação instantânea no chat.",
+      title: "Agenda, disponibilidade e confirmação",
+      description: "Consulte horários, profissionais, reservas, reagendamento, lembretes e até pagamento antecipado em serviços que dependem de agenda.",
       image: "/images/snapshots/payment_link.png",
-      icon: CreditCard,
-      highlight: "Financeiro",
-      benefits: [
-        "Links de pagamento dinâmicos",
-        "Confirmação de recebimento",
-        "Split de pagamentos nativo"
-      ],
-      apiFeatures: {
-        title: "API Transacional e Pagamentos",
-        description: "Processamento e controle de capital fluindo de ponta a ponta desde o Chat.",
-        items: [
-          "Geração dinâmica e infinita de Cobranças contendo métodos Flexíveis (Credito/Pix/Ticket)",
-          "Motor de Split nativamente processado alocando pagamentos a unidades franqueadas simultaneamente",
-          "Capacidade preditiva orientada a IA que analisa a taxa de aprovação para recomendar meios de pagamento",
-          "Endpoints geradores permitindo suspensões instantâneas ou cancelamentos de propostas transientes"
-        ]
-      }
-    },
-    {
-      title: "Agendamento Inteligente",
-      description: "Sua agenda viva. A IA consulta horários, agenda serviços e envia lembretes para garantir que seu cliente nunca falte.",
-      image: "/images/snapshots/scheduling.png",
       icon: Calendar,
       highlight: "Scheduling",
       benefits: [
-        "Consulta de agenda realtime",
-        "Lembretes de confirmação",
-        "Gestão de profissionais"
+        "Agenda por profissional e categoria",
+        "Lembretes e confirmações automáticas",
+        "Google Calendar, Meet e pré-pagamento"
       ],
-      apiFeatures: {
-        title: "API de Reservas de Infraestrutura",
-        description: "Motor completo e resiliente conectando diretamente ao Google Calendar.",
-        items: [
-          "Handshake imediato via OAuth2 provendo leitura dos calendários protegidos das filiais",
-          "Garantias algoritmicas e exclusão mútua eliminando acidentes de conflito de agenda (Overbookings)",
-          "Escalonamento do Staffing avaliando agenda de colaboradores distintos antes de assumir e preencher blocos",
-          "Notificação em cadência engatilhada contra Ausências minimizando a perda dos profissionais no horário"
-        ]
-      }
+      detailTitle: "Agenda operacional conectada à conversa",
+      detailDescription: "A jornada de agendamento fica integrada ao atendimento, à disponibilidade real e ao pagamento quando necessário.",
     },
     {
-      title: "Prospecção de Leads",
-      description: "Saia do passivo. O AtendeAí encontra empresas e leads ideais, cria campanhas de prospecção e traz novas oportunidades todos os dias.",
+      title: "Prospecção e novas oportunidades",
+      description: "Saia do atendimento passivo com qualificação de leads, campanhas outbound e motor de prospecção para gerar nova demanda comercial.",
       image: "/images/snapshots/prospect.png",
       icon: Search,
-      highlight: "Growth",
+      highlight: "Prospecção",
       benefits: [
-        "Busca de leads qualificados",
-        "Outreach automático",
-        "Enriquecimento de dados"
+        "Qualificação de leads por contexto",
+        "Busca e segmentação de oportunidades",
+        "Mais previsibilidade para o time comercial"
       ],
-      apiFeatures: {
-        title: "API de Inteligência Demográfica",
-        description: "Extração ativa e conversão de visitantes com integração de Webhooks em publicidade.",
-        items: [
-          "Importação Autônoma provida através da Ponte oficial do LeadAds da Meta para dentro do CRM local",
-          "Máquinas Automáticas de Engajamento despachando e-mails/templates nos primeiros milissegundos do opt-in",
-          "Qualificador Sistêmico bloqueando contatos irregulares e preservando o Rating da organização",
-          "Agregações Analíticas para visualizações aprofundadas por campanha (CAC, CPA e Converted Events)"
-        ]
-      }
+      detailTitle: "Mais que atendimento: geração de demanda",
+      detailDescription: "A plataforma também apoia operações que precisam abrir novas oportunidades, não só responder quem já chegou.",
     },
     {
-      title: "Alertas & Monitoramento",
-      description: "Fique por dentro de cada movimento importante. Notificações inteligentes sobre vendas críticas, falhas ou pedidos de ajuda humana.",
+      title: "Dashboards, roteamento e governança",
+      description: "Acompanhe operação, distribua conversas, conecte módulos e tenha uma visão mais madura da máquina comercial por trás do atendimento.",
       image: "/images/snapshots/alerts.png",
-      icon: Bell,
-      highlight: "Observabilidade",
+      icon: CreditCard,
+      highlight: "Operação",
       benefits: [
-        "Alertas push & WhatsApp",
-        "Monitoramento de saúde de IA",
-        "Log de auditoria completo"
+        "Roteamento de equipe por regra",
+        "Relatórios avançados por operação",
+        "Hub de integrações para escalar"
       ],
-      apiFeatures: {
-        title: "API de Telemetria e Políticas",
-        description: "Controle as rédeas da operação digital, delimitando a inteligência e mapeando intercorrências.",
-        items: [
-          "Modificador semântico via Prompts Sistêmicos estritos assegurando os limites (Guardrails) de fala da IA",
-          "Emissão programática de Push Alarms alertando os encarregados da filial frente a desvios na negociação",
-          "Logs extensivos englobos pela Central captando assinaturas financeiras em transação dentro do Hub",
-          "Auditorias permanentes do Workspace com proteção dos artefatos corporativos (Roles e Acessos)"
-        ]
-      }
+      detailTitle: "A operação cresce com mais controle",
+      detailDescription: "À medida que a rotina comercial amadurece, a plataforma ajuda a dar mais governança, visibilidade e coordenação ao time.",
     }
   ];
 
   return (
     <div className="relative">
-      {/* Background line decoration with moving light */}
       <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent -translate-x-1/2 opacity-30 hidden lg:block overflow-hidden">
         <motion.div
           animate={{ y: ["-100%", "200%"] }}
