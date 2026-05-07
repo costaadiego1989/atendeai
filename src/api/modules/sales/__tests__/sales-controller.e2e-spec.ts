@@ -1,4 +1,5 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { Prisma } from '@prisma/client';
@@ -68,7 +69,9 @@ describe('SalesController (e2e)', () => {
     app.use(cookieParser());
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     app.useGlobalFilters(new GlobalExceptionFilter());
-    app.useGlobalInterceptors(new SuccessResponseInterceptor());
+    app.useGlobalInterceptors(
+      new SuccessResponseInterceptor(app.get(Reflector)),
+    );
     app.setGlobalPrefix('api/v1');
     await app.init();
 
@@ -286,6 +289,7 @@ describe('SalesController (e2e)', () => {
           name: 'serviço Premium',
           status: 'ACTIVE',
           source: 'MANUAL',
+          externalId: expect.any(String),
         }),
       ]),
     );
