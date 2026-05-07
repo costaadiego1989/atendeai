@@ -30,11 +30,16 @@ import { RecoveryCaseDetailSheet } from '@/modules/recovery/components/RecoveryC
 import { RecoveryDialogs } from '@/modules/recovery/components/RecoveryDialogs';
 import { RecoveryMetricCard } from '@/modules/recovery/components/RecoveryMetricCard';
 import { RecoveryPlaybooksSheet } from '@/modules/recovery/components/RecoveryPlaybooksSheet';
+import { RecoveryReportsSheet } from '@/modules/recovery/components/RecoveryReportsSheet';
 import {
   RECOVERY_SOURCE_OPTIONS,
   RECOVERY_STATUS_OPTIONS,
 } from '@/modules/recovery/components/RecoveryViewHelper';
 import { recoverySourceLabels } from '@/modules/recovery/components/RecoveryLabel';
+import {
+  getRecoveryCommercialContext,
+  getRecoveryCommercialToneClassName,
+} from '@/modules/recovery/utils/recovery-commercial';
 import { useRecoveryPageViewModel } from '@/modules/recovery/view-models/useRecoveryPageViewModel';
 import { formatCurrency } from '@/shared/lib/formatters';
 import { formatPhone } from '@/shared/lib/masks';
@@ -58,15 +63,6 @@ export default function RecoveryPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <ModuleAgentRuleButton moduleId="recovery" className="gap-1.5" />
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5"
-            onClick={() => vm.setPlaybooksOpen(true)}
-          >
-            <BookMarked className="h-4 w-4" />
-            Playbooks
-          </Button>
           <Button size="sm" className="gap-1.5" onClick={() => vm.setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             Novo caso
@@ -235,7 +231,10 @@ export default function RecoveryPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {vm.pageCases.map((item) => (
+                  {vm.pageCases.map((item) => {
+                    const commercial = getRecoveryCommercialContext(item);
+
+                    return (
                     <TableRow
                       key={item.id}
                       className="cursor-pointer"
@@ -264,19 +263,33 @@ export default function RecoveryPage() {
                       </TableCell>
                       <TableCell>{recoverySourceLabels[item.source] ?? item.source}</TableCell>
                       <TableCell>
-                        <StatusBadge status={item.status} />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <StatusBadge status={item.status} />
+                          <Badge
+                            variant="outline"
+                            className={getRecoveryCommercialToneClassName(commercial.tone)}
+                          >
+                            {commercial.kindLabel}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-xs text-muted-foreground">
-                          {item.paidAt
-                            ? new Date(item.paidAt).toLocaleString('pt-BR')
-                            : item.lastContactedAt
-                              ? new Date(item.lastContactedAt).toLocaleString('pt-BR')
-                              : new Date(item.createdAt).toLocaleString('pt-BR')}
-                        </span>
+                        <div className="space-y-1">
+                          <span className="text-xs text-muted-foreground">
+                            {item.paidAt
+                              ? new Date(item.paidAt).toLocaleString('pt-BR')
+                              : item.lastContactedAt
+                                ? new Date(item.lastContactedAt).toLocaleString('pt-BR')
+                                : new Date(item.createdAt).toLocaleString('pt-BR')}
+                          </span>
+                          <p className="text-[11px] text-muted-foreground">
+                            {commercial.statusLabel}
+                          </p>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </Card>
