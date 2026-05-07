@@ -166,7 +166,7 @@ function getQueueSignal(conversation: ReturnType<typeof useConversationsPageView
   }
 
   return {
-    label: 'Fluxo ativo',
+    label: 'Chat por IA',
     detail: 'A IA pode continuar conduzindo essa conversa até o handoff humano.',
     tone: 'active' as const,
   };
@@ -624,7 +624,7 @@ export default function ConversationsPage() {
               <SelectContent>
                 <SelectItem value="ALL">Todos os status</SelectItem>
                 <SelectItem value="OPEN">Em aberto</SelectItem>
-                <SelectItem value="ACTIVE">Fluxo ativo</SelectItem>
+                <SelectItem value="ACTIVE">Chat por IA</SelectItem>
                 <SelectItem value="PENDING_HUMAN">Atendimento humano</SelectItem>
                 <SelectItem value="ARCHIVED">Encerradas</SelectItem>
               </SelectContent>
@@ -1074,7 +1074,7 @@ export default function ConversationsPage() {
                       disabled={vm.updateStatusMutation.isPending}
                     >
                       <Bot className="mr-1.5 h-3.5 w-3.5" />
-                      Fluxo ativo
+                      Chat por IA
                     </Button>
                     <Button
                       type="button"
