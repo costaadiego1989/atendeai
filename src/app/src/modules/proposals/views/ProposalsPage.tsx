@@ -99,6 +99,7 @@ export default function ProposalsPage() {
             onSelect={vm.selectProposal}
             onEdit={vm.openEditEditor}
             onGeneratePdf={vm.generatePdf}
+            onOpen={vm.openPublicProposal}
             onSend={vm.sendProposal}
             onSchedule={vm.scheduleProposal}
             onDelete={vm.requestDelete}
@@ -109,6 +110,7 @@ export default function ProposalsPage() {
         <ProposalDetailPanel
           proposal={vm.selectedProposal}
           contactNameMap={vm.contactLabelMap}
+          onOpen={vm.openPublicProposal}
           onEdit={vm.openEditEditor}
           onGeneratePdf={vm.generatePdf}
           onSend={vm.sendProposal}
