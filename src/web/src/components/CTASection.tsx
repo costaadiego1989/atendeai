@@ -12,7 +12,6 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
 
   return (
     <section ref={ref} className="px-6 py-[16vh] relative overflow-hidden">
-      {/* Subtle ambient glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,hsl(168_100%_36%/0.08),transparent_70%)]" />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center">
@@ -32,8 +31,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
           transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter mb-6 leading-[0.95]"
         >
-          Sua empresa pode vender{" "}
-          <span className="text-gradient-primary">24 horas por dia</span>
+          Monte sua <span className="text-gradient-primary">operação comercial com IA</span>
         </motion.h2>
 
         <motion.p
@@ -42,7 +40,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
           transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
         >
-          Enquanto você descansa, a AtendeAI responde, qualifica, agenda e converte clientes pelo WhatsApp e Instagram. Teste grátis por 7 dias, sem compromisso.
+          Comece pelo plano base, ative os módulos do seu nicho e valide atendimento, agenda, cobrança, propostas e pagamento com 7 dias grátis.
         </motion.p>
 
         <motion.button
@@ -55,7 +53,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
           className="inline-flex items-center gap-2.5 h-14 px-10 bg-primary text-primary-foreground font-bold rounded-xl shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-lg)] transition-all duration-300 text-base mx-auto"
         >
           <Sparkles className="w-5 h-5" />
-          Começar teste grátis
+          Começar trial
           <ArrowRight className="w-5 h-5" />
         </motion.button>
 
@@ -65,7 +63,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-5 text-xs text-muted-foreground/60"
         >
-          Sem cartão de crédito. Cancele quando quiser.
+          Sem cartão na largada. Setup orientado.
         </motion.p>
       </div>
     </section>
