@@ -19,6 +19,10 @@ import {
   formatSalesCurrency,
   formatSalesDueDate,
 } from './sales-view-helpers';
+import {
+  getPaymentLinkCommercialContext,
+  getPaymentLinkCommercialToneClassName,
+} from '../utils/payment-link-commercial';
 
 type Props = {
   items: SalesPaymentLink[];
@@ -100,7 +104,10 @@ export function PaymentLinksTable({
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
+            {items.map((item) => {
+              const commercial = getPaymentLinkCommercialContext(item);
+
+              return (
               <tr
                 key={item.id}
                 className="border-b border-border/50 transition-colors hover:bg-muted/20"
@@ -113,7 +120,19 @@ export function PaymentLinksTable({
                         variant="secondary"
                         className="rounded-full px-2.5 py-1 text-[11px]"
                       >
-                        {item.resourceType === 'PAYMENT' ? 'Checkout split' : 'Link legado'}
+                        {commercial.channelLabel}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={`rounded-full px-2.5 py-1 text-[11px] ${getPaymentLinkCommercialToneClassName(commercial.tone)}`}
+                      >
+                        {commercial.kindLabel}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={`rounded-full px-2.5 py-1 text-[11px] ${getPaymentLinkCommercialToneClassName(commercial.tone)}`}
+                      >
+                        {commercial.statusLabel}
                       </Badge>
                       {item.recurrenceEnabled ? (
                         <Badge
@@ -234,7 +253,8 @@ export function PaymentLinksTable({
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
