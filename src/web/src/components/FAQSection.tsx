@@ -4,20 +4,32 @@ import { HelpCircle, ChevronDown } from "lucide-react";
 
 const faqs = [
   {
-    q: "Preciso entender de tecnologia?",
-    a: "Não. Nós fazemos tudo pra você. Você só precisa aprovar.",
+    q: "Como funcionam os planos base?",
+    a: "A operação começa com um plano base mensal: Essencial, Profissional ou Escala. Eles definem a capacidade inicial de WhatsApp, contatos, IA e operação.",
   },
   {
-    q: "Funciona para qualquer negócio?",
-    a: "Funciona melhor para quem vende pelo WhatsApp e Instagram. Se seus clientes te procuram por mensagem, funciona pra você.",
+    q: "O que são módulos extras?",
+    a: "São recursos ativados conforme a necessidade da operação, como agenda, checkout conversacional, propostas, links de pagamento, cobrança, recovery, promoções ou prospecção.",
   },
   {
-    q: "Quanto tempo leva?",
-    a: "Em poucos dias já está funcionando. A maioria dos clientes começa a ver resultados na primeira semana.",
+    q: "Serve para quais nichos?",
+    a: "Hoje a plataforma atende especialmente varejo, e-commerce, food & delivery, saúde & agenda, beleza, pet, cobrança & recovery, serviços consultivos e empresas B2B.",
   },
   {
-    q: "E se eu não gostar?",
-    a: "Se não fizer sentido pra você, você não continua. Sem compromisso, sem letra pequena.",
+    q: "Funciona com WhatsApp e Instagram?",
+    a: "Sim. A plataforma foi pensada para operar atendimento comercial por mensagem, com centralização do fluxo e contexto da operação.",
+  },
+  {
+    q: "Como funciona o trial de 7 dias?",
+    a: "Você ativa a conta, testa a base da plataforma e valida a operação com 7 dias de trial antes de seguir com a contratação.",
+  },
+  {
+    q: "Quando faz sentido usar agenda, checkout, cobrança, propostas ou prospecção?",
+    a: "Cada módulo entra quando faz parte da sua rotina comercial. A ideia é ativar só o que sustenta o seu fluxo atual, sem contratar uma operação maior do que você precisa.",
+  },
+  {
+    q: "O time humano pode assumir a conversa?",
+    a: "Sim. A plataforma suporta handoff humano e operação assistida, então a IA pode automatizar, sugerir respostas ou transferir a conversa para a equipe.",
   },
 ];
 
@@ -28,7 +40,6 @@ const FAQSection = () => {
 
   return (
     <section id="faq" ref={ref} className="px-6 py-[16vh] relative overflow-hidden">
-      {/* Subtle bg */}
       <motion.div
         animate={{ y: [0, -15, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
