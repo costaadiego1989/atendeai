@@ -19,6 +19,7 @@ import { AlertsModule } from './modules/alerts/alerts.module';
 import { SupportModule } from './modules/support/support.module';
 import { CommerceModule } from './modules/commerce/commerce.module';
 import { SocialModule } from './modules/social/social.module';
+import { ProposalModule } from './modules/proposal/proposal.module';
 import { BullModule } from '@nestjs/bullmq';
 import { StorageModule } from './shared/infrastructure/storage/StorageModule';
 import { ConfigService } from '@nestjs/config';
@@ -64,6 +65,7 @@ import { parseRedisConnection } from './shared/infrastructure/redis/redis-connec
     CommerceModule,
     SocialModule,
     StorageModule,
+    ProposalModule,
     PlatformAdminModule,
   ],
   providers: [

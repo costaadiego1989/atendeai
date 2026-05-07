@@ -6,6 +6,7 @@ import { GetProposalUseCase } from '@modules/proposal/application/use-cases/GetP
 import { ListProposalsUseCase } from '@modules/proposal/application/use-cases/ListProposalsUseCase';
 import { GenerateProposalPdfUseCase } from '@modules/proposal/application/use-cases/GenerateProposalPdfUseCase';
 import { ScheduleProposalDeliveryUseCase } from '@modules/proposal/application/use-cases/ScheduleProposalDeliveryUseCase';
+import { SendProposalToConversationUseCase } from '@modules/proposal/application/use-cases/SendProposalToConversationUseCase';
 
 type ProposalItemInput = {
   name: string;
@@ -120,6 +121,7 @@ export class ProposalController {
     private readonly listProposalsUseCase: ListProposalsUseCase,
     private readonly generateProposalPdfUseCase: GenerateProposalPdfUseCase,
     private readonly scheduleProposalDeliveryUseCase: ScheduleProposalDeliveryUseCase,
+    private readonly sendProposalToConversationUseCase: SendProposalToConversationUseCase,
   ) { }
 
   @Post()
@@ -176,5 +178,11 @@ export class ProposalController {
     });
 
     return { success: true, scheduledAt: date };
+  }
+
+  @Post(':id/send')
+  async send(@Param('id') id: string) {
+    const result = await this.sendProposalToConversationUseCase.execute(id);
+    return { success: true, ...result };
   }
 }

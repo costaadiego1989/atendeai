@@ -808,6 +808,31 @@ model SalesCoupon {
   @@schema("sales_schema")
 }
 
+model Proposal {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  contactId       String   @map("contact_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  title           String   @db.VarChar(255)
+  description     String?  @db.Text
+  benefits        String?  @db.Text
+  items           Json     @default("[]")
+  totalAmount     Decimal  @map("total_amount") @db.Decimal(12, 2)
+  status          String   @default("DRAFT") @db.VarChar(20)
+  validUntil      DateTime? @map("valid_until") @db.Timestamptz
+  scheduledAt     DateTime? @map("scheduled_at") @db.Timestamptz
+  pdfUrl          String?  @map("pdf_url") @db.Text
+  notes           String?  @db.Text
+  metadata        Json?    @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, status], name: "idx_proposals_tenant_status")
+  @@index([tenantId, contactId], name: "idx_proposals_tenant_contact")
+  @@map("proposals")
+  @@schema("sales_schema")
+}
+
 model SalesCouponTarget {
   id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   couponId      String      @map("coupon_id") @db.Uuid

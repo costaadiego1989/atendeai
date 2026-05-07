@@ -107,6 +107,11 @@ import { RedeemCouponUseCase } from './application/use-cases/RedeemCouponUseCase
       useExisting: PrismaSalesRepository,
     },
   ],
-  exports: [ICreatePaymentLinkUseCase, TrackSalesMetricUseCase, SALES_REPOSITORY],
+  exports: [
+    ICreatePaymentLinkUseCase,
+    TrackSalesMetricUseCase,
+    SALES_REPOSITORY,
+    CreateSplitPaymentChargeUseCase,
+  ],
 })
 export class SalesModule { }
