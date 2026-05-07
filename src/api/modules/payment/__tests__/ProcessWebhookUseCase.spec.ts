@@ -315,8 +315,29 @@ describe('Payment ProcessWebhookUseCase', () => {
   it('should project a sales payment link as PAID using the sales projection service', async () => {
     const prisma = {
       $executeRaw: jest.fn().mockResolvedValue(undefined),
+      $queryRaw: jest
+        .fn()
+        .mockResolvedValueOnce([
+          {
+            id: 'link-1',
+            tenant_id: '123e4567-e89b-12d3-a456-426614174000',
+            branch_id: 'branch-1',
+            contact_id: 'contact-1',
+            conversation_id: 'conversation-1',
+            url: 'https://pay.test/link-1',
+            name: 'Proposta aceita',
+            value: 230,
+            external_id:
+              'sales-link|123e4567-e89b-12d3-a456-426614174000|local-link-1',
+            status: 'PAID',
+          },
+        ])
+        .mockResolvedValueOnce([{ name: 'Cliente Teste' }]),
     };
-    const projection = new PaymentWebhookSalesProjectionService(prisma as any);
+    const eventBus = {
+      publish: jest.fn().mockResolvedValue(undefined),
+    };
+    const projection = new PaymentWebhookSalesProjectionService(prisma as any, eventBus as any);
 
     await projection.project({
       eventType: 'PAYMENT_CONFIRMED',
@@ -326,6 +347,8 @@ describe('Payment ProcessWebhookUseCase', () => {
       occurredAt: new Date('2026-03-31T21:00:00.000Z'),
     });
 
-    expect(prisma.$executeRaw).toHaveBeenCalledTimes(2);
+    expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
   });
 });

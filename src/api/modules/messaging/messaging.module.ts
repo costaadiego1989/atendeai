@@ -26,6 +26,7 @@ import { GET_CONVERSATION_SALE_ATTRIBUTION_USE_CASE } from './application/use-ca
 import { UpdateConversationSaleAttributionUseCase } from './application/use-cases/UpdateConversationSaleAttributionUseCase';
 import { UPDATE_CONVERSATION_SALE_ATTRIBUTION_USE_CASE } from './application/use-cases/interfaces/IUpdateConversationSaleAttributionUseCase';
 import { ConversationSaleAiValidationService } from './application/services/ConversationSaleAiValidationService';
+import { ConversationSaleEvidenceService } from './application/services/ConversationSaleEvidenceService';
 import { SuggestAgentReplyService } from './application/services/SuggestAgentReplyService';
 import { SendAIMessageUseCase } from './application/use-cases/SendAIMessageUseCase';
 import { ProcessOutboundMessageUseCase } from './application/use-cases/ProcessOutboundMessageUseCase';
@@ -158,6 +159,7 @@ import { CommerceModule } from '@modules/commerce/commerce.module';
     },
     SuggestAgentReplyService,
     ConversationSaleAiValidationService,
+    ConversationSaleEvidenceService,
     MarkConversationSaleUseCase,
     VoidConversationSaleUseCase,
     GetConversationSaleAttributionUseCase,

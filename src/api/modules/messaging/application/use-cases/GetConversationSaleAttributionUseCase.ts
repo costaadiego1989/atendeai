@@ -67,6 +67,18 @@ export class GetConversationSaleAttributionUseCase
         ? sale.aiValidatedAt.toISOString()
         : null,
       notes: sale.notes,
+      commercialKind:
+        typeof (sale.metadata as any)?.objectiveEvidence?.commercialKind === 'string'
+          ? (sale.metadata as any).objectiveEvidence.commercialKind
+          : null,
+      commercialStatus:
+        typeof (sale.metadata as any)?.objectiveEvidence?.commercialStatus === 'string'
+          ? (sale.metadata as any).objectiveEvidence.commercialStatus
+          : null,
+      evidenceSource:
+        typeof (sale.metadata as any)?.objectiveEvidence?.source === 'string'
+          ? (sale.metadata as any).objectiveEvidence.source
+          : null,
     };
   }
 }

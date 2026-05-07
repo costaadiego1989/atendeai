@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import * as bcrypt from 'bcryptjs';
-import * as cookieParser from 'cookie-parser';
-import * as request from 'supertest';
+import cookieParser from 'cookie-parser';
+import request from 'supertest';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
 
 describe('MessagingController (e2e)', () => {
@@ -17,6 +17,7 @@ describe('MessagingController (e2e)', () => {
   let conversationId: string;
   let otherConversationId: string;
   let freshContactId: string;
+  let activeContactId: string;
   let authCookie: string;
 
   const ownerEmail = 'messaging-controller-owner@test.com';
@@ -117,6 +118,7 @@ describe('MessagingController (e2e)', () => {
         stage: 'LEAD',
       },
     });
+    activeContactId = contact.id;
 
     const archivedContact = await prisma.contact.create({
       data: {
@@ -206,6 +208,15 @@ describe('MessagingController (e2e)', () => {
               tenantId: {
                 in: [tenantId, otherTenantId].filter(Boolean),
               },
+            },
+          },
+        })
+        .catch(() => {});
+      await prisma.paymentLink
+        .deleteMany({
+          where: {
+            tenantId: {
+              in: [tenantId, otherTenantId].filter(Boolean),
             },
           },
         })
@@ -410,5 +421,113 @@ describe('MessagingController (e2e)', () => {
       .get(`/api/v1/tenants/${otherTenantId}/conversations/${otherConversationId}/messages`)
       .set('Cookie', [authCookie])
       .expect(401);
+  });
+
+  it('should allow sale attribution when the conversation already has a confirmed payment', async () => {
+    await prisma.paymentLink.create({
+      data: {
+        tenantId,
+        providerLinkId: 'provider-paid-1',
+        externalId: `sales-charge|${tenantId}|paid-link-${Date.now()}`,
+        name: 'Proposta aceite',
+        label: 'Proposta aceita',
+        value: 345,
+        url: 'https://pay.test/paid-link',
+        billingType: 'PIX',
+        status: 'PAID',
+        source: 'MANUAL',
+        resourceType: 'PAYMENT',
+        contactId: activeContactId,
+        conversationId,
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post(`/api/v1/tenants/${tenantId}/conversations/${conversationId}/sale-attribution`)
+      .set('Cookie', [authCookie])
+      .send({})
+      .expect(201);
+
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        approved: true,
+        conversationId,
+        saleAmount: '345',
+        aiValidationStatus: 'APPROVED',
+      }),
+    );
+
+    const saleEvent = await prisma.conversationSaleEvent.findFirst({
+      where: {
+        tenantId,
+        conversationId,
+        lifecycleStatus: 'ACTIVE',
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    expect(saleEvent).toBeDefined();
+    expect(saleEvent?.metadata).toEqual(
+      expect.objectContaining({
+        objectiveEvidence: expect.objectContaining({
+          source: 'PAYMENT_CONFIRMED',
+        }),
+      }),
+    );
+  });
+
+  it('should not allow sale attribution when the confirmed payment belongs to recovery', async () => {
+    const recoveryConversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        contactId: activeContactId,
+        channel: 'WHATSAPP',
+        status: 'ACTIVE',
+      },
+    });
+
+    await prisma.paymentLink.create({
+      data: {
+        tenantId,
+        providerLinkId: 'provider-recovery-1',
+        externalId: `recovery|${tenantId}|paid-link-${Date.now()}`,
+        name: 'Cobrança em aberto',
+        label: 'Recovery',
+        value: 199,
+        url: 'https://pay.test/recovery-link',
+        billingType: 'PIX',
+        status: 'PAID',
+        source: 'MANUAL',
+        resourceType: 'PAYMENT',
+        contactId: activeContactId,
+        conversationId: recoveryConversation.id,
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post(`/api/v1/tenants/${tenantId}/conversations/${recoveryConversation.id}/sale-attribution`)
+      .set('Cookie', [authCookie])
+      .send({})
+      .expect(201);
+
+    expect(response.body).toEqual({
+      approved: false,
+      reason: 'Pagamento confirmado em recovery conta como receita recuperada, não como nova venda.',
+      confidence: 1,
+      conversationId: recoveryConversation.id,
+      commercialKind: 'RECOVERY',
+      commercialStatus: 'RECOVERED',
+      evidenceSource: 'PAYMENT_CONFIRMED',
+    });
+
+    const saleEvent = await prisma.conversationSaleEvent.findFirst({
+      where: {
+        tenantId,
+        conversationId: recoveryConversation.id,
+        lifecycleStatus: 'ACTIVE',
+      },
+    });
+
+    expect(saleEvent).toBeNull();
   });
 });

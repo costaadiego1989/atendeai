@@ -51,3 +51,27 @@ export class SalesPaymentLinkOverdueRemarketingIntegrationEvent extends Integrat
     this.payload = data;
   }
 }
+
+export class SalesPaymentConfirmedConversationIntegrationEvent extends IntegrationEvent {
+  readonly queue = 'sales.payment_confirmed.conversation';
+  readonly sourceModule = 'sales';
+  readonly payload: Record<string, unknown>;
+
+  get aggregateId(): string | undefined {
+    return this.payload.contactId as string;
+  }
+
+  constructor(data: {
+    tenantId: string;
+    contactId: string;
+    contactName: string;
+    branchId?: string | null;
+    conversationId?: string | null;
+    paymentLinkUrl: string;
+    linkTitle: string;
+    value: number;
+  }) {
+    super();
+    this.payload = data;
+  }
+}

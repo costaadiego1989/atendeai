@@ -3,7 +3,10 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { PaymentWebhookProjectionInput } from './PaymentWebhookSchedulingProjectionService';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
-import { SalesPaymentLinkOverdueRemarketingIntegrationEvent } from '@modules/sales/application/integration-events/SalesIntegrationEvents';
+import {
+  SalesPaymentConfirmedConversationIntegrationEvent,
+  SalesPaymentLinkOverdueRemarketingIntegrationEvent,
+} from '@modules/sales/application/integration-events/SalesIntegrationEvents';
 
 @Injectable()
 export class PaymentWebhookSalesProjectionService {
@@ -43,11 +46,7 @@ export class PaymentWebhookSalesProjectionService {
     `);
 
     const updated = rows[0];
-    if (
-      !updated ||
-      status !== 'OVERDUE' ||
-      salesResourceMatch[1] !== 'sales-link'
-    ) {
+    if (!updated) {
       return;
     }
 
@@ -66,8 +65,7 @@ export class PaymentWebhookSalesProjectionService {
       contactName = String(contactRows[0].name);
     }
 
-    await this.eventBus.publish(
-      new SalesPaymentLinkOverdueRemarketingIntegrationEvent({
+    const payload = {
         tenantId: input.tenantId,
         contactId,
         contactName,
@@ -76,8 +74,20 @@ export class PaymentWebhookSalesProjectionService {
         paymentLinkUrl: String(updated.url ?? ''),
         linkTitle: String(updated.name ?? ''),
         value: Number(updated.value ?? 0),
-      }),
-    );
+      };
+
+    if (status === 'PAID') {
+      await this.eventBus.publish(
+        new SalesPaymentConfirmedConversationIntegrationEvent(payload),
+      );
+      return;
+    }
+
+    if (status === 'OVERDUE' && salesResourceMatch[1] === 'sales-link') {
+      await this.eventBus.publish(
+        new SalesPaymentLinkOverdueRemarketingIntegrationEvent(payload),
+      );
+    }
   }
 
   private resolveStatus(

@@ -19,6 +19,9 @@ export interface ConversationSaleAttributionDTO {
   markedAt: string;
   aiValidatedAt: string | null;
   notes: string | null;
+  commercialKind?: string | null;
+  commercialStatus?: string | null;
+  evidenceSource?: string | null;
 }
 
 export interface IGetConversationSaleAttributionUseCase {

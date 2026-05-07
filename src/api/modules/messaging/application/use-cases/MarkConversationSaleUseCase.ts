@@ -1,22 +1,19 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import {
-  CONVERSATION_REPOSITORY,
-  IConversationRepository,
-} from '../../domain/repositories/IConversationRepository';
+import { TenantManualSaleEligibilityService } from '@shared/infrastructure/billing/TenantManualSaleEligibilityService';
+import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import {
   EntityNotFoundException,
   ForbiddenException,
   UnauthorizedException,
   ValidationErrorException,
 } from '@shared/domain/exceptions/DomainExceptions';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
-import { TenantManualSaleEligibilityService } from '@shared/infrastructure/billing/TenantManualSaleEligibilityService';
+import {
+  CONVERSATION_REPOSITORY,
+  IConversationRepository,
+} from '../../domain/repositories/IConversationRepository';
 import { ConversationSaleAiValidationService } from '../services/ConversationSaleAiValidationService';
+import { ConversationSaleEvidenceService } from '../services/ConversationSaleEvidenceService';
 import {
   IMarkConversationSaleUseCase,
   MarkConversationSaleInput,
@@ -33,6 +30,7 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
     private readonly prisma: PrismaService,
     private readonly manualSaleEligibility: TenantManualSaleEligibilityService,
     private readonly saleAiValidation: ConversationSaleAiValidationService,
+    private readonly saleEvidence: ConversationSaleEvidenceService,
   ) {}
 
   async execute(
@@ -86,7 +84,7 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
     if (input.saleAmount != null) {
       if (!Number.isFinite(input.saleAmount) || input.saleAmount < 0) {
         throw new ValidationErrorException(
-          'Valor da venda inválido (use número ≥ 0).',
+          'Valor da venda inválido (use número >= 0).',
         );
       }
     }
@@ -106,27 +104,62 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
       );
     }
 
-    const ai = await this.saleAiValidation.validate({
-      tenantId: input.tenantId,
-      conversationId: input.conversationId,
-      claimedSaleAmount: input.saleAmount ?? null,
-      notes: input.notes ?? null,
-    });
+    const evidence = await this.saleEvidence.resolve(
+      input.tenantId,
+      input.conversationId,
+    );
 
-    if (!ai.approved) {
-      throw new ValidationErrorException(
-        ai.reason || 'Venda não confirmada pelo contexto da conversa.',
-      );
+    if (evidence.confirmed && !evidence.saleEligible) {
+      return {
+        approved: false,
+        reason:
+          evidence.reason ||
+          'Este pagamento não representa uma nova venda comercial.',
+        confidence: 1,
+        conversationId: input.conversationId,
+        commercialKind: evidence.commercialKind ?? null,
+        commercialStatus: evidence.commercialStatus ?? null,
+        evidenceSource: evidence.source ?? null,
+      };
+    }
+
+    let approvalReason = 'Venda confirmada por evidência objetiva do sistema.';
+    let approvalConfidence = 1;
+    let rawModelText = '';
+
+    if (!evidence.confirmed) {
+      const ai = await this.saleAiValidation.validate({
+        tenantId: input.tenantId,
+        conversationId: input.conversationId,
+        claimedSaleAmount: input.saleAmount ?? null,
+        notes: input.notes ?? null,
+      });
+
+      if (!ai.approved) {
+        return {
+          approved: false,
+          reason: ai.reason || 'Venda não confirmada pelo contexto da conversa.',
+          confidence: ai.confidence,
+          conversationId: input.conversationId,
+        };
+      }
+
+      approvalReason = ai.reason;
+      approvalConfidence = ai.confidence;
+      rawModelText = ai.rawModelText;
     }
 
     const currency =
       input.currency?.trim() ||
-      (input.saleAmount != null ? 'BRL' : null);
+      evidence.currency?.trim() ||
+      (input.saleAmount != null || evidence.amount != null ? 'BRL' : null);
 
     const saleAmountDecimal =
       input.saleAmount != null
         ? new Prisma.Decimal(input.saleAmount)
-        : null;
+        : evidence.amount != null
+          ? new Prisma.Decimal(evidence.amount)
+          : null;
 
     const now = new Date();
     const created = await this.prisma.conversationSaleEvent.create({
@@ -142,9 +175,18 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
         aiValidatedAt: now,
         notes: input.notes?.trim() || null,
         metadata: {
-          aiReason: ai.reason,
-          aiConfidence: ai.confidence,
-          aiModelExcerpt: ai.rawModelText.slice(0, 12000),
+          aiReason: approvalReason,
+          aiConfidence: approvalConfidence,
+          aiModelExcerpt: rawModelText.slice(0, 12000),
+          objectiveEvidence: evidence.confirmed
+            ? {
+                source: evidence.source,
+                module: evidence.module,
+                commercialKind: evidence.commercialKind,
+                commercialStatus: evidence.commercialStatus,
+                paymentLinkId: evidence.paymentLinkId,
+              }
+            : null,
         } as Prisma.InputJsonValue,
       },
     });
@@ -164,8 +206,15 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
     markedAt: Date;
     aiValidatedAt: Date | null;
     notes: string | null;
+    metadata?: Prisma.JsonValue | null;
   }): MarkConversationSaleOutput {
+    const objectiveEvidence =
+      row.metadata && typeof row.metadata === 'object' && !Array.isArray(row.metadata)
+        ? (row.metadata as Record<string, any>).objectiveEvidence
+        : null;
+
     return {
+      approved: true,
       id: row.id,
       conversationId: row.conversationId,
       attributedUserId: row.attributedUserId,
@@ -180,6 +229,18 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
         ? row.aiValidatedAt.toISOString()
         : null,
       notes: row.notes,
+      commercialKind:
+        typeof objectiveEvidence?.commercialKind === 'string'
+          ? objectiveEvidence.commercialKind
+          : null,
+      commercialStatus:
+        typeof objectiveEvidence?.commercialStatus === 'string'
+          ? objectiveEvidence.commercialStatus
+          : null,
+      evidenceSource:
+        typeof objectiveEvidence?.source === 'string'
+          ? objectiveEvidence.source
+          : null,
     };
   }
 }

@@ -1,7 +1,10 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  SalesPaymentConfirmedConversationIntegrationEvent,
+  SalesPaymentLinkOverdueRemarketingIntegrationEvent,
+} from '@modules/sales/application/integration-events/SalesIntegrationEvents';
 import { EVENT_BUS, IEventBus } from '../../../../shared/application/ports/IEventBus';
 import { IMessagingFacade, MESSAGING_FACADE } from '../facades/MessagingFacade';
-import { SalesPaymentLinkOverdueRemarketingIntegrationEvent } from '@modules/sales/application/integration-events/SalesIntegrationEvents';
 
 type SalesPaymentChargeCreatedEnvelope = {
   payload?: {
@@ -22,20 +25,17 @@ export class SalesIntegrationHandlers implements OnModuleInit {
     private readonly eventBus: IEventBus,
     @Inject(MESSAGING_FACADE)
     private readonly messagingFacade: IMessagingFacade,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.eventBus.subscribe(
-      'sales.messaging_integration',
-      async (event) => {
-        const payload = this.extractPayload(
-          event as unknown as SalesPaymentChargeCreatedEnvelope,
-        );
-        if (payload) {
-          await this.handleChargeCreated(payload);
-        }
-      },
-    );
+    this.eventBus.subscribe('sales.messaging_integration', async (event) => {
+      const payload = this.extractPayload(
+        event as unknown as SalesPaymentChargeCreatedEnvelope,
+      );
+      if (payload) {
+        await this.handleChargeCreated(payload);
+      }
+    });
 
     this.eventBus.subscribe(
       'sales.payment_link.overdue_remarketing',
@@ -45,6 +45,16 @@ export class SalesIntegrationHandlers implements OnModuleInit {
         );
       },
       { consumerName: 'messaging-sales-payment-link-overdue-remarketing' },
+    );
+
+    this.eventBus.subscribe(
+      'sales.payment_confirmed.conversation',
+      async (event) => {
+        await this.handlePaymentConfirmedConversation(
+          event as SalesPaymentConfirmedConversationIntegrationEvent,
+        );
+      },
+      { consumerName: 'messaging-sales-payment-confirmed-conversation' },
     );
   }
 
@@ -63,13 +73,15 @@ export class SalesIntegrationHandlers implements OnModuleInit {
     return payload;
   }
 
-  private async handleChargeCreated(payload: NonNullable<SalesPaymentChargeCreatedEnvelope['payload']>) {
+  private async handleChargeCreated(
+    payload: NonNullable<SalesPaymentChargeCreatedEnvelope['payload']>,
+  ) {
     const formattedValue = payload.value.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     });
 
-    const text = `Olá! ${payload.contactName}! Seu link de pagamento foi gerado no valor de ${formattedValue}. Você pode concluir por aqui: ${payload.invoiceUrl}`;
+    const text = `Olá, ${payload.contactName}! O seu link de pagamento foi gerado no valor de ${formattedValue}. Quando quiser concluir, pode seguir por aqui: ${payload.invoiceUrl}`;
 
     await this.messagingFacade.queueSystemMessage({
       tenantId: payload.tenantId,
@@ -112,7 +124,8 @@ export class SalesIntegrationHandlers implements OnModuleInit {
       typeof p.linkTitle === 'string' && p.linkTitle.trim()
         ? p.linkTitle.trim()
         : 'seu pagamento';
-    const value = typeof p.value === 'number' && Number.isFinite(p.value) ? p.value : null;
+    const value =
+      typeof p.value === 'number' && Number.isFinite(p.value) ? p.value : null;
     const formattedValue =
       value != null
         ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -120,7 +133,49 @@ export class SalesIntegrationHandlers implements OnModuleInit {
 
     const valuePhrase = formattedValue ? ` (${formattedValue})` : '';
 
-    const text = `Olá, ${contactName}! O link "${title}"${valuePhrase} segue disponível. Se ainda tiver interesse, pode concluir aqui: ${p.paymentLinkUrl}`;
+    const text = `Olá, ${contactName}! O link "${title}"${valuePhrase} segue disponível. Se ainda quiser concluir, pode finalizar aqui: ${p.paymentLinkUrl}`;
+
+    await this.messagingFacade.queueSystemMessage({
+      tenantId: p.tenantId,
+      contactId: p.contactId,
+      channel: 'WHATSAPP',
+      text,
+      branchId: p.branchId ?? undefined,
+      conversationId: p.conversationId ?? undefined,
+    });
+  }
+
+  private async handlePaymentConfirmedConversation(
+    event: SalesPaymentConfirmedConversationIntegrationEvent,
+  ) {
+    const p = event.payload as {
+      tenantId?: string;
+      contactId?: string;
+      contactName?: string;
+      paymentLinkUrl?: string;
+      linkTitle?: string;
+      value?: number;
+      branchId?: string | null;
+      conversationId?: string | null;
+    };
+
+    if (typeof p.tenantId !== 'string' || typeof p.contactId !== 'string') {
+      return;
+    }
+
+    const contactName =
+      typeof p.contactName === 'string' && p.contactName.trim()
+        ? p.contactName.trim()
+        : 'Cliente';
+    const value =
+      typeof p.value === 'number' && Number.isFinite(p.value) ? p.value : null;
+    const formattedValue =
+      value != null
+        ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        : null;
+
+    const amountLine = formattedValue ? ` no valor de ${formattedValue}` : '';
+    const text = `Pagamento confirmado com sucesso, ${contactName}! Recebemos a confirmação${amountLine}. Seguimos com o seu atendimento e qualquer atualização importante vai aparecer por aqui.`;
 
     await this.messagingFacade.queueSystemMessage({
       tenantId: p.tenantId,

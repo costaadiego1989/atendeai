@@ -14,17 +14,23 @@ export interface MarkConversationSaleInput {
 }
 
 export interface MarkConversationSaleOutput {
-  id: string;
+  approved: boolean;
+  reason?: string;
+  confidence?: number;
+  id?: string;
   conversationId: string;
-  attributedUserId: string;
-  saleAmount: string | null;
-  currency: string | null;
-  lifecycleStatus: string;
-  aiValidationStatus: string;
-  markedByUserId: string;
-  markedAt: string;
-  aiValidatedAt: string | null;
-  notes: string | null;
+  attributedUserId?: string;
+  saleAmount?: string | null;
+  currency?: string | null;
+  lifecycleStatus?: string;
+  aiValidationStatus?: string;
+  markedByUserId?: string;
+  markedAt?: string;
+  aiValidatedAt?: string | null;
+  notes?: string | null;
+  commercialKind?: string | null;
+  commercialStatus?: string | null;
+  evidenceSource?: string | null;
 }
 
 export interface IMarkConversationSaleUseCase {
