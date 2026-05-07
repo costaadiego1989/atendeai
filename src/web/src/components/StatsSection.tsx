@@ -1,35 +1,13 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
-import { TrendingUp, Clock, Users, Zap } from "lucide-react";
+import { useRef } from "react";
+import { MessageSquare, Puzzle, Calendar, CreditCard } from "lucide-react";
 
 const stats = [
-  { value: 97, suffix: "%", label: "Taxa de resposta", icon: TrendingUp },
-  { value: 3, suffix: "s", label: "Tempo médio resposta", icon: Clock },
-  { value: 500, suffix: "+", label: "Empresas atendidas", icon: Users },
-  { value: 24, suffix: "/7", label: "Operação contínua", icon: Zap },
+  { value: "Atendimento", label: "WhatsApp e Instagram no mesmo fluxo", icon: MessageSquare },
+  { value: "Módulos", label: "Ative agenda, cobrança, checkout, propostas e mais", icon: Puzzle },
+  { value: "Agenda", label: "Profissionais, horários, confirmações e no-show", icon: Calendar },
+  { value: "Pagamento", label: "Links, proposta, checkout e recuperação", icon: CreditCard },
 ];
-
-const AnimatedCounter = ({ target, suffix, inView }: { target: number; suffix: string; inView: boolean }) => {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const duration = 2000;
-    const increment = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [inView, target]);
-
-  return <span className="tabular-nums">{count}{suffix}</span>;
-};
 
 const StatsSection = () => {
   const ref = useRef(null);
@@ -56,10 +34,10 @@ const StatsSection = () => {
               className="text-center"
             >
               <Icon className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
-                <AnimatedCounter target={s.value} suffix={s.suffix} inView={inView} />
+              <p className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">
+                {s.value}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">{s.label}</p>
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{s.label}</p>
             </motion.div>
           );
         })}
