@@ -2,10 +2,10 @@ import { Subscription } from '../domain/entities/Subscription';
 import { TenantId } from '@shared/domain/TenantId';
 
 describe('Subscription', () => {
-  it('should create an active ESSENCIAL subscription by default', () => {
+  it('should create an active TRIAL subscription by default', () => {
     const subscription = Subscription.create(TenantId.create('tenant-1'));
 
-    expect(subscription.plan).toBe('ESSENCIAL');
+    expect(subscription.plan).toBe('TRIAL');
     expect(subscription.status).toBe('ACTIVE');
   });
 
@@ -55,8 +55,8 @@ describe('Subscription', () => {
     subscription.changePlan('PROFISSIONAL');
 
     expect(subscription.plan).toBe('PROFISSIONAL');
-    expect(subscription.quotas.messages).toBe(5000);
-    expect(subscription.quotas.aiTokens).toBe(1500000);
-    expect(subscription.quotas.contacts).toBe(7500);
+    expect(subscription.quotas.messages).toBe(75000);
+    expect(subscription.quotas.aiTokens).toBe(7500000);
+    expect(subscription.quotas.contacts).toBe(2500);
   });
 });
