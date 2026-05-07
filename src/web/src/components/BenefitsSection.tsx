@@ -1,14 +1,14 @@
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { useRef } from "react";
-import { CheckCircle2, Trophy, Clock, BrainCircuit, Users, Timer, TrendingUp, Shield } from "lucide-react";
+import { CheckCircle2, Trophy, BrainCircuit, Timer, TrendingUp, Shield } from "lucide-react";
 
 const benefits = [
-  { text: "Resposta em segundos, 24 horas por dia", icon: Clock },
-  { text: "Aumento de vendas sem contratar equipe", icon: Trophy },
-  { text: "Atendimento profissional e padronizado", icon: BrainCircuit },
-  { text: "Prospecção automática de novos clientes", icon: TrendingUp },
-  { text: "Cobrança e recovery integrados", icon: Shield },
-  { text: "Economia de tempo e recursos", icon: Timer },
+  { text: "Centralize atendimento, CRM e operação em um só lugar", icon: Trophy },
+  { text: "Venda, cobre, agende e acompanhe no mesmo fluxo", icon: BrainCircuit },
+  { text: "Ative módulos conforme o seu nicho e a sua rotina", icon: TrendingUp },
+  { text: "Combine IA, automação e atendimento humano", icon: Shield },
+  { text: "Meça nova venda e receita recuperada com mais clareza", icon: Timer },
+  { text: "Escalone sem depender de processos soltos entre equipes", icon: CheckCircle2 },
 ];
 
 const BenefitsSection = () => {
@@ -56,7 +56,7 @@ const BenefitsSection = () => {
                 transition={{ duration: 0.4, delay: 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 className="flex items-center gap-4 p-5 rounded-xl enterprise-card hover:border-primary/15 transition-all group"
-                style={{ borderColor: 'hsl(168 100% 36% / 0.06)' }}
+                style={{ borderColor: "hsl(168 100% 36% / 0.06)" }}
               >
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover:from-primary/25 group-hover:to-primary/10 transition-all">
                   <Icon className="w-5 h-5 text-primary" />
