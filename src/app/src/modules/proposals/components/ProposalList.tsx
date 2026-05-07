@@ -23,6 +23,7 @@ type Props = {
   isError: boolean;
   contactNameMap: Record<string, string>;
   onSelect: (proposalId: string) => void;
+  onOpen: (proposal: ProposalRecord) => void;
   onEdit: (proposal: ProposalRecord) => void;
   onGeneratePdf: (proposal: ProposalRecord) => void;
   onSend: (proposal: ProposalRecord) => void;
@@ -37,6 +38,7 @@ export function ProposalList({
   isError,
   contactNameMap,
   onSelect,
+  onOpen,
   onEdit,
   onGeneratePdf,
   onSend,
@@ -177,7 +179,7 @@ export function ProposalList({
 
               <ProposalActionsMenu
                 proposal={proposal}
-                onOpen={onSelect}
+                onOpen={onOpen}
                 onEdit={onEdit}
                 onGeneratePdf={onGeneratePdf}
                 onSend={onSend}
