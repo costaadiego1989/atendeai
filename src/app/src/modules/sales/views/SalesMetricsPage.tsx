@@ -93,13 +93,13 @@ export function SalesMetricsPage() {
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                  Receita capturada
+                  Nova venda capturada
                 </p>
                 <p className="mt-2 text-sm font-semibold text-foreground">
-                  {formatPercent(vm.paidShare)}
+                  {formatPercent(vm.newSaleShare)}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {formatSalesCurrency(vm.paymentSummary.paidRevenue)} pagos no periodo recente
+                  {formatSalesCurrency(vm.commercialRevenue.newSaleRevenue)} pagos em novas vendas
                 </p>
               </div>
             </div>
@@ -127,9 +127,9 @@ export function SalesMetricsPage() {
           icon={Send}
         />
         <KPICard
-          title="Receita estimada"
-          value={formatSalesCurrency(vm.summary.totalRevenue)}
-          subtitle={`Ticket medio de ${formatSalesCurrency(vm.averageTicket)}`}
+          title="Receita recuperada"
+          value={formatSalesCurrency(vm.commercialRevenue.recoveredRevenue)}
+          subtitle={`${vm.commercialRevenue.recoveredPaymentsCount} pagamentos de recovery`}
           icon={CreditCard}
         />
       </div>
@@ -219,24 +219,24 @@ export function SalesMetricsPage() {
                 </div>
                 <div className="rounded-2xl border border-border/60 bg-background/60 p-4">
                   <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                    Receita paga
+                    Nova venda paga
                   </p>
                   <p className="mt-2 text-2xl font-bold text-foreground">
-                    {formatSalesCurrency(vm.paymentSummary.paidRevenue)}
+                    {formatSalesCurrency(vm.commercialRevenue.newSaleRevenue)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Valor que ja entrou efetivamente
+                    Valor ja confirmado em novos pedidos e checkouts
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border/60 bg-background/60 p-4">
                   <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                    Checkouts ativos
+                    Receita recuperada
                   </p>
                   <p className="mt-2 text-2xl font-bold text-foreground">
-                    {vm.paymentSummary.activeLinks}
+                    {formatSalesCurrency(vm.commercialRevenue.recoveredRevenue)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Cobranças ainda abertas para conversao
+                    Pagamentos confirmados em recovery, sem misturar com nova venda
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border/60 bg-background/60 p-4">

@@ -6,6 +6,7 @@ import {
   type DashboardMetricValue,
   type DashboardRange,
 } from '@/modules/dashboard/services/dashboard-service';
+import { buildCommercialRevenueSnapshot } from '@/shared/commercial/commercial-metrics';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import {
   buildScopedTenantData,
@@ -61,6 +62,7 @@ export function useDashboardPageViewModel() {
     const usage = snapshot?.usage;
     const salesMetrics = snapshot?.salesMetrics;
     const paymentSummary = snapshot?.paymentSummary;
+    const commercialRevenue = buildCommercialRevenueSnapshot(paymentSummary, recoveryCases);
 
     const waitingHumanCount = conversations.filter(
       (conversation) => conversation.status === 'PENDING_HUMAN',
@@ -234,6 +236,14 @@ export function useDashboardPageViewModel() {
         value: paymentSummary?.paidRevenue ?? 0,
         helper: `${paymentSummary?.paidLinks ?? 0} pagamentos confirmados`,
       },
+      'payments.newSaleRevenue': {
+        value: commercialRevenue.newSaleRevenue,
+        helper: `${commercialRevenue.newSalePaymentsCount} vendas pagas`,
+      },
+      'payments.recoveredRevenue': {
+        value: commercialRevenue.recoveredRevenue,
+        helper: `${commercialRevenue.recoveredPaymentsCount} pagamentos de recovery`,
+      },
       'payments.activeLinks': {
         value: paymentSummary?.activeLinks ?? 0,
         helper: `${paymentSummary?.totalLinks ?? 0} checkouts no periodo`,
@@ -281,6 +291,7 @@ export function useDashboardPageViewModel() {
         estimatedRevenue: 0,
         paidRevenue: 0,
       },
+      commercialRevenue,
       billingCycle: usage?.billingCycle,
       plan: usage?.plan,
       unavailableModules: snapshot?.unavailableModules ?? [],

@@ -126,16 +126,16 @@ export default function DashboardPage() {
             icon: CreditCard,
           },
           {
-            title: 'Pagamentos confirmados',
-            value: formatCurrency(vm.paymentSummary.paidRevenue),
-            subtitle: `${vm.paymentSummary.paidLinks} pedidos pagos`,
+            title: 'Nova venda confirmada',
+            value: formatCurrency(vm.commercialRevenue.newSaleRevenue),
+            subtitle: `${vm.commercialRevenue.newSalePaymentsCount} pagamentos de venda`,
             icon: Wallet,
           },
           {
-            title: 'Pedidos em aberto',
-            value: vm.paymentSummary.activeLinks,
-            subtitle: `${vm.salesSummary.totalIntents} intenções de compra no período`,
-            icon: ShoppingCart,
+            title: 'Receita recuperada',
+            value: formatCurrency(vm.commercialRevenue.recoveredRevenue),
+            subtitle: `${vm.commercialRevenue.recoveredPaymentsCount} pagamentos de recovery`,
+            icon: Siren,
           },
           {
             title: 'Atendimento humano',

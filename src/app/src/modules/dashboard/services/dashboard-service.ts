@@ -3,6 +3,7 @@ import { contactsService } from '@/modules/contacts/services/contacts-service';
 import { messagingService } from '@/modules/messaging/services/messaging-service';
 import { recoveryService } from '@/modules/recovery/services/RecoveryService';
 import { salesService, type SalesMetricsSnapshot } from '@/modules/sales/services/sales-service';
+import { buildCommercialRevenueSnapshot } from '@/shared/commercial/commercial-metrics';
 import type {
   Contact,
   Conversation,
@@ -104,14 +105,25 @@ const defaultDashboardWidgets: DashboardWidget[] = [
     icon: 'CreditCard',
   },
   {
-    id: 'sales-paid-revenue',
+    id: 'sales-new-sale-revenue',
     moduleCode: 'CHECKOUT_WA',
-    title: 'Pagamentos confirmados',
+    title: 'Nova venda confirmada',
     kind: 'KPI',
     priority: 20,
-    queryKey: 'payments.paidRevenue',
-    profileKeys: ['commerce', 'recovery', 'default'],
-    subtitle: 'Receita efetivamente capturada',
+    queryKey: 'payments.newSaleRevenue',
+    profileKeys: ['commerce', 'default', 'service'],
+    subtitle: 'Receita paga em novos pedidos e checkouts',
+    icon: 'Wallet',
+  },
+  {
+    id: 'recovery-recovered-revenue',
+    moduleCode: 'Cobran\u00e7a_AUTO',
+    title: 'Receita recuperada',
+    kind: 'KPI',
+    priority: 30,
+    queryKey: 'payments.recoveredRevenue',
+    profileKeys: ['commerce', 'recovery', 'default', 'service'],
+    subtitle: 'Pagamentos confirmados em recovery',
     icon: 'Wallet',
   },
   {
@@ -290,9 +302,10 @@ function resolveLayoutProfile(tenant?: Tenant | null): DashboardLayoutProfile {
 const widgetPriorityByProfile: Record<string, Record<string, number>> = {
   commerce: {
     'sales-estimated-revenue': 10,
-    'sales-paid-revenue': 20,
-    'commerce-open-checkouts': 30,
-    'messaging-human-queue': 40,
+    'sales-new-sale-revenue': 20,
+    'recovery-recovered-revenue': 30,
+    'commerce-open-checkouts': 40,
+    'messaging-human-queue': 50,
   },
   scheduling: {
     'messaging-human-queue': 10,
@@ -302,15 +315,15 @@ const widgetPriorityByProfile: Record<string, Record<string, number>> = {
   },
   recovery: {
     'recovery-open-amount': 10,
-    'sales-paid-revenue': 20,
+    'recovery-recovered-revenue': 20,
     'messaging-human-queue': 30,
-    'commerce-open-checkouts': 40,
+    'sales-new-sale-revenue': 40,
   },
   service: {
     'contacts-total': 10,
     'messaging-human-queue': 20,
-    'sales-estimated-revenue': 30,
-    'sales-paid-revenue': 40,
+    'sales-new-sale-revenue': 30,
+    'recovery-recovered-revenue': 40,
   },
 };
 
@@ -420,6 +433,10 @@ export const dashboardService = {
       (total, item) => total + (item.amountDue ?? 0),
       0,
     );
+    const commercialRevenue = buildCommercialRevenueSnapshot(
+      snapshot.paymentSummary,
+      snapshot.recoveryCases,
+    );
 
     return {
       range,
@@ -434,6 +451,14 @@ export const dashboardService = {
         'payments.paidRevenue': {
           value: snapshot.paymentSummary.paidRevenue,
           helper: `${snapshot.paymentSummary.paidLinks} pagamentos confirmados`,
+        },
+        'payments.newSaleRevenue': {
+          value: commercialRevenue.newSaleRevenue,
+          helper: `${commercialRevenue.newSalePaymentsCount} vendas pagas`,
+        },
+        'payments.recoveredRevenue': {
+          value: commercialRevenue.recoveredRevenue,
+          helper: `${commercialRevenue.recoveredPaymentsCount} pagamentos de recovery`,
         },
         'payments.activeLinks': {
           value: snapshot.paymentSummary.activeLinks,

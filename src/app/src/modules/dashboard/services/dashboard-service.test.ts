@@ -29,7 +29,7 @@ describe('composeDashboardLayout', () => {
     const layout = composeDashboardLayout(makeTenant(['CHECKOUT_WA']));
 
     expect(layout.widgets.map((widget) => widget.id)).toContain('sales-estimated-revenue');
-    expect(layout.widgets.map((widget) => widget.id)).toContain('sales-paid-revenue');
+    expect(layout.widgets.map((widget) => widget.id)).toContain('sales-new-sale-revenue');
     expect(layout.widgets.every((widget) => widget.moduleCode === 'CHECKOUT_WA')).toBe(true);
   });
 
@@ -79,7 +79,7 @@ describe('composeDashboardLayout', () => {
       layout.widgets.filter((widget) => widget.kind === 'KPI').map((widget) => widget.id),
     ).toEqual([
       'sales-estimated-revenue',
-      'sales-paid-revenue',
+      'sales-new-sale-revenue',
       'commerce-open-checkouts',
       'messaging-human-queue',
     ]);

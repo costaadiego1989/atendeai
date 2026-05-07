@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { dashboardService } from '@/modules/dashboard/services/dashboard-service';
 import { salesPaymentLinksService } from '@/modules/sales/services/sales-payment-links-service';
+import { recoveryService } from '@/modules/recovery/services/RecoveryService';
+import { buildCommercialRevenueSnapshot } from '@/shared/commercial/commercial-metrics';
 import { useAuthStore } from '@/shared/stores/auth-store';
 
 type MetricsRange = '7d' | '30d' | '90d';
@@ -35,6 +37,12 @@ export function useSalesMetricsPageViewModel() {
       }),
   });
 
+  const recoveryCasesQuery = useQuery({
+    queryKey: ['sales-metrics-recovery-cases', tenant?.id, activeBranchId ?? 'tenant'],
+    enabled: Boolean(tenant?.id),
+    queryFn: () => recoveryService.listCases(tenant!.id, { branchId: activeBranchId ?? undefined }),
+  });
+
   const metrics = metricsQuery.data?.salesMetrics.metrics ?? [];
   const summary = metricsQuery.data?.salesMetrics.summary ?? {
     totalMessages: 0,
@@ -52,6 +60,8 @@ export function useSalesMetricsPageViewModel() {
     paidRevenue: 0,
   };
   const recentCharges = recentChargesQuery.data?.items ?? [];
+  const recoveryCases = recoveryCasesQuery.data ?? [];
+  const commercialRevenue = buildCommercialRevenueSnapshot(paymentSummary, recoveryCases);
 
   const chartData = useMemo(
     () =>
@@ -81,6 +91,10 @@ export function useSalesMetricsPageViewModel() {
   const paidShare =
     paymentSummary.estimatedRevenue > 0
       ? (paymentSummary.paidRevenue / paymentSummary.estimatedRevenue) * 100
+      : 0;
+  const newSaleShare =
+    paymentSummary.estimatedRevenue > 0
+      ? (commercialRevenue.newSaleRevenue / paymentSummary.estimatedRevenue) * 100
       : 0;
 
   const bestDay = useMemo(() => {
@@ -141,7 +155,7 @@ export function useSalesMetricsPageViewModel() {
       label: 'Pagos',
       count: paymentSummary.paidLinks,
       helper: `${paidShare.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% da receita ja foi capturada.`,
-      amount: paymentSummary.paidRevenue,
+      amount: commercialRevenue.newSaleRevenue,
     },
   ];
 
@@ -150,14 +164,17 @@ export function useSalesMetricsPageViewModel() {
     setRange,
     metricsQuery,
     recentChargesQuery,
+    recoveryCasesQuery,
     summary,
     paymentSummary,
+    commercialRevenue,
     recentCharges,
     chartData,
     intentRate,
     checkoutRate,
     averageTicket,
     paidShare,
+    newSaleShare,
     bestDay,
     statusCards,
     salesFunnel,

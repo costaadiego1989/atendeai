@@ -27,6 +27,8 @@ const iconMap = {
 const currencyMetricKeys = new Set([
   'sales.totalRevenue',
   'payments.paidRevenue',
+  'payments.newSaleRevenue',
+  'payments.recoveredRevenue',
   'recovery.openAmount',
 ]);
 
