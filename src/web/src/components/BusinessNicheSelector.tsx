@@ -66,7 +66,7 @@ const ModuleDetailModal = ({ module, open, onOpenChange }: { module: ModuleAPI |
         <DialogHeader className="mb-8 relative text-left">
           <div className="flex items-center gap-2 mb-6">
             <Sparkles className="w-4 h-4 text-[#00C59E]" />
-            <span className="text-[9px] font-black text-[#00C59E] uppercase tracking-[0.3em]">Documentação do Módulo</span>
+            <span className="text-[9px] font-black text-[#00C59E] uppercase tracking-[0.3em]">Módulo da operação</span>
           </div>
 
           <DialogTitle className="text-4xl font-black tracking-tighter text-white leading-tight mb-4">
@@ -80,7 +80,7 @@ const ModuleDetailModal = ({ module, open, onOpenChange }: { module: ModuleAPI |
 
         <div className="space-y-10">
           <div>
-            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-6">Principais Benefícios:</p>
+            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-6">Principais benefícios:</p>
             <div className="space-y-4">
               {benefits.map((benefit: string, i: number) => (
                 <div key={i} className="flex items-start gap-4 group">
@@ -206,11 +206,11 @@ export const BusinessNicheSelector: React.FC<{ onSignupClick: (planCode: string)
                     <span className="font-black text-[10px] tracking-[0.2em] uppercase">Setor Selecionado</span>
                   </div>
                   <h3 className="text-3xl md:text-5xl font-black text-white mb-8 leading-tight tracking-tighter text-pretty">
-                    Solução <span className="text-[#00C59E]">{selectedNiche?.displayName}</span>
+                    Operação <span className="text-[#00C59E]">{selectedNiche?.displayName}</span>
                   </h3>
 
                   <div className="mb-10">
-                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-6">Foco na Resolução de Problemas:</p>
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-6">Dores que esse nicho costuma resolver:</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedNiche.pains.map((pain, pi) => (
                         <div key={pi} className="flex items-start gap-4 text-sm font-semibold text-white/60 bg-white/5 p-4 rounded-2xl border border-white/5 group hover:border-[#00C59E]/20 transition-colors">
@@ -224,7 +224,7 @@ export const BusinessNicheSelector: React.FC<{ onSignupClick: (planCode: string)
                   </div>
 
                   <div>
-                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-6">Inteligência Elite Ativada:</p>
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-6">Módulos recomendados para a operação:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {selectedNiche?.modules.map((modCode, i) => {
                         const mod = modules.find(m => m.code === modCode);
@@ -263,9 +263,9 @@ export const BusinessNicheSelector: React.FC<{ onSignupClick: (planCode: string)
                   <div className="relative mb-10 text-left">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="h-1 w-8 bg-[#00C59E] rounded-full" />
-                      <span className="text-[10px] font-black text-[#00C59E] uppercase tracking-[0.2em]">Resumo Combo Elite</span>
+                      <span className="text-[10px] font-black text-[#00C59E] uppercase tracking-[0.2em]">Resumo comercial</span>
                     </div>
-                    <h4 className="text-2xl font-black text-white tracking-tighter">Assinatura <span className="text-[#00C59E]">Unificada</span></h4>
+                    <h4 className="text-2xl font-black text-white tracking-tighter">Plano base + <span className="text-[#00C59E]">módulos</span></h4>
                   </div>
 
                   <div className="space-y-6 mb-12">
@@ -290,7 +290,7 @@ export const BusinessNicheSelector: React.FC<{ onSignupClick: (planCode: string)
                       <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
                         <div className="flex items-center gap-3">
                           <Clock className="w-4 h-4 text-white/40" />
-                          <span className="text-[11px] font-bold text-white/60">Base: {selectedBase?.displayName.split(' (')[0]}</span>
+                          <span className="text-[11px] font-bold text-white/60">Plano base: {selectedBase?.displayName.split(' (')[0]}</span>
                         </div>
                         <span className="text-xs font-black text-white tracking-tighter italic tabular-nums">R$ {selectedBase?.monthlyPrice}</span>
                       </div>
@@ -298,7 +298,7 @@ export const BusinessNicheSelector: React.FC<{ onSignupClick: (planCode: string)
                       <div className="flex justify-between items-center bg-[#00C59E]/5 p-4 rounded-xl border border-[#00C59E]/10">
                         <div className="flex items-center gap-3">
                           <Sparkles className="w-4 h-4 text-[#00C59E]" />
-                          <span className="text-[11px] font-bold text-white/60">Especialista {selectedNiche?.displayName}</span>
+                          <span className="text-[11px] font-bold text-white/60">Módulos do nicho {selectedNiche?.displayName}</span>
                         </div>
                         <span className="text-xs font-black text-[#00C59E] tracking-tighter italic tabular-nums">+ R$ {modularPrice}</span>
                       </div>
@@ -306,13 +306,17 @@ export const BusinessNicheSelector: React.FC<{ onSignupClick: (planCode: string)
                   </div>
 
                   <div className="mt-auto pt-8 border-t border-white/5 text-left xl:text-center">
-                    <div className="flex items-baseline xl:justify-center gap-1 mb-8">
+                  <div className="flex items-baseline xl:justify-center gap-1 mb-8">
                       <span className="text-xs font-black italic text-[#00C59E]">R$</span>
                       <span className="text-7xl font-black tracking-tighter tabular-nums text-white">
                         {totalPrice}
                       </span>
                       <span className="text-sm font-bold text-white/30">/mês</span>
                     </div>
+
+                    <p className="mb-6 text-xs leading-relaxed text-white/45 xl:text-center">
+                      Estimativa considerando plano base mensal e módulos recomendados para este nicho.
+                    </p>
 
                     <button
                       onClick={() => onSignupClick(basePlanCode)}
@@ -325,12 +329,12 @@ export const BusinessNicheSelector: React.FC<{ onSignupClick: (planCode: string)
                     <div className="mt-8 flex items-center xl:justify-center gap-4 text-[9px] font-black uppercase tracking-widest text-white/20">
                       <div className="flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-[#00C59E]" />
-                        Setup Grátis
+                        Setup grátis
                       </div>
                       <div className="w-1 h-1 bg-white/10 rounded-full" />
                       <div className="flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-[#00C59E]" />
-                        7 Dias Free
+                        7 dias grátis
                       </div>
                     </div>
                   </div>
