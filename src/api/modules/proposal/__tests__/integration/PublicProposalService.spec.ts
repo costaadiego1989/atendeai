@@ -10,6 +10,11 @@ describe('PublicProposalService', () => {
       return undefined;
     },
   };
+  const tenantRepository = {
+    findById: jest.fn(async () => ({
+      companyName: { value: 'Empresa Teste' },
+    })),
+  };
 
   it('returns the public proposal by token', async () => {
     const repository = new InMemoryProposalRepository();
@@ -21,6 +26,7 @@ describe('PublicProposalService', () => {
 
     const service = new PublicProposalService(
       repository as any,
+      tenantRepository as any,
       publicLinks,
       {} as any,
       {} as any,
@@ -31,6 +37,9 @@ describe('PublicProposalService', () => {
     expect(response).toEqual(
       expect.objectContaining({
         id: proposal.id,
+        branding: expect.objectContaining({
+          companyName: 'Empresa Teste',
+        }),
         title: proposal.title,
         approvalStatus: 'PENDING',
       }),
@@ -70,12 +79,16 @@ describe('PublicProposalService', () => {
 
     const service = new PublicProposalService(
       repository as any,
+      tenantRepository as any,
       publicLinks,
       createSplitPaymentChargeUseCase as any,
       contacts as any,
     );
 
-    const response = await service.accept(token);
+    const response = await service.acceptWithSignature(token, {
+      signerName: 'Cliente Teste',
+      signatureDataUrl: 'data:image/png;base64,signature',
+    });
 
     expect(createSplitPaymentChargeUseCase.execute).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -105,6 +118,7 @@ describe('PublicProposalService', () => {
 
     const service = new PublicProposalService(
       repository as any,
+      tenantRepository as any,
       publicLinks,
       {} as any,
       {} as any,

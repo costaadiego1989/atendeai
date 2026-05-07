@@ -10,6 +10,10 @@ export interface PublicProposalItem {
 
 export interface PublicProposalRecord {
   id: string;
+  branding?: {
+    companyName: string;
+    logoUrl?: string | null;
+  };
   title: string;
   description?: string | null;
   benefits?: string | null;

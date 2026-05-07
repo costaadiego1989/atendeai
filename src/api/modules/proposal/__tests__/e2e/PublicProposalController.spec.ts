@@ -4,6 +4,7 @@ import request from 'supertest';
 import { Reflector } from '@nestjs/core';
 import { SuccessResponseInterceptor } from '@shared/infrastructure/http/interceptors/SuccessResponseInterceptor';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
+import { TENANT_REPOSITORY } from '@modules/tenant/domain/repositories/ITenantRepository';
 import { PublicProposalController } from '../../presentation/controllers/PublicProposalController';
 import { ProposalPublicLinkService } from '../../application/services/implementations/ProposalPublicLinkService';
 import { PublicProposalService } from '../../application/services/implementations/PublicProposalService';
@@ -16,6 +17,11 @@ describe('PublicProposalController', () => {
   let app: INestApplication;
   let repository: InMemoryProposalRepository;
   let publicLinks: ProposalPublicLinkService;
+  const tenantRepository = {
+    findById: jest.fn(async () => ({
+      companyName: { value: 'Empresa Publica' },
+    })),
+  };
 
   beforeAll(async () => {
     repository = new InMemoryProposalRepository();
@@ -33,18 +39,28 @@ describe('PublicProposalController', () => {
         { provide: 'IProposalRepository', useValue: repository },
         { provide: ProposalPublicLinkService, useValue: publicLinks },
         {
+          provide: TENANT_REPOSITORY,
+          useValue: tenantRepository,
+        },
+        {
           provide: PublicProposalService,
           useFactory: (
             repo: InMemoryProposalRepository,
+            tenants: typeof tenantRepository,
             links: ProposalPublicLinkService,
           ) =>
             new PublicProposalService(
               repo as any,
+              tenants as any,
               links,
               {} as any,
               {} as any,
             ),
-          inject: ['IProposalRepository', ProposalPublicLinkService],
+          inject: [
+            'IProposalRepository',
+            TENANT_REPOSITORY,
+            ProposalPublicLinkService,
+          ],
         },
       ],
     }).compile();
@@ -77,6 +93,9 @@ describe('PublicProposalController', () => {
     expect(response.body).toEqual(
       expect.objectContaining({
         id: proposal.id,
+        branding: expect.objectContaining({
+          companyName: 'Empresa Publica',
+        }),
         title: proposal.title,
         description: proposal.description,
         benefits: proposal.benefits,

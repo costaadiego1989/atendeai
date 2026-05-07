@@ -29,6 +29,7 @@ import { ProposalPublicLinkService } from './application/services/implementation
 import { PublicProposalService } from './application/services/implementations/PublicProposalService';
 import { ContactModule } from '../contact/contact.module';
 import { SalesModule } from '../sales/sales.module';
+import { TenantModule } from '../tenant/tenant.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SalesModule } from '../sales/sales.module';
     MessagingModule,
     ContactModule,
     SalesModule,
+    TenantModule,
   ],
   controllers: [ProposalController, PublicProposalController],
   providers: [

@@ -123,6 +123,15 @@ export default function PublicProposalPage() {
   const finalAmount = toSafeCurrencyValue(
     proposal?.finalAmount ?? proposal?.totalAmount,
   );
+  const companyName = toSafeText(
+    proposal?.branding?.companyName,
+    'Sua empresa',
+  );
+  const logoUrl =
+    typeof proposal?.branding?.logoUrl === 'string' &&
+    proposal.branding.logoUrl.trim()
+      ? proposal.branding.logoUrl.trim()
+      : null;
   const safeTitle = toSafeText(proposal?.title, 'Proposta comercial');
   const safeDescription = toSafeText(
     proposal?.description,
@@ -162,7 +171,7 @@ export default function PublicProposalPage() {
     context.lineCap = 'round';
     context.lineJoin = 'round';
     context.lineWidth = 2.5;
-    context.strokeStyle = '#f8fafc';
+    context.strokeStyle = '#ffffff';
     context.fillStyle = '#0d1625';
     context.fillRect(0, 0, canvas.width, canvas.height);
   }, []);
@@ -337,6 +346,30 @@ export default function PublicProposalPage() {
         <div className="mb-8 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-[0_24px_80px_rgba(8,15,28,0.45)] backdrop-blur">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_360px]">
             <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                {logoUrl ? (
+                  <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                    <img
+                      src={logoUrl}
+                      alt={companyName}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-14 min-w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-3 text-center text-xs font-semibold uppercase tracking-[0.22em] text-white/80">
+                    {companyName}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-[0.28em] text-white/35">
+                    Empresa
+                  </p>
+                  <p className="truncate text-base font-semibold text-white/85">
+                    {companyName}
+                  </p>
+                </div>
+              </div>
+
               <Badge className="w-fit border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.32em] text-emerald-200">
                 Contrato digital
               </Badge>

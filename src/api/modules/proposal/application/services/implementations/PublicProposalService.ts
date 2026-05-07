@@ -8,6 +8,10 @@ import { CONTACT_FACADE, IContactFacade } from '@modules/contact/application/fac
 import { CreateSplitPaymentChargeUseCase } from '@modules/sales/application/use-cases/CreateSplitPaymentChargeUseCase';
 import { IProposalRepository } from '@modules/proposal/domain/ports/IProposalRepository';
 import { Proposal } from '@modules/proposal/domain/entities/Proposal';
+import {
+  ITenantRepository,
+  TENANT_REPOSITORY,
+} from '@modules/tenant/domain/repositories/ITenantRepository';
 import { ProposalPublicLinkService } from './ProposalPublicLinkService';
 import {
   normalizeProposalMetadata,
@@ -16,6 +20,10 @@ import {
 
 type PublicProposalResponse = {
   id: string;
+  branding: {
+    companyName: string;
+    logoUrl?: string | null;
+  };
   title: string;
   description?: string | null;
   benefits?: string | null;
@@ -50,6 +58,8 @@ export class PublicProposalService {
   constructor(
     @Inject('IProposalRepository')
     private readonly proposalRepository: IProposalRepository,
+    @Inject(TENANT_REPOSITORY)
+    private readonly tenantRepository: ITenantRepository,
     private readonly publicLinks: ProposalPublicLinkService,
     private readonly createSplitPaymentChargeUseCase: CreateSplitPaymentChargeUseCase,
     @Inject(CONTACT_FACADE)
@@ -172,11 +182,24 @@ export class PublicProposalService {
     return proposal;
   }
 
-  private toPublicResponse(proposal: Proposal): PublicProposalResponse {
+  private async toPublicResponse(proposal: Proposal): Promise<PublicProposalResponse> {
     const metadata = normalizeProposalMetadata(proposal.metadata);
+    const tenant = await this.tenantRepository.findById(proposal.tenantId);
+    const brandingSource =
+      metadata.branding && typeof metadata.branding === 'object'
+        ? (metadata.branding as Record<string, unknown>)
+        : null;
+    const logoUrl =
+      typeof brandingSource?.logoUrl === 'string' && brandingSource.logoUrl.trim()
+        ? brandingSource.logoUrl.trim()
+        : null;
 
     return {
       id: proposal.id,
+      branding: {
+        companyName: tenant?.companyName.value ?? 'Sua empresa',
+        logoUrl,
+      },
       title: proposal.title,
       description: proposal.description,
       benefits: proposal.benefits,
