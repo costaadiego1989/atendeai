@@ -1,35 +1,76 @@
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { useRef } from "react";
-import { BrainCircuit, Search, CreditCard, BarChart3, ArrowRight, MessageSquare, Target, Receipt, TrendingUp, Package, Calendar } from "lucide-react";
+import {
+  BrainCircuit,
+  Target,
+  Receipt,
+  TrendingUp,
+  MessageSquare,
+  Package,
+  Calendar,
+  CreditCard,
+  ShoppingCart,
+  Scissors,
+  Search,
+  BarChart3,
+} from "lucide-react";
 
 const pillars = [
   {
     icon: Package,
     accent: MessageSquare,
     title: "Varejo & Estoque",
-    desc: "Perfeito para lojas físicas ou digitais. A IA sincroniza seu estoque em tempo real, responde disponibilidade, sugere produtos complementares e fecha a venda direto no chat.",
-    highlights: ["Sincronização Realtime", "Upsell Inteligente", "Reserva de Itens"],
+    desc: "Para operações que precisam responder catálogo, disponibilidade, carrinho, pagamento e entrega com mais contexto comercial.",
+    highlights: ["Catálogo e estoque", "Checkout conversacional", "Entrega e frete"],
+  },
+  {
+    icon: ShoppingCart,
+    accent: TrendingUp,
+    title: "E-commerce, Food & Delivery",
+    desc: "Para quem vende com pedido, carrinho, cupom, entrega, frete e retomada de abandono sem perder o cliente na conversa.",
+    highlights: ["Carrinho abandonado", "Cupons e promoções", "Pedidos e entrega"],
   },
   {
     icon: BrainCircuit,
     accent: Target,
-    title: "Serviços & Catálogo",
-    desc: "Ideal para prestadores de serviços e empresas com catálogos complexos. Qualifique leads, explique propostas e orquestre o atendimento com tom profissional e guardrails rígidos.",
-    highlights: ["Qualificação Avançada", "Catálogo Dinâmico", "Guardrails CRM"],
+    title: "Serviços consultivos e B2B",
+    desc: "Para negócios que precisam qualificar demanda, gerar propostas, acompanhar retorno comercial e organizar pipeline com mais clareza.",
+    highlights: ["Qualificação de leads", "Orçamentos e propostas", "Motor de prospecção"],
   },
   {
     icon: Calendar,
     accent: Receipt,
     title: "Agendamento Online",
-    desc: "Para clínicas, escritórios e consultórios. A IA consulta sua agenda, marca horários, envia lembretes e evita No-Show, tudo de forma autônoma e humanizada.",
-    highlights: ["Gestão de Agenda", "Lembretes Automáticos", "Zero Atrito"],
+    desc: "Para clínicas, studios e operações por horário. A plataforma consulta agenda, reserva, confirma, lembra e reduz faltas com menos atrito.",
+    highlights: ["Agenda profissional", "Lembretes e confirmações", "Pagamento antecipado"],
+  },
+  {
+    icon: Scissors,
+    accent: Calendar,
+    title: "Beleza, Pet & Studios",
+    desc: "Para serviços recorrentes por profissional, unidade e horário, com foco em confirmação, retorno e venda de recorrência.",
+    highlights: ["Profissionais", "Recorrência", "Redução de no-show"],
   },
   {
     icon: CreditCard,
     accent: TrendingUp,
-    title: "Saúde Financeira",
-    desc: "Recuperação de carrinhos abandonados, boletos e PIX com fluxos de abordagem baseados em comportamento. Transforme dívidas em receita com negociação automática.",
-    highlights: ["Recovery de Checkout", "Vendas Ativas", "Links Direct-to-Pay"],
+    title: "Cobrança e Recovery",
+    desc: "Para operações que precisam cobrar, negociar, acompanhar promessas e medir recuperação de receita com mais governança.",
+    highlights: ["Carteira de cobrança", "Régua de cobrança", "Links de pagamento"],
+  },
+  {
+    icon: Search,
+    accent: Target,
+    title: "Prospecção e Qualificação",
+    desc: "Para equipes que precisam gerar oportunidades, qualificar demanda e manter histórico comercial antes da proposta.",
+    highlights: ["Motor de prospecção", "Qualificação de leads", "Pipeline comercial"],
+  },
+  {
+    icon: BarChart3,
+    accent: Receipt,
+    title: "Gestão, Relatórios e Integrações",
+    desc: "Para acompanhar operação, equipes, filiais, canais e módulos com mais controle à medida que a empresa cresce.",
+    highlights: ["Roteamento de equipe", "Relatórios avançados", "Hub de integrações"],
   },
 ];
 
@@ -64,10 +105,10 @@ const PlatformSection = () => {
             Plataforma completa
           </div>
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter mb-4">
-            Uma <span className="text-gradient-primary">máquina de vendas</span> completa
+            Uma <span className="text-gradient-primary">operação comercial</span> completa
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Atendimento, prospecção, cobrança e conversão, conectados em um único fluxo inteligente.
+            Atendimento, agenda, propostas, pagamento, cobrança, prospecção e operação conectados em um único fluxo.
           </p>
         </motion.div>
 
