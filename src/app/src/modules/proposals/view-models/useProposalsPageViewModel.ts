@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { contactsService } from '@/modules/contacts/services/contacts-service';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
@@ -199,6 +200,7 @@ function getProposalPdfFileName(proposal: ProposalRecord) {
 }
 
 export function useProposalsPageViewModel() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const tenant = useAuthStore((state) => state.tenant);
   const user = useAuthStore((state) => state.user);
@@ -431,6 +433,32 @@ export function useProposalsPageViewModel() {
         title: 'Falha ao gerar PDF',
         description: getFriendlyErrorMessage(error, {
           fallbackMessage: 'Não foi possível gerar o PDF agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: (proposal: ProposalRecord) => proposalsService.sendProposalToConversation(proposal.id),
+    onSuccess: async (result, proposal) => {
+      await Promise.all([
+        invalidateProposals(),
+        queryClient.invalidateQueries({ queryKey: ['conversations', tenant?.id], exact: false }),
+      ]);
+
+      toast({
+        title: 'Proposta enviada na conversa',
+        description: 'A mensagem foi disparada automaticamente para o contato associado.',
+      });
+
+      navigate(`/app/conversations/${result.conversationId}`);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao enviar proposta',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível enviar a proposta agora.',
         }),
         variant: 'destructive',
       });
@@ -680,6 +708,9 @@ export function useProposalsPageViewModel() {
       }
 
       pdfMutation.mutate(proposal);
+    },
+    sendProposal(proposal: ProposalRecord) {
+      sendMutation.mutate(proposal);
     },
     confirmSchedule() {
       scheduleMutation.mutate();

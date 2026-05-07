@@ -6,40 +6,31 @@ import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/formatters';
 import type { ProposalRecord } from '../types';
 import { ProposalActionsMenu } from './ProposalActionsMenu';
+import {
+  getProposalDisplayTotal,
+  getProposalFinalPrice,
+} from '../utils/proposal-finance';
+import {
+  getProposalCommercialJourney,
+  getProposalJourneyToneClassName,
+} from '../utils/proposal-commercial';
 
 type Props = {
   proposal: ProposalRecord | null;
   contactNameMap: Record<string, string>;
   onEdit: (proposal: ProposalRecord) => void;
   onGeneratePdf: (proposal: ProposalRecord) => void;
+  onSend: (proposal: ProposalRecord) => void;
   onSchedule: (proposal: ProposalRecord) => void;
   onDelete: (proposal: ProposalRecord) => void;
 };
-
-function getFinalPrice(metadata: ProposalRecord['metadata']) {
-  if (!metadata || typeof metadata !== 'object') {
-    return null;
-  }
-
-  const raw = (metadata as Record<string, unknown>).finalPrice;
-
-  if (typeof raw === 'number' && Number.isFinite(raw)) {
-    return raw;
-  }
-
-  if (typeof raw === 'string') {
-    const parsed = Number(raw);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  return null;
-}
 
 export function ProposalDetailPanel({
   proposal,
   contactNameMap,
   onEdit,
   onGeneratePdf,
+  onSend,
   onSchedule,
   onDelete,
 }: Props) {
@@ -50,7 +41,7 @@ export function ProposalDetailPanel({
           <EmptyState
             icon={FileText}
             title="Selecione uma proposta"
-            description="Abra um item da lista para ver os detalhes, editar, gerar PDF ou agendar o envio."
+            description="Abra um item da lista para ver os detalhes, editar, gerar PDF ou acompanhar o envio comercial."
           />
         </CardContent>
       </Card>
@@ -58,8 +49,9 @@ export function ProposalDetailPanel({
   }
 
   const contactLabel = contactNameMap[proposal.contactId] ?? proposal.contactId;
-  const finalPrice = getFinalPrice(proposal.metadata);
-  const effectiveTotal = finalPrice ?? proposal.totalAmount;
+  const finalPrice = getProposalFinalPrice(proposal);
+  const effectiveTotal = getProposalDisplayTotal(proposal);
+  const journey = getProposalCommercialJourney(proposal);
 
   return (
     <Card className="glass-card h-full overflow-hidden">
@@ -80,6 +72,7 @@ export function ProposalDetailPanel({
               proposal={proposal}
               onEdit={onEdit}
               onGeneratePdf={onGeneratePdf}
+              onSend={onSend}
               onSchedule={onSchedule}
               onDelete={onDelete}
             />
@@ -101,41 +94,54 @@ export function ProposalDetailPanel({
       <CardContent className="space-y-5 p-5">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-3xl border border-border/60 bg-background/60 p-5 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-              Valor
-            </p>
-            <div className="mt-3 flex items-end gap-3">
-              <p className="text-3xl font-bold text-foreground">
-                {formatCurrency(effectiveTotal) ?? 'R$ 0,00'}
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+                Valor
               </p>
-              {finalPrice ? (
-                <Badge variant="outline" className="rounded-full px-2.5 py-1 text-[11px]">
-                  Preço final
+              {finalPrice !== null ? (
+                <Badge variant="outline" className="shrink-0 rounded-full px-2.5 py-1 text-[11px]">
+                  Preco final
                 </Badge>
               ) : null}
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {proposal.items.length} item(s) compõem esta proposta
-            </p>
-            {finalPrice ? (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Total calculado: {formatCurrency(proposal.totalAmount) ?? 'R$ 0,00'}
+            <div className="mt-3 space-y-1">
+              <p className="text-3xl font-bold text-foreground">
+                {formatCurrency(effectiveTotal) ?? 'R$ 0,00'}
               </p>
-            ) : null}
+              <p className="text-sm text-muted-foreground">
+                {proposal.items.length} item(s) compoem esta proposta
+              </p>
+              {finalPrice !== null ? (
+                <p className="text-xs text-muted-foreground">
+                  Base calculada: {formatCurrency(proposal.totalAmount) ?? 'R$ 0,00'}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="rounded-3xl border border-border/60 bg-background/60 p-5 shadow-sm">
             <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-              Envio
+              Jornada comercial
             </p>
-            <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <p>PDF: {proposal.pdfUrl ? 'Disponível' : 'Ainda não gerado'}</p>
-              <p>Agendamento: {proposal.scheduledAt ? 'Programado' : 'Não programado'}</p>
+            <div className="mt-3 space-y-3 text-sm text-muted-foreground">
+              {[journey.contract, journey.approval, journey.payment].map((step) => (
+                <div key={step.label} className="flex items-center justify-between gap-3">
+                  <span>{step.title}</span>
+                  <Badge
+                    variant="outline"
+                    className={`rounded-full px-2.5 py-1 text-[11px] ${getProposalJourneyToneClassName(step.tone)}`}
+                  >
+                    {step.label}
+                  </Badge>
+                </div>
+              ))}
+              <p>Agendamento: {proposal.scheduledAt ? 'Programado' : 'Nao programado'}</p>
               <p>
                 Validade:{' '}
                 {proposal.validUntil ? formatDate(proposal.validUntil) ?? 'Sem data' : 'Sem validade'}
               </p>
             </div>
+            <p className="mt-4 text-xs leading-5 text-muted-foreground">{journey.summary}</p>
           </div>
         </div>
 
@@ -144,7 +150,7 @@ export function ProposalDetailPanel({
             {proposal.description ? (
               <div className="rounded-3xl border border-border/60 bg-background/60 p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                  Descrição
+                  Descricao
                 </p>
                 <p className="mt-3 text-sm leading-6 text-foreground/90">{proposal.description}</p>
               </div>
@@ -152,7 +158,7 @@ export function ProposalDetailPanel({
             {proposal.benefits ? (
               <div className="rounded-3xl border border-border/60 bg-background/60 p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                  Benefícios
+                  Beneficios
                 </p>
                 <p className="mt-3 text-sm leading-6 text-foreground/90">{proposal.benefits}</p>
               </div>
@@ -181,7 +187,7 @@ export function ProposalDetailPanel({
                       <p className="text-sm text-muted-foreground">{item.description}</p>
                     ) : null}
                     <p className="text-xs text-muted-foreground">
-                      Quantidade: {item.quantity} | Valor unitário:{' '}
+                      Quantidade: {item.quantity} | Valor unitario:{' '}
                       {formatCurrency(item.unitPrice) ?? 'R$ 0,00'}
                     </p>
                   </div>
@@ -197,18 +203,27 @@ export function ProposalDetailPanel({
         <div className="rounded-3xl border border-primary/15 bg-primary/5 p-5">
           <p className="text-sm font-semibold text-foreground">Fluxo de envio automatizado</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Quando você agenda esta proposta, o worker de entrega dispara a mensagem para o contato
-            com o link do PDF no horário escolhido.
+            O envio principal desta proposta acontece pela conversa com um link do contrato digital.
+            Depois do aceite, o cliente segue para o pagamento e o webhook confirma a conclusao no chat.
           </p>
-          {proposal.pdfUrl ? (
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
-              className="mt-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-              onClick={() => onGeneratePdf(proposal)}
+              className="inline-flex items-center rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
+              onClick={() => onSend(proposal)}
             >
-              Baixar PDF gerado
+              Enviar na conversa
             </button>
-          ) : null}
+            {proposal.pdfUrl ? (
+              <button
+                type="button"
+                className="inline-flex items-center rounded-xl border border-border/60 bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
+                onClick={() => onGeneratePdf(proposal)}
+              >
+                Baixar PDF gerado
+              </button>
+            ) : null}
+          </div>
         </div>
       </CardContent>
     </Card>

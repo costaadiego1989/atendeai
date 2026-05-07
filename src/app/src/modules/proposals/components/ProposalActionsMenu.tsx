@@ -1,4 +1,4 @@
-import { Download, Eye, MoreHorizontal, Pencil, Send, Trash2 } from 'lucide-react';
+import { CalendarClock, Download, Eye, MoreHorizontal, Pencil, Send, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ type Props = {
   onOpen?: (proposal: ProposalRecord) => void;
   onEdit: (proposal: ProposalRecord) => void;
   onGeneratePdf: (proposal: ProposalRecord) => void;
+  onSend: (proposal: ProposalRecord) => void;
   onSchedule: (proposal: ProposalRecord) => void;
   onDelete: (proposal: ProposalRecord) => void;
 };
@@ -23,6 +24,7 @@ export function ProposalActionsMenu({
   onOpen,
   onEdit,
   onGeneratePdf,
+  onSend,
   onSchedule,
   onDelete,
 }: Props) {
@@ -54,8 +56,12 @@ export function ProposalActionsMenu({
           <Download className="h-4 w-4" />
           Baixar PDF
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onSchedule(proposal)} className="gap-2">
+        <DropdownMenuItem onSelect={() => onSend(proposal)} className="gap-2">
           <Send className="h-4 w-4" />
+          Enviar na conversa
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onSchedule(proposal)} className="gap-2">
+          <CalendarClock className="h-4 w-4" />
           Agendar
         </DropdownMenuItem>
         <DropdownMenuSeparator />

@@ -41,6 +41,13 @@ export interface ProposalPayload {
 
 export interface ProposalUpdatePayload extends Partial<ProposalPayload> {}
 
+export interface ProposalSendResult {
+  success: boolean;
+  conversationId: string;
+  messageId: string;
+  publicUrl: string;
+}
+
 function toIsoString(value?: string | null) {
   if (!value) {
     return undefined;
@@ -63,6 +70,29 @@ function normalizeItem(item: ProposalItemRecord & { subtotal?: number }): Propos
   };
 }
 
+function normalizeMetadata(metadata: unknown): Record<string, unknown> | null {
+  if (!metadata) {
+    return null;
+  }
+
+  if (typeof metadata === 'string') {
+    try {
+      const parsed = JSON.parse(metadata);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+
+  return null;
+}
+
 function normalizeProposal(raw: ProposalApiResponse): ProposalRecord {
   return {
     id: raw.id,
@@ -79,7 +109,7 @@ function normalizeProposal(raw: ProposalApiResponse): ProposalRecord {
     scheduledAt: toIsoString(raw.scheduledAt) ?? null,
     pdfUrl: raw.pdfUrl ?? null,
     notes: raw.notes ?? null,
-    metadata: raw.metadata ?? null,
+    metadata: normalizeMetadata(raw.metadata),
     createdAt: toIsoString(raw.createdAt) ?? new Date().toISOString(),
     updatedAt: toIsoString(raw.updatedAt) ?? new Date().toISOString(),
   };
@@ -157,6 +187,10 @@ export const proposalsService = {
 
   async generateProposalPdf(proposalId: string): Promise<{ success: boolean; pdfUrl?: string }> {
     return apiClient.post(`/proposals/${proposalId}/pdf`);
+  },
+
+  async sendProposalToConversation(proposalId: string): Promise<ProposalSendResult> {
+    return apiClient.post(`/proposals/${proposalId}/send`);
   },
 
   async scheduleProposalDelivery(

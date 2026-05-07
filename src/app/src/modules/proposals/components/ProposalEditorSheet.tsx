@@ -10,6 +10,7 @@ import { formatCurrencyInput, formatPhone } from '@/shared/lib/masks';
 import { TagInput } from '@/shared/ui/TagInput';
 import type { Contact } from '@/shared/types';
 import type { ProposalFormState, ProposalItemDraft } from '../types';
+import { getProposalDisplayTotal } from '../utils/proposal-finance';
 
 type Props = {
   open: boolean;
@@ -41,11 +42,6 @@ function computeFormTotal(form: ProposalFormState) {
   }, 0);
 }
 
-function parseCurrencyField(value: string) {
-  const digits = value.replace(/\D/g, '');
-  return digits ? Number(digits) / 100 : 0;
-}
-
 export function ProposalEditorSheet({
   open,
   mode,
@@ -68,9 +64,11 @@ export function ProposalEditorSheet({
   onSubmit,
 }: Props) {
   const total = computeFormTotal(form);
-  const finalPriceValue = parseCurrencyField(form.finalPrice);
-  const hasFinalPriceOverride = finalPriceValue > 0;
-  const displayTotal = hasFinalPriceOverride ? finalPriceValue : total;
+  const hasFinalPriceOverride = Boolean(form.finalPrice.trim());
+  const displayTotal = getProposalDisplayTotal({
+    metadata: hasFinalPriceOverride ? { finalPrice: form.finalPrice } : null,
+    totalAmount: total,
+  });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -313,14 +311,14 @@ export function ProposalEditorSheet({
           </div>
 
           <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
-            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-semibold text-foreground">Resumo da proposta</p>
                 <p className="text-sm text-muted-foreground">
                   O total abaixo é calculado em tempo real pelos itens preenchidos.
                 </p>
               </div>
-              <div className="text-right">
+              <div className="flex flex-col items-start gap-1 text-left lg:items-end lg:text-right">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   {hasFinalPriceOverride ? 'Preço final' : 'Total calculado'}
                 </p>

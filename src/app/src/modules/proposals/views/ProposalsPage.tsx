@@ -95,13 +95,14 @@ export default function ProposalsPage() {
               selectedId={vm.selectedProposalId}
               isLoading={vm.proposalsQuery.isLoading}
               isError={vm.proposalsQuery.isError}
-              contactNameMap={vm.contactLabelMap}
-              onSelect={vm.selectProposal}
-              onEdit={vm.openEditEditor}
-              onGeneratePdf={vm.generatePdf}
-              onSchedule={vm.scheduleProposal}
-              onDelete={vm.requestDelete}
-            />
+            contactNameMap={vm.contactLabelMap}
+            onSelect={vm.selectProposal}
+            onEdit={vm.openEditEditor}
+            onGeneratePdf={vm.generatePdf}
+            onSend={vm.sendProposal}
+            onSchedule={vm.scheduleProposal}
+            onDelete={vm.requestDelete}
+          />
           </div>
         </Card>
 
@@ -110,6 +111,7 @@ export default function ProposalsPage() {
           contactNameMap={vm.contactLabelMap}
           onEdit={vm.openEditEditor}
           onGeneratePdf={vm.generatePdf}
+          onSend={vm.sendProposal}
           onSchedule={vm.scheduleProposal}
           onDelete={vm.requestDelete}
         />

@@ -7,6 +7,14 @@ import { TableSkeleton } from '@/shared/ui/Skeletons';
 import { formatCurrency, formatDateTime } from '@/shared/lib/formatters';
 import type { ProposalRecord } from '../types';
 import { ProposalActionsMenu } from './ProposalActionsMenu';
+import {
+  getProposalDisplayTotal,
+  getProposalFinalPrice,
+} from '../utils/proposal-finance';
+import {
+  getProposalCommercialJourney,
+  getProposalJourneyToneClassName,
+} from '../utils/proposal-commercial';
 
 type Props = {
   items: ProposalRecord[];
@@ -17,17 +25,10 @@ type Props = {
   onSelect: (proposalId: string) => void;
   onEdit: (proposal: ProposalRecord) => void;
   onGeneratePdf: (proposal: ProposalRecord) => void;
+  onSend: (proposal: ProposalRecord) => void;
   onSchedule: (proposal: ProposalRecord) => void;
   onDelete: (proposal: ProposalRecord) => void;
 };
-
-function hasFinalPrice(proposal: ProposalRecord) {
-  if (!proposal.metadata || typeof proposal.metadata !== 'object') {
-    return false;
-  }
-
-  return Object.prototype.hasOwnProperty.call(proposal.metadata, 'finalPrice');
-}
 
 export function ProposalList({
   items,
@@ -38,6 +39,7 @@ export function ProposalList({
   onSelect,
   onEdit,
   onGeneratePdf,
+  onSend,
   onSchedule,
   onDelete,
 }: Props) {
@@ -74,6 +76,9 @@ export function ProposalList({
       {items.map((proposal) => {
         const selected = proposal.id === selectedId;
         const contactLabel = contactNameMap[proposal.contactId] ?? proposal.contactId;
+        const finalPrice = getProposalFinalPrice(proposal);
+        const effectiveTotal = getProposalDisplayTotal(proposal);
+        const journey = getProposalCommercialJourney(proposal);
 
         return (
           <Card
@@ -101,6 +106,17 @@ export function ProposalList({
                           PDF pronto
                         </Badge>
                       ) : null}
+                      {[journey.contract, journey.approval, journey.payment]
+                        .filter((step) => step.visible)
+                        .map((step) => (
+                          <Badge
+                            key={step.label}
+                            variant="outline"
+                            className={`rounded-full px-2.5 py-1 text-[11px] ${getProposalJourneyToneClassName(step.tone)}`}
+                          >
+                            {step.label}
+                          </Badge>
+                        ))}
                       {proposal.scheduledAt ? (
                         <Badge variant="outline" className="rounded-full px-2.5 py-1 text-[11px]">
                           Agendada
@@ -134,17 +150,20 @@ export function ProposalList({
                         Sem descrição cadastrada para esta proposta.
                       </p>
                     )}
+                    <p className="text-xs text-muted-foreground">{journey.summary}</p>
                   </div>
 
-                  <div className="flex shrink-0 flex-col items-start gap-2 lg:items-end">
+                  <div className="flex shrink-0 flex-col items-start gap-2 lg:items-end lg:pl-6">
                     <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                      Total da proposta
+                      {finalPrice !== null ? 'Preço final' : 'Total da proposta'}
                     </p>
                     <p className="text-2xl font-bold text-foreground">
-                      {formatCurrency(proposal.totalAmount) ?? 'R$ 0,00'}
+                      {formatCurrency(effectiveTotal) ?? 'R$ 0,00'}
                     </p>
-                    {hasFinalPrice(proposal) ? (
-                      <p className="text-xs text-muted-foreground">Preço final salvo no registro</p>
+                    {finalPrice !== null ? (
+                      <p className="text-xs text-muted-foreground">
+                        Base calculada: {formatCurrency(proposal.totalAmount) ?? 'R$ 0,00'}
+                      </p>
                     ) : null}
                   </div>
                 </div>
@@ -161,6 +180,7 @@ export function ProposalList({
                 onOpen={onSelect}
                 onEdit={onEdit}
                 onGeneratePdf={onGeneratePdf}
+                onSend={onSend}
                 onSchedule={onSchedule}
                 onDelete={onDelete}
               />
