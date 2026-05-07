@@ -9,6 +9,7 @@ import { formatCurrency } from '@/shared/lib/formatters';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Contact } from '@/shared/types';
 import { proposalsService } from '../services/proposals-service';
+import { getProposalPublicPath } from '../utils/proposal-finance';
 import {
   createProposalFormState,
   createProposalItemDraft,
@@ -465,6 +466,21 @@ export function useProposalsPageViewModel() {
     },
   });
 
+  function openPublicProposal(proposal: ProposalRecord) {
+    const publicPath = getProposalPublicPath(proposal);
+
+    if (!publicPath) {
+      toast({
+        title: 'Contrato ainda indisponivel',
+        description: 'Envie a proposta ou gere o acesso publico antes de abrir esta pagina.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    navigate(publicPath);
+  }
+
   const scheduleMutation = useMutation({
     mutationFn: () => {
       if (!scheduleTarget) {
@@ -712,6 +728,7 @@ export function useProposalsPageViewModel() {
     sendProposal(proposal: ProposalRecord) {
       sendMutation.mutate(proposal);
     },
+    openPublicProposal,
     confirmSchedule() {
       scheduleMutation.mutate();
     },
