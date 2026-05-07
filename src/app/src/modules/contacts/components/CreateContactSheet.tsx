@@ -111,7 +111,7 @@ export function CreateContactSheet({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={onSubmit} disabled={isPending}>
+          <Button type="button" onClick={onSubmit} disabled={isPending}>
             Salvar contato
           </Button>
         </div>
