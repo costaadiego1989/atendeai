@@ -345,6 +345,13 @@ export const BILLING_NICHE_SEED = [
     pains: ['qualificar demanda', 'gerar orcamento', 'acompanhar retorno'],
     modules: ['LEAD_QUALIFICATION', 'PROPOSALS_QUOTES', 'PROSPECTING_ENGINE', 'TEAM_ROUTING', 'ANALYTICS_PRO'],
   },
+  {
+    code: 'B2B',
+    displayName: 'Empresas B2B',
+    description: 'Vendas complexas, propostas personalizadas e ciclo de venda longo.',
+    pains: ['gerar propostas rapidas', 'acompanhar aprovacao', 'organizar pipeline b2b'],
+    modules: ['PROPOSALS_QUOTES', 'LEAD_QUALIFICATION', 'PROSPECTING_ENGINE', 'TEAM_ROUTING', 'ANALYTICS_PRO'],
+  },
 ] as const;
 
 export function buildBillingCatalogSeedSql(): Prisma.Sql[] {
