@@ -131,19 +131,19 @@ export function PaymentLinksPage() {
               {!vm.isTenantReadyForPayments ? (
                 <div className="flex flex-col gap-3 pt-2">
                   {!vm.hasCompanyAddress && (
-                    <p className="text-xs font-medium text-destructive bg-destructive/5 px-3 py-1.5 rounded-full border border-destructive/20 w-fit">
+                    <div className="w-fit rounded-2xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-100">
                       Endereço pendente: Complete CEP, Rua e Bairro em Dados da Empresa.
-                    </p>
+                    </div>
                   )}
                   {!vm.hasOwnerBirthDate && (
-                    <p className="text-xs font-medium text-destructive bg-destructive/5 px-3 py-1.5 rounded-full border border-destructive/20 w-fit">
+                    <div className="w-fit rounded-2xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-100">
                       Responsável pendente: A data de nascimento é obrigatória para habilitar taxas de repasse.
-                    </p>
+                    </div>
                   )}
                   <Button
                     size="sm"
                     variant="link"
-                    className="text-primary h-auto p-0 font-bold w-fit"
+                    className="h-auto w-fit p-0 font-bold text-primary"
                     onClick={() => navigate('/app/settings/company')}
                   >
                     Ir para Dados da empresa/responsável
