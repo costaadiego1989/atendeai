@@ -14,11 +14,16 @@ export interface PublicProposalRecord {
   description?: string | null;
   benefits?: string | null;
   items: PublicProposalItem[];
-  totalAmount: number;
-  finalAmount: number;
+  totalAmount?: number | null;
+  finalAmount?: number | null;
   validUntil?: string | null;
   status: string;
   approvalStatus: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  signature?: {
+    signerName?: string | null;
+    signedAt?: string | null;
+    hasSignature: boolean;
+  };
   payment?: {
     id?: string;
     paymentId?: string;
@@ -51,9 +56,16 @@ export const publicProposalsService = {
     return readJson<PublicProposalRecord>(response);
   },
 
-  async accept(token: string): Promise<PublicProposalRecord> {
+  async accept(
+    token: string,
+    payload: { signerName: string; signatureDataUrl: string },
+  ): Promise<PublicProposalRecord> {
     const response = await fetch(`${BASE_URL}/public/proposals/${token}/accept`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
       credentials: 'omit',
     });
 

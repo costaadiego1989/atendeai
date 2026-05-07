@@ -1,5 +1,31 @@
 import type { ProposalRecord } from '../types';
 
+function normalizeUrl(value: string) {
+  return value.replace(/\/$/, '');
+}
+
+function resolvePublicAppBaseUrl() {
+  const explicitUrl = (import.meta.env.VITE_PUBLIC_APP_URL as string | undefined)?.trim();
+
+  if (explicitUrl) {
+    return normalizeUrl(explicitUrl);
+  }
+
+  if (import.meta.env.DEV) {
+    if (typeof window !== 'undefined') {
+      return normalizeUrl(window.location.origin);
+    }
+
+    return 'http://localhost:8080';
+  }
+
+  if (typeof window !== 'undefined') {
+    return normalizeUrl(window.location.origin);
+  }
+
+  return '';
+}
+
 function parseNumberValue(value: unknown): number | null {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value;
@@ -70,6 +96,42 @@ export function getProposalPublicLink(
   const url = publicAccess?.publicUrl;
 
   return typeof url === 'string' && url.trim() ? url : null;
+}
+
+export function getProposalPublicToken(
+  proposal: Pick<ProposalRecord, 'metadata'>,
+): string | null {
+  const publicUrl = getProposalPublicLink(proposal);
+
+  if (!publicUrl) {
+    return null;
+  }
+
+  const normalizedUrl = publicUrl.trim();
+  const pathMatch =
+    normalizedUrl.match(/\/proposal\/([^/?#]+)/i) ??
+    normalizedUrl.match(/\/public\/proposals\/([^/?#]+)/i);
+
+  return pathMatch?.[1] ?? null;
+}
+
+export function getProposalPublicPath(
+  proposal: Pick<ProposalRecord, 'metadata'>,
+): string | null {
+  const token = getProposalPublicToken(proposal);
+  return token ? `/proposal/${token}` : null;
+}
+
+export function getResolvedProposalPublicUrl(
+  proposal: Pick<ProposalRecord, 'metadata'>,
+): string | null {
+  const path = getProposalPublicPath(proposal);
+
+  if (!path) {
+    return null;
+  }
+
+  return `${resolvePublicAppBaseUrl()}${path}`;
 }
 
 export function getProposalPaymentStatus(

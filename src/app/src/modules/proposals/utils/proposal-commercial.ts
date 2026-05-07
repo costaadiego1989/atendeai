@@ -33,13 +33,13 @@ export function getProposalCommercialJourney(
   const contract: JourneyStep = publicLink
     ? {
         title: 'Contrato',
-        label: 'Contrato publico pronto',
+        label: 'Pronto',
         tone: 'info',
         visible: true,
       }
     : {
         title: 'Contrato',
-        label: 'Contrato ainda nao gerado',
+        label: 'Pendente',
         tone: 'muted',
         visible: false,
       };
@@ -48,45 +48,45 @@ export function getProposalCommercialJourney(
     approvalStatus === 'ACCEPTED'
       ? {
           title: 'Aceite',
-          label: 'Aceita pelo cliente',
+          label: 'Aceito',
           tone: 'success',
           visible: true,
         }
       : approvalStatus === 'REJECTED'
         ? {
             title: 'Aceite',
-            label: 'Recusada pelo cliente',
+            label: 'Recusado',
             tone: 'danger',
             visible: true,
-          }
-        : {
-            title: 'Aceite',
-            label: publicLink ? 'Aguardando aceite' : 'Aceite ainda indisponivel',
-            tone: publicLink ? 'warning' : 'muted',
-            visible: true,
-          };
+        }
+      : {
+          title: 'Aceite',
+          label: publicLink ? 'Aguardando' : 'Indisponivel',
+          tone: publicLink ? 'warning' : 'muted',
+          visible: true,
+        };
 
   const payment: JourneyStep =
     paymentStatus === 'PAID'
       ? {
           title: 'Pagamento',
-          label: 'Pagamento confirmado',
+          label: 'Confirmado',
           tone: 'success',
           visible: true,
         }
       : approvalStatus === 'ACCEPTED'
         ? {
             title: 'Pagamento',
-            label: 'Pagamento pendente',
+            label: 'Pendente',
             tone: 'warning',
             visible: true,
-          }
-        : {
-            title: 'Pagamento',
-            label: 'Pagamento pendente',
-            tone: 'muted',
-            visible: true,
-          };
+        }
+      : {
+          title: 'Pagamento',
+          label: 'Aguardando',
+          tone: 'muted',
+          visible: true,
+        };
 
   const summary =
     paymentStatus === 'PAID'
@@ -94,7 +94,7 @@ export function getProposalCommercialJourney(
       : approvalStatus === 'ACCEPTED'
         ? 'Contrato aceito pelo cliente. Falta apenas a confirmacao de pagamento.'
         : publicLink
-          ? 'Contrato pronto para envio e aguardando a resposta do cliente.'
+          ? 'Contrato publicado e aguardando a resposta do cliente.'
           : 'Finalize a proposta e gere o contrato publico para iniciar o fluxo comercial.';
 
   return {

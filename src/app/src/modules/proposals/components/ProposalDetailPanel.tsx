@@ -9,6 +9,7 @@ import { ProposalActionsMenu } from './ProposalActionsMenu';
 import {
   getProposalDisplayTotal,
   getProposalFinalPrice,
+  getResolvedProposalPublicUrl,
 } from '../utils/proposal-finance';
 import {
   getProposalCommercialJourney,
@@ -18,6 +19,7 @@ import {
 type Props = {
   proposal: ProposalRecord | null;
   contactNameMap: Record<string, string>;
+  onOpen: (proposal: ProposalRecord) => void;
   onEdit: (proposal: ProposalRecord) => void;
   onGeneratePdf: (proposal: ProposalRecord) => void;
   onSend: (proposal: ProposalRecord) => void;
@@ -25,9 +27,52 @@ type Props = {
   onDelete: (proposal: ProposalRecord) => void;
 };
 
+type ProposalJourneyStepRowProps = {
+  title: string;
+  label: string;
+  toneClassName: string;
+};
+
+function ProposalJourneyStepRow({
+  title,
+  label,
+  toneClassName,
+}: ProposalJourneyStepRowProps) {
+  return (
+    <div className="rounded-2xl border border-border/50 bg-background/45 px-3 py-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-sm font-medium text-foreground">{title}</span>
+      <Badge
+        variant="outline"
+          className={`w-fit rounded-full px-2.5 py-1 text-[11px] ${toneClassName}`}
+      >
+        {label}
+      </Badge>
+      </div>
+    </div>
+  );
+}
+
+type ProposalMetaInfoCardProps = {
+  title: string;
+  value: string;
+};
+
+function ProposalMetaInfoCard({ title, value }: ProposalMetaInfoCardProps) {
+  return (
+    <div className="rounded-3xl border border-border/60 bg-background/60 p-4 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+        {title}
+      </p>
+      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
+    </div>
+  );
+}
+
 export function ProposalDetailPanel({
   proposal,
   contactNameMap,
+  onOpen,
   onEdit,
   onGeneratePdf,
   onSend,
@@ -52,6 +97,7 @@ export function ProposalDetailPanel({
   const finalPrice = getProposalFinalPrice(proposal);
   const effectiveTotal = getProposalDisplayTotal(proposal);
   const journey = getProposalCommercialJourney(proposal);
+  const publicUrl = getResolvedProposalPublicUrl(proposal);
 
   return (
     <Card className="glass-card h-full overflow-hidden">
@@ -70,6 +116,7 @@ export function ProposalDetailPanel({
 
             <ProposalActionsMenu
               proposal={proposal}
+              onOpen={onOpen}
               onEdit={onEdit}
               onGeneratePdf={onGeneratePdf}
               onSend={onSend}
@@ -92,7 +139,7 @@ export function ProposalDetailPanel({
       </CardHeader>
 
       <CardContent className="space-y-5 p-5">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)]">
           <div className="rounded-3xl border border-border/60 bg-background/60 p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
@@ -123,26 +170,33 @@ export function ProposalDetailPanel({
             <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
               Jornada comercial
             </p>
-            <div className="mt-3 space-y-3 text-sm text-muted-foreground">
+            <div className="mt-3 grid gap-2.5">
               {[journey.contract, journey.approval, journey.payment].map((step) => (
-                <div key={step.label} className="flex items-center justify-between gap-3">
-                  <span>{step.title}</span>
-                  <Badge
-                    variant="outline"
-                    className={`rounded-full px-2.5 py-1 text-[11px] ${getProposalJourneyToneClassName(step.tone)}`}
-                  >
-                    {step.label}
-                  </Badge>
-                </div>
+                <ProposalJourneyStepRow
+                  key={`${step.title}-${step.label}`}
+                  title={step.title}
+                  label={step.label}
+                  toneClassName={getProposalJourneyToneClassName(step.tone)}
+                />
               ))}
-              <p>Agendamento: {proposal.scheduledAt ? 'Programado' : 'Nao programado'}</p>
-              <p>
-                Validade:{' '}
-                {proposal.validUntil ? formatDate(proposal.validUntil) ?? 'Sem data' : 'Sem validade'}
-              </p>
             </div>
-            <p className="mt-4 text-xs leading-5 text-muted-foreground">{journey.summary}</p>
+            <p className="mt-3 text-xs leading-5 text-muted-foreground">{journey.summary}</p>
           </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <ProposalMetaInfoCard
+            title="Agendamento"
+            value={proposal.scheduledAt ? 'Programado' : 'Nao programado'}
+          />
+          <ProposalMetaInfoCard
+            title="Validade"
+            value={
+              proposal.validUntil
+                ? formatDate(proposal.validUntil) ?? 'Sem data'
+                : 'Sem validade'
+            }
+          />
         </div>
 
         {proposal.description || proposal.benefits ? (
@@ -222,6 +276,16 @@ export function ProposalDetailPanel({
               >
                 Baixar PDF gerado
               </button>
+            ) : null}
+            {publicUrl ? (
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-xl border border-border/60 bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
+              >
+                Abrir contrato
+              </a>
             ) : null}
           </div>
         </div>
