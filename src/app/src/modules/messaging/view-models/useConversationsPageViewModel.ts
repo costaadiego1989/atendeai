@@ -547,6 +547,51 @@ export function useConversationsPageViewModel() {
     },
   });
 
+  const sendAssistantReplyMutation = useMutation({
+    mutationFn: async () => {
+      const suggestion = await messagingService.suggestReply(
+        tenant!.id,
+        selectedConversation!.id,
+      );
+
+      const text = suggestion.text.trim();
+      if (!text) {
+        throw new Error('A IA nao conseguiu sugerir uma resposta agora.');
+      }
+
+      return messagingService.sendMessage(
+        tenant!.id,
+        selectedConversation!.id,
+        text,
+      );
+    },
+    onSuccess: () => {
+      setDraftMessage('');
+      setSelectedAttachment(null);
+      void queryClient.invalidateQueries({
+        queryKey: ['conversation-messages', tenant?.id, selectedConversation?.id],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['conversations', tenant?.id],
+        exact: false,
+      });
+      toast({
+        title: 'Resposta da IA enviada',
+        description: 'A conversa recebeu uma mensagem sugerida automaticamente pela IA.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao responder com IA',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage:
+            'Nao foi possivel gerar e enviar a resposta automatica agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
   const updateCheckoutAbandonmentStateMutation = useMutation({
     mutationFn: (paused: boolean) =>
       checkoutService.updateAbandonmentState(tenant!.id, selectedCheckoutOrder!.id, {
@@ -730,6 +775,7 @@ export function useConversationsPageViewModel() {
     sendMessageMutation,
     updateStatusMutation,
     suggestReplyMutation,
+    sendAssistantReplyMutation,
     updateCheckoutAbandonmentStateMutation,
     triggerCheckoutAbandonmentTouchMutation,
     chargeDialogOpen,
