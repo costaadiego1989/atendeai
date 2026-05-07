@@ -1,0 +1,20 @@
+aws_region  = "us-east-1"
+project_name = "atendeai"
+environment  = "dev"
+
+# Never commit real passwords in terraform.tfvars.
+db_password = "CHANGE_ME"
+mq_password = "CHANGE_ME"
+
+# Use the same tag published by the build pipeline.
+image_tag = "latest"
+
+# Optional: set these when using images outside the ECR repositories created here.
+api_image_uri = null
+app_image_uri = null
+web_image_uri = null
+
+api_desired_count    = 1
+app_desired_count    = 1
+web_desired_count    = 1
+worker_desired_count = 1
