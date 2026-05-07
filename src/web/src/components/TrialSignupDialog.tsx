@@ -73,7 +73,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
   });
 
   const selectedPlan = plansData?.plans?.find((p) => p.code === planCode);
-  const selectedPlanName = selectedPlan?.displayName ?? planCode;
+  const selectedPlanName = selectedPlan?.displayName ?? "Trial";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -88,6 +88,12 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
       password: "",
     },
   });
+
+  const resetDialog = () => {
+    setStep(1);
+    setLoading(false);
+    form.reset();
+  };
 
   const onNextStep = async () => {
     const valid = await form.trigger(["name", "email", "phone", "companyName", "nicheCode"]);
@@ -108,7 +114,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
         cnpj: values.cnpj,
         nicheCode: values.nicheCode,
         password: values.password,
-        plan: planCode,
+        plan: "TRIAL",
       });
 
       setStep(3);
@@ -119,7 +125,6 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
         toast.success("Trial ativado com sucesso! Redirecionando...");
         window.location.href = `${appUrl}/login`;
       }, 2500);
-
     } catch (error: any) {
       toast.error(error.message || "Erro ao processar sua solicitação.");
       setLoading(false);
@@ -127,13 +132,14 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => {
-      onOpenChange(val);
-      if (!val) setStep(1);
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        onOpenChange(value);
+        if (!value) resetDialog();
+      }}
+    >
       <DialogContent className="sm:max-w-[480px] bg-[#080c0d] border-white/5 text-white p-0 rounded-[2.5rem] shadow-[0_0_120px_rgba(0,0,0,0.9)] outline-none overflow-hidden border-none focus-within:ring-0">
-
-        {/* Step Indicator Top Bar */}
         <div className="flex w-full h-1.5 gap-1 p-0 absolute top-0 left-0 z-50">
           {[1, 2, 3].map((s) => (
             <div
@@ -164,11 +170,12 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                   </div>
 
                   <DialogTitle className="text-3xl font-black tracking-tighter text-white leading-[1.1] mb-4">
-                    Ative seus <span className="text-[#00C59E]">7 dias de ELITE</span>
+                    Ative seus <span className="text-[#00C59E]">7 dias de trial</span>
                   </DialogTitle>
 
                   <DialogDescription className="text-sm text-white/40 leading-relaxed font-medium">
-                    Você escolheu o <span className="text-[#00C59E] font-bold">{selectedPlanName}</span>. <br />Vamos criar sua conta e iniciar seu trial.
+                    Você escolheu o plano base <span className="text-[#00C59E] font-bold">{selectedPlanName}</span>. <br />
+                    Vamos criar sua conta e iniciar a validação da sua operação.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -189,7 +196,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                               name="name"
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">Nome Completo</FormLabel>
+                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">Nome completo</FormLabel>
                                   <FormControl>
                                     <Input placeholder="Seu nome" {...field} className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold placeholder:text-white/10" />
                                   </FormControl>
@@ -202,7 +209,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                               name="email"
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">E-mail de Trabalho</FormLabel>
+                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">E-mail de trabalho</FormLabel>
                                   <FormControl>
                                     <Input placeholder="seu@email.com" {...field} className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold placeholder:text-white/10" />
                                   </FormControl>
@@ -230,7 +237,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                                   <FormItem className="space-y-2">
                                     <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">Empresa</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="Nome da Loja/Clínica" {...field} className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold placeholder:text-white/10" />
+                                      <Input placeholder="Nome da loja, clínica ou empresa" {...field} className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold placeholder:text-white/10" />
                                     </FormControl>
                                   </FormItem>
                                 )}
@@ -241,7 +248,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                               name="nicheCode"
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">Tipo de Empresa (Nicho)</FormLabel>
+                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">Nicho da operação</FormLabel>
                                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                       <SelectTrigger className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold text-white/60">
@@ -285,7 +292,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                               name="cpf"
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">CPF do Titular</FormLabel>
+                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">CPF do titular</FormLabel>
                                   <FormControl>
                                     <Input placeholder="000.000.000-00" {...field} className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold placeholder:text-white/10" onChange={(e) => field.onChange(formatDocument(e.target.value))} />
                                   </FormControl>
@@ -298,7 +305,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                               name="cnpj"
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">CNPJ da Empresa</FormLabel>
+                                  <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">CNPJ da empresa</FormLabel>
                                   <FormControl>
                                     <Input placeholder="00.000.000/0000-00" {...field} className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold placeholder:text-white/10" onChange={(e) => field.onChange(formatDocument(e.target.value))} />
                                   </FormControl>
@@ -312,7 +319,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
                             name="password"
                             render={({ field }) => (
                               <FormItem className="space-y-2">
-                                <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">Senha de Acesso</FormLabel>
+                                <FormLabel className="text-[9px] font-black text-white/30 uppercase tracking-widest pl-1">Senha de acesso</FormLabel>
                                 <FormControl>
                                   <Input type="password" placeholder="Definir senha de acesso" {...field} className="h-14 bg-white/5 border-white/5 rounded-2xl focus:border-[#00C59E]/50 focus:ring-0 transition-all text-sm font-bold placeholder:text-white/10" />
                                 </FormControl>
@@ -386,7 +393,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
               <div className="w-1 h-1 bg-white/10 rounded-full" />
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3 h-3" />
-                7 Dias Free
+                7 dias grátis
               </div>
             </div>
           )}
