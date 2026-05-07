@@ -362,9 +362,13 @@ export function useContactsListViewModel() {
   );
 
   const createContactMutation = useMutation({
-    mutationFn: () =>
-      contactsService.createContact(
-        tenant!.id,
+    mutationFn: () => {
+      if (!tenant?.id) {
+        throw new Error('A sessão da empresa ainda não carregou.');
+      }
+
+      return contactsService.createContact(
+        tenant.id,
         {
           name: createForm.name.trim(),
           phone: normalizePhone(createForm.phone),
@@ -374,7 +378,8 @@ export function useContactsListViewModel() {
           notes: createForm.notes.trim() || undefined,
         },
         activeBranchId,
-      ),
+      );
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['contacts', tenant?.id] });
       setCreateOpen(false);
@@ -751,16 +756,19 @@ export function useContactsListViewModel() {
       }));
     },
     submitCreate() {
-      const documentDigits = createForm.document.replace(/\D/g, '');
+      if (!tenant?.id) {
+        toast({
+          title: 'Sessão ainda não carregada',
+          description: 'Aguarde a empresa terminar de carregar e tente novamente.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      if (
-        !createForm.name.trim() ||
-        normalizePhone(createForm.phone).length < 10 ||
-        ![11, 14].includes(documentDigits.length)
-      ) {
+      if (!createForm.name.trim() || !createForm.phone.trim() || !createForm.document.trim()) {
         toast({
           title: 'Preencha os campos obrigatórios',
-          description: 'Informe nome, telefone válido e CPF/CNPJ para criar o contato.',
+          description: 'Informe nome, telefone e CPF/CNPJ para criar o contato.',
           variant: 'destructive',
         });
         return;
