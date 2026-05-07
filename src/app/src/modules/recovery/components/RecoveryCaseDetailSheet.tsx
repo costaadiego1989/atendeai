@@ -26,6 +26,10 @@ import { formatPhone } from '@/shared/lib/masks';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { recoverySourceLabels } from '@/modules/recovery/components/RecoveryLabel';
 import {
+  getRecoveryCommercialContext,
+  getRecoveryCommercialToneClassName,
+} from '@/modules/recovery/utils/recovery-commercial';
+import {
   buildRecoveryFallbackMilestones,
   mapContactTimelineEntryToVisual,
 } from '@/modules/recovery/components/RecoveryTimelineHelper';
@@ -285,6 +289,7 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
   const playbook = item
     ? buildRecoveryWorkflowUI(item, guidanceAlreadySent, allowAnotherOutreach)
     : null;
+  const commercial = item ? getRecoveryCommercialContext(item) : null;
   const timelineItems =
     vm.timelineQuery.data?.entries?.length
       ? vm.timelineQuery.data.entries.map(mapContactTimelineEntryToVisual)
@@ -318,6 +323,14 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                     <Repeat className="h-4 w-4" />
                     Recorrência
                   </Button>
+                  {commercial ? (
+                    <Badge
+                      variant="outline"
+                      className={getRecoveryCommercialToneClassName(commercial.tone)}
+                    >
+                      {commercial.kindLabel}
+                    </Badge>
+                  ) : null}
                   <StatusBadge status={item.status} className="shrink-0" />
                 </div>
               </div>
@@ -390,6 +403,21 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                   </CardContent>
                 </Card>
               </div>
+
+              {commercial ? (
+                <div className="rounded-xl border border-border/60 bg-background/60 px-4 py-3 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={getRecoveryCommercialToneClassName(commercial.tone)}
+                    >
+                      {commercial.kindLabel}
+                    </Badge>
+                    <span className="font-medium text-foreground">{commercial.statusLabel}</span>
+                  </div>
+                  <p className="mt-2 text-muted-foreground">{commercial.summary}</p>
+                </div>
+              ) : null}
 
               {item.playbookId ? (
                 <div className="rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm">
