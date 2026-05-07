@@ -8,6 +8,10 @@ function resolveApiOrigin() {
     return rawOrigin.replace(/\/$/, '').replace(/\/api\/v1$/, '');
   }
 
+  if (import.meta.env.DEV) {
+    return 'http://localhost:3000';
+  }
+
   if (typeof window === 'undefined') {
     return '';
   }
