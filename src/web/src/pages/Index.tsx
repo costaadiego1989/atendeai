@@ -7,7 +7,6 @@ import PlatformSection from "@/components/PlatformSection";
 import HowItWorks from "@/components/HowItWorks";
 import BenefitsSection from "@/components/BenefitsSection";
 import AboutSection from "@/components/AboutSection";
-import { BusinessNicheSelector } from "@/components/BusinessNicheSelector";
 import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import FAQSection from "@/components/FAQSection";
@@ -18,9 +17,9 @@ import TrialSignupDialog from "@/components/TrialSignupDialog";
 
 const Index = () => {
   const [signupOpen, setSignupOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("PROFISSIONAL");
+  const [selectedPlan, setSelectedPlan] = useState("TRIAL");
 
-  const openSignup = (plan = "PROFISSIONAL") => {
+  const openSignup = (plan = "TRIAL") => {
     setSelectedPlan(plan);
     setSignupOpen(true);
   };
@@ -44,10 +43,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center mb-16">
             <h2 className="text-4xl md:text-6xl font-black text-center mb-4 text-white leading-tight tracking-tighter">
-              Descubra o plano <span className="text-gradient-primary">perfeito para você</span>.
+              Planos base para operar. <span className="text-gradient-primary">Módulos para crescer</span>.
             </h2>
             <p className="text-white/40 text-center text-sm md:text-base max-w-xl">
-              Responda algumas perguntas rápidas e receba uma recomendação sob medida para o seu negócio.
+              Responda algumas perguntas rápidas e receba uma recomendação alinhada ao seu nicho, ao seu momento operacional e aos módulos da sua operação.
             </p>
           </div>
 
@@ -58,7 +57,7 @@ const Index = () => {
       </section>
 
       <SectionDivider />
-      <CTASection onSignupClick={() => openSignup("PROFISSIONAL")} />
+      <CTASection onSignupClick={() => openSignup("TRIAL")} />
       <SectionDivider flip />
       <FAQSection />
       <Footer />
