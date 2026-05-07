@@ -49,6 +49,10 @@ import {
 } from 'lucide-react';
 import { MessagingKPIs } from '../components/MessagingKPIs';
 import type { Conversation } from '@/shared/types';
+import {
+  getSaleAttributionDialogCopy,
+  getSaleAttributionMeta,
+} from '@/modules/messaging/utils/sale-attribution-ui';
 
 const PROSPECT_TAGS = ['prospect', 'prospecting', 'prospecção', 'campanha', 'campaign'];
 
@@ -420,6 +424,16 @@ export default function ConversationsPage() {
   const [saleDialogOpen, setSaleDialogOpen] = useState(false);
   const [saleNotes, setSaleNotes] = useState('');
   const [saleAmountDisplay, setSaleAmountDisplay] = useState('');
+  const saleAttributionMeta = getSaleAttributionMeta({
+    commercialKind: vm.saleAttribution?.commercialKind,
+    commercialStatus: vm.saleAttribution?.commercialStatus,
+    evidenceSource: vm.saleAttribution?.evidenceSource,
+  });
+  const saleDialogCopy = getSaleAttributionDialogCopy({
+    commercialKind: vm.saleAttribution?.commercialKind,
+    commercialStatus: vm.saleAttribution?.commercialStatus,
+    evidenceSource: vm.saleAttribution?.evidenceSource,
+  });
 
   const selectedSignal = useMemo(() => {
     if (!vm.selectedConversation) {
@@ -780,9 +794,12 @@ export default function ConversationsPage() {
                   <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-2">
                     {vm.supportsManualSaleAttribution &&
                     vm.saleAttribution?.aiValidationStatus === 'APPROVED' ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                      <span className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold',
+                        saleAttributionMeta.accentClassName,
+                      )}>
                         <ShoppingBag className="h-3.5 w-3.5" />
-                        Venda confirmada
+                        {saleAttributionMeta.badgeLabel}
                       </span>
                     ) : null}
                     <Button
@@ -996,7 +1013,9 @@ export default function ConversationsPage() {
                       Venda manual
                     </p>
                     <p className="mt-1 text-[13px] leading-5 text-muted-foreground">
-                      Disponível quando o módulo de checkout commerce não está activo na subscrição.
+                      {vm.saleAttribution?.aiValidationStatus === 'APPROVED'
+                        ? saleAttributionMeta.summary
+                        : 'Registe uma nova venda somente quando houver fecho comercial claro ou evidencia objetiva no sistema.'}
                     </p>
                     {vm.selectedConversation.status === 'ARCHIVED' ? (
                       <p className="mt-3 text-sm text-muted-foreground">
@@ -1013,8 +1032,19 @@ export default function ConversationsPage() {
                           <ShoppingBag className="mt-0.5 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold text-foreground">
-                              Venda atribuída e confirmada pela IA
+                              {saleAttributionMeta.confirmationLabel}
                             </p>
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <span className={cn(
+                                'inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold',
+                                saleAttributionMeta.accentClassName,
+                              )}>
+                                {saleAttributionMeta.kindLabel}
+                              </span>
+                              <span className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                                {saleAttributionMeta.statusLabel}
+                              </span>
+                            </div>
                             {vm.saleAttribution.saleAmount != null &&
                             vm.saleAttribution.saleAmount !== '' ? (
                               <p className="mt-1 text-sm text-muted-foreground">
@@ -1029,6 +1059,9 @@ export default function ConversationsPage() {
                                 Sem valor monetário declarado.
                               </p>
                             )}
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {saleAttributionMeta.summary}
+                            </p>
                             {vm.saleAttribution.notes ? (
                               <p className="mt-2 line-clamp-4 text-xs text-muted-foreground">
                                 {vm.saleAttribution.notes}
@@ -1077,7 +1110,7 @@ export default function ConversationsPage() {
                         }}
                       >
                         <ShoppingBag className="mr-2 h-4 w-4" />
-                        Marcar como venda
+                        {saleDialogCopy.title}
                       </Button>
                     )}
                   </div>
@@ -1465,11 +1498,8 @@ export default function ConversationsPage() {
       <Dialog open={saleDialogOpen} onOpenChange={setSaleDialogOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
-            <DialogTitle>Marcar como venda</DialogTitle>
-            <DialogDescription>
-              A IA analisa o histórico desta conversa. A venda só é gravada se houver evidência clara de
-              fecho comercial com o cliente.
-            </DialogDescription>
+            <DialogTitle>{saleDialogCopy.title}</DialogTitle>
+            <DialogDescription>{saleDialogCopy.description}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
@@ -1532,7 +1562,7 @@ export default function ConversationsPage() {
               ) : (
                 <ShoppingBag className="mr-2 h-4 w-4" />
               )}
-              Pedir validação IA
+              {saleDialogCopy.submitLabel}
             </Button>
           </DialogFooter>
         </DialogContent>

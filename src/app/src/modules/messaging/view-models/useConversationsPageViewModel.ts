@@ -7,6 +7,7 @@ import { useAuthStore } from '@/shared/stores/auth-store';
 import type { ConversationStatus, Message } from '@/shared/types';
 import { messagingService } from '@/modules/messaging/services/messaging-service';
 import { messagingRealtimeService } from '@/modules/messaging/services/messaging-realtime-service';
+import { getSaleAttributionToastCopy } from '@/modules/messaging/utils/sale-attribution-ui';
 import { checkoutService } from '@/modules/checkout/services/checkout-service';
 import { salesPaymentLinksService } from '@/modules/sales/services/sales-payment-links-service';
 import type { CreateSalesSplitChargeInput } from '@/modules/sales/services/sales-types';
@@ -451,7 +452,22 @@ export function useConversationsPageViewModel() {
         selectedConversation!.id,
         payload,
       ),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if ('approved' in response && response.approved === false) {
+        const toastCopy = getSaleAttributionToastCopy({
+          approved: false,
+          commercialKind: response.commercialKind,
+          commercialStatus: response.commercialStatus,
+        });
+        toast({
+          title: toastCopy.title,
+          description:
+            response.reason ??
+            toastCopy.description,
+        });
+        return;
+      }
+
       void queryClient.invalidateQueries({
         queryKey: [
           'conversation-sale-attribution',
@@ -459,10 +475,15 @@ export function useConversationsPageViewModel() {
           selectedConversation?.id,
         ],
       });
+      const toastCopy = getSaleAttributionToastCopy({
+        approved: true,
+        commercialKind: response.commercialKind,
+        commercialStatus: response.commercialStatus,
+        evidenceSource: response.evidenceSource,
+      });
       toast({
-        title: 'Venda registada',
-        description:
-          'A IA confirmou o contexto da conversa e a venda foi atribuída.',
+        title: toastCopy.title,
+        description: toastCopy.description,
       });
     },
     onError: (error) => {

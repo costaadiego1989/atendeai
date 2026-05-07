@@ -19,6 +19,18 @@ export interface ConversationSaleAttribution {
   markedAt: string;
   aiValidatedAt: string | null;
   notes: string | null;
+  commercialKind?: string | null;
+  commercialStatus?: string | null;
+  evidenceSource?: string | null;
+}
+
+export interface ConversationSaleValidationResult {
+  approved: boolean;
+  reason?: string;
+  confidence?: number;
+  conversationId: string;
+  commercialKind?: string | null;
+  commercialStatus?: string | null;
 }
 
 interface ListConversationsApiResponse {
@@ -286,7 +298,7 @@ export const messagingService = {
       currency?: string;
       notes?: string;
     },
-  ): Promise<ConversationSaleAttribution> {
+  ): Promise<ConversationSaleAttribution | ConversationSaleValidationResult> {
     return apiClient.post(
       `/tenants/${tenantId}/conversations/${conversationId}/sale-attribution`,
       payload,
