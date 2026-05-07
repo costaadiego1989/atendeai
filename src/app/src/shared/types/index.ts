@@ -1332,6 +1332,7 @@ export type SalesPaymentRecurrenceFrequency = 'WEEKLY' | 'MONTHLY' | 'QUARTERLY'
 export interface SalesPaymentLink {
   id: string;
   branchId?: string | null;
+  externalId?: string;
   name: string;
   description?: string;
   label?: string;
