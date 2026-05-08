@@ -47,22 +47,22 @@ locals {
     messaging = {
       command = ["node", "dist/messaging-worker"]
       cpu     = 256
-      memory  = 512
+      memory  = 384
     }
     prospect_search = {
       command = ["node", "dist/prospect-search-worker"]
       cpu     = 256
-      memory  = 512
+      memory  = 384
     }
     alerts = {
       command = ["node", "dist/alerts-worker"]
       cpu     = 128
-      memory  = 384
+      memory  = 256
     }
     scheduling = {
       command = ["node", "dist/scheduling-worker"]
       cpu     = 128
-      memory  = 384
+      memory  = 256
     }
   }
 }
@@ -90,7 +90,7 @@ data "aws_ssm_parameter" "ecs_optimized_ami" {
 resource "aws_launch_template" "ecs" {
   name_prefix   = "${local.name_prefix}-ecs-lt-"
   image_id      = data.aws_ssm_parameter.ecs_optimized_ami.value
-  instance_type = "t3.medium"
+  instance_type = var.ec2_instance_type
 
   iam_instance_profile {
     name = var.instance_profile_name
@@ -117,9 +117,9 @@ resource "aws_launch_template" "ecs" {
 resource "aws_autoscaling_group" "ecs" {
   name                = "${local.name_prefix}-ecs-asg"
   vpc_zone_identifier = var.private_subnets
-  desired_capacity    = 1
-  min_size            = 1
-  max_size            = 3
+  desired_capacity    = var.asg_desired_capacity
+  min_size            = var.asg_min_size
+  max_size            = var.asg_max_size
 
   launch_template {
     id      = aws_launch_template.ecs.id
@@ -214,7 +214,7 @@ resource "aws_lb_target_group" "api" {
   name        = "${local.name_prefix}-api-tg"
   port        = var.api_container_port
   protocol    = "HTTP"
-  target_type = "ip"
+  target_type = "instance"
   vpc_id      = var.vpc_id
 
   health_check {
@@ -233,7 +233,7 @@ resource "aws_lb_target_group" "app" {
   name        = "${local.name_prefix}-app-tg"
   port        = var.frontend_container_port
   protocol    = "HTTP"
-  target_type = "ip"
+  target_type = "instance"
   vpc_id      = var.vpc_id
 
   health_check {
@@ -252,7 +252,7 @@ resource "aws_lb_target_group" "web" {
   name        = "${local.name_prefix}-web-tg"
   port        = var.frontend_container_port
   protocol    = "HTTP"
-  target_type = "ip"
+  target_type = "instance"
   vpc_id      = var.vpc_id
 
   health_check {
@@ -317,10 +317,10 @@ resource "aws_lb_listener_rule" "web" {
 
 resource "aws_ecs_task_definition" "api" {
   family                   = "${local.name_prefix}-api"
-  network_mode             = "awsvpc"
+  network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
   cpu                      = 512
-  memory                   = 1024
+  memory                   = 768
   execution_role_arn       = var.task_execution_role_arn
   task_role_arn            = var.task_role_arn
 
@@ -333,7 +333,7 @@ resource "aws_ecs_task_definition" "api" {
       portMappings = [
         {
           containerPort = var.api_container_port
-          hostPort      = var.api_container_port
+          hostPort      = 0
           protocol      = "tcp"
         }
       ]
@@ -357,7 +357,7 @@ resource "aws_ecs_task_definition" "worker" {
   for_each = local.workers
 
   family                   = "${local.name_prefix}-${replace(each.key, "_", "-")}"
-  network_mode             = "awsvpc"
+  network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
   cpu                      = each.value.cpu
   memory                   = each.value.memory
@@ -399,10 +399,10 @@ resource "aws_ecs_task_definition" "frontend" {
   }
 
   family                   = "${local.name_prefix}-${each.key}"
-  network_mode             = "awsvpc"
+  network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
-  cpu                      = 256
-  memory                   = 512
+  cpu                      = 128
+  memory                   = 128
   execution_role_arn       = var.task_execution_role_arn
   task_role_arn            = var.task_role_arn
 
@@ -414,7 +414,7 @@ resource "aws_ecs_task_definition" "frontend" {
       portMappings = [
         {
           containerPort = each.value.port
-          hostPort      = each.value.port
+          hostPort      = 0
           protocol      = "tcp"
         }
       ]
@@ -443,11 +443,6 @@ resource "aws_ecs_service" "api" {
     weight            = 100
   }
 
-  network_configuration {
-    subnets         = var.private_subnets
-    security_groups = [var.security_group_id]
-  }
-
   load_balancer {
     target_group_arn = aws_lb_target_group.api.arn
     container_name   = "api"
@@ -470,11 +465,6 @@ resource "aws_ecs_service" "worker" {
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.ec2.name
     weight            = 100
-  }
-
-  network_configuration {
-    subnets         = var.private_subnets
-    security_groups = [var.security_group_id]
   }
 
   tags = var.tags
@@ -500,11 +490,6 @@ resource "aws_ecs_service" "frontend" {
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.ec2.name
     weight            = 100
-  }
-
-  network_configuration {
-    subnets         = var.private_subnets
-    security_groups = [var.security_group_id]
   }
 
   load_balancer {

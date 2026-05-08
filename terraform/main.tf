@@ -62,6 +62,10 @@ module "ecs" {
   http_listener_arn       = module.alb.listener_http_arn
   ssm_parameter_prefix    = module.secrets.parameter_prefix
   image_tag               = var.image_tag
+  ec2_instance_type       = var.ec2_instance_type
+  asg_min_size            = var.asg_min_size
+  asg_desired_capacity    = var.asg_desired_capacity
+  asg_max_size            = var.asg_max_size
   api_image_uri           = var.api_image_uri
   app_image_uri           = var.app_image_uri
   web_image_uri           = var.web_image_uri

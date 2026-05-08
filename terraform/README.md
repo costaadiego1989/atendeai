@@ -2,6 +2,8 @@
 
 Infraestrutura base para rodar o AtendeAi na AWS com ECS on EC2, comecando em 1 instancia e preparado para escalar para 2 ou 3 nos.
 
+O modo inicial foi pensado para baixo custo: uma EC2 no Auto Scaling Group, ECS services separados e portas dinamicas em modo `bridge` para evitar o limite de ENIs do `awsvpc` em instancias pequenas.
+
 ## O que este Terraform cria
 
 - VPC com subnets publicas e privadas em 2 AZs.
@@ -87,7 +89,30 @@ O Auto Scaling Group nasce com:
 - `min_size = 1`
 - `max_size = 3`
 
+Esses valores ficam configuraveis por variavel:
+
+```hcl
+ec2_instance_type    = "t3.medium"
+asg_min_size         = 1
+asg_desired_capacity = 1
+asg_max_size         = 3
+```
+
+Para disponibilidade real, altere para:
+
+```hcl
+ec2_instance_type    = "t3.large"
+asg_min_size         = 2
+asg_desired_capacity = 2
+asg_max_size         = 3
+api_desired_count    = 2
+```
+
 Os ECS services tambem tem autoscaling por CPU. Para alta disponibilidade real, suba o ASG para pelo menos 2 instancias em AZs diferentes.
+
+## Observabilidade no inicio
+
+Para manter custo baixo, comece com CloudWatch Logs dos ECS services. Grafana, Loki, Tempo e Prometheus devem entrar depois como stack separada ou servicos gerenciados, porque competem por memoria/CPU com a API e os workers em uma unica EC2.
 
 ## Pendencias antes de producao
 

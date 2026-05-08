@@ -54,6 +54,30 @@ variable "image_tag" {
   default     = "latest"
 }
 
+variable "ec2_instance_type" {
+  description = "EC2 instance type for the ECS Auto Scaling Group"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "asg_min_size" {
+  description = "Minimum size for the ECS Auto Scaling Group"
+  type        = number
+  default     = 1
+}
+
+variable "asg_desired_capacity" {
+  description = "Desired capacity for the ECS Auto Scaling Group"
+  type        = number
+  default     = 1
+}
+
+variable "asg_max_size" {
+  description = "Maximum size for the ECS Auto Scaling Group"
+  type        = number
+  default     = 3
+}
+
 variable "api_image_uri" {
   description = "Full API image URI. Defaults to this module ECR repository URL plus image_tag"
   type        = string
