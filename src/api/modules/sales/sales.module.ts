@@ -27,7 +27,6 @@ import { DeepSeekAdapter } from '../ai/infrastructure/adapters/DeepSeekAdapter';
 import { AgentRulesModule } from '../agent-rules/agent-rules.module';
 import { CreateSplitPaymentChargeUseCase } from './application/use-cases/CreateSplitPaymentChargeUseCase';
 import { ContactModule } from '../contact/contact.module';
-import { SalesPaymentLinksSchemaService } from './infrastructure/persistence/services/SalesPaymentLinksSchemaService';
 import { SalesPaymentLinkLifecycleService } from './application/services/SalesPaymentLinkLifecycleService';
 import { SalesPaymentLinksReportCsvBuilder } from './application/services/SalesPaymentLinksReportCsvBuilder';
 import { GenerateSalesPaymentLinksReportUseCase } from './application/use-cases/GenerateSalesPaymentLinksReportUseCase';
@@ -71,7 +70,6 @@ import { RedeemCouponUseCase } from './application/use-cases/RedeemCouponUseCase
     RedeemCouponUseCase,
     SalesPaymentLinkLifecycleService,
     SalesPaymentLinksReportCsvBuilder,
-    SalesPaymentLinksSchemaService,
     TrackSalesMetricUseCase,
     SalesAnalyticsHandler,
     {

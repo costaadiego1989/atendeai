@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaSalesRepository } from '../infrastructure/persistence/repositories/PrismaSalesRepository';
 import { PrismaService } from '../../../../shared/infrastructure/database/PrismaService';
-import { SalesPaymentLinksSchemaService } from '../infrastructure/persistence/services/SalesPaymentLinksSchemaService';
 import { randomUUID } from 'crypto';
 
 describe('PrismaSalesRepository Integration', () => {
@@ -13,7 +12,6 @@ describe('PrismaSalesRepository Integration', () => {
       providers: [
         PrismaSalesRepository,
         PrismaService,
-        SalesPaymentLinksSchemaService,
       ],
     }).compile();
 

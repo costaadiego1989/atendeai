@@ -11,13 +11,11 @@ import {
   SalesPromotionTargetRecord,
 } from '../../../domain/repositories/ISalesRepository';
 import { UniqueEntityID } from '../../../../../shared/domain/UniqueEntityID';
-import { SalesPaymentLinksSchemaService } from '../services/SalesPaymentLinksSchemaService';
 
 @Injectable()
 export class PrismaSalesRepository implements ISalesRepository {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly schemaService: SalesPaymentLinksSchemaService,
   ) { }
 
   private mapPaymentLink(record: Record<string, unknown>): SalesPaymentLinkRecord {
@@ -184,7 +182,7 @@ export class PrismaSalesRepository implements ISalesRepository {
   async createPaymentLink(
     record: Omit<SalesPaymentLinkRecord, 'createdAt' | 'updatedAt'>,
   ): Promise<SalesPaymentLinkRecord> {
-    await this.schemaService.ensureColumns();
+
 
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       INSERT INTO sales_schema.payment_links (
@@ -263,7 +261,7 @@ export class PrismaSalesRepository implements ISalesRepository {
     total: number;
     summary: SalesPaymentLinksSummary;
   }> {
-    await this.schemaService.ensureColumns();
+
 
     const conditions: Prisma.Sql[] = [
       Prisma.sql`payment_links.tenant_id = ${tenantId}::uuid`,
@@ -353,7 +351,7 @@ export class PrismaSalesRepository implements ISalesRepository {
     tenantId: string,
     paymentLinkId: string,
   ): Promise<SalesPaymentLinkRecord | null> {
-    await this.schemaService.ensureColumns();
+
 
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT payment_links.*, contacts.name AS contact_name
@@ -375,7 +373,7 @@ export class PrismaSalesRepository implements ISalesRepository {
     status: SalesPaymentLinkStatus,
     deletedAt?: Date | null,
   ): Promise<SalesPaymentLinkRecord | null> {
-    await this.schemaService.ensureColumns();
+
 
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       UPDATE sales_schema.payment_links
@@ -395,7 +393,7 @@ export class PrismaSalesRepository implements ISalesRepository {
     externalReference: string,
     status: 'PAID' | 'OVERDUE' | 'REFUNDED',
   ): Promise<SalesPaymentLinkRecord | null> {
-    await this.schemaService.ensureColumns();
+
 
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       UPDATE sales_schema.payment_links
