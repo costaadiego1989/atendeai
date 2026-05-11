@@ -17,8 +17,6 @@ export class PrismaRecoveryRecurringChargeRepository
   async create(
     input: CreateRecoveryRecurringChargeInput,
   ): Promise<RecoveryRecurringChargeRecord> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO recovery_schema.recovery_recurring_charges (
         tenant_id,
@@ -56,8 +54,6 @@ export class PrismaRecoveryRecurringChargeRepository
     tenantId: string,
     recurrenceId: string,
   ): Promise<RecoveryRecurringChargeRecord | null> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM recovery_schema.recovery_recurring_charges
@@ -73,8 +69,6 @@ export class PrismaRecoveryRecurringChargeRepository
     tenantId: string,
     caseId: string,
   ): Promise<RecoveryRecurringChargeRecord[]> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM recovery_schema.recovery_recurring_charges
@@ -90,7 +84,6 @@ export class PrismaRecoveryRecurringChargeRepository
     now: Date,
     limit: number,
   ): Promise<RecoveryRecurringChargeRecord[]> {
-    await this.ensureTableShape();
     const leaseUntil = new Date(now.getTime() + 5 * 60 * 1000);
 
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
@@ -120,8 +113,6 @@ export class PrismaRecoveryRecurringChargeRepository
     recurrenceId: string;
     errorMessage?: string | null;
   }): Promise<void> {
-    await this.ensureTableShape();
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE recovery_schema.recovery_recurring_charges
       SET lease_until = NULL,
@@ -139,8 +130,6 @@ export class PrismaRecoveryRecurringChargeRepository
     occurrenceNumber: number;
     scheduledFor: Date;
   }): Promise<RecoveryRecurringChargeRunRecord | null> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO recovery_schema.recovery_recurring_charge_runs (
         recurrence_id,
@@ -171,8 +160,6 @@ export class PrismaRecoveryRecurringChargeRepository
     conversationId?: string | null;
     messageId?: string | null;
   }): Promise<void> {
-    await this.ensureTableShape();
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE recovery_schema.recovery_recurring_charge_runs
       SET status = 'SUCCEEDED',
@@ -188,8 +175,6 @@ export class PrismaRecoveryRecurringChargeRepository
     runId: string;
     errorMessage: string;
   }): Promise<void> {
-    await this.ensureTableShape();
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE recovery_schema.recovery_recurring_charge_runs
       SET status = 'FAILED',
@@ -200,8 +185,6 @@ export class PrismaRecoveryRecurringChargeRepository
   }
 
   async markRunSkipped(input: { runId: string; reason: string }): Promise<void> {
-    await this.ensureTableShape();
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE recovery_schema.recovery_recurring_charge_runs
       SET status = 'SKIPPED',
@@ -217,8 +200,6 @@ export class PrismaRecoveryRecurringChargeRepository
     occurrenceNumber: number;
     nextRunAt?: Date | null;
   }): Promise<RecoveryRecurringChargeRecord> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE recovery_schema.recovery_recurring_charges
       SET occurrences_sent = ${input.occurrenceNumber},
@@ -242,8 +223,6 @@ export class PrismaRecoveryRecurringChargeRepository
     recurrenceId: string;
     reason?: string;
   }): Promise<RecoveryRecurringChargeRecord> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE recovery_schema.recovery_recurring_charges
       SET status = 'CANCELLED',
@@ -265,8 +244,6 @@ export class PrismaRecoveryRecurringChargeRepository
     caseId: string;
     reason?: string;
   }): Promise<number> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<Array<{ count: number }>>(Prisma.sql`
       WITH updated AS (
         UPDATE recovery_schema.recovery_recurring_charges
@@ -335,62 +312,4 @@ export class PrismaRecoveryRecurringChargeRepository
     };
   }
 
-  async ensureTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`CREATE SCHEMA IF NOT EXISTS recovery_schema`);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS recovery_schema.recovery_recurring_charges (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        branch_id UUID NULL,
-        case_id UUID NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-        billing_type VARCHAR(20) NOT NULL DEFAULT 'UNDEFINED',
-        interval_days INTEGER NOT NULL,
-        max_occurrences INTEGER NULL,
-        occurrences_sent INTEGER NOT NULL DEFAULT 0,
-        first_run_at TIMESTAMPTZ NOT NULL,
-        next_run_at TIMESTAMPTZ NULL,
-        last_run_at TIMESTAMPTZ NULL,
-        message_template TEXT NULL,
-        last_error TEXT NULL,
-        lease_until TIMESTAMPTZ NULL,
-        created_by_user_id UUID NULL,
-        created_by_user_email VARCHAR(255) NULL,
-        cancelled_at TIMESTAMPTZ NULL,
-        completed_at TIMESTAMPTZ NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS recovery_schema.recovery_recurring_charge_runs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        recurrence_id UUID NOT NULL,
-        tenant_id UUID NOT NULL,
-        case_id UUID NOT NULL,
-        occurrence_number INTEGER NOT NULL,
-        scheduled_for TIMESTAMPTZ NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'PROCESSING',
-        payment_link_id VARCHAR(120) NULL,
-        conversation_id UUID NULL,
-        message_id UUID NULL,
-        error_message TEXT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        completed_at TIMESTAMPTZ NULL,
-        UNIQUE (recurrence_id, occurrence_number)
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_recovery_recurring_charges_due
-      ON recovery_schema.recovery_recurring_charges (status, next_run_at, lease_until)
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_recovery_recurring_charges_case
-      ON recovery_schema.recovery_recurring_charges (tenant_id, case_id)
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_recovery_recurring_charge_runs_case
-      ON recovery_schema.recovery_recurring_charge_runs (tenant_id, case_id, created_at DESC)
-    `);
-  }
 }
