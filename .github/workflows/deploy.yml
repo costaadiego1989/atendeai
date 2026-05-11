@@ -1,0 +1,217 @@
+name: CI/CD Pipeline - AtendeAi
+
+# ==============================================================================
+# ATENÇÃO: SEGREDOS E VARIÁVEIS DO REPOSITÓRIO GITHUB (REQUISITOS)
+# ==============================================================================
+# Para o funcionamento correto deste pipeline, configure os seguintes segredos em:
+# Settings > Secrets and variables > Actions > New repository secret
+#
+# 🔑 CREDENCIAIS AWS (Obrigatórias):
+#   - AWS_ACCESS_KEY_ID: Chave de acesso do usuário IAM de deploy.
+#   - AWS_SECRET_ACCESS_KEY: Chave secreta correspondente do usuário IAM.
+#
+# 🗄️ PARÂMETROS DE INFRAESTRUTURA (Obrigatórias - Injetadas via Terraform):
+#   - DB_PASSWORD: Senha de produção/staging do banco de dados RDS PostgreSQL.
+#   - MQ_PASSWORD: Senha de produção/staging do RabbitMQ no Amazon MQ.
+#
+# 🌐 CONFIGURAÇÕES DE BUILD DO FRONTEND (Opcionais - Build-time Args):
+#   - VITE_API_ORIGIN: Origem HTTP da API (ex: https://api.atendeai.com).
+#   - VITE_API_URL: URL base da API (ex: https://api.atendeai.com/api/v1).
+#   - VITE_APP_URL: URL do Dashboard Frontend (ex: https://app.atendeai.com).
+#   - VITE_PLATFORM_ADMIN_API_KEY: Token de autenticação administrativo.
+#   - VITE_SHOW_PLATFORM_ADMIN_NAV: "true" para habilitar navegação de admin.
+# ==============================================================================
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  PROJECT_NAME: atendeai
+  ENVIRONMENT: dev
+
+jobs:
+  validate:
+    name: Validate Codebase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Lint and Verify - API
+        run: npm run lint --workspace=src/api
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Verify Types and Build - API
+        run: npm run build:api
+
+      - name: Verify Types and Build - App (Frontend)
+        run: npm run build:app
+
+      - name: Verify Types and Build - Web (Frontend)
+        run: npm run build:web
+
+  deploy:
+    name: Build & Deploy to AWS
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set ECR Metadata
+        run: |
+          echo "IMAGE_TAG=sha-${{ github.sha }}" >> $GITHUB_ENV
+          echo "REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+
+      # 1. API Docker Build & Push
+      - name: Build and Push API Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/api
+          file: ./src/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.PROJECT_NAME }}-api:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_NAME }}-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 2. App Docker Build & Push
+      - name: Build and Push App Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/app
+          file: ./src/app/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.PROJECT_NAME }}-app:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_NAME }}-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_ORIGIN=${{ secrets.VITE_API_ORIGIN }}
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_PLATFORM_ADMIN_API_KEY=${{ secrets.VITE_PLATFORM_ADMIN_API_KEY }}
+            VITE_SHOW_PLATFORM_ADMIN_NAV=${{ secrets.VITE_SHOW_PLATFORM_ADMIN_NAV }}
+
+      # 3. Web Docker Build & Push
+      - name: Build and Push Web Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/web
+          file: ./src/web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.PROJECT_NAME }}-web:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_NAME }}-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_ORIGIN=${{ secrets.VITE_API_ORIGIN }}
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_APP_URL=${{ secrets.VITE_APP_URL }}
+
+      # 4. Setup and Run Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: |
+          terraform apply -auto-approve \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="mq_password=${{ secrets.MQ_PASSWORD }}" \
+            -var="image_tag=${{ env.IMAGE_TAG }}" \
+            -var="environment=${{ env.ENVIRONMENT }}" \
+            -var="project_name=${{ env.PROJECT_NAME }}" \
+            -var="aws_region=${{ env.AWS_REGION }}"
+
+      # 5. Run Prisma Migrations as an ECS One-off Task
+      # Rodamos a migration usando a nova imagem construída (que foi aplicada nas task definitions via terraform)
+      - name: Run Prisma Database Migrations
+        run: |
+          CLUSTER_NAME="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-cluster"
+          TASK_DEF="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-api"
+          
+          echo "Iniciando migração do banco de dados Prisma via container no ECS..."
+          
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEF" \
+            --launch-type EC2 \
+            --overrides '{"containerOverrides": [{"name": "api", "command": ["npx", "prisma", "migrate", "deploy"]}]}' \
+            --query "tasks[0].taskArn" \
+            --output text)
+            
+          if [ -z "$TASK_ARN" ] || [ "$TASK_ARN" == "None" ]; then
+            echo "Erro: Falha ao iniciar a task de migração no ECS!"
+            exit 1
+          fi
+          
+          echo "Task de migração iniciada com sucesso! ARN: $TASK_ARN"
+          echo "Aguardando conclusão da migração..."
+          
+          aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN"
+          
+          EXIT_CODE=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "$TASK_ARN" \
+            --query "tasks[0].containers[0].exitCode" \
+            --output text)
+            
+          if [ "$EXIT_CODE" -ne 0 ]; then
+            echo "Erro: A task de migração do Prisma falhou com código de saída $EXIT_CODE!"
+            REASON=$(aws ecs describe-tasks \
+              --cluster "$CLUSTER_NAME" \
+              --tasks "$TASK_ARN" \
+              --query "tasks[0].containers[0].reason" \
+              --output text)
+            echo "Razão: $REASON"
+            exit 1
+          fi
+          
+          echo "Migração do banco de dados Prisma concluída com sucesso!"
