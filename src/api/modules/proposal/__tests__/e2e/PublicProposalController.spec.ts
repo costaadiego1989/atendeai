@@ -112,4 +112,37 @@ describe('PublicProposalController', () => {
 
     expect(response.body.data).toBeUndefined();
   });
+
+  it('PROP-T-050: rejects tampered tokens without exposing proposal data', async () => {
+    const proposal = buildProposal({
+      id: 'public-proposal-tamper',
+    });
+
+    repository.seed(proposal);
+    const { token } = await publicLinks.ensurePublicLink(proposal);
+
+    await request(app.getHttpServer())
+      .get(`/api/v1/public/proposals/${token.slice(0, -2)}xx`)
+      .expect(404)
+      .expect((response) => {
+        expect(response.body.error.message).toContain('Proposta');
+      });
+  });
+
+  it('PROP-T-051: rejects a valid token after proposal deletion', async () => {
+    const proposal = buildProposal({
+      id: 'public-proposal-deleted',
+    });
+
+    repository.seed(proposal);
+    const { token } = await publicLinks.ensurePublicLink(proposal);
+    await repository.delete(proposal.id);
+
+    await request(app.getHttpServer())
+      .get(`/api/v1/public/proposals/${token}`)
+      .expect(404)
+      .expect((response) => {
+        expect(response.body.error.message).toContain('Proposta');
+      });
+  });
 });
