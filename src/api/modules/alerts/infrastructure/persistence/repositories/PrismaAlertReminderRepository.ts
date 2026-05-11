@@ -10,47 +10,7 @@ import { AlertReminder } from '../../../domain/types/AlertReminder';
 export class PrismaAlertReminderRepository implements IAlertReminderRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async ensureTable(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE SCHEMA IF NOT EXISTS alerts_schema
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS alerts_schema.alert_reminders (
-        id UUID PRIMARY KEY,
-        tenant_id UUID NOT NULL,
-        branch_id UUID,
-        user_id UUID NOT NULL,
-        user_name VARCHAR(255) NOT NULL,
-        user_phone VARCHAR(40) NOT NULL,
-        user_email VARCHAR(255),
-        title VARCHAR(255) NOT NULL,
-        message TEXT NOT NULL,
-        frequency VARCHAR(20) NOT NULL,
-        scheduled_at TIMESTAMPTZ,
-        time_of_day VARCHAR(5),
-        next_trigger_at TIMESTAMPTZ,
-        last_triggered_at TIMESTAMPTZ,
-        status VARCHAR(20) NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE alerts_schema.alert_reminders
-      ADD COLUMN IF NOT EXISTS timezone VARCHAR(80)
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE alerts_schema.alert_reminders
-      ADD COLUMN IF NOT EXISTS branch_id UUID
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_alert_reminders_tenant_branch
-      ON alerts_schema.alert_reminders (tenant_id, branch_id)
-    `);
-  }
-
   async save(reminder: AlertReminder): Promise<void> {
-    await this.ensureTable();
     await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO alerts_schema.alert_reminders (
           id, tenant_id, branch_id, user_id, user_name, user_phone, user_email,
@@ -100,7 +60,6 @@ export class PrismaAlertReminderRepository implements IAlertReminderRepository {
   }
 
   async findById(tenantId: string, reminderId: string): Promise<AlertReminder | null> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT *
         FROM alerts_schema.alert_reminders
@@ -115,7 +74,6 @@ export class PrismaAlertReminderRepository implements IAlertReminderRepository {
     userId: string,
     branchId?: string,
   ): Promise<AlertReminder[]> {
-    await this.ensureTable();
     const rows = branchId
       ? await this.prisma.$queryRaw<any[]>(Prisma.sql`
             SELECT *
@@ -136,7 +94,6 @@ export class PrismaAlertReminderRepository implements IAlertReminderRepository {
   }
 
   async delete(tenantId: string, reminderId: string): Promise<void> {
-    await this.ensureTable();
     await this.prisma.$executeRaw(Prisma.sql`
         DELETE FROM alerts_schema.alert_reminders
         WHERE tenant_id = ${tenantId}::uuid AND id = ${reminderId}::uuid
@@ -144,7 +101,6 @@ export class PrismaAlertReminderRepository implements IAlertReminderRepository {
   }
 
   async countActiveByUser(tenantId: string, userId: string): Promise<number> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<{ c: bigint }[]>(Prisma.sql`
         SELECT COUNT(*)::bigint AS c
         FROM alerts_schema.alert_reminders
@@ -160,7 +116,6 @@ export class PrismaAlertReminderRepository implements IAlertReminderRepository {
     userPhone: string,
     sinceIso: string,
   ): Promise<number> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<{ c: bigint }[]>(Prisma.sql`
         SELECT COUNT(*)::bigint AS c
         FROM alerts_schema.alert_reminders
