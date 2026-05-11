@@ -12,18 +12,12 @@ import {
 } from '@modules/billing/domain/repositories/IBillingRepository';
 import { BillingMapper } from '../mappers/BillingMapper';
 import { PlanType } from '@modules/billing/domain/value-objects/Quotas';
-import { buildBillingCatalogSeedSql } from '@modules/billing/application/support/BillingCatalogSeed';
 
 @Injectable()
 export class PrismaBillingRepository implements IBillingRepository {
-  private subscriptionSchemaEnsured = false;
-  private planCatalogSchemaEnsured = false;
-
   constructor(private readonly prisma: PrismaService) { }
 
   async findSubscription(tenantId: string): Promise<Subscription | null> {
-    await this.ensureSubscriptionSchema();
-
     const [raw] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           id,
@@ -55,8 +49,6 @@ export class PrismaBillingRepository implements IBillingRepository {
   }
 
   async saveSubscription(sub: Subscription): Promise<void> {
-    await this.ensureSubscriptionSchema();
-
     const data = BillingMapper.subscriptionToPersistence(sub);
     await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO billing_schema.subscriptions (
@@ -125,8 +117,6 @@ export class PrismaBillingRepository implements IBillingRepository {
   }
 
   async listPlans(): Promise<BillingPlanCatalogRecord[]> {
-    await this.ensurePlanCatalogSchema();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           code,
@@ -151,8 +141,6 @@ export class PrismaBillingRepository implements IBillingRepository {
   }
 
   async findPlanByCode(code: PlanType): Promise<BillingPlanCatalogRecord | null> {
-    await this.ensurePlanCatalogSchema();
-
     const [row] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           code,
@@ -230,8 +218,6 @@ export class PrismaBillingRepository implements IBillingRepository {
   }
 
   async listNiches(): Promise<BusinessNicheRecord[]> {
-    await this.ensurePlanCatalogSchema();
-
     const niches = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT
         n.*,
@@ -279,8 +265,6 @@ export class PrismaBillingRepository implements IBillingRepository {
   }
 
   async listModules(): Promise<BillingModuleRecord[]> {
-    await this.ensurePlanCatalogSchema();
-
     const modules = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT
         code,
@@ -319,8 +303,6 @@ export class PrismaBillingRepository implements IBillingRepository {
   async listSubscriptionModules(
     subscriptionId: string,
   ): Promise<SubscriptionModuleRecord[]> {
-    await this.ensurePlanCatalogSchema();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT
         subscription_id,
@@ -359,8 +341,6 @@ export class PrismaBillingRepository implements IBillingRepository {
     tenantId: string,
     modules: Array<Omit<SubscriptionModuleRecord, 'subscriptionId' | 'tenantId'>>,
   ): Promise<void> {
-    await this.ensurePlanCatalogSchema();
-
     await this.prisma.$executeRaw(Prisma.sql`
       DELETE FROM billing_schema.subscription_modules
       WHERE subscription_id = ${subscriptionId}::uuid
@@ -395,147 +375,6 @@ export class PrismaBillingRepository implements IBillingRepository {
         )
       `);
     }
-  }
-
-  private async ensureSubscriptionSchema(): Promise<void> {
-    if (this.subscriptionSchemaEnsured) {
-      return;
-    }
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE billing_schema.subscriptions
-      ADD COLUMN IF NOT EXISTS scheduled_plan VARCHAR(20),
-      ADD COLUMN IF NOT EXISTS base_monthly_price NUMERIC(12,2) NOT NULL DEFAULT 0,
-      ADD COLUMN IF NOT EXISTS addons_monthly_price NUMERIC(12,2) NOT NULL DEFAULT 0,
-      ADD COLUMN IF NOT EXISTS total_monthly_price NUMERIC(12,2) NOT NULL DEFAULT 0,
-      ADD COLUMN IF NOT EXISTS pricing_version VARCHAR(50),
-      ADD COLUMN IF NOT EXISTS pricing_snapshot JSONB NOT NULL DEFAULT '{}',
-      ADD COLUMN IF NOT EXISTS config JSONB NOT NULL DEFAULT '{}'
-    `);
-
-    this.subscriptionSchemaEnsured = true;
-  }
-
-  private async ensurePlanCatalogSchema(): Promise<void> {
-    if (this.planCatalogSchemaEnsured) {
-      return;
-    }
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS billing_schema.billing_plan_catalog (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        code VARCHAR(20) NOT NULL UNIQUE,
-        display_name VARCHAR(100) NOT NULL,
-        description TEXT,
-        monthly_price NUMERIC(12,2) NOT NULL,
-        messages_quota INTEGER NOT NULL,
-        ai_tokens_quota INTEGER NOT NULL,
-        contacts_quota INTEGER NOT NULL,
-        pricing_version VARCHAR(50),
-        sort_order INTEGER NOT NULL DEFAULT 0,
-        active BOOLEAN NOT NULL DEFAULT TRUE,
-        features JSONB NOT NULL DEFAULT '[]',
-        is_standard BOOLEAN NOT NULL DEFAULT FALSE,
-        config JSONB NOT NULL DEFAULT '{}',
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS billing_schema.billing_modules (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        code VARCHAR(50) NOT NULL UNIQUE,
-        display_name VARCHAR(100) NOT NULL,
-        description TEXT,
-        category VARCHAR(50),
-        billing_mode VARCHAR(20) NOT NULL DEFAULT 'ADDON',
-        monthly_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
-        pricing_version VARCHAR(50),
-        sales_pitch TEXT,
-        quota_impact JSONB NOT NULL DEFAULT '{}',
-        included_in_plans JSONB NOT NULL DEFAULT '[]',
-        config JSONB NOT NULL DEFAULT '{}',
-        active BOOLEAN NOT NULL DEFAULT TRUE,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS billing_schema.business_niches (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        code VARCHAR(50) NOT NULL UNIQUE,
-        display_name VARCHAR(100) NOT NULL,
-        description TEXT,
-        pains JSONB NOT NULL DEFAULT '[]',
-        icon_name VARCHAR(50),
-        active BOOLEAN NOT NULL DEFAULT TRUE,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS billing_schema.niche_modules (
-        niche_code VARCHAR(50) NOT NULL,
-        module_code VARCHAR(50) NOT NULL,
-        is_recommended BOOLEAN NOT NULL DEFAULT TRUE,
-        is_primary BOOLEAN NOT NULL DEFAULT FALSE,
-        marketing_headline VARCHAR(255),
-        sales_pitch TEXT,
-        sort_order INTEGER NOT NULL DEFAULT 0,
-        PRIMARY KEY (niche_code, module_code)
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS billing_schema.subscription_modules (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        subscription_id UUID NOT NULL,
-        tenant_id UUID NOT NULL,
-        module_code VARCHAR(50) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-        monthly_price NUMERIC(12,2) NOT NULL DEFAULT 0,
-        pricing_version VARCHAR(50),
-        pricing_snapshot JSONB NOT NULL DEFAULT '{}',
-        quota_impact JSONB NOT NULL DEFAULT '{}',
-        metadata JSONB NOT NULL DEFAULT '{}',
-        started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        ended_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        CONSTRAINT uq_subscription_modules_subscription_module UNIQUE (subscription_id, module_code)
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE billing_schema.billing_plan_catalog
-      ADD COLUMN IF NOT EXISTS pricing_version VARCHAR(50)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE billing_schema.billing_modules
-      ADD COLUMN IF NOT EXISTS category VARCHAR(50),
-      ADD COLUMN IF NOT EXISTS billing_mode VARCHAR(20) NOT NULL DEFAULT 'ADDON',
-      ADD COLUMN IF NOT EXISTS pricing_version VARCHAR(50),
-      ADD COLUMN IF NOT EXISTS sales_pitch TEXT,
-      ADD COLUMN IF NOT EXISTS quota_impact JSONB NOT NULL DEFAULT '{}',
-      ADD COLUMN IF NOT EXISTS included_in_plans JSONB NOT NULL DEFAULT '[]'
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE billing_schema.niche_modules
-      ADD COLUMN IF NOT EXISTS is_primary BOOLEAN NOT NULL DEFAULT FALSE,
-      ADD COLUMN IF NOT EXISTS marketing_headline VARCHAR(255),
-      ADD COLUMN IF NOT EXISTS sales_pitch TEXT
-    `);
-
-    for (const statement of buildBillingCatalogSeedSql()) {
-      await this.prisma.$executeRaw(statement);
-    }
-
-    this.planCatalogSchemaEnsured = true;
   }
 
   private mapPlan(row: any): BillingPlanCatalogRecord {
