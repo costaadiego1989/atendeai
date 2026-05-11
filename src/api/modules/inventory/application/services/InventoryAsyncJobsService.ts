@@ -63,7 +63,6 @@ export class InventoryAsyncJobsService {
     payload: Record<string, unknown>;
     totalItems?: number;
   }): Promise<InventoryAsyncJobView> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
       INSERT INTO inventory_schema.inventory_async_jobs (
         tenant_id,
@@ -96,7 +95,6 @@ export class InventoryAsyncJobsService {
   }
 
   async attachQueueJobId(jobId: string, queueJobId: string): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE inventory_schema.inventory_async_jobs
       SET queue_job_id = ${queueJobId},
@@ -106,7 +104,6 @@ export class InventoryAsyncJobsService {
   }
 
   async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE inventory_schema.inventory_async_jobs
       SET status = 'PROCESSING',
@@ -131,7 +128,6 @@ export class InventoryAsyncJobsService {
       fileContent?: string;
     },
   ): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE inventory_schema.inventory_async_jobs
       SET status = 'COMPLETED',
@@ -152,7 +148,6 @@ export class InventoryAsyncJobsService {
   }
 
   async failJob(jobId: string, errorMessage: string): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE inventory_schema.inventory_async_jobs
       SET status = 'FAILED',
@@ -164,7 +159,6 @@ export class InventoryAsyncJobsService {
   }
 
   async listJobs(tenantId: string, limit = 15): Promise<InventoryAsyncJobView[]> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM inventory_schema.inventory_async_jobs
@@ -177,7 +171,6 @@ export class InventoryAsyncJobsService {
   }
 
   async getJob(tenantId: string, jobId: string): Promise<InventoryAsyncJobView> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM inventory_schema.inventory_async_jobs
@@ -199,7 +192,6 @@ export class InventoryAsyncJobsService {
     fileContent?: string | null;
     fileUrl?: string | null;
   }> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM inventory_schema.inventory_async_jobs
@@ -248,35 +240,4 @@ export class InventoryAsyncJobsService {
     };
   }
 
-  private async ensureTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS inventory_schema.inventory_async_jobs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        type VARCHAR(50) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'QUEUED',
-        requested_by_user_id UUID NULL,
-        requested_by_user_email VARCHAR(255) NULL,
-        payload JSONB NOT NULL DEFAULT '{}'::jsonb,
-        progress INTEGER NOT NULL DEFAULT 0,
-        total_items INTEGER NOT NULL DEFAULT 0,
-        processed_items INTEGER NOT NULL DEFAULT 0,
-        result_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
-        file_name VARCHAR(255) NULL,
-        file_mime_type VARCHAR(120) NULL,
-        file_url TEXT NULL,
-        file_content TEXT NULL,
-        error_message TEXT NULL,
-        queue_job_id VARCHAR(120) NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        completed_at TIMESTAMPTZ NULL,
-        failed_at TIMESTAMPTZ NULL
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_inventory_async_jobs_tenant_created
-      ON inventory_schema.inventory_async_jobs (tenant_id, created_at DESC)
-    `);
-  }
 }
