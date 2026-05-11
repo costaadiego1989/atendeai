@@ -1,36 +1,43 @@
-# Matriz de testes por módulo (API)
+# API module testing matrix
 
-Este ficheiro no monorepo aponta para as **especificações de teste** vivas no repositório da API (`src/api`), commitadas junto ao código executável.
+This file points from the monorepo docs to the living API testing specs committed next to the executable code.
 
-## Onde está o detalhe
+## Detail
 
-- **Índice:** [src/api/docs/testing/MODULE-TEST-SPEC-INDEX.md](../../src/api/docs/testing/MODULE-TEST-SPEC-INDEX.md)
-- **Por módulo:** `src/api/modules/<módulo>/TEST-SPEC.md`
+- Test spec index: [src/api/docs/testing/MODULE-TEST-SPEC-INDEX.md](../../src/api/docs/testing/MODULE-TEST-SPEC-INDEX.md)
+- Central guarantee plan: [src/api/API-E2E-GUARANTEE-PLAN.md](../../src/api/API-E2E-GUARANTEE-PLAN.md)
+- Per module: `src/api/modules/<module>/TEST-SPEC.md`
 
-## Resumo de escala (aprox., 2026-05)
+## Inventory snapshot
 
-| Módulo | Ficheiros `*.spec.ts` + `*.e2e-spec.ts` (aprox.) | Nota de risco |
-|--------|---------------------------------------------------|---------------|
-| tenant | ~57 | Cobertura alta; foco em tempo de CI e race conditions. |
-| prospecting | ~35 | Forte em unit; validar smoke worker/CI. |
-| messaging | ~28 | Golden files webhooks recomendados. |
-| billing | ~17 | Reforçar concorrência em quotas. |
-| contact | ~14 | Bastante coberto. |
-| sales | ~14 | Relatórios e decimais. |
-| recovery | ~12 | Templates e injeção. |
-| auth | ~12 | Cookies/CSRF/rate limit. |
-| payment | ~11 | Idempotência webhook. |
-| commerce | ~10 | Sessão concorrente. |
-| scheduling | ~8 | Mock Google para CI. |
-| ai | ~19 | Falhas adapter e safety. |
-| alerts | ~4 | Fila/cron e2e. |
-| agent-rules | ~3 | AuthZ REST. |
-| social | ~3 | E2E Meta sugerido. |
-| platform-admin | ~4 | **P0:** matriz papel/IDOR. |
-| support | ~2 | **P0:** e2e + paginação. |
-| catalog | ~1 | **P0:** unit além do e2e. |
-| inventory | ~3 (inclui 2 unit novos + e2e) | Integrações HTTP mock; DTO vs factory. |
+Generated from local files under `src/api/modules` on 2026-05-08.
 
-## Relação com `MODULE-*.md`
+| Module | Test files | E2E files | Risk note |
+|--------|------------|-----------|-----------|
+| tenant | 57 | 9 | Strong coverage; protect runtime and role matrix. |
+| messaging | 38 | 19 | Very broad coverage; add provider golden files and ordering cases. |
+| prospecting | 35 | 3 | Strong unit coverage; enforce async worker smoke. |
+| ai | 19 | 3 | Good service coverage; harden provider failure contracts. |
+| billing | 17 | 2 | Good domain coverage; add quota race tests. |
+| contact | 14 | 3 | Solid CRM/timeline coverage; add identity merge edge cases. |
+| sales | 14 | 2 | Good financial basics; add concurrent coupon and locale CSV cases. |
+| auth | 12 | 3 | Good core coverage; harden cookie/throttle/session matrix. |
+| proposal | 12 | 1 | Lifecycle covered; add auth/public-link hardening. |
+| recovery | 12 | 1 | Good recovery coverage; add opt-out/payment race tests. |
+| payment | 11 | 3 | Good PSP start; keep webhook idempotency central. |
+| commerce | 10 | 1 | Good focused specs; add concurrent cart/session tests. |
+| scheduling | 8 | 2 | Critical flow covered; many use cases still need targeted units. |
+| inventory | 7 | 1 | Improved coverage; add provider failure matrix. |
+| alerts | 4 | 0 | Missing e2e/worker idempotency confidence. |
+| platform-admin | 4 | 0 | High-risk admin surface needs e2e authz matrix. |
+| agent-rules | 3 | 2 | Needs stronger role/version/history guarantees. |
+| social | 3 | 0 | Needs webhook signature/golden payload e2e. |
+| catalog | 2 | 1 | Under-tested relative to 10 use cases. |
+| support | 2 | 0 | Needs API and tenant-isolation e2e. |
+| dashboard | 1 | 1 | Cross-module reporting slice; add tenant/status/date fixtures. |
 
-Os ficheiros `MODULE-<módulo>.md` nesta pasta descrevem arquitetura/negócio; os `TEST-SPEC.md` no `src/api` descrevem **o que falta testar** e **IDs de cenário** para rastreio em PRs/commits.
+## Relation to `MODULE-*.md`
+
+- `docs/api-modules-review/MODULE-<module>.md` describes architecture, domain role, coupling, and maintainability.
+- `src/api/modules/<module>/TEST-SPEC.md` describes scenario IDs, priority gaps, and test backlog.
+- `src/api/API-E2E-GUARANTEE-PLAN.md` connects modules into full application flows.
