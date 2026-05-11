@@ -15,6 +15,7 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let tenantId: string;
+  let otherTenantId: string;
   let authCookie: string;
 
   const ownerEmail = `dashboard-metrics-owner-${Date.now()}@test.com`;
@@ -58,6 +59,15 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
     });
     tenantId = tenant.id;
 
+    const otherTenant = await prisma.tenant.create({
+      data: {
+        companyName: 'Dashboard Metrics Other Store',
+        cnpj: `dcmo${Date.now().toString().slice(-8)}`,
+        plan: 'PROFISSIONAL',
+      },
+    });
+    otherTenantId = otherTenant.id;
+
     await prisma.user.create({
       data: {
         tenantId,
@@ -99,6 +109,32 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
           source: 'MANUAL',
           resourceType: 'PAYMENT',
         },
+        {
+          tenantId,
+          providerLinkId: `provider-pending-${Date.now()}`,
+          externalId: `sales-charge|${tenantId}|pending`,
+          name: 'Pedido pendente',
+          label: 'Venda pendente',
+          value: 999,
+          url: 'https://pay.test/pending-sale',
+          billingType: 'PIX',
+          status: 'PENDING',
+          source: 'MANUAL',
+          resourceType: 'PAYMENT',
+        },
+        {
+          tenantId: otherTenantId,
+          providerLinkId: `provider-other-sale-${Date.now()}`,
+          externalId: `sales-charge|${otherTenantId}|1`,
+          name: 'Pedido pago outro tenant',
+          label: 'Venda alheia',
+          value: 900,
+          url: 'https://pay.test/other-sale',
+          billingType: 'PIX',
+          status: 'PAID',
+          source: 'MANUAL',
+          resourceType: 'PAYMENT',
+        },
       ],
     });
 
@@ -113,13 +149,26 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
         paidAt: new Date(),
       },
     });
+
+    await prisma.recoveryCase.create({
+      data: {
+        tenantId: otherTenantId,
+        debtorName: 'Cliente outro tenant',
+        phone: '5511999777666',
+        source: 'MANUAL',
+        status: 'PAID',
+        amountDue: 300,
+        paidAt: new Date(),
+      },
+    });
   });
 
   afterAll(async () => {
-    await prisma.paymentLink.deleteMany({ where: { tenantId } }).catch(() => {});
-    await prisma.recoveryCase.deleteMany({ where: { tenantId } }).catch(() => {});
+    await prisma.paymentLink.deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } }).catch(() => {});
+    await prisma.recoveryCase.deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } }).catch(() => {});
     await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
     await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+    await prisma.tenant.deleteMany({ where: { id: otherTenantId } }).catch(() => {});
     await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
     await app.close();
   });
@@ -153,6 +202,20 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
         }),
         expect.objectContaining({
           externalId: expect.stringContaining('recovery|'),
+        }),
+      ]),
+    );
+    expect(linksData.items).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          externalId: expect.stringContaining(`sales-charge|${otherTenantId}|`),
+        }),
+      ]),
+    );
+    expect(recoveryItems).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          tenantId: otherTenantId,
         }),
       ]),
     );
