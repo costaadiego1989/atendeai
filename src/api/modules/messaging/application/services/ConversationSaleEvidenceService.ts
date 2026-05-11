@@ -4,7 +4,7 @@ import {
   CommercialKind,
   CommercialModule,
   CommercialStatus,
-} from './conversation-sale-context';
+} from './ConversationSaleContext';
 
 export interface ConversationSaleEvidenceResult {
   confirmed: boolean;
