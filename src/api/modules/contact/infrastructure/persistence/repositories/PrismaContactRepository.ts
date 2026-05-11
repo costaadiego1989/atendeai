@@ -10,7 +10,6 @@ export class PrismaContactRepository implements IContactRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(contact: Contact): Promise<void> {
-    await this.ensureContactTableShape();
     const data = ContactMapper.toPersistence(contact);
     await this.prisma.contact.upsert({
       where: { id: data.id },
@@ -53,7 +52,6 @@ export class PrismaContactRepository implements IContactRepository {
   }
 
   async findById(tenantId: string, id: string): Promise<Contact | null> {
-    await this.ensureContactTableShape();
     const raw = await this.prisma.contact.findUnique({
       where: {
         tenantId_id: {
@@ -76,7 +74,6 @@ export class PrismaContactRepository implements IContactRepository {
   }
 
   async findByPhone(tenantId: string, phone: string): Promise<Contact | null> {
-    await this.ensureContactTableShape();
     const raw = await this.prisma.contact.findFirst({
       where: { tenantId, phone },
     });
@@ -103,7 +100,6 @@ export class PrismaContactRepository implements IContactRepository {
       branchId?: string;
     } = {},
   ): Promise<{ data: Contact[]; total: number }> {
-    await this.ensureContactTableShape();
     const { page = 1, limit = 20, stage, tag, branchId } = filters;
 
     const offset = (page - 1) * limit;
@@ -197,21 +193,6 @@ export class PrismaContactRepository implements IContactRepository {
         },
       });
     });
-  }
-
-  private async ensureContactTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE contact_schema.contacts
-      ADD COLUMN IF NOT EXISTS document VARCHAR(30)
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE contact_schema.contacts
-      ADD COLUMN IF NOT EXISTS branch_id UUID
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_contacts_tenant_branch_stage
-      ON contact_schema.contacts (tenant_id, branch_id, stage)
-    `);
   }
 
   private async findDocumentsByContactIds(
