@@ -28,13 +28,9 @@ import {
 
 @Injectable()
 export class PrismaCommerceRepository implements ICommerceRepository {
-  private infraEnsured = false;
-
   constructor(private readonly prisma: PrismaService) { }
 
   async saveAuditLog(input: CommerceAuditLogInput): Promise<void> {
-    await this.ensureInfrastructure();
-
     await this.prisma.$executeRaw(Prisma.sql`
       INSERT INTO commerce_schema.commerce_audit_log (
         tenant_id,
@@ -56,214 +52,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         now()
       )
     `);
-  }
-
-  private async ensureInfrastructure(): Promise<void> {
-    if (this.infraEnsured) {
-      return;
-    }
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE SCHEMA IF NOT EXISTS commerce_schema
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS commerce_schema.shipping_policies (
-        tenant_id UUID PRIMARY KEY,
-        mode VARCHAR(20) NOT NULL,
-        fixed_amount NUMERIC(12, 2),
-        price_per_km NUMERIC(12, 2),
-        minimum_amount NUMERIC(12, 2),
-        max_radius_km NUMERIC(10, 2),
-        serviced_neighborhoods JSONB,
-        delivery_schedule JSONB,
-        notes TEXT,
-        active BOOLEAN NOT NULL DEFAULT TRUE,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shipping_policies
-      ADD COLUMN IF NOT EXISTS max_radius_km NUMERIC(10, 2)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shipping_policies
-      ADD COLUMN IF NOT EXISTS serviced_neighborhoods JSONB
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shipping_policies
-      ADD COLUMN IF NOT EXISTS delivery_schedule JSONB
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS commerce_schema.shopping_sessions (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        branch_id UUID,
-        conversation_id UUID NOT NULL,
-        contact_id UUID,
-        status VARCHAR(30) NOT NULL DEFAULT 'BUILDING_CART',
-        fulfillment_type VARCHAR(20),
-        shipping_mode VARCHAR(20),
-        distance_km NUMERIC(10, 2),
-        freight_amount NUMERIC(12, 2),
-        subtotal_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
-        total_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
-        delivery_address TEXT,
-        notes TEXT,
-        payment_reference VARCHAR(255),
-        payment_link_id VARCHAR(80),
-        payment_link_url TEXT,
-        payment_status VARCHAR(20),
-        checked_out_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS current_step VARCHAR(40) NOT NULL DEFAULT 'IDENTIFYING_NEED'
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS pending_query TEXT
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS pending_options JSONB
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS selected_source VARCHAR(20)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS selected_inventory_item_id UUID
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS selected_catalog_item_id UUID
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS selected_item_name VARCHAR(255)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS abandonment_paused BOOLEAN NOT NULL DEFAULT FALSE
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS branch_id UUID
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS abandonment_paused_at TIMESTAMPTZ
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(100)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.shopping_sessions
-      ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(12, 2)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS commerce_schema.shopping_session_items (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        session_id UUID NOT NULL REFERENCES commerce_schema.shopping_sessions(id) ON DELETE CASCADE,
-        tenant_id UUID NOT NULL,
-        source VARCHAR(20) NOT NULL,
-        inventory_item_id UUID,
-        catalog_item_id UUID,
-        name VARCHAR(255) NOT NULL,
-        quantity INT NOT NULL,
-        unit_price NUMERIC(12, 2),
-        currency VARCHAR(10) NOT NULL DEFAULT 'BRL',
-        line_total NUMERIC(12, 2) NOT NULL DEFAULT 0,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS commerce_schema.orders (
-        id UUID PRIMARY KEY,
-        tenant_id UUID NOT NULL,
-        branch_id UUID,
-        session_id UUID NOT NULL UNIQUE REFERENCES commerce_schema.shopping_sessions(id) ON DELETE CASCADE,
-        conversation_id UUID NOT NULL,
-        contact_id UUID,
-        status VARCHAR(30) NOT NULL,
-        fulfillment_type VARCHAR(20),
-        shipping_mode VARCHAR(20),
-        subtotal_amount NUMERIC(12, 2) NOT NULL,
-        freight_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
-        total_amount NUMERIC(12, 2) NOT NULL,
-        delivery_address TEXT,
-        payment_reference VARCHAR(255) UNIQUE,
-        payment_link_id VARCHAR(80),
-        payment_link_url TEXT,
-        payment_status VARCHAR(20),
-        paid_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_commerce_sessions_tenant_conversation
-      ON commerce_schema.shopping_sessions (tenant_id, conversation_id, updated_at DESC)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_commerce_orders_tenant_reference
-      ON commerce_schema.orders (tenant_id, payment_reference)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.orders
-      ADD COLUMN IF NOT EXISTS branch_id UUID
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.orders
-      ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(100)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE commerce_schema.orders
-      ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(12, 2)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_commerce_orders_tenant_branch_status
-      ON commerce_schema.orders (tenant_id, branch_id, status, updated_at DESC)
-    `);
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_commerce_sessions_tenant_branch_status
-      ON commerce_schema.shopping_sessions (tenant_id, branch_id, status, updated_at DESC)
-    `);
-
-    this.infraEnsured = true;
   }
 
   private toSqlString(value: string): string {
@@ -486,8 +274,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async upsertShippingPolicy(
     input: UpsertCommerceShippingPolicyInput,
   ): Promise<CommerceShippingPolicyRecord> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       INSERT INTO commerce_schema.shipping_policies (
         tenant_id,
@@ -536,8 +322,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async upsertAbandonmentConfig(
     input: UpsertCommerceAbandonmentConfigInput,
   ): Promise<CommerceAbandonmentConfigRecord> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       INSERT INTO commerce_schema.commerce_abandonment_configs (
         tenant_id,
@@ -579,8 +363,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async findAbandonmentConfigByTenantId(
     tenantId: string,
   ): Promise<CommerceAbandonmentConfigRecord | null> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT *
       FROM commerce_schema.commerce_abandonment_configs
@@ -597,8 +379,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async findShippingPolicyByTenantId(
     tenantId: string,
   ): Promise<CommerceShippingPolicyRecord | null> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT *
       FROM commerce_schema.shipping_policies
@@ -610,8 +390,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   }
 
   async createSession(input: CreateCommerceSessionInput): Promise<CommerceSessionRecord> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       INSERT INTO commerce_schema.shopping_sessions (
         tenant_id,
@@ -646,8 +424,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     conversationId: string,
   ): Promise<CommerceSessionRecord | null> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT *
       FROM commerce_schema.shopping_sessions
@@ -666,8 +442,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     sessionId: string,
   ): Promise<CommerceSessionRecord | null> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT *
       FROM commerce_schema.shopping_sessions
@@ -682,8 +456,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async addSessionItem(
     input: AddCommerceSessionItemInput,
   ): Promise<CommerceSessionItemRecord> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       INSERT INTO commerce_schema.shopping_session_items (
         session_id,
@@ -721,8 +493,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async updateSessionState(
     input: UpdateCommerceSessionStateInput,
   ): Promise<CommerceSessionRecord> {
-    await this.ensureInfrastructure();
-
     const assignments: Prisma.Sql[] = [];
 
     if ('status' in input) {
@@ -815,8 +585,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   }
 
   async createOrder(input: CreateCommerceOrderInput): Promise<CommerceOrderRecord> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       INSERT INTO commerce_schema.orders (
         id,
@@ -869,8 +637,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     orderId: string,
   ): Promise<CommerceOrderRecord | null> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT *
       FROM commerce_schema.orders
@@ -886,8 +652,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     paymentReference: string,
   ): Promise<CommerceOrderRecord | null> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT *
       FROM commerce_schema.orders
@@ -907,8 +671,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     dateFrom?: Date | null;
     dateTo?: Date | null;
   }): Promise<CommerceOrderListItemRecord[]> {
-    await this.ensureInfrastructure();
-
     const whereClauses: Prisma.Sql[] = [Prisma.sql`orders.tenant_id = ${input.tenantId}::uuid`];
 
     if (input.branchId) {
@@ -965,8 +727,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     orderId: string;
     status: CommerceOrderStatus;
   }): Promise<CommerceOrderRecord> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       UPDATE commerce_schema.orders
       SET
@@ -995,8 +755,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async markOrderPaidByPaymentReference(
     input: MarkCommerceOrderPaidInput,
   ): Promise<CommerceOrderRecord | null> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       UPDATE commerce_schema.orders
       SET
@@ -1030,8 +788,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async listAbandonedSessions(
     input: ListAbandonedCommerceSessionsInput,
   ): Promise<CommerceSessionRecord[]> {
-    await this.ensureInfrastructure();
-
     const limitExpr = input.limit ? Prisma.sql`LIMIT ${Number(input.limit)}` : Prisma.empty;
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT sessions.*
@@ -1068,8 +824,6 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     sessionId: string,
   ): Promise<CommerceAbandonmentTouchRecord[]> {
-    await this.ensureInfrastructure();
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       SELECT
         COALESCE(audit.metadata->>'interval', '') AS interval,
