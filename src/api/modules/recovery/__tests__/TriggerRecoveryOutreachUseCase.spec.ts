@@ -30,10 +30,16 @@ describe('TriggerRecoveryOutreachUseCase', () => {
       messagingFacade,
     );
 
+    const playbookRepository = {
+      findActiveByTenantId: jest.fn().mockResolvedValue(null),
+      findById: jest.fn().mockResolvedValue(null),
+    };
+
     sut = new TriggerRecoveryOutreachUseCase(
       recoveryRepository,
       recoveryCaseMessagingService,
       recoveryOutreachGenerator,
+      playbookRepository as any,
     );
   });
 
