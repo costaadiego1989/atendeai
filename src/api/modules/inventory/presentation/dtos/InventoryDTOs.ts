@@ -24,6 +24,13 @@ const INVENTORY_SOURCES = [
   'ERP_SYNC',
   'PDV_SYNC',
   'ECOMMERCE_SYNC',
+  'BLING',
+  'TINY',
+  'SHOPIFY',
+  'NUVEMSHOP',
+  'WOOCOMMERCE',
+  'MERCADOLIVRE',
+  'SHOPEE',
 ] as const;
 
 export class SyncInventoryItemDTO {

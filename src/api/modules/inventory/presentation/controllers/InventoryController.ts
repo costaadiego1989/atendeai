@@ -22,6 +22,7 @@ import { SyncInventoryItemUseCase } from '../../application/use-cases/SyncInvent
 import { ListInventoryItemsUseCase } from '../../application/use-cases/ListInventoryItemsUseCase';
 import { CreateInventoryConnectionUseCase } from '../../application/use-cases/CreateInventoryConnectionUseCase';
 import { ListInventoryConnectionsUseCase } from '../../application/use-cases/ListInventoryConnectionsUseCase';
+import { SyncInventoryConnectionUseCase } from '../../application/use-cases/SyncInventoryConnectionUseCase';
 import {
   CreateInventoryConnectionDTO,
   GenerateInventoryReportDTO,
@@ -38,6 +39,7 @@ export class InventoryController {
     private readonly listInventoryItemsUseCase: ListInventoryItemsUseCase,
     private readonly createInventoryConnectionUseCase: CreateInventoryConnectionUseCase,
     private readonly listInventoryConnectionsUseCase: ListInventoryConnectionsUseCase,
+    private readonly syncInventoryConnectionUseCase: SyncInventoryConnectionUseCase,
     private readonly generateInventoryReportUseCase: GenerateInventoryReportUseCase,
     private readonly inventoryAsyncJobsService: InventoryAsyncJobsService,
     @InjectQueue('inventory-async-jobs')
@@ -63,6 +65,17 @@ export class InventoryController {
   @Roles('OWNER', 'ADMIN')
   async listConnections(@Param('tenantId') tenantId: string) {
     return this.listInventoryConnectionsUseCase.execute(tenantId);
+  }
+
+  @Post('connections/:connectionId/sync')
+  @Roles('OWNER', 'ADMIN')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async syncConnection(
+    @Param('tenantId') tenantId: string,
+    @Param('connectionId') connectionId: string,
+  ) {
+    await this.syncInventoryConnectionUseCase.execute({ tenantId, connectionId });
+    return { message: 'Sync started', connectionId };
   }
 
   @Post('items/sync')
