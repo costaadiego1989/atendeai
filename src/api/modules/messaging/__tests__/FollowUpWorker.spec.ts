@@ -61,7 +61,7 @@ describe('FollowUpWorker', () => {
       'follow-up',
       expect.any(Function),
       expect.objectContaining({
-        connection: { host: 'localhost', port: 6379 },
+        connection: { host: 'localhost', port: 6379, maxRetriesPerRequest: null, enableReadyCheck: false },
         concurrency: 10,
       }),
     );

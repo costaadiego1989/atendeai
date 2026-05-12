@@ -23,6 +23,7 @@ describe('ProcessOutboundMessageUseCase', () => {
     let tenantFacade: jest.Mocked<ITenantFacade>;
     let eventBus: { publish: jest.Mock };
     let structuredLog: { emit: jest.Mock };
+    let retryService: { sendWithRetry: jest.Mock };
 
     beforeEach(() => {
         conversationRepository = {
@@ -47,6 +48,7 @@ describe('ProcessOutboundMessageUseCase', () => {
             publish: jest.fn(),
         };
         structuredLog = { emit: jest.fn() };
+        retryService = { sendWithRetry: jest.fn() };
         sut = new ProcessOutboundMessageUseCase(
             conversationRepository,
             contactFacade,
@@ -54,6 +56,7 @@ describe('ProcessOutboundMessageUseCase', () => {
             tenantFacade,
             eventBus as any,
             structuredLog as any,
+            retryService as any,
         );
     });
 
@@ -90,10 +93,12 @@ describe('ProcessOutboundMessageUseCase', () => {
             status: 'ACTIVE',
         });
         messagingGateway.sendMessage.mockResolvedValue({ success: true, messageId: 'ext-123' });
+        retryService.sendWithRetry.mockResolvedValue({ success: true, messageId: 'ext-123', attempts: 1, exhaustedRetries: false });
 
         await sut.execute({ messageId: messageId.toString() });
 
-        expect(messagingGateway.sendMessage).toHaveBeenCalledWith(
+        expect(retryService.sendWithRetry).toHaveBeenCalledWith(
+            messagingGateway,
             expect.objectContaining({
                 provider: 'BUBBLEWHATS',
                 credentials: expect.objectContaining({
@@ -102,6 +107,9 @@ describe('ProcessOutboundMessageUseCase', () => {
             }),
             '5521993001883',
             expect.any(Object),
+            expect.objectContaining({
+                messageId: messageId.toString(),
+            }),
         );
         expect(message.deliveryStatus).toBe('SENT');
         expect(conversationRepository.save).toHaveBeenCalledWith(conversation);
@@ -155,12 +163,13 @@ describe('ProcessOutboundMessageUseCase', () => {
             status: 'ACTIVE',
         });
         messagingGateway.sendMessage.mockResolvedValue({ success: false, error: 'API Down' });
+        retryService.sendWithRetry.mockResolvedValue({ success: false, error: 'API Down', attempts: 1, exhaustedRetries: false });
 
         await expect(sut.execute({ messageId: messageId.toString() }))
-            .rejects.toThrow('Failed to send message: API Down');
+            .rejects.toThrow('Failed to send message after 1 attempt(s): API Down');
 
-        expect(message.deliveryStatus).toBe('PENDING'); // Status remains pending for retry
-        expect(conversationRepository.save).not.toHaveBeenCalled();
+        expect(message.deliveryStatus).toBe('FAILED');
+        expect(conversationRepository.save).toHaveBeenCalledWith(conversation);
         expect(eventBus.publish).not.toHaveBeenCalled();
     });
 
