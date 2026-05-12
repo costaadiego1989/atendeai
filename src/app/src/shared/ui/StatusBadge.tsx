@@ -53,6 +53,7 @@ const labelMap: Record<string, { label: string; variant: StatusVariant }> = {
   PROMISE_TO_PAY: { label: 'Promessa de pagamento', variant: 'pending' },
   NO_RESPONSE: { label: 'Sem resposta', variant: 'draft' },
   INVALID_CONTACT: { label: 'Contato invalido', variant: 'closed' },
+  RESPONDED: { label: 'Respondeu', variant: 'success' },
   STOPPED: { label: 'Parado', variant: 'closed' },
   AVAILABLE: { label: 'Disponivel', variant: 'success' },
   LOW_STOCK: { label: 'Estoque baixo', variant: 'warning' },
