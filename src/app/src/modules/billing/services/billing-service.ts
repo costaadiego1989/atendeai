@@ -1,4 +1,5 @@
 import { apiClient, BASE_URL } from '@/shared/api/client';
+import { triggerFileDownload } from '@/shared/lib/file-download';
 import type {
   BillingPlan,
   BillingSubscriptionCatalog,
@@ -50,13 +51,7 @@ export const billingService = {
   },
 
   downloadUsageExportCsv(tenantId: string, fallbackFileName = 'uso-periodo-atual.csv'): void {
-    const anchor = document.createElement('a');
-    anchor.href = `${BASE_URL}/tenants/${tenantId}/usage/export.csv`;
-    anchor.download = fallbackFileName;
-    anchor.rel = 'noopener';
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    triggerFileDownload(`${BASE_URL}/tenants/${tenantId}/usage/export.csv`, fallbackFileName);
   },
 
   async listPlans(tenantId: string): Promise<BillingPlan[]> {
