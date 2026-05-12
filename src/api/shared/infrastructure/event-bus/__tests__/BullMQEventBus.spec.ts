@@ -53,7 +53,8 @@ describe('BullMQEventBus', () => {
       }),
     } as any;
 
-    sut = new BullMQEventBus(configService);
+    const redisConnection = { disconnect: jest.fn(), on: jest.fn() } as any;
+    sut = new BullMQEventBus(configService, redisConnection);
   });
 
   it('should preserve the original event id in the payload without forcing BullMQ-level dedupe', async () => {
