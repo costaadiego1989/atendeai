@@ -6,6 +6,7 @@ import {
   MessageStatus,
   MessageSender,
 } from '@/shared/types';
+import type { PageMeta } from '@/shared/types';
 
 export interface ConversationSaleAttribution {
   id: string;
@@ -65,12 +66,7 @@ interface ListConversationsApiResponse {
       updatedAt: string;
     };
   }>;
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta: PageMeta;
 }
 
 interface GetConversationMessagesApiResponse {
@@ -86,12 +82,7 @@ interface GetConversationMessagesApiResponse {
     timestamp: string;
     deliveryStatus?: MessageStatus;
   }>;
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta: PageMeta;
 }
 
 function mapSender(sentBy: 'CONTACT' | 'AI' | 'HUMAN' | 'SYSTEM'): MessageSender {
