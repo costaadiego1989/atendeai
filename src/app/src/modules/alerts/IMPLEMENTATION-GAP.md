@@ -26,7 +26,7 @@ Backend: [`src/api/modules/alerts/presentation/controllers/AlertReminderControll
 
 | ID | Prioridade | Descrição | Referência backend |
 |----|------------|-----------|---------------------|
-| APP-ALT-002 | P1 | Estados de erro de domínio exibidos com código estável (`DomainException`) | [`src/api/modules/alerts/TEST-SPEC.md`](../../../../api/modules/alerts/TEST-SPEC.md) |
+| APP-ALT-002 | P1 | Estados de erro de domínio exibidos com código estável (`DomainException`). **Resolvido:** mapeamentos adicionados em `shared/api/error-message.ts` (`mapDomainMessage`) para todas as mensagens de `ValidationErrorException` e `EntityNotFoundException` do módulo alerts. Testes em `error-message-alerts-domain.test.ts`. | [`src/api/modules/alerts/TEST-SPEC.md`](../../../../api/modules/alerts/TEST-SPEC.md) |
 
 ## Alinhamento de contrato
 
