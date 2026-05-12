@@ -476,6 +476,14 @@ export const dashboardService = {
           value: snapshot.contacts.length,
           helper: 'Contatos carregados para o radar',
         },
+        'charts.revenue': {
+          value: snapshot.salesMetrics.metrics?.length ?? 0,
+          helper: `${snapshot.salesMetrics.metrics?.length ?? 0} pontos no período`,
+        },
+        'queues.operations': {
+          value: waitingHuman + openRecoveryCases.length,
+          helper: `${waitingHuman} handoff + ${openRecoveryCases.length} cobrança`,
+        },
       },
     };
   },

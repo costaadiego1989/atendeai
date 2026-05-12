@@ -503,11 +503,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 2xl:grid-cols-[1.5fr_1fr]">
-        {showRevenueChart ? <DashboardRevenueChart data={vm.revenueSeries} /> : null}
+        {showRevenueChart ? <DashboardRevenueChart data={vm.revenueSeries} onExportCsv={vm.exportSalesReportCsv} /> : null}
         <DashboardUsagePanel
           usageSeries={vm.usageSeries}
           plan={vm.plan}
           billingCycle={vm.billingCycle}
+          onExportCsv={vm.exportUsageCsv}
         />
       </div>
 

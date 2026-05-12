@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   composeDashboardLayout,
@@ -6,6 +6,8 @@ import {
   type DashboardMetricValue,
   type DashboardRange,
 } from '@/modules/dashboard/services/dashboard-service';
+import { billingService } from '@/modules/billing/services/billing-service';
+import { salesPaymentLinksService } from '@/modules/sales/services/sales-payment-links-service';
 import { buildCommercialRevenueSnapshot } from '@/shared/commercial/commercial-metrics';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import {
@@ -254,6 +256,14 @@ export function useDashboardPageViewModel() {
         value: contacts.length,
         helper: 'Leads e clientes no CRM',
       },
+      'charts.revenue': {
+        value: revenueSeries.length,
+        helper: `${revenueSeries.length} pontos no período`,
+      },
+      'queues.operations': {
+        value: waitingHumanCount + openRecoveryCases.length,
+        helper: `${waitingHumanCount} handoff + ${openRecoveryCases.length} cobrança`,
+      },
     };
     return {
       waitingHumanCount,
@@ -301,6 +311,30 @@ export function useDashboardPageViewModel() {
     };
   }, [snapshotQuery.data, tenantSettingsQuery.data, tenant, activeBranchId]);
 
+  const exportUsageCsv = useCallback(() => {
+    if (tenant?.id) {
+      billingService.downloadUsageExportCsv(tenant.id);
+    }
+  }, [tenant?.id]);
+
+  const exportSalesReportCsv = useCallback(() => {
+    const { startDate, endDate } = (() => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(end.getDate() - (range === '7d' ? 6 : range === '30d' ? 29 : 89));
+      return {
+        startDate: start.toISOString().slice(0, 10),
+        endDate: end.toISOString().slice(0, 10),
+      };
+    })();
+
+    void salesPaymentLinksService.downloadPaymentLinksReport({
+      branchId: activeBranchId ?? undefined,
+      dateFrom: startDate,
+      dateTo: endDate,
+    });
+  }, [range, activeBranchId]);
+
   return {
     user,
     tenant,
@@ -308,6 +342,8 @@ export function useDashboardPageViewModel() {
     setRange,
     snapshotQuery,
     isLoading,
+    exportUsageCsv,
+    exportSalesReportCsv,
     ...derived,
   };
 }

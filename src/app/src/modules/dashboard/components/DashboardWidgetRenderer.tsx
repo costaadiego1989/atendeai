@@ -42,6 +42,23 @@ function formatMetricValue(widget: DashboardWidget, metric?: DashboardMetricValu
   return value.toLocaleString('pt-BR');
 }
 
+/**
+ * Renders KPI widgets inline. CHART and QUEUE widgets are rendered by dedicated
+ * components in DashboardPage (DashboardRevenueChart, DashboardOperationsPanel)
+ * and are intentionally skipped here — they are NOT missing implementations.
+ *
+ * Widget → Service → Endpoint mapping:
+ * - sales.totalRevenue       → salesService.listPaymentLinks   → GET /sales/payment-links
+ * - payments.paidRevenue     → salesService.listPaymentLinks   → GET /sales/payment-links
+ * - payments.newSaleRevenue  → salesService.listPaymentLinks + recoveryService → computed
+ * - payments.recoveredRevenue→ recoveryService.listCases       → GET /recovery/cases
+ * - payments.activeLinks     → salesService.listPaymentLinks   → GET /sales/payment-links
+ * - conversations.waitingHuman → messagingService.listConversations → GET /messaging/conversations
+ * - recovery.openAmount      → recoveryService.listCases       → GET /recovery/cases
+ * - contacts.total           → contactsService.listContacts    → GET /contacts
+ * - charts.revenue           → salesService.getMetrics         → GET /sales/metrics
+ * - queues.operations        → messagingService + recoveryService → computed
+ */
 export function DashboardWidgetRenderer({
   widget,
   metric,
@@ -49,6 +66,7 @@ export function DashboardWidgetRenderer({
   widget: DashboardWidget;
   metric?: DashboardMetricValue;
 }) {
+  // CHART and QUEUE widgets are rendered by dedicated page-level components
   if (widget.kind !== 'KPI') {
     return null;
   }

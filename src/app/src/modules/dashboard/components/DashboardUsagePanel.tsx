@@ -1,4 +1,5 @@
-import { Zap } from 'lucide-react';
+import { Download, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -7,6 +8,7 @@ export function DashboardUsagePanel({
   usageSeries,
   plan,
   billingCycle,
+  onExportCsv,
 }: {
   usageSeries: Array<{
     id: string;
@@ -17,11 +19,20 @@ export function DashboardUsagePanel({
   }>;
   plan?: string;
   billingCycle?: { start: string; end: string };
+  onExportCsv?: () => void;
 }) {
   return (
     <Card className="glass-card">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-base">Consumo do plano</CardTitle>
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-base">Consumo do plano</CardTitle>
+          {onExportCsv && usageSeries.length > 0 ? (
+            <Button variant="ghost" size="sm" className="gap-1.5" onClick={onExportCsv}>
+              <Download className="h-4 w-4" />
+              CSV
+            </Button>
+          ) : null}
+        </div>
         <p className="text-sm text-muted-foreground">
           {plan ? `Plano ${plan}` : 'Uso atual da operação'}{' '}
           {billingCycle?.start && billingCycle?.end
