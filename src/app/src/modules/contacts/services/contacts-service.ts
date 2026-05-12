@@ -7,6 +7,8 @@ import type {
   ContactsReport,
   ContactStage,
   ContactTimelineResult,
+  PageMeta,
+  PaginatedResponse,
 } from '@/shared/types';
 
 type ContactListRow = {
@@ -20,21 +22,13 @@ type ContactListRow = {
   lastInteraction?: string;
 };
 
-interface ListContactsApiResponse {
-  data: ContactListRow[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+type ListContactsApiResponse = PaginatedResponse<ContactListRow>;
 
 function parseListContactsPayload(
   raw: unknown,
   page: number,
   limit: number,
-): { rows: ContactListRow[]; meta: ListContactsApiResponse['meta'] } {
+): { rows: ContactListRow[]; meta: PageMeta } {
   if (Array.isArray(raw)) {
     const rows = raw as ContactListRow[];
     return {
