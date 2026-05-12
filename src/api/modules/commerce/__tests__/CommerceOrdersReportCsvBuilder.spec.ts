@@ -30,6 +30,8 @@ describe('CommerceOrdersReportCsvBuilder', () => {
       abandonmentTouchesCount: 0,
       lastAbandonmentInterval: null,
       lastAbandonmentAt: null,
+      couponCode: null,
+      discountAmount: null,
     };
 
     const csv = builder.build([order], {

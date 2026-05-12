@@ -2,11 +2,13 @@ import { IEventBus } from '@shared/application/ports/IEventBus';
 import { CommercePaymentEventHandler } from '../application/handlers/CommercePaymentEventHandler';
 import { ICommerceRepository } from '../domain/ports/ICommerceRepository';
 import { CommerceOrderPaidIntegrationEvent } from '../application/integration-events/CheckoutIntegrationEvents';
+import { ISalesCouponRepository } from '@modules/sales/domain/repositories/ISalesRepository';
 
 describe('CommercePaymentEventHandler', () => {
   let handler: CommercePaymentEventHandler;
   let eventBus: jest.Mocked<IEventBus>;
   let commerceRepository: jest.Mocked<ICommerceRepository>;
+  let salesRepository: jest.Mocked<ISalesCouponRepository>;
 
   beforeEach(() => {
     eventBus = {
@@ -33,7 +35,17 @@ describe('CommercePaymentEventHandler', () => {
       findInventoryItemById: jest.fn(),
     } as unknown as jest.Mocked<ICommerceRepository>;
 
-    handler = new CommercePaymentEventHandler(eventBus, commerceRepository);
+    salesRepository = {
+      createCoupon: jest.fn(),
+      updateCoupon: jest.fn(),
+      deleteCoupon: jest.fn(),
+      findCouponById: jest.fn(),
+      findCouponByCode: jest.fn(),
+      listCoupons: jest.fn(),
+      incrementCouponUsage: jest.fn(),
+    } as unknown as jest.Mocked<ISalesCouponRepository>;
+
+    handler = new CommercePaymentEventHandler(eventBus, commerceRepository, salesRepository);
   });
 
   it('should subscribe to payment.confirmed on module init', () => {
@@ -56,6 +68,7 @@ describe('CommercePaymentEventHandler', () => {
     commerceRepository.findOrderByPaymentReference.mockResolvedValue({
       id: 'order-1',
       tenantId: 'tenant-1',
+      branchId: null,
       sessionId: 'session-1',
       conversationId: 'conversation-1',
       contactId: 'contact-1',
@@ -69,6 +82,8 @@ describe('CommercePaymentEventHandler', () => {
       paymentReference: 'commerce|tenant-1|order-1',
       paymentLinkId: 'plink-1',
       paymentLinkUrl: 'https://pay.test/plink-1',
+      couponCode: null,
+      discountAmount: null,
       paymentStatus: 'PENDING',
       paidAt: null,
       createdAt: new Date(),
@@ -77,6 +92,7 @@ describe('CommercePaymentEventHandler', () => {
     commerceRepository.markOrderPaidByPaymentReference.mockResolvedValue({
       id: 'order-1',
       tenantId: 'tenant-1',
+      branchId: null,
       sessionId: 'session-1',
       conversationId: 'conversation-1',
       contactId: 'contact-1',
@@ -90,6 +106,8 @@ describe('CommercePaymentEventHandler', () => {
       paymentReference: 'commerce|tenant-1|order-1',
       paymentLinkId: 'plink-1',
       paymentLinkUrl: 'https://pay.test/plink-1',
+      couponCode: null,
+      discountAmount: null,
       paymentStatus: 'PAID',
       paidAt: new Date('2026-04-08T19:00:00.000Z'),
       createdAt: new Date(),

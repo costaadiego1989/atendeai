@@ -45,6 +45,7 @@ describe('TriggerCommerceAbandonmentTouchUseCase', () => {
     commerceRepository.findOrderById.mockResolvedValue({
       id: 'order-1',
       tenantId: 'tenant-1',
+      branchId: null,
       sessionId: 'session-1',
       conversationId: 'conversation-1',
       contactId: 'contact-1',
@@ -58,6 +59,8 @@ describe('TriggerCommerceAbandonmentTouchUseCase', () => {
       paymentReference: 'commerce|tenant-1|order-1',
       paymentLinkId: 'plink-1',
       paymentLinkUrl: 'https://pay.test/plink-1',
+      couponCode: null,
+      discountAmount: null,
       paymentStatus: 'PENDING',
       paidAt: null,
       createdAt: new Date(),
@@ -66,6 +69,7 @@ describe('TriggerCommerceAbandonmentTouchUseCase', () => {
     commerceRepository.findSessionById.mockResolvedValue({
       id: 'session-1',
       tenantId: 'tenant-1',
+      branchId: null,
       conversationId: 'conversation-1',
       contactId: 'contact-1',
       status: 'AWAITING_PAYMENT',
@@ -84,6 +88,8 @@ describe('TriggerCommerceAbandonmentTouchUseCase', () => {
       paymentStatus: 'PENDING',
       abandonmentPaused: false,
       abandonmentPausedAt: null,
+      couponCode: null,
+      discountAmount: null,
       pendingQuery: null,
       pendingOptions: [],
       selectedSource: null,
