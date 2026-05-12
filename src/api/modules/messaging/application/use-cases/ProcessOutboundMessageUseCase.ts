@@ -26,7 +26,9 @@ import {
   MessageFailedIntegrationEvent,
   MessageSentIntegrationEvent,
 } from '../integration-events/publishers/MessageSentIntegrationEvent';
+import { MessageDeliveryFailedIntegrationEvent } from '../integration-events/publishers/MessageDeliveryFailedIntegrationEvent';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
+import { OutboundMessageRetryService } from '../services/OutboundMessageRetryService';
 
 export interface ProcessOutboundMessageInput {
   messageId: string;
@@ -48,6 +50,7 @@ export class ProcessOutboundMessageUseCase {
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
     private readonly structuredLog: StructuredLogEmitter,
+    private readonly retryService: OutboundMessageRetryService,
   ) {}
 
   async execute(input: ProcessOutboundMessageInput): Promise<void> {
@@ -144,13 +147,21 @@ export class ProcessOutboundMessageUseCase {
       },
     });
 
-    const result = await gateway.sendMessage(
+    const messageContent = {
+      type: message.contentType.toLowerCase(),
+      text: message.content.text,
+      url: message.content.url,
+    };
+
+    const result = await this.retryService.sendWithRetry(
+      gateway,
       config,
       contact.phone,
+      messageContent,
       {
-        type: message.contentType.toLowerCase(),
-        text: message.content.text,
-        url: message.content.url,
+        messageId: input.messageId,
+        tenantId: conversation.tenantId.toString(),
+        conversationId: conversation.id.toString(),
       },
     );
 
@@ -184,9 +195,36 @@ export class ProcessOutboundMessageUseCase {
           message_id: message.id.toString(),
           conversation_id: conversation.id.toString(),
           channel: conversation.channel,
+          attempts: String(result.attempts),
         },
       });
     } else {
+      message.updateStatus('FAILED');
+      await this.conversationRepository.save(conversation);
+
+      if (result.exhaustedRetries) {
+        await this.eventBus.publish(
+          new MessageDeliveryFailedIntegrationEvent(
+            {
+              tenantId: conversation.tenantId.toString(),
+              conversationId: conversation.id.toString(),
+              contactId: conversation.contactId.toString(),
+              messageId: message.id.toString(),
+              channel: conversation.channel,
+              reason: 'RETRIES_EXHAUSTED',
+              attempts: result.attempts,
+              lastError: result.error ?? 'unknown',
+              content: {
+                type: message.contentType,
+                text: message.content.text ?? '',
+                ...(message.content.url ? { url: message.content.url } : {}),
+              },
+            },
+            `messaging:delivery-failed:${message.id.toString()}`,
+          ),
+        );
+      }
+
       this.structuredLog.emit({
         level: 'error',
         event: 'messaging.outbound.gateway_rejected',
@@ -197,9 +235,11 @@ export class ProcessOutboundMessageUseCase {
           message_id: input.messageId,
           conversation_id: conversation.id.toString(),
           channel: conversation.channel,
+          attempts: String(result.attempts),
+          retries_exhausted: String(result.exhaustedRetries),
         },
       });
-      throw new Error(`Failed to send message: ${result.error}`);
+      throw new Error(`Failed to send message after ${result.attempts} attempt(s): ${result.error}`);
     }
   }
 

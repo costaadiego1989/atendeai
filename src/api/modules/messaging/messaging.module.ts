@@ -80,6 +80,7 @@ import { SchedulingIntegrationHandlers } from './application/handlers/Scheduling
 import { SalesIntegrationHandlers } from './application/handlers/SalesIntegrationHandlers';
 import { CommerceIntegrationHandlers } from './application/handlers/CommerceIntegrationHandlers';
 import { CommerceModule } from '@modules/commerce/commerce.module';
+import { OutboundMessageRetryService } from './application/services/OutboundMessageRetryService';
 
 @Module({
   imports: [
@@ -183,6 +184,7 @@ import { CommerceModule } from '@modules/commerce/commerce.module';
     SendAIMessageUseCase,
     ProcessOutboundMessageUseCase,
     ProcessWebhookUseCase,
+    OutboundMessageRetryService,
     AIResponseGeneratedHandler,
     MessagingRealtimeEventsHandler,
     MessagingBusinessRulesHandler,
