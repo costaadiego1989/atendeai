@@ -21,7 +21,7 @@ Backend: [`SalesController.ts`](../../../../api/modules/sales/presentation/contr
 |----|------------|-----------|---------------------|
 | ~~APP-SAL-001~~ | ~~P1~~ | ~~Redeem cupom~~ — [`redeemCoupon` / `redeemCouponById`](./services/sales-coupons-service.ts) | `SalesController` |
 | ~~APP-SAL-002~~ | ~~P1~~ | ~~CSV links~~ — [`downloadPaymentLinksReport`](./services/sales-payment-links-service.ts) usa `GET /sales/links/report.csv` | `SalesController` |
-| APP-SAL-003 | P1 | Promoções: possível sobreposição com fluxo `tenant` (`/tenants/:id/promotions`) também usado em settings — evitar divergência de origem de verdade | `TenantController` |
+| APP-SAL-003 | P1 | Promoções: possível sobreposição com fluxo `tenant` (`/tenants/:id/promotions`) também usado em settings — evitar divergência de origem de verdade. **Resolvido:** são conceitos distintos (comercial vs informativo) com storage separado. Documentação de escopo adicionada em `sales-promotions-service.ts`, `usePromotionsViewModel.ts` e `usePromotionsSettingsViewModel.ts`. | `TenantController` |
 
 ## Alinhamento de contrato
 
