@@ -1,4 +1,5 @@
 import { apiClient, BASE_URL } from '@/shared/api/client';
+import { triggerFileDownload } from '@/shared/lib/file-download';
 import type { ProspectingAsyncJob } from '@/shared/types';
 import { prospectingAdsService } from './prospecting-ads-service';
 import { prospectingCampaignService } from './prospecting-campaign-service';
@@ -29,14 +30,17 @@ export const prospectingService = {
   async listAsyncJobs(): Promise<ProspectingAsyncJob[]> {
     return apiClient.get<ProspectingAsyncJob[]>('/prospecting/reports/jobs');
   },
+  async getAsyncJob(jobId: string): Promise<ProspectingAsyncJob> {
+    return apiClient.get<ProspectingAsyncJob>(`/prospecting/reports/jobs/${jobId}`);
+  },
   async downloadAsyncJobFile(jobId: string, fallbackFileName?: string): Promise<void> {
-    const anchor = document.createElement('a');
-    anchor.href = `${BASE_URL}/prospecting/reports/jobs/${jobId}/download`;
-    anchor.download = fallbackFileName ?? `prospecting-${jobId}.csv`;
-
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    triggerFileDownload(
+      `${BASE_URL}/prospecting/reports/jobs/${jobId}/download`,
+      fallbackFileName ?? `prospecting-${jobId}.csv`,
+    );
+  },
+  async dispatchExecution(executionId: string): Promise<void> {
+    await apiClient.post(`/prospecting/executions/${executionId}/dispatch`);
   },
   ...prospectingAdsService,
   ...prospectingSearchService,
