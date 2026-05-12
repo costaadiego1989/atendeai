@@ -26,6 +26,7 @@ import { ConfigService } from '@nestjs/config';
 import { PlatformAdminModule } from './modules/platform-admin/platform-admin.module';
 import { ObservabilityModule } from './shared/infrastructure/observability/observability.module';
 import { ResilienceModule } from './shared/infrastructure/resilience/ResilienceModule';
+import { HealthModule } from './shared/infrastructure/health/HealthModule';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './shared/infrastructure/http/filters/GlobalExceptionFilter';
 import { StructuredLogEmitter } from './shared/infrastructure/observability/StructuredLogEmitter';
@@ -47,6 +48,7 @@ import { parseRedisConnection } from './shared/infrastructure/redis/redis-connec
     }),
     ObservabilityModule,
     ResilienceModule,
+    HealthModule,
     DatabaseModule,
     RedisModule,
     EventBusModule,
