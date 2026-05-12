@@ -18,7 +18,7 @@ export class PrismaSchedulingRecurringReservationRepository
   async create(
     input: CreateSchedulingRecurringReservationInput,
   ): Promise<SchedulingRecurringReservationRecord> {
-    await this.ensureTableShape();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO scheduling_schema.scheduling_recurring_reservations (
         tenant_id,
@@ -73,7 +73,7 @@ export class PrismaSchedulingRecurringReservationRepository
     tenantId: string,
     recurrenceId: string,
   ): Promise<SchedulingRecurringReservationRecord | null> {
-    await this.ensureTableShape();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_recurring_reservations
@@ -89,7 +89,7 @@ export class PrismaSchedulingRecurringReservationRepository
     professionalId?: string | null;
     status?: SchedulingRecurringReservationStatus | null;
   }): Promise<SchedulingRecurringReservationRecord[]> {
-    await this.ensureTableShape();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_recurring_reservations
@@ -105,7 +105,7 @@ export class PrismaSchedulingRecurringReservationRepository
     now: Date,
     limit: number,
   ): Promise<SchedulingRecurringReservationRecord[]> {
-    await this.ensureTableShape();
+
     const leaseUntil = new Date(now.getTime() + 5 * 60 * 1000);
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations AS recurrence
@@ -133,7 +133,7 @@ export class PrismaSchedulingRecurringReservationRepository
     recurrenceId: string;
     errorMessage?: string | null;
   }): Promise<void> {
-    await this.ensureTableShape();
+
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations
       SET lease_until = NULL,
@@ -150,7 +150,7 @@ export class PrismaSchedulingRecurringReservationRepository
     occurrenceNumber: number;
     targetDate: string;
   }): Promise<SchedulingRecurringReservationRunRecord | null> {
-    await this.ensureTableShape();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO scheduling_schema.scheduling_recurring_reservation_runs (
         recurrence_id,
@@ -176,7 +176,7 @@ export class PrismaSchedulingRecurringReservationRepository
     runId: string;
     slotId: string;
   }): Promise<void> {
-    await this.ensureTableShape();
+
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservation_runs
       SET status = 'SUCCEEDED',
@@ -190,7 +190,7 @@ export class PrismaSchedulingRecurringReservationRepository
     runId: string;
     errorMessage: string;
   }): Promise<void> {
-    await this.ensureTableShape();
+
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservation_runs
       SET status = 'FAILED',
@@ -201,7 +201,7 @@ export class PrismaSchedulingRecurringReservationRepository
   }
 
   async markRunSkipped(input: { runId: string; reason: string }): Promise<void> {
-    await this.ensureTableShape();
+
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservation_runs
       SET status = 'SKIPPED',
@@ -218,7 +218,7 @@ export class PrismaSchedulingRecurringReservationRepository
     nextDate?: string | null;
     nextRunAt?: Date | null;
   }): Promise<SchedulingRecurringReservationRecord> {
-    await this.ensureTableShape();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations
       SET occurrences_created = ${input.occurrencesCreated},
@@ -239,7 +239,7 @@ export class PrismaSchedulingRecurringReservationRepository
     recurrenceId: string;
     reason?: string;
   }): Promise<SchedulingRecurringReservationRecord> {
-    await this.ensureTableShape();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations
       SET status = 'CANCELLED',
@@ -260,7 +260,7 @@ export class PrismaSchedulingRecurringReservationRepository
     tenantId: string;
     recurrenceId: string;
   }): Promise<void> {
-    await this.ensureTableShape();
+
     await this.prisma.$transaction(async (transaction) => {
       await transaction.$executeRaw(Prisma.sql`
         DELETE FROM scheduling_schema.scheduling_recurring_reservation_runs
@@ -335,68 +335,5 @@ export class PrismaSchedulingRecurringReservationRepository
 
   private toDateString(value: Date | string): string {
     return value instanceof Date ? value.toISOString().slice(0, 10) : String(value).slice(0, 10);
-  }
-
-  private async ensureTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`CREATE SCHEMA IF NOT EXISTS scheduling_schema`);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS scheduling_schema.scheduling_recurring_reservations (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        branch_id UUID NULL,
-        professional_id VARCHAR(80) NOT NULL,
-        contact_id UUID NULL,
-        category_id VARCHAR(80) NULL,
-        conversation_id UUID NULL,
-        period VARCHAR(20) NOT NULL,
-        interval INTEGER NOT NULL DEFAULT 1,
-        max_occurrences INTEGER NOT NULL,
-        occurrences_created INTEGER NOT NULL DEFAULT 0,
-        starts_at VARCHAR(5) NOT NULL,
-        ends_at VARCHAR(5) NOT NULL,
-        first_date DATE NOT NULL,
-        end_date DATE NULL,
-        next_date DATE NULL,
-        next_run_at TIMESTAMPTZ NULL,
-        is_free BOOLEAN NOT NULL DEFAULT TRUE,
-        is_online BOOLEAN NOT NULL DEFAULT FALSE,
-        payment_timeout_hours INTEGER NULL,
-        notes TEXT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-        last_error TEXT NULL,
-        lease_until TIMESTAMPTZ NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        completed_at TIMESTAMPTZ NULL,
-        cancelled_at TIMESTAMPTZ NULL
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE scheduling_schema.scheduling_recurring_reservations
-      ADD COLUMN IF NOT EXISTS interval INTEGER NOT NULL DEFAULT 1
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE scheduling_schema.scheduling_recurring_reservations
-      ADD COLUMN IF NOT EXISTS end_date DATE NULL
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS scheduling_schema.scheduling_recurring_reservation_runs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        recurrence_id UUID NOT NULL,
-        tenant_id UUID NOT NULL,
-        occurrence_number INTEGER NOT NULL,
-        target_date DATE NOT NULL,
-        slot_id VARCHAR(80) NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'PROCESSING',
-        error_message TEXT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        completed_at TIMESTAMPTZ NULL,
-        UNIQUE (recurrence_id, occurrence_number)
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_scheduling_recurring_reservations_due
-      ON scheduling_schema.scheduling_recurring_reservations (status, next_run_at, lease_until)
-    `);
   }
 }

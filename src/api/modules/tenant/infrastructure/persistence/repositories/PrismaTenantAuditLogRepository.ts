@@ -12,8 +12,6 @@ export class PrismaTenantAuditLogRepository implements ITenantAuditLogRepository
   constructor(private readonly prisma: PrismaService) { }
 
   async record(input: TenantAuditLogInput): Promise<void> {
-    await this.ensureTableShape();
-
     await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO tenant_schema.tenant_audit_logs (
           tenant_id,
@@ -35,8 +33,6 @@ export class PrismaTenantAuditLogRepository implements ITenantAuditLogRepository
     tenantId: string,
     limit = 10,
   ): Promise<TenantAuditLogEntry[]> {
-    await this.ensureTableShape();
-
     const rows = await this.prisma.$queryRaw<
       Array<{
         id: string;
@@ -71,27 +67,5 @@ export class PrismaTenantAuditLogRepository implements ITenantAuditLogRepository
       metadata: (row.metadata ?? {}) as Record<string, unknown>,
       createdAt: row.created_at,
     }));
-  }
-
-  private async ensureTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS tenant_schema.tenant_audit_logs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        user_id UUID NULL,
-        email VARCHAR(255) NULL,
-        event_type VARCHAR(80) NOT NULL,
-        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_tenant_audit_logs_tenant_created
-      ON tenant_schema.tenant_audit_logs(tenant_id, created_at DESC)
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_tenant_audit_logs_event_created
-      ON tenant_schema.tenant_audit_logs(event_type, created_at DESC)
-    `);
   }
 }

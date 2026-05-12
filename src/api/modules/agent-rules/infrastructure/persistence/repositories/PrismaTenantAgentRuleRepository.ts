@@ -36,8 +36,6 @@ type AgentRuleHistoryRow = {
 
 @Injectable()
 export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleRepository {
-  private infrastructureReady: Promise<void> | null = null;
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findByModule(
@@ -45,7 +43,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     moduleId: AgentModule,
     branchId?: string | null,
   ): Promise<TenantAgentRule | null> {
-    await this.ensureInfrastructure();
 
     if (branchId) {
       const branchRule = await this.findExactByScope(tenantId, moduleId, branchId);
@@ -73,7 +70,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     moduleId: AgentModule,
     branchId?: string | null,
   ): Promise<TenantAgentRule | null> {
-    await this.ensureInfrastructure();
 
     const rows = branchId
       ? await this.prisma.$queryRaw<AgentRuleRow[]>(Prisma.sql`
@@ -126,7 +122,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
   }
 
   async save(rule: TenantAgentRule): Promise<void> {
-    await this.ensureInfrastructure();
 
     if (rule.branchId) {
       const updatedRows = await this.prisma.$executeRaw(Prisma.sql`
@@ -232,7 +227,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
   }
 
   async saveHistory(history: TenantAgentRuleHistory): Promise<void> {
-    await this.ensureInfrastructure();
 
     await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO tenant_schema.tenant_agent_rule_history (
@@ -266,7 +260,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     branchId?: string | null;
     limit: number;
   }): Promise<TenantAgentRuleHistory[]> {
-    await this.ensureInfrastructure();
 
     const lim = Math.min(100, Math.max(1, params.limit));
 
@@ -316,55 +309,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
       updatedByUserId: row.updatedByUserId ?? undefined,
       updatedByUserName: row.updatedByUserName ?? undefined,
     }));
-  }
-
-  private async ensureInfrastructure(): Promise<void> {
-    if (!this.infrastructureReady) {
-      this.infrastructureReady = (async () => {
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE tenant_schema.tenant_agent_rules
-          ADD COLUMN IF NOT EXISTS branch_id UUID
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE tenant_schema.tenant_agent_rule_history
-          ADD COLUMN IF NOT EXISTS branch_id UUID
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE tenant_schema.tenant_agent_rules
-          DROP CONSTRAINT IF EXISTS uq_tenant_agent_rules
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE tenant_schema.tenant_agent_rules
-          DROP CONSTRAINT IF EXISTS tenant_agent_rules_tenant_id_module_id_key
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          DROP INDEX IF EXISTS tenant_schema.uq_tenant_agent_rules
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          DROP INDEX IF EXISTS tenant_schema.tenant_agent_rules_tenant_id_module_id_key
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE UNIQUE INDEX IF NOT EXISTS uq_tenant_agent_rules_tenant_scope
-          ON tenant_schema.tenant_agent_rules (tenant_id, module_id)
-          WHERE branch_id IS NULL
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE UNIQUE INDEX IF NOT EXISTS uq_tenant_agent_rules_branch_scope
-          ON tenant_schema.tenant_agent_rules (tenant_id, module_id, branch_id)
-          WHERE branch_id IS NOT NULL
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE INDEX IF NOT EXISTS idx_tenant_agent_rules_lookup
-          ON tenant_schema.tenant_agent_rules (tenant_id, module_id, branch_id)
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE INDEX IF NOT EXISTS idx_tenant_agent_rule_history_lookup_v2
-          ON tenant_schema.tenant_agent_rule_history (tenant_id, module_id, branch_id, created_at DESC)
-        `);
-      })();
-    }
-
-    await this.infrastructureReady;
   }
 
   private toDomain(row: AgentRuleRow): TenantAgentRule {

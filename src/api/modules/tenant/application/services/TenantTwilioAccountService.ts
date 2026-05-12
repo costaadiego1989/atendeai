@@ -24,8 +24,6 @@ export class TenantTwilioAccountService {
   ) {}
 
   async findByTenantId(tenantId: string): Promise<TenantTwilioAccount | null> {
-    await this.ensureSchema();
-
     const [row] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT
         tenant_id,
@@ -57,8 +55,6 @@ export class TenantTwilioAccountService {
     tenantId: string;
     companyName: string;
   }): Promise<TenantTwilioAccount> {
-    await this.ensureSchema();
-
     const existing = await this.findByTenantId(input.tenantId);
     if (existing) {
       return existing;
@@ -113,24 +109,6 @@ export class TenantTwilioAccountService {
       accountSid: account.accountSid,
       authToken: account.authToken,
     };
-  }
-
-  private async ensureSchema(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS tenant_schema.tenant_twilio_accounts (
-        tenant_id UUID PRIMARY KEY,
-        account_sid VARCHAR(34) NOT NULL UNIQUE,
-        auth_token TEXT NOT NULL,
-        status VARCHAR(30) NOT NULL DEFAULT 'active',
-        friendly_name VARCHAR(100) NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT tenant_twilio_accounts_tenant_id_fkey
-          FOREIGN KEY (tenant_id)
-          REFERENCES tenant_schema.tenants(id)
-          ON DELETE CASCADE
-      )
-    `);
   }
 
   private mapRow(row: any): TenantTwilioAccount {

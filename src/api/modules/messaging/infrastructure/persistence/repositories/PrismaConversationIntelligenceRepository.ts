@@ -10,15 +10,12 @@ import {
 export class PrismaConversationIntelligenceRepository
   implements IConversationIntelligenceRepository
 {
-  private static infraPromise: Promise<void> | null = null;
-
   constructor(private readonly prisma: PrismaService) {}
 
   async save(
     record: Omit<ConversationIntelligenceRecord, 'updatedAt'>,
     options?: { tx?: Prisma.TransactionClient },
   ): Promise<void> {
-    await this.ensureInfra();
     const executor = options?.tx ?? this.prisma;
 
     await executor.$executeRaw(Prisma.sql`
@@ -59,7 +56,6 @@ export class PrismaConversationIntelligenceRepository
     tenantId: string,
     conversationIds: string[],
   ): Promise<Record<string, ConversationIntelligenceRecord>> {
-    await this.ensureInfra();
     if (!conversationIds.length) {
       return {};
     }
@@ -113,35 +109,5 @@ export class PrismaConversationIntelligenceRepository
       },
       {},
     );
-  }
-
-  private async ensureInfra(): Promise<void> {
-    if (!PrismaConversationIntelligenceRepository.infraPromise) {
-      PrismaConversationIntelligenceRepository.infraPromise = (async () => {
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE TABLE IF NOT EXISTS messaging_schema.conversation_intelligence (
-            tenant_id UUID NOT NULL,
-            conversation_id UUID NOT NULL,
-            summary TEXT NOT NULL,
-            sentiment VARCHAR(20) NOT NULL DEFAULT 'NEUTRAL',
-            tags JSONB NOT NULL DEFAULT '[]'::jsonb,
-            interests JSONB NOT NULL DEFAULT '[]'::jsonb,
-            next_step TEXT,
-            loss_reason TEXT,
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            PRIMARY KEY (tenant_id, conversation_id)
-          )
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE INDEX IF NOT EXISTS idx_conversation_intelligence_sentiment
-          ON messaging_schema.conversation_intelligence (tenant_id, sentiment)
-        `);
-      })().catch((error) => {
-        PrismaConversationIntelligenceRepository.infraPromise = null;
-        throw error;
-      });
-    }
-
-    await PrismaConversationIntelligenceRepository.infraPromise;
   }
 }

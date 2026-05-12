@@ -11,15 +11,12 @@ import {
 export class PrismaContactFinancialProfileRepository
   implements IContactFinancialProfileRepository
 {
-  private ensured = false;
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findByTenantAndContact(
     tenantId: string,
     contactId: string,
   ): Promise<ContactFinancialProfileRecord | null> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<
       Array<{
         id: string;
@@ -64,7 +61,6 @@ export class PrismaContactFinancialProfileRepository
   async save(
     record: Omit<ContactFinancialProfileRecord, 'createdAt' | 'updatedAt'>,
   ): Promise<ContactFinancialProfileRecord> {
-    await this.ensureTable();
     const id = record.id || randomUUID();
     const rows = await this.prisma.$queryRaw<
       Array<{
@@ -115,26 +111,5 @@ export class PrismaContactFinancialProfileRepository
       createdAt: raw.created_at,
       updatedAt: raw.updated_at,
     };
-  }
-
-  private async ensureTable(): Promise<void> {
-    if (this.ensured) {
-      return;
-    }
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS contact_schema.contact_financial_profiles (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL REFERENCES tenant_schema.tenants(id) ON DELETE CASCADE,
-        contact_id UUID NOT NULL REFERENCES contact_schema.contacts(id) ON DELETE CASCADE,
-        provider VARCHAR(20) NOT NULL DEFAULT 'ASAAS',
-        asaas_customer_id VARCHAR(80) NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT uq_contact_financial_profiles_tenant_contact UNIQUE (tenant_id, contact_id)
-      )
-    `);
-
-    this.ensured = true;
   }
 }

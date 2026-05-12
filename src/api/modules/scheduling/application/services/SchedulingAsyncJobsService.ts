@@ -66,7 +66,6 @@ export class SchedulingAsyncJobsService {
     payload: Record<string, unknown>;
     totalItems?: number;
   }): Promise<SchedulingAsyncJobView> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
       INSERT INTO scheduling_schema.scheduling_async_jobs (
         tenant_id,
@@ -101,7 +100,6 @@ export class SchedulingAsyncJobsService {
   }
 
   async attachQueueJobId(jobId: string, queueJobId: string): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_async_jobs
       SET queue_job_id = ${queueJobId},
@@ -111,7 +109,6 @@ export class SchedulingAsyncJobsService {
   }
 
   async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_async_jobs
       SET status = 'PROCESSING',
@@ -136,7 +133,6 @@ export class SchedulingAsyncJobsService {
       fileContent?: string;
     },
   ): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_async_jobs
       SET status = 'COMPLETED',
@@ -157,7 +153,6 @@ export class SchedulingAsyncJobsService {
   }
 
   async failJob(jobId: string, errorMessage: string): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_async_jobs
       SET status = 'FAILED',
@@ -169,7 +164,6 @@ export class SchedulingAsyncJobsService {
   }
 
   async listJobs(tenantId: string, limit = 15): Promise<SchedulingAsyncJobView[]> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_async_jobs
@@ -182,7 +176,6 @@ export class SchedulingAsyncJobsService {
   }
 
   async getJob(tenantId: string, jobId: string): Promise<SchedulingAsyncJobView> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_async_jobs
@@ -207,7 +200,6 @@ export class SchedulingAsyncJobsService {
     fileContent?: string | null;
     fileUrl?: string | null;
   }> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_async_jobs
@@ -255,45 +247,5 @@ export class SchedulingAsyncJobsService {
       completedAt: row.completed_at,
       failedAt: row.failed_at,
     };
-  }
-
-  private async ensureTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE SCHEMA IF NOT EXISTS scheduling_schema
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS scheduling_schema.scheduling_async_jobs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        branch_id UUID NULL,
-        type VARCHAR(50) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'QUEUED',
-        requested_by_user_id UUID NULL,
-        requested_by_user_email VARCHAR(255) NULL,
-        payload JSONB NOT NULL DEFAULT '{}'::jsonb,
-        progress INTEGER NOT NULL DEFAULT 0,
-        total_items INTEGER NOT NULL DEFAULT 0,
-        processed_items INTEGER NOT NULL DEFAULT 0,
-        result_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
-        file_name VARCHAR(255) NULL,
-        file_mime_type VARCHAR(120) NULL,
-        file_url TEXT NULL,
-        file_content TEXT NULL,
-        error_message TEXT NULL,
-        queue_job_id VARCHAR(120) NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        completed_at TIMESTAMPTZ NULL,
-        failed_at TIMESTAMPTZ NULL
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_scheduling_async_jobs_tenant_created
-      ON scheduling_schema.scheduling_async_jobs (tenant_id, created_at DESC)
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_scheduling_async_jobs_tenant_status
-      ON scheduling_schema.scheduling_async_jobs (tenant_id, status)
-    `);
   }
 }

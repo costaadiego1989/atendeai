@@ -30,8 +30,6 @@ export class TenantPDFResumeRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async upsert(input: UpsertTenantPDFResumeRecordInput): Promise<TenantPDFResumeRecord> {
-    await this.ensureTable();
-
     const checksumFilter = input.checksum
       ? Prisma.sql`checksum = ${input.checksum}`
       : Prisma.sql`file_url = ${input.fileUrl}`;
@@ -80,8 +78,6 @@ export class TenantPDFResumeRepository {
   }
 
   async listByTenant(tenantId: string): Promise<TenantPDFResumeRecord[]> {
-    await this.ensureTable();
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM tenant_schema.tenant_pdf_resumes
@@ -93,8 +89,6 @@ export class TenantPDFResumeRepository {
   }
 
   async listReadySummaries(tenantId: string): Promise<string[]> {
-    await this.ensureTable();
-
     const rows = await this.prisma.$queryRaw<Array<{ summaries: unknown }>>(Prisma.sql`
       SELECT summaries
       FROM tenant_schema.tenant_pdf_resumes
@@ -105,27 +99,6 @@ export class TenantPDFResumeRepository {
     `);
 
     return rows.flatMap((row) => this.normalizeSummaries(row.summaries));
-  }
-
-  private async ensureTable() {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS tenant_schema.tenant_pdf_resumes (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        file_name VARCHAR(255) NOT NULL,
-        file_url TEXT,
-        checksum VARCHAR(128),
-        summaries JSONB NOT NULL DEFAULT '[]'::jsonb,
-        status VARCHAR(20) NOT NULL DEFAULT 'PROCESSING',
-        error TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_tenant_pdf_resumes_tenant_status
-      ON tenant_schema.tenant_pdf_resumes (tenant_id, status)
-    `);
   }
 
   private map(row: any): TenantPDFResumeRecord {

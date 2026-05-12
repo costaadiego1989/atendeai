@@ -14,37 +14,7 @@ export class PrismaProspectLeadCaptureRepository
   implements IProspectLeadCaptureRepository {
   constructor(private readonly prisma: PrismaService) { }
 
-  private async ensureTable(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS prospecting_schema.prospect_lead_captures (
-        id UUID PRIMARY KEY,
-        tenant_id UUID NOT NULL,
-        source VARCHAR(40) NOT NULL DEFAULT 'GOOGLE_ADS_LEAD_FORM',
-        external_lead_id VARCHAR(255) NOT NULL,
-        google_ads_customer_id VARCHAR(64),
-        campaign_name VARCHAR(255),
-        form_name VARCHAR(255),
-        full_name VARCHAR(255),
-        phone VARCHAR(40),
-        email VARCHAR(255),
-        city VARCHAR(100),
-        state VARCHAR(50),
-        instagram_handle VARCHAR(255),
-        document VARCHAR(30),
-        interests JSONB,
-        raw_payload JSONB,
-        submission_at TIMESTAMPTZ NOT NULL,
-        import_status VARCHAR(30) NOT NULL DEFAULT 'NEW',
-        contact_id VARCHAR(255),
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        UNIQUE (tenant_id, external_lead_id)
-      )
-    `);
-  }
-
   async saveMany(leads: ProspectLeadCapture[]): Promise<void> {
-    await this.ensureTable();
     for (const lead of leads) {
       const data = ProspectLeadCaptureMapper.toPersistence(lead);
       await this.prisma.$executeRaw(Prisma.sql`
@@ -84,8 +54,6 @@ export class PrismaProspectLeadCaptureRepository
     tenantId: string,
     filters: ProspectLeadCaptureFilters,
   ): Promise<ProspectLeadCapturePage> {
-    await this.ensureTable();
-    
     const conditions = [Prisma.sql`tenant_id = ${tenantId}::uuid`];
 
     if (filters.campaignName?.trim()) {
@@ -139,7 +107,6 @@ export class PrismaProspectLeadCaptureRepository
   }
 
   async findManyByIds(tenantId: string, leadIds: string[]): Promise<ProspectLeadCapture[]> {
-    await this.ensureTable();
     if (!leadIds.length) {
       return [];
     }

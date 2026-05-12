@@ -65,7 +65,6 @@ export class ProspectingAsyncJobsService {
     payload: Record<string, unknown>;
     totalItems?: number;
   }): Promise<ProspectingAsyncJobView> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
       INSERT INTO prospecting_schema.prospecting_async_jobs (
         tenant_id,
@@ -98,7 +97,6 @@ export class ProspectingAsyncJobsService {
   }
 
   async attachQueueJobId(jobId: string, queueJobId: string): Promise<void> {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET queue_job_id = ${queueJobId},
@@ -108,7 +106,6 @@ export class ProspectingAsyncJobsService {
   }
 
   async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }) {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET status = 'PROCESSING',
@@ -133,7 +130,6 @@ export class ProspectingAsyncJobsService {
       fileContent?: string;
     },
   ) {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET status = 'COMPLETED',
@@ -154,7 +150,6 @@ export class ProspectingAsyncJobsService {
   }
 
   async failJob(jobId: string, errorMessage: string) {
-    await this.ensureTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET status = 'FAILED',
@@ -166,7 +161,6 @@ export class ProspectingAsyncJobsService {
   }
 
   async listJobs(tenantId: string, limit = 15): Promise<ProspectingAsyncJobView[]> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM prospecting_schema.prospecting_async_jobs
@@ -179,7 +173,6 @@ export class ProspectingAsyncJobsService {
   }
 
   async getJob(tenantId: string, jobId: string): Promise<ProspectingAsyncJobView> {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM prospecting_schema.prospecting_async_jobs
@@ -196,7 +189,6 @@ export class ProspectingAsyncJobsService {
   }
 
   async getDownloadPayload(tenantId: string, jobId: string) {
-    await this.ensureTableShape();
     const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM prospecting_schema.prospecting_async_jobs
@@ -244,42 +236,4 @@ export class ProspectingAsyncJobsService {
     };
   }
 
-  private async ensureTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE SCHEMA IF NOT EXISTS prospecting_schema
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS prospecting_schema.prospecting_async_jobs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL,
-        type VARCHAR(50) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'QUEUED',
-        requested_by_user_id UUID NULL,
-        requested_by_user_email VARCHAR(255) NULL,
-        payload JSONB NOT NULL DEFAULT '{}'::jsonb,
-        progress INTEGER NOT NULL DEFAULT 0,
-        total_items INTEGER NOT NULL DEFAULT 0,
-        processed_items INTEGER NOT NULL DEFAULT 0,
-        result_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
-        file_name VARCHAR(255) NULL,
-        file_mime_type VARCHAR(120) NULL,
-        file_url TEXT NULL,
-        file_content TEXT NULL,
-        error_message TEXT NULL,
-        queue_job_id VARCHAR(120) NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        completed_at TIMESTAMPTZ NULL,
-        failed_at TIMESTAMPTZ NULL
-      )
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_prospecting_async_jobs_tenant_created
-      ON prospecting_schema.prospecting_async_jobs (tenant_id, created_at DESC)
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE INDEX IF NOT EXISTS idx_prospecting_async_jobs_tenant_status
-      ON prospecting_schema.prospecting_async_jobs (tenant_id, status)
-    `);
-  }
 }

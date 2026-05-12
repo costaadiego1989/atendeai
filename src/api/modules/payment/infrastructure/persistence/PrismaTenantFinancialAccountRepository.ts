@@ -11,14 +11,11 @@ import {
 export class PrismaTenantFinancialAccountRepository
   implements ITenantFinancialAccountRepository
 {
-  private ensured = false;
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findByTenantId(
     tenantId: string,
   ): Promise<TenantFinancialAccountRecord | null> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<
       Array<{
         id: string;
@@ -65,7 +62,6 @@ export class PrismaTenantFinancialAccountRepository
   async save(
     record: Omit<TenantFinancialAccountRecord, 'createdAt' | 'updatedAt'>,
   ): Promise<TenantFinancialAccountRecord> {
-    await this.ensureTable();
     const id = record.id || randomUUID();
     const rows = await this.prisma.$queryRaw<
       Array<{
@@ -123,26 +119,5 @@ export class PrismaTenantFinancialAccountRepository
       createdAt: raw.created_at,
       updatedAt: raw.updated_at,
     };
-  }
-
-  private async ensureTable(): Promise<void> {
-    if (this.ensured) {
-      return;
-    }
-
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS tenant_schema.tenant_financial_accounts (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL UNIQUE REFERENCES tenant_schema.tenants(id) ON DELETE CASCADE,
-        provider VARCHAR(20) NOT NULL DEFAULT 'ASAAS',
-        asaas_account_id VARCHAR(80) NOT NULL,
-        wallet_id VARCHAR(80) NOT NULL,
-        status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-
-    this.ensured = true;
   }
 }

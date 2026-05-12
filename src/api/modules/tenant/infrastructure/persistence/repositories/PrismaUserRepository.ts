@@ -10,7 +10,6 @@ export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaService) { }
 
   async saveWithTenant(user: User, tenantId: string): Promise<void> {
-    await this.ensureUserTableShape();
     const data = UserMapper.toPersistence(user, tenantId);
     await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO tenant_schema.users (
@@ -49,7 +48,6 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async save(user: User): Promise<void> {
-    await this.ensureUserTableShape();
     const existing = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>(Prisma.sql`
         SELECT tenant_id
         FROM tenant_schema.users
@@ -78,7 +76,6 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    await this.ensureUserTableShape();
     const [raw] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           id,
@@ -96,7 +93,6 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async findByIdAndTenant(id: string, tenantId: string): Promise<User | null> {
-    await this.ensureUserTableShape();
     const [raw] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           id,
@@ -115,7 +111,6 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    await this.ensureUserTableShape();
     const [raw] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           id,
@@ -140,7 +135,6 @@ export class PrismaUserRepository implements IUserRepository {
     email: string;
     phone: string;
   } | null> {
-    await this.ensureUserTableShape();
     const [raw] = await this.prisma.$queryRaw<
       Array<{ id: string; name: string; email: string; phone: string }>
     >(Prisma.sql`
@@ -154,7 +148,6 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async findAllByTenant(tenantId: string): Promise<User[]> {
-    await this.ensureUserTableShape();
     const rawUsers = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           id,
@@ -172,17 +165,9 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.ensureUserTableShape();
     await this.prisma.$executeRaw(Prisma.sql`
         DELETE FROM tenant_schema.users
         WHERE id = ${id}::uuid
       `);
-  }
-
-  private async ensureUserTableShape(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE tenant_schema.users
-      ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT FALSE
-    `);
   }
 }

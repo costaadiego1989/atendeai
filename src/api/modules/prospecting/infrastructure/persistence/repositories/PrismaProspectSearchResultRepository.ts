@@ -10,19 +10,7 @@ export class PrismaProspectSearchResultRepository
   implements IProspectSearchResultRepository {
   constructor(private readonly prisma: PrismaService) { }
 
-  private async ensureChannelColumns(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE prospecting_schema.prospect_search_results
-      ADD COLUMN IF NOT EXISTS whatsapp_phone TEXT
-    `);
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE prospecting_schema.prospect_search_results
-      ADD COLUMN IF NOT EXISTS instagram_url TEXT
-    `);
-  }
-
   async saveMany(results: ProspectSearchResult[]): Promise<void> {
-    await this.ensureChannelColumns();
     for (const result of results) {
       const data = ProspectSearchResultMapper.toPersistence(result);
 
@@ -91,7 +79,6 @@ export class PrismaProspectSearchResultRepository
     tenantId: string,
     searchId: string,
   ): Promise<ProspectSearchResult[]> {
-    await this.ensureChannelColumns();
     const results = await this.prisma.$queryRaw<
       Array<{
         id: string;

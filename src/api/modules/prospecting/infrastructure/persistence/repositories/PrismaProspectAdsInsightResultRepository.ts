@@ -12,26 +12,7 @@ export class PrismaProspectAdsInsightResultRepository
   implements IProspectAdsInsightResultRepository {
   constructor(private readonly prisma: PrismaService) { }
 
-  private async ensureTable(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS prospecting_schema.prospect_ads_insight_results (
-        id UUID PRIMARY KEY,
-        tenant_id UUID NOT NULL,
-        query_id UUID NOT NULL,
-        result_type VARCHAR(40) NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        subtitle TEXT,
-        metric_value DOUBLE PRECISION,
-        score DOUBLE PRECISION,
-        metadata JSONB,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-  }
-
   async saveMany(results: ProspectAdsInsightResult[]): Promise<void> {
-    await this.ensureTable();
     for (const result of results) {
       const data = ProspectAdsInsightResultMapper.toPersistence(result);
       await this.prisma.$executeRaw(Prisma.sql`
@@ -56,7 +37,6 @@ export class PrismaProspectAdsInsightResultRepository
   }
 
   async deleteByQuery(tenantId: string, queryId: string): Promise<void> {
-    await this.ensureTable();
     await this.prisma.$executeRaw(Prisma.sql`
         DELETE FROM prospecting_schema.prospect_ads_insight_results
         WHERE tenant_id = ${tenantId}::uuid AND query_id = ${queryId}::uuid
@@ -64,7 +44,6 @@ export class PrismaProspectAdsInsightResultRepository
   }
 
   async findAllByQuery(tenantId: string, queryId: string): Promise<ProspectAdsInsightResult[]> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT *
         FROM prospecting_schema.prospect_ads_insight_results

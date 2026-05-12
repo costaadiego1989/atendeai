@@ -10,15 +10,7 @@ export class PrismaProspectSearchRepository
   implements IProspectSearchRepository {
   constructor(private readonly prisma: PrismaService) { }
 
-  private async ensureNeighborhoodColumn(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE prospecting_schema.prospect_searches
-      ADD COLUMN IF NOT EXISTS neighborhood TEXT
-    `);
-  }
-
   async save(search: ProspectSearch): Promise<void> {
-    await this.ensureNeighborhoodColumn();
     const data = ProspectSearchMapper.toPersistence(search);
 
     await this.prisma.$executeRaw(Prisma.sql`
@@ -69,7 +61,6 @@ export class PrismaProspectSearchRepository
   }
 
   async findById(tenantId: string, id: string): Promise<ProspectSearch | null> {
-    await this.ensureNeighborhoodColumn();
     const results = await this.prisma.$queryRaw<
       Array<{
         id: string;
@@ -111,7 +102,6 @@ export class PrismaProspectSearchRepository
   }
 
   async findBySearchId(id: string): Promise<ProspectSearch | null> {
-    await this.ensureNeighborhoodColumn();
     const results = await this.prisma.$queryRaw<
       Array<{
         id: string;
@@ -153,7 +143,6 @@ export class PrismaProspectSearchRepository
   }
 
   async findAllByTenant(tenantId: string): Promise<ProspectSearch[]> {
-    await this.ensureNeighborhoodColumn();
     const results = await this.prisma.$queryRaw<
       Array<{
         id: string;

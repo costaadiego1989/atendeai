@@ -8,264 +8,12 @@ import { MessagingMapper } from '../mappers/MessagingMapper';
 
 @Injectable()
 export class PrismaConversationRepository implements IConversationRepository {
-  private static orderingInfraPromise: Promise<void> | null = null;
-  private static assignmentInfraPromise: Promise<void> | null = null;
-  private static queueInfraPromise: Promise<void> | null = null;
-  private static branchInfraPromise: Promise<void> | null = null;
-
   constructor(private readonly prisma: PrismaService) { }
-
-  private async ensureConversationBranchInfra(): Promise<void> {
-    if (!PrismaConversationRepository.branchInfraPromise) {
-      PrismaConversationRepository.branchInfraPromise = (async () => {
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS branch_id UUID
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE INDEX IF NOT EXISTS idx_conversations_tenant_branch_status
-          ON messaging_schema.conversations (tenant_id, branch_id, status)
-        `);
-      })().catch((error) => {
-        PrismaConversationRepository.branchInfraPromise = null;
-        throw error;
-      });
-    }
-
-    await PrismaConversationRepository.branchInfraPromise;
-  }
-
-  private async ensureConversationAssignmentInfra(): Promise<void> {
-    if (!PrismaConversationRepository.assignmentInfraPromise) {
-      PrismaConversationRepository.assignmentInfraPromise = (async () => {
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS assigned_user_id UUID
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS released_at TIMESTAMPTZ
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE INDEX IF NOT EXISTS idx_conversations_assigned_user
-          ON messaging_schema.conversations (tenant_id, assigned_user_id)
-        `);
-      })().catch((error) => {
-        PrismaConversationRepository.assignmentInfraPromise = null;
-        throw error;
-      });
-    }
-
-    await PrismaConversationRepository.assignmentInfraPromise;
-  }
-
-  private async ensureConversationQueueInfra(): Promise<void> {
-    if (!PrismaConversationRepository.queueInfraPromise) {
-      PrismaConversationRepository.queueInfraPromise = (async () => {
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS unread_count INTEGER NOT NULL DEFAULT 0
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS last_inbound_at TIMESTAMPTZ
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS last_outbound_at TIMESTAMPTZ
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS last_message_at TIMESTAMPTZ
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS last_message_direction VARCHAR(10)
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS last_message_preview TEXT
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS last_read_at TIMESTAMPTZ
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.conversations
-          ADD COLUMN IF NOT EXISTS last_read_sort_order BIGINT
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          UPDATE messaging_schema.conversations c
-          SET
-            last_inbound_at = (
-              SELECT m.created_at
-              FROM messaging_schema.messages m
-              WHERE m.conversation_id = c.id
-                AND m.direction = 'INBOUND'
-              ORDER BY m.created_at DESC, m.id DESC
-              LIMIT 1
-            ),
-            last_outbound_at = (
-              SELECT m.created_at
-              FROM messaging_schema.messages m
-              WHERE m.conversation_id = c.id
-                AND m.direction = 'OUTBOUND'
-              ORDER BY m.created_at DESC, m.id DESC
-              LIMIT 1
-            ),
-            last_message_at = (
-              SELECT m.created_at
-              FROM messaging_schema.messages m
-              WHERE m.conversation_id = c.id
-              ORDER BY m.created_at DESC, m.id DESC
-              LIMIT 1
-            ),
-            last_message_direction = (
-              SELECT m.direction
-              FROM messaging_schema.messages m
-              WHERE m.conversation_id = c.id
-              ORDER BY m.created_at DESC, m.id DESC
-              LIMIT 1
-            ),
-            last_message_preview = (
-              SELECT COALESCE(m.content ->> 'text', '')
-              FROM messaging_schema.messages m
-              WHERE m.conversation_id = c.id
-              ORDER BY m.created_at DESC, m.id DESC
-              LIMIT 1
-            ),
-            unread_count = COALESCE((
-              SELECT COUNT(*)
-              FROM messaging_schema.messages inbound
-              WHERE inbound.conversation_id = c.id
-                AND inbound.direction = 'INBOUND'
-                AND inbound.sort_order > COALESCE(
-                  GREATEST(
-                    (
-                      SELECT outbound.sort_order
-                      FROM messaging_schema.messages outbound
-                      WHERE outbound.conversation_id = c.id
-                        AND outbound.direction = 'OUTBOUND'
-                      ORDER BY outbound.sort_order DESC NULLS LAST, outbound.created_at DESC, outbound.id DESC
-                      LIMIT 1
-                    ),
-                    c.last_read_sort_order
-                  ),
-                  (
-                    SELECT outbound.sort_order
-                    FROM messaging_schema.messages outbound
-                    WHERE outbound.conversation_id = c.id
-                      AND outbound.direction = 'OUTBOUND'
-                    ORDER BY outbound.sort_order DESC NULLS LAST, outbound.created_at DESC, outbound.id DESC
-                    LIMIT 1
-                  ),
-                  c.last_read_sort_order,
-                  0
-                )
-            ), 0)
-          WHERE EXISTS (
-            SELECT 1
-            FROM messaging_schema.messages m
-            WHERE m.conversation_id = c.id
-          )
-        `);
-      })().catch((error) => {
-        PrismaConversationRepository.queueInfraPromise = null;
-        throw error;
-      });
-    }
-
-    await PrismaConversationRepository.queueInfraPromise;
-  }
-
-  private async ensureMessageOrderingInfra(): Promise<void> {
-    if (!PrismaConversationRepository.orderingInfraPromise) {
-      PrismaConversationRepository.orderingInfraPromise = (async () => {
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE SEQUENCE IF NOT EXISTS messaging_schema.messages_sort_order_seq
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.messages
-          ADD COLUMN IF NOT EXISTS sort_order BIGINT
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE messaging_schema.messages
-          ALTER COLUMN sort_order SET DEFAULT nextval('messaging_schema.messages_sort_order_seq')
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          WITH max_value AS (
-            SELECT COALESCE(MAX(sort_order), 0) AS base
-            FROM messaging_schema.messages
-          ),
-          ordered AS (
-            SELECT
-              ctid,
-              ROW_NUMBER() OVER (
-                ORDER BY conversation_id ASC, created_at ASC, ctid ASC
-              ) AS row_number
-            FROM messaging_schema.messages
-            WHERE sort_order IS NULL
-          )
-          UPDATE messaging_schema.messages AS messages
-          SET sort_order = max_value.base + ordered.row_number
-          FROM ordered, max_value
-          WHERE messages.ctid = ordered.ctid
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          SELECT setval(
-            'messaging_schema.messages_sort_order_seq',
-            GREATEST(
-              COALESCE(
-              (SELECT MAX(sort_order) FROM messaging_schema.messages),
-                1
-              ),
-              1
-            ),
-            true
-          )
-        `);
-
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE INDEX IF NOT EXISTS idx_messages_conversation_sort_order
-          ON messaging_schema.messages (conversation_id, sort_order)
-        `);
-      })().catch((error) => {
-        PrismaConversationRepository.orderingInfraPromise = null;
-        throw error;
-      });
-    }
-
-    await PrismaConversationRepository.orderingInfraPromise;
-  }
 
   async save(
     conversation: Conversation,
     options?: { tx?: Prisma.TransactionClient },
   ): Promise<void> {
-    await this.ensureMessageOrderingInfra();
-    await this.ensureConversationQueueInfra();
-    await this.ensureConversationBranchInfra();
-
     const data = MessagingMapper.toPersistence(conversation);
     const { messages, branchId, ...conversationData } = data;
 
@@ -427,9 +175,6 @@ export class PrismaConversationRepository implements IConversationRepository {
       assignedUserId?: string;
     },
   ): Promise<{ data: Conversation[]; total: number }> {
-    await this.ensureConversationBranchInfra();
-    await this.ensureConversationAssignmentInfra();
-
     const { page = 1, limit = 20, status, branchId, assignedUserId } = filters;
     const offset = (page - 1) * limit;
 
@@ -495,8 +240,6 @@ export class PrismaConversationRepository implements IConversationRepository {
     conversationId: string,
     userId: string | null,
   ): Promise<void> {
-    await this.ensureConversationAssignmentInfra();
-
     await this.prisma.$executeRaw(Prisma.sql`
         UPDATE messaging_schema.conversations
         SET
@@ -518,8 +261,6 @@ export class PrismaConversationRepository implements IConversationRepository {
     tenantId: string,
     conversationIds: string[],
   ): Promise<Record<string, { id: string; name: string; assignedAt?: Date }>> {
-    await this.ensureConversationAssignmentInfra();
-
     if (!conversationIds.length) {
       return {};
     }
@@ -574,8 +315,6 @@ export class PrismaConversationRepository implements IConversationRepository {
       }
     >
   > {
-    await this.ensureConversationQueueInfra();
-
     if (!conversationIds.length) {
       return {};
     }
@@ -703,8 +442,6 @@ export class PrismaConversationRepository implements IConversationRepository {
   }
 
   async markAsRead(tenantId: string, conversationId: string): Promise<void> {
-    await this.ensureConversationQueueInfra();
-
     await this.prisma.$executeRaw(Prisma.sql`
         UPDATE messaging_schema.conversations
         SET
@@ -727,8 +464,6 @@ export class PrismaConversationRepository implements IConversationRepository {
     page: number,
     limit: number,
   ): Promise<{ data: Message[]; total: number }> {
-    await this.ensureMessageOrderingInfra();
-
     const [results, total] = await Promise.all([
       this.prisma.$queryRaw<
         Array<{

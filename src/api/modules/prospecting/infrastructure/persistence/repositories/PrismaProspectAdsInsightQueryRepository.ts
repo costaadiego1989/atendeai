@@ -12,30 +12,7 @@ export class PrismaProspectAdsInsightQueryRepository
   implements IProspectAdsInsightQueryRepository {
   constructor(private readonly prisma: PrismaService) { }
 
-  private async ensureTable(): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      CREATE TABLE IF NOT EXISTS prospecting_schema.prospect_ads_insight_queries (
-        id UUID PRIMARY KEY,
-        tenant_id UUID NOT NULL,
-        source VARCHAR(30) NOT NULL DEFAULT 'GOOGLE_ADS_AUDIENCE',
-        segment VARCHAR(255) NOT NULL,
-        city VARCHAR(100),
-        state VARCHAR(50),
-        country VARCHAR(10) NOT NULL DEFAULT 'BR',
-        age_range VARCHAR(50),
-        gender VARCHAR(30),
-        interest VARCHAR(255),
-        status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-        discovered_count INTEGER NOT NULL DEFAULT 0,
-        failure_reason TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-  }
-
   async save(query: ProspectAdsInsightQuery): Promise<void> {
-    await this.ensureTable();
     const data = ProspectAdsInsightQueryMapper.toPersistence(query);
     await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO prospecting_schema.prospect_ads_insight_queries (
@@ -64,7 +41,6 @@ export class PrismaProspectAdsInsightQueryRepository
   }
 
   async findById(tenantId: string, queryId: string): Promise<ProspectAdsInsightQuery | null> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT *
         FROM prospecting_schema.prospect_ads_insight_queries
@@ -75,7 +51,6 @@ export class PrismaProspectAdsInsightQueryRepository
   }
 
   async findAllByTenant(tenantId: string): Promise<ProspectAdsInsightQuery[]> {
-    await this.ensureTable();
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT *
         FROM prospecting_schema.prospect_ads_insight_queries

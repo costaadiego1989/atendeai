@@ -18,14 +18,12 @@ import { CatalogCategoryInUseError } from '../../../domain/errors/CatalogCategor
 
 @Injectable()
 export class PrismaCatalogRepository implements ICatalogRepository {
-  private static catalogExtensionsPromise: Promise<void> | null = null;
-
   constructor(private readonly prisma: PrismaService) {}
 
   async createCategory(
     input: CreateCatalogCategoryInput,
   ): Promise<CatalogCategoryRecord> {
-    await this.ensureCatalogExtensions();
+
     const parent = input.parentCategoryId
       ? await this.findCategoryById(input.tenantId, input.parentCategoryId)
       : null;
@@ -58,7 +56,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   async updateCategory(
     input: UpdateCatalogCategoryInput,
   ): Promise<CatalogCategoryRecord> {
-    await this.ensureCatalogExtensions();
+
     const existing = await this.prisma.catalogCategory.findFirst({
       where: {
         id: input.categoryId,
@@ -113,7 +111,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   }
 
   async listCategories(tenantId: string): Promise<CatalogCategoryRecord[]> {
-    await this.ensureCatalogExtensions();
+
     const categories = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT child.*, parent.name AS parent_category_name
       FROM catalog_schema.catalog_categories child
@@ -131,7 +129,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     categoryId: string,
   ): Promise<CatalogCategoryRecord | null> {
-    await this.ensureCatalogExtensions();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT child.*, parent.name AS parent_category_name
       FROM catalog_schema.catalog_categories child
@@ -149,7 +147,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     categoryId: string,
   ): Promise<CatalogCategoryRecord> {
-    await this.ensureCatalogExtensions();
+
     const existing = await this.prisma.catalogCategory.findFirst({
       where: {
         id: categoryId,
@@ -205,7 +203,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   }
 
   async createItem(input: CreateCatalogItemInput): Promise<CatalogItemRecord> {
-    await this.ensureCatalogExtensions();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO catalog_schema.catalog_items (
         tenant_id, category_id, type, name, description, base_price, currency, tags,
@@ -233,7 +231,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   }
 
   async updateItem(input: UpdateCatalogItemInput): Promise<CatalogItemRecord> {
-    await this.ensureCatalogExtensions();
+
     const existing = await this.prisma.catalogItem.findFirst({
       where: {
         id: input.itemId,
@@ -270,7 +268,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   }
 
   async listItems(filters: ListCatalogItemsFilters): Promise<CatalogItemRecord[]> {
-    await this.ensureCatalogExtensions();
+
     const items = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -295,7 +293,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     itemId: string,
   ): Promise<CatalogItemRecord | null> {
-    await this.ensureCatalogExtensions();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -313,7 +311,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     externalReference: string,
   ): Promise<CatalogItemRecord | null> {
-    await this.ensureCatalogExtensions();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -332,7 +330,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     type: string,
     name: string,
   ): Promise<CatalogItemRecord | null> {
-    await this.ensureCatalogExtensions();
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -478,36 +476,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
     };
-  }
-
-  private async ensureCatalogExtensions(): Promise<void> {
-    if (!PrismaCatalogRepository.catalogExtensionsPromise) {
-      PrismaCatalogRepository.catalogExtensionsPromise = (async () => {
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE catalog_schema.catalog_categories
-          ADD COLUMN IF NOT EXISTS parent_category_id UUID NULL,
-          ADD COLUMN IF NOT EXISTS path TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
-          ADD COLUMN IF NOT EXISTS level INTEGER NOT NULL DEFAULT 0
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          ALTER TABLE catalog_schema.catalog_items
-          ADD COLUMN IF NOT EXISTS attributes JSONB NOT NULL DEFAULT '{}'::jsonb,
-          ADD COLUMN IF NOT EXISTS variants JSONB NOT NULL DEFAULT '[]'::jsonb,
-          ADD COLUMN IF NOT EXISTS option_groups JSONB NOT NULL DEFAULT '[]'::jsonb
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          UPDATE catalog_schema.catalog_categories
-          SET path = ARRAY[name]::TEXT[]
-          WHERE path IS NULL OR cardinality(path) = 0
-        `);
-        await this.prisma.$executeRaw(Prisma.sql`
-          CREATE INDEX IF NOT EXISTS idx_catalog_categories_parent
-          ON catalog_schema.catalog_categories (tenant_id, parent_category_id, active)
-        `);
-      })();
-    }
-
-    return PrismaCatalogRepository.catalogExtensionsPromise;
   }
 
   private async mapItemWithCategory(item: any): Promise<CatalogItemRecord> {

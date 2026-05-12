@@ -32,11 +32,6 @@ export class PaymentWebhookSalesProjectionService {
       return;
     }
 
-    await this.prisma.$executeRaw(Prisma.sql`
-      ALTER TABLE sales_schema.payment_links
-      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    `);
-
     const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
       UPDATE sales_schema.payment_links
       SET status = ${status}, updated_at = now()
