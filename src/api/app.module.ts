@@ -25,6 +25,7 @@ import { StorageModule } from './shared/infrastructure/storage/StorageModule';
 import { ConfigService } from '@nestjs/config';
 import { PlatformAdminModule } from './modules/platform-admin/platform-admin.module';
 import { ObservabilityModule } from './shared/infrastructure/observability/observability.module';
+import { ResilienceModule } from './shared/infrastructure/resilience/ResilienceModule';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './shared/infrastructure/http/filters/GlobalExceptionFilter';
 import { StructuredLogEmitter } from './shared/infrastructure/observability/StructuredLogEmitter';
@@ -45,6 +46,7 @@ import { parseRedisConnection } from './shared/infrastructure/redis/redis-connec
       }),
     }),
     ObservabilityModule,
+    ResilienceModule,
     DatabaseModule,
     RedisModule,
     EventBusModule,
