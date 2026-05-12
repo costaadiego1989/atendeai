@@ -6,8 +6,6 @@ export interface CreateTeamMemberInput {
   email: string;
   phone: string;
   role: 'ADMIN' | 'AGENT';
-  accessibleBranchIds?: string[];
-  mustChangePassword?: boolean;
 }
 
 export interface UpdateTeamMemberInput {
@@ -15,8 +13,6 @@ export interface UpdateTeamMemberInput {
   email?: string;
   phone?: string;
   role?: 'OWNER' | 'ADMIN' | 'AGENT';
-  accessibleBranchIds?: string[];
-  mustChangePassword?: boolean;
 }
 
 export const usersService = {
