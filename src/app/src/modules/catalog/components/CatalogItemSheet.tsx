@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Loader2, Plus, Trash2, Upload, X, Info } from 'lucide-react';
+import { Loader2, Plus, Trash2, Upload, X, Info, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -23,6 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { TagInput } from '@/shared/ui/TagInput';
 import { Link } from 'react-router-dom';
 import { requiresInventoryControl } from '../utils/formatters';
+import type { InventoryItemRecord } from '@/shared/types';
 
 interface CatalogItemSheetProps {
   open: boolean;
@@ -71,6 +72,8 @@ interface CatalogItemSheetProps {
   isUploading: boolean;
   onSubmit: () => void;
   isPending: boolean;
+  /** Inventory items linked to this catalog item (by catalogItemId or externalReference). */
+  linkedInventoryItems?: InventoryItemRecord[];
 }
 
 const createRowId = (prefix: string) =>
@@ -89,6 +92,7 @@ export function CatalogItemSheet({
   isUploading,
   onSubmit,
   isPending,
+  linkedInventoryItems,
 }: CatalogItemSheetProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -96,6 +100,37 @@ export function CatalogItemSheet({
       onUploadImage(file);
     }
   };
+
+  // SKU divergence detection: compare catalog SKUs against linked inventory items
+  const skuDivergences = (() => {
+    if (!linkedInventoryItems?.length || !requiresInventoryControl(form.type)) {
+      return [];
+    }
+
+    const inventorySkus = new Set(linkedInventoryItems.map((item) => item.sku));
+    const mismatches: Array<{ catalogSku: string; context: string }> = [];
+
+    // Check main externalReference
+    if (form.externalReference?.trim()) {
+      const ref = form.externalReference.trim();
+      if (!inventorySkus.has(ref)) {
+        mismatches.push({ catalogSku: ref, context: 'Referência externa do item' });
+      }
+    }
+
+    // Check variant references/SKUs
+    for (const variant of form.variants) {
+      const variantSku = variant.reference?.trim();
+      if (variantSku && !inventorySkus.has(variantSku)) {
+        mismatches.push({
+          catalogSku: variantSku,
+          context: `Variação "${variant.name || 'sem nome'}"`,
+        });
+      }
+    }
+
+    return mismatches;
+  })();
 
   const updateCustomField = (
     id: string,
@@ -194,6 +229,34 @@ export function CatalogItemSheet({
               </Link>{' '}
               para evitar divergência entre catálogo e inventário (vínculo por SKU /
               catalogItemId).
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        {skuDivergences.length > 0 ? (
+          <Alert variant="destructive" className="mt-3">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Divergência de SKU detectada</AlertTitle>
+            <AlertDescription className="text-xs">
+              <p className="mb-1">
+                Os seguintes SKUs do catálogo não foram encontrados no estoque vinculado:
+              </p>
+              <ul className="list-disc pl-4 space-y-0.5">
+                {skuDivergences.map((d) => (
+                  <li key={d.catalogSku}>
+                    <span className="font-mono font-medium">{d.catalogSku}</span>
+                    {' — '}
+                    {d.context}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2">
+                Corrija a referência aqui ou{' '}
+                <Link to="/app/inventory" className="font-medium underline underline-offset-2">
+                  sincronize no Estoque
+                </Link>{' '}
+                para manter o vínculo.
+              </p>
             </AlertDescription>
           </Alert>
         ) : null}

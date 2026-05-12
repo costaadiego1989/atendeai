@@ -174,6 +174,7 @@ export default function CatalogPage() {
         onUploadImage={vm.uploadItemImageMutation.mutate}
         onNewCategory={() => vm.setCreateCategoryOpen(true)}
         isUploading={vm.uploadItemImageMutation.isPending}
+        linkedInventoryItems={vm.linkedInventoryItems}
         onSubmit={() =>
           vm.isEditingItem
             ? vm.updateItemMutation.mutate()

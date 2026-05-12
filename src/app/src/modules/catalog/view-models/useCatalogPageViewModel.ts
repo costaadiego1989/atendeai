@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/components/ui/use-toast';
 import { catalogService } from '@/modules/catalog/services/catalog-service';
+import { inventoryService } from '@/modules/inventory/services/inventory-service';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
 import type { AsyncOperationItem } from '@/shared/ui/AsyncOperationsPanel';
 import {
@@ -11,6 +12,7 @@ import {
 import { formatCurrency } from '@/shared/lib/formatters';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { CatalogAsyncJob, CatalogCategory, CatalogItem } from '@/shared/types';
+import { requiresInventoryControl } from '../utils/formatters';
 
 const DEFAULT_CATEGORY_FORM = {
   name: '',
@@ -270,6 +272,26 @@ export function useCatalogPageViewModel() {
       const job = query.state.data as CatalogAsyncJob | undefined;
       return job && isActiveJob(job) ? 2500 : false;
     },
+  });
+
+  // Fetch inventory items linked to the catalog item being edited (for SKU divergence detection)
+  const linkedInventoryQuery = useQuery({
+    queryKey: ['inventory-items-for-catalog', tenant?.id, selectedItem?.id],
+    enabled: Boolean(
+      tenant?.id &&
+      selectedItem?.id &&
+      createItemOpen &&
+      requiresInventoryControl(selectedItem?.type),
+    ),
+    queryFn: () => inventoryService.listItems(tenant!.id),
+    select: (items) =>
+      items.filter(
+        (item) =>
+          item.catalogItemId === selectedItem?.id ||
+          (selectedItem?.externalReference &&
+            item.sku === selectedItem.externalReference),
+      ),
+    staleTime: 30_000,
   });
 
   function resolveJobFromList(jobId: string | null) {
@@ -749,6 +771,7 @@ export function useCatalogPageViewModel() {
     activeJobItems,
     activeReportJob,
     activeImportJob,
+    linkedInventoryItems: linkedInventoryQuery.data ?? [],
     filteredItems: paginatedItems,
     totalFilteredItems: filteredItems.length,
     selectedCategory,
