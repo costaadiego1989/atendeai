@@ -359,10 +359,14 @@ export function TenantBranchesTab({
                       <Input
                         id="branch-instagram"
                         value={form.instagramAccountId ?? ''}
-                        onChange={(event) => updateForm('instagramAccountId', event.target.value)}
-                        placeholder="@instagram"
+                        readOnly
+                        disabled
+                        placeholder="Não configurado"
                         className="bg-muted/50"
                       />
+                      <p className="text-[10px] text-muted-foreground">
+                        Configure via <a href="/app/settings/channels" className="text-primary underline">Canais</a> para garantir a conexão OAuth Meta.
+                      </p>
                     </div>
                   </div>
                 </div>

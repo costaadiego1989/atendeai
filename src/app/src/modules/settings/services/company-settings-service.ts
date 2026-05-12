@@ -292,6 +292,72 @@ function extractUnknownRows(raw: unknown): unknown[] {
   return [];
 }
 
+/**
+ * Extracts profile section rows from the backend response shape:
+ * `{ id, marketing: { companyName, businessType, ... }, technical: { cnpj, plan, ... } }`
+ *
+ * Each field with a truthy value counts as "completed" for that section.
+ */
+function extractProfileSectionRows(raw: unknown): TenantProfileSectionRow[] {
+  if (Array.isArray(raw)) {
+    return raw
+      .map(normalizeProfileSectionRow)
+      .filter((row): row is TenantProfileSectionRow => row !== null);
+  }
+
+  if (!raw || typeof raw !== 'object') {
+    return [];
+  }
+
+  const envelope = raw as Record<string, unknown>;
+
+  // If the backend returns a flat array envelope, delegate to generic extractor
+  const flatRows = extractUnknownRows(raw);
+  if (flatRows.length > 0) {
+    return flatRows
+      .map(normalizeProfileSectionRow)
+      .filter((row): row is TenantProfileSectionRow => row !== null);
+  }
+
+  // Handle structured response: { marketing: {...}, technical: {...} }
+  const sections: TenantProfileSectionRow[] = [];
+  const sectionLabels: Record<string, string> = {
+    companyName: 'Nome da empresa',
+    businessType: 'Tipo de negócio',
+    description: 'Descrição',
+    services: 'Serviços',
+    catalog: 'Catálogo',
+    address: 'Endereço',
+    operatingHours: 'Horário de funcionamento',
+    promotions: 'Promoções',
+    cnpj: 'CNPJ',
+    plan: 'Plano',
+    channels: 'Canais conectados',
+    aiConfig: 'Configuração IA',
+  };
+
+  const marketing = envelope.marketing as Record<string, unknown> | undefined;
+  const technical = envelope.technical as Record<string, unknown> | undefined;
+
+  if (marketing && typeof marketing === 'object') {
+    for (const [key, value] of Object.entries(marketing)) {
+      const label = sectionLabels[key] ?? key;
+      const completed = Array.isArray(value) ? value.length > 0 : Boolean(value);
+      sections.push({ id: `marketing.${key}`, title: label, completed });
+    }
+  }
+
+  if (technical && typeof technical === 'object') {
+    for (const [key, value] of Object.entries(technical)) {
+      const label = sectionLabels[key] ?? key;
+      const completed = Array.isArray(value) ? value.length > 0 : Boolean(value);
+      sections.push({ id: `technical.${key}`, title: label, completed });
+    }
+  }
+
+  return sections;
+}
+
 function normalizeProfileSectionRow(item: unknown): TenantProfileSectionRow | null {
   if (!item || typeof item !== 'object') {
     return null;
@@ -463,9 +529,7 @@ export const companySettingsService = {
 
   async getProfileSections(tenantId: string): Promise<TenantProfileSectionRow[]> {
     const raw = await apiClient.get<unknown>(`/tenants/${tenantId}/profile-sections`);
-    return extractUnknownRows(raw)
-      .map(normalizeProfileSectionRow)
-      .filter((row): row is TenantProfileSectionRow => row !== null);
+    return extractProfileSectionRows(raw);
   },
 
   async getOnboardingChecklist(tenantId: string): Promise<TenantOnboardingChecklistRow[]> {
