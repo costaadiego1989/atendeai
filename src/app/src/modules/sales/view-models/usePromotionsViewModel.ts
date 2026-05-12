@@ -6,6 +6,13 @@ import { salesService } from '@/modules/sales/services/sales-service';
 import { catalogService } from '@/modules/catalog/services/catalog-service';
 import type { SalesPromotionTarget } from '@/modules/sales/services/sales-types';
 
+/**
+ * ViewModel para promoções COMERCIAIS (descontos em links/charges).
+ * Dados vêm de /sales/promotions (tabela sales_promotions).
+ *
+ * Promoções informativas do chatbot/integração ficam em Settings
+ * (usePromotionsSettingsViewModel → /tenants/:id/promotions).
+ */
 export function usePromotionsViewModel() {
   const tenant = useAuthStore((state) => state.tenant);
   const queryClient = useQueryClient();
