@@ -49,38 +49,6 @@ AtendeAi is a multi-tenant SaaS platform for small/medium businesses in Brazil. 
 - **Scope**: module name (`feat(messaging):`, `fix(billing):`)
 - **Atomic commits**: one logical change per commit
 
-## Known Architectural Debt (Priority Order)
-
-### 1. Runtime DDL (CRITICAL — 7 modules)
-Modules that create/alter tables at runtime via `ensureInfrastructure()`, `ensureTableShape()`, `ensureTable()`, `ensureColumns()`:
-- Commerce, Inventory, Alerts, Contact, Sales, Recovery, Billing
-
-**Fix**: Migrate all DDL to Prisma migrations. Remove runtime schema manipulation.
-
-### 2. Boundary Violations (GRAVE)
-Modules importing internal classes from other modules instead of using ports/facades:
-- Scheduling → imports `PrismaConversationRepository` from Messaging
-- AI → imports `AdvanceCommerceConversationUseCase` from Commerce
-- AI → imports `ReserveProfessionalSlotUseCase` from Scheduling
-- Sales → instantiates `DeepSeekAdapter` directly (duplicates AI module binding)
-
-**Fix**: Create port interfaces in consuming module, implement adapters that delegate to facades.
-
-### 3. God Classes (GRAVE)
-Services/controllers with excessive dependencies (10-17 params):
-- `ProcessAIResponseService` (14 deps)
-- `AdvanceCommerceConversationUseCase` (12 deps)
-- `CommerceController` (17 deps)
-- `ReserveProfessionalSlotUseCase` (10 deps)
-
-**Fix**: Decompose into pipeline steps, extract sub-use-cases, apply Strategy/Chain of Responsibility.
-
-### 4. Reliability Issues
-- `setTimeout` for delayed operations (Social DM, Billing plan changes) — use BullMQ delayed jobs
-- No circuit breaker for external APIs (Instagram, Asaas, ERPs)
-- Redis as primary store for scheduling data (risk of data loss)
-- OutboxDispatcher without leader election (redundant polling in multi-instance)
-
 ## Commands
 
 ```bash
@@ -103,20 +71,6 @@ cd src/api && npx prisma generate       # Generate client
 # Lint
 cd src/api && npm run lint   # ESLint with fix
 ```
-
-## Implementation Waves (Architectural Improvements)
-
-### Wave 1 — Runtime DDL Elimination
-Remove all `ensureInfrastructure()` / `ensureTableShape()` / `ensureTable()` / `ensureColumns()` patterns. Create proper Prisma migrations for any tables/columns not yet in schema.prisma.
-
-### Wave 2 — Boundary Enforcement
-Create port interfaces for cross-module dependencies. Replace direct imports with facade-based communication. Modules should only depend on their own ports + shared layer.
-
-### Wave 3 — God Class Decomposition
-Break services with >7 dependencies into smaller, focused units. Apply pipeline pattern for complex flows (AI response, commerce conversation, inbound message processing).
-
-### Wave 4 — Reliability Hardening
-Replace `setTimeout` with BullMQ delayed jobs. Add circuit breakers for external API calls. Persist scheduling data in PostgreSQL (Redis as cache only). Add leader election to OutboxDispatcher.
 
 ## Key Files
 
