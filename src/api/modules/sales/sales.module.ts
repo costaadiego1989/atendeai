@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CreatePaymentLinkUseCase } from './application/use-cases/CreatePaymentLinkUseCase';
 import { ICreatePaymentLinkUseCase } from './application/use-cases/interfaces/ICreatePaymentLinkUseCase';
 import { TrackSalesMetricUseCase } from './application/use-cases/TrackSalesMetricUseCase';
@@ -22,8 +22,7 @@ import { PausePaymentLinkUseCase } from './application/use-cases/PausePaymentLin
 import { ResumePaymentLinkUseCase } from './application/use-cases/ResumePaymentLinkUseCase';
 import { DeletePaymentLinkUseCase } from './application/use-cases/DeletePaymentLinkUseCase';
 import { SuggestPaymentLinkWithAIUseCase } from './application/use-cases/SuggestPaymentLinkWithAIUseCase';
-import { AI_ENGINE } from '../ai/application/ports/IAIEngine';
-import { DeepSeekAdapter } from '../ai/infrastructure/adapters/DeepSeekAdapter';
+import { AIModule } from '../ai/ai.module';
 import { AgentRulesModule } from '../agent-rules/agent-rules.module';
 import { CreateSplitPaymentChargeUseCase } from './application/use-cases/CreateSplitPaymentChargeUseCase';
 import { ContactModule } from '../contact/contact.module';
@@ -48,6 +47,7 @@ import { RedeemCouponUseCase } from './application/use-cases/RedeemCouponUseCase
     ContactModule,
     DatabaseModule,
     AuthModule,
+    forwardRef(() => AIModule),
   ],
   controllers: [SalesController],
   providers: [
@@ -72,10 +72,6 @@ import { RedeemCouponUseCase } from './application/use-cases/RedeemCouponUseCase
     SalesPaymentLinksReportCsvBuilder,
     TrackSalesMetricUseCase,
     SalesAnalyticsHandler,
-    {
-      provide: AI_ENGINE,
-      useClass: DeepSeekAdapter,
-    },
     {
       provide: ICreatePaymentLinkUseCase,
       useClass: CreatePaymentLinkUseCase,
