@@ -3,6 +3,7 @@ import { SchedulingReminderProcessor } from '../infrastructure/queue/SchedulingR
 describe('SchedulingReminderProcessor', () => {
   let schedulingStore: any;
   let messagingFacade: any;
+  let structuredLog: any;
   let processor: SchedulingReminderProcessor;
 
   beforeEach(() => {
@@ -13,7 +14,13 @@ describe('SchedulingReminderProcessor', () => {
     messagingFacade = {
       queueSystemMessage: jest.fn(),
     };
-    processor = new SchedulingReminderProcessor(schedulingStore, messagingFacade);
+    structuredLog = {
+      emit: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    };
+    processor = new SchedulingReminderProcessor(schedulingStore, messagingFacade, structuredLog);
   });
 
   it('should send reminder with Google Meet link when slot is still reserved', async () => {
