@@ -104,6 +104,7 @@ export function PlatformTenantActionsSheet({
         title: 'Falha ao ajustar quotas',
         description: getFriendlyErrorMessage(e, {
           fallbackMessage: 'Tente novamente.',
+          context: 'platform-admin',
         }),
         variant: 'destructive',
       });
@@ -133,6 +134,7 @@ export function PlatformTenantActionsSheet({
         title: 'Falha no rascunho',
         description: getFriendlyErrorMessage(e, {
           fallbackMessage: 'Não foi possível gerar o rascunho agora.',
+          context: 'platform-admin',
         }),
         variant: 'destructive',
       });
@@ -158,6 +160,7 @@ export function PlatformTenantActionsSheet({
         title: 'Falha ao enviar',
         description: getFriendlyErrorMessage(e, {
           fallbackMessage: 'Verifique número do proprietário ou fila.',
+          context: 'platform-admin',
         }),
         variant: 'destructive',
       });
