@@ -40,7 +40,7 @@ describe('RedeemCouponUseCase', () => {
     const result = await useCase.execute({ tenantId: 'tenant-1', code: 'VALID' });
 
     expect(result.discount.value).toBe(10);
-    expect(result.coupon.usedCount).toBe(1);
+    expect(result.coupon!.usedCount).toBe(1);
     expect(repoMock.incrementCouponUsage).toHaveBeenCalledWith('tenant-1', 'id-123');
   });
 
