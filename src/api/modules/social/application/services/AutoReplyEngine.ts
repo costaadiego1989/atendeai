@@ -1,6 +1,7 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
 import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
 import { ISocialPlatformAdapter, SOCIAL_PLATFORM_ADAPTER } from '../../domain/ports/ISocialPlatformAdapter';
+import { ISocialDelayedJobQueue, SOCIAL_DELAYED_JOB_QUEUE } from '../../domain/ports/ISocialDelayedJobQueue';
 import { SocialComment } from '../../domain/entities/SocialComment';
 import { SocialAutoReplyRule } from '../../domain/entities/SocialAutoReplyRule';
 import { AI_ENGINE, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
@@ -12,6 +13,7 @@ export class AutoReplyEngine {
   constructor(
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
     @Inject(SOCIAL_PLATFORM_ADAPTER) private readonly adapter: ISocialPlatformAdapter,
+    @Inject(SOCIAL_DELAYED_JOB_QUEUE) private readonly socialDelayedJobQueue: ISocialDelayedJobQueue,
     @Optional() @Inject(AI_ENGINE) private readonly aiEngine?: IAIEngine,
     @Optional() @Inject(EVENT_BUS) private readonly eventBus?: IEventBus,
   ) { }
@@ -125,12 +127,26 @@ export class AutoReplyEngine {
 
     if (actions.sendInboxMessage?.enabled && comment.authorExternalId) {
       const delayMs = (actions.sendInboxMessage.delaySeconds || 0) * 1000;
+      const inboxText = await this.resolveReplyText(actions.sendInboxMessage, comment.text);
+      const mediaAttachments = actions.sendInboxMessage.mediaAttachments || [];
 
-      const sendInbox = async () => {
-        const inboxText = await this.resolveReplyText(actions.sendInboxMessage, comment.text);
-        const mediaAttachments = actions.sendInboxMessage.mediaAttachments || [];
-
-        await this.adapter.sendInboxMessage(accessToken, comment.authorExternalId!, {
+      if (delayMs > 0) {
+        await this.socialDelayedJobQueue.addDelayedInboxMessage({
+          tenantId: comment.tenantId,
+          accountId: comment.socialAccountId,
+          recipientId: comment.authorExternalId,
+          text: inboxText,
+          mediaAttachments,
+          delayMs,
+          accessToken,
+          socialAccountId: comment.socialAccountId,
+          platform: comment.platform,
+          commentId: comment.id.toValue(),
+          ruleId: rule.id.toValue(),
+          recipientUsername: comment.authorUsername || undefined,
+        });
+      } else {
+        await this.adapter.sendInboxMessage(accessToken, comment.authorExternalId, {
           text: inboxText,
         });
 
@@ -144,13 +160,13 @@ export class AutoReplyEngine {
             if (media.caption) content.linkTitle = media.caption;
           }
 
-          await this.adapter.sendInboxMessage(accessToken, comment.authorExternalId!, content);
+          await this.adapter.sendInboxMessage(accessToken, comment.authorExternalId, content);
         }
 
         await this.repo.upsertInboxThread(comment.tenantId, {
           socialAccountId: comment.socialAccountId,
           platform: comment.platform,
-          recipientExternalId: comment.authorExternalId!,
+          recipientExternalId: comment.authorExternalId,
           recipientUsername: comment.authorUsername || undefined,
           originCommentId: comment.id.toValue(),
           lastMessageText: inboxText,
@@ -174,12 +190,6 @@ export class AutoReplyEngine {
             action: 'INBOX_DM',
           }),
         );
-      };
-
-      if (delayMs > 0) {
-        setTimeout(sendInbox, delayMs);
-      } else {
-        await sendInbox();
       }
 
       didReply = true;
