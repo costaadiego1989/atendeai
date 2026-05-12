@@ -40,6 +40,8 @@ describe('CancelSubscriptionUseCase', () => {
     billingRepository = {
       findSubscription: jest.fn(),
       saveSubscription: jest.fn(),
+      replaceSubscriptionModules: jest.fn().mockResolvedValue(undefined),
+      findPlanByCode: jest.fn().mockResolvedValue(null),
     };
     tenantRepository = {
       findById: jest.fn(),

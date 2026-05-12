@@ -14,6 +14,7 @@ describe('ChangeSubscriptionPlanUseCase', () => {
       findSubscription: jest.fn(),
       saveSubscription: jest.fn(),
       findPlanByCode: jest.fn(),
+      listSubscriptionModules: jest.fn().mockResolvedValue([]),
     };
     tenantRepository = {
       findById: jest.fn(),

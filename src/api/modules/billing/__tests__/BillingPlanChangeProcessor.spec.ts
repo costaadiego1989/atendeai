@@ -16,6 +16,8 @@ describe('BillingPlanChangeProcessor', () => {
       findSubscription: jest.fn(),
       saveSubscription: jest.fn(),
       saveUsage: jest.fn(),
+      findPlanByCode: jest.fn().mockResolvedValue(null),
+      listSubscriptionModules: jest.fn().mockResolvedValue([]),
     };
     eventBus = {
       publish: jest.fn(),
