@@ -8,6 +8,14 @@ import { companySettingsService } from '@/modules/settings/services/company-sett
 import { useCompanySettingsQuery } from '@/modules/settings/view-models/useCompanySettingsQuery';
 import { usersService } from '@/modules/users/services/users-service';
 
+/**
+ * ViewModel para promoções INFORMATIVAS/MARKETING do tenant.
+ * Dados vêm de /tenants/:id/promotions (JSON no aggregate do tenant).
+ * Expostas ao chatbot e integrações externas via IntegrationController.
+ *
+ * Promoções comerciais com desconto real ficam no módulo Sales
+ * (usePromotionsViewModel → /sales/promotions).
+ */
 export function usePromotionsSettingsViewModel() {
   const tenant = useAuthStore((state) => state.tenant);
   const queryClient = useQueryClient();
