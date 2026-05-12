@@ -15,6 +15,7 @@ import { Dialog360ConfigurationStrategy } from '../application/strategies/whatsa
 import { WhatsAppConfigurationStrategyRegistry } from '../application/strategies/whatsapp/WhatsAppConfigurationStrategyRegistry';
 import { Dialog360ManagementAcl } from '../infrastructure/acl/Dialog360ManagementAcl';
 import { TenantAuditService } from '../application/services/TenantAuditService';
+import { TenantBillingCapacityService } from '@shared/infrastructure/billing/TenantBillingCapacityService';
 
 describe('ConfigureWhatsAppUseCase', () => {
   let useCase: ConfigureWhatsAppUseCase;
@@ -22,6 +23,7 @@ describe('ConfigureWhatsAppUseCase', () => {
   let tenantDomainEventPublisher: jest.Mocked<TenantDomainEventPublisher>;
   let dialog360ManagementAcl: jest.Mocked<Dialog360ManagementAcl>;
   let tenantAuditService: jest.Mocked<TenantAuditService>;
+  let billingCapacityService: jest.Mocked<TenantBillingCapacityService>;
 
   beforeEach(() => {
     tenantRepo = {
@@ -49,6 +51,10 @@ describe('ConfigureWhatsAppUseCase', () => {
       record: jest.fn(),
     } as unknown as jest.Mocked<TenantAuditService>;
 
+    billingCapacityService = {
+      assertCanAdd: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<TenantBillingCapacityService>;
+
     const bubbleStrategy = new BubbleWhatsConfigurationStrategy();
     const d360Strategy = new Dialog360ConfigurationStrategy(
       {
@@ -72,6 +78,7 @@ describe('ConfigureWhatsAppUseCase', () => {
       tenantDomainEventPublisher,
       strategyRegistry,
       tenantAuditService,
+      billingCapacityService,
     );
   });
 
@@ -154,10 +161,11 @@ describe('ConfigureWhatsAppUseCase', () => {
       d360WebhookUrl: 'https://app.atendeai.com/api/v1/webhooks/whatsapp',
     });
 
-    expect(dialog360ManagementAcl.configurePhoneWebhook).toHaveBeenCalledWith(
-      'd360-api-key',
-      'https://app.atendeai.com/api/v1/webhooks/whatsapp',
-    );
+    expect(dialog360ManagementAcl.configurePhoneWebhook).toHaveBeenCalledWith({
+      apiKey: 'd360-api-key',
+      url: 'https://app.atendeai.com/api/v1/webhooks/whatsapp',
+      tenantId: tenant.id.toValue(),
+    });
     expect(result).toEqual(
       expect.objectContaining({
         provider: 'D360',

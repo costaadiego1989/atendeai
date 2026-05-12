@@ -78,9 +78,10 @@ describe('CompleteMetaInstagramConnectionUseCase', () => {
     });
 
     expect(stateService.verify).toHaveBeenCalledWith('signed-state');
-    expect(oauthService.exchangeCodeForAccessToken).toHaveBeenCalledWith('oauth-code');
+    expect(oauthService.exchangeCodeForAccessToken).toHaveBeenCalledWith('oauth-code', 'tenant-1');
     expect(oauthService.listInstagramAccounts).toHaveBeenCalledWith(
       'meta-access-token',
+      'tenant-1',
     );
     expect(result.accounts).toHaveLength(1);
     expect(result.accounts[0].username).toBe('loja.acme');

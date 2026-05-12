@@ -76,6 +76,7 @@ describe('Tenant Entity', () => {
         services: null,
         address: null,
         catalogUrl: null,
+        catalogFiles: [],
         operatingHours: null,
         promotions: [],
         apiKey: 'api-key',

@@ -2,6 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { GetTenantSettingsUseCase } from '../application/use-cases/GetTenantSettingsUseCase';
 import { ITenantRepository } from '../domain/repositories/ITenantRepository';
 import { ITenantAuditLogRepository } from '../application/ports/ITenantAuditLogRepository';
+import { TenantModuleAccessService } from '@shared/infrastructure/billing/TenantModuleAccessService';
 import { Tenant } from '../domain/entities/Tenant';
 import { CompanyName } from '../domain/value-objects/CompanyName';
 import { CNPJ } from '../domain/value-objects/CNPJ';
@@ -15,6 +16,7 @@ describe('GetTenantSettingsUseCase', () => {
   let useCase: GetTenantSettingsUseCase;
   let tenantRepository: jest.Mocked<ITenantRepository>;
   let tenantAuditLogRepository: jest.Mocked<ITenantAuditLogRepository>;
+  let tenantModuleAccessService: jest.Mocked<TenantModuleAccessService>;
 
   beforeEach(() => {
     tenantRepository = {
@@ -35,9 +37,28 @@ describe('GetTenantSettingsUseCase', () => {
       listRecent: jest.fn(),
     };
 
+    tenantModuleAccessService = {
+      getSummary: jest.fn().mockResolvedValue({
+        subscriptionId: null,
+        plan: null,
+        status: null,
+        pricing: {
+          baseMonthlyPrice: 0,
+          addonsMonthlyPrice: 0,
+          totalMonthlyPrice: 0,
+          pricingVersion: null,
+        },
+        includedModules: [],
+        addonModules: [],
+        enabledModules: [],
+        moduleAccess: {},
+      }),
+    } as unknown as jest.Mocked<TenantModuleAccessService>;
+
     useCase = new GetTenantSettingsUseCase(
       tenantRepository,
       tenantAuditLogRepository,
+      tenantModuleAccessService,
     );
   });
 

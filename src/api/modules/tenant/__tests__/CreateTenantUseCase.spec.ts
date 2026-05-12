@@ -41,7 +41,7 @@ describe('CreateTenantUseCase', () => {
     );
   });
 
-  it('should create a tenant with default ESSENCIAL plan and owner user', async () => {
+  it('should create a tenant with default TRIAL plan and owner user', async () => {
     tenantRepo.exists.mockResolvedValue(false);
     passwordHasher.hash.mockResolvedValue('hashed-password');
 
@@ -62,7 +62,7 @@ describe('CreateTenantUseCase', () => {
     );
 
     const savedTenant = tenantRepo.save.mock.calls[0][0];
-    expect(savedTenant.plan.value).toBe('PROFISSIONAL');
+    expect(savedTenant.plan.value).toBe('TRIAL');
     expect(savedTenant.owner?.name).toBe('Owner Name');
     expect(savedTenant.owner?.email.value).toBe('owner@acme.com');
     expect(savedTenant.owner?.cpf?.value).toBe('529.982.247-25');
@@ -70,7 +70,7 @@ describe('CreateTenantUseCase', () => {
     expect(savedTenant.owner?.passwordHash).toBe('hashed-password');
 
     expect(result.companyName).toBe('Acme Corp');
-    expect(result.plan).toBe('PROFISSIONAL');
+    expect(result.plan).toBe('TRIAL');
     expect(result.owner.name).toBe('Owner Name');
     expect(result.owner.email).toBe('owner@acme.com');
   });

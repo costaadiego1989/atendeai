@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { GetTenantDetailsUseCase } from '../application/use-cases/GetTenantDetailsUseCase';
 import { ITenantRepository } from '../domain/repositories/ITenantRepository';
+import { TenantModuleAccessService } from '@shared/infrastructure/billing/TenantModuleAccessService';
 import { Tenant } from '../domain/entities/Tenant';
 import { CompanyName } from '../domain/value-objects/CompanyName';
 import { CNPJ } from '../domain/value-objects/CNPJ';
@@ -16,6 +17,7 @@ import { Promotion } from '../domain/value-objects/Promotion';
 describe('GetTenantDetailsUseCase', () => {
   let useCase: GetTenantDetailsUseCase;
   let tenantRepository: jest.Mocked<ITenantRepository>;
+  let tenantModuleAccessService: jest.Mocked<TenantModuleAccessService>;
 
   beforeEach(() => {
     tenantRepository = {
@@ -32,7 +34,25 @@ describe('GetTenantDetailsUseCase', () => {
       exists: jest.fn(),
     };
 
-    useCase = new GetTenantDetailsUseCase(tenantRepository);
+    tenantModuleAccessService = {
+      getSummary: jest.fn().mockResolvedValue({
+        subscriptionId: null,
+        plan: null,
+        status: null,
+        pricing: {
+          baseMonthlyPrice: 0,
+          addonsMonthlyPrice: 0,
+          totalMonthlyPrice: 0,
+          pricingVersion: null,
+        },
+        includedModules: [],
+        addonModules: [],
+        enabledModules: [],
+        moduleAccess: {},
+      }),
+    } as unknown as jest.Mocked<TenantModuleAccessService>;
+
+    useCase = new GetTenantDetailsUseCase(tenantRepository, tenantModuleAccessService);
   });
 
   it('should throw when the tenant does not exist', async () => {

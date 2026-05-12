@@ -18,6 +18,7 @@ describe('DeleteUserUseCase', () => {
       findByIdAndTenant: jest.fn(),
       findByEmail: jest.fn(),
       findAllByTenant: jest.fn(),
+      findOwnerPrincipalByTenantId: jest.fn(),
       delete: jest.fn(),
     };
 

@@ -15,7 +15,8 @@ describe('Twilio Subaccount Provisioning (E2E)', () => {
       TWILIO_API_BASE_URL: process.env.TWILIO_API_BASE_URL || 'https://api.twilio.com/2010-04-01',
     });
 
-    twilioAcl = new TwilioManagementAcl(configService);
+    const structuredLog = { emit: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() } as any;
+    twilioAcl = new TwilioManagementAcl(configService, structuredLog);
   });
 
   it('should have TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN configured', () => {

@@ -238,6 +238,9 @@ describe('RegisterTwilioWhatsAppSenderUseCase', () => {
       expect.objectContaining({
         senderId: 'whatsapp:+5521999990000',
       }),
+      expect.objectContaining({
+        tenantId: expect.any(String),
+      }),
     );
     expect(result.whatsappNumber).toBe('5521999990000');
   });
