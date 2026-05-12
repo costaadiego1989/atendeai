@@ -1,11 +1,14 @@
 import { InitiateTrialSubscriptionUseCase } from '../application/use-cases/InitiateTrialSubscriptionUseCase';
 import { IPaymentGateway } from '../domain/ports/IPaymentGateway';
 import { Queue } from 'bullmq';
+import { ConfigService } from '@nestjs/config';
 
 describe('InitiateTrialSubscriptionUseCase', () => {
     let useCase: InitiateTrialSubscriptionUseCase;
     let paymentGateway: jest.Mocked<IPaymentGateway>;
+    let eventBus: any;
     let billingQueue: jest.Mocked<Queue>;
+    let configService: jest.Mocked<ConfigService>;
 
     beforeEach(() => {
         paymentGateway = {
@@ -16,11 +19,28 @@ describe('InitiateTrialSubscriptionUseCase', () => {
             cancelSubscription: jest.fn(),
         } as unknown as jest.Mocked<IPaymentGateway>;
 
+        eventBus = {
+            publish: jest.fn(),
+        };
+
         billingQueue = {
             add: jest.fn(),
         } as unknown as jest.Mocked<Queue>;
 
-        useCase = new InitiateTrialSubscriptionUseCase(paymentGateway, billingQueue);
+        configService = {
+            get: jest.fn().mockImplementation((key: string, defaultValue?: number) => {
+                if (key === 'TRIAL_WARNING_HOURS') return 165;
+                if (key === 'TRIAL_EXPIRATION_HOURS') return 168;
+                return defaultValue;
+            }),
+        } as unknown as jest.Mocked<ConfigService>;
+
+        useCase = new InitiateTrialSubscriptionUseCase(
+            paymentGateway,
+            eventBus,
+            billingQueue,
+            configService,
+        );
     });
 
     it('should create an Asaas customer and subscription, then enqueue a warning notification job', async () => {
@@ -56,6 +76,12 @@ describe('InitiateTrialSubscriptionUseCase', () => {
             'check-trial-expiration',
             { subscriptionId: 'sub_123', tenantId: 'uuid-tenant-123' },
             { delay: 165 * 60 * 60 * 1000 }
+        );
+
+        expect(billingQueue.add).toHaveBeenCalledWith(
+            'trial-expired',
+            { subscriptionId: 'sub_123', tenantId: 'uuid-tenant-123' },
+            { delay: 168 * 60 * 60 * 1000 }
         );
 
         expect(result.subscriptionId).toBe('sub_123');

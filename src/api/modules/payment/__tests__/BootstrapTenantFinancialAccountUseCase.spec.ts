@@ -10,6 +10,7 @@ describe('BootstrapTenantFinancialAccountUseCase', () => {
   beforeEach(() => {
     tenantRepository = {
       findById: jest.fn(),
+      save: jest.fn(),
     };
     tenantFinancialAccountRepository = {
       findByTenantId: jest.fn(),
@@ -28,6 +29,11 @@ describe('BootstrapTenantFinancialAccountUseCase', () => {
   });
 
   it('should return the existing financial account when already provisioned', async () => {
+    tenantRepository.findById.mockResolvedValue({
+      owner: { email: { value: 'owner@test.com' }, phone: { value: '11999999999' } },
+      ownerBirthDate: null,
+      updateBusinessData: jest.fn(),
+    });
     tenantFinancialAccountRepository.findByTenantId.mockResolvedValue({
       id: 'fin-1',
       tenantId: 'tenant-1',
@@ -101,6 +107,8 @@ describe('BootstrapTenantFinancialAccountUseCase', () => {
     tenantRepository.findById.mockResolvedValue({
       companyName: { value: 'Clinica Sorriso' },
       cnpj: { value: '11.444.777/0001-61' },
+      ownerBirthDate: null,
+      updateBusinessData: jest.fn(),
       owner: {
         email: { value: 'owner@test.com' },
         phone: { value: '11999999999' },
@@ -122,6 +130,8 @@ describe('BootstrapTenantFinancialAccountUseCase', () => {
     tenantRepository.findById.mockResolvedValue({
       companyName: { value: 'Clinica Sorriso' },
       cnpj: { value: '11.444.777/0001-61' },
+      ownerBirthDate: null,
+      updateBusinessData: jest.fn(),
       owner: {
         email: { value: 'owner@test.com' },
         phone: { value: '11999999999' },
