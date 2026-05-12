@@ -6,6 +6,9 @@ import { InventoryModule } from '@modules/inventory/inventory.module';
 import { SalesModule } from '@modules/sales/sales.module';
 import { ApplyCouponToShoppingSessionUseCase } from './application/use-cases/ApplyCouponToShoppingSessionUseCase';
 import { CommerceController } from './presentation/controllers/CommerceController';
+import { CommerceShippingController } from './presentation/controllers/CommerceShippingController';
+import { CommerceOrdersController } from './presentation/controllers/CommerceOrdersController';
+import { CommerceAbandonmentController } from './presentation/controllers/CommerceAbandonmentController';
 import { ConfigureShippingPolicyUseCase } from './application/use-cases/ConfigureShippingPolicyUseCase';
 import { GetShippingPolicyUseCase } from './application/use-cases/GetShippingPolicyUseCase';
 import { SearchCommerceCatalogUseCase } from './application/use-cases/SearchCommerceCatalogUseCase';
@@ -41,7 +44,12 @@ import { ReadyForCheckoutStepHandler } from './application/services/conversation
 
 @Module({
   imports: [AuthModule, CatalogModule, InventoryModule, PaymentModule, SalesModule],
-  controllers: [CommerceController],
+  controllers: [
+    CommerceController,
+    CommerceShippingController,
+    CommerceOrdersController,
+    CommerceAbandonmentController,
+  ],
   providers: [
     {
       provide: COMMERCE_REPOSITORY,
