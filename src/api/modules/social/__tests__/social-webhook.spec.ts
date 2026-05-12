@@ -6,10 +6,12 @@ import { ProcessIncomingCommentUseCase } from '../application/use-cases/ProcessI
 import { AutoReplyEngine } from '../application/services/AutoReplyEngine';
 import { SOCIAL_REPOSITORY } from '../domain/ports/ISocialRepository';
 import { SOCIAL_PLATFORM_ADAPTER } from '../domain/ports/ISocialPlatformAdapter';
+import { SOCIAL_DELAYED_JOB_QUEUE } from '../domain/ports/ISocialDelayedJobQueue';
 import { SocialAutoReplyRule } from '../domain/entities/SocialAutoReplyRule';
 import { SocialAccount } from '../domain/entities/SocialAccount';
 import { UniqueEntityID } from '../../../shared/domain/UniqueEntityID';
 import { EVENT_BUS } from '../../../shared/application/ports/IEventBus';
+import { AI_ENGINE } from '@modules/ai/application/ports/IAIEngine';
 
 describe('SocialWebhookController', () => {
   let app: INestApplication;
@@ -109,6 +111,8 @@ describe('SocialWebhookController', () => {
         AutoReplyEngine,
         { provide: SOCIAL_REPOSITORY, useValue: repo },
         { provide: SOCIAL_PLATFORM_ADAPTER, useValue: adapter },
+        { provide: SOCIAL_DELAYED_JOB_QUEUE, useValue: { schedule: jest.fn() } },
+        { provide: AI_ENGINE, useValue: null },
         {
           provide: EVENT_BUS,
           useValue: {

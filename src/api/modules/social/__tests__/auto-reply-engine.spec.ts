@@ -63,7 +63,8 @@ describe('AutoReplyEngine', () => {
       publish: jest.fn().mockResolvedValue(undefined),
     } as any;
 
-    const sut = new AutoReplyEngine(repo, adapter, undefined, eventBus);
+    const delayedJobQueue = { schedule: jest.fn() } as any;
+    const sut = new AutoReplyEngine(repo, adapter, delayedJobQueue, undefined, eventBus);
 
     const ruleId = await sut.evaluate(comment, 'token-x', 'post-1');
 
