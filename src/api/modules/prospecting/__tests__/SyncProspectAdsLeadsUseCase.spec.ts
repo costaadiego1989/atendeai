@@ -46,6 +46,10 @@ describe('SyncProspectAdsLeadsUseCase', () => {
       findByApiKey: jest.fn(),
       findAll: jest.fn(),
       exists: jest.fn(),
+      listBranches: jest.fn(),
+      createBranch: jest.fn(),
+      updateBranch: jest.fn(),
+      deleteBranch: jest.fn(),
     };
     googleAdsLeadSource = {
       pullLeads: jest.fn(),

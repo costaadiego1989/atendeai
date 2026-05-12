@@ -48,6 +48,10 @@ describe('CreateProspectAdsInsightQueryUseCase', () => {
       findByApiKey: jest.fn(),
       findAll: jest.fn(),
       exists: jest.fn(),
+      listBranches: jest.fn(),
+      createBranch: jest.fn(),
+      updateBranch: jest.fn(),
+      deleteBranch: jest.fn(),
     };
     queryRepository = {
       save: jest.fn(),

@@ -1,7 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as request from 'supertest';
+import request from 'supertest';
 import * as cookieParser from 'cookie-parser';
 import * as bcrypt from 'bcryptjs';
 import { AppModule } from '../../../app.module';

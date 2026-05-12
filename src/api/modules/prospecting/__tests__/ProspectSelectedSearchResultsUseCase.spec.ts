@@ -44,6 +44,7 @@ describe('ProspectSelectedSearchResultsUseCase', () => {
       getContactById: jest.fn(),
       ensureContact: jest.fn(),
       upsertProspectContact: jest.fn(),
+      findContactIdsForReengagementAudience: jest.fn(),
     };
     campaignRepository = {
       save: jest.fn(),

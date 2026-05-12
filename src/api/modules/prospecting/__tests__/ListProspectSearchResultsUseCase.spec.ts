@@ -35,6 +35,7 @@ describe('ListProspectSearchResultsUseCase', () => {
     searchResultRepository = {
       saveMany: jest.fn(),
       findAllBySearch: jest.fn(),
+      deleteBySearch: jest.fn(),
     };
 
     useCase = new ListProspectSearchResultsUseCase(
