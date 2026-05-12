@@ -20,11 +20,14 @@ Backend: [`SocialController.ts`](../../../../api/modules/social/presentation/con
 | ID | Prioridade | Descrição | Referência backend |
 |----|------------|-----------|---------------------|
 | APP-SOC-001 | P2 | Webhooks Meta (`SocialWebhookController`) são **infra backend** — SPA não implementa; manter runbook de verificação e assinatura | `SocialWebhookController` |
-| APP-SOC-002 | P1 | Conferir novos endpoints ou query params em `SocialController` após upgrades da API (campos sentiment/status/hidden) | `SocialController` |
+| APP-SOC-002 | P1 | Conferir novos endpoints ou query params em `SocialController` após upgrades da API (campos sentiment/status/hidden) | [x] Verificado 2026-05-12 |
 
 ## Alinhamento de contrato
 
-- `ListComments` resposta `{ data, meta }` deve tipar paginação igual à API.
+- `ListComments` resposta `{ data, total, page, limit }` — frontend e backend alinhados.
+- Todos os 13 endpoints do `SocialController` têm método correspondente no `social.service.ts`.
+- Query params `status`, `postId`, `platform`, `page`, `limit` — alinhados.
+- Campos `sentiment` e `isHidden` retornados na resposta e tipados no frontend, mas **não são filtros** no backend DTO atual. Quando o backend adicionar esses filtros, atualizar `listComments` filters no frontend.
 
 ## Verificação (Done when)
 
