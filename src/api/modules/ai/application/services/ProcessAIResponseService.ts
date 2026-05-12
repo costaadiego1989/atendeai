@@ -19,7 +19,7 @@ import { ICheckQuotaUseCase } from '../../../billing/application/use-cases/inter
 import { UsageType } from '../../../billing/application/use-cases/interfaces/IRecordUsageUseCase';
 import { AIResponseProcessor } from './AIResponseProcessor';
 import { HumanHandoffPolicy } from './HumanHandoffPolicy';
-import { AdvanceCommerceConversationUseCase } from '@modules/commerce/application/use-cases/AdvanceCommerceConversationUseCase';
+import { IAdvanceCommerceConversation } from '../ports/IAdvanceCommerceConversation';
 import { AISessionService } from './AISessionService';
 import { AIContextAggregator } from './AIContextAggregator';
 import { IContactRepository } from '@modules/contact/domain/repositories/IContactRepository';
@@ -40,7 +40,7 @@ export class ProcessAIResponseService {
     private readonly checkQuotaUseCase: ICheckQuotaUseCase,
     private readonly responseProcessor: AIResponseProcessor,
     private readonly humanHandoffPolicy: HumanHandoffPolicy,
-    private readonly advanceCommerceConversationUseCase: AdvanceCommerceConversationUseCase,
+    private readonly advanceCommerceConversationUseCase: IAdvanceCommerceConversation,
     private readonly aiSessionService: AISessionService,
     private readonly contextAggregator: AIContextAggregator,
     private readonly contactRepository: IContactRepository,

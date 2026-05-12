@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProcessAIResponseUseCase } from '@modules/ai/application/use-cases/ProcessAIResponseUseCase';
 import { IProcessAIResponseUseCase } from '@modules/ai/application/use-cases/interfaces/IProcessAIResponseUseCase';
@@ -87,12 +87,14 @@ import { TenantAgentRuleService } from '@modules/agent-rules/application/service
 import { AdvanceCommerceConversationUseCase } from '@modules/commerce/application/use-cases/AdvanceCommerceConversationUseCase';
 import { ReserveProfessionalSlotUseCase } from '@modules/scheduling/application/use-cases/ReserveProfessionalSlotUseCase';
 import { AiSafetyGate } from './application/services/AiSafetyGate';
+import { ADVANCE_COMMERCE_CONVERSATION } from './application/ports/IAdvanceCommerceConversation';
+import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessionalSlot';
 
 @Module({
   imports: [
     ConfigModule,
     TenantModule,
-    SalesModule,
+    forwardRef(() => SalesModule),
     BillingModule,
     SchedulingModule,
     CatalogModule,
@@ -116,7 +118,7 @@ import { AiSafetyGate } from './application/services/AiSafetyGate';
           paymentLinkGenerator,
           reserveProfessionalSlotUseCase,
         ),
-      inject: [PAYMENT_LINK_GENERATOR, ReserveProfessionalSlotUseCase],
+      inject: [PAYMENT_LINK_GENERATOR, RESERVE_PROFESSIONAL_SLOT],
     },
     {
       provide: HumanHandoffPolicy,
@@ -278,7 +280,7 @@ import { AiSafetyGate } from './application/services/AiSafetyGate';
         ICheckQuotaUseCase,
         AIResponseProcessor,
         HumanHandoffPolicy,
-        AdvanceCommerceConversationUseCase,
+        ADVANCE_COMMERCE_CONVERSATION,
         AISessionService,
         AIContextAggregator,
         CONTACT_REPOSITORY,
@@ -290,6 +292,14 @@ import { AiSafetyGate } from './application/services/AiSafetyGate';
     {
       provide: CHAT_HISTORY_REPOSITORY,
       useClass: RedisChatHistoryRepository,
+    },
+    {
+      provide: ADVANCE_COMMERCE_CONVERSATION,
+      useExisting: AdvanceCommerceConversationUseCase,
+    },
+    {
+      provide: RESERVE_PROFESSIONAL_SLOT,
+      useExisting: ReserveProfessionalSlotUseCase,
     },
   ],
   controllers: [],

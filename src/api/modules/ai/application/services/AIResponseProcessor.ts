@@ -1,10 +1,10 @@
 import { IPaymentLinkGenerator } from '../ports/IPaymentLinkGenerator';
-import { ReserveProfessionalSlotUseCase } from '@modules/scheduling/application/use-cases/ReserveProfessionalSlotUseCase';
+import { IReserveProfessionalSlot } from '../ports/IReserveProfessionalSlot';
 
 export class AIResponseProcessor {
   constructor(
     private readonly paymentLinkGenerator: IPaymentLinkGenerator,
-    private readonly reserveProfessionalSlotUseCase?: ReserveProfessionalSlotUseCase,
+    private readonly reserveProfessionalSlotUseCase?: IReserveProfessionalSlot,
   ) { }
 
   public async process(
