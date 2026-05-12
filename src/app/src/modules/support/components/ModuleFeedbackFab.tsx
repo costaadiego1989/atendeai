@@ -135,15 +135,6 @@ export function ModuleFeedbackFab() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Caminho da página</Label>
-              <Input
-                value={pagePath}
-                onChange={(e) => setPagePath(e.target.value)}
-                placeholder="/app/…"
-              />
-            </div>
-
             <Button
               className="w-full gap-2"
               disabled={
