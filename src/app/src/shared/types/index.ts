@@ -1123,6 +1123,13 @@ export type ProspectCampaignStatus =
   | 'PAUSED'
   | 'COMPLETED'
   | 'ARCHIVED';
+export type ProspectExecutionStatus =
+  | 'PENDING'
+  | 'CONTACTED'
+  | 'RESPONDED'
+  | 'STOPPED'
+  | 'FAILED';
+
 export type ProspectCampaignAudienceType = 'REENGAGEMENT' | 'CONTACT_LIST';
 export type ProspectCampaignChannel = 'WHATSAPP' | 'INSTAGRAM';
 
@@ -1170,7 +1177,7 @@ export interface ProspectCampaignStartResult {
   executions: Array<{
     id: string;
     contactId: string;
-    status: 'PENDING' | 'CONTACTED' | 'RESPONDED' | 'STOPPED' | 'FAILED';
+    status: ProspectExecutionStatus;
   }>;
 }
 
@@ -1179,7 +1186,7 @@ export interface ProspectCampaignDispatchNextResult {
   executionId: string;
   conversationId: string;
   messageId: string;
-  status: 'PENDING' | 'CONTACTED' | 'RESPONDED' | 'STOPPED' | 'FAILED';
+  status: ProspectExecutionStatus;
   renderedMessage: string;
   remainingPendingExecutions: number;
 }
@@ -1308,12 +1315,16 @@ export interface RecoveryAsyncJob {
   failedAt?: string | null;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
+export interface PageMeta {
   total: number;
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PageMeta;
 }
 
 export type SalesPaymentLinkStatus =
