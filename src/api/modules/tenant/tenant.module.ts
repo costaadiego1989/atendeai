@@ -18,6 +18,8 @@ import { DeletePromotionUseCase } from './application/use-cases/DeletePromotionU
 import { CreateExternalTenantUseCase } from './application/use-cases/CreateExternalTenantUseCase';
 import { GetTenantDetailsUseCase } from './application/use-cases/GetTenantDetailsUseCase';
 import { TenantController } from './presentation/controllers/TenantController';
+import { TenantWhatsAppController } from './presentation/controllers/TenantWhatsAppController';
+import { TenantBranchController } from './presentation/controllers/TenantBranchController';
 import { IntegrationController } from './presentation/controllers/IntegrationController';
 import { UserController } from './presentation/controllers/UserController';
 import { InstagramMetaConnectionController } from './presentation/controllers/InstagramMetaConnectionController';
@@ -210,6 +212,8 @@ const TENANT_BILLING_PROVIDERS = [
   imports: [AuthModule, ConfigModule],
   controllers: [
     TenantController,
+    TenantWhatsAppController,
+    TenantBranchController,
     IntegrationController,
     UserController,
     InstagramMetaConnectionController,

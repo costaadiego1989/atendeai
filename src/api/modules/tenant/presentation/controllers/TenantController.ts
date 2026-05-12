@@ -11,25 +11,18 @@ import {
   UseGuards,
   Inject,
   Req,
-  Query,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ICreateTenantUseCase } from '../../application/use-cases/interfaces/ICreateTenantUseCase';
-import { IConfigureWhatsAppUseCase } from '../../application/use-cases/interfaces/IConfigureWhatsAppUseCase';
 import { IConfigureInstagramUseCase } from '../../application/use-cases/interfaces/IConfigureInstagramUseCase';
 import { IConfigureAIUseCase } from '../../application/use-cases/interfaces/IConfigureAIUseCase';
 import {
   CreateTenantDTO,
-  ConfigureWhatsAppDTO,
   ConfigureInstagramDTO,
   ConfigureAIDTO,
   UpdateBusinessDataDTO,
   AddPromotionDTO,
   UpdatePromotionDTO,
-  RegisterTwilioWhatsAppSenderDTO,
-  VerifyTwilioWhatsAppSenderDTO,
-  CreateTenantBranchDTO,
-  UpdateTenantBranchDTO,
   UpsertTenantPDFResumeDTO,
 } from '../dtos/TenantDTOs';
 import { IUpdateBusinessDataUseCase } from '../../application/use-cases/interfaces/IUpdateBusinessDataUseCase';
@@ -45,13 +38,6 @@ import { IGetTenantDetailsUseCase } from '../../application/use-cases/interfaces
 import { IGetTenantSettingsUseCase } from '../../application/use-cases/interfaces/IGetTenantSettingsUseCase';
 import { IGetTenantProfileSectionsUseCase } from '../../application/use-cases/interfaces/IGetTenantProfileSectionsUseCase';
 import { IGetTenantOnboardingChecklistUseCase } from '../../application/use-cases/interfaces/IGetTenantOnboardingChecklistUseCase';
-import { GetWhatsAppConnectionUseCase } from '../../application/use-cases/GetWhatsAppConnectionUseCase';
-import { RegisterTwilioWhatsAppSenderUseCase } from '../../application/use-cases/RegisterTwilioWhatsAppSenderUseCase';
-import { VerifyTwilioWhatsAppSenderUseCase } from '../../application/use-cases/VerifyTwilioWhatsAppSenderUseCase';
-import { RefreshTwilioWhatsAppSenderStatusUseCase } from '../../application/use-cases/RefreshTwilioWhatsAppSenderStatusUseCase';
-import { CreateTenantBranchUseCase } from '../../application/use-cases/CreateTenantBranchUseCase';
-import { UpdateTenantBranchUseCase } from '../../application/use-cases/UpdateTenantBranchUseCase';
-import { DeleteTenantBranchUseCase } from '../../application/use-cases/DeleteTenantBranchUseCase';
 import { UpsertTenantPDFResumeUseCase } from '../../application/use-cases/UpsertTenantPDFResumeUseCase';
 import { ListTenantPDFResumesUseCase } from '../../application/use-cases/ListTenantPDFResumesUseCase';
 
@@ -61,8 +47,6 @@ export class TenantController {
   constructor(
     @Inject(ICreateTenantUseCase)
     private readonly createTenantUseCase: ICreateTenantUseCase,
-    @Inject(IConfigureWhatsAppUseCase)
-    private readonly configureWhatsAppUseCase: IConfigureWhatsAppUseCase,
     @Inject(IConfigureInstagramUseCase)
     private readonly configureInstagramUseCase: IConfigureInstagramUseCase,
     @Inject(IConfigureAIUseCase)
@@ -80,13 +64,6 @@ export class TenantController {
     private readonly addPromotionUseCase: AddPromotionUseCase,
     private readonly updatePromotionUseCase: UpdatePromotionUseCase,
     private readonly deletePromotionUseCase: DeletePromotionUseCase,
-    private readonly getWhatsAppConnectionUseCase: GetWhatsAppConnectionUseCase,
-    private readonly registerTwilioWhatsAppSenderUseCase: RegisterTwilioWhatsAppSenderUseCase,
-    private readonly verifyTwilioWhatsAppSenderUseCase: VerifyTwilioWhatsAppSenderUseCase,
-    private readonly refreshTwilioWhatsAppSenderStatusUseCase: RefreshTwilioWhatsAppSenderStatusUseCase,
-    private readonly createTenantBranchUseCase: CreateTenantBranchUseCase,
-    private readonly updateTenantBranchUseCase: UpdateTenantBranchUseCase,
-    private readonly deleteTenantBranchUseCase: DeleteTenantBranchUseCase,
     private readonly upsertTenantPDFResumeUseCase: UpsertTenantPDFResumeUseCase,
     private readonly listTenantPDFResumesUseCase: ListTenantPDFResumesUseCase,
   ) {}
@@ -119,68 +96,6 @@ export class TenantController {
   @UseGuards(JwtCookieGuard, TenantGuard)
   async getOnboardingChecklist(@Param('id') id: string) {
     return this.getTenantOnboardingChecklistUseCase.execute(id);
-  }
-
-  @Get(':id/whatsapp-connection')
-  @UseGuards(JwtCookieGuard, TenantGuard)
-  async getWhatsAppConnection(
-    @Param('id') id: string,
-    @Query('branchId') branchId?: string,
-  ) {
-    return this.getWhatsAppConnectionUseCase.execute(id, branchId);
-  }
-
-  @Put(':id/whatsapp-config')
-  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
-  @Roles('OWNER', 'ADMIN')
-  async updateWhatsAppConfig(
-    @Param('id') id: string,
-    @Body() body: ConfigureWhatsAppDTO,
-    @Req() req: Request,
-  ) {
-    const user = (req as any).user;
-    return this.configureWhatsAppUseCase.execute({
-      ...body,
-      tenantId: id,
-      requestingUserId: user?.sub,
-      requestingUserEmail: user?.email,
-    });
-  }
-
-  @Post(':id/whatsapp/twilio/sender')
-  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
-  @Roles('OWNER', 'ADMIN')
-  async registerTwilioWhatsAppSender(
-    @Param('id') id: string,
-    @Body() body: RegisterTwilioWhatsAppSenderDTO,
-  ) {
-    return this.registerTwilioWhatsAppSenderUseCase.execute({
-      ...body,
-      tenantId: id,
-    });
-  }
-
-  @Post(':id/whatsapp/twilio/verify')
-  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
-  @Roles('OWNER', 'ADMIN')
-  async verifyTwilioWhatsAppSender(
-    @Param('id') id: string,
-    @Body() body: VerifyTwilioWhatsAppSenderDTO,
-  ) {
-    return this.verifyTwilioWhatsAppSenderUseCase.execute({
-      ...body,
-      tenantId: id,
-    });
-  }
-
-  @Post(':id/whatsapp/twilio/refresh')
-  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
-  @Roles('OWNER', 'ADMIN')
-  async refreshTwilioWhatsAppSender(
-    @Param('id') id: string,
-    @Query('branchId') branchId?: string,
-  ) {
-    return this.refreshTwilioWhatsAppSenderStatusUseCase.execute(id, branchId);
   }
 
   @Put(':id/instagram-config')
@@ -293,69 +208,6 @@ export class TenantController {
     return this.deletePromotionUseCase.execute({
       tenantId: id,
       promotionId,
-      requestingUserId: user?.sub,
-      requestingUserEmail: user?.email,
-    });
-  }
-
-  @Post(':id/branches')
-  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
-  @Roles('OWNER', 'ADMIN')
-  async createBranch(@Param('id') id: string, @Body() body: CreateTenantBranchDTO, @Req() req: Request) {
-    const user = (req as any).user;
-    return this.createTenantBranchUseCase.execute({
-      ...body,
-      tenantId: id,
-      whatsAppConfigOverride: body.whatsAppProvider
-        ? {
-            provider: body.whatsAppProvider,
-            credentials: body.whatsAppCredentials ?? {},
-            webhookSecret: body.whatsAppWebhookSecret,
-          }
-        : null,
-      requestingUserId: user?.sub,
-      requestingUserEmail: user?.email,
-    });
-  }
-
-  @Put(':id/branches/:branchId')
-  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
-  @Roles('OWNER', 'ADMIN')
-  async updateBranch(
-    @Param('id') id: string,
-    @Param('branchId') branchId: string,
-    @Body() body: UpdateTenantBranchDTO,
-    @Req() req: Request,
-  ) {
-    const user = (req as any).user;
-    return this.updateTenantBranchUseCase.execute({
-      ...body,
-      tenantId: id,
-      branchId,
-      whatsAppConfigOverride: body.whatsAppProvider
-        ? {
-            provider: body.whatsAppProvider,
-            credentials: body.whatsAppCredentials ?? {},
-            webhookSecret: body.whatsAppWebhookSecret,
-          }
-        : null,
-      requestingUserId: user?.sub,
-      requestingUserEmail: user?.email,
-    });
-  }
-
-  @Delete(':id/branches/:branchId')
-  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
-  @Roles('OWNER', 'ADMIN')
-  async deleteBranch(
-    @Param('id') id: string,
-    @Param('branchId') branchId: string,
-    @Req() req: Request,
-  ) {
-    const user = (req as any).user;
-    return this.deleteTenantBranchUseCase.execute({
-      tenantId: id,
-      branchId,
       requestingUserId: user?.sub,
       requestingUserEmail: user?.email,
     });
