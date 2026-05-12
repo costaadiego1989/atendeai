@@ -1,13 +1,11 @@
 import { MessageReceivedHandler } from '../application/handlers/MessageReceivedHandler';
 import { IEventBus } from '@shared/infrastructure/event-bus';
 import { IProcessAIResponseUseCase } from '../application/use-cases/interfaces/IProcessAIResponseUseCase';
-import { FollowUpService } from '@modules/messaging/application/services/FollowUpService';
 
 describe('MessageReceivedHandler', () => {
   let handler: MessageReceivedHandler;
   let eventBus: jest.Mocked<IEventBus>;
   let processAIResponseUseCase: jest.Mocked<IProcessAIResponseUseCase>;
-  let followUpService: jest.Mocked<FollowUpService>;
 
   beforeEach(() => {
     eventBus = {
@@ -19,18 +17,13 @@ describe('MessageReceivedHandler', () => {
       execute: jest.fn(),
     } as unknown as jest.Mocked<IProcessAIResponseUseCase>;
 
-    followUpService = {
-      cancelFollowUps: jest.fn(),
-    } as unknown as jest.Mocked<FollowUpService>;
-
     handler = new MessageReceivedHandler(
       eventBus,
       processAIResponseUseCase,
-      followUpService,
     );
   });
 
-  it('should subscribe to messaging.message-received and process payload after cancelling follow-ups', async () => {
+  it('should subscribe to messaging.message-received and process payload', async () => {
     let subscribedHandler: ((event: any) => Promise<void>) | undefined;
     eventBus.subscribe.mockImplementation((queue, callback) => {
       if (queue === 'messaging.message-received') {
@@ -55,7 +48,6 @@ describe('MessageReceivedHandler', () => {
 
     await subscribedHandler!({ payload });
 
-    expect(followUpService.cancelFollowUps).toHaveBeenCalledWith('conversation-1');
     expect(processAIResponseUseCase.execute).toHaveBeenCalledWith(payload);
   });
 });

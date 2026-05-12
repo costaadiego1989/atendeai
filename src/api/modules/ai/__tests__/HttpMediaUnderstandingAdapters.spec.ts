@@ -61,6 +61,7 @@ describe('HttpMediaUnderstandingAdapters', () => {
           Authorization: 'Bearer secret-key',
           'Content-Type': 'application/json',
         },
+        timeout: 90000,
       },
     );
     expect(output).toEqual({

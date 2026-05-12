@@ -6,7 +6,6 @@ describe('FollowUpTriggeredHandler', () => {
   let handler: FollowUpTriggeredHandler;
   let eventBus: jest.Mocked<IEventBus>;
   let processAIResponseUseCase: jest.Mocked<IProcessAIResponseUseCase>;
-  let conversationIntelligenceRepository: { findByConversationIds: jest.Mock };
 
   beforeEach(() => {
     eventBus = {
@@ -17,23 +16,10 @@ describe('FollowUpTriggeredHandler', () => {
     processAIResponseUseCase = {
       execute: jest.fn(),
     } as unknown as jest.Mocked<IProcessAIResponseUseCase>;
-    conversationIntelligenceRepository = {
-      findByConversationIds: jest.fn().mockResolvedValue({
-        'conversation-1': {
-          summary: 'Cliente: Quero comprar cafe',
-          sentiment: 'POSITIVE',
-          tags: ['venda'],
-          interests: ['produto'],
-          nextStep: 'Enviar opcoes e confirmar checkout.',
-          lossReason: null,
-        },
-      }),
-    };
 
     handler = new FollowUpTriggeredHandler(
       eventBus,
       processAIResponseUseCase,
-      conversationIntelligenceRepository as any,
     );
   });
 
@@ -59,6 +45,14 @@ describe('FollowUpTriggeredHandler', () => {
         tenantId: 'tenant-1',
         contactId: 'contact-1',
         interval: '12h',
+        intelligence: {
+          summary: 'Cliente: Quero comprar cafe',
+          sentiment: 'POSITIVE',
+          tags: ['venda'],
+          interests: ['produto'],
+          nextStep: 'Enviar opcoes e confirmar checkout.',
+          lossReason: null,
+        },
       },
     });
 

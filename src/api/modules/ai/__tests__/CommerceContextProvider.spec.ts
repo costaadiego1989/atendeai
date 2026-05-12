@@ -1,9 +1,11 @@
 import { CommerceContextProvider } from '../infrastructure/adapters/CommerceContextProvider';
 import { ICommerceRepository } from '@modules/commerce/domain/ports/ICommerceRepository';
+import { ISalesRepository } from '@modules/sales/domain/repositories/ISalesRepository';
 import { SearchCommerceCatalogUseCase } from '@modules/commerce/application/use-cases/SearchCommerceCatalogUseCase';
 
 describe('CommerceContextProvider', () => {
   let commerceRepository: jest.Mocked<ICommerceRepository>;
+  let salesRepository: jest.Mocked<ISalesRepository>;
   let searchCommerceCatalogUseCase: jest.Mocked<SearchCommerceCatalogUseCase>;
   let provider: CommerceContextProvider;
 
@@ -25,12 +27,18 @@ describe('CommerceContextProvider', () => {
       findInventoryItemById: jest.fn(),
     } as unknown as jest.Mocked<ICommerceRepository>;
 
+    salesRepository = {
+      listCoupons: jest.fn().mockResolvedValue([]),
+      listPromotions: jest.fn().mockResolvedValue([]),
+    } as unknown as jest.Mocked<ISalesRepository>;
+
     searchCommerceCatalogUseCase = {
       execute: jest.fn(),
     } as unknown as jest.Mocked<SearchCommerceCatalogUseCase>;
 
     provider = new CommerceContextProvider(
       commerceRepository,
+      salesRepository,
       searchCommerceCatalogUseCase,
     );
   });
@@ -50,6 +58,9 @@ describe('CommerceContextProvider', () => {
         availableQuantity: 12,
         availabilityStatus: 'AVAILABLE',
         categoryName: null,
+        attributes: undefined,
+        variants: undefined,
+        optionGroups: undefined,
       },
       {
         optionNumber: 2,
@@ -62,6 +73,9 @@ describe('CommerceContextProvider', () => {
         availableQuantity: null,
         availabilityStatus: null,
         categoryName: 'Bebidas',
+        attributes: {},
+        variants: [],
+        optionGroups: [],
       },
     ]);
 
@@ -83,6 +97,7 @@ describe('CommerceContextProvider', () => {
     commerceRepository.findActiveSessionByConversation.mockResolvedValue({
       id: 'session-1',
       tenantId: 'tenant-1',
+      branchId: null,
       conversationId: 'conversation-1',
       contactId: 'contact-1',
       status: 'READY_FOR_CHECKOUT',
@@ -99,6 +114,8 @@ describe('CommerceContextProvider', () => {
       paymentLinkId: null,
       paymentLinkUrl: null,
       paymentStatus: null,
+      abandonmentPaused: false,
+      abandonmentPausedAt: null,
       pendingQuery: null,
       pendingOptions: [],
       selectedSource: null,
@@ -106,6 +123,8 @@ describe('CommerceContextProvider', () => {
       selectedCatalogItemId: null,
       selectedItemName: null,
       checkedOutAt: null,
+      couponCode: null,
+      discountAmount: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       items: [
