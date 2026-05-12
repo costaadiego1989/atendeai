@@ -1,0 +1,4 @@
+/**
+ * Placeholder to ensure git tracks the .auth directory.
+ * Storage state files are generated at runtime and should not be committed.
+ */
