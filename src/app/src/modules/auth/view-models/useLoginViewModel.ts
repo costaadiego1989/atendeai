@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
+import { HttpError } from '@/shared/api/client';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import {
   authService,
@@ -22,12 +23,13 @@ export function useLoginViewModel() {
       );
     },
     onError: (error) => {
+      const isThrottled = error instanceof HttpError && error.status === 429;
       const message = getFriendlyErrorMessage(error, {
         fallbackMessage: 'Não foi possível entrar agora.',
       });
 
       toast({
-        title: 'Falha no login',
+        title: isThrottled ? 'Limite de tentativas atingido' : 'Falha no login',
         description: message,
         variant: 'destructive',
       });
