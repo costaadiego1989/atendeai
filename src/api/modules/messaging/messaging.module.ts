@@ -49,6 +49,15 @@ import { MESSAGE_QUEUE } from './domain/ports/IMessageQueue';
 import { BullMQMessageQueue } from './infrastructure/queue/BullMQMessageQueue';
 import { FollowUpService } from './application/services/FollowUpService';
 import { FollowUpAuditService } from './application/services/FollowUpAuditService';
+import {
+  DeduplicateMessageStep,
+  IdentifyContactStep,
+  EnsureConversationStep,
+  PersistMessageStep,
+  AnalyzeMessageStep,
+  DispatchReplyStep,
+  InboundMessagePipeline,
+} from './application/services/inbound-pipeline';
 import { AIEscalationRequestedHandler } from './application/handlers/AIEscalationRequestedHandler';
 import { InstagramGraphAdapter } from './infrastructure/acl/InstagramGraphAdapter';
 import { MessagingGatewayRegistry } from './infrastructure/acl/MessagingGatewayRegistry';
@@ -89,6 +98,13 @@ import { CommerceModule } from '@modules/commerce/commerce.module';
     TwilioAdapter,
     InstagramGraphAdapter,
     MessagingGatewayRegistry,
+    DeduplicateMessageStep,
+    IdentifyContactStep,
+    EnsureConversationStep,
+    PersistMessageStep,
+    AnalyzeMessageStep,
+    DispatchReplyStep,
+    InboundMessagePipeline,
     ProcessInboundMessageUseCase,
     SalesIntegrationHandlers,
     SchedulingIntegrationHandlers,
