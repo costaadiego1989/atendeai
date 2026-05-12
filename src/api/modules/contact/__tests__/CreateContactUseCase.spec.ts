@@ -31,6 +31,7 @@ describe('CreateContactUseCase', () => {
       tenantId: '123e4567-e89b-12d3-a456-426614174000',
       name: 'John Doe',
       phone: '5511999999999',
+      document: '529.982.247-25',
       tags: ['VIP'],
     });
 
@@ -50,6 +51,7 @@ describe('CreateContactUseCase', () => {
         tenantId: '123e4567-e89b-12d3-a456-426614174000',
         name: 'John Doe',
         phone: '5511999999999',
+        document: '529.982.247-25',
       }),
     ).rejects.toThrow(ValidationErrorException);
   });
