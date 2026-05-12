@@ -46,6 +46,7 @@ export function usePlatformTenantsPageViewModel() {
     }
     return getFriendlyErrorMessage(err, {
       fallbackMessage: 'Não foi possível carregar a lista de tenants.',
+      context: 'platform-admin',
     });
   }, [tenantsQuery.error]);
 
