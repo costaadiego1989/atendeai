@@ -23,6 +23,8 @@ describe('BillingPaymentHandlers', () => {
       saveAuditLog: jest.fn(),
       findPlanByCode: jest.fn(),
       listSubscriptionModules: jest.fn().mockResolvedValue([]),
+      findActiveSubscriptionModule: jest.fn().mockResolvedValue(null),
+      updateSubscriptionModuleStatus: jest.fn(),
     };
     paymentService = {
       updateSubscription: jest.fn(),
