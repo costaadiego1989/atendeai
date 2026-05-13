@@ -7,6 +7,7 @@ import {
   Gauge,
   Loader2,
   MessageSquare,
+  Package,
   ShieldCheck,
   Sparkles,
   Users,
@@ -24,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { BillingHeader } from '../components/BillingHeader';
 import { BillingUsageProgressCard } from '@/modules/billing/components/BillingUsageProgressCard';
 import { useBillingPageViewModel } from '@/modules/billing/view-models/useBillingPageViewModel';
+import { useAddonPackageViewModel } from '@/modules/billing/view-models/useAddonPackageViewModel';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { KPICard } from '@/shared/ui/KPICard';
 import { PageSkeleton } from '@/shared/ui/Skeletons';
@@ -187,6 +189,7 @@ function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
 
 export default function BillingUsagePage() {
   const vm = useBillingPageViewModel();
+  const addonPackage = useAddonPackageViewModel(vm.tenant?.id);
 
   if (vm.isLoading) {
     return <PageSkeleton />;
@@ -350,6 +353,62 @@ export default function BillingUsagePage() {
           Exportar uso (CSV)
         </Button>
       </div>
+
+      {addonPackage.isAvailable && (messagePercent >= 80 || aiPercent >= 80 || contactsPercent >= 80) && (
+        <Card className="mb-10 overflow-hidden border-primary/20 bg-primary/[0.02]">
+          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-primary/10 p-2.5">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-bold text-foreground">Pacote Adicional de Quota</p>
+                {addonPackage.isActive ? (
+                  <p className="max-w-xl text-sm text-muted-foreground">
+                    Pacote ativo neste ciclo. As quotas extras ja estao aplicadas.
+                  </p>
+                ) : addonPackage.awaitingPayment ? (
+                  <p className="max-w-xl text-sm text-muted-foreground">
+                    Aguardando confirmacao do pagamento. As quotas serao atualizadas automaticamente.
+                  </p>
+                ) : addonPackage.packageDetails ? (
+                  <p className="max-w-xl text-sm text-muted-foreground">
+                    Adicione +{addonPackage.packageDetails.messages.toLocaleString('pt-BR')} mensagens,
+                    {' '}+{addonPackage.packageDetails.contacts.toLocaleString('pt-BR')} contatos e
+                    {' '}+{addonPackage.packageDetails.aiTokens.toLocaleString('pt-BR')} tokens de IA
+                    por {formatCurrency(addonPackage.packageDetails.price)} neste ciclo.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            {addonPackage.isActive ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => addonPackage.cancel()}
+                disabled={addonPackage.isCanceling}
+              >
+                {addonPackage.isCanceling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Cancelar pacote
+              </Button>
+            ) : addonPackage.awaitingPayment ? (
+              <Button size="sm" variant="outline" disabled>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Aguardando pagamento
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => addonPackage.purchase()}
+                disabled={addonPackage.isPurchasing}
+              >
+                {addonPackage.isPurchasing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Contratar pacote
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {shouldShowCommercialAdvisor && advisorAnswers && recommendation && (
         <div className="mb-10 grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">

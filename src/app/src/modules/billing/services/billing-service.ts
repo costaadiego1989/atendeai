@@ -29,6 +29,30 @@ interface BackendPlansResponse {
 
 interface BackendSubscriptionCatalogResponse extends BillingSubscriptionCatalog {}
 
+export interface AddonPackageInfo {
+  tenantId: string;
+  available: boolean;
+  active: boolean;
+  package: {
+    messages: number;
+    aiTokens: number;
+    contacts: number;
+    price: number;
+  } | null;
+}
+
+export interface PurchaseAddonPackageResult {
+  tenantId: string;
+  package: {
+    messages: number;
+    aiTokens: number;
+    contacts: number;
+    price: number;
+  };
+  mode: 'CHECKOUT_REQUIRED';
+  checkoutUrl: string;
+}
+
 function mapUsageData(input: BackendUsageResponse): UsageData {
   return {
     tenantId: input.tenantId,
@@ -116,5 +140,23 @@ export const billingService = {
   async getPublicModules(): Promise<any[]> {
     const response = await apiClient.get<any>('/public/billing/modules');
     return response.modules || [];
+  },
+
+  async getAddonPackageInfo(tenantId: string): Promise<AddonPackageInfo> {
+    return apiClient.get<AddonPackageInfo>(
+      `/tenants/${tenantId}/subscription/addon-package`,
+    );
+  },
+
+  async purchaseAddonPackage(tenantId: string): Promise<PurchaseAddonPackageResult> {
+    return apiClient.post<PurchaseAddonPackageResult>(
+      `/tenants/${tenantId}/subscription/addon-package`,
+    );
+  },
+
+  async cancelAddonPackage(tenantId: string): Promise<{ tenantId: string; status: string }> {
+    return apiClient.delete<{ tenantId: string; status: string }>(
+      `/tenants/${tenantId}/subscription/addon-package`,
+    );
   },
 };
