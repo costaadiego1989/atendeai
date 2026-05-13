@@ -87,6 +87,21 @@ export interface IBillingRepository {
   listNiches(): Promise<BusinessNicheRecord[]>;
   listModules(): Promise<BillingModuleRecord[]>;
   listSubscriptionModules(subscriptionId: string): Promise<SubscriptionModuleRecord[]>;
+  findActiveSubscriptionModule(
+    tenantId: string,
+    moduleCode: string,
+  ): Promise<SubscriptionModuleRecord | null>;
+  saveSubscriptionModule(
+    tenantId: string,
+    subscriptionId: string,
+    module: Omit<SubscriptionModuleRecord, 'subscriptionId' | 'tenantId'>,
+  ): Promise<void>;
+  updateSubscriptionModuleStatus(
+    tenantId: string,
+    moduleCode: string,
+    status: string,
+    endedAt?: Date,
+  ): Promise<void>;
   replaceSubscriptionModules(
     subscriptionId: string,
     tenantId: string,

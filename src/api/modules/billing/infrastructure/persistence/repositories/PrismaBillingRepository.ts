@@ -377,6 +377,99 @@ export class PrismaBillingRepository implements IBillingRepository {
     }
   }
 
+  async findActiveSubscriptionModule(
+    tenantId: string,
+    moduleCode: string,
+  ): Promise<SubscriptionModuleRecord | null> {
+    const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
+      SELECT
+        subscription_id,
+        tenant_id,
+        module_code,
+        status,
+        monthly_price,
+        pricing_version,
+        pricing_snapshot,
+        quota_impact,
+        metadata,
+        started_at,
+        ended_at
+      FROM billing_schema.subscription_modules
+      WHERE tenant_id = ${tenantId}::uuid
+        AND module_code = ${moduleCode}
+        AND status = 'ACTIVE'
+      LIMIT 1
+    `);
+
+    if (!rows.length) return null;
+
+    const row = rows[0];
+    return {
+      subscriptionId: row.subscription_id,
+      tenantId: row.tenant_id,
+      moduleCode: row.module_code,
+      status: row.status,
+      monthlyPrice: Number(row.monthly_price || 0),
+      pricingVersion: row.pricing_version,
+      pricingSnapshot: row.pricing_snapshot || {},
+      quotaImpact: row.quota_impact || {},
+      metadata: row.metadata || {},
+      startedAt: row.started_at,
+      endedAt: row.ended_at,
+    };
+  }
+
+  async saveSubscriptionModule(
+    tenantId: string,
+    subscriptionId: string,
+    module: Omit<SubscriptionModuleRecord, 'subscriptionId' | 'tenantId'>,
+  ): Promise<void> {
+    await this.prisma.$executeRaw(Prisma.sql`
+      INSERT INTO billing_schema.subscription_modules (
+        subscription_id,
+        tenant_id,
+        module_code,
+        status,
+        monthly_price,
+        pricing_version,
+        pricing_snapshot,
+        quota_impact,
+        metadata,
+        started_at,
+        ended_at
+      ) VALUES (
+        ${subscriptionId}::uuid,
+        ${tenantId}::uuid,
+        ${module.moduleCode},
+        ${module.status},
+        ${module.monthlyPrice},
+        ${module.pricingVersion ?? null},
+        ${JSON.stringify(module.pricingSnapshot || {})}::jsonb,
+        ${JSON.stringify(module.quotaImpact || {})}::jsonb,
+        ${JSON.stringify(module.metadata || {})}::jsonb,
+        ${module.startedAt}::timestamptz,
+        ${module.endedAt ?? null}::timestamptz
+      )
+    `);
+  }
+
+  async updateSubscriptionModuleStatus(
+    tenantId: string,
+    moduleCode: string,
+    status: string,
+    endedAt?: Date,
+  ): Promise<void> {
+    await this.prisma.$executeRaw(Prisma.sql`
+      UPDATE billing_schema.subscription_modules
+      SET status = ${status},
+          ended_at = ${endedAt ?? null}::timestamptz,
+          updated_at = NOW()
+      WHERE tenant_id = ${tenantId}::uuid
+        AND module_code = ${moduleCode}
+        AND status = 'ACTIVE'
+    `);
+  }
+
   private mapPlan(row: any): BillingPlanCatalogRecord {
     return {
       code: row.code,

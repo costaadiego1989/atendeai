@@ -29,6 +29,12 @@ import { IGetSubscriptionCatalogUseCase } from './application/use-cases/interfac
 import { GetSubscriptionCatalogUseCase } from './application/use-cases/GetSubscriptionCatalogUseCase';
 import { IReplaceSubscriptionModulesUseCase } from './application/use-cases/interfaces/IReplaceSubscriptionModulesUseCase';
 import { ReplaceSubscriptionModulesUseCase } from './application/use-cases/ReplaceSubscriptionModulesUseCase';
+import { PurchaseAddonPackageUseCase } from './application/use-cases/PurchaseAddonPackageUseCase';
+import { IPurchaseAddonPackageUseCase } from './application/use-cases/interfaces/IPurchaseAddonPackageUseCase';
+import { CancelAddonPackageUseCase } from './application/use-cases/CancelAddonPackageUseCase';
+import { ICancelAddonPackageUseCase } from './application/use-cases/interfaces/ICancelAddonPackageUseCase';
+import { GetAddonPackageInfoUseCase } from './application/use-cases/GetAddonPackageInfoUseCase';
+import { IGetAddonPackageInfoUseCase } from './application/use-cases/interfaces/IGetAddonPackageInfoUseCase';
 import { TenantModuleAccessService } from '@shared/infrastructure/billing/TenantModuleAccessService';
 import { TenantManualSaleEligibilityService } from '@shared/infrastructure/billing/TenantManualSaleEligibilityService';
 import { BillingProspectingQuotaService } from './application/services/BillingProspectingQuotaService';
@@ -91,6 +97,18 @@ import { BillingProspectingQuotaService } from './application/services/BillingPr
       provide: IReplaceSubscriptionModulesUseCase,
       useClass: ReplaceSubscriptionModulesUseCase,
     },
+    {
+      provide: IPurchaseAddonPackageUseCase,
+      useClass: PurchaseAddonPackageUseCase,
+    },
+    {
+      provide: ICancelAddonPackageUseCase,
+      useClass: CancelAddonPackageUseCase,
+    },
+    {
+      provide: IGetAddonPackageInfoUseCase,
+      useClass: GetAddonPackageInfoUseCase,
+    },
   ],
   exports: [
     BILLING_REPOSITORY,
@@ -102,6 +120,9 @@ import { BillingProspectingQuotaService } from './application/services/BillingPr
     IListBillingPlansUseCase,
     IGetSubscriptionCatalogUseCase,
     IReplaceSubscriptionModulesUseCase,
+    IPurchaseAddonPackageUseCase,
+    ICancelAddonPackageUseCase,
+    IGetAddonPackageInfoUseCase,
     BillingProspectingQuotaService,
     TenantModuleAccessService,
     TenantManualSaleEligibilityService,

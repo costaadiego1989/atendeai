@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
 import {
@@ -12,6 +12,9 @@ import { ICancelSubscriptionUseCase } from '../../application/use-cases/interfac
 import { IListBillingPlansUseCase } from '../../application/use-cases/interfaces/IListBillingPlansUseCase';
 import { IGetSubscriptionCatalogUseCase } from '../../application/use-cases/interfaces/IGetSubscriptionCatalogUseCase';
 import { IReplaceSubscriptionModulesUseCase } from '../../application/use-cases/interfaces/IReplaceSubscriptionModulesUseCase';
+import { IPurchaseAddonPackageUseCase } from '../../application/use-cases/interfaces/IPurchaseAddonPackageUseCase';
+import { ICancelAddonPackageUseCase } from '../../application/use-cases/interfaces/ICancelAddonPackageUseCase';
+import { IGetAddonPackageInfoUseCase } from '../../application/use-cases/interfaces/IGetAddonPackageInfoUseCase';
 
 @Controller('tenants/:tenantId/subscription')
 @UseGuards(JwtCookieGuard, TenantGuard)
@@ -27,6 +30,12 @@ export class SubscriptionController {
     private readonly getSubscriptionCatalogUseCase: IGetSubscriptionCatalogUseCase,
     @Inject(IReplaceSubscriptionModulesUseCase)
     private readonly replaceSubscriptionModulesUseCase: IReplaceSubscriptionModulesUseCase,
+    @Inject(IPurchaseAddonPackageUseCase)
+    private readonly purchaseAddonPackageUseCase: IPurchaseAddonPackageUseCase,
+    @Inject(ICancelAddonPackageUseCase)
+    private readonly cancelAddonPackageUseCase: ICancelAddonPackageUseCase,
+    @Inject(IGetAddonPackageInfoUseCase)
+    private readonly getAddonPackageInfoUseCase: IGetAddonPackageInfoUseCase,
   ) {}
 
   @Get('plans')
@@ -64,5 +73,20 @@ export class SubscriptionController {
   @Post('cancel')
   async cancel(@Param('tenantId') tenantId: string) {
     return this.cancelSubscriptionUseCase.execute({ tenantId });
+  }
+
+  @Get('addon-package')
+  async getAddonPackageInfo(@Param('tenantId') tenantId: string) {
+    return this.getAddonPackageInfoUseCase.execute({ tenantId });
+  }
+
+  @Post('addon-package')
+  async purchaseAddonPackage(@Param('tenantId') tenantId: string) {
+    return this.purchaseAddonPackageUseCase.execute({ tenantId });
+  }
+
+  @Delete('addon-package')
+  async cancelAddonPackage(@Param('tenantId') tenantId: string) {
+    return this.cancelAddonPackageUseCase.execute({ tenantId });
   }
 }

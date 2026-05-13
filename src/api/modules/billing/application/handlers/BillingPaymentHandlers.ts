@@ -21,6 +21,8 @@ import {
   BillingSubscriptionOverdueIntegrationEvent,
 } from '../integration-events/BillingIntegrationEvents';
 import { buildSubscriptionCommercialState } from '../support/BillingCommercialConfig';
+import { ADDON_PACKAGE_MODULE_CODE } from '../../domain/constants/AddonPackages';
+import { Subscription } from '../../domain/entities/Subscription';
 
 @Injectable()
 export class BillingPaymentHandlers implements OnModuleInit {
@@ -52,6 +54,19 @@ export class BillingPaymentHandlers implements OnModuleInit {
           payload.rawReference,
         );
 
+        const addonPackageRequest = this.parseBillingAddonReference(
+          payload.rawReference,
+        );
+
+        // Handle addon package payment confirmation
+        if (addonPackageRequest) {
+          await this.handleAddonPackagePaymentConfirmed(
+            addonPackageRequest.tenantId,
+            subscription,
+          );
+          return;
+        }
+
         if (planUpgradeRequest) {
           const oldPlan = subscription.plan;
           const targetPlanDefinition = await this.billingRepository.findPlanByCode(
@@ -73,6 +88,9 @@ export class BillingPaymentHandlers implements OnModuleInit {
           );
           subscription.clearScheduledPlan();
           subscription.renewCycleFrom(confirmedAt);
+
+          // Expire addon package from previous cycle
+          await this.expireAddonPackageOnRenewal(tenantId, subscription);
 
           await this.syncRecurringBillingAfterUpgrade(
             tenantId,
@@ -154,6 +172,10 @@ export class BillingPaymentHandlers implements OnModuleInit {
         }
 
         subscription.renewCycleFrom(confirmedAt);
+
+        // Expire addon package from previous cycle
+        await this.expireAddonPackageOnRenewal(tenantId, subscription);
+
         await this.billingRepository.saveSubscription(subscription);
 
         await this.billingRepository.saveAuditLog({
@@ -224,7 +246,16 @@ export class BillingPaymentHandlers implements OnModuleInit {
       const tenantId = payload.tenantId;
       const subscription = await this.billingRepository.findSubscription(tenantId);
 
-      if (subscription && subscription.status !== 'OVERDUE') {
+      if (!subscription) return;
+
+      // Check if this refund is for an addon package
+      const addonRef = this.parseBillingAddonReference(payload.rawReference);
+      if (addonRef) {
+        await this.rollbackAddonPackage(tenantId, subscription);
+        return;
+      }
+
+      if (subscription.status !== 'OVERDUE') {
         subscription.markAsOverdue();
         await this.billingRepository.saveSubscription(subscription);
 
@@ -266,6 +297,120 @@ export class BillingPaymentHandlers implements OnModuleInit {
       tenantId: match[1],
       targetPlan: match[2] as PlanType,
     };
+  }
+
+  private parseBillingAddonReference(rawReference?: unknown): {
+    tenantId: string;
+    moduleCode: string;
+  } | null {
+    if (typeof rawReference !== 'string') {
+      return null;
+    }
+
+    const match = /^billing-addon\|([^|]+)\|([^|]+)$/.exec(rawReference);
+
+    if (!match) {
+      return null;
+    }
+
+    return {
+      tenantId: match[1],
+      moduleCode: match[2],
+    };
+  }
+
+  /**
+   * Confirms addon package payment. The quotas were already applied optimistically
+   * at purchase time, so we just mark the module as PAID and log it.
+   */
+  private async handleAddonPackagePaymentConfirmed(
+    tenantId: string,
+    subscription: Subscription,
+  ): Promise<void> {
+    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
+      tenantId,
+      ADDON_PACKAGE_MODULE_CODE,
+    );
+
+    if (!activeModule) {
+      this.logger.warn(
+        `Addon package payment confirmed for tenant ${tenantId} but no active module found`,
+      );
+      return;
+    }
+
+    await this.billingRepository.saveAuditLog({
+      tenantId,
+      event: 'ADDON_PACKAGE_PAYMENT_CONFIRMED',
+      metadata: {
+        moduleCode: ADDON_PACKAGE_MODULE_CODE,
+        plan: subscription.plan,
+        price: activeModule.monthlyPrice,
+      },
+    });
+
+    this.logger.log(`Addon package payment confirmed for tenant ${tenantId}`);
+  }
+
+  /**
+   * Rollbacks addon package quotas when payment is refunded.
+   * Reverts the optimistic quota adjustment and marks module as REFUNDED.
+   */
+  private async rollbackAddonPackage(
+    tenantId: string,
+    subscription: Subscription,
+  ): Promise<void> {
+    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
+      tenantId,
+      ADDON_PACKAGE_MODULE_CODE,
+    );
+
+    if (!activeModule) {
+      this.logger.warn(
+        `Addon package refund for tenant ${tenantId} but no active module found`,
+      );
+      return;
+    }
+
+    const quotaImpact = activeModule.quotaImpact || {};
+
+    // Revert quotas
+    subscription.adjustQuotas({
+      messages: -(quotaImpact.messages ?? 0),
+      aiTokens: -(quotaImpact.aiTokens ?? 0),
+      contacts: -(quotaImpact.contacts ?? 0),
+    });
+
+    // Revert pricing
+    subscription.updatePricing({
+      baseMonthlyPrice: subscription.baseMonthlyPrice,
+      addonsMonthlyPrice: Math.max(
+        0,
+        subscription.addonsMonthlyPrice - activeModule.monthlyPrice,
+      ),
+    });
+
+    await this.billingRepository.saveSubscription(subscription);
+
+    // Mark module as refunded
+    await this.billingRepository.updateSubscriptionModuleStatus(
+      tenantId,
+      ADDON_PACKAGE_MODULE_CODE,
+      'REFUNDED',
+      new Date(),
+    );
+
+    await this.billingRepository.saveAuditLog({
+      tenantId,
+      event: 'ADDON_PACKAGE_REFUNDED',
+      metadata: {
+        moduleCode: ADDON_PACKAGE_MODULE_CODE,
+        revertedQuotas: quotaImpact,
+        revertedPrice: activeModule.monthlyPrice,
+      },
+    });
+
+    this.logger.log(`Addon package refunded and rolled back for tenant ${tenantId}`);
   }
 
   private async syncRecurringBillingAfterUpgrade(
@@ -343,5 +488,59 @@ export class BillingPaymentHandlers implements OnModuleInit {
       customerId,
       subscriptionId: remoteSubscription.id,
     };
+  }
+
+  /**
+   * Expires any active addon package (quota-boost) on cycle renewal.
+   * Reverts the quota deltas and marks the module as EXPIRED.
+   */
+  private async expireAddonPackageOnRenewal(
+    tenantId: string,
+    subscription: Subscription,
+  ): Promise<void> {
+    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
+      tenantId,
+      ADDON_PACKAGE_MODULE_CODE,
+    );
+
+    if (!activeModule) return;
+
+    const quotaImpact = activeModule.quotaImpact || {};
+
+    // Revert quotas added by the addon package
+    subscription.adjustQuotas({
+      messages: -(quotaImpact.messages ?? 0),
+      aiTokens: -(quotaImpact.aiTokens ?? 0),
+      contacts: -(quotaImpact.contacts ?? 0),
+    });
+
+    // Revert pricing
+    subscription.updatePricing({
+      baseMonthlyPrice: subscription.baseMonthlyPrice,
+      addonsMonthlyPrice: Math.max(
+        0,
+        subscription.addonsMonthlyPrice - activeModule.monthlyPrice,
+      ),
+    });
+
+    // Mark module as expired
+    await this.billingRepository.updateSubscriptionModuleStatus(
+      tenantId,
+      ADDON_PACKAGE_MODULE_CODE,
+      'EXPIRED',
+      new Date(),
+    );
+
+    await this.billingRepository.saveAuditLog({
+      tenantId,
+      event: 'ADDON_PACKAGE_EXPIRED',
+      metadata: {
+        moduleCode: ADDON_PACKAGE_MODULE_CODE,
+        revertedQuotas: quotaImpact,
+        revertedPrice: activeModule.monthlyPrice,
+      },
+    });
+
+    this.logger.log(`Addon package expired for tenant ${tenantId}`);
   }
 }
