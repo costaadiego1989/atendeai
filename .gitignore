@@ -60,6 +60,10 @@ scripts/
 .cursor/skills
 docs/api-modules-review
 
+# Playwright
+playwright-report/
+test-results/
+
 # OS
 Thumbs.db
 ehthumbs.db
