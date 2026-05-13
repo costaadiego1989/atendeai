@@ -4,7 +4,7 @@ const AUTH_FILE = './e2e/.auth/user.json';
 
 /**
  * Authentication setup — runs once before all tests.
- * Logs in via the UI and persists storage state for reuse.
+ * Logs in via the UI and persists storage state (cookies) for reuse.
  *
  * Requires env vars: E2E_USER_EMAIL, E2E_USER_PASSWORD
  * Defaults to test credentials for local dev.
@@ -14,15 +14,19 @@ setup('authenticate', async ({ page }) => {
   const password = process.env.E2E_USER_PASSWORD ?? 'Test@123';
 
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: /entrar|login/i })).toBeVisible();
 
-  await page.getByLabel(/e-?mail/i).fill(email);
-  await page.getByLabel(/senha|password/i).fill(password);
-  await page.getByRole('button', { name: /entrar|login/i }).click();
+  // Real heading: "Acesse sua Máquina de Vendas"
+  await expect(
+    page.getByRole('heading', { name: /acesse sua máquina de vendas/i })
+  ).toBeVisible({ timeout: 15_000 });
 
-  // Wait for redirect to the app
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Senha').fill(password);
+  await page.getByRole('button', { name: 'Entrar' }).click();
+
+  // Wait for redirect to the app (dashboard or first-access)
   await page.waitForURL(/\/app\//, { timeout: 15_000 });
 
-  // Persist authenticated state
+  // Persist authenticated state (cookies)
   await page.context().storageState({ path: AUTH_FILE });
 });

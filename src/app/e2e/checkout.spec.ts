@@ -1,141 +1,396 @@
 import { test, expect } from '../playwright-fixture';
+import { CheckoutPage } from './pages';
+import {
+  mockApiError,
+  mockApiResponse,
+  mockApiTimeout,
+} from './helpers';
+
+const TENANT_ID = 'a0000000-0000-0000-0000-000000000001';
+const ORDERS_API = `**/api/v1/tenants/${TENANT_ID}/checkout/orders*`;
+const ANALYTICS_API = `**/api/v1/tenants/${TENANT_ID}/checkout/analytics*`;
+
+/**
+ * Checkout E2E Tests — Operations dashboard for managing orders.
+ * Covers: smoke, KPIs, orders tabs, funnel, analytics, abandonment, shipping, reports, errors, responsiveness.
+ */
 
 test.describe('Checkout', () => {
-  test.describe('Session & Navigation (APP-CHKT-002)', () => {
-    test('@smoke should load checkout page', async ({ page }) => {
-      await page.goto('/app/checkout');
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 1. SMOKE TESTS
+  // ═══════════════════════════════════════════════════════════════════════════════
 
-      await expect(page).toHaveURL(/\/app\/checkout/);
-
-      const content = page.locator(
-        'main, [role="main"], [data-testid="checkout-page"], [data-testid="checkout"]'
-      );
-      await expect(content.first()).toBeVisible({ timeout: 10_000 });
+  test.describe('1. Smoke Tests', () => {
+    test('1.1 @smoke should load checkout page with heading', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
     });
 
-    test('@regression should display checkout stepper or breadcrumb', async ({ page }) => {
-      await page.goto('/app/checkout');
+    test('1.2 @smoke should display page description', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
 
-      // Stepper/breadcrumb indicating checkout steps
-      const stepper = page.locator(
-        '[data-testid="checkout-stepper"], [role="progressbar"], .stepper, nav[aria-label*="step"], ol'
-      );
-      const hasSteps = await stepper.first().isVisible().catch(() => false);
-
-      // At minimum, the page should have some structured navigation
-      const heading = page.locator('h1, h2, [data-testid="checkout-title"]');
-      const hasHeading = await heading.first().isVisible().catch(() => false);
-
-      expect(hasSteps || hasHeading).toBe(true);
+      await expect(checkout.description).toBeVisible();
     });
 
-    test('@regression should show order summary section', async ({ page }) => {
-      await page.goto('/app/checkout');
+    test('1.3 @smoke should display header action buttons', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
 
-      // Order summary with items, subtotal, total
-      const summary = page.locator(
-        '[data-testid="order-summary"], [data-testid="cart-summary"], .order-summary'
-      );
-      const summaryText = page.getByText(/total|subtotal|resumo/i);
-
-      const hasSummary = await summary.first().isVisible().catch(() => false);
-      const hasText = await summaryText.first().isVisible().catch(() => false);
-
-      expect(hasSummary || hasText).toBe(true);
-    });
-  });
-
-  test.describe('Payment Methods', () => {
-    test('@regression should display payment method options', async ({ page }) => {
-      await page.goto('/app/checkout');
-
-      // Payment method selection (PIX, cartao, boleto)
-      const paymentOptions = page.getByText(/pix|cartão|cartao|boleto|credito|débito/i);
-      const paymentSection = page.locator(
-        '[data-testid="payment-methods"], [data-testid="payment-options"]'
-      );
-
-      const hasOptions = await paymentOptions.first().isVisible().catch(() => false);
-      const hasSection = await paymentSection.first().isVisible().catch(() => false);
-
-      // Page may require items in cart first - just verify page loads without error
-      const errorPage = page.locator('[data-testid="error-page"], .error-boundary');
-      const hasError = await errorPage.first().isVisible().catch(() => false);
-      expect(hasError).toBe(false);
+      await expect(checkout.abandonmentButton).toBeVisible();
+      await expect(checkout.shippingButton).toBeVisible();
     });
 
-    test('@regression should validate required checkout fields', async ({ page }) => {
-      await page.goto('/app/checkout');
+    test('1.4 @smoke should display KPI cards', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
 
-      // Try to submit/advance without filling required fields
-      const submitBtn = page.getByRole('button', {
-        name: /finalizar|confirmar|pagar|continuar|avancar|next/i,
-      });
-      const hasSubmit = await submitBtn.first().isVisible().catch(() => false);
+      await expect(checkout.kpiOpenOrders).toBeVisible();
+      await expect(checkout.kpiAwaitingPayment).toBeVisible();
+      await expect(checkout.kpiPendingRevenue).toBeVisible();
+      await expect(checkout.kpiPaidRevenue).toBeVisible();
+    });
 
-      if (hasSubmit) {
-        await submitBtn.first().click();
+    test('1.5 @smoke should display period filter card', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
 
-        // Expect validation messages
-        const errors = page.locator('[role="alert"], .text-destructive, [data-error], .error');
-        await expect(errors.first()).toBeVisible({ timeout: 5_000 });
-      }
+      await expect(checkout.reportCardTitle).toBeVisible();
+      await expect(checkout.periodToday).toBeVisible();
+      await expect(checkout.period7d).toBeVisible();
+      await expect(checkout.period30d).toBeVisible();
+    });
+
+    test('1.6 @smoke should display logistics strategy card', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.logisticsTitle).toBeVisible();
+    });
+
+    test('1.7 @smoke should display funnel section', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.funnelTitle).toBeVisible();
+    });
+
+    test('1.8 @smoke should display orders section', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.ordersTitle).toBeVisible();
     });
   });
 
-  test.describe('Coupon & Discounts', () => {
-    test('@regression should show coupon input field', async ({ page }) => {
-      await page.goto('/app/checkout');
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 2. ORDERS TABS
+  // ═══════════════════════════════════════════════════════════════════════════════
 
-      const couponInput = page.getByPlaceholder(/cupom|coupon|desconto|codigo/i)
-        .or(page.locator('[data-testid="coupon-input"]'));
-      const couponBtn = page.getByRole('button', { name: /cupom|aplicar|coupon/i });
+  test.describe('2. Orders Tabs', () => {
+    test('2.1 @regression should display order status tabs', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
 
-      const hasInput = await couponInput.first().isVisible().catch(() => false);
-      const hasBtn = await couponBtn.first().isVisible().catch(() => false);
+      await expect(checkout.tabAll).toBeVisible();
+      await expect(checkout.tabNew).toBeVisible();
+      await expect(checkout.tabPreparing).toBeVisible();
+      await expect(checkout.tabReady).toBeVisible();
+    });
 
-      // Coupon feature may not be visible without items - just verify no crash
-      const errorPage = page.locator('[data-testid="error-page"], .error-boundary');
-      const hasError = await errorPage.first().isVisible().catch(() => false);
-      expect(hasError).toBe(false);
+    test('2.2 @regression should switch to New tab', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.tabNew.click();
+      await checkout.assertNoCrash();
+    });
+
+    test('2.3 @regression should switch to Preparing tab', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.tabPreparing.click();
+      await checkout.assertNoCrash();
+    });
+
+    test('2.4 @regression should switch to Delivered tab', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.tabDelivered.click();
+      await checkout.assertNoCrash();
+    });
+
+    test('2.5 @regression should switch to Cancelled tab', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.tabCancelled.click();
+      await checkout.assertNoCrash();
+    });
+
+    test('2.6 @regression should show orders or empty state', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      const hasOrders = await page.locator('.glass-card').nth(3)
+        .isVisible({ timeout: 10_000 }).catch(() => false);
+      const hasEmpty = await checkout.ordersEmptyTitle.isVisible().catch(() => false);
+      const hasLoading = await checkout.ordersLoading.isVisible().catch(() => false);
+
+      expect(hasOrders || hasEmpty || hasLoading).toBe(true);
     });
   });
 
-  test.describe('Error Handling', () => {
-    test('@regression should handle payment API errors gracefully', async ({ page }) => {
-      // Mock payment endpoint to return error
-      await page.route('**/api/v1/checkout/payment*', (route) =>
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 3. PERIOD TOGGLE
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('3. Period Toggle', () => {
+    test('3.1 @regression should toggle to 7 dias', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.period7d.click();
+      await checkout.assertNoCrash();
+    });
+
+    test('3.2 @regression should toggle to 30 dias', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.period30d.click();
+      await checkout.assertNoCrash();
+    });
+
+    test('3.3 @regression should toggle to Hoje', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.periodToday.click();
+      await checkout.assertNoCrash();
+    });
+
+    test('3.4 @regression should click generate report button', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.generateReportButton.click();
+      await checkout.assertNoCrash();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 4. ANALYTICS
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('4. Analytics', () => {
+    test('4.1 @regression should display analytics section', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.analyticsTitle).toBeVisible();
+    });
+
+    test('4.2 @regression should display products and customers tabs', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.analyticsProductsTab).toBeVisible();
+      await expect(checkout.analyticsCustomersTab).toBeVisible();
+    });
+
+    test('4.3 @regression should switch to customers tab', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.analyticsCustomersTab.click();
+      await checkout.assertNoCrash();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 5. ABANDONMENT CONFIG
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('5. Abandonment Config', () => {
+    test('5.1 @regression should open abandonment config sheet', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.openAbandonmentSheet();
+      await expect(checkout.abandonmentSaveButton).toBeVisible();
+    });
+
+    test('5.2 @regression should display abandonment form fields', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.openAbandonmentSheet();
+
+      // Should show message toggle and interval config
+      const messageLabel = page.getByText('Mensagem de Abandono');
+      await expect(messageLabel).toBeVisible();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 6. SHIPPING CONFIG
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('6. Shipping Config', () => {
+    test('6.1 @regression should open shipping config sheet', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.openShippingSheet();
+      await expect(checkout.shippingModeSelect).toBeVisible();
+      await expect(checkout.shippingSaveButton).toBeVisible();
+    });
+
+    test('6.2 @regression should display shipping form fields', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.openShippingSheet();
+
+      const freightLabel = page.getByText('Modelo de Cobrança de Frete');
+      await expect(freightLabel).toBeVisible();
+
+      const deliveryLabel = page.getByText('Janelas de Entrega');
+      await expect(deliveryLabel).toBeVisible();
+    });
+
+    test('6.3 @regression should close shipping sheet on cancel', async ({ page }) => {
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.openShippingSheet();
+      await expect(checkout.shippingSheetTitle).toBeVisible();
+
+      await checkout.shippingCancelButton.click();
+      await expect(checkout.shippingSheetTitle).toBeHidden({ timeout: 3_000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 7. ERROR HANDLING
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('7. Error Handling', () => {
+    test('7.1 @regression should handle orders API error gracefully', async ({ page }) => {
+      await page.route(ORDERS_API, (route) =>
         route.fulfill({
           status: 500,
           contentType: 'application/json',
-          body: JSON.stringify({ error: 'Payment processing failed' }),
-        })
+          body: JSON.stringify({ error: 'Internal Server Error' }),
+        }),
       );
 
-      await page.goto('/app/checkout');
-
-      // Page should still load without crashing
-      const errorBoundary = page.locator('.error-boundary, [data-testid="error-boundary"]');
-      const hasCrash = await errorBoundary.first().isVisible().catch(() => false);
-      expect(hasCrash).toBe(false);
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+      await checkout.assertNoCrash();
     });
 
-    test('@regression should show friendly message on session expiry', async ({ page }) => {
-      // Mock session endpoint to return 401
-      await page.route('**/api/v1/checkout/session*', (route) =>
-        route.fulfill({
-          status: 401,
-          contentType: 'application/json',
-          body: JSON.stringify({ error: 'Session expired' }),
-        })
-      );
+    test('7.2 @regression should handle analytics API timeout gracefully', async ({ page }) => {
+      await page.route(ANALYTICS_API, (route) => route.abort('timedout'));
 
-      await page.goto('/app/checkout');
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+      await checkout.assertNoCrash();
+    });
 
-      // Should not crash - either redirect to login or show message
-      const errorBoundary = page.locator('.error-boundary, [data-testid="error-boundary"]');
-      const hasCrash = await errorBoundary.first().isVisible().catch(() => false);
-      expect(hasCrash).toBe(false);
+    test('7.3 @regression should handle orders API timeout gracefully', async ({ page }) => {
+      await page.route(ORDERS_API, (route) => route.abort('timedout'));
+
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+      await checkout.assertNoCrash();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 8. RESPONSIVENESS
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('8. Responsiveness', () => {
+    test('8.1 @regression checkout page renders on mobile viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 });
+
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.kpiOpenOrders).toBeVisible();
+      await expect(checkout.abandonmentButton).toBeVisible();
+    });
+
+    test('8.2 @regression checkout page renders on tablet viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 768, height: 1024 });
+
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.reportCardTitle).toBeVisible();
+      await expect(checkout.funnelTitle).toBeVisible();
+    });
+
+    test('8.3 @regression checkout page renders on desktop viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await expect(checkout.kpiOpenOrders).toBeVisible();
+      await expect(checkout.kpiAwaitingPayment).toBeVisible();
+      await expect(checkout.kpiPendingRevenue).toBeVisible();
+      await expect(checkout.kpiPaidRevenue).toBeVisible();
+      await expect(checkout.ordersTitle).toBeVisible();
+      await expect(checkout.analyticsTitle).toBeVisible();
+    });
+
+    test('8.4 @regression shipping sheet works on mobile', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 });
+
+      const checkout = new CheckoutPage(page);
+      await checkout.goto();
+      await checkout.assertPageVisible();
+
+      await checkout.openShippingSheet();
+      await expect(checkout.shippingModeSelect).toBeVisible();
+      await expect(checkout.shippingSaveButton).toBeVisible();
     });
   });
 });

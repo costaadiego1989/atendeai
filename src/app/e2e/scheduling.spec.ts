@@ -1,162 +1,471 @@
 import { test, expect } from '../playwright-fixture';
+import { SchedulingPage } from './pages';
+import {
+  mockApiError,
+  mockApiResponse,
+  mockApiTimeout,
+} from './helpers';
+
+const TENANT_ID = 'a0000000-0000-0000-0000-000000000001';
+const PROFESSIONALS_API = `**/api/v1/tenants/${TENANT_ID}/scheduling/professionals*`;
+const CATEGORIES_API = `**/api/v1/tenants/${TENANT_ID}/scheduling/categories*`;
+const SLOTS_API = `**/api/v1/tenants/${TENANT_ID}/scheduling/slots*`;
+
+/**
+ * Scheduling E2E Tests — Rewritten with real selectors, direct assertions.
+ * Covers: smoke, professionals CRUD, categories CRUD, slots, reports, errors, responsiveness.
+ */
 
 test.describe('Scheduling', () => {
-  test.describe('Calendar View', () => {
-    test('@smoke should load scheduling page with calendar', async ({ page }) => {
-      await page.goto('/app/scheduling');
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 1. SMOKE TESTS
+  // ═══════════════════════════════════════════════════════════════════════════════
 
-      await expect(page).toHaveURL(/\/app\/scheduling/);
-
-      const content = page.locator(
-        'main, [role="main"], [data-testid="scheduling-page"], [data-testid="calendar"]'
-      );
-      await expect(content.first()).toBeVisible({ timeout: 10_000 });
+  test.describe('1. Smoke Tests', () => {
+    test('1.1 @smoke should load scheduling page with heading', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
     });
 
-    test('@regression should display calendar or agenda view', async ({ page }) => {
-      await page.goto('/app/scheduling');
+    test('1.2 @smoke should display page description', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      const calendar = page.locator(
-        '[data-testid="calendar"], [role="grid"], .calendar, .fc, [data-testid="agenda"]'
-      );
-      const emptyState = page.getByText(/nenhum agendamento|sem agendamentos|agenda vazia/i);
-
-      const hasCalendar = await calendar.first().isVisible().catch(() => false);
-      const hasEmpty = await emptyState.first().isVisible().catch(() => false);
-
-      expect(hasCalendar || hasEmpty).toBe(true);
+      await expect(scheduling.description).toBeVisible();
     });
 
-    test('@regression should allow switching between day/week/month views', async ({ page }) => {
-      await page.goto('/app/scheduling');
+    test('1.3 @smoke should display report card with period buttons', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      const viewToggle = page.locator(
-        '[data-testid="view-toggle"], [role="tablist"], .view-switcher'
-      );
-      const dayBtn = page.getByRole('button', { name: /dia|day/i });
-      const weekBtn = page.getByRole('button', { name: /semana|week/i });
-      const monthBtn = page.getByRole('button', { name: /mês|mes|month/i });
-
-      const hasToggle = await viewToggle.first().isVisible().catch(() => false);
-      const hasDay = await dayBtn.first().isVisible().catch(() => false);
-      const hasWeek = await weekBtn.first().isVisible().catch(() => false);
-
-      expect(hasToggle || hasDay || hasWeek).toBe(true);
+      await expect(scheduling.reportCardTitle).toBeVisible();
+      await expect(scheduling.periodToday).toBeVisible();
+      await expect(scheduling.period7d).toBeVisible();
+      await expect(scheduling.period30d).toBeVisible();
     });
 
-    test('@regression should filter by professional', async ({ page }) => {
-      await page.goto('/app/scheduling');
+    test('1.4 @smoke should display reports button', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      const professionalFilter = page.locator(
-        '[data-testid="professional-filter"], [data-testid="filter-professional"]'
-      );
-      const filterSelect = page.getByRole('combobox', { name: /profissional|professional/i });
-      const filterBtn = page.getByRole('button', { name: /profissional|filtrar/i });
+      await expect(scheduling.reportsButton).toBeVisible();
+    });
 
-      const hasFilter = await professionalFilter.first().isVisible().catch(() => false);
-      const hasSelect = await filterSelect.first().isVisible().catch(() => false);
-      const hasBtn = await filterBtn.first().isVisible().catch(() => false);
+    test('1.5 @smoke should display KPI overview cards', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      // At minimum, page should load without error
-      const errorBoundary = page.locator('.error-boundary');
-      const hasCrash = await errorBoundary.first().isVisible().catch(() => false);
-      expect(hasCrash).toBe(false);
+      await expect(scheduling.kpiProfessionals).toBeVisible();
+      await expect(scheduling.kpiCategories).toBeVisible();
+      await expect(scheduling.kpiDaySlots).toBeVisible();
+      await expect(scheduling.kpiReservations).toBeVisible();
+    });
+
+    test('1.6 @smoke should display Google Calendar card', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await expect(scheduling.googleCalendarBadge).toBeVisible();
     });
   });
 
-  test.describe('Appointment CRUD', () => {
-    test('@regression should open create appointment form', async ({ page }) => {
-      await page.goto('/app/scheduling');
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 2. PROFESSIONALS TAB
+  // ═══════════════════════════════════════════════════════════════════════════════
 
-      const newButton = page.getByRole('button', { name: /novo|agendar|criar|adicionar|new/i });
-      const hasButton = await newButton.first().isVisible().catch(() => false);
+  test.describe('2. Professionals Tab', () => {
+    test('2.1 @smoke should display professionals card title', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      if (hasButton) {
-        await newButton.first().click();
+      await expect(scheduling.professionalsCardTitle).toBeVisible();
+    });
 
-        const form = page.locator(
-          'form, [role="dialog"], [data-testid="appointment-form"], [data-testid="create-appointment"]'
-        );
-        await expect(form.first()).toBeVisible({ timeout: 5_000 });
+    test('2.2 @regression should show empty state or professionals list', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      // Either professionals are listed or empty state is shown
+      const hasProfessionals = await page.locator('button').filter({ hasText: /\w{2,}/ }).first()
+        .isVisible({ timeout: 10_000 }).catch(() => false);
+      const hasEmpty = await scheduling.noProfessionalsEmpty.isVisible().catch(() => false);
+      const hasSelect = await scheduling.selectProfessionalEmpty.isVisible().catch(() => false);
+
+      expect(hasProfessionals || hasEmpty || hasSelect).toBe(true);
+    });
+
+    test('2.3 @regression should open create professional sheet', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.openCreateProfessionalSheet();
+      await expect(scheduling.professionalNameInput).toBeVisible();
+      await expect(scheduling.professionalPhoneInput).toBeVisible();
+      await expect(scheduling.createProfessionalButton).toBeVisible();
+    });
+
+    test('2.4 @regression should disable create button when name is empty', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.openCreateProfessionalSheet();
+
+      // Name empty — create should be disabled or show validation on click
+      const isDisabled = await scheduling.createProfessionalButton.isDisabled().catch(() => false);
+      if (!isDisabled) {
+        // Click and expect validation error
+        await scheduling.createProfessionalButton.click();
+        const validation = page.locator('[role="alert"], .text-destructive, .text-red-500');
+        const toast = page.locator('[data-sonner-toast]');
+        const hasValidation = await validation.first().isVisible({ timeout: 3_000 }).catch(() => false);
+        const hasToast = await toast.first().isVisible({ timeout: 3_000 }).catch(() => false);
+        expect(hasValidation || hasToast || isDisabled).toBe(true);
+      } else {
+        expect(isDisabled).toBe(true);
       }
     });
 
-    test('@regression should validate appointment form fields', async ({ page }) => {
-      await page.goto('/app/scheduling');
+    test('2.5 @regression should close create professional sheet on cancel', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      const newButton = page.getByRole('button', { name: /novo|agendar|criar|adicionar|new/i });
-      const hasButton = await newButton.first().isVisible().catch(() => false);
+      await scheduling.openCreateProfessionalSheet();
+      await expect(scheduling.createProfessionalTitle).toBeVisible();
 
-      if (hasButton) {
-        await newButton.first().click();
-
-        // Try to submit empty
-        const submitBtn = page.getByRole('button', { name: /salvar|confirmar|agendar|save/i });
-        const hasSubmit = await submitBtn.first().isVisible().catch(() => false);
-
-        if (hasSubmit) {
-          await submitBtn.first().click();
-          const errors = page.locator('[role="alert"], .text-destructive, [data-error]');
-          await expect(errors.first()).toBeVisible({ timeout: 5_000 });
-        }
-      }
+      await scheduling.cancelProfessionalButton.click();
+      await expect(scheduling.createProfessionalTitle).toBeHidden({ timeout: 3_000 });
     });
 
-    test('@regression should handle time conflict error', async ({ page }) => {
-      // Mock scheduling endpoint to return conflict
-      await page.route('**/api/v1/scheduling/appointments*', (route) => {
-        if (route.request().method() === 'POST') {
-          return route.fulfill({
-            status: 409,
-            contentType: 'application/json',
-            body: JSON.stringify({ error: 'Time slot conflict', code: 'SLOT_CONFLICT' }),
-          });
-        }
-        return route.continue();
-      });
+    test('2.6 @regression should fill professional name and phone', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      await page.goto('/app/scheduling');
+      await scheduling.openCreateProfessionalSheet();
 
-      // Page should load without crash
-      const errorBoundary = page.locator('.error-boundary');
-      const hasCrash = await errorBoundary.first().isVisible().catch(() => false);
-      expect(hasCrash).toBe(false);
+      await scheduling.professionalNameInput.fill('Dr. Teste E2E');
+      await expect(scheduling.professionalNameInput).toHaveValue('Dr. Teste E2E');
+
+      await scheduling.professionalPhoneInput.fill('21999999999');
+      await expect(scheduling.professionalPhoneInput).toHaveValue(/\d+/);
+    });
+
+    test('2.7 @regression should display schedule mode tabs when professional selected', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      // If there are professionals, the schedule tabs should appear
+      const hasScheduleTabs = await scheduling.scheduleDayTab.isVisible({ timeout: 10_000 }).catch(() => false);
+      const hasEmpty = await scheduling.selectProfessionalEmpty.isVisible().catch(() => false);
+      const hasNoProfessionals = await scheduling.noProfessionalsEmpty.isVisible().catch(() => false);
+
+      expect(hasScheduleTabs || hasEmpty || hasNoProfessionals).toBe(true);
     });
   });
 
-  test.describe('Professionals Management', () => {
-    test('@regression should navigate to professionals page', async ({ page }) => {
-      await page.goto('/app/scheduling/professionals');
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 3. CATEGORIES TAB
+  // ═══════════════════════════════════════════════════════════════════════════════
 
-      await expect(page).toHaveURL(/\/app\/scheduling\/professionals/);
+  test.describe('3. Categories Tab', () => {
+    test('3.1 @smoke should switch to categories tab', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      const content = page.locator('main, [role="main"]');
-      await expect(content.first()).toBeVisible({ timeout: 10_000 });
+      await scheduling.switchToCategoriesTab();
+      // Should show categories content
+      await scheduling.assertNoCrash();
     });
 
-    test('@regression should display professionals list or empty state', async ({ page }) => {
-      await page.goto('/app/scheduling/professionals');
+    test('3.2 @regression should show empty state or categories list', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
 
-      const list = page.locator(
-        '[data-testid="professionals-list"], table, [role="list"], .professional-item'
+      await scheduling.switchToCategoriesTab();
+
+      const hasCategories = await page.locator('button').filter({ hasText: /\w{2,}/ }).first()
+        .isVisible({ timeout: 10_000 }).catch(() => false);
+      const hasEmpty = await scheduling.noCategoriesEmpty.isVisible().catch(() => false);
+
+      expect(hasCategories || hasEmpty).toBe(true);
+    });
+
+    test('3.3 @regression should open create category sheet', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.switchToCategoriesTab();
+
+      // Click add button in categories context
+      await scheduling.addCategoryButton.click();
+      await expect(scheduling.createCategoryTitle).toBeVisible({ timeout: 5_000 });
+      await expect(scheduling.categoryNameInput).toBeVisible();
+      await expect(scheduling.categoryDurationInput).toBeVisible();
+      await expect(scheduling.categoryPriceInput).toBeVisible();
+    });
+
+    test('3.4 @regression should fill category form fields', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.switchToCategoriesTab();
+      await scheduling.addCategoryButton.click();
+      await expect(scheduling.createCategoryTitle).toBeVisible({ timeout: 5_000 });
+
+      await scheduling.categoryNameInput.fill('Consulta E2E');
+      await expect(scheduling.categoryNameInput).toHaveValue('Consulta E2E');
+
+      await scheduling.categoryDurationInput.fill('30');
+      await expect(scheduling.categoryDurationInput).toHaveValue('30');
+
+      await scheduling.categoryPriceInput.fill('120,00');
+      await expect(scheduling.categoryPriceInput).toHaveValue(/120/);
+    });
+
+    test('3.5 @regression should close create category sheet on cancel', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.switchToCategoriesTab();
+      await scheduling.addCategoryButton.click();
+      await expect(scheduling.createCategoryTitle).toBeVisible({ timeout: 5_000 });
+
+      await scheduling.cancelCategoryButton.click();
+      await expect(scheduling.createCategoryTitle).toBeHidden({ timeout: 3_000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 4. PERIOD TOGGLE & REPORTS
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('4. Period Toggle & Reports', () => {
+    test('4.1 @regression should toggle period to 7 dias', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.period7d.click();
+      await scheduling.assertNoCrash();
+    });
+
+    test('4.2 @regression should toggle period to 30 dias', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.period30d.click();
+      await scheduling.assertNoCrash();
+    });
+
+    test('4.3 @regression should toggle period to Hoje', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.periodToday.click();
+      await scheduling.assertNoCrash();
+    });
+
+    test('4.4 @regression should open reports sheet', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.openReportsSheet();
+      await expect(scheduling.reportsSheetTitle).toBeVisible();
+      await expect(scheduling.reportsCsvButton).toBeVisible();
+    });
+
+    test('4.5 @regression should close reports sheet', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.openReportsSheet();
+      await expect(scheduling.reportsSheetTitle).toBeVisible();
+
+      await scheduling.reportsCloseButton.click();
+      await expect(scheduling.reportsSheetTitle).toBeHidden({ timeout: 3_000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 5. GOOGLE CALENDAR INTEGRATION
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('5. Google Calendar', () => {
+    test('5.1 @regression should display Google Calendar badge', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await expect(scheduling.googleCalendarBadge).toBeVisible();
+    });
+
+    test('5.2 @regression should show connect or disconnect button', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      const hasConnect = await scheduling.connectGoogleButton.isVisible({ timeout: 5_000 }).catch(() => false);
+      const hasDisconnect = await scheduling.disconnectGoogleButton.isVisible().catch(() => false);
+      const hasConnected = await scheduling.googleCalendarConnected.isVisible().catch(() => false);
+      const hasDisconnected = await scheduling.googleCalendarDisconnected.isVisible().catch(() => false);
+
+      expect(hasConnect || hasDisconnect || hasConnected || hasDisconnected).toBe(true);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 6. ERROR HANDLING
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('6. Error Handling', () => {
+    test('6.1 @regression should handle professionals API error gracefully', async ({ page }) => {
+      await page.route(PROFESSIONALS_API, (route) =>
+        route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Internal Server Error' }),
+        }),
       );
-      const emptyState = page.getByText(/nenhum profissional|sem profissionais|adicione/i);
 
-      const hasList = await list.first().isVisible().catch(() => false);
-      const hasEmpty = await emptyState.first().isVisible().catch(() => false);
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+      await scheduling.assertNoCrash();
+    });
 
-      expect(hasList || hasEmpty).toBe(true);
+    test('6.2 @regression should handle categories API error gracefully', async ({ page }) => {
+      await page.route(CATEGORIES_API, (route) =>
+        route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Internal Server Error' }),
+        }),
+      );
+
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.switchToCategoriesTab();
+      await scheduling.assertNoCrash();
+    });
+
+    test('6.3 @regression should handle slots API timeout gracefully', async ({ page }) => {
+      await page.route(SLOTS_API, (route) => route.abort('timedout'));
+
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+      await scheduling.assertNoCrash();
+    });
+
+    test('6.4 @regression should show error state on metrics loading failure', async ({ page }) => {
+      await page.route(`**/api/v1/tenants/${TENANT_ID}/scheduling/overview*`, (route) =>
+        route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Internal Server Error' }),
+        }),
+      );
+
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+      await scheduling.assertNoCrash();
     });
   });
 
-  test.describe('Categories', () => {
-    test('@regression should navigate to categories page', async ({ page }) => {
-      await page.goto('/app/scheduling/categories');
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 7. RESPONSIVENESS
+  // ═══════════════════════════════════════════════════════════════════════════════
 
-      await expect(page).toHaveURL(/\/app\/scheduling\/categories/);
+  test.describe('7. Responsiveness', () => {
+    test('7.1 @regression scheduling page renders on mobile viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 });
 
-      const content = page.locator('main, [role="main"]');
-      await expect(content.first()).toBeVisible({ timeout: 10_000 });
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await expect(scheduling.kpiProfessionals).toBeVisible();
+      await expect(scheduling.periodToday).toBeVisible();
+    });
+
+    test('7.2 @regression scheduling page renders on tablet viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 768, height: 1024 });
+
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await expect(scheduling.reportCardTitle).toBeVisible();
+      await expect(scheduling.googleCalendarBadge).toBeVisible();
+    });
+
+    test('7.3 @regression scheduling page renders on desktop viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await expect(scheduling.kpiProfessionals).toBeVisible();
+      await expect(scheduling.kpiCategories).toBeVisible();
+      await expect(scheduling.kpiDaySlots).toBeVisible();
+      await expect(scheduling.kpiReservations).toBeVisible();
+    });
+
+    test('7.4 @regression create professional sheet works on mobile', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 });
+
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      await scheduling.openCreateProfessionalSheet();
+      await expect(scheduling.professionalNameInput).toBeVisible();
+      await expect(scheduling.createProfessionalButton).toBeVisible();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 8. BULK SLOT GENERATION
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  test.describe('8. Bulk Slot Generation', () => {
+    test('8.1 @regression should display bulk slots button when professional exists', async ({ page }) => {
+      const scheduling = new SchedulingPage(page);
+      await scheduling.goto();
+      await scheduling.assertPageVisible();
+
+      // Bulk button only visible when a professional is selected and day tab active
+      const hasBulk = await scheduling.bulkSlotsButton.isVisible({ timeout: 10_000 }).catch(() => false);
+      const hasEmpty = await scheduling.noProfessionalsEmpty.isVisible().catch(() => false);
+      const hasSelect = await scheduling.selectProfessionalEmpty.isVisible().catch(() => false);
+
+      // Either bulk button is visible or no professionals exist
+      expect(hasBulk || hasEmpty || hasSelect).toBe(true);
     });
   });
 });

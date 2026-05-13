@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const authFile = './e2e/.auth/user.json';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -21,9 +23,18 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: './e2e/.auth/user.json',
+        storageState: authFile,
       },
       dependencies: ['setup'],
+      testIgnore: /bug-hunting\//,
+    },
+    {
+      name: 'bug-hunting',
+      testMatch: /bug-hunting\/.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // No storageState — bug-hunting tests mock everything via page.route()
+      },
     },
   ],
 
