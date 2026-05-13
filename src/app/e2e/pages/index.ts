@@ -1,0 +1,10 @@
+export { BasePage } from './BasePage';
+export { LoginPage } from './LoginPage';
+export { RegisterPage } from './RegisterPage';
+export { ContactsPage } from './ContactsPage';
+export { ContactDetailPage } from './ContactDetailPage';
+export { MessagingPage } from './MessagingPage';
+export { SalesPage } from './SalesPage';
+export { SchedulingPage } from './SchedulingPage';
+export { CatalogPage } from './CatalogPage';
+export { CheckoutPage } from './CheckoutPage';
