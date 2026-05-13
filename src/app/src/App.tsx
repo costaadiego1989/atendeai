@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster as Sonner } from '@/components/ui/sonner';
@@ -10,6 +10,8 @@ import { SubscriptionGuard } from '@/shared/ui/SubscriptionGuard';
 import { ModuleAccessGuard } from '@/shared/ui/ModuleAccessGuard';
 import { AppLayout } from '@/app/layouts/AppLayout';
 import { useAuthBootstrap } from '@/modules/auth/view-models/useAuthBootstrap';
+import { HttpError } from '@/shared/api/client';
+import { toast } from '@/components/ui/use-toast';
 import LoginPage from '@/modules/auth/views/LoginPage';
 import RegisterPage from '@/modules/auth/views/RegisterPage';
 import ForgotPasswordPage from '@/modules/auth/views/ForgotPasswordPage';
@@ -50,6 +52,17 @@ import PlatformTenantsPage from '@/modules/platform-admin/views/PlatformTenantsP
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (error instanceof HttpError && error.status === 429) {
+        toast({
+          title: 'Limite de requisições atingido',
+          description: 'Muitas solicitações em pouco tempo. Aguarde um instante e tente novamente.',
+          variant: 'destructive',
+        });
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,

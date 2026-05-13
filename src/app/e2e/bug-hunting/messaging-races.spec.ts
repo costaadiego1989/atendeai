@@ -416,9 +416,10 @@ test.describe('@bug-hunt Messaging — Race Conditions', () => {
   // ═══════════════════════════════════════════════════════════════════════════════
   // RACE #6: Multiple mark-read calls (loop detection)
   // Bug: Effect fires repeatedly because refetch overwrites optimistic update
+  // FIX: Added ref-based guard to prevent re-firing for the same conversation
   // ═══════════════════════════════════════════════════════════════════════════════
 
-  test.fail('6.1 mark-read should not fire more than once per conversation', async ({ page }) => {
+  test('6.1 mark-read should not fire more than once per conversation', async ({ page }) => {
     await setupMessagingMocks(page);
 
     let markReadCount = 0;

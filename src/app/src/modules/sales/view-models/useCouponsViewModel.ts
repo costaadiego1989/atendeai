@@ -212,6 +212,12 @@ export function useCouponsViewModel() {
         active,
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onError: () => {
+      toast({
+        title: 'Falha ao alterar status do cupom',
+        variant: 'destructive',
+      });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -219,6 +225,12 @@ export function useCouponsViewModel() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey });
       toast({ title: 'Cupom excluído' });
+    },
+    onError: () => {
+      toast({
+        title: 'Falha ao excluir cupom',
+        variant: 'destructive',
+      });
     },
   });
 

@@ -145,6 +145,9 @@ async function request<T>(
       shouldRedirectToLoginOnUnauthorized()
     ) {
       window.location.href = '/login?reason=session-expired';
+      // Halt execution: prevent the thrown error from propagating to React
+      // Query and triggering re-renders that could interfere with navigation.
+      return new Promise<T>(() => {});
     }
 
     throw new HttpError({

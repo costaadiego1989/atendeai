@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -96,6 +96,7 @@ export function useConversationsPageViewModel() {
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [chargeDialogOpen, setChargeDialogOpen] = useState(false);
   const [chargeForm, setChargeForm] = useState(DEFAULT_CHARGE_FORM);
+  const markedReadRef = useRef<Set<string>>(new Set());
   const tenantBusinessType = normalizeCode(tenant?.businessType);
   const enabledModuleCodes = new Set(
     (tenant?.billingAccess?.enabledModules ?? []).map(normalizeCode),
@@ -340,13 +341,10 @@ export function useConversationsPageViewModel() {
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (!tenant?.id || !selectedConversation?.id) {
-      return;
-    }
-
-    void messagesQuery.refetch();
-  }, [messagesQuery.refetch, selectedConversation?.id, tenant?.id]);
+  // React Query automatically refetches when the query key changes
+  // (selectedConversation.id). No manual refetch needed — removing the
+  // previous useEffect that called messagesQuery.refetch() eliminates a
+  // race condition where a stale refetch could fire for the wrong conversation.
 
   useEffect(() => {
     if (!tenant?.id || !selectedConversation?.id) {
@@ -357,28 +355,37 @@ export function useConversationsPageViewModel() {
       return;
     }
 
+    // Prevent re-firing loop: when stale server data overwrites the
+    // optimistic unreadCount: 0, the effect would re-trigger endlessly.
+    // Guard: only mark-read once per conversation selection.
+    const key = `${selectedConversation.id}`;
+    if (markedReadRef.current.has(key)) {
+      return;
+    }
+
+    markedReadRef.current.add(key);
     clearConversationUnreadInCache(selectedConversation.id);
 
     void messagingService
       .markConversationRead(tenant.id, selectedConversation.id)
-      .then(() =>
-        queryClient.invalidateQueries({
-          queryKey: ['conversations', tenant.id],
-          exact: false,
-        }),
-      )
       .catch(() => {
-        void queryClient.invalidateQueries({
-          queryKey: ['conversations', tenant.id],
-          exact: false,
-        });
+        // On failure, allow retry on next effect trigger
+        markedReadRef.current.delete(key);
       });
   }, [
-    queryClient,
     selectedConversation?.id,
     selectedConversation?.unreadCount,
     tenant?.id,
   ]);
+
+  // Reset mark-read guard when user switches conversation
+  useEffect(() => {
+    if (selectedConversation?.id) {
+      // Keep current conversation in the set, clear others
+      const currentId = selectedConversation.id;
+      markedReadRef.current = new Set([currentId]);
+    }
+  }, [selectedConversation?.id]);
 
   const sendMessageMutation = useMutation({
     mutationFn: (payload: { text: string; file?: File | null }) => {

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useRef } from 'react';
 import { Loader2, Plus, Trash2, Upload, X, Info, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -94,6 +95,19 @@ export function CatalogItemSheet({
   isPending,
   linkedInventoryItems,
 }: CatalogItemSheetProps) {
+  const submittingRef = useRef(false);
+
+  // Sync ref with isPending prop to reset after mutation completes
+  if (!isPending) {
+    submittingRef.current = false;
+  }
+
+  const handleSubmit = () => {
+    if (submittingRef.current || isPending) return;
+    submittingRef.current = true;
+    onSubmit();
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -870,7 +884,7 @@ export function CatalogItemSheet({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={onSubmit} disabled={isPending || !form.name.trim()}>
+          <Button onClick={handleSubmit} disabled={isPending || !form.name.trim()}>
             {isPending ? 'Salvando...' : isEditing ? 'Salvar ajustes' : 'Criar item'}
           </Button>
         </div>

@@ -121,7 +121,7 @@ test.describe('@bug-hunt Sales Mutations — Error Handling', () => {
   // Additional finding: delete has no confirmation dialog (dangerous!)
   // ═══════════════════════════════════════════════════════════════════════════════
 
-  test.fail('1.1 coupon delete should show error toast on API 500', async ({ page }) => {
+  test('1.1 coupon delete should show error toast on API 500', async ({ page }) => {
     await setupSalesPageMocks(page);
 
     // Mock: coupons list returns one active coupon
@@ -155,7 +155,7 @@ test.describe('@bug-hunt Sales Mutations — Error Handling', () => {
 
     // BUG: Without onError, no toast appears. This assertion should FAIL if bug exists.
     await expect(
-      page.getByText(/falha|erro|error|não foi possível/i),
+      page.getByText(/falha|erro|error|não foi possível/i).first(),
     ).toBeVisible({ timeout: 5000 });
   });
 
@@ -202,7 +202,7 @@ test.describe('@bug-hunt Sales Mutations — Error Handling', () => {
   // Actual: silent failure, coupon may disappear from UI optimistically
   // ═══════════════════════════════════════════════════════════════════════════════
 
-  test.fail('2.1 coupon delete should show error toast on API 500', async ({ page }) => {
+  test('2.1 coupon delete should show error toast on API 500', async ({ page }) => {
     await setupSalesPageMocks(page);
 
     let deleteAttempted = false;
@@ -243,7 +243,7 @@ test.describe('@bug-hunt Sales Mutations — Error Handling', () => {
 
     // BUG: Without onError, no feedback is shown
     await expect(
-      page.getByText(/falha|erro|error|não foi possível/i),
+      page.getByText(/falha|erro|error|não foi possível/i).first(),
     ).toBeVisible({ timeout: 5000 });
 
     // Coupon should still be visible (delete failed)
