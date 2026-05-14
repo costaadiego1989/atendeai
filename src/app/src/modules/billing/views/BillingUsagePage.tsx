@@ -234,6 +234,7 @@ export default function BillingUsagePage() {
         cancelOpen={vm.cancelOpen}
         setCancelOpen={vm.setCancelOpen}
         isPendingCancel={vm.cancelSubscriptionMutation.isPending}
+        isTrial={usage.plan === 'TRIAL' || vm.tenant?.planStatus === 'TRIALING'}
       />
 
       {usage.scheduledPlan && (

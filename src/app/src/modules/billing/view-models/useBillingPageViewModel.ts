@@ -251,7 +251,7 @@ export function useBillingPageViewModel() {
       usage.contacts.quota > 0 ? (usage.contacts.used / usage.contacts.quota) * 100 : 0;
 
     const currentPlan = billingPlans.find((plan) => plan.code === usage.plan);
-    const hasContractedPlan = usage.plan !== 'TRIAL';
+    const hasContractedPlan = usage.plan !== 'TRIAL' && tenant?.planStatus !== 'TRIALING';
 
     return {
       usage,
@@ -286,6 +286,7 @@ export function useBillingPageViewModel() {
     selectedPlan,
     subscriptionCatalogQuery.data,
     usageQuery.data,
+    tenant?.planStatus,
   ]);
 
   const isLoading =
