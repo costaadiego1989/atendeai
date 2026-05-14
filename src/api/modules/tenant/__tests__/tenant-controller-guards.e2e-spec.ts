@@ -3,9 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import * as bcrypt from 'bcryptjs';
-import * as cookieParser from 'cookie-parser';
-import * as request from 'supertest';
+import cookieParser from 'cookie-parser';
+import request from 'supertest';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
+import { Prisma } from '@prisma/client';
 
 describe('TenantController guards (e2e)', () => {
   jest.setTimeout(60000);
@@ -151,10 +152,8 @@ describe('TenantController guards (e2e)', () => {
     await prisma.aIConfig
       .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
       .catch(() => { });
-    await prisma.$executeRaw(Prisma.sql(
-      'DELETE FROM tenant_schema.instagram_configs WHERE tenant_id = $1 OR tenant_id = $2',
-      tenantId,
-      otherTenantId,
+    await prisma.$executeRaw(
+      Prisma.sql`DELETE FROM tenant_schema.instagram_configs WHERE tenant_id = ${tenantId}::uuid OR tenant_id = ${otherTenantId}::uuid`,
     ).catch(() => { });
     await prisma.whatsAppConfig
       .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
