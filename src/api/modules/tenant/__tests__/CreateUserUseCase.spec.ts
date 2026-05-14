@@ -5,6 +5,8 @@ import { IPasswordHasher } from '@shared/application/ports/IPasswordHasher';
 import { UserDomainEventPublisher } from '../application/services/UserDomainEventPublisher';
 import { ITenantRepository } from '../domain/repositories/ITenantRepository';
 import { ITeamMemberCredentialsEmailSender } from '../application/ports/ITeamMemberCredentialsEmailSender';
+import { IMessagingFacade } from '@modules/messaging/application/facades/MessagingFacade';
+import { IContactFacade } from '@modules/contact/application/facades/ContactFacade';
 import { User } from '../domain/entities/User';
 import { Email } from '../domain/value-objects/Email';
 import { Phone } from '../domain/value-objects/Phone';
@@ -22,6 +24,8 @@ describe('CreateUserUseCase', () => {
   let teamMemberCredentialsEmailSender: jest.Mocked<ITeamMemberCredentialsEmailSender>;
   let userDomainEventPublisher: jest.Mocked<UserDomainEventPublisher>;
   let billingCapacityService: { assertCanAdd: jest.Mock };
+  let messagingFacade: jest.Mocked<IMessagingFacade>;
+  let contactFacade: jest.Mocked<IContactFacade>;
 
   beforeEach(() => {
     userRepo = {
@@ -56,6 +60,18 @@ describe('CreateUserUseCase', () => {
       send: jest.fn(),
     };
 
+    messagingFacade = {
+      queueSystemMessage: jest.fn().mockResolvedValue({ conversationId: 'conv-1', messageId: 'msg-1' }),
+    };
+
+    contactFacade = {
+      identifyContact: jest.fn(),
+      getContactById: jest.fn(),
+      ensureContact: jest.fn().mockResolvedValue({ contactId: 'contact-1', created: true }),
+      upsertProspectContact: jest.fn(),
+      findContactIdsForReengagementAudience: jest.fn(),
+    };
+
     userDomainEventPublisher = {
       publishFromAggregate: jest.fn(),
     } as unknown as jest.Mocked<UserDomainEventPublisher>;
@@ -80,6 +96,8 @@ describe('CreateUserUseCase', () => {
       teamMemberCredentialsEmailSender,
       userDomainEventPublisher,
       billingCapacityService as any,
+      messagingFacade,
+      contactFacade,
     );
   });
 
@@ -123,6 +141,55 @@ describe('CreateUserUseCase', () => {
       }),
     );
     expect(result.id).toBeDefined();
+  });
+
+  it('should send WhatsApp credentials via MessagingFacade after user creation', async () => {
+    userRepo.findByEmail.mockResolvedValue(null);
+    passwordHasher.hash.mockResolvedValue('hashed-password');
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      name: 'John Admin',
+      email: 'john@tenant.com',
+      phone: '11999998888',
+      role: 'ADMIN',
+    });
+
+    expect(contactFacade.ensureContact).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        name: 'John Admin',
+        phone: '11999998888',
+        email: 'john@tenant.com',
+        tags: ['equipe-interna'],
+      }),
+    );
+    expect(messagingFacade.queueSystemMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        contactId: 'contact-1',
+        channel: 'WHATSAPP',
+        text: expect.stringContaining('Atd!'),
+      }),
+    );
+  });
+
+  it('should not fail user creation if WhatsApp notification fails', async () => {
+    userRepo.findByEmail.mockResolvedValue(null);
+    passwordHasher.hash.mockResolvedValue('hashed-password');
+    contactFacade.ensureContact.mockRejectedValue(new Error('WhatsApp not configured'));
+
+    const result = await useCase.execute({
+      tenantId: 'tenant-1',
+      name: 'John Admin',
+      email: 'john@tenant.com',
+      phone: '11999998888',
+      role: 'ADMIN',
+    });
+
+    expect(result.id).toBeDefined();
+    expect(userRepo.saveWithTenant).toHaveBeenCalledTimes(1);
+    expect(teamMemberCredentialsEmailSender.send).toHaveBeenCalledTimes(1);
   });
 
   it('should throw conflict when email is already in use', async () => {

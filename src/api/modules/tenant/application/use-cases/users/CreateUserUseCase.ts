@@ -2,6 +2,8 @@ import {
   Inject,
   Injectable,
   ConflictException,
+  Optional,
+  Logger,
 } from '@nestjs/common';
 import {
   IUserRepository,
@@ -24,6 +26,14 @@ import {
   ITeamMemberCredentialsEmailSender,
   TEAM_MEMBER_CREDENTIALS_EMAIL_SENDER,
 } from '../../ports/ITeamMemberCredentialsEmailSender';
+import {
+  IMessagingFacade,
+  MESSAGING_FACADE,
+} from '@modules/messaging/application/facades/MessagingFacade';
+import {
+  IContactFacade,
+  CONTACT_FACADE,
+} from '@modules/contact/application/facades/ContactFacade';
 import { randomBytes } from 'crypto';
 import { TenantBillingCapacityService } from '@shared/infrastructure/billing/TenantBillingCapacityService';
 
@@ -37,6 +47,8 @@ export interface CreateUserInput {
 
 @Injectable()
 export class CreateUserUseCase {
+  private readonly logger = new Logger(CreateUserUseCase.name);
+
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepo: IUserRepository,
@@ -48,6 +60,12 @@ export class CreateUserUseCase {
     private readonly teamMemberCredentialsEmailSender: ITeamMemberCredentialsEmailSender,
     private readonly userDomainEventPublisher: UserDomainEventPublisher,
     private readonly billingCapacityService: TenantBillingCapacityService,
+    @Optional()
+    @Inject(MESSAGING_FACADE)
+    private readonly messagingFacade?: IMessagingFacade,
+    @Optional()
+    @Inject(CONTACT_FACADE)
+    private readonly contactFacade?: IContactFacade,
   ) {}
 
   async execute(input: CreateUserInput): Promise<{ id: string }> {
@@ -89,7 +107,51 @@ export class CreateUserUseCase {
       tenantName: tenantCompanyName,
     });
 
+    await this.sendWhatsAppCredentials(input, temporaryPassword, tenantCompanyName);
+
     return { id: user.id.toValue() };
+  }
+
+  private async sendWhatsAppCredentials(
+    input: CreateUserInput,
+    temporaryPassword: string,
+    tenantName: string,
+  ): Promise<void> {
+    if (!this.messagingFacade || !this.contactFacade) {
+      return;
+    }
+
+    try {
+      const { contactId } = await this.contactFacade.ensureContact({
+        tenantId: input.tenantId,
+        name: input.name,
+        phone: input.phone,
+        email: input.email,
+        tags: ['equipe-interna'],
+      });
+
+      const loginUrl = process.env['APP_LOGIN_URL_BASE'] || 'http://localhost:8080/login';
+      const message = [
+        `Olá ${input.name}! Você foi adicionado(a) à equipe *${tenantName}* no AtendeAi.`,
+        '',
+        `Acesse: ${loginUrl}`,
+        `E-mail: ${input.email}`,
+        `Senha temporária: ${temporaryPassword}`,
+        '',
+        'Troque a senha no primeiro acesso.',
+      ].join('\n');
+
+      await this.messagingFacade.queueSystemMessage({
+        tenantId: input.tenantId,
+        contactId,
+        channel: 'WHATSAPP',
+        text: message,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to send WhatsApp credentials to ${input.phone}: ${(error as Error).message}`,
+      );
+    }
   }
 
   private generateTemporaryPassword(): string {
