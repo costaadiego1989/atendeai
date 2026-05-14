@@ -194,4 +194,79 @@ describe('BillingProvisioningProcessor', () => {
     expect(sub.status).toBe('PROVISIONING_FAILED');
     expect(billingRepo.saveSubscription).toHaveBeenCalledTimes(1);
   });
+
+  it('should skip provisioning when subscription is already ACTIVE with asaasCustomerId', async () => {
+    const sub = Subscription.create(TenantId.create('t1'), 'PROFISSIONAL');
+    sub.updateAsaasInfo('cus_existing', 'sub_existing');
+    sub.activate();
+    billingRepo.findSubscription.mockResolvedValue(sub);
+
+    await processor.process({
+      data: {
+        tenantId: 't1',
+        plan: 'PROFISSIONAL',
+        ownerName: 'Owner',
+        ownerEmail: 'owner@test.com',
+        cnpj: '11.444.777/0001-61',
+        ownerPhone: '11999999999',
+      },
+    } as any);
+
+    expect(paymentGateway.createCustomer).not.toHaveBeenCalled();
+    expect(paymentGateway.createSubscription).not.toHaveBeenCalled();
+    expect(billingRepo.saveSubscription).not.toHaveBeenCalled();
+  });
+
+  it('should NOT mark as PROVISIONING_FAILED if subscription is already ACTIVE', async () => {
+    const sub = Subscription.create(TenantId.create('t1'), 'PROFISSIONAL');
+    sub.activate();
+    billingRepo.findSubscription.mockResolvedValue(sub);
+    billingRepo.findPlanByCode.mockResolvedValue({
+      code: 'PROFISSIONAL',
+      displayName: 'Profissional',
+      monthlyPrice: 297,
+    });
+
+    // Simulate: subscription is ACTIVE but processor still runs (race condition)
+    // The early return catches it, but if somehow it gets past (e.g., status changed mid-flight),
+    // the error handler should NOT overwrite ACTIVE status
+    paymentGateway.createCustomer.mockRejectedValue(new Error('Conflict'));
+
+    const job = {
+      data: {
+        tenantId: 't1',
+        plan: 'PROFISSIONAL',
+        ownerName: 'Owner',
+        ownerEmail: 'owner@test.com',
+        cnpj: '11.444.777/0001-61',
+        ownerPhone: '11999999999',
+      },
+      opts: { attempts: 3 },
+      attemptsMade: 2,
+    } as any;
+
+    // The early return should prevent reaching createCustomer since sub is ACTIVE + has customerId
+    // But let's test the error handler path by removing the customerId so it passes the early return
+    const sub2 = Subscription.create(TenantId.create('t2'), 'PROFISSIONAL');
+    sub2.activate(); // ACTIVE but no asaasCustomerId — passes early return
+    billingRepo.findSubscription.mockResolvedValue(sub2);
+
+    const job2 = {
+      data: {
+        tenantId: 't2',
+        plan: 'PROFISSIONAL',
+        ownerName: 'Owner',
+        ownerEmail: 'owner@test.com',
+        cnpj: '11.444.777/0001-61',
+        ownerPhone: '11999999999',
+      },
+      opts: { attempts: 3 },
+      attemptsMade: 2,
+    } as any;
+
+    await expect(processor.process(job2)).rejects.toThrow('Conflict');
+
+    expect(sub2.status).toBe('ACTIVE');
+    expect(billingRepo.saveSubscription).not.toHaveBeenCalled();
+  });
 });

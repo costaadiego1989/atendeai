@@ -65,6 +65,13 @@ export class BillingProvisioningProcessor extends WorkerHost {
         throw new Error(`Subscription not found for tenant ${tenantId}`);
       }
 
+      if (subscription.status === 'ACTIVE' && subscription.asaasCustomerId) {
+        this.logger.log(
+          `Subscription already active for tenant ${tenantId}, skipping provisioning`,
+        );
+        return;
+      }
+
       if (
         subscription.asaasCustomerId &&
         (plan === 'ESSENCIAL' || subscription.asaasSubscriptionId)
@@ -164,12 +171,9 @@ export class BillingProvisioningProcessor extends WorkerHost {
         );
       }
     } catch (error) {
-      if (
-        job.attemptsMade >=
-        ((job.opts?.attempts as number | undefined) || 3) - 1
-      ) {
+      if (job.attemptsMade >= (job.opts?.attempts || 3) - 1) {
         const subscription = await this.billingRepo.findSubscription(tenantId);
-        if (subscription) {
+        if (subscription && subscription.status !== 'ACTIVE') {
           subscription.markAsProvisioningFailed();
           await this.billingRepo.saveSubscription(subscription);
         }

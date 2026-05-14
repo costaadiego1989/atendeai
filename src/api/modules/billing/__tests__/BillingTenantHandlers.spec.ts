@@ -155,6 +155,29 @@ describe('BillingTenantHandlers', () => {
       expect(billingRepo.saveSubscription).toHaveBeenCalledTimes(1);
       expect(existing.plan).toBe('PROFISSIONAL');
     });
+
+    it('should NOT enqueue provision-tenant when isTrial is true', async () => {
+      const handler = getHandler('tenant.created');
+      billingRepo.findSubscription.mockResolvedValue(null);
+      billingRepo.findPlanByCode.mockResolvedValue(null);
+
+      await handler({
+        payload: {
+          aggregateId: 'tenant-trial',
+          companyName: 'Trial Co',
+          cnpj: '12345678000100',
+          plan: 'PROFISSIONAL',
+          ownerName: 'John',
+          ownerEmail: 'john@trial.com',
+          ownerPhone: '11999999999',
+          isTrial: true,
+        },
+      });
+
+      expect(billingRepo.saveSubscription).toHaveBeenCalledTimes(1);
+      expect(billingRepo.saveUsage).toHaveBeenCalledTimes(1);
+      expect(provisioningQueue.add).not.toHaveBeenCalled();
+    });
   });
 
   describe('tenant.plan-changed → updates subscription plan', () => {
