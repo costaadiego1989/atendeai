@@ -3,8 +3,12 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import {
   ISupportFeedbackRepository,
+  ListAllFeedbacksFilters,
+  ListAllFeedbacksResult,
+  CreateReplyInput,
+  SupportFeedbackReply,
 } from '../../../domain/repositories/ISupportFeedbackRepository';
-import { SupportFeedback } from '../../../domain/types/SupportFeedback';
+import { SupportFeedback, SupportFeedbackStatus } from '../../../domain/types/SupportFeedback';
 
 @Injectable()
 export class PrismaSupportFeedbackRepository
@@ -66,7 +70,109 @@ export class PrismaSupportFeedbackRepository
             ORDER BY created_at DESC
           `);
 
-    return rows.map((row) => ({
+    return rows.map(this.mapRow);
+  }
+
+  async findAll(filters: ListAllFeedbacksFilters): Promise<ListAllFeedbacksResult> {
+    const page = filters.page || 1;
+    const limit = filters.limit || 20;
+    const offset = (page - 1) * limit;
+
+    const conditions: Prisma.Sql[] = [];
+    if (filters.type) {
+      conditions.push(Prisma.sql`f.type = ${filters.type}`);
+    }
+    if (filters.status) {
+      conditions.push(Prisma.sql`f.status = ${filters.status}`);
+    }
+    if (filters.tenantId) {
+      conditions.push(Prisma.sql`f.tenant_id = ${filters.tenantId}::uuid`);
+    }
+
+    const whereClause = conditions.length > 0
+      ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+      : Prisma.empty;
+
+    const [rows, countResult] = await Promise.all([
+      this.prisma.$queryRaw<any[]>(Prisma.sql`
+        SELECT f.*, t.company_name as tenant_name
+        FROM support_schema.feedbacks f
+        LEFT JOIN tenant_schema.tenants t ON t.id = f.tenant_id
+        ${whereClause}
+        ORDER BY f.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `),
+      this.prisma.$queryRaw<[{ count: bigint }]>(Prisma.sql`
+        SELECT COUNT(*)::bigint as count
+        FROM support_schema.feedbacks f
+        ${whereClause}
+      `),
+    ]);
+
+    return {
+      data: rows.map((row) => ({
+        ...this.mapRow(row),
+        tenantName: row.tenant_name ?? undefined,
+      })),
+      total: Number(countResult[0].count),
+    };
+  }
+
+  async findById(feedbackId: string): Promise<SupportFeedback | null> {
+    const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
+      SELECT f.*, t.company_name as tenant_name
+      FROM support_schema.feedbacks f
+      LEFT JOIN tenant_schema.tenants t ON t.id = f.tenant_id
+      WHERE f.id = ${feedbackId}::uuid
+      LIMIT 1
+    `);
+
+    if (!rows.length) return null;
+
+    return {
+      ...this.mapRow(rows[0]),
+      tenantName: rows[0].tenant_name ?? undefined,
+    } as SupportFeedback;
+  }
+
+  async updateStatus(feedbackId: string, status: SupportFeedbackStatus): Promise<void> {
+    await this.prisma.$executeRaw(Prisma.sql`
+      UPDATE support_schema.feedbacks
+      SET status = ${status}, updated_at = NOW()
+      WHERE id = ${feedbackId}::uuid
+    `);
+  }
+
+  async createReply(input: CreateReplyInput): Promise<SupportFeedbackReply> {
+    const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
+      INSERT INTO support_schema.feedback_replies (
+        feedback_id, author_name, message, sent_via, message_id
+      ) VALUES (
+        ${input.feedbackId}::uuid,
+        ${input.authorName},
+        ${input.message},
+        ${input.sentVia ?? null},
+        ${input.messageId ?? null}::uuid
+      )
+      RETURNING id, feedback_id, author_name, message, sent_via, message_id, created_at
+    `);
+
+    return this.mapReplyRow(rows[0]);
+  }
+
+  async listReplies(feedbackId: string): Promise<SupportFeedbackReply[]> {
+    const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
+      SELECT *
+      FROM support_schema.feedback_replies
+      WHERE feedback_id = ${feedbackId}::uuid
+      ORDER BY created_at ASC
+    `);
+
+    return rows.map(this.mapReplyRow);
+  }
+
+  private mapRow(row: any): SupportFeedback {
+    return {
       id: row.id,
       tenantId: row.tenant_id,
       branchId: row.branch_id ?? undefined,
@@ -74,13 +180,25 @@ export class PrismaSupportFeedbackRepository
       userName: row.user_name,
       userEmail: row.user_email,
       type: row.type,
-      title: row.title,
-      description: row.description,
+      title: row.title ?? row.subject,
+      description: row.description ?? row.message,
       pagePath: row.page_path ?? undefined,
       appModule: row.app_module ?? undefined,
       status: row.status,
       createdAt: new Date(row.created_at).toISOString(),
       updatedAt: new Date(row.updated_at).toISOString(),
-    }));
+    };
+  }
+
+  private mapReplyRow(row: any): SupportFeedbackReply {
+    return {
+      id: row.id,
+      feedbackId: row.feedback_id,
+      authorName: row.author_name,
+      message: row.message,
+      sentVia: row.sent_via ?? null,
+      messageId: row.message_id ?? null,
+      createdAt: new Date(row.created_at).toISOString(),
+    };
   }
 }

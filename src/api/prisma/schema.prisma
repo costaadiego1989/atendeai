@@ -1521,8 +1521,26 @@ model SupportFeedback {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
+  replies SupportFeedbackReply[]
+
   @@index([tenantId, status], name: "idx_feedbacks_tenant_status")
   @@index([appModule], name: "idx_feedbacks_app_module")
   @@map("feedbacks")
+  @@schema("support_schema")
+}
+
+model SupportFeedbackReply {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  feedbackId String   @map("feedback_id") @db.Uuid
+  authorName String   @map("author_name") @db.VarChar(100)
+  message    String   @db.Text
+  sentVia    String?  @map("sent_via") @db.VarChar(30)
+  messageId  String?  @map("message_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  feedback SupportFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@index([feedbackId], name: "idx_feedback_replies_feedback")
+  @@map("feedback_replies")
   @@schema("support_schema")
 }
