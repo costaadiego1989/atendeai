@@ -3,7 +3,6 @@ import {
   IBillingRepository,
   BILLING_REPOSITORY,
 } from '../../domain/repositories/IBillingRepository';
-import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
   IGetUsageUseCase,
   GetUsageInput,
@@ -22,7 +21,24 @@ export class GetUsageUseCase implements IGetUsageUseCase {
       input.tenantId,
     );
     if (!subscription) {
-      throw new EntityNotFoundException('Subscription', input.tenantId);
+      const now = new Date();
+      const cycleEnd = new Date(now);
+      cycleEnd.setDate(now.getDate() + 7);
+
+      return {
+        tenantId: input.tenantId,
+        plan: 'TRIAL',
+        scheduledPlan: undefined,
+        currentPeriod: {
+          start: now,
+          end: cycleEnd,
+        },
+        usage: {
+          messages: { used: 0, quota: 50 },
+          aiTokens: { used: 0, quota: 150000 },
+          contacts: { used: 0, quota: 50 },
+        },
+      };
     }
 
     const usage = await this.billingRepo.getUsage(
