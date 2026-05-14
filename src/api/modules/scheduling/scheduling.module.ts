@@ -66,6 +66,7 @@ import { PrismaSchedulingRecurringReservationRepository } from './infrastructure
 import { SchedulingReminderProcessor } from './infrastructure/queue/SchedulingReminderProcessor';
 import { BullMQSchedulingReminderQueue } from './infrastructure/queue/BullMQSchedulingReminderQueue';
 import { SCHEDULING_REMINDER_QUEUE } from './domain/ports/ISchedulingReminderQueue';
+import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedulingMeetingUseCase';
 
 @Module({
   imports: [
@@ -119,6 +120,7 @@ import { SCHEDULING_REMINDER_QUEUE } from './domain/ports/ISchedulingReminderQue
     DeleteSchedulingRecurrenceUseCase,
     SchedulingRecurringReservationDueHandler,
     SchedulingRecurringReservationScheduler,
+    JoinSchedulingMeetingUseCase,
     SchedulingPaymentEventHandler,
     MessagingFacade,
     {

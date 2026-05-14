@@ -38,6 +38,7 @@ import { ListSchedulingRecurrencesUseCase } from '../../application/use-cases/Li
 import { CancelSchedulingRecurrenceUseCase } from '../../application/use-cases/CancelSchedulingRecurrenceUseCase';
 import { DeleteSchedulingRecurrenceUseCase } from '../../application/use-cases/DeleteSchedulingRecurrenceUseCase';
 import { ProcessSchedulingRecurringReservationUseCase } from '../../application/use-cases/ProcessSchedulingRecurringReservationUseCase';
+import { JoinSchedulingMeetingUseCase } from '../../application/use-cases/JoinSchedulingMeetingUseCase';
 import {
   AssignProfessionalCategoriesDTO,
   CancelSchedulingRecurrenceDTO,
@@ -77,6 +78,7 @@ export class SchedulingController {
     private readonly cancelSchedulingRecurrenceUseCase: CancelSchedulingRecurrenceUseCase,
     private readonly deleteSchedulingRecurrenceUseCase: DeleteSchedulingRecurrenceUseCase,
     private readonly processSchedulingRecurringReservationUseCase: ProcessSchedulingRecurringReservationUseCase,
+    private readonly joinSchedulingMeetingUseCase: JoinSchedulingMeetingUseCase,
     private readonly schedulingAsyncJobsService: SchedulingAsyncJobsService,
     @InjectQueue('scheduling-async-jobs')
     private readonly schedulingAsyncQueue: Queue,
@@ -380,6 +382,26 @@ export class SchedulingController {
       slotId,
       date: body.date,
       billingType: body.billingType,
+    });
+  }
+
+  @Post('professionals/:professionalId/availability/slots/:slotId/join-meeting')
+  @Roles('OWNER', 'ADMIN')
+  @HttpCode(HttpStatus.OK)
+  async joinMeeting(
+    @Param('tenantId') tenantId: string,
+    @Query('branchId') branchId: string | undefined,
+    @Param('professionalId') professionalId: string,
+    @Param('slotId') slotId: string,
+    @Body() body: { date: string; professionalName?: string },
+  ) {
+    return this.joinSchedulingMeetingUseCase.execute({
+      tenantId,
+      branchId,
+      professionalId,
+      slotId,
+      date: body.date,
+      professionalName: body.professionalName,
     });
   }
 
