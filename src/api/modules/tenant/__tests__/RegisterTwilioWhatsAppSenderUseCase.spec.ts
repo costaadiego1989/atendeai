@@ -244,4 +244,79 @@ describe('RegisterTwilioWhatsAppSenderUseCase', () => {
     );
     expect(result.whatsappNumber).toBe('5521999990000');
   });
+
+  describe('normalizeBrazilPhone edge cases', () => {
+    function setupTenantAndMock(normalizedNumber: string) {
+      const tenant = Tenant.create({
+        companyName: CompanyName.create('Acme Corp'),
+        cnpj: CNPJ.create('60.701.190/0001-04'),
+        plan: Plan.create('ESSENCIAL'),
+        users: [],
+      });
+      tenantRepository.findById.mockResolvedValue(tenant);
+      twilioManagementAcl.createSender.mockResolvedValue({
+        sid: 'XE200',
+        status: 'PENDING_VERIFICATION',
+        senderId: `whatsapp:+${normalizedNumber}`,
+        configuration: { wabaId: 'waba-norm', verificationMethod: 'sms' },
+      });
+      return tenant;
+    }
+
+    it('should prepend 55 for raw 11-digit mobile number', async () => {
+      const tenant = setupTenantAndMock('5521993001883');
+      const result = await useCase.execute({
+        tenantId: tenant.id.toValue(),
+        phoneNumber: '21993001883',
+        wabaId: 'waba-norm',
+      });
+      expect(twilioManagementAcl.createSender).toHaveBeenCalledWith(
+        expect.objectContaining({ senderId: 'whatsapp:+5521993001883' }),
+        expect.anything(),
+      );
+      expect(result.whatsappNumber).toBe('5521993001883');
+    });
+
+    it('should keep number unchanged when already prefixed with 55', async () => {
+      const tenant = setupTenantAndMock('5521993001883');
+      const result = await useCase.execute({
+        tenantId: tenant.id.toValue(),
+        phoneNumber: '5521993001883',
+        wabaId: 'waba-norm',
+      });
+      expect(twilioManagementAcl.createSender).toHaveBeenCalledWith(
+        expect.objectContaining({ senderId: 'whatsapp:+5521993001883' }),
+        expect.anything(),
+      );
+      expect(result.whatsappNumber).toBe('5521993001883');
+    });
+
+    it('should strip +55 prefix and non-digit chars', async () => {
+      const tenant = setupTenantAndMock('5521993001883');
+      const result = await useCase.execute({
+        tenantId: tenant.id.toValue(),
+        phoneNumber: '+55 21 99300-1883',
+        wabaId: 'waba-norm',
+      });
+      expect(twilioManagementAcl.createSender).toHaveBeenCalledWith(
+        expect.objectContaining({ senderId: 'whatsapp:+5521993001883' }),
+        expect.anything(),
+      );
+      expect(result.whatsappNumber).toBe('5521993001883');
+    });
+
+    it('should prepend 55 for 10-digit landline number', async () => {
+      const tenant = setupTenantAndMock('552199300188');
+      const result = await useCase.execute({
+        tenantId: tenant.id.toValue(),
+        phoneNumber: '2199300188',
+        wabaId: 'waba-norm',
+      });
+      expect(twilioManagementAcl.createSender).toHaveBeenCalledWith(
+        expect.objectContaining({ senderId: 'whatsapp:+552199300188' }),
+        expect.anything(),
+      );
+      expect(result.whatsappNumber).toBe('552199300188');
+    });
+  });
 });
