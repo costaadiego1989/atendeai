@@ -282,7 +282,7 @@ export class PrismaConversationRepository implements IConversationRepository {
         INNER JOIN tenant_schema.users u
           ON u.id = c.assigned_user_id
         WHERE c.tenant_id = ${tenantId}::uuid
-          AND c.id IN (${Prisma.join(conversationIds)})
+          AND c.id IN (${Prisma.join(conversationIds.map((id) => Prisma.sql`${id}::uuid`))})
       `);
 
     return rows.reduce<Record<string, { id: string; name: string; assignedAt?: Date }>>(
@@ -408,7 +408,7 @@ export class PrismaConversationRepository implements IConversationRepository {
           ) AS "lastMessagePreview"
         FROM messaging_schema.conversations c
         WHERE c.tenant_id = ${tenantId}::uuid
-          AND c.id IN (${Prisma.join(conversationIds)})
+          AND c.id IN (${Prisma.join(conversationIds.map((id) => Prisma.sql`${id}::uuid`))})
       `);
 
     return rows.reduce<

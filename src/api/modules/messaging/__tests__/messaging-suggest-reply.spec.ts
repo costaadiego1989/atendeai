@@ -7,12 +7,22 @@ import { AppModule } from '../../../app.module';
 import { PrismaService } from '../../../shared/infrastructure/database/PrismaService';
 import { ICreateTenantUseCase } from '../../tenant/application/use-cases/interfaces/ICreateTenantUseCase';
 import { IConfigureAIUseCase } from '../../tenant/application/use-cases/interfaces/IConfigureAIUseCase';
-import { ITenantRepository, TENANT_REPOSITORY } from '../../tenant/domain/repositories/ITenantRepository';
+import {
+  ITenantRepository,
+  TENANT_REPOSITORY,
+} from '../../tenant/domain/repositories/ITenantRepository';
 import { WhatsAppConfig } from '../../tenant/domain/entities/WhatsAppConfig';
-import { AI_ENGINE, AIResponse, IAIEngine } from '../../ai/application/ports/IAIEngine';
+import {
+  AI_ENGINE,
+  AIResponse,
+  IAIEngine,
+} from '../../ai/application/ports/IAIEngine';
 import { MESSAGE_QUEUE } from '../domain/ports/IMessageQueue';
 import { FollowUpService } from '../application/services/FollowUpService';
-import { EVENT_BUS, IEventBus } from '../../../shared/application/ports/IEventBus';
+import {
+  EVENT_BUS,
+  IEventBus,
+} from '../../../shared/application/ports/IEventBus';
 import { IntegrationEvent } from '../../../shared/application/ports/IntegrationEvent';
 
 describe('Suggest AI Agent Reply (e2e)', () => {
@@ -33,26 +43,31 @@ describe('Suggest AI Agent Reply (e2e)', () => {
   const testCnpj = generateValidCnpj(seed);
 
   const mockAiEngine: IAIEngine = {
-    generateResponse: jest.fn(async (request): Promise<AIResponse> => ({
-      text: `Rascunho Inteligente IA: Próximo Passo Mapeado`,
-      tokensUsed: 20, // Test deduction of 20 * 3 = 60
-      confidence: 0.99,
-      finishReason: 'stop',
-      intent: 'GENERAL',
-      sentiment: 'NEUTRAL',
-    })),
+    generateResponse: jest.fn(
+      async (request): Promise<AIResponse> => ({
+        text: `Rascunho Inteligente IA: Próximo Passo Mapeado`,
+        tokensUsed: 20, // Test deduction of 20 * 3 = 60
+        confidence: 0.99,
+        finishReason: 'stop',
+        intent: 'GENERAL',
+        sentiment: 'NEUTRAL',
+      }),
+    ),
   };
 
   const mockMessageQueue = {
-    addJob: jest.fn(async () => { }),
+    addJob: jest.fn(async () => {}),
   };
 
   const mockFollowUpService = {
-    cancelFollowUps: jest.fn(async () => { }),
-    scheduleFollowUps: jest.fn(async () => { }),
+    cancelFollowUps: jest.fn(async () => {}),
+    scheduleFollowUps: jest.fn(async () => {}),
   };
 
-  const subscribedHandlers = new Map<string, Array<(event: Record<string, unknown>) => Promise<void>>>();
+  const subscribedHandlers = new Map<
+    string,
+    Array<(event: Record<string, unknown>) => Promise<void>>
+  >();
 
   const inMemoryEventBus: IEventBus = {
     async publish<T extends IntegrationEvent>(event: T): Promise<void> {
@@ -60,9 +75,14 @@ describe('Suggest AI Agent Reply (e2e)', () => {
       const serialized = event.toJSON();
       for (const handler of handlers) await handler(serialized);
     },
-    subscribe<T extends IntegrationEvent>(queue: string, handler: (event: T) => Promise<void>): void {
+    subscribe<T extends IntegrationEvent>(
+      queue: string,
+      handler: (event: T) => Promise<void>,
+    ): void {
       const handlers = subscribedHandlers.get(queue) || [];
-      handlers.push(handler as unknown as (event: Record<string, unknown>) => Promise<void>);
+      handlers.push(
+        handler as unknown as (event: Record<string, unknown>) => Promise<void>,
+      );
       subscribedHandlers.set(queue, handlers);
     },
   };
@@ -70,13 +90,21 @@ describe('Suggest AI Agent Reply (e2e)', () => {
   function generateValidCnpj(seedValue: number): string {
     const base = String(seedValue).padStart(12, '0').slice(-12);
     const calcDigit = (digits: string, weights: number[]) => {
-      const sum = digits.split('').reduce((acc, digit, index) => acc + Number(digit) * weights[index], 0);
+      const sum = digits
+        .split('')
+        .reduce((acc, digit, index) => acc + Number(digit) * weights[index], 0);
       const rest = sum % 11;
       return rest < 2 ? 0 : 11 - rest;
     };
     const digit1 = calcDigit(base, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-    const digit2 = calcDigit(`${base}${digit1}`, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-    return `${base}${digit1}${digit2}`.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    const digit2 = calcDigit(
+      `${base}${digit1}`,
+      [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
+    );
+    return `${base}${digit1}${digit2}`.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+      '$1.$2.$3/$4-$5',
+    );
   }
 
   async function seedBilling(tenantId: string, aiQuota: number = 5000) {
@@ -134,12 +162,16 @@ describe('Suggest AI Agent Reply (e2e)', () => {
 
   async function waitForConversation(phone: string) {
     for (let i = 0; i < 20; i++) {
-      const contact = await (prisma.contact as any).findFirst({ where: { tenantId, phone } });
+      const contact = await (prisma.contact as any).findFirst({
+        where: { tenantId, phone },
+      });
       if (contact) {
-        const conversation = await (prisma.conversation as any).findFirst({ where: { tenantId, contactId: contact.id } });
+        const conversation = await (prisma.conversation as any).findFirst({
+          where: { tenantId, contactId: contact.id },
+        });
         if (conversation) return { contact, conversation };
       }
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
     return null;
   }
@@ -192,7 +224,11 @@ describe('Suggest AI Agent Reply (e2e)', () => {
     const savedTenant = await tenantRepository.findById(tenantId);
     const whatsAppConfig = WhatsAppConfig.create({
       provider: 'BUBBLEWHATS',
-      credentials: { id: bubbleWhatsId, token: 'ai-suggest-token', apiUrl: `https://${bubbleWhatsId}.bubblewhats.com` },
+      credentials: {
+        id: bubbleWhatsId,
+        token: 'ai-suggest-token',
+        apiUrl: `https://${bubbleWhatsId}.bubblewhats.com`,
+      },
       whatsappNumber,
       webhookSecret: null,
     });
@@ -210,19 +246,41 @@ describe('Suggest AI Agent Reply (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await (prisma.message as any).deleteMany({ where: { conversation: { tenantId } } }).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM messaging_schema.conversation_intelligence WHERE tenant_id = ${tenantId}::uuid`);
-      await (prisma.conversation as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.contact as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.aIConfig as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.subscription as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.whatsAppConfig as any).deleteMany({ where: { tenantId } }).catch(() => { });
+      await (prisma.message as any)
+        .deleteMany({ where: { conversation: { tenantId } } })
+        .catch(() => {});
+      await prisma.$executeRaw(
+        Prisma.sql`DELETE FROM messaging_schema.conversation_intelligence WHERE tenant_id = ${tenantId}::uuid`,
+      );
+      await (prisma.conversation as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.contact as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.aIConfig as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.subscription as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.whatsAppConfig as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
 
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM billing_schema.usage_records WHERE tenant_id = ${tenantId}::uuid`);
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM billing_schema.subscriptions WHERE tenant_id = ${tenantId}::uuid`);
+      await prisma.$executeRaw(
+        Prisma.sql`DELETE FROM billing_schema.usage_records WHERE tenant_id = ${tenantId}::uuid`,
+      );
+      await prisma.$executeRaw(
+        Prisma.sql`DELETE FROM billing_schema.subscriptions WHERE tenant_id = ${tenantId}::uuid`,
+      );
 
-      await (prisma.user as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.tenant as any).delete({ where: { id: tenantId } }).catch(() => { });
+      await (prisma.user as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.tenant as any)
+        .delete({ where: { id: tenantId } })
+        .catch(() => {});
     }
     await app.close();
   });
@@ -232,7 +290,7 @@ describe('Suggest AI Agent Reply (e2e)', () => {
 
     const firstText = 'Gostaria de agendar uma demonstração do AtendeAi';
     await sendInbound(userPhone, firstText, `ai-sugg-real-${Date.now()}`);
-    
+
     const persisted = await waitForConversation(userPhone);
     expect(persisted).not.toBeNull();
     const { conversation } = persisted!;
@@ -240,7 +298,9 @@ describe('Suggest AI Agent Reply (e2e)', () => {
     (mockAiEngine.generateResponse as jest.Mock).mockClear();
 
     const suggestResponse = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${conversation.id}/suggest-reply`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversation.id}/suggest-reply`,
+      )
       .set('Cookie', authCookies)
       .expect(201);
 
@@ -258,22 +318,24 @@ describe('Suggest AI Agent Reply (e2e)', () => {
 
     await prisma.usageRecord.upsert({
       where: { tenantId_periodStart: { tenantId, periodStart: cycleStart } },
-      create: { 
-        tenantId, 
-        periodStart: cycleStart, 
+      create: {
+        tenantId,
+        periodStart: cycleStart,
         periodEnd: cycleStart,
-        aiTokensUsed: 10 
+        aiTokensUsed: 10,
       },
-      update: { aiTokensUsed: 10 }
+      update: { aiTokensUsed: 10 },
     });
 
-    const phone = '5511988887777'; 
+    const phone = '5511988887777';
     await sendInbound(phone, 'Ola exausto', `ai-sugg-exhaust-${Date.now()}`);
     const persisted = await waitForConversation(phone);
     const { conversation } = persisted!;
 
     const suggestResponse = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${conversation.id}/suggest-reply`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversation.id}/suggest-reply`,
+      )
       .set('Cookie', authCookies)
       .expect(201);
 
@@ -281,5 +343,36 @@ describe('Suggest AI Agent Reply (e2e)', () => {
       text: 'Limite de uso da IA atingido. Renove seu plano para gerar sugestões.',
     });
   });
-});
 
+  it('should return provisioning message when subscription does not exist (NO_SUBSCRIPTION)', async () => {
+    // Remove any existing subscription and usage for the tenant
+    await prisma.$executeRaw(
+      Prisma.sql`DELETE FROM billing_schema.usage_records WHERE tenant_id = ${tenantId}::uuid`,
+    );
+    await prisma.$executeRaw(
+      Prisma.sql`DELETE FROM billing_schema.subscriptions WHERE tenant_id = ${tenantId}::uuid`,
+    );
+
+    const phone = '5511977776666';
+    await sendInbound(
+      phone,
+      'Ola sem subscription',
+      `ai-sugg-nosub-${Date.now()}`,
+    );
+    const persisted = await waitForConversation(phone);
+    const { conversation } = persisted!;
+
+    const suggestResponse = await request(app.getHttpServer())
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversation.id}/suggest-reply`,
+      )
+      .set('Cookie', authCookies)
+      .expect(201);
+
+    // Should NOT say "Limite de uso da IA atingido" — should indicate provisioning issue
+    expect(suggestResponse.body.text).not.toContain(
+      'Limite de uso da IA atingido',
+    );
+    expect(suggestResponse.body.text).toContain('sendo configurada');
+  });
+});
