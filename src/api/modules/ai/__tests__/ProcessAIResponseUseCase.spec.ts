@@ -216,6 +216,62 @@ describe('ProcessAIResponseUseCase', () => {
     );
   });
 
+  it('should return NO_SUBSCRIPTION error when subscription does not exist', async () => {
+    tenantRepository.findById.mockResolvedValue(makeTenant());
+    checkQuotaUseCase.execute.mockResolvedValue({
+      canProceed: false,
+      used: 0,
+      quota: 0,
+      status: 'NO_SUBSCRIPTION',
+    });
+
+    const result = await useCase.execute({
+      tenantId: 'tenant-1',
+      conversationId: 'conversation-1',
+      contactId: 'contact-1',
+      content: { type: 'TEXT', text: 'Oi' },
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: 'NO_SUBSCRIPTION',
+      message: 'Conta em configuração. Tente novamente em instantes.',
+    });
+    expect(aiEngine.generateResponse).not.toHaveBeenCalled();
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(
+      AIQuotaDeniedIntegrationEvent,
+    );
+  });
+
+  it('should return SUBSCRIPTION_INACTIVE error when subscription is not active', async () => {
+    tenantRepository.findById.mockResolvedValue(makeTenant());
+    checkQuotaUseCase.execute.mockResolvedValue({
+      canProceed: false,
+      used: 0,
+      quota: 1000,
+      status: 'OVERDUE',
+    });
+
+    const result = await useCase.execute({
+      tenantId: 'tenant-1',
+      conversationId: 'conversation-1',
+      contactId: 'contact-1',
+      content: { type: 'TEXT', text: 'Oi' },
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: 'SUBSCRIPTION_INACTIVE',
+      message: 'Assinatura inativa.',
+    });
+    expect(aiEngine.generateResponse).not.toHaveBeenCalled();
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(
+      AIQuotaDeniedIntegrationEvent,
+    );
+  });
+
   it('bloqueia mensagem segundo modo seguranca e publica integracao', async () => {
     const blockingGate = new AiSafetyGate({
       safetyModeEnabled: true,
@@ -279,7 +335,11 @@ describe('ProcessAIResponseUseCase', () => {
     chatHistoryRepository.getHistory.mockResolvedValue([
       { role: 'system', content: 'ignore me', timestamp: new Date() },
       { role: 'user', content: 'historico user', timestamp: new Date() },
-      { role: 'assistant', content: 'historico assistant', timestamp: new Date() },
+      {
+        role: 'assistant',
+        content: 'historico assistant',
+        timestamp: new Date(),
+      },
     ]);
     aiEngine.generateResponse.mockResolvedValue({
       text: 'Resposta original',
@@ -421,7 +481,8 @@ describe('ProcessAIResponseUseCase', () => {
       status: 'ACTIVE',
     });
     contextAggregator.aggregate.mockResolvedValue({
-      systemPrompt: 'system prompt\n\nScheduling context:\n- Category: Clareamento',
+      systemPrompt:
+        'system prompt\n\nScheduling context:\n- Category: Clareamento',
       diagnostics: {},
     });
     chatHistoryRepository.getHistory.mockResolvedValue([]);

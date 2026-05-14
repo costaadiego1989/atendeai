@@ -49,7 +49,9 @@ export class ProcessAIResponseService {
     private readonly mediaUnderstandingService?: MediaUnderstandingService,
   ) {}
 
-  async process(input: ProcessAIResponseInput): Promise<ProcessAIResponseOutput> {
+  async process(
+    input: ProcessAIResponseInput,
+  ): Promise<ProcessAIResponseOutput> {
     return traceAsync(
       'ai.ProcessAIResponseService.process',
       {
@@ -63,7 +65,9 @@ export class ProcessAIResponseService {
     );
   }
 
-  private async runPipeline(input: ProcessAIResponseInput): Promise<ProcessAIResponseOutput> {
+  private async runPipeline(
+    input: ProcessAIResponseInput,
+  ): Promise<ProcessAIResponseOutput> {
     const tenant = await this.tenantRepository.findById(input.tenantId);
     if (!tenant) {
       throw new EntityNotFoundException('Tenant', input.tenantId);
@@ -88,7 +92,25 @@ export class ProcessAIResponseService {
 
     if (!quotaCheck.canProceed) {
       await this.publishQuotaDenied(input, quotaCheck);
-      return { success: false, error: 'QUOTA_EXCEEDED', message: 'Limite de uso atingido.' };
+      if (quotaCheck.status === 'NO_SUBSCRIPTION') {
+        return {
+          success: false,
+          error: 'NO_SUBSCRIPTION',
+          message: 'Conta em configuração. Tente novamente em instantes.',
+        };
+      }
+      if (quotaCheck.status !== 'ACTIVE') {
+        return {
+          success: false,
+          error: 'SUBSCRIPTION_INACTIVE',
+          message: 'Assinatura inativa.',
+        };
+      }
+      return {
+        success: false,
+        error: 'QUOTA_EXCEEDED',
+        message: 'Limite de uso atingido.',
+      };
     }
 
     const aiSession = await this.aiSessionService.getOrCreateSession(
@@ -97,10 +119,15 @@ export class ProcessAIResponseService {
       input.conversationId,
     );
 
-    const history = await this.chatHistoryRepository.getHistory(input.conversationId);
+    const history = await this.chatHistoryRepository.getHistory(
+      input.conversationId,
+    );
     const contextHistory = history
       .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
-      .map((msg) => ({ role: msg.role as 'user' | 'assistant', content: msg.content }));
+      .map((msg) => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+      }));
 
     const resolvedBranchId = await this.resolveBranchId(input);
 
@@ -113,12 +140,13 @@ export class ProcessAIResponseService {
       userMessage,
     });
 
-    const { systemPrompt, diagnostics } = await this.contextAggregator.aggregate(
-      tenant,
-      input.conversationId,
-      userMessage,
-      contextHistory.length === 0,
-    );
+    const { systemPrompt, diagnostics } =
+      await this.contextAggregator.aggregate(
+        tenant,
+        input.conversationId,
+        userMessage,
+        contextHistory.length === 0,
+      );
 
     let promptWithAgentRule = await this.applyMessagingAgentRule(
       input.tenantId,
@@ -157,17 +185,34 @@ export class ProcessAIResponseService {
       });
 
       if (handoffDecision.shouldHandoff) {
-        return this.handleHandoff(input, tenant, response, handoffDecision, aiSession.id, userMessage);
+        return this.handleHandoff(
+          input,
+          tenant,
+          response,
+          handoffDecision,
+          aiSession.id,
+          userMessage,
+        );
       }
 
-      const processedText = await this.responseProcessor.process(response.text, {
-        tenantId: tenant.id.toString(),
-        branchId: resolvedBranchId,
-        contactId: input.contactId,
-        conversationId: input.conversationId,
-      });
+      const processedText = await this.responseProcessor.process(
+        response.text,
+        {
+          tenantId: tenant.id.toString(),
+          branchId: resolvedBranchId,
+          contactId: input.contactId,
+          conversationId: input.conversationId,
+        },
+      );
 
-      await this.persistTurn(input, aiSession.id, processedText, response, diagnostics, userMessage);
+      await this.persistTurn(
+        input,
+        aiSession.id,
+        processedText,
+        response,
+        diagnostics,
+        userMessage,
+      );
 
       return { success: true };
     } catch (error: unknown) {
@@ -194,7 +239,12 @@ export class ProcessAIResponseService {
     input: ProcessAIResponseInput,
     sessionId: string,
     processedText: string,
-    aiResponse: { tokensUsed?: number; intent?: string; sentiment?: string; confidence?: number },
+    aiResponse: {
+      tokensUsed?: number;
+      intent?: string;
+      sentiment?: string;
+      confidence?: number;
+    },
     diagnostics: Record<string, unknown>,
     userMessage: string,
   ) {
@@ -241,7 +291,8 @@ export class ProcessAIResponseService {
     sessionId: string,
     userMessage: string,
   ) {
-    const escalationMessage = tenant.aiConfig?.escalationMessage || 'Encaminhando para um humano...';
+    const escalationMessage =
+      tenant.aiConfig?.escalationMessage || 'Encaminhando para um humano...';
 
     await this.chatHistoryRepository.saveMessage(input.conversationId, {
       role: 'assistant',
@@ -263,7 +314,11 @@ export class ProcessAIResponseService {
       }),
     );
 
-    return { success: false, error: 'HANDOFF_REQUIRED', message: 'Escalated to human.' };
+    return {
+      success: false,
+      error: 'HANDOFF_REQUIRED',
+      message: 'Escalated to human.',
+    };
   }
 
   private async handleFailure(input: ProcessAIResponseInput, error: unknown) {
@@ -288,11 +343,14 @@ export class ProcessAIResponseService {
     return { success: false, error: 'AI_PROVIDER_ERROR', message: msg };
   }
 
-  private async publishQuotaDenied(input: ProcessAIResponseInput, quotaCheck: {
-    status: string;
-    used: number;
-    quota: number;
-  }) {
+  private async publishQuotaDenied(
+    input: ProcessAIResponseInput,
+    quotaCheck: {
+      status: string;
+      used: number;
+      quota: number;
+    },
+  ) {
     await this.eventBus.publish(
       new AIQuotaDeniedIntegrationEvent({
         conversationId: input.conversationId,
@@ -306,13 +364,18 @@ export class ProcessAIResponseService {
     );
   }
 
-  private async resolveBranchId(input: ProcessAIResponseInput): Promise<string | null> {
+  private async resolveBranchId(
+    input: ProcessAIResponseInput,
+  ): Promise<string | null> {
     if (input.branchId) {
       return input.branchId;
     }
 
     try {
-      const contact = await this.contactRepository.findById(input.tenantId, input.contactId);
+      const contact = await this.contactRepository.findById(
+        input.tenantId,
+        input.contactId,
+      );
       return contact?.branchId ?? null;
     } catch {
       return null;
@@ -334,7 +397,9 @@ export class ProcessAIResponseService {
         branchId,
       );
 
-      const customPrompt = agentRule?.isActive ? agentRule.customPrompt?.trim() : '';
+      const customPrompt = agentRule?.isActive
+        ? agentRule.customPrompt?.trim()
+        : '';
       if (!customPrompt) {
         return systemPrompt;
       }
@@ -390,9 +455,13 @@ export class ProcessAIResponseService {
     return parts.join('\n');
   }
 
-  private async resolveUserMessage(input: ProcessAIResponseInput): Promise<string> {
+  private async resolveUserMessage(
+    input: ProcessAIResponseInput,
+  ): Promise<string> {
     const type = input.content.type?.toUpperCase();
-    const isMedia = ['IMAGE', 'AUDIO', 'VIDEO', 'DOCUMENT'].includes(type ?? '');
+    const isMedia = ['IMAGE', 'AUDIO', 'VIDEO', 'DOCUMENT'].includes(
+      type ?? '',
+    );
 
     if (!isMedia || !input.content.url || !this.mediaUnderstandingService) {
       return this.toUserMessage(input.content);
