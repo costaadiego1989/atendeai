@@ -115,7 +115,7 @@ export default function TeamPage() {
     resetEdit({
       name: vm.editingUser.name,
       email: vm.editingUser.email,
-      phone: vm.editingUser.phone ?? '',
+      phone: formatPhone(vm.editingUser.phone ?? ''),
       role: vm.editingUser.role,
     });
   }, [resetEdit, vm.editingUser]);
@@ -269,7 +269,7 @@ export default function TeamPage() {
             onSubmit={handleSubmit((values) => vm.createUserMutation.mutate({
               name: values.name!,
               email: values.email!,
-              phone: values.phone!,
+              phone: values.phone!.replace(/\D/g, ''),
               role: values.role! as 'ADMIN' | 'AGENT',
             }))}
           >
@@ -289,7 +289,14 @@ export default function TeamPage() {
             </div>
             <div className="space-y-2">
               <Label>Telefone</Label>
-              <Input placeholder="11999999999" {...register('phone')} />
+              <Input
+                placeholder="(11) 99999-9999"
+                value={watch('phone')}
+                onChange={(e) => {
+                  const formatted = formatPhone(e.target.value);
+                  setValue('phone', formatted, { shouldValidate: true });
+                }}
+              />
               {errors.phone && (
                 <p className="text-xs text-destructive">{errors.phone.message}</p>
               )}
@@ -347,7 +354,7 @@ export default function TeamPage() {
                 userId: vm.editingUser.id,
                 name: values.name!,
                 email: values.email!,
-                phone: values.phone!,
+                phone: values.phone!.replace(/\D/g, ''),
                 role: values.role! as 'OWNER' | 'ADMIN' | 'AGENT',
               });
             })}
@@ -372,7 +379,14 @@ export default function TeamPage() {
             </div>
             <div className="space-y-2">
               <Label>Telefone</Label>
-              <Input placeholder="11999999999" {...registerEdit('phone')} />
+              <Input
+                placeholder="(11) 99999-9999"
+                value={watchEdit('phone')}
+                onChange={(e) => {
+                  const formatted = formatPhone(e.target.value);
+                  setEditValue('phone', formatted, { shouldValidate: true });
+                }}
+              />
               {editErrors.phone && (
                 <p className="text-xs text-destructive">{editErrors.phone.message}</p>
               )}
