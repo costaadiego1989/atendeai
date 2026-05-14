@@ -97,6 +97,15 @@ export function useSocialPageViewModel() {
       toast({ title: 'Status atualizado' });
       queryClient.invalidateQueries({ queryKey: ['social-rules', tenant?.id] });
     },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Falha ao alterar regra',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível alterar o status da regra.',
+        }),
+      });
+    },
   });
 
   const createRuleMutation = useMutation({
@@ -138,6 +147,15 @@ export function useSocialPageViewModel() {
       toast({ title: 'Resposta enviada' });
       queryClient.invalidateQueries({ queryKey: ['social-comments', tenant?.id] });
       queryClient.invalidateQueries({ queryKey: ['social-comment-thread', tenant?.id, selectedCommentId] });
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Falha ao responder',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível enviar a resposta ao comentário.',
+        }),
+      });
     },
   });
 

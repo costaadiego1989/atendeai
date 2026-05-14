@@ -240,6 +240,15 @@ export function useCheckoutPageViewModel() {
         description: 'O download do CSV do checkout foi iniciado com os filtros selecionados.',
       });
     },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Falha ao gerar relatório',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível gerar o relatório de pedidos.',
+        }),
+      });
+    },
   });
 
   useEffect(() => {
@@ -395,6 +404,15 @@ export function useCheckoutPageViewModel() {
       });
       setShippingPolicySheetOpen(false);
     },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Falha ao salvar frete',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível salvar a política de frete.',
+        }),
+      });
+    },
   });
 
   const updateAbandonmentStateMutation = useMutation({
@@ -428,6 +446,15 @@ export function useCheckoutPageViewModel() {
           : 'Os toques automaticos de abandono voltaram a ficar ativos.',
       });
     },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Falha ao alterar régua',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível alterar o estado da régua de abandono.',
+        }),
+      });
+    },
   });
 
   const triggerAbandonmentTouchMutation = useMutation({
@@ -457,6 +484,15 @@ export function useCheckoutPageViewModel() {
       toast({
         title: 'Toque reenviado',
         description: 'A IA iniciou uma nova retomada manual para este checkout.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Falha ao reenviar toque',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível disparar o toque de retomada.',
+        }),
       });
     },
   });
