@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '../../../shared/infrastructure/database/PrismaService';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { GlobalExceptionFilter } from '../../../shared/infrastructure/http/filters/GlobalExceptionFilter';
-import { SuccessResponseInterceptor } from '../../../shared/infrastructure/http/interceptors/SuccessResponseInterceptor';
 import { Prisma } from '@prisma/client';
 
 describe('Tenant WhatsApp Connection (e2e)', () => {
@@ -22,7 +21,6 @@ describe('Tenant WhatsApp Connection (e2e)', () => {
     app.use(cookieParser());
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     app.useGlobalFilters(new GlobalExceptionFilter());
-    app.useGlobalInterceptors(new SuccessResponseInterceptor());
     app.setGlobalPrefix('api/v1');
     await app.init();
     prisma = app.get(PrismaService);
@@ -78,16 +76,21 @@ describe('Tenant WhatsApp Connection (e2e)', () => {
     await app.close();
   });
 
-  it('should return whatsapp connection and embedded signup info', async () => {
+  it('should return whatsapp connection info', async () => {
     const response = await request(app.getHttpServer())
       .get(`/api/v1/tenants/${tenantId}/whatsapp-connection`)
       .set('Cookie', authCookie);
 
     expect(response.status).toBe(200);
-    // Handle double-wrapping
-    const data = response.body.data?.data || response.body.data;
-    expect(data).toHaveProperty('isConnected');
-    expect(data.isConnected).toBe(false);
-    expect(data).toHaveProperty('embeddedSignupInfo');
+    // The SuccessResponseInterceptor wraps in { data: ... }
+    const data = response.body.data?.data || response.body.data || response.body;
+    expect(data).toHaveProperty('provider');
+    expect(data.provider).toBe('TWILIO');
+    expect(data).toHaveProperty('mode');
+    expect(data.mode).toBe('EMBEDDED_SIGNUP');
+    expect(data).toHaveProperty('embeddedSignupReady');
+    expect(data).toHaveProperty('embeddedSignup');
+    expect(data).toHaveProperty('connection');
+    expect(data.connection).toBeNull(); // No WhatsApp configured yet
   });
 });
