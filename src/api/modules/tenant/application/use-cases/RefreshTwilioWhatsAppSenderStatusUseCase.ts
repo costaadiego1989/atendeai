@@ -3,7 +3,7 @@ import {
   ITenantRepository,
   TENANT_REPOSITORY,
 } from '../../domain/repositories/ITenantRepository';
-import { EntityNotFoundException } from '../../../../shared/domain/exceptions/DomainExceptions';
+import { EntityNotFoundException, ValidationErrorException } from '../../../../shared/domain/exceptions/DomainExceptions';
 import { TwilioManagementAcl } from '../../infrastructure/acl/TwilioManagementAcl';
 import { WhatsAppConfig } from '../../domain/entities/WhatsAppConfig';
 import { TenantDomainEventPublisher } from '../services/TenantDomainEventPublisher';
@@ -27,12 +27,12 @@ export class RefreshTwilioWhatsAppSenderStatusUseCase {
       const branch = await this.resolveBranch(tenantId, branchId);
       const override = branch.whatsAppConfigOverride;
       if (!override || override.provider !== 'TWILIO') {
-        throw new Error('Branch WhatsApp provider is not Twilio');
+        throw new ValidationErrorException('Branch WhatsApp provider is not Twilio');
       }
 
       const senderSid = override.credentials.senderSid;
       if (!senderSid) {
-        throw new Error('Twilio sender SID is not configured');
+        throw new ValidationErrorException('Twilio sender SID is not configured');
       }
 
       const sender = await this.twilioManagementAcl.getSender(
@@ -85,12 +85,12 @@ export class RefreshTwilioWhatsAppSenderStatusUseCase {
     }
 
     if (tenant.whatsAppConfig.provider !== 'TWILIO') {
-      throw new Error('Tenant WhatsApp provider is not Twilio');
+      throw new ValidationErrorException('Tenant WhatsApp provider is not Twilio');
     }
 
     const senderSid = tenant.whatsAppConfig.credentials.senderSid;
     if (!senderSid) {
-      throw new Error('Twilio sender SID is not configured');
+      throw new ValidationErrorException('Twilio sender SID is not configured');
     }
 
     const sender = await this.twilioManagementAcl.getSender(
