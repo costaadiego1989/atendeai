@@ -1385,9 +1385,12 @@ model ConversationIntelligence {
   tags           Json     @default("[]")
   interests      Json     @default("[]")
   summary        String?  @db.Text
+  nextStep       String?  @map("next_step") @db.Text
+  lossReason     String?  @map("loss_reason") @db.Text
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
 
+  @@unique([tenantId, conversationId], name: "uq_conversation_intelligence_tenant_conversation")
   @@index([tenantId, sentiment], name: "idx_conversation_intelligence_tenant_sentiment")
   @@map("conversation_intelligence")
   @@schema("messaging_schema")
