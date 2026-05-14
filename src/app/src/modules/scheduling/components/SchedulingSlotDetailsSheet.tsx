@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ExternalLink } from 'lucide-react';
+import { CalendarDays, Clock, ExternalLink, Video } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -18,8 +18,11 @@ import {
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import type { SchedulingSlotBillingType } from '@/modules/scheduling/services/scheduling-service';
+import { schedulingService } from '@/modules/scheduling/services/scheduling-service';
 import type { SchedulingPageViewModel } from '@/modules/scheduling/view-models/useSchedulingPageViewModel';
 import { formatCurrency, formatScheduleDate } from './scheduling-view-helpers';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { toast } from '@/hooks/use-toast';
 
 type Props = {
   vm: SchedulingPageViewModel;
@@ -28,12 +31,56 @@ type Props = {
 export function SchedulingSlotDetailsSheet({ vm }: Props) {
   const [paymentBillingType, setPaymentBillingType] =
     useState<SchedulingSlotBillingType>('PIX');
+  const [joiningMeeting, setJoiningMeeting] = useState(false);
+  const { tenant, activeBranchId } = useAuthStore();
+
+  const handleJoinMeeting = async () => {
+    if (!vm.selectedSlotDetails?.reservedFor?.meetingUrl || !tenant) return;
+
+    setJoiningMeeting(true);
+    try {
+      const result = await schedulingService.joinMeeting(
+        tenant.id,
+        vm.selectedProfessionalId || '',
+        vm.selectedSlotDetails.id,
+        vm.selectedDate || '',
+        activeBranchId,
+        vm.selectedProfessional?.name,
+      );
+
+      // Open the meeting URL
+      window.open(result.meetingUrl, '_blank');
+
+      if (result.messageSent) {
+        toast({
+          title: 'Sala acessada',
+          description: 'O cliente foi notificado via WhatsApp que você entrou na sala.',
+        });
+      } else {
+        toast({
+          title: 'Sala acessada',
+          description: 'Não foi possível notificar o cliente, mas a sala está aberta.',
+          variant: 'destructive',
+        });
+      }
+    } catch {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível acessar a sala.',
+        variant: 'destructive',
+      });
+    } finally {
+      setJoiningMeeting(false);
+    }
+  };
+
+  const isFreeSlot = vm.selectedSlotDetails?.status === 'RESERVED' && !vm.selectedSlotDetails?.payment;
 
   return (
     <Sheet open={vm.slotDetailsOpen} onOpenChange={vm.setSlotDetailsOpen}>
       <SheetContent side="right" className="w-[560px] sm:max-w-[560px] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Detalhes do horário</SheetTitle>
+          <SheetTitle>Detalhes do agendamento</SheetTitle>
           <SheetDescription>
             Ajuste a reserva, veja o cliente vinculado ou libere o horário novamente.
           </SheetDescription>
@@ -42,7 +89,7 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
           <div className="rounded-2xl border border-border/60 bg-muted/15 p-4 text-sm">
             <p className="font-medium text-foreground">
               {vm.selectedSlotDetails
-                ? `${formatScheduleDate(vm.selectedDate)} - ${vm.selectedSlotDetails.startsAt} - ${vm.selectedSlotDetails.endsAt}`
+                ? `${formatScheduleDate(vm.selectedDate)} das ${vm.selectedSlotDetails.startsAt} às ${vm.selectedSlotDetails.endsAt}`
                 : 'Nenhum horário selecionado'}
             </p>
             {vm.selectedSlotDetails?.customPrice ? (
@@ -99,9 +146,17 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
                     </p>
                   ) : null}
                 </div>
+              ) : isFreeSlot ? (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-900">
+                  <p className="font-medium">Atendimento gratuito</p>
+                  <p className="mt-1 text-emerald-700">
+                    Este horário foi confirmado sem cobrança.
+                  </p>
+                </div>
               ) : null}
               {(vm.selectedSlotDetails.status === 'RESERVED' ||
                 vm.selectedSlotDetails.status === 'PRE_RESERVED') &&
+              !isFreeSlot &&
               (!vm.selectedSlotDetails.payment ||
                 vm.selectedSlotDetails.payment.status === 'PENDING') ? (
                 <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/15 p-4">
@@ -138,27 +193,39 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
                 </div>
               ) : null}
               {vm.selectedSlotDetails.reservedFor?.meetingUrl ? (
-                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Atendimento online</p>
-                  <p className="mt-1 break-all">
+                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4 text-emerald-700" />
+                    <p className="font-medium text-foreground">Consulta online</p>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    <span>{formatScheduleDate(vm.selectedDate)}</span>
+                    <span>•</span>
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>{vm.selectedSlotDetails.startsAt} – {vm.selectedSlotDetails.endsAt}</span>
+                  </div>
+                  <p className="mt-2 break-all text-xs text-muted-foreground">
                     {vm.selectedSlotDetails.reservedFor.meetingUrl}
                   </p>
-                  <Button asChild size="sm" className="mt-3">
-                    <a
-                      href={vm.selectedSlotDetails.reservedFor.meetingUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Abrir Meet
-                    </a>
+                  <Button
+                    size="sm"
+                    className="mt-3 rounded-xl"
+                    disabled={joiningMeeting}
+                    onClick={handleJoinMeeting}
+                  >
+                    <Video className="mr-2 h-4 w-4" />
+                    {joiningMeeting ? 'Entrando...' : 'Acessar sala'}
                   </Button>
                 </div>
               ) : vm.selectedSlotDetails.reservedFor?.isOnline ? (
                 <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Atendimento online</p>
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4 text-amber-700" />
+                    <p className="font-medium text-foreground">Atendimento online</p>
+                  </div>
                   <p className="mt-1">
-                    Link do Meet ainda nao foi gerado. Verifique a conexao com Google Calendar.
+                    Link do Meet ainda não foi gerado. Verifique a conexão com Google Calendar.
                   </p>
                 </div>
               ) : null}

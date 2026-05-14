@@ -113,7 +113,7 @@ export function SchedulingDaySlotCard({
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground">{formatSlotTime(slot)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {slot.label || 'horário operacional da agenda'}
+              {slot.label || 'Horário da agenda'}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">{getStatusSummary(slot)}</p>
             {slot.customPrice ? (

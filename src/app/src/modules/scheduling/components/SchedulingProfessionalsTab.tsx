@@ -846,7 +846,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                                     {formatSlotTime(slot)}
                                   </p>
                                   <p className="mt-1 text-xs text-muted-foreground">
-                                    {slot.label || 'horário operacional da agenda'}
+                                    {slot.label || 'Horário da agenda'}
                                   </p>
                                   {slot.customPrice ? (
                                     <p className="mt-2 text-xs font-medium text-foreground">
@@ -956,7 +956,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                                     {formatSlotTime(slot)}
                                   </p>
                                   <p className="mt-1 text-xs text-muted-foreground">
-                                    {slot.label || 'horário operacional da agenda'}
+                                    {slot.label || 'Horário da agenda'}
                                   </p>
                                   {slot.customPrice ? (
                                     <p className="mt-2 text-xs font-medium text-foreground">

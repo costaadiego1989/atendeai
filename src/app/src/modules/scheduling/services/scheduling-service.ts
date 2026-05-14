@@ -813,6 +813,23 @@ export const schedulingService = {
     return mapSlot(response, professionalId, date);
   },
 
+  async joinMeeting(
+    tenantId: string,
+    professionalId: string,
+    slotId: string,
+    date: string,
+    branchId?: string | null,
+    professionalName?: string,
+  ): Promise<{ meetingUrl: string; messageSent: boolean }> {
+    return apiClient.post(
+      withBranchQuery(
+        `/tenants/${tenantId}/scheduling/professionals/${professionalId}/availability/slots/${slotId}/join-meeting`,
+        branchId,
+      ),
+      { date, professionalName },
+    );
+  },
+
   async downloadAsyncJobFile(
     tenantId: string,
     jobId: string,
