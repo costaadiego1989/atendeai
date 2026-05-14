@@ -282,12 +282,13 @@ export function useConversationsPageViewModel() {
       return;
     }
 
-    if (selectedConversationId && !selectedConversation && conversations[0]) {
+    if (selectedConversationId && !selectedConversation && !conversationsQuery.isFetching && conversations[0]) {
       setSelectedConversationId(conversations[0].id);
       navigate(`/app/conversations/${conversations[0].id}`, { replace: true });
     }
   }, [
     conversations,
+    conversationsQuery.isFetching,
     conversationsQuery.isLoading,
     navigate,
     selectedConversation,
