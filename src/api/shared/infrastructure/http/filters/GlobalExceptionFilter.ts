@@ -46,6 +46,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const traceId = sc?.traceId ?? '';
     const spanId = sc?.spanId ?? '';
 
+    const prismaCode =
+      exception instanceof PrismaClientKnownRequestError ? exception.code : undefined;
+    const rawMessage =
+      exception instanceof Error ? exception.message : undefined;
+
     this.log?.emit({
       level:
         status >= HttpStatus.INTERNAL_SERVER_ERROR ? 'error' : 'warn',
@@ -56,6 +61,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       attributes: {
         error_code: code,
         http_status: String(status),
+        ...(prismaCode && { prisma_code: prismaCode }),
+        ...(rawMessage && status >= HttpStatus.INTERNAL_SERVER_ERROR && { raw_error: rawMessage.slice(0, 500) }),
       },
     });
 
