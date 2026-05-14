@@ -214,44 +214,6 @@ function LegacyChannelsSettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Link2 className="h-4 w-4 text-primary" />
-              Politica de roteamento
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-xl border border-border/60 p-4">
-              <div>
-                <p className="text-sm font-medium text-foreground">Habilitar fila humana</p>
-                <p className="text-xs text-muted-foreground">
-                  Mantem o desenho visual da triagem entre IA e operação humana.
-                </p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            <div className="space-y-2">
-              <Label>Canal preferêncial</Label>
-              <Select defaultValue="WHATSAPP">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
-                  <SelectItem value="INSTAGRAM">Instagram</SelectItem>
-                  <SelectItem value="LINKEDIN" disabled>
-                    LinkedIn - Em breve
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Observações operacionais</Label>
-              <Textarea rows={5} placeholder="Ex: conversas de alta prioridade devem ir para o time humano em ate 5 minutos." />
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

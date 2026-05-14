@@ -1,4 +1,4 @@
-import { Bot, ExternalLink, Linkedin, Link2, MessageSquare, RefreshCcw, ShieldCheck } from 'lucide-react';
+import { Bot, ExternalLink, Linkedin, Link2, MessageSquare, RefreshCcw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,13 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { useChannelsSettingsViewModel } from '@/modules/settings/view-models/useChannelsSettingsViewModel';
-import { ModuleAgentRuleButton } from '@/modules/agent-rules/components/ModuleAgentRuleButton';
-
 export function ChannelsSettingsContent() {
   const vm = useChannelsSettingsViewModel();
   const connection = vm.connection;
@@ -30,7 +26,6 @@ export function ChannelsSettingsContent() {
             Conecte multiplos números por Matriz ou filial, acompanhe a ativação via Twilio e vincule contas do Instagram para cada Operação.
           </p>
         </div>
-        <ModuleAgentRuleButton moduleId="channels" buttonSize="sm" className="gap-1.5 shrink-0" />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -200,8 +195,8 @@ export function ChannelsSettingsContent() {
                 >
                   <ExternalLink className="h-4 w-4" />
                   {vm.startEmbeddedSignupMutation.isPending
-                    ? 'Abrindo Facebook...'
-                    : 'Continuar com Facebook'}
+                    ? 'Conectando via Meta...'
+                    : 'Conectar via Meta Business'}
                 </Button>
                 <Button
                   variant="outline"
@@ -278,12 +273,12 @@ export function ChannelsSettingsContent() {
                   >
                     <ExternalLink className="h-4 w-4" />
                     {vm.startInstagramMetaConnectionMutation.isPending
-                      ? 'Abrindo Meta...'
-                      : 'Continuar com Meta/Facebook'}
+                      ? 'Conectando via Meta...'
+                      : 'Conectar com Meta Business'}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Esse e o fluxo oficial sugerido pela Meta: o usuario faz login no Facebook/Meta, concede acesso e o sistema lista as contas de Instagram Business disponiveis para escolha.
+                  Fluxo oficial da Meta: você faz login no Meta Business, concede acesso e o sistema lista as contas de Instagram Business disponíveis para escolha.
                 </p>
               </div>
 
@@ -375,44 +370,7 @@ export function ChannelsSettingsContent() {
             </CardContent>
           </Card>
 
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ShieldCheck className="h-4 w-4 text-primary" />
-                Politica de roteamento
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-xl border border-border/60 p-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Fila humana habilitada</p>
-                  <p className="text-xs text-muted-foreground">
-                    Mantem o desenho visual da triagem entre IA e Operação humana.
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="space-y-2">
-                <Label>Canal preferêncial</Label>
-                <Select defaultValue="WHATSAPP">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
-                    <SelectItem value="INSTAGRAM">Instagram</SelectItem>
-                    <SelectItem value="LINKEDIN" disabled>
-                      LinkedIn - Em breve
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Observações operacionais</Label>
-                <Textarea rows={5} placeholder="Ex: a filial do shopping usa apenas Instagram no horario noturno." />
-              </div>
-            </CardContent>
-          </Card>
+
         </div>
       </div>
     </div>
