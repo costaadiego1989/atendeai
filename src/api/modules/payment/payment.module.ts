@@ -20,22 +20,24 @@ import { TenantModule } from '@modules/tenant/tenant.module';
 import { PrismaTenantFinancialAccountRepository } from './infrastructure/persistence/PrismaTenantFinancialAccountRepository';
 import { PrismaContactFinancialProfileRepository } from './infrastructure/persistence/PrismaContactFinancialProfileRepository';
 import { BullModule } from '@nestjs/bullmq';
-import {
-  TENANT_FINANCIAL_ACCOUNT_REPOSITORY,
-} from './domain/repositories/ITenantFinancialAccountRepository';
-import {
-  CONTACT_FINANCIAL_PROFILE_REPOSITORY,
-} from './domain/repositories/IContactFinancialProfileRepository';
+import { TENANT_FINANCIAL_ACCOUNT_REPOSITORY } from './domain/repositories/ITenantFinancialAccountRepository';
+import { CONTACT_FINANCIAL_PROFILE_REPOSITORY } from './domain/repositories/IContactFinancialProfileRepository';
+import { BILLING_REPOSITORY } from '@modules/billing/domain/repositories/IBillingRepository';
+import { PrismaBillingRepository } from '@modules/billing/infrastructure/persistence/repositories/PrismaBillingRepository';
 
 @Global()
 @Module({
   imports: [
-    ConfigModule, 
-    TenantModule, 
+    ConfigModule,
+    TenantModule,
     AuthModule,
-    BullModule.registerQueue({ name: 'BILLING_QUEUE' })
+    BullModule.registerQueue({ name: 'BILLING_QUEUE' }),
   ],
-  controllers: [PaymentController, PaymentManagementController, TrialSignupController],
+  controllers: [
+    PaymentController,
+    PaymentManagementController,
+    TrialSignupController,
+  ],
   providers: [
     {
       provide: IPAYMENT_GATEWAY,
@@ -48,6 +50,10 @@ import {
     {
       provide: CONTACT_FINANCIAL_PROFILE_REPOSITORY,
       useClass: PrismaContactFinancialProfileRepository,
+    },
+    {
+      provide: BILLING_REPOSITORY,
+      useClass: PrismaBillingRepository,
     },
     PaymentService,
     PaymentWebhookSchedulingProjectionService,
@@ -69,4 +75,4 @@ import {
     GetTenantFinancialAccountStatusUseCase,
   ],
 })
-export class PaymentModule { }
+export class PaymentModule {}
