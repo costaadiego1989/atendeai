@@ -40,6 +40,7 @@ import { UserProfileSheet } from '@/modules/users/components/UserProfileSheet';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { useUIStore } from '@/shared/stores/ui-store';
+import { filterNavByNiche } from '@/app/helpers/niche-nav-filter';
 
 interface NavItem {
   label: string;
@@ -141,6 +142,12 @@ export function AppLayout({ children }: { children?: ReactNode }) {
   };
 
   const content = children ?? <Outlet />;
+  const businessType = tenant?.businessType;
+
+  const filteredMainNav = filterNavByNiche(mainNav, businessType);
+  const filteredSalesNav = filterNavByNiche(salesNav, businessType);
+  const filteredProspectingNav = filterNavByNiche(prospectingNav, businessType);
+
   const platformNavItems = ((): NavItem[] => {
     const show =
       import.meta.env.VITE_SHOW_PLATFORM_ADMIN_NAV === 'true' &&
@@ -187,23 +194,29 @@ export function AppLayout({ children }: { children?: ReactNode }) {
         <nav className="flex-1 overflow-y-auto py-3">
           <NavSection
             title="Principal"
-            items={mainNav}
+            items={filteredMainNav}
             collapsed={sidebarCollapsed}
             currentPath={location.pathname}
           />
-          <Separator className="my-2 bg-sidebar-border" />
-          <NavSection
-            title="Comercial"
-            items={salesNav}
-            collapsed={sidebarCollapsed}
-            currentPath={location.pathname}
-          />
-          <NavSection
-            title="Prospecção"
-            items={prospectingNav}
-            collapsed={sidebarCollapsed}
-            currentPath={location.pathname}
-          />
+          {filteredSalesNav.length > 0 && (
+            <>
+              <Separator className="my-2 bg-sidebar-border" />
+              <NavSection
+                title="Comercial"
+                items={filteredSalesNav}
+                collapsed={sidebarCollapsed}
+                currentPath={location.pathname}
+              />
+            </>
+          )}
+          {filteredProspectingNav.length > 0 && (
+            <NavSection
+              title="Prospecção"
+              items={filteredProspectingNav}
+              collapsed={sidebarCollapsed}
+              currentPath={location.pathname}
+            />
+          )}
           {platformNavItems.length > 0 ? (
             <>
               <Separator className="my-2 bg-sidebar-border" />
