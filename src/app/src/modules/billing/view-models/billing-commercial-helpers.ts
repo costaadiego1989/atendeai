@@ -164,14 +164,14 @@ const NICHE_PROFILES: Record<string, NichePlanProfile> = {
       'Ajuda a estruturar retorno e indicacoes.',
     ],
     professionalBenefits: [
-      'Mais folego para multiplos profissionais e lembretes.',
-      'Ideal para rotina diaria com agenda cheia.',
+      'Mais folego para múltiplos profissionais e lembretes.',
+      'Ideal para rotina diária com agenda cheia.',
       'Ajuda a vender combos, pacotes e recorrência.',
     ],
     scaleBenefits: [
       'Suporta unidades, equipes e campanhas intensas.',
       'Mais margem para relatórios, roteamento e automacoes.',
-      'Indicado para operacao com alta recorrência.',
+      'Indicado para operação com alta recorrência.',
     ],
     primaryMetrics: ['Horarios', 'Clientes recorrentes', 'No-show'],
   },
@@ -181,17 +181,17 @@ const NICHE_PROFILES: Record<string, NichePlanProfile> = {
     essentialBenefits: [
       'Valida carteira pequena com mensagens e historico.',
       'Boa entrada para organizar devedores e casos ativos.',
-      'Permite testar abordagem antes de escalar automacao.',
+      'Permite testar abordagem antes de escalar atomação.',
     ],
     professionalBenefits: [
       'Mais capacidade para ciclos de cobranca e follow-up.',
       'Indicado quando promessas e renegociacoes viram rotina.',
-      'Acomoda maior base de contatos e cadencias.',
+      'Acomoda maior base de contatos e cadências.',
     ],
     scaleBenefits: [
       'Suporta carteira grande e times de recuperacao.',
       'Mais margem para governança, auditoria e dashboards.',
-      'Ideal para operacao critica de receita recuperada.',
+      'Ideal para operação crítica de receita recuperada.',
     ],
     primaryMetrics: ['Casos ativos', 'Promessas', 'Follow-ups'],
   },
@@ -302,8 +302,8 @@ export const OPERATION_MODE_OPTIONS: BillingAdvisorOption<BillingOperationMode>[
   },
   {
     value: 'AUTOMATED',
-    label: 'Automacao como rotina',
-    description: 'IA, checkout, agenda ou cobranca ja fazem parte do processo diario.',
+    label: 'Automação como rotina',
+    description: 'IA, checkout, agenda ou cobrança ja fazem parte do processo diario.',
     planHint: 'PROFISSIONAL',
   },
   {
@@ -373,7 +373,7 @@ export function buildBillingAdvisorQuestions(
     {
       field: 'conversationsBand',
       label: 'Volume de conversas',
-      helper: 'Escolha o ritmo esperado de atendimento, vendas ou cobranca no ciclo.',
+      helper: 'Escolha o ritmo esperado de atendimento, vendas ou cobrança no ciclo.',
       value: answers.conversationsBand,
       options: CONVERSATION_BAND_OPTIONS,
     },
@@ -387,7 +387,7 @@ export function buildBillingAdvisorQuestions(
     {
       field: 'operationMode',
       label: 'Maturidade operacional',
-      helper: 'Defina se o negocio esta validando, automatizando ou governando escala.',
+      helper: 'Defina se o negócio esta validando, automatizando ou governando escala.',
       value: answers.operationMode,
       options: OPERATION_MODE_OPTIONS,
     },
@@ -490,15 +490,15 @@ export function buildBillingRecommendation(
   } else if (answers.conversationsBand === 'MEDIUM') {
     reasons.push('A rotina comercial ja pede folga acima da entrada inicial.');
   } else {
-    reasons.push('O volume ainda cabe em uma validacao controlada.');
+    reasons.push('O volume ainda cabe em uma validação controlada.');
   }
 
   if (answers.contactsBand === 'HIGH') {
-    reasons.push('A base projetada pede capacidade robusta de CRM e historico.');
+    reasons.push('A base projetada pede capacidade robusta de CRM e histórico.');
   } else if (answers.contactsBand === 'MEDIUM') {
-    reasons.push('A carteira ja precisa de mais espaco para relacionamento e retorno.');
+    reasons.push('A carteira já precisa de mais espaco para relacionamento e retorno.');
   } else {
-    reasons.push('A base esta adequada para organizar os primeiros relacionamentos.');
+    reasons.push('A base está adequada para organizar os primeiros relacionamentos.');
   }
 
   if (answers.operationMode === 'GOVERNED') {
@@ -506,7 +506,7 @@ export function buildBillingRecommendation(
   } else if (answers.operationMode === 'AUTOMATED') {
     reasons.push('Automacoes ja entram como rotina, entao o plano precisa absorver IA e processos.');
   } else {
-    reasons.push('Faz sentido iniciar enxuto e ativar modulos conforme a tracao cresce.');
+    reasons.push('Faz sentido iniciar enxuto e ativar modulos conforme a tração cresce.');
   }
 
   const nicheBenefits = recommendedPlan
@@ -521,7 +521,7 @@ export function buildBillingRecommendation(
     recommendedPlan,
     headline: subscriptionCatalog?.niche
       ? `Para ${subscriptionCatalog.niche.displayName}, o plano base indicado e ${recommendedPlan?.displayName ?? 'o plano disponivel'}.`
-      : `O plano base indicado e ${recommendedPlan?.displayName ?? 'o plano disponivel'}.`,
+      : `O plano base indicado e ${recommendedPlan?.displayName ?? 'o plano disponível'}.`,
     summary: nicheProfile.summary,
     reasons,
     primaryAddons,
