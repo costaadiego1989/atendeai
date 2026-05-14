@@ -1,6 +1,5 @@
 import { Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ModuleAgentRuleButton } from '@/modules/agent-rules/components/ModuleAgentRuleButton';
 
 interface TeamHeaderProps {
   onNewMember: () => void;
@@ -19,7 +18,6 @@ export function TeamHeader({ onNewMember }: TeamHeaderProps) {
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <ModuleAgentRuleButton moduleId="team" buttonSize="sm" className="gap-1.5" />
         <Button size="sm" className="gap-1.5 w-fit" onClick={onNewMember}>
           <Plus className="h-4 w-4" /> Novo membro
         </Button>
