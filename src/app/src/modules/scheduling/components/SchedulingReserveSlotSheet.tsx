@@ -30,8 +30,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { SchedulingPageViewModel } from '@/modules/scheduling/view-models/useSchedulingPageViewModel';
 import { formatPhone } from '@/shared/lib/masks';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { CalendarDays, Check, ChevronsUpDown, Clock, Video } from 'lucide-react';
 import { formatCurrency } from './scheduling-view-helpers';
+
+function formatSlotDate(dateStr?: string): string {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function formatTimeRange(startsAt?: string, endsAt?: string): string {
+  if (!startsAt || !endsAt) return '';
+  return `${startsAt} – ${endsAt}`;
+}
 
 type Props = {
   vm: SchedulingPageViewModel;
@@ -133,12 +149,32 @@ export function SchedulingReserveSlotSheet({ vm }: Props) {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-border/60 bg-muted/15 p-4 text-sm md:col-span-2 mt-4">
-            <p className="font-medium text-foreground">
-              {vm.selectedSlot
-                ? `${vm.selectedDate} - ${vm.selectedSlot.startsAt} - ${vm.selectedSlot.endsAt}`
-                : 'Nenhum horário selecionado'}
-            </p>
+          <div className="rounded-2xl border border-border/60 bg-muted/15 p-4 md:col-span-2 mt-4">
+            {vm.selectedSlot ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <CalendarDays className="h-4 w-4 text-primary" />
+                  <span>{formatSlotDate(vm.selectedDate)}</span>
+                  <span className="text-muted-foreground">•</span>
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{formatTimeRange(vm.selectedSlot.startsAt, vm.selectedSlot.endsAt)}</span>
+                </div>
+                {vm.selectedReserveCategory && (
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                      {vm.selectedReserveCategory.name}
+                    </span>
+                    {vm.selectedReserveCategory.basePrice ? (
+                      <span className="text-sm font-bold text-foreground">
+                        {formatCurrency(vm.selectedReserveCategory.basePrice)}
+                      </span>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nenhum horário selecionado</p>
+            )}
           </div>
 
           {reserveStep === 1 ? (
@@ -276,21 +312,29 @@ export function SchedulingReserveSlotSheet({ vm }: Props) {
                 </div>
               ) : (
                 <>
-                  <div className="space-y-2">
-                    <Label htmlFor="reserve-payment-timeout">Expira em (horas)</Label>
-                    <Input
-                      id="reserve-payment-timeout"
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={vm.reserveForm.paymentTimeoutHours}
-                      onChange={(event) =>
-                        vm.setReserveForm((current) => ({
-                          ...current,
-                          paymentTimeoutHours: event.target.value.replace(/\D/g, ''),
-                        }))
-                      }
-                    />
+                  <div className="flex items-center gap-3 md:col-span-2">
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor="reserve-payment-timeout">Expira em (horas)</Label>
+                      <Input
+                        id="reserve-payment-timeout"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={vm.reserveForm.paymentTimeoutHours}
+                        onChange={(event) =>
+                          vm.setReserveForm((current) => ({
+                            ...current,
+                            paymentTimeoutHours: event.target.value.replace(/\D/g, ''),
+                          }))
+                        }
+                      />
+                    </div>
+                    {vm.reserveForm.isOnline && (
+                      <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700">
+                        <Video className="h-3.5 w-3.5" />
+                        Consulta online
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -348,16 +392,31 @@ export function SchedulingReserveSlotSheet({ vm }: Props) {
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                  horário
+                  Horário
                 </p>
                 <p className="mt-2 text-sm font-semibold text-foreground">
                   {vm.selectedSlot
-                    ? `${vm.selectedSlot.startsAt} - ${vm.selectedSlot.endsAt}`
+                    ? `${formatSlotDate(vm.selectedDate)} • ${formatTimeRange(vm.selectedSlot.startsAt, vm.selectedSlot.endsAt)}`
                     : 'Sem horário'}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {vm.selectedReserveCategory?.name || 'Sem categoria vinculada'}
-                </p>
+                <div className="mt-1.5 flex items-center gap-2">
+                  {vm.selectedReserveCategory && (
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                      {vm.selectedReserveCategory.name}
+                    </span>
+                  )}
+                  {vm.selectedReserveCategory?.basePrice ? (
+                    <span className="text-sm font-bold text-foreground">
+                      {formatCurrency(vm.selectedReserveCategory.basePrice)}
+                    </span>
+                  ) : null}
+                  {vm.reserveForm.isOnline && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700">
+                      <Video className="h-3 w-3" />
+                      Online
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="rounded-2xl border border-border/60 bg-background/70 p-4 md:col-span-2">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
@@ -365,16 +424,24 @@ export function SchedulingReserveSlotSheet({ vm }: Props) {
                 </p>
                 <p className="mt-2 text-sm font-semibold text-foreground">
                   {vm.reserveForm.isFree
-                    ? 'Atendimento gratuíto'
+                    ? 'Atendimento gratuito'
                     : 'Pré-agendamento com pagamento'}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {vm.reserveForm.isFree
-                    ? 'O cliente receberá a confirmação automática no WhatsApp.'
-                    : `O pagamento precisa acontecer em até ${vm.reserveForm.paymentTimeoutHours || '3'} horas para confirmar o slot.`}
-                </p>
+                <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
+                  <span>
+                    {vm.reserveForm.isFree
+                      ? 'O cliente receberá a confirmação automática no WhatsApp.'
+                      : `Pagamento expira em ${vm.reserveForm.paymentTimeoutHours || '3'}h`}
+                  </span>
+                  {!vm.reserveForm.isFree && vm.reserveForm.isOnline && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700">
+                      <Video className="h-3 w-3" />
+                      Consulta online
+                    </span>
+                  )}
+                </div>
                 {vm.reserveForm.notes ? (
-                  <p className="mt-3 text-xs text-muted-foreground">{vm.reserveForm.notes}</p>
+                  <p className="mt-3 text-xs text-muted-foreground italic">{vm.reserveForm.notes}</p>
                 ) : null}
               </div>
             </>
