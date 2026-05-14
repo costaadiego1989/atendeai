@@ -62,7 +62,7 @@ export function SchedulingCreateCategorySheet({ vm }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="PER_MINUTE">Por minuto</SelectItem>
-                <SelectItem value="PER_SESSION">Por sessao</SelectItem>
+                <SelectItem value="PER_SESSION">Por sessão</SelectItem>
                 <SelectItem value="PER_CONSULTATION">Por consulta</SelectItem>
               </SelectContent>
             </Select>
