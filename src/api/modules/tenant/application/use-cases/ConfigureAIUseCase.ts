@@ -28,6 +28,9 @@ export class ConfigureAIUseCase implements IConfigureAIUseCase {
       throw new EntityNotFoundException('Tenant', input.tenantId);
     }
 
+    // Reuse existing config ID for idempotent upsert
+    const existingId = tenant.aiConfig?.id ?? undefined;
+
     const config = AIConfig.create({
       systemPrompt: input.systemPrompt,
       tone: input.tone as ToneType,
@@ -36,7 +39,7 @@ export class ConfigureAIUseCase implements IConfigureAIUseCase {
       confidenceThreshold: input.confidenceThreshold ?? 0.7,
       escalationMessage: input.escalationMessage || null,
       businessRules: input.businessRules ?? [],
-    });
+    }, existingId);
 
     tenant.configureAI(config);
     await this.tenantRepo.save(tenant);
