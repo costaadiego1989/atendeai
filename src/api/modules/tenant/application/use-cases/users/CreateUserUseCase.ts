@@ -99,13 +99,22 @@ export class CreateUserUseCase {
 
     await this.userRepo.saveWithTenant(user, input.tenantId);
     await this.userDomainEventPublisher.publishFromAggregate(user, input.tenantId);
-    await this.teamMemberCredentialsEmailSender.send({
-      email: input.email,
-      name: input.name,
-      temporaryPassword,
-      loginUrl: process.env['APP_LOGIN_URL_BASE'] || 'http://localhost:8080/login',
-      tenantName: tenantCompanyName,
-    });
+
+    const loginUrl = process.env['APP_LOGIN_URL_BASE'] || 'http://localhost:8080/login';
+
+    try {
+      await this.teamMemberCredentialsEmailSender.send({
+        email: input.email,
+        name: input.name,
+        temporaryPassword,
+        loginUrl,
+        tenantName: tenantCompanyName,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to send credentials email to ${input.email}: ${(error as Error).message}`,
+      );
+    }
 
     await this.sendWhatsAppCredentials(input, temporaryPassword, tenantCompanyName);
 
