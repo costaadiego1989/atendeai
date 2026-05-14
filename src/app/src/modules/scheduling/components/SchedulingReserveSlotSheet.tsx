@@ -280,67 +280,25 @@ export function SchedulingReserveSlotSheet({ vm }: Props) {
                 Agora escolha se esse horário será gratuito ou se deve virar pré-agendamento com
                 pagamento antes da confirmação final.
               </div>
-              {vm.selectedReserveCategory ? (
-                <div className="rounded-2xl border border-border/60 bg-muted/15 p-3 text-sm text-muted-foreground md:col-span-2">
-                  Categoria vinculada automaticamente:{' '}
-                  <strong className="text-foreground">{vm.selectedReserveCategory.name}</strong>
-                  {vm.selectedReserveCategory.basePrice
-                    ? ` - ${formatCurrency(vm.selectedReserveCategory.basePrice)}`
-                    : ''}
-                </div>
-              ) : null}
-              <label className="flex items-start gap-3 rounded-2xl border border-border/60 bg-muted/10 p-4 md:col-span-2">
-                <Checkbox
-                  checked={vm.reserveForm.isFree}
-                  onCheckedChange={(checked) =>
-                    vm.setReserveForm((current) => ({
-                      ...current,
-                      isFree: Boolean(checked),
-                    }))
-                  }
-                />
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">Atendimento gratuito</p>
-                  <p className="text-xs text-muted-foreground">
-                    Quando ativo, o horário ja fica confirmado e nenhuma cobrança e enviada.
-                  </p>
-                </div>
-              </label>
-              {vm.reserveForm.isFree ? (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-900 md:col-span-2">
-                  O cliente recebera apenas a confirmação amigavel do agendamento no WhatsApp.
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3 md:col-span-2">
-                    <div className="flex-1 space-y-2">
-                      <Label htmlFor="reserve-payment-timeout">Expira em (horas)</Label>
-                      <Input
-                        id="reserve-payment-timeout"
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={vm.reserveForm.paymentTimeoutHours}
-                        onChange={(event) =>
-                          vm.setReserveForm((current) => ({
-                            ...current,
-                            paymentTimeoutHours: event.target.value.replace(/\D/g, ''),
-                          }))
-                        }
-                      />
-                    </div>
-                    {vm.reserveForm.isOnline && (
-                      <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700">
-                        <Video className="h-3.5 w-3.5" />
-                        Consulta online
-                      </div>
-                    )}
+              <div className="grid grid-cols-2 gap-4 md:col-span-2">
+                <label className="flex items-start gap-3 rounded-2xl border border-border/60 bg-muted/10 p-4">
+                  <Checkbox
+                    checked={vm.reserveForm.isFree}
+                    onCheckedChange={(checked) =>
+                      vm.setReserveForm((current) => ({
+                        ...current,
+                        isFree: Boolean(checked),
+                      }))
+                    }
+                  />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">Atendimento gratuito</p>
+                    <p className="text-xs text-muted-foreground">
+                      Horário confirmado sem cobrança.
+                    </p>
                   </div>
-                </>
-              )}
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="reserve-notes">Observações</Label>
-                <label className="mb-4 flex items-start gap-3 rounded-2xl border border-border/60 bg-muted/10 p-4">
+                </label>
+                <label className="flex items-start gap-3 rounded-2xl border border-border/60 bg-muted/10 p-4">
                   <Checkbox
                     checked={vm.reserveForm.isOnline}
                     onCheckedChange={(checked) =>
@@ -353,10 +311,43 @@ export function SchedulingReserveSlotSheet({ vm }: Props) {
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-foreground">Atendimento online</p>
                     <p className="text-xs text-muted-foreground">
-                      Com Google Calendar conectado, o sistema cria e envia o link do Meet.
+                      Cria e envia link do Google Meet.
                     </p>
                   </div>
                 </label>
+              </div>
+              {vm.reserveForm.isFree ? (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-900 md:col-span-2">
+                  O cliente recebera apenas a confirmação amigavel do agendamento no WhatsApp.
+                </div>
+              ) : (
+                <div className="flex items-center gap-4 md:col-span-2">
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="reserve-payment-timeout">Expira em (horas)</Label>
+                    <Input
+                      id="reserve-payment-timeout"
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={vm.reserveForm.paymentTimeoutHours}
+                      onChange={(event) =>
+                        vm.setReserveForm((current) => ({
+                          ...current,
+                          paymentTimeoutHours: event.target.value.replace(/\D/g, ''),
+                        }))
+                      }
+                    />
+                  </div>
+                  {vm.reserveForm.isOnline && (
+                    <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700">
+                      <Video className="h-3.5 w-3.5" />
+                      Consulta online
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="reserve-notes">Observações</Label>
                 <Textarea
                   id="reserve-notes"
                   value={vm.reserveForm.notes}
