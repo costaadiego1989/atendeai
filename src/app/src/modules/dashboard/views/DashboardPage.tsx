@@ -92,11 +92,11 @@ export default function DashboardPage() {
     Activity;
   const reportStats = {
     handoff: {
-      label: 'Handoff',
+      label: 'Aguardando atendente',
       value: vm.operationReports.handoffQueue,
     },
     risk: {
-      label: 'Risco',
+      label: 'Conversas críticas',
       value: vm.operationReports.sentimentSummary.negative,
     },
     recovery: {
@@ -234,43 +234,41 @@ export default function DashboardPage() {
 
   return (
     <div className="page-container animate-fade-in overflow-x-hidden">
-      <div className="page-header space-y-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="space-y-2">
-            <h1 className="page-title">
-              {profile.title}, {vm.user?.name?.split(' ')[0] || 'time'}
-            </h1>
-            <p className="page-description">
-              {profile.description} Visão de {vm.tenant?.name || 'sua operação'} para{' '}
-              {profile.businessLabel}.
-            </p>
-          </div>
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-2">
+          <h1 className="page-title">
+            {profile.title}, {vm.user?.name?.split(' ')[0] || 'time'}
+          </h1>
+          <p className="page-description">
+            Resumo da sua operação nos últimos {vm.range === '7d' ? '7 dias' : '30 dias'}.
+          </p>
+        </div>
 
-          <div className="flex w-full flex-wrap items-center justify-end gap-2 xl:w-auto">
-            <div className="flex items-center gap-2">
-              <div className="rounded-2xl border border-border/60 bg-background/80 p-1">
-                <Button
-                  size="sm"
-                  variant={vm.range === '7d' ? 'default' : 'ghost'}
-                  onClick={() => vm.setRange('7d')}
-                >
-                  7 dias
-                </Button>
-                <Button
-                  size="sm"
-                  variant={vm.range === '30d' ? 'default' : 'ghost'}
-                  onClick={() => vm.setRange('30d')}
-                >
-                  30 dias
-                </Button>
-              </div>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => void vm.snapshotQuery.refetch()}>
-                <RefreshCcw className="h-4 w-4" />
-                Atualizar
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 xl:w-auto">
+          <div className="flex items-center gap-2">
+            <div className="rounded-2xl border border-border/60 bg-background/80 p-1">
+              <Button
+                size="sm"
+                variant={vm.range === '7d' ? 'default' : 'ghost'}
+                onClick={() => vm.setRange('7d')}
+              >
+                7 dias
+              </Button>
+              <Button
+                size="sm"
+                variant={vm.range === '30d' ? 'default' : 'ghost'}
+                onClick={() => vm.setRange('30d')}
+              >
+                30 dias
               </Button>
             </div>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => void vm.snapshotQuery.refetch()}>
+              <RefreshCcw className="h-4 w-4" />
+              Atualizar
+            </Button>
           </div>
         </div>
+      </div>
 
         <Card className="glass-card overflow-hidden border-primary/15">
           <CardContent className="flex flex-col gap-5 p-5 lg:flex-row lg:items-center lg:justify-between">
@@ -311,76 +309,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {profile.moduleCards.length > 0 ? (
-          <Card className="glass-card overflow-hidden">
-            <CardContent className="p-5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    Módulos do nicho
-                  </Badge>
-                  <h2 className="mt-3 text-lg font-semibold text-foreground">
-                    Prioridades para {profile.businessLabel}
-                  </h2>
-                </div>
-                <Badge className="w-fit rounded-full bg-primary/10 px-3 py-1 text-primary hover:bg-primary/10">
-                  {profile.moduleCards.filter((item) => item.enabled).length} ativos
-                </Badge>
-              </div>
-
-              <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {profile.moduleCards.map((module) => {
-                  const ModuleIcon =
-                    dashboardIconMap[module.icon as keyof typeof dashboardIconMap] ??
-                    Activity;
-
-                  return (
-                    <Link
-                      key={module.code}
-                      to={module.route}
-                      className="flex min-h-[150px] flex-col justify-between rounded-2xl border border-border/60 bg-background/50 p-4 transition hover:border-primary/30 hover:bg-primary/[0.03]"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="rounded-2xl bg-primary/10 p-2.5">
-                            <ModuleIcon className="h-4 w-4 text-primary" />
-                          </div>
-                          <Badge
-                            variant={module.enabled ? 'secondary' : 'outline'}
-                            className="rounded-full"
-                          >
-                            {module.enabled ? 'Ativo' : 'Plano'}
-                          </Badge>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">
-                            {module.label}
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                            {module.description}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {module.primary ? (
-                          <Badge variant="outline" className="rounded-full">
-                            Primário
-                          </Badge>
-                        ) : null}
-                        {module.recommended ? (
-                          <Badge variant="outline" className="rounded-full">
-                            Recomendado
-                          </Badge>
-                        ) : null}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
-
         <div className="grid gap-4 xl:grid-cols-[1fr_1.2fr]">
           <Card className="glass-card overflow-hidden">
             <CardContent className="p-5">
@@ -397,7 +325,7 @@ export default function DashboardPage() {
                     para a IA trabalhar com contexto seguro.
                   </p>
                 </div>
-                <p className="text-3xl font-bold text-foreground">
+                <p className="text-2xl font-bold text-foreground">
                   {vm.launchProgress.percent}%
                 </p>
               </div>
@@ -481,9 +409,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
-      <div className="card-grid mb-6">
+      <div className="card-grid">
         {modularKpiWidgets.map((widget) => (
           <DashboardWidgetRenderer
             key={widget.id}
