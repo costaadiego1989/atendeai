@@ -2,7 +2,7 @@ import { ModuleAgentRuleButton } from '@/modules/agent-rules/components/ModuleAg
 
 export function SchedulingHeader() {
   return (
-    <div className="page-header flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="space-y-1">
         <h1 className="page-title">Agenda operacional</h1>
         <p className="page-description max-w-2xl">
