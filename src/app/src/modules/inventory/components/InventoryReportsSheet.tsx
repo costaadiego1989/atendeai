@@ -75,8 +75,8 @@ export function InventoryReportsSheet({ vm }: InventoryReportsSheetProps) {
             }
           >
             {vm.reportFilters.availableOnly
-              ? 'Somente itens disponiveis'
-              : 'Incluir itens indisponiveis'}
+              ? 'Somente itens disponíveis'
+              : 'Incluir itens indisponíveis'}
           </Button>
         </div>
 
@@ -95,7 +95,7 @@ export function InventoryReportsSheet({ vm }: InventoryReportsSheetProps) {
                 `CSV pronto${vm.activeReportJob.fileName ? `: ${vm.activeReportJob.fileName}` : ''}.`}
               {vm.activeReportJob.status === 'FAILED' &&
                 (vm.activeReportJob.errorMessage ??
-                  'não foi possivel gerar o CSV deste Relatório.')}
+                  'não foi possível gerar o CSV deste Relatório.')}
             </p>
           </div>
         )}
