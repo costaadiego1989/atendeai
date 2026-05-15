@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import type { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
-import { FileText, Loader2, Trash2, UploadCloud } from 'lucide-react';
+import { FileText, Loader2, Trash2, UploadCloud, CheckCircle2, AlertCircle, Brain } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { catalogService } from '@/modules/catalog/services/catalog-service';
-import { companySettingsService } from '@/modules/settings/services/company-settings-service';
+import { companySettingsService, TenantPDFResume } from '@/modules/settings/services/company-settings-service';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { getBusinessTypeLabel } from '@/shared/constants/business-types';
 import { formatCnpj, formatCpf, formatPhone } from '@/shared/lib/masks';
@@ -29,7 +31,45 @@ export function TenantIdentityTab({
   isBranchScope?: boolean;
 }) {
   const [isUploading, setIsUploading] = useState(false);
+  const [togglingUrl, setTogglingUrl] = useState<string | null>(null);
   const catalogFiles = watch('catalogFiles') || [];
+  const queryClient = useQueryClient();
+
+  const { data: pdfResumes = [] } = useQuery({
+    queryKey: ['tenant-pdf-resumes', tenantData?.id],
+    queryFn: () => companySettingsService.listPDFResumes(tenantData!.id),
+    enabled: Boolean(tenantData?.id),
+    staleTime: 30_000,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return false;
+      const hasProcessing = data.some(
+        (r) => ['PROCESSING', 'EXTRACTING', 'CHUNKING', 'EMBEDDING'].includes(r.status),
+      );
+      return hasProcessing ? 5_000 : false;
+    },
+  });
+
+  const getPDFResume = (url: string) => pdfResumes.find((r) => r.fileUrl === url);
+
+  const handleToggleCanSendIt = async (url: string, current: boolean) => {
+    if (!tenantData?.id) return;
+    const resume = getPDFResume(url);
+    setTogglingUrl(url);
+    try {
+      await companySettingsService.upsertPDFResume(tenantData.id, {
+        fileName: resume?.fileName ?? url.split('/').pop() ?? 'documento.pdf',
+        fileUrl: url,
+        summaries: resume?.summaries,
+        canSendIt: !current,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['tenant-pdf-resumes', tenantData.id] });
+    } catch (error) {
+      console.error('Falha ao atualizar permissão de envio:', error);
+    } finally {
+      setTogglingUrl(null);
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -68,6 +108,24 @@ export function TenantIdentityTab({
       { shouldDirty: true }
     );
   };
+
+  const getStatusConfig = (resume: TenantPDFResume | undefined) => {
+    if (!resume) return null;
+    const statusMap: Record<string, { label: string; color: string; animate?: boolean }> = {
+      PROCESSING: { label: 'Processando...', color: 'text-amber-600', animate: true },
+      EXTRACTING: { label: 'Extraindo texto...', color: 'text-amber-600', animate: true },
+      CHUNKING: { label: 'Dividindo em blocos...', color: 'text-amber-600', animate: true },
+      EMBEDDING: { label: 'Gerando embeddings...', color: 'text-amber-600', animate: true },
+      READY: { label: 'Indexado', color: 'text-emerald-600' },
+      ERROR: { label: 'Erro no processamento', color: 'text-red-500' },
+    };
+    return statusMap[resume.status] ?? { label: resume.status, color: 'text-muted-foreground' };
+  };
+
+  const totalChunks = pdfResumes
+    .filter((r) => r.status === 'READY')
+    .reduce((sum, r) => sum + (r.chunkCount ?? 0), 0);
+
   return (
     <div className="space-y-5">
       <div className="grid gap-4 lg:grid-cols-2">
@@ -105,7 +163,7 @@ export function TenantIdentityTab({
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="ownerName">responsável da conta</Label>
+          <Label htmlFor="ownerName">Responsável da conta</Label>
           <Input id="ownerName" value={owner?.name ?? ''} disabled />
         </div>
         <div className="space-y-2">
@@ -168,49 +226,99 @@ export function TenantIdentityTab({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {catalogFiles.map((url, index) => (
-            <div
-              key={url}
-              className="group flex flex-col gap-3 rounded-2xl border border-border/60 bg-muted/20 p-4 transition-all hover:border-primary/40 hover:bg-muted/30"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-inner">
-                  <FileText className="h-6 w-6" />
+          {catalogFiles.map((url, index) => {
+            const resume = getPDFResume(url);
+            const canSendIt = resume?.canSendIt ?? false;
+            const isToggling = togglingUrl === url;
+
+            return (
+              <div
+                key={url}
+                className="group flex flex-col gap-3 rounded-2xl border border-border/60 bg-muted/20 p-4 transition-all hover:border-primary/40 hover:bg-muted/30"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-inner">
+                    <FileText className="h-6 w-6" />
+                  </div>
+                  <div className="flex flex-1 flex-col overflow-hidden">
+                    <span className="truncate text-sm font-bold text-foreground">
+                      {resume?.fileName ?? `Catálogo PDF ${index + 1}`}
+                    </span>
+                    {(() => {
+                      const statusConfig = getStatusConfig(resume);
+                      if (!statusConfig) return (
+                        <span className="truncate text-[11px] text-muted-foreground">
+                          Documento de referência para IA
+                        </span>
+                      );
+                      return (
+                        <span className={cn('flex items-center gap-1 text-[11px]', statusConfig.color)}>
+                          {statusConfig.animate && <Loader2 className="h-3 w-3 animate-spin" />}
+                          {resume?.status === 'READY' && <CheckCircle2 className="h-3 w-3" />}
+                          {resume?.status === 'ERROR' && <AlertCircle className="h-3 w-3" />}
+                          {statusConfig.label}
+                          {resume?.status === 'READY' && resume.chunkCount > 0 && (
+                            <span className="ml-1 rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                              {resume.chunkCount} blocos
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                  {!isBranchScope && (
+                    <button
+                      type="button"
+                      onClick={() => removeFile(url)}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      title="Remover catálogo"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-                <div className="flex flex-1 flex-col overflow-hidden">
-                  <span className="truncate text-sm font-bold text-foreground">
-                    Catálogo PDF {index + 1}
-                  </span>
-                  <span className="truncate text-[11px] text-muted-foreground">
-                    Documento de referência para IA
-                  </span>
-                </div>
-                {!isBranchScope && (
-                  <button
-                    type="button"
-                    onClick={() => removeFile(url)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    title="Remover catálogo"
+
+                <div className="flex gap-2">
+                  <Button
+                    asChild
+                    variant="secondary"
+                    size="sm"
+                    className="h-8 flex-1 rounded-lg text-[11px] font-semibold"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      Visualizar PDF
+                    </a>
+                  </Button>
+                </div>
+
+                {!isBranchScope && (
+                  <div className={cn(
+                    'flex items-center justify-between rounded-xl border px-3 py-2 transition-colors',
+                    canSendIt
+                      ? 'border-emerald-500/30 bg-emerald-500/[0.06]'
+                      : 'border-border/50 bg-background/40',
+                  )}>
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-semibold text-foreground">
+                        IA pode enviar link ao cliente
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {canSendIt
+                          ? 'Link enviado quando solicitado'
+                          : 'Somente contexto interno'}
+                      </span>
+                    </div>
+                    <Switch
+                      checked={canSendIt}
+                      disabled={isToggling}
+                      onCheckedChange={() => handleToggleCanSendIt(url, canSendIt)}
+                      aria-label="Permitir IA enviar link do PDF ao cliente"
+                    />
+                  </div>
                 )}
               </div>
-
-              <div className="flex gap-2">
-                <Button
-                  asChild
-                  variant="secondary"
-                  size="sm"
-                  className="h-8 flex-1 rounded-lg text-[11px] font-semibold"
-                >
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    Visualizar PDF
-                  </a>
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           {!isBranchScope && (
             <div className="relative">
@@ -247,6 +355,22 @@ export function TenantIdentityTab({
             </div>
           )}
         </div>
+
+        {totalChunks > 0 && (
+          <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] px-4 py-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+              <Brain className="h-4 w-4 text-emerald-600" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[12px] font-semibold text-emerald-700">
+                Base inteligente ativa
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                {totalChunks} blocos indexados para respostas contextuais
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="rounded-xl bg-primary/5 p-3 flex gap-3 border border-primary/10">
           <div className="h-5 w-5 rounded bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">

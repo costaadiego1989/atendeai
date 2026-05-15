@@ -172,8 +172,10 @@ export interface TenantPDFResume {
   fileUrl: string | null;
   checksum: string | null;
   summaries: string[];
-  status: 'PROCESSING' | 'READY' | 'FAILED' | string;
+  status: 'PROCESSING' | 'EXTRACTING' | 'CHUNKING' | 'EMBEDDING' | 'READY' | 'ERROR' | string;
   error: string | null;
+  canSendIt: boolean;
+  chunkCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -327,11 +329,14 @@ function extractProfileSectionRows(raw: unknown): TenantProfileSectionRow[] {
     description: 'Descrição',
     services: 'Serviços',
     catalog: 'Catálogo',
+    catalogUrl: 'URL do catálogo',
+    catalogFiles: 'Arquivos do catálogo',
     address: 'Endereço',
     operatingHours: 'Horário de funcionamento',
     promotions: 'Promoções',
     cnpj: 'CNPJ',
     plan: 'Plano',
+    planStatus: 'Status do plano',
     channels: 'Canais conectados',
     aiConfig: 'Configuração IA',
   };
@@ -450,6 +455,7 @@ export const companySettingsService = {
       checksum?: string | null;
       extractedText?: string | null;
       summaries?: string[];
+      canSendIt?: boolean;
     },
   ): Promise<TenantPDFResume> {
     return apiClient.post<TenantPDFResume>(`/tenants/${tenantId}/pdf-resumes`, input);
