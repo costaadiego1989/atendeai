@@ -55,9 +55,7 @@ export default function RecoveryPage() {
         <div className="min-w-0 flex-1">
           <h1 className="page-title">Recuperação de clientes</h1>
           <p className="page-description">
-            Organize cobranças em atraso, envie mensagens com contexto e use{' '}
-            <strong>playbooks</strong> (roteiros por fases) para sequências de contacto automáticas quando a API estiver
-            configurada.
+            Gerencie cobranças em atraso e acompanhe a recuperação de valores.
           </p>
         </div>
 
@@ -72,7 +70,7 @@ export default function RecoveryPage() {
 
       <AsyncOperationsPanel
         title="Processamentos em andamento"
-        description="As exportações grandes de cobrança continuam em segundo plano sem travar a operação."
+        description="Processando em segundo plano — você pode continuar usando normalmente."
         items={vm.recoveryActiveJobItems}
       />
 
@@ -84,9 +82,6 @@ export default function RecoveryPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">Relatório da Cobrança</p>
-              <p className="text-xs text-muted-foreground">
-                Carteira, indicadores e CSV usam o mesmo periodo.
-              </p>
             </div>
           </div>
 
@@ -118,7 +113,7 @@ export default function RecoveryPage() {
         </CardContent>
       </Card>
 
-      <div className="card-grid mb-6">
+      <div className="card-grid">
         <RecoveryMetricCard
           icon={HandCoins}
           title="Carteira aberta"
@@ -139,7 +134,7 @@ export default function RecoveryPage() {
         />
         <RecoveryMetricCard
           icon={Bot}
-          title="Sugestoes prontas"
+          title="Sugestões prontas"
           value={String(vm.summary.guidanceCount)}
           subtitle="Casos com resposta sugerida para o atendente."
         />
