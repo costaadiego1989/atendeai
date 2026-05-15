@@ -385,7 +385,7 @@ export function CatalogItemSheet({
                     placeholder="0"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Usado para criar o item de estoque quando nao houver variacoes.
+                    Usado para criar o item de estoque quando não houver variações.
                   </p>
                 </div>
               ) : null}
@@ -439,7 +439,7 @@ export function CatalogItemSheet({
             {form.customFields.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border p-5 text-sm text-muted-foreground">
                 Nenhum campo customizado. Adicione dados como material, prazo, garantia,
-                genero, composicao ou qualquer regra do seu nicho.
+                gênero, composição ou qualquer regra do seu nicho.
               </div>
             ) : null}
 
