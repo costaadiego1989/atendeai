@@ -53,7 +53,7 @@ export function TenantMetricsGrid({
   mondayClosed: boolean;
 }) {
   return (
-    <div className="card-grid mb-6">
+    <div className="card-grid">
       <CompanyMetric
         title="Empresa"
         value={tenantData?.name ?? 'Empresa'}
