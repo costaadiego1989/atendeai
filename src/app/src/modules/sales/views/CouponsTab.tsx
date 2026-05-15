@@ -28,7 +28,7 @@ export function CouponsTab() {
         </Button>
       </div>
 
-      <div className="card-grid mb-8">
+      <div className="card-grid mb-6">
         <SalesMetricCard
           icon={TicketCheck}
           title="Ativos"
