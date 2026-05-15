@@ -141,8 +141,8 @@ export default function RecoveryPage() {
       </div>
 
       <div className="space-y-4">
-        <div className="glass-card space-y-4 p-4">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="glass-card p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-1 items-center gap-3">
               {vm.filteredCases && (
                 <Badge variant="secondary" className="hidden lg:inline-flex items-center whitespace-nowrap h-9 px-3.5 rounded-md border-border/60 bg-muted/30">
@@ -150,7 +150,7 @@ export default function RecoveryPage() {
                   <span className="font-normal text-muted-foreground">{vm.filteredCases.length === 1 ? 'caso' : 'casos'}</span>
                 </Badge>
               )}
-              <div className="relative flex-1 xl:max-w-md">
+              <div className="relative flex-1 lg:max-w-md">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={vm.search}
