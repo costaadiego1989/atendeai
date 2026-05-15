@@ -126,7 +126,7 @@ export function useProspectingCampaignsViewModel() {
       toast({
         title: 'Falha ao criar campanha',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar a campanha agora.',
+          fallbackMessage: 'não foi possível criar a campanha agora.',
         }),
         variant: 'destructive',
       });
@@ -167,7 +167,7 @@ export function useProspectingCampaignsViewModel() {
       toast({
         title: 'Falha ao gerar mensagem',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel gerar a mensagem agora.',
+          fallbackMessage: 'não foi possível gerar a mensagem agora.',
         }),
         variant: 'destructive',
       });
@@ -188,7 +188,7 @@ export function useProspectingCampaignsViewModel() {
       toast({
         title: 'Falha ao ativar campanha',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel ativar a campanha agora.',
+          fallbackMessage: 'não foi possível ativar a campanha agora.',
         }),
         variant: 'destructive',
       });
@@ -209,7 +209,7 @@ export function useProspectingCampaignsViewModel() {
       toast({
         title: 'Falha ao pausar campanha',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel pausar a campanha agora.',
+          fallbackMessage: 'não foi possível pausar a campanha agora.',
         }),
         variant: 'destructive',
       });
@@ -229,7 +229,7 @@ export function useProspectingCampaignsViewModel() {
       toast({
         title: 'Falha ao iniciar campanha',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel iniciar os disparos agora.',
+          fallbackMessage: 'não foi possível iniciar os disparos agora.',
         }),
         variant: 'destructive',
       });
@@ -369,7 +369,7 @@ export function useProspectingCampaignsViewModel() {
       toast({
         title: 'Falha ao exportar campanhas',
         description:
-          activeReportJob.errorMessage ?? 'não foi possivel gerar o CSV deste Relatório.',
+          activeReportJob.errorMessage ?? 'não foi possível gerar o CSV deste Relatório.',
         variant: 'destructive',
       });
     }
@@ -399,7 +399,7 @@ export function useProspectingCampaignsViewModel() {
       toast({
         title: 'Falha ao iniciar exportação',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enfileirar o relatorio agora.',
+          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
         }),
         variant: 'destructive',
       });
