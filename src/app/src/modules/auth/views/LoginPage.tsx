@@ -80,7 +80,7 @@ export default function LoginPage() {
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="voce@empresa.com"
+            placeholder="você@empresa.com"
             {...register('email')}
           />
           {errors.email && (
