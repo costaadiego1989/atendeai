@@ -68,6 +68,7 @@ model User {
   passwordHash String   @map("password_hash") @db.VarChar(255)
   mustChangePassword Boolean @default(false) @map("must_change_password")
   role         String   @default("AGENT") @db.VarChar(20)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
   tenant       Tenant   @relation(fields: [tenantId], references: [id])
   salesProfile TenantUserSalesProfile?
@@ -162,19 +163,43 @@ model TenantAgentRuleHistory {
 }
 
 model TenantPDFResume {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  fileName  String   @map("file_name") @db.VarChar(255)
-  fileUrl   String?  @map("file_url") @db.Text
-  checksum  String?  @db.VarChar(128)
-  summaries Json     @default("[]")
-  status    String   @default("PROCESSING") @db.VarChar(20)
-  error     String?  @db.Text
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  fileName   String   @map("file_name") @db.VarChar(255)
+  fileUrl    String?  @map("file_url") @db.Text
+  checksum   String?  @db.VarChar(128)
+  summaries  Json     @default("[]")
+  status     String   @default("PROCESSING") @db.VarChar(20)
+  error      String?  @db.Text
+  canSendIt  Boolean  @default(false) @map("can_send_it")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  chunks TenantDocumentChunk[]
 
   @@index([tenantId, status], name: "idx_tenant_pdf_resumes_tenant_status")
   @@map("tenant_pdf_resumes")
+  @@schema("tenant_schema")
+}
+
+/// Stores chunked text with vector embeddings for RAG similarity search.
+/// The `embedding` column (vector(1536)) is managed via raw SQL — Prisma does not natively support pgvector types.
+model TenantDocumentChunk {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  documentId String   @map("document_id") @db.Uuid
+  chunkIndex Int      @map("chunk_index")
+  content    String   @db.Text
+  tokenCount Int      @default(0) @map("token_count")
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  document TenantPDFResume @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, chunkIndex], name: "uq_chunk_per_doc")
+  @@index([tenantId], name: "idx_chunks_tenant")
+  @@index([documentId], name: "idx_chunks_document")
+  @@map("tenant_document_chunks")
   @@schema("tenant_schema")
 }
 
