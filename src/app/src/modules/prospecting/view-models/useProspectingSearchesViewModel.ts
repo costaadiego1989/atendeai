@@ -471,7 +471,7 @@ export function useProspectingSearchesViewModel() {
       toast({
         title: 'Falha ao exportar prospeccao',
         description:
-          activeReportJob.errorMessage ?? 'não foi possivel gerar o CSV deste Relatório.',
+          activeReportJob.errorMessage ?? 'não foi possível gerar o CSV deste Relatório.',
         variant: 'destructive',
       });
     }
@@ -500,7 +500,7 @@ export function useProspectingSearchesViewModel() {
       toast({
         title: 'Falha ao iniciar exportação',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enfileirar o relatorio agora.',
+          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
         }),
         variant: 'destructive',
       });
