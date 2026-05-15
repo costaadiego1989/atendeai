@@ -1009,7 +1009,7 @@ describe('SchedulingController (e2e)', () => {
       .post(`/api/v1/tenants/${tenantId}/scheduling/categories`)
       .set('Cookie', [authCookie])
       .send({
-        name: 'Sessao relatorio',
+        name: 'sessão relatorio',
         unit: 'PER_SESSION',
         basePrice: 140,
       })
@@ -1047,7 +1047,7 @@ describe('SchedulingController (e2e)', () => {
           {
             startsAt: '15:00',
             endsAt: '15:30',
-            label: 'Sessao de teste',
+            label: 'sessão de teste',
             customPrice: 160,
           },
         ],
