@@ -89,8 +89,8 @@ export function SchedulingCreateCategorySheet({ vm }: Props) {
             />
             <p className="text-xs text-muted-foreground">
               {vm.createCategoryForm.unit === 'PER_MINUTE'
-                ? 'Obrigatorio para categorias cobradas por minuto.'
-                : 'Opcional para sessao ou consulta.'}
+                ? 'Obrigatório para categorias cobradas por minuto.'
+                : 'Opcional para sessão ou consulta.'}
             </p>
           </div>
           <div className="space-y-2">
