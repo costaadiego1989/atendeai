@@ -1,4 +1,4 @@
-import { Plus, Users } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface TeamHeaderProps {
@@ -7,12 +7,9 @@ interface TeamHeaderProps {
 
 export function TeamHeader({ onNewMember }: TeamHeaderProps) {
   return (
-    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
-        <h1 className="page-title flex items-center gap-2">
-          <Users className="h-6 w-6 text-primary" />
-          Equipe
-        </h1>
+        <h1 className="page-title">Equipe</h1>
         <p className="page-description mt-1">
           Convide administradores e agentes. A senha provisória é enviada por e-mail e a troca ocorre no primeiro login.
         </p>
