@@ -125,7 +125,7 @@ export function useSocialPageViewModel() {
         variant: 'destructive',
         title: 'Falha ao criar regra',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar a regra agora.',
+          fallbackMessage: 'não foi possível salvar a regra agora.',
         }),
       });
     },
