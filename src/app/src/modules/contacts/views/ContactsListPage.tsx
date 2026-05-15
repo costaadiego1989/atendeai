@@ -75,8 +75,8 @@ export default function ContactsListPage() {
         inactive={vm.stats.inactive}
       />
 
-      <div className="space-y-4 mt-8">
-        <div className="glass-card space-y-4 p-4">
+      <div className="space-y-4">
+        <div className="glass-card p-4">
           <ContactsFilters
             search={vm.search}
             onSearchChange={vm.updateSearch}
