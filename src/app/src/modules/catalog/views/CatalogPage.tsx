@@ -46,7 +46,7 @@ export default function CatalogPage() {
 
       <AsyncOperationsPanel
         title="Processamentos em andamento"
-        description="As exportações grandes do catalogo continuam em segundo plano sem travar a operação."
+        description="Processando em segundo plano — você pode continuar usando normalmente."
         items={vm.activeJobItems}
       />
 
