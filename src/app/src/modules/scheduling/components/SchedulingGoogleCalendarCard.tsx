@@ -24,11 +24,11 @@ export function SchedulingGoogleCalendarCard() {
             Google Calendar
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {connected ? 'Calendario conectado' : 'Conecte sua agenda ao Google Calendar'}
+            {connected ? 'Calendário conectado' : 'Conecte sua agenda ao Google Calendar'}
           </h3>
           <p className="text-sm text-muted-foreground">
             {connected
-              ? 'Novas reservas, cancelamentos e confirmacoes de pagamento podem refletir no calendario principal.'
+              ? 'Novas reservas, cancelamentos e confirmações de pagamento podem refletir no calendário principal.'
               : 'Autorize uma conta Google para sincronizar reservas e horários confirmados automaticamente.'}
           </p>
           {branchScoped ? (
@@ -51,19 +51,19 @@ export function SchedulingGoogleCalendarCard() {
                 </p>
               ) : null}
               <p className="mt-1 text-xs text-muted-foreground">
-                Calendario: {vm.connection?.calendarId || 'primary'}
+                Calendário: {vm.connection?.calendarId || 'primary'}
               </p>
               {vm.calendars.length ? (
                 <div className="space-y-2">
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    Calendario de sincronização
+                    Calendário de sincronização
                   </p>
                   <Select
                     value={vm.connection?.calendarId || 'primary'}
                     onValueChange={(value) => vm.selectCalendar(value)}
                   >
                     <SelectTrigger className="w-full bg-background">
-                      <SelectValue placeholder="Selecione o calendario" />
+                      <SelectValue placeholder="Selecione o calendário" />
                     </SelectTrigger>
                     <SelectContent>
                       {vm.calendars.map((calendar) => (
