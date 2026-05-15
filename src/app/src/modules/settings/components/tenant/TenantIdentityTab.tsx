@@ -90,7 +90,7 @@ export function TenantIdentityTab({
         fileName: file.name,
         fileUrl,
         summaries: [
-          `Documento "${file.name}" enviado para a base de conhecimento da empresa. Use este PDF como contexto informativo em atendimentos automaticos assim que a extracao completa estiver disponivel.`,
+          `Documento "${file.name}" enviado para a base de conhecimento da empresa. Use este PDF como contexto informativo em atendimentos automáticos assim que a extração estiver disponível.`,
         ],
       });
     } catch (error) {
@@ -142,7 +142,7 @@ export function TenantIdentityTab({
             readOnly
           />
           <p className="text-xs text-muted-foreground">
-            CNPJ e identidade fiscal ficam travados apos o cadastro inicial.
+            CNPJ e identidade fiscal ficam travados após o cadastro inicial.
           </p>
         </div>
       </div>
@@ -156,8 +156,7 @@ export function TenantIdentityTab({
           readOnly
         />
         <p className="text-xs text-muted-foreground">
-          Definido no cadastro inicial. Este dado direciona regras internas,
-          prompts e jornadas do produto.
+          Definido no cadastro inicial. Define como a IA se comporta no seu atendimento.
         </p>
       </div>
 
@@ -377,7 +376,7 @@ export function TenantIdentityTab({
             <span className="text-[10px] font-bold text-primary">i</span>
           </div>
           <p className="text-[11px] leading-relaxed text-muted-foreground">
-            Os arquivos PDF são fundamentais para o cérebro da sua IA.
+            Esses documentos são usados pela IA para responder perguntas sobre sua empresa.
             <strong> {tenantData?.name}</strong> utiliza esses documentos para extrair preços,
             detalhes técnicos e condições comerciais durante os atendimentos automáticos.
           </p>
