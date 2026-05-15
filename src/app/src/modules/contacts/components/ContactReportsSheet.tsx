@@ -161,7 +161,7 @@ export function ContactReportsSheet({
               {activeJob.status === 'COMPLETED' &&
                 `CSV pronto${activeJob.fileName ? `: ${activeJob.fileName}` : ''}.`}
               {activeJob.status === 'FAILED' &&
-                (activeJob.errorMessage ?? 'não foi possivel gerar o CSV deste Relatório.')}
+                (activeJob.errorMessage ?? 'não foi possível gerar o CSV deste Relatório.')}
             </p>
           </div>
         )}
