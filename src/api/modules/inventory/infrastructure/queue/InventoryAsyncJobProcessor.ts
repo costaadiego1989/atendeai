@@ -5,8 +5,9 @@ import { FILE_STORAGE_SERVICE, FileStorageService } from '@shared/domain/service
 import { InventoryAsyncJobsService } from '../../application/services/InventoryAsyncJobsService';
 import { InventoryReportCsvBuilder } from '../../application/services/InventoryReportCsvBuilder';
 import { GenerateInventoryReportUseCase } from '../../application/use-cases/GenerateInventoryReportUseCase';
+import { SyncInventoryConnectionUseCase } from '../../application/use-cases/SyncInventoryConnectionUseCase';
 
-type InventoryAsyncJobPayload = {
+type ExportReportPayload = {
   asyncJobId: string;
   type: 'EXPORT_INVENTORY_REPORT_CSV';
   tenantId: string;
@@ -14,6 +15,15 @@ type InventoryAsyncJobPayload = {
   availableOnly?: boolean;
   statuses?: Array<'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'RESERVED'>;
 };
+
+type SyncConnectionPayload = {
+  asyncJobId: string;
+  type: 'SYNC_INVENTORY_CONNECTION';
+  tenantId: string;
+  connectionId: string;
+};
+
+type InventoryAsyncJobPayload = ExportReportPayload | SyncConnectionPayload;
 
 @Processor('inventory-async-jobs')
 export class InventoryAsyncJobProcessor extends WorkerHost {
@@ -25,25 +35,32 @@ export class InventoryAsyncJobProcessor extends WorkerHost {
     private readonly inventoryReportCsvBuilder: InventoryReportCsvBuilder,
     @Inject(FILE_STORAGE_SERVICE)
     private readonly fileStorageService: FileStorageService,
+    private readonly syncInventoryConnectionUseCase: SyncInventoryConnectionUseCase,
   ) {
     super();
   }
 
   async process(job: Job<InventoryAsyncJobPayload>): Promise<void> {
+    if (job.name === 'sync-inventory-connection') {
+      return this.processSyncConnection(job as Job<SyncConnectionPayload>);
+    }
+
     if (job.name !== 'export-inventory-report-csv') {
       return;
     }
 
-    await this.inventoryAsyncJobsService.markProcessing(job.data.asyncJobId, {
+    const exportData = job.data as ExportReportPayload;
+
+    await this.inventoryAsyncJobsService.markProcessing(exportData.asyncJobId, {
       progress: 30,
     });
 
     try {
       const report = await this.generateInventoryReportUseCase.execute({
-        tenantId: job.data.tenantId,
-        query: job.data.query,
-        availableOnly: job.data.availableOnly,
-        statuses: job.data.statuses,
+        tenantId: exportData.tenantId,
+        query: exportData.query,
+        availableOnly: exportData.availableOnly,
+        statuses: exportData.statuses,
       });
 
       const csv = this.inventoryReportCsvBuilder.build(report);
@@ -55,7 +72,7 @@ export class InventoryAsyncJobProcessor extends WorkerHost {
           Buffer.from(csv.content, 'utf-8'),
           csv.fileName,
           csv.mimeType,
-          { folder: `tenant-${job.data.tenantId}/inventory-reports` },
+          { folder: `tenant-${exportData.tenantId}/inventory-reports` },
         );
 
         if (uploadedUrl) {
@@ -63,13 +80,13 @@ export class InventoryAsyncJobProcessor extends WorkerHost {
         }
       } catch (error) {
         this.logger.warn(
-          `Falling back to database file storage for inventory export ${job.data.asyncJobId}: ${
+          `Falling back to database file storage for inventory export ${exportData.asyncJobId}: ${
             error instanceof Error ? error.message : 'unknown error'
           }`,
         );
       }
 
-      await this.inventoryAsyncJobsService.completeJob(job.data.asyncJobId, {
+      await this.inventoryAsyncJobsService.completeJob(exportData.asyncJobId, {
         processedItems: report.items.length,
         totalItems: report.items.length,
         resultSummary: {
@@ -89,7 +106,31 @@ export class InventoryAsyncJobProcessor extends WorkerHost {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Falha ao exportar relatorio de estoque.';
-      await this.inventoryAsyncJobsService.failJob(job.data.asyncJobId, message);
+      await this.inventoryAsyncJobsService.failJob(exportData.asyncJobId, message);
+      throw error;
+    }
+  }
+
+  private async processSyncConnection(job: Job<SyncConnectionPayload>): Promise<void> {
+    const { asyncJobId, tenantId, connectionId } = job.data;
+
+    await this.inventoryAsyncJobsService.markProcessing(asyncJobId, { progress: 20 });
+
+    try {
+      await this.syncInventoryConnectionUseCase.execute({ tenantId, connectionId });
+
+      await this.inventoryAsyncJobsService.completeJob(asyncJobId, {
+        processedItems: 0,
+        totalItems: 0,
+        resultSummary: { connectionId, tenantId },
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Falha ao sincronizar conexão de inventário.';
+      this.logger.error(
+        `Sync connection job ${asyncJobId} failed for connection ${connectionId}: ${message}`,
+      );
+      await this.inventoryAsyncJobsService.failJob(asyncJobId, message);
       throw error;
     }
   }
