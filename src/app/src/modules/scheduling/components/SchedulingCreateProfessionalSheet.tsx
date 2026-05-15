@@ -54,8 +54,8 @@ export function SchedulingCreateProfessionalSheet({ vm }: Props) {
               placeholder="Ex: (21) 99999-9999"
             />
             <p className="text-xs text-muted-foreground">
-              O número do usuario logado entra como base, mas voce pode trocar para o celular
-              que deve receber as confirmacoes da agenda.
+              O número do usuário logado entra como base, mas você pode trocar para o celular
+              que deve receber as confirmações da agenda.
             </p>
           </div>
         </div>
