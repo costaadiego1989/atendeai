@@ -60,7 +60,7 @@ export function InventoryItemsTab({
     <div className="space-y-4">
       <div className="glass-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1 lg:max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -69,24 +69,27 @@ export function InventoryItemsTab({
               className="pl-9"
             />
           </div>
-          <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-            <SelectTrigger className="w-full lg:w-[190px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Todos os status</SelectItem>
-              <SelectItem value="AVAILABLE">Disponivel</SelectItem>
-              <SelectItem value="LOW_STOCK">Estoque baixo</SelectItem>
-              <SelectItem value="UNAVAILABLE">Indisponivel</SelectItem>
-              <SelectItem value="RESERVED">Reservado</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant={showAvailableOnly ? 'default' : 'outline'}
-            onClick={onToggleAvailableOnly}
-          >
-            {showAvailableOnly ? 'Somente disponíveis' : 'Filtrar disponíveis'}
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+              <SelectTrigger className="w-full sm:w-[190px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos os status</SelectItem>
+                <SelectItem value="AVAILABLE">Disponível</SelectItem>
+                <SelectItem value="LOW_STOCK">Estoque baixo</SelectItem>
+                <SelectItem value="UNAVAILABLE">Indisponível</SelectItem>
+                <SelectItem value="RESERVED">Reservado</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant={showAvailableOnly ? 'default' : 'outline'}
+              onClick={onToggleAvailableOnly}
+            >
+              {showAvailableOnly ? 'Somente disponíveis' : 'Filtrar disponíveis'}
+            </Button>
+          </div>
         </div>
       </div>
 
