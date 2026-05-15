@@ -283,7 +283,7 @@ export function usePaymentLinksPageViewModel() {
       toast({
         title: 'Falha ao baixar relatório',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel baixar o CSV agora.',
+          fallbackMessage: 'não foi possível baixar o CSV agora.',
         }),
         variant: 'destructive',
       });
