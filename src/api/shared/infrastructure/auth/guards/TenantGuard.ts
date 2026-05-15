@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { UnauthorizedException } from '../../../domain/exceptions/DomainExceptions';
+import { ForbiddenException, UnauthorizedException } from '../../../domain/exceptions/DomainExceptions';
 import { AuthenticatedUser } from './JwtCookieGuard';
 import { TENANT_PARAM_KEY } from '../decorators/tenant-param.decorator';
 
@@ -28,7 +28,7 @@ export class TenantGuard implements CanActivate {
     }
 
     if (user.tenantId !== tenantId) {
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         'Access denied: tenant mismatch',
         'TENANT_MISMATCH',
       );
