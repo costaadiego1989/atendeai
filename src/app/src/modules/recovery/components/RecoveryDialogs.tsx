@@ -157,10 +157,6 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {createStep === 1 ? (
               <>
-                <div className="rounded-xl border border-border/60 bg-muted/15 p-4 text-sm text-muted-foreground md:col-span-2">
-                  Comece escolhendo quem esta em atraso. Se houver contato no CRM, nome, telefone e documento sao reaproveitados automaticamente.
-                </div>
-
                 <div className="space-y-4 md:col-span-2">
                   <div className="rounded-2xl border border-border/60 bg-muted/25 p-4">
                     <div className="flex items-center gap-2">
@@ -449,9 +445,9 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
       <Sheet open={vm.outreachOpen} onOpenChange={vm.setOutreachOpen}>
         <SheetContent side="right" className="w-[640px] sm:max-w-[640px] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Contacto ao cliente</SheetTitle>
+            <SheetTitle>Contato ao cliente</SheetTitle>
             <SheetDescription>
-              Escolha entre mensagem livre (manual ou IA) ou seguir o <strong>roteiro</strong> do playbook ligado ao caso —
+              Escolha entre mensagem livre (manual ou IA) ou seguir o <strong>roteiro de cobrança</strong> ligado ao caso —
               com regras de prazo e texto gerado conforme cada fase.
             </SheetDescription>
           </SheetHeader>
@@ -481,16 +477,15 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="free">Mensagem livre (manual ou IA)</SelectItem>
-                  <SelectItem value="playbook">Seguir playbook / roteiro</SelectItem>
+                  <SelectItem value="playbook">Seguir roteiro de cobrança</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {vm.outreachForm.outreachMode === 'playbook' && !vm.selectedCase?.playbookId ? (
               <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                Este caso não está ligado a um playbook. Active um playbook na página de recuperação e crie novos casos com{' '}
-                <code className="rounded bg-background px-1">RECOVERY_PLAYBOOKS_ENABLED=true</code> na API, ou associe um roteiro
-                quando existir essa opção.
+                Este caso não está ligado a um roteiro. Ative um roteiro na página de recuperação e crie novos casos com a
+                configuração habilitada, ou associe um roteiro quando existir essa opção.
               </div>
             ) : null}
 
@@ -722,7 +717,7 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
           <SheetHeader>
             <SheetTitle>Atualizar status do caso</SheetTitle>
             <SheetDescription>
-              Ajuste o momento operacional da cobrança e, se necessario, agende o proximo follow-up.
+              Ajuste o momento operacional da cobrança e, se necessário, agende o próximo contato.
             </SheetDescription>
           </SheetHeader>
           <div className="space-y-4 mt-6">
