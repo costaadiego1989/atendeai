@@ -127,7 +127,7 @@ export function RecoveryReportsSheet({ vm }: Props) {
                 `CSV pronto${vm.recoveryActiveReportJob.fileName ? `: ${vm.recoveryActiveReportJob.fileName}` : ''}.`}
               {vm.recoveryActiveReportJob.status === 'FAILED' &&
                 (vm.recoveryActiveReportJob.errorMessage ??
-                  'não foi possivel gerar o CSV deste Relatório.')}
+                  'não foi possível gerar o CSV deste Relatório.')}
             </p>
           </div>
         ) : null}
