@@ -126,7 +126,7 @@ function formatLeadImportStatus(value: ProspectLeadImportStatus) {
     case 'REUSED':
       return 'Reaproveitado';
     case 'SKIPPED_NO_PHONE':
-      return 'Sem canal valido';
+      return 'Sem canal válido';
     default:
       return 'Novo';
   }
@@ -166,7 +166,7 @@ function ProspectingPlacesContent({
 
   return (
     <div className="space-y-8">
-      <div className="card-grid">
+      <div className="card-grid mb-6">
         <MetricCard
           title="Buscas registradas"
           value={vm.metrics.totalSearches}
@@ -188,7 +188,7 @@ function ProspectingPlacesContent({
         <MetricCard
           title="Empresas encontradas"
           value={vm.metrics.totalDiscovered}
-          description="Volume bruto captado ate agora."
+          description="Volume bruto captado até agora."
           icon={Radar}
         />
       </div>
@@ -706,7 +706,7 @@ function ProspectingPlacesContent({
           <SheetHeader>
             <SheetTitle>Preparar abordagem a partir da busca</SheetTitle>
             <SheetDescription>
-              Revise os contatos encontrados, ajuste a mensagem e envie a primeira conversa pelos canais ja configurados.
+              Revise os contatos encontrados, ajuste a mensagem e envie a primeira conversa pelos canais já configurados.
             </SheetDescription>
           </SheetHeader>
 
@@ -897,7 +897,7 @@ function ProspectingAdsInsightsContent({
     <>
       <GoogleAdsConnectionCard vm={connectionVm} />
 
-      <div className="card-grid">
+      <div className="card-grid mb-6">
         <MetricCard
           title="Consultas de demanda"
           value={vm.queries.length}
@@ -1231,7 +1231,7 @@ function ProspectingAdsLeadsContent({
     <>
       <GoogleAdsConnectionCard vm={connectionVm} />
 
-      <div className="card-grid">
+      <div className="card-grid mb-6">
         <MetricCard
           title="Leads captados"
           value={vm.metrics.total}
@@ -1241,7 +1241,7 @@ function ProspectingAdsLeadsContent({
         <MetricCard
           title="Importados"
           value={vm.metrics.imported}
-          description="Leads ja reconciliados com o CRM."
+          description="Leads já reconciliados com o CRM."
           icon={Database}
         />
         <MetricCard
@@ -1264,7 +1264,7 @@ function ProspectingAdsLeadsContent({
             <div>
               <CardTitle className="text-base">Leads captados</CardTitle>
               <p className="mt-2 text-sm text-muted-foreground">
-                Trabalhe apenas leads consentidos, com filtro por campanha, periodo e canal disponivel.
+                Trabalhe apenas leads consentidos, com filtro por campanha, período e canal disponível.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1321,7 +1321,7 @@ function ProspectingAdsLeadsContent({
                   <SelectItem value="NEW">Novos</SelectItem>
                   <SelectItem value="IMPORTED">Importados</SelectItem>
                   <SelectItem value="REUSED">Reaproveitados</SelectItem>
-                  <SelectItem value="SKIPPED_NO_PHONE">Sem canal valido</SelectItem>
+                  <SelectItem value="SKIPPED_NO_PHONE">Sem canal válido</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1352,7 +1352,7 @@ function ProspectingAdsLeadsContent({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ads-leads-date-to">Ate</Label>
+              <Label htmlFor="ads-leads-date-to">Até</Label>
               <Input
                 id="ads-leads-date-to"
                 type="date"
@@ -1475,7 +1475,7 @@ function ProspectingAdsLeadsContent({
           <SheetHeader>
             <SheetTitle>Criar campanha com leads captados</SheetTitle>
             <SheetDescription>
-              Esses leads ja vieram por formulario do Google Ads e podem seguir direto para CRM e campanha.
+              Esses leads já vieram por formulário do Google Ads e podem seguir direto para CRM e campanha.
             </SheetDescription>
           </SheetHeader>
 
@@ -1574,7 +1574,7 @@ function ProspectingCampaignsContent({
 }) {
   return (
     <>
-      <div className="card-grid">
+      <div className="card-grid mb-6">
         <MetricCard
           title="Campanhas"
           value={vm.metrics.totalCampaigns}
@@ -1932,8 +1932,8 @@ export function ProspectingSearchesPage() {
   const placesVm = useProspectingSearchesViewModel();
 
   return (
-    <div className="page-container animate-fade-in space-y-8">
-      <div className="page-header flex items-start justify-between gap-4">
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="page-title">Prospecção local</h1>
           <p className="page-description">
@@ -1945,6 +1945,7 @@ export function ProspectingSearchesPage() {
           <ModuleAgentRuleButton moduleId="prospecting" />
           <Button
             variant="outline"
+            size="sm"
             className="gap-2"
             onClick={() => placesVm.setReportsOpen(true)}
           >
@@ -1956,7 +1957,7 @@ export function ProspectingSearchesPage() {
 
       <AsyncOperationsPanel
         title="Processamentos em andamento"
-        description="As exportacoes de prospeccao continuam em segundo plano sem travar a Operação comercial."
+        description="Processando em segundo plano — você pode continuar usando normalmente."
         items={placesVm.activeJobItems}
       />
 
@@ -1970,8 +1971,8 @@ export function ProspectingCampaignsPage() {
   const vm = useProspectingCampaignsViewModel();
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
-      <div className="page-header flex items-start justify-between gap-4">
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="page-title">Campanhas de prospecção</h1>
           <p className="page-description">
@@ -1982,7 +1983,7 @@ export function ProspectingCampaignsPage() {
           <ModuleAgentRuleButton
             moduleId="prospecting"
           />
-          <Button variant="outline" className="gap-2" onClick={() => vm.setReportsOpen(true)}>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => vm.setReportsOpen(true)}>
             <BarChart3 className="h-4 w-4" />
             Relatórios
           </Button>
@@ -1991,7 +1992,7 @@ export function ProspectingCampaignsPage() {
 
       <AsyncOperationsPanel
         title="Processamentos em andamento"
-        description="As exportações das campanhas continuam em segundo plano sem travar a Operação comercial."
+        description="Processando em segundo plano — você pode continuar usando normalmente."
         items={vm.activeJobItems}
       />
 
