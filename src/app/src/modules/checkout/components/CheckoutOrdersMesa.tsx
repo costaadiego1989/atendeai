@@ -68,7 +68,7 @@ const KANBAN_COLUMNS: Array<{
     statuses: ['AWAITING_PAYMENT', 'PAID'],
     targetStatus: 'PAID',
     title: 'Novo',
-    description: 'Pedidos novos, pagos ou aguardando confirmacao.',
+    description: 'Pedidos novos, pagos ou aguardando confirmação.',
   },
   {
     id: 'preparing',
@@ -189,7 +189,7 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-start justify-between gap-2">
               <p className="min-w-0 truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
-                {order.contactName || 'Contato nao identificado'}
+                {order.contactName || 'Contato não identificado'}
               </p>
               <Badge
                 className={`shrink-0 border px-2 py-0.5 text-[10px] font-bold uppercase ${getOrderTone(order.status)}`}
