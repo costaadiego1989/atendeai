@@ -4,6 +4,16 @@ import {
   USER_REPOSITORY,
 } from '../../../domain/repositories/IUserRepository';
 
+export interface TeamMemberOutput {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  mustChangePassword: boolean;
+  role: string;
+  lastLoginAt: string | null;
+}
+
 @Injectable()
 export class GetUsersByTenantUseCase {
   constructor(
@@ -11,7 +21,7 @@ export class GetUsersByTenantUseCase {
     private readonly userRepo: IUserRepository,
   ) {}
 
-  async execute(tenantId: string): Promise<any[]> {
+  async execute(tenantId: string): Promise<TeamMemberOutput[]> {
     const users = await this.userRepo.findAllByTenant(tenantId);
 
     return users.map((user) => ({
@@ -21,6 +31,7 @@ export class GetUsersByTenantUseCase {
       phone: user.phone.value,
       mustChangePassword: user.mustChangePassword,
       role: user.role.value,
+      lastLoginAt: (user as any).lastLoginAt ?? null,
     }));
   }
 }

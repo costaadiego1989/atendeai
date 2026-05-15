@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsObject,
@@ -167,8 +168,8 @@ export class ConfigureAIDTO {
 
   @IsNumber()
   @IsOptional()
-  @Min(10)
-  @Max(4096)
+  @Min(50)
+  @Max(4000)
   maxTokensPerResponse?: number;
 
   @IsNumber()
@@ -258,6 +259,10 @@ export class UpsertTenantPDFResumeDTO {
   @IsOptional()
   @IsString({ each: true })
   summaries?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  canSendIt?: boolean;
 }
 
 export class AddPromotionDTO {

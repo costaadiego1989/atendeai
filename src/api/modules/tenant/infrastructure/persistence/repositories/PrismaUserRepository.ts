@@ -156,12 +156,17 @@ export class PrismaUserRepository implements IUserRepository {
           phone,
           password_hash AS "passwordHash",
           must_change_password AS "mustChangePassword",
-          role
+          role,
+          last_login_at AS "lastLoginAt"
         FROM tenant_schema.users
         WHERE tenant_id = ${tenantId}::uuid
         ORDER BY created_at ASC
       `);
-    return rawUsers.map((raw) => UserMapper.toDomain(raw));
+    return rawUsers.map((raw) => {
+      const user = UserMapper.toDomain(raw);
+      (user as any).lastLoginAt = raw.lastLoginAt ?? null;
+      return user;
+    });
   }
 
   async delete(id: string): Promise<void> {
