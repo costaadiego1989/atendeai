@@ -166,8 +166,8 @@ function getQueueSignal(conversation: ReturnType<typeof useConversationsPageView
   }
 
   return {
-    label: 'Chat por IA',
-    detail: 'A IA pode continuar conduzindo essa conversa até o handoff humano.',
+    label: 'IA respondendo',
+    detail: 'A IA está respondendo. Você será notificado se precisar intervir.',
     tone: 'active' as const,
   };
 }
@@ -208,15 +208,15 @@ function getHandoffGuide(
   if (conversation.status === 'PENDING_HUMAN') {
     const owner =
       conversation.assignedToUserId && conversation.assignedToUserId === currentUserId
-        ? 'voce'
+        ? 'você'
         : conversation.assignedToName ?? 'o time';
 
     return {
-      title: 'Handoff humano ativo',
+      title: 'Atendimento humano em andamento',
       detail: `A IA deve ficar em apoio enquanto ${owner} conduz a conversa.`,
       action:
         conversation.intelligence?.nextStep ??
-        'Leia o resumo, responda de forma objetiva e defina o proximo passo.',
+        'Leia o resumo, responda de forma objetiva e defina o próximo passo.',
     };
   }
 
@@ -236,16 +236,16 @@ function getHandoffGuide(
       detail: 'Existe mensagem nova aguardando leitura e classificação operacional.',
       action:
         conversation.intelligence?.nextStep ??
-        'Responder agora ou assumir se a mensagem exigir decisao humana.',
+        'Responder agora ou assumir se a mensagem exigir decisão humana.',
     };
   }
 
   return {
     title: 'IA pode conduzir',
-    detail: 'A conversa esta dentro do fluxo automatico e sem sinal critico no momento.',
+    detail: 'A conversa está dentro do fluxo automático e sem sinal crítico no momento.',
     action:
       conversation.intelligence?.nextStep ??
-      'Acompanhe o retorno do cliente e assuma apenas se aparecer objeção ou pedido sensivel.',
+      'Acompanhe o retorno do cliente e assuma apenas se aparecer objeção ou pedido sensível.',
   };
 }
 
@@ -549,8 +549,8 @@ export default function ConversationsPage() {
   }
 
   return (
-    <div className="page-container animate-fade-in space-y-4">
-      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="page-title">Conversas</h1>
           <p className="page-description">
@@ -560,8 +560,7 @@ export default function ConversationsPage() {
         </div>
         <ModuleAgentRuleButton
           moduleId="messaging"
-          buttonSize="default"
-          className="h-11 rounded-xl px-5"
+          buttonSize="sm"
         />
       </div>
 
@@ -871,7 +870,7 @@ export default function ConversationsPage() {
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-foreground">
-                          Assistente IA no handoff
+                          Assistente IA no atendimento
                         </p>
                         <p className="text-xs leading-5 text-muted-foreground">
                           Ative para a IA gerar e enviar a resposta automaticamente com base na última interação do cliente.
@@ -1126,7 +1125,7 @@ export default function ConversationsPage() {
                       </p>
                       <p className="mt-2 text-sm leading-6 text-foreground">
                         {vm.selectedConversation.intelligence?.summary ??
-                          'A inteligência aparece aqui apos as primeiras mensagens relevantes.'}
+                          'A inteligência aparece aqui após as primeiras mensagens relevantes.'}
                       </p>
                     </div>
                     {vm.selectedConversation.intelligence ? (
@@ -1173,7 +1172,7 @@ export default function ConversationsPage() {
                     return (
                       <>
                         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-300">
-                          Briefing de handoff
+                          Resumo para o atendente
                         </p>
                         <p className="mt-2 text-sm font-semibold text-foreground">
                           {guide.title}
