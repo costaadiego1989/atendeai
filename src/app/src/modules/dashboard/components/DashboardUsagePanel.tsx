@@ -36,7 +36,7 @@ export function DashboardUsagePanel({
         <p className="text-sm text-muted-foreground">
           {plan ? `Plano ${plan}` : 'Uso atual da operação'}{' '}
           {billingCycle?.start && billingCycle?.end
-            ? `- ciclo de ${new Date(billingCycle.start).toLocaleDateString('pt-BR')} ate ${new Date(billingCycle.end).toLocaleDateString('pt-BR')}`
+            ? `- ciclo de ${new Date(billingCycle.start).toLocaleDateString('pt-BR')} até ${new Date(billingCycle.end).toLocaleDateString('pt-BR')}`
             : ''}
         </p>
       </CardHeader>
