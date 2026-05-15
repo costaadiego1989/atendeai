@@ -23,7 +23,7 @@ export function IntegrationsSettingsPage() {
   const activeConnectionsCount = vm.connectionsQuery.data?.length ?? 0;
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
+    <div className="page-container animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Integrações globais</h1>
         <p className="page-description">
@@ -34,10 +34,10 @@ export function IntegrationsSettingsPage() {
       <Tabs value={vm.activeTab} onValueChange={vm.setActiveTab} className="w-full">
         <PageTabsList
           tabs={[
-            { value: 'catalog', label: 'Catalogo de apps', icon: Blocks },
+            { value: 'catalog', label: 'Catálogo de apps', icon: Blocks },
             {
               value: 'active',
-              label: `Conexoes ativas ${activeConnectionsCount > 0 ? `(${activeConnectionsCount})` : ''}`,
+              label: `Conexões ativas ${activeConnectionsCount > 0 ? `(${activeConnectionsCount})` : ''}`,
               icon: CheckCircle2,
             },
           ]}
@@ -166,7 +166,7 @@ export function IntegrationsSettingsPage() {
               Cancelar
             </Button>
             <Button onClick={vm.submitConnection} disabled={vm.isSubmitting}>
-              {vm.isSubmitting ? 'Testando conexao...' : 'Conectar aplicativo'}
+              {vm.isSubmitting ? 'Testando conexão...' : 'Conectar aplicativo'}
             </Button>
           </DialogFooter>
         </DialogContent>
