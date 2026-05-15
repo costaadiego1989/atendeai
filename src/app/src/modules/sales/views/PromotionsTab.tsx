@@ -27,7 +27,7 @@ export function PromotionsTab() {
         </Button>
       </div>
 
-      <div className="card-grid mb-8">
+      <div className="card-grid mb-6">
         <SalesMetricCard
           icon={Tag}
           title="Em Circulação"
