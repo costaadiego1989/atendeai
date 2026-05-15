@@ -1,4 +1,4 @@
-import { Search, Warehouse } from 'lucide-react';
+import { Filter, Search, Warehouse } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -72,7 +72,10 @@ export function InventoryItemsTab({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Select value={statusFilter} onValueChange={onStatusFilterChange}>
               <SelectTrigger className="w-full sm:w-[190px]">
-                <SelectValue />
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Todos os status</SelectItem>
@@ -88,6 +91,14 @@ export function InventoryItemsTab({
               onClick={onToggleAvailableOnly}
             >
               {showAvailableOnly ? 'Somente disponíveis' : 'Filtrar disponíveis'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!search && statusFilter === 'ALL' && !showAvailableOnly}
+              onClick={() => { onSearchChange(''); onStatusFilterChange('ALL'); if (showAvailableOnly) onToggleAvailableOnly(); }}
+            >
+              Limpar filtros
             </Button>
           </div>
         </div>
