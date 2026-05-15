@@ -66,7 +66,7 @@ function LegacyChannelsSettingsPage() {
   const connection = vm.connectionQuery.data?.connection;
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
+    <div className="page-container animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Canais</h1>
         <p className="page-description">
@@ -87,7 +87,7 @@ function LegacyChannelsSettingsPage() {
               <div>
                 <p className="text-sm font-medium text-foreground">conexão principal via Twilio</p>
                 <p className="text-xs text-muted-foreground">
-                  O onboarding acontece por Embedded Signup. Aqui voce acompanha status, verifica OTP e sincroniza o sender.
+                  O onboarding acontece por Embedded Signup. Aqui você acompanha status, verifica OTP e sincroniza o sender.
                 </p>
               </div>
               <StatusBadge
@@ -224,13 +224,10 @@ export function PromotionsSettingsPage() {
   const vm = usePromotionsSettingsViewModel();
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
-      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="page-title flex items-center gap-2">
-            <Gift className="h-6 w-6 text-primary" />
-            Promoções
-          </h1>
+          <h1 className="page-title">Promoções</h1>
           <p className="page-description mt-1">
             Organize promoções para seus clientes com validade, responsável e controle operacional.
           </p>
@@ -241,7 +238,7 @@ export function PromotionsSettingsPage() {
         </Button>
       </div>
 
-      <div className="card-grid mb-8">
+      <div className="card-grid">
         <Card className="glass-card">
           <CardContent className="p-5">
             <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">Total</p>
