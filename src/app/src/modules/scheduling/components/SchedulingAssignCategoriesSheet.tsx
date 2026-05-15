@@ -53,7 +53,7 @@ export function SchedulingAssignCategoriesSheet({ vm }: Props) {
           ) : (
             <EmptyState
               icon={ScissorsSquare}
-              title="Sem categorias disponiveis"
+              title="Sem categorias disponíveis"
               description="Crie categorias antes de vincular serviços aos profissionais."
               actionLabel="Criar nova categoria"
               onAction={() => {
