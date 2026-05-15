@@ -63,23 +63,23 @@ const salesNav: NavItem[] = [
   { label: 'Propostas', path: '/app/proposals', icon: FileText },
   { label: 'Checkout', path: '/app/checkout', icon: ShoppingCart },
   { label: 'Métricas', path: '/app/sales/metrics', icon: BarChart3 },
-  { label: 'Links Pagamento', path: '/app/sales/payment-links', icon: LinkIcon },
-  { label: 'Promoções & Cupons', path: '/app/sales/promotions', icon: Tag },
+  { label: 'Links de pagamento', path: '/app/sales/payment-links', icon: LinkIcon },
+  { label: 'Promoções', path: '/app/sales/promotions', icon: Tag },
 ];
 
 const prospectingNav: NavItem[] = [
-  { label: 'Prospectar clientes', path: '/app/prospecting/searches', icon: Search },
+  { label: 'Prospecção', path: '/app/prospecting/searches', icon: Search },
 ];
 
 const settingsNav: NavItem[] = [
-  { label: 'Dados da empresa', path: '/app/settings/company', icon: Building2 },
+  { label: 'Empresa', path: '/app/settings/company', icon: Building2 },
   { label: 'Integrações', path: '/app/settings/integrations', icon: Webhook },
   { label: 'Canais', path: '/app/settings/channels', icon: MessageSquare },
   { label: 'Alertas', path: '/app/settings/alerts', icon: Bell },
-  { label: 'Suporte técnico', path: '/app/settings/support', icon: LifeBuoy },
-  { label: 'IA Comercial', path: '/app/settings/ai', icon: Bot },
+  { label: 'Suporte', path: '/app/settings/support', icon: LifeBuoy },
+  { label: 'Assistente IA', path: '/app/settings/ai', icon: Bot },
   { label: 'Equipe', path: '/app/team', icon: UserPlus },
-  { label: 'Uso / Billing', path: '/app/billing/usage', icon: CreditCard },
+  { label: 'Plano e consumo', path: '/app/billing/usage', icon: CreditCard },
 ];
 
 function NavSection({
