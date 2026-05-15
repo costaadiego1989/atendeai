@@ -15,7 +15,7 @@ export function InventoryHeader({
       <div>
         <h1 className="page-title">Estoque</h1>
         <p className="page-description">
-          Controle snapshots, disponibilidade e conexoes operacionais com dados reais.
+          Controle snapshots, disponibilidade e conexões operacionais com dados reais.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
