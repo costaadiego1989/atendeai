@@ -33,7 +33,7 @@ export default function AlertsPage() {
   const vm = useAlertsPageViewModel();
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
+    <div className="page-container animate-fade-in">
       <AlertsHeader />
 
       <AlertsKPIs
@@ -124,7 +124,7 @@ export default function AlertsPage() {
             )}
 
             <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4 text-sm text-muted-foreground">
-              O sistema envia esse lembrete para o seu contato interno e reaproveita a infraestrutura de mensagens ja conectada.
+              O sistema envia esse lembrete para o seu contato interno e reaproveita a infraestrutura de mensagens já conectada.
             </div>
 
             <Button
