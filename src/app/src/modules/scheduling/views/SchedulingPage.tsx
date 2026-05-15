@@ -31,7 +31,7 @@ export default function SchedulingPage() {
 
       <AsyncOperationsPanel
         title="Processamentos em andamento"
-        description="As exportações grandes da agenda continuam em segundo plano sem travar a operação."
+        description="Processando em segundo plano — você pode continuar usando normalmente."
         items={vm.schedulingActiveJobItems}
       />
 
@@ -43,7 +43,6 @@ export default function SchedulingPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">Relatório da agenda</p>
-              <p className="text-xs text-muted-foreground">Disponibilidade, reservas e CSV usam o período selecionado.</p>
             </div>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
