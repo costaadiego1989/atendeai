@@ -29,7 +29,7 @@ export function SchedulingBulkSlotGeneratorSheet({ vm }: Props) {
         <SheetHeader>
           <SheetTitle>Gerar horários em lote</SheetTitle>
           <SheetDescription>
-            Preencha um periodo e a agenda cria os slots automaticamente, respeitando o horário
+            Preencha um período e a agenda cria os slots automaticamente, respeitando o horário
             de funcionamento da empresa quando ele existir.
           </SheetDescription>
         </SheetHeader>
@@ -193,7 +193,7 @@ export function SchedulingBulkSlotGeneratorSheet({ vm }: Props) {
 
           <div className="rounded-2xl border border-border/60 bg-muted/15 p-4 text-sm text-muted-foreground">
             Quando o horário do dia atingir o limite configurado no funcionamento da empresa, a
-            agenda pula automaticamente para o proximo dia util do periodo.
+            agenda pula automaticamente para o próximo dia útil do período.
           </div>
         </div>
         <div className="mt-6 flex justify-end gap-2">
