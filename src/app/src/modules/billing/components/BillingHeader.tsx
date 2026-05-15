@@ -28,7 +28,7 @@ export function BillingHeader({
   isTrial,
 }: BillingHeaderProps) {
   return (
-    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <h1 className="page-title">Consumo & Faturamento</h1>
         <p className="page-description mt-1">
