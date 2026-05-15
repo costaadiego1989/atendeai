@@ -1,4 +1,4 @@
-import { Package, Search } from 'lucide-react';
+import { Filter, Package, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -62,7 +62,10 @@ export function CatalogItemsTab({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Select value={typeFilter} onValueChange={onTypeFilterChange}>
               <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue />
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Todos os tipos</SelectItem>
@@ -73,6 +76,14 @@ export function CatalogItemsTab({
             </Select>
             <Button size="sm" variant={showInactive ? 'default' : 'outline'} onClick={() => onShowInactiveChange(!showInactive)}>
               {showInactive ? 'Mostrando inativos' : 'Mostrar inativos'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!search && typeFilter === 'ALL' && !showInactive}
+              onClick={() => { onSearchChange(''); onTypeFilterChange('ALL'); onShowInactiveChange(false); }}
+            >
+              Limpar filtros
             </Button>
           </div>
         </div>
