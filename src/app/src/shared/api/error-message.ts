@@ -32,7 +32,7 @@ function mapPrismaLikeMessage(rawMessage: string): string | null {
     normalized.includes('prismaclient') ||
     normalized.includes('foreign key constraint failed')
   ) {
-    return 'não foi possivel concluir a operação agora. Tente novamente em instantes.';
+    return 'não foi possível concluir a operação agora. Tente novamente em instantes.';
   }
 
   return null;
