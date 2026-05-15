@@ -42,7 +42,7 @@ export class MediaUnderstandingService {
             : 'Conteudo extraido';
           parts.push(`${prefix}: ${extraction.extractedText.trim()}`);
         } else {
-          parts.push('Nao foi possivel extrair o conteudo da midia automaticamente.');
+          parts.push('Nao foi possível extrair o conteudo da midia automaticamente.');
         }
 
         parts.push(`Arquivo: ${input.url}`);

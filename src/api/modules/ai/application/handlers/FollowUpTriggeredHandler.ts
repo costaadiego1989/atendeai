@@ -47,7 +47,7 @@ export class FollowUpTriggeredHandler implements OnModuleInit {
       intelligence?.interests?.length
         ? `Interesses: ${intelligence.interests.join(', ')}`
         : null,
-      intelligence?.lossReason ? `Possivel motivo de perda: ${intelligence.lossReason}` : null,
+      intelligence?.lossReason ? `possível motivo de perda: ${intelligence.lossReason}` : null,
       intelligence?.nextStep ? `Proximo passo sugerido: ${intelligence.nextStep}` : null,
     ].filter(Boolean);
 

@@ -123,6 +123,6 @@ describe('MediaUnderstandingService', () => {
 
     expect(output).toContain('Cliente enviou imagem pelo WhatsApp.');
     expect(output).toContain('Arquivo: https://media.test/image.jpg');
-    expect(output).toContain('Nao foi possivel extrair o conteudo da midia automaticamente.');
+    expect(output).toContain('Nao foi possível extrair o conteudo da midia automaticamente.');
   });
 });
