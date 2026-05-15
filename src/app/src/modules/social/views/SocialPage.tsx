@@ -105,8 +105,8 @@ export function SocialPage() {
       <div className="min-h-[500px]">
         {vm.state.activeTab === 'comments' && (
           <div className="space-y-4">
-            <div className="glass-card space-y-4 p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="glass-card p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <Badge variant="secondary" className="hidden lg:inline-flex items-center whitespace-nowrap h-9 px-3.5 rounded-md border-border/60 bg-muted/30">
                   <span className="font-bold text-foreground mr-1.5">{vm.state.commentsTotal}</span>
                   <span className="font-normal text-muted-foreground">resultados</span>
@@ -116,12 +116,12 @@ export function SocialPage() {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Pesquisar por autor, publicação ou contexto verbal..."
-                    className="pl-9 h-9 bg-background/50"
+                    className="pl-9"
                   />
                 </div>
 
                 <Select defaultValue="all">
-                  <SelectTrigger className="w-full lg:w-[220px] h-9 bg-background/50">
+                  <SelectTrigger className="w-full lg:w-[220px]">
                     <div className="flex items-center gap-2">
                       <Filter className="h-4 w-4 text-muted-foreground" />
                       <SelectValue placeholder="Status: Automático" />
