@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { feedbackModuleLabel } from '@/shared/constants/feedback-app-module';
+import { KPICard } from '@/shared/ui/KPICard';
 import { useSupportPageViewModel } from '@/modules/support/view-models/useSupportPageViewModel';
 
 function typeLabel(type: string) {
@@ -32,48 +33,41 @@ export default function SupportPage() {
   const vm = useSupportPageViewModel();
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
-      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="page-title flex items-center gap-2">
-            <Wrench className="h-6 w-6 text-primary" />
-            Suporte técnico
-          </h1>
+          <h1 className="page-title">Suporte técnico</h1>
           <p className="page-description mt-1">
             Envie bugs, sugestões e melhorias para evoluirmos a operação com mais clareza.
           </p>
         </div>
       </div>
 
-      <div className="card-grid mb-8">
-        <Card className="glass-card">
-          <CardContent className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">Total enviado</p>
-            <p className="mt-2 text-2xl font-bold text-foreground">{vm.summary.total}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Feedbacks registrados</p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card">
-          <CardContent className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">Bugs</p>
-            <p className="mt-2 text-2xl font-bold text-foreground">{vm.summary.bugs}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Problemas reportados</p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card">
-          <CardContent className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">Sugestões</p>
-            <p className="mt-2 text-2xl font-bold text-foreground">{vm.summary.suggestions}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Ideias enviadas pelo time</p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card">
-          <CardContent className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">Melhorias</p>
-            <p className="mt-2 text-2xl font-bold text-foreground">{vm.summary.improvements}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Refinamentos solicitados</p>
-          </CardContent>
-        </Card>
+      <div className="card-grid">
+        <KPICard
+          title="Total enviado"
+          value={vm.summary.total}
+          subtitle="Feedbacks registrados"
+          icon={SendHorizonal}
+        />
+        <KPICard
+          title="Bugs"
+          value={vm.summary.bugs}
+          subtitle="Problemas reportados"
+          icon={Bug}
+        />
+        <KPICard
+          title="Sugestões"
+          value={vm.summary.suggestions}
+          subtitle="Ideias enviadas pelo time"
+          icon={Lightbulb}
+        />
+        <KPICard
+          title="Melhorias"
+          value={vm.summary.improvements}
+          subtitle="Refinamentos solicitados"
+          icon={Rocket}
+        />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[400px_1fr]">
