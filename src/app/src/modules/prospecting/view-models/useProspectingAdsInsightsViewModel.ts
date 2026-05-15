@@ -77,7 +77,7 @@ export function useProspectingAdsInsightsViewModel() {
       toast({
         title: 'Falha ao gerar insights',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel consultar os insights do Google Ads agora.',
+          fallbackMessage: 'não foi possível consultar os insights do Google Ads agora.',
         }),
         variant: 'destructive',
       });
