@@ -66,7 +66,7 @@ export function useAlertsPageViewModel() {
       toast({
         title: 'Falha ao criar alerta',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar o alerta agora.',
+          fallbackMessage: 'não foi possível criar o alerta agora.',
         }),
         variant: 'destructive',
       });
@@ -96,7 +96,7 @@ export function useAlertsPageViewModel() {
       toast({
         title: 'Falha ao atualizar alerta',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel atualizar o alerta agora.',
+          fallbackMessage: 'não foi possível atualizar o alerta agora.',
         }),
         variant: 'destructive',
       });
@@ -116,7 +116,7 @@ export function useAlertsPageViewModel() {
       toast({
         title: 'Falha ao excluir alerta',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel excluir o alerta agora.',
+          fallbackMessage: 'não foi possível excluir o alerta agora.',
         }),
         variant: 'destructive',
       });
