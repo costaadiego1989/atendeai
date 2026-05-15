@@ -7,9 +7,9 @@ type Props = {
 
 export function ProposalsHeader({ onNewProposal }: Props) {
   return (
-    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
-        <h1 className="page-title flex items-center gap-2">
+        <h1 className="page-title">
           Propostas
         </h1>
         <p className="page-description mt-1 max-w-3xl">
