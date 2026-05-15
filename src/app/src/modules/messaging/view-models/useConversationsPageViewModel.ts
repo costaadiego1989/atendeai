@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -8,6 +8,7 @@ import type { ConversationStatus, Message } from '@/shared/types';
 import { messagingService } from '@/modules/messaging/services/messaging-service';
 import { messagingRealtimeService } from '@/modules/messaging/services/messaging-realtime-service';
 import { getSaleAttributionToastCopy } from '@/modules/messaging/utils/sale-attribution-ui';
+import { getQueueSignal } from '@/modules/messaging/utils/conversation-ui-helpers';
 import { checkoutService } from '@/modules/checkout/services/checkout-service';
 import { salesPaymentLinksService } from '@/modules/sales/services/sales-payment-links-service';
 import type { CreateSalesSplitChargeInput } from '@/modules/sales/services/sales-types';
@@ -593,7 +594,7 @@ export function useConversationsPageViewModel() {
         title: 'Falha ao responder com IA',
         description: getFriendlyErrorMessage(error, {
           fallbackMessage:
-            'Nao foi possivel gerar e enviar a resposta automatica agora.',
+            'Nao foi possível gerar e enviar a resposta automatica agora.',
         }),
         variant: 'destructive',
       });
@@ -725,7 +726,7 @@ export function useConversationsPageViewModel() {
       toast({
         title: 'Falha ao enviar cobranca',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'Nao foi possivel criar e enviar a cobranca agora.',
+          fallbackMessage: 'Nao foi possível criar e enviar a cobranca agora.',
         }),
         variant: 'destructive',
       });
@@ -740,6 +741,63 @@ export function useConversationsPageViewModel() {
         user.role === 'ADMIN' ||
         saleAttribution.markedByUserId === user.id),
   );
+
+  // Sale dialog state
+  const [saleDialogOpen, setSaleDialogOpen] = useState(false);
+  const [saleNotes, setSaleNotes] = useState('');
+  const [saleAmountDisplay, setSaleAmountDisplay] = useState('');
+
+  // Assistant autopilot state
+  const [assistantAutopilotEnabled, setAssistantAutopilotEnabled] = useState(false);
+
+  // Reset autopilot when conversation changes
+  useEffect(() => {
+    if (selectedConversation?.status !== 'PENDING_HUMAN') {
+      setAssistantAutopilotEnabled(false);
+    }
+  }, [selectedConversation?.id, selectedConversation?.status]);
+
+  // Signal for the selected conversation
+  const selectedSignal = useMemo(() => {
+    if (!selectedConversation) return null;
+    return getQueueSignal(selectedConversation, user?.id ?? null);
+  }, [user?.id, selectedConversation]);
+
+  // Queue stats
+  const queueStats = useMemo(() => {
+    return {
+      newItems: conversations.filter((c) => (c.unreadCount ?? 0) > 0).length,
+      ownedItems: conversations.filter(
+        (c) => c.status === 'PENDING_HUMAN' && c.assignedToUserId === (user?.id ?? null),
+      ).length,
+      waitingItems: conversations.filter(
+        (c) =>
+          c.status === 'ACTIVE' &&
+          c.lastMessageDirection === 'OUTBOUND' &&
+          (c.unreadCount ?? 0) === 0,
+      ).length,
+    };
+  }, [conversations, user?.id]);
+
+  // Copy selected contact phone to clipboard
+  async function copySelectedPhone() {
+    if (!selectedConversation?.contactPhone) return;
+    try {
+      await navigator.clipboard.writeText(
+        selectedConversation.contactPhone.replace(/^55(?=\d{10,11}$)/, ''),
+      );
+      toast({ title: 'Telefone copiado', description: 'O número do contato foi copiado para a área de transferência.' });
+    } catch {
+      toast({ title: 'Falha ao copiar telefone', description: 'Não foi possível copiar o número agora.', variant: 'destructive' });
+    }
+  }
+
+  // Handle attachment file selection
+  function handleAttachmentChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setSelectedAttachment(file);
+    event.target.value = '';
+  }
 
   return {
     tenant,
@@ -877,5 +935,17 @@ export function useConversationsPageViewModel() {
     currentUserId: user?.id ?? null,
     userRole: user?.role ?? null,
     canCreateConversationCharge,
+    saleDialogOpen,
+    setSaleDialogOpen,
+    saleNotes,
+    setSaleNotes,
+    saleAmountDisplay,
+    setSaleAmountDisplay,
+    assistantAutopilotEnabled,
+    setAssistantAutopilotEnabled,
+    selectedSignal,
+    queueStats,
+    copySelectedPhone,
+    handleAttachmentChange,
   };
 }
