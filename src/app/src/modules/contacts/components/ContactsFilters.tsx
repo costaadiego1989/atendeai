@@ -32,7 +32,7 @@ export function ContactsFilters({
   totalCount,
 }: ContactsFiltersProps) {
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       {totalCount !== undefined && (
         <Badge variant="secondary" className="hidden lg:inline-flex items-center whitespace-nowrap h-9 px-3.5 rounded-md border-border/60 bg-muted/30">
           <span className="font-bold text-foreground mr-1.5">{totalCount}</span>
