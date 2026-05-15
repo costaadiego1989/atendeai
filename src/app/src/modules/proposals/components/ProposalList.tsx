@@ -1,4 +1,4 @@
-import { CalendarClock, UserRound } from 'lucide-react';
+import { CalendarClock, FileDown, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/shared/ui/EmptyState';
