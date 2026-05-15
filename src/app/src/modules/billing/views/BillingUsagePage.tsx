@@ -40,18 +40,18 @@ import type {
 const volumeOptions_DEPRECATED: Array<{ value: string; label: string; description: string }> = [
   {
     value: 'LOW',
-    label: 'Operação inicial',
-    description: 'Ate a primeira faixa comercial de conversas ou base.',
+    label: 'Começando',
+    description: 'Para quem está começando com poucos atendimentos.',
   },
   {
     value: 'MEDIUM',
-    label: 'Operação em crescimento',
-    description: 'Ja precisa folga real para vendas, CRM e IA.',
+    label: 'Crescendo',
+    description: 'Para quem já tem volume e precisa de mais recursos.',
   },
   {
     value: 'HIGH',
-    label: 'Operação intensa',
-    description: 'Precisa teto alto para escalar time e automação.',
+    label: 'Alta demanda',
+    description: 'Para operações grandes com muitos atendentes e automações.',
   },
 ];
 
@@ -68,7 +68,7 @@ const operationOptions: Array<{
     {
       value: 'AUTOMATED',
       label: 'Automatizada',
-      description: 'Quer usar IA, checkout, cobrança e playbooks do nicho.',
+      description: 'Quer usar IA, checkout, cobrança e roteiros do nicho.',
     },
     {
       value: 'GOVERNED',
@@ -201,7 +201,7 @@ export default function BillingUsagePage() {
         <EmptyState
           icon={CreditCard}
           title="Erro no carregamento"
-          description="não foi possivel recuperar os dados de faturamento. Verifique sua conexao ou contate o suporte."
+          description="Não foi possível recuperar os dados de faturamento. Verifique sua conexão ou contate o suporte."
         />
       </div>
     );
@@ -245,7 +245,7 @@ export default function BillingUsagePage() {
                 <CalendarClock className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="font-bold text-amber-900">Transicao de plano agendada</p>
+                <p className="font-bold text-amber-900">Transição de plano agendada</p>
                 <p className="max-w-xl text-sm text-amber-800/80">
                   Seu plano sera alterado para <span className="font-bold">{usage.scheduledPlan}</span>{' '}
                   automaticamente em{' '}
@@ -268,10 +268,10 @@ export default function BillingUsagePage() {
                 <AlertTriangle className="h-5 w-5 text-destructive" />
               </div>
               <div>
-                <p className="font-bold text-destructive">Atencao operacional: limite proximo</p>
+                <p className="font-bold text-destructive">Atenção: limite próximo</p>
                 <p className="max-w-xl text-sm text-destructive-foreground/80">
-                  Voce atingiu pelo menos 80% de um dos limites do seu plano. Para evitar interrupcoes,
-                  vale revisar o plano base e os módulos da Operação.
+                  Você atingiu pelo menos 80% de um dos limites do seu plano. Para evitar interrupções,
+                  vale revisar o plano base e os módulos da operação.
                 </p>
               </div>
             </div>
@@ -366,11 +366,11 @@ export default function BillingUsagePage() {
                 <p className="font-bold text-foreground">Pacote Adicional de Quota</p>
                 {addonPackage.isActive ? (
                   <p className="max-w-xl text-sm text-muted-foreground">
-                    Pacote ativo neste ciclo. As quotas extras ja estao aplicadas.
+                    Pacote ativo neste ciclo. As quotas extras já estão aplicadas.
                   </p>
                 ) : addonPackage.awaitingPayment ? (
                   <p className="max-w-xl text-sm text-muted-foreground">
-                    Aguardando confirmacao do pagamento. As quotas serao atualizadas automaticamente.
+                    Aguardando confirmação do pagamento. As quotas serão atualizadas automaticamente.
                   </p>
                 ) : addonPackage.packageDetails ? (
                   <p className="max-w-xl text-sm text-muted-foreground">
@@ -477,7 +477,7 @@ export default function BillingUsagePage() {
                       Plano base indicado
                     </p>
                     <p className="mt-2 text-3xl font-black text-foreground">
-                      {recommendation.recommendedPlan?.displayName ?? 'Sem plano disponivel'}
+                      {recommendation.recommendedPlan?.displayName ?? 'Sem plano disponível'}
                     </p>
                   </div>
                   <div className="text-right">
@@ -530,7 +530,7 @@ export default function BillingUsagePage() {
                   {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'}
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Estimativa das recomendacoes do nicho caso voce decida ativar os módulos depois.
+                  Estimativa das recomendações do nicho caso você decida ativar os módulos depois.
                   Não estamos somando isso no preço do plano base.
                 </p>
               </div>
@@ -555,7 +555,7 @@ export default function BillingUsagePage() {
                 )}
               </div>
               <p className="text-muted-foreground">
-                Aqui o sistema separa o que ja esta no plano do que pode ser ativado como add-on.
+                Aqui o sistema separa o que já está no plano do que pode ser ativado como add-on.
               </p>
             </div>
             {recommendation && recommendation.estimatedAddonInvestment > 0 && (
@@ -564,7 +564,7 @@ export default function BillingUsagePage() {
                   Potencial em add-ons
                 </p>
                 <p className="mt-1 text-lg font-bold text-foreground">
-                  {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'} / mes
+                  {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'} / mês
                 </p>
               </div>
             )}
@@ -584,7 +584,7 @@ export default function BillingUsagePage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-bold leading-none text-foreground">{module.displayName}</p>
                       <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
-                        Prioritario
+                        Prioritário
                       </Badge>
                     </div>
                     <p className="text-xs leading-relaxed text-muted-foreground">
@@ -592,11 +592,11 @@ export default function BillingUsagePage() {
                     </p>
                     <div className="flex flex-wrap gap-2 pt-1">
                       <Badge variant="outline">
-                        {module.includedInPlan || module.subscribed ? 'Ja disponivel' : 'Add-on'}
+                        {module.includedInPlan || module.subscribed ? 'Já disponível' : 'Add-on'}
                       </Badge>
                       {!module.includedInPlan && (
                         <Badge variant="outline">
-                          {formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mes
+                          {formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mês
                         </Badge>
                       )}
                     </div>
@@ -621,8 +621,8 @@ export default function BillingUsagePage() {
                     </p>
                     <Badge variant="outline">
                       {module.includedInPlan || module.subscribed
-                        ? 'Ja disponivel'
-                        : `${formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mes`}
+                        ? 'Já disponível'
+                        : `${formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mês`}
                     </Badge>
                   </div>
                 </CardContent>
@@ -687,7 +687,7 @@ export default function BillingUsagePage() {
                 )}
                 {selectedPlanRelation === 'upgrade'
                   ? 'Cobrança imediata'
-                  : 'Alteração no proximo ciclo'}
+                  : 'Alteração no próximo ciclo'}
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {selectedPlanRelation === 'upgrade'
@@ -735,7 +735,7 @@ export default function BillingUsagePage() {
                 Importante
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                O valor abaixo e apenas do plano base. Se voce ativar add-ons do nicho depois, eles
+                O valor abaixo é apenas do plano base. Se você ativar add-ons do nicho depois, eles
                 serao somados separadamente na assinatura.
               </p>
             </div>
@@ -796,7 +796,7 @@ export default function BillingUsagePage() {
               <p className="text-xl font-bold text-foreground">Sincronizando faturamento...</p>
               <p className="leading-relaxed text-muted-foreground">
                 Assim que processarmos a confirmação do pagamento pelo gateway, seu plano{' '}
-                <span className="font-bold text-foreground">{vm.pendingCheckoutPlanCode}</span> sera
+                 <span className="font-bold text-foreground">{vm.pendingCheckoutPlanCode}</span> será
                 ativado instantaneamente.
               </p>
             </div>
@@ -804,7 +804,7 @@ export default function BillingUsagePage() {
 
           <div className="mt-10 grid gap-3">
             <Button className="w-full" variant="default" onClick={vm.refreshBillingStatus}>
-              Ja efetuei o pagamento, atualizar agora
+              Já efetuei o pagamento, atualizar agora
             </Button>
             <Button className="w-full" variant="ghost" onClick={() => vm.setWaitingCheckoutOpen(false)}>
               Verificar mais tarde
