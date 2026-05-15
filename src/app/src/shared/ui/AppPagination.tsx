@@ -37,7 +37,7 @@ export function AppPagination({
     >
       <p className="text-sm text-muted-foreground">
         Mostrando <span className="font-medium text-foreground">{currentItemsCount}</span> de{' '}
-        <span className="font-medium text-foreground">{totalItems}</span> {itemLabel}. Pagina{' '}
+        <span className="font-medium text-foreground">{totalItems}</span> {itemLabel}. Página{' '}
         <span className="font-medium text-foreground">{page}</span> de{' '}
         <span className="font-medium text-foreground">{totalPages}</span>.
       </p>
