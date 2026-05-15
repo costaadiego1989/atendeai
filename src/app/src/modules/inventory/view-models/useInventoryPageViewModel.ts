@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -65,6 +65,9 @@ export function useInventoryPageViewModel() {
   const [reportFilters, setReportFilters] = useState(DEFAULT_REPORT_FILTERS);
   const [currentReportJobId, setCurrentReportJobId] = useState<string | null>(null);
   const handledJobsRef = useRef<Record<string, string>>({});
+  const [localSyncItems, setLocalSyncItems] = useState<AsyncOperationItem[]>([]);
+  const syncProgressIntervalsRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
+  const [lastSyncResult, setLastSyncResult] = useState<{ connectionId: string; success: boolean; timestamp: number } | null>(null);
   const prefillCatalogItemId = searchParams.get('catalogItemId') ?? '';
   const prefillName = searchParams.get('name') ?? '';
   const prefillExternalReference = searchParams.get('externalReference') ?? '';
@@ -144,21 +147,20 @@ export function useInventoryPageViewModel() {
     return resolveReportJobFromList(currentReportJobId);
   }, [currentReportJobId, focusedJobQuery.data, jobsQuery.data]);
 
-  const activeJobItems = useMemo<AsyncOperationItem[]>(
-    () =>
-      (jobsQuery.data ?? [])
-        .filter((job) => isActiveJob(job))
-        .map((job) => ({
-          id: job.id,
-          title: 'Exportação de estoque',
-          description: 'Estamos consolidando os itens atuais para montar o CSV.',
-          status: job.status,
-          progress: job.progress,
-          processedItems: job.processedItems,
-          totalItems: job.totalItems,
-        })),
-    [jobsQuery.data],
-  );
+  const activeJobItems = useMemo<AsyncOperationItem[]>(() => {
+    const exportJobs = (jobsQuery.data ?? [])
+      .filter((job) => isActiveJob(job))
+      .map((job) => ({
+        id: job.id,
+        title: 'Exportação de estoque',
+        description: 'Estamos consolidando os itens atuais para montar o CSV.',
+        status: job.status,
+        progress: job.progress,
+        processedItems: job.processedItems,
+        totalItems: job.totalItems,
+      }));
+    return [...localSyncItems, ...exportJobs];
+  }, [jobsQuery.data, localSyncItems]);
 
   useEffect(() => {
     if (!activeReportJob || handledJobsRef.current[activeReportJob.id] === activeReportJob.status) {
@@ -197,7 +199,7 @@ export function useInventoryPageViewModel() {
       toast({
         title: 'Falha ao exportar estoque',
         description:
-          activeReportJob.errorMessage ?? 'não foi possivel gerar o CSV do estoque.',
+          activeReportJob.errorMessage ?? 'não foi possível gerar o CSV do estoque.',
         variant: 'destructive',
       });
     }
@@ -230,6 +232,51 @@ export function useInventoryPageViewModel() {
     setPage(1);
   }, [search, statusFilter, showAvailableOnly]);
 
+  const startLocalSyncTracking = useCallback((connectionId: string, providerName: string) => {
+    const item: AsyncOperationItem = {
+      id: `sync-${connectionId}`,
+      title: `Sincronizando ${providerName}`,
+      description: 'Buscando itens do fornecedor e atualizando o estoque em segundo plano.',
+      status: 'PROCESSING',
+      progress: 0,
+    };
+
+    setLocalSyncItems((prev) => [...prev.filter((i) => i.id !== item.id), item]);
+
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      currentProgress = Math.min(currentProgress + Math.random() * 8 + 2, 88);
+      setLocalSyncItems((prev) =>
+        prev.map((i) => (i.id === item.id ? { ...i, progress: Math.round(currentProgress) } : i)),
+      );
+    }, 800);
+
+    syncProgressIntervalsRef.current.set(connectionId, interval);
+  }, []);
+
+  const stopLocalSyncTracking = useCallback((connectionId: string, success: boolean) => {
+    const interval = syncProgressIntervalsRef.current.get(connectionId);
+    if (interval) {
+      clearInterval(interval);
+      syncProgressIntervalsRef.current.delete(connectionId);
+    }
+
+    setLocalSyncItems((prev) =>
+      prev.map((i) =>
+        i.id === `sync-${connectionId}`
+          ? { ...i, status: success ? 'COMPLETED' : 'FAILED', progress: success ? 100 : i.progress }
+          : i,
+      ),
+    );
+
+    setTimeout(() => {
+      setLocalSyncItems((prev) => prev.filter((i) => i.id !== `sync-${connectionId}`));
+    }, 3000);
+
+    setLastSyncResult({ connectionId, success, timestamp: Date.now() });
+    setTimeout(() => setLastSyncResult(null), 5000);
+  }, []);
+
   const createConnectionMutation = useMutation({
     mutationFn: () =>
       inventoryService.createConnection(tenant!.id, {
@@ -252,7 +299,7 @@ export function useInventoryPageViewModel() {
       toast({
         title: 'Falha ao criar conexão',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar a conexão agora.',
+          fallbackMessage: 'não foi possível criar a conexão agora.',
         }),
         variant: 'destructive',
       });
@@ -260,25 +307,27 @@ export function useInventoryPageViewModel() {
   });
 
   const syncConnectionMutation = useMutation({
-    mutationFn: (connectionId: string) =>
-      inventoryService.syncConnectionNow(tenant!.id, connectionId),
-    onSuccess: async () => {
+    mutationFn: ({ connectionId, providerName }: { connectionId: string; providerName: string }) => {
+      startLocalSyncTracking(connectionId, providerName);
+      return inventoryService.syncConnectionNow(tenant!.id, connectionId);
+    },
+    onSuccess: async (_, { connectionId }) => {
+      stopLocalSyncTracking(connectionId, true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['inventory-connections', tenant?.id] }),
         queryClient.invalidateQueries({ queryKey: ['inventory-items'] }),
       ]);
       toast({
-        title: 'Sincronização solicitada',
-        description:
-          'Pedimos atualização dos dados desta conexão. Os itens aparecem conforme o ERP disponibilizar.',
+        title: 'Sincronização concluída',
+        description: 'Os itens do estoque foram atualizados com os dados mais recentes.',
       });
     },
-    onError: (error) => {
+    onError: (error, { connectionId }) => {
+      stopLocalSyncTracking(connectionId, false);
       toast({
-        title: 'Não foi possível sincronizar agora',
+        title: 'Falha na sincronização',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage:
-            'Se o backend ainda não expõe esta rota (404), aguarde a API ou use snapshot manual.',
+          fallbackMessage: 'Não foi possível sincronizar esta conexão agora. Tente novamente.',
         }),
         variant: 'destructive',
       });
@@ -318,7 +367,7 @@ export function useInventoryPageViewModel() {
       toast({
         title: 'Falha ao sincronizar item',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar o snapshot agora.',
+          fallbackMessage: 'não foi possível salvar o snapshot agora.',
         }),
         variant: 'destructive',
       });
@@ -352,7 +401,7 @@ export function useInventoryPageViewModel() {
       toast({
         title: 'Falha ao iniciar exportação',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enfileirar o relatorio agora.',
+          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
         }),
         variant: 'destructive',
       });
@@ -460,6 +509,7 @@ export function useInventoryPageViewModel() {
         currentPrice: formatCurrencyInput(value),
       }));
     },
+    lastSyncResult,
     createConnectionMutation,
     syncConnectionMutation,
     syncItemMutation,
