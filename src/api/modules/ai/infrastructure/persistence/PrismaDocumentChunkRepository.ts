@@ -33,7 +33,7 @@ export class PrismaDocumentChunkRepository implements IDocumentChunkRepository {
         ${chunk.content},
         ${chunk.tokenCount},
         ${JSON.stringify(chunk.metadata)}::jsonb,
-        ${this.vectorLiteral(chunk.embedding)}::vector
+        ARRAY[${Prisma.join(chunk.embedding)}]::float8[]
       )`,
     );
 
@@ -57,8 +57,6 @@ export class PrismaDocumentChunkRepository implements IDocumentChunkRepository {
     topK: number,
     threshold: number,
   ): Promise<SimilarChunkResult[]> {
-    const vectorStr = this.vectorLiteral(embedding);
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT
         c.id,
@@ -68,27 +66,42 @@ export class PrismaDocumentChunkRepository implements IDocumentChunkRepository {
         c.content,
         c.token_count,
         c.metadata,
-        1 - (c.embedding <=> ${vectorStr}::vector) AS similarity,
+        c.embedding,
         d.file_name
       FROM tenant_schema.tenant_document_chunks c
       JOIN tenant_schema.tenant_pdf_resumes d ON d.id = c.document_id
       WHERE c.tenant_id = ${tenantId}::uuid
-        AND 1 - (c.embedding <=> ${vectorStr}::vector) >= ${threshold}
-      ORDER BY c.embedding <=> ${vectorStr}::vector
-      LIMIT ${topK}
+      ORDER BY c.created_at DESC
+      LIMIT 200
     `);
 
-    return rows.map((row) => ({
-      id: String(row.id),
-      tenantId: String(row.tenant_id),
-      documentId: String(row.document_id),
-      chunkIndex: Number(row.chunk_index),
-      content: row.content,
-      tokenCount: Number(row.token_count),
-      metadata: (row.metadata as Record<string, unknown>) ?? {},
-      similarity: Number(row.similarity),
-      fileName: row.file_name ?? undefined,
-    }));
+    // Compute cosine similarity in memory
+    const results: SimilarChunkResult[] = [];
+    for (const row of rows) {
+      const chunkEmbedding: number[] = Array.isArray(row.embedding)
+        ? row.embedding
+        : [];
+      if (chunkEmbedding.length === 0) continue;
+
+      const similarity = this.cosineSimilarity(embedding, chunkEmbedding);
+      if (similarity >= threshold) {
+        results.push({
+          id: String(row.id),
+          tenantId: String(row.tenant_id),
+          documentId: String(row.document_id),
+          chunkIndex: Number(row.chunk_index),
+          content: row.content,
+          tokenCount: Number(row.token_count),
+          metadata: (row.metadata as Record<string, unknown>) ?? {},
+          similarity,
+          fileName: row.file_name ?? undefined,
+        });
+      }
+    }
+
+    // Sort by similarity descending and take topK
+    results.sort((a, b) => b.similarity - a.similarity);
+    return results.slice(0, topK);
   }
 
   async deleteByDocument(documentId: string): Promise<void> {
@@ -109,9 +122,24 @@ export class PrismaDocumentChunkRepository implements IDocumentChunkRepository {
   }
 
   /**
-   * Converts a number array to a pgvector literal string: '[0.1,0.2,...]'
+   * Computes cosine similarity between two vectors.
    */
-  private vectorLiteral(embedding: number[]): string {
-    return `[${embedding.join(',')}]`;
+  private cosineSimilarity(a: number[], b: number[]): number {
+    if (a.length !== b.length || a.length === 0) return 0;
+
+    let dot = 0;
+    let normA = 0;
+    let normB = 0;
+
+    for (let i = 0; i < a.length; i++) {
+      dot += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+
+    const denominator = Math.sqrt(normA) * Math.sqrt(normB);
+    if (denominator === 0) return 0;
+
+    return dot / denominator;
   }
 }
