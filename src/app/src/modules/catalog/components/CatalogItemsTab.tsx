@@ -50,7 +50,7 @@ export function CatalogItemsTab({
     <div className="space-y-4">
       <div className="glass-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1 lg:max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -59,20 +59,22 @@ export function CatalogItemsTab({
               className="pl-9"
             />
           </div>
-          <Select value={typeFilter} onValueChange={onTypeFilterChange}>
-            <SelectTrigger className="w-full lg:w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Todos os tipos</SelectItem>
-              <SelectItem value="SERVICE">Serviços</SelectItem>
-              <SelectItem value="PRODUCT">Produtos</SelectItem>
-              <SelectItem value="RENTAL">Locações</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant={showInactive ? 'default' : 'outline'} onClick={() => onShowInactiveChange(!showInactive)}>
-            {showInactive ? 'Mostrando inativos' : 'Mostrar inativos'}
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Select value={typeFilter} onValueChange={onTypeFilterChange}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos os tipos</SelectItem>
+                <SelectItem value="SERVICE">Serviços</SelectItem>
+                <SelectItem value="PRODUCT">Produtos</SelectItem>
+                <SelectItem value="RENTAL">Locações</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button size="sm" variant={showInactive ? 'default' : 'outline'} onClick={() => onShowInactiveChange(!showInactive)}>
+              {showInactive ? 'Mostrando inativos' : 'Mostrar inativos'}
+            </Button>
+          </div>
         </div>
       </div>
 
