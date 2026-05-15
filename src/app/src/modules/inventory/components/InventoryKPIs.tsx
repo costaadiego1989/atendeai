@@ -15,7 +15,7 @@ export function InventoryKPIs({
   connectionCount,
 }: InventoryKPIsProps) {
   return (
-    <div className="card-grid mb-6">
+    <div className="card-grid">
       <KPICard
         title="Itens monitorados"
         value={itemCount}
