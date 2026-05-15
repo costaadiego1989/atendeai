@@ -104,7 +104,7 @@ export class SalesPage extends BasePage {
     this.executiveSection = page.getByText('Leitura executiva');
     this.recentCheckoutsSection = page.getByText('Checkouts recentes');
     this.metricsLoadingText = page.getByText('Carregando metricas comerciais...');
-    this.metricsErrorState = page.getByText(/não foi possivel carregar o painel/i);
+    this.metricsErrorState = page.getByText(/não foi possível carregar o painel/i);
 
     // Payment Links
     this.paymentLinksHeading = page.getByRole('heading', { name: /Cobranças/i }).first();
