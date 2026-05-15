@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 
-export type InventoryAsyncJobType = 'EXPORT_INVENTORY_REPORT_CSV';
+export type InventoryAsyncJobType = 'EXPORT_INVENTORY_REPORT_CSV' | 'SYNC_INVENTORY_CONNECTION';
 export type InventoryAsyncJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
 interface InventoryAsyncJobRow {
