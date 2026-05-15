@@ -566,16 +566,17 @@ export default function ConversationsPage() {
 
       <MessagingKPIs stats={queueStats} />
 
-      <div className="glass-card flex flex-col gap-4 p-4 lg:flex-row lg:items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={vm.search}
-            onChange={(event) => vm.setSearch(event.target.value)}
-            placeholder="Buscar conversa, telefone ou mensagem"
-            className="h-11 rounded-xl bg-background/50 pl-10"
-          />
-        </div>
+      <div className="glass-card p-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={vm.search}
+              onChange={(event) => vm.setSearch(event.target.value)}
+              placeholder="Buscar conversa, telefone ou mensagem"
+              className="pl-9"
+            />
+          </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 rounded-xl bg-muted/30 p-1">
@@ -617,7 +618,7 @@ export default function ConversationsPage() {
                 )
               }
             >
-              <SelectTrigger className="h-11 w-[180px] rounded-xl bg-background/50">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -635,7 +636,7 @@ export default function ConversationsPage() {
                 vm.setChannelFilter(value as 'ALL' | 'WHATSAPP' | 'INSTAGRAM')
               }
             >
-              <SelectTrigger className="h-11 w-[160px] rounded-xl bg-background/50">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="Canal" />
               </SelectTrigger>
               <SelectContent>
