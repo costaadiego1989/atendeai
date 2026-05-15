@@ -13,7 +13,7 @@ export const CheckoutHeader: React.FC<CheckoutHeaderProps> = ({
   onOpenAbandonmentConfig,
 }) => {
   return (
-    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <h1 className="page-title text-2xl font-bold tracking-tight">Checkout e Pedidos</h1>
         <p className="page-description text-muted-foreground">
@@ -23,19 +23,20 @@ export const CheckoutHeader: React.FC<CheckoutHeaderProps> = ({
       <div className="flex flex-wrap gap-3">
         <ModuleAgentRuleButton
           moduleId="checkout"
-          buttonSize="default"
-          className="h-11 rounded-xl px-5"
+          buttonSize="sm"
         />
         <Button
           variant="outline"
-          className="h-11 gap-2 rounded-xl px-5"
+          size="sm"
+          className="gap-2"
           onClick={onOpenAbandonmentConfig}
         >
           <MessageSquareText className="h-4 w-4" />
           Carrinho Abandonado
         </Button>
         <Button
-          className="h-11 gap-2 rounded-xl px-5"
+          size="sm"
+          className="gap-2"
           onClick={onOpenShippingPolicy}
         >
           <Settings2 className="h-4 w-4" />
