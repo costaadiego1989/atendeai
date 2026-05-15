@@ -117,6 +117,7 @@ export class LoginUseCase implements ILoginUseCase {
       refreshSessionId,
       this.tokenService.getRefreshTokenTtlSeconds(),
     );
+    await this.authUserRepo.updateLastLogin(user.id.toString());
     await this.recordAudit({
       eventType: 'LOGIN_SUCCEEDED',
       userId: user.id.toString(),

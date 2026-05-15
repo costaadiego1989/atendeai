@@ -81,6 +81,14 @@ export class PrismaAuthUserRepository implements IAuthUserRepository {
       `);
   }
 
+  async updateLastLogin(userId: string): Promise<void> {
+    await this.prisma.$executeRaw(Prisma.sql`
+        UPDATE tenant_schema.users
+        SET last_login_at = NOW()
+        WHERE id = ${userId}::uuid
+      `);
+  }
+
   private async findTenantBranches(tenantId: string): Promise<
     Array<{
       id: string;
