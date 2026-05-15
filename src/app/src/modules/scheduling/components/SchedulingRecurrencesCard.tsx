@@ -101,7 +101,7 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
         <SheetHeader>
           <SheetTitle>Novo atendimento recorrente</SheetTitle>
           <SheetDescription>
-            Venda um pacote de sessoes para o mesmo cliente, profissional, servico e horario.
+            Venda um pacote de sessões para o mesmo cliente, profissional, serviço e horário.
           </SheetDescription>
         </SheetHeader>
 
@@ -422,7 +422,7 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
           <SheetHeader>
             <SheetTitle>Detalhes do recorrente</SheetTitle>
             <SheetDescription>
-              Contrato recorrente e informacoes das sessoes geradas para a agenda.
+              Contrato recorrente e informações das sessões geradas para a agenda.
             </SheetDescription>
           </SheetHeader>
 
@@ -447,11 +447,11 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
                 </p>
                 <p className="mt-1">
                   {selectedRecurrence.occurrencesCreated}/{selectedRecurrence.maxOccurrences}{' '}
-                  sessoes geradas
+                  sessões geradas
                 </p>
                 {selectedRecurrence.nextDate ? (
                   <p className="mt-1">
-                    Proxima geracao em {formatRecurrenceDateRange(selectedRecurrence.nextDate)}
+                    Próxima geração em {formatRecurrenceDateRange(selectedRecurrence.nextDate)}
                   </p>
                 ) : null}
               </div>
@@ -476,7 +476,7 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
                 <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-muted-foreground">
                   <p className="font-medium text-foreground">Consulta online</p>
                   <p className="mt-1">
-                    O link do Google Meet fica disponivel nos detalhes de cada sessao gerada na
+                    O link do Google Meet fica disponível nos detalhes de cada sessão gerada na
                     agenda do dia.
                   </p>
                 </div>
@@ -523,7 +523,7 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
                       <p className="mt-1 text-xs text-muted-foreground">
                         {professional.phone
                           ? formatPhone(professional.phone)
-                          : 'Telefone para confirmacoes nao definido'}
+                          : 'Telefone para confirmações não definido'}
                       </p>
                     </div>
                     <StatusBadge status={professional.active ? 'ACTIVE' : 'CLOSED'} />
@@ -666,12 +666,12 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
                               ciclo(s)
                             </p>
                             <p className="mt-1">
-                              {recurrence.occurrencesCreated}/{recurrence.maxOccurrences} sessoes
+                              {recurrence.occurrencesCreated}/{recurrence.maxOccurrences} sessões
                               geradas
                             </p>
                             {recurrence.nextDate ? (
                               <p className="mt-1">
-                                Proxima geracao em {formatRecurrenceDateRange(recurrence.nextDate)}
+                                Próxima geração em {formatRecurrenceDateRange(recurrence.nextDate)}
                               </p>
                             ) : null}
                             {recurrence.status === 'ACTIVE' ? (
@@ -698,7 +698,7 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
                     <EmptyState
                       icon={CalendarRange}
                       title="Sem atendimentos recorrentes"
-                      description="Crie um pacote recorrente para vender sessoes por cliente, servico e horario."
+                      description="Crie um pacote recorrente para vender sessões por cliente, serviço e horário."
                     />
                   )}
                 </>
