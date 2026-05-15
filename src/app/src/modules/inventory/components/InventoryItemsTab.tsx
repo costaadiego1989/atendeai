@@ -85,7 +85,7 @@ export function InventoryItemsTab({
             variant={showAvailableOnly ? 'default' : 'outline'}
             onClick={onToggleAvailableOnly}
           >
-            {showAvailableOnly ? 'Somente disponiveis' : 'Filtrar disponiveis'}
+            {showAvailableOnly ? 'Somente disponíveis' : 'Filtrar disponíveis'}
           </Button>
         </div>
       </div>
