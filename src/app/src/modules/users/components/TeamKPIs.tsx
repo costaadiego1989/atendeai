@@ -10,7 +10,7 @@ interface TeamKPIsProps {
 
 export function TeamKPIs({ total, admins, agents, active }: TeamKPIsProps) {
   return (
-    <div className="card-grid mb-8">
+    <div className="card-grid">
       <KPICard
         title="Total da Equipe"
         value={total}
