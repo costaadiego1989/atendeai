@@ -27,7 +27,7 @@ export default function ContactsListPage() {
 
       <AsyncOperationsPanel
         title="Processamentos em andamento"
-        description="Importações e exportações grandes continuam em segundo plano. Você pode seguir usando a tela enquanto a fila avança."
+        description="Processando em segundo plano — você pode continuar usando normalmente."
         items={vm.activeJobItems}
       />
 
@@ -39,7 +39,6 @@ export default function ContactsListPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">Relatório de contatos</p>
-              <p className="text-xs text-muted-foreground">Lista e CSV usam etapa e periodo selecionados.</p>
             </div>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
