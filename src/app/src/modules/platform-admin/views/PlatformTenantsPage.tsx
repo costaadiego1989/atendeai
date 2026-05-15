@@ -61,7 +61,7 @@ export default function PlatformTenantsPage() {
 
   if (vm.configErrorMessage) {
     return (
-      <div className="page-container animate-fade-in space-y-6">
+      <div className="page-container animate-fade-in">
         <PlatformTenantsHeader />
         <Alert variant="destructive">
           <ShieldAlert className="h-4 w-4" />
@@ -73,7 +73,7 @@ export default function PlatformTenantsPage() {
   }
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
+    <div className="page-container animate-fade-in">
       <PlatformTenantsHeader />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
