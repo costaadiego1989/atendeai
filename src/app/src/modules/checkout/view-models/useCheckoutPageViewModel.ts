@@ -569,7 +569,7 @@ export function useCheckoutPageViewModel() {
       toast({
         title: 'Falha ao mover pedido',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'Nao foi possivel atualizar o status do pedido.',
+          fallbackMessage: 'Nao foi possível atualizar o status do pedido.',
         }),
         variant: 'destructive',
       });
