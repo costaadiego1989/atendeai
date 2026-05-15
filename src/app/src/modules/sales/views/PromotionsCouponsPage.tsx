@@ -6,15 +6,14 @@ import { PageTabsList } from '@/components/PageTabs';
 
 export function PromotionsCouponsPage() {
   return (
-    <div className="page-container animate-fade-in space-y-6">
-      <div className="page-header mb-8">
-        <h1 className="page-title flex items-center gap-2">
-          <Gift className="h-6 w-6 text-primary" />
-          Promoções & Cupons
-        </h1>
-        <p className="page-description mt-1">
-          Gerencie ofertas comerciais, descontos programados e cupons de ativação.
-        </p>
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="page-title">Promoções & Cupons</h1>
+          <p className="page-description mt-1">
+            Gerencie ofertas comerciais, descontos programados e cupons de ativação.
+          </p>
+        </div>
       </div>
 
       <Tabs defaultValue="promotions" className="w-full">
