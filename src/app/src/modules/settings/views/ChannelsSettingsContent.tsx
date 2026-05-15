@@ -12,60 +12,39 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
+import { KPICard } from '@/shared/ui/KPICard';
 import { useChannelsSettingsViewModel } from '@/modules/settings/view-models/useChannelsSettingsViewModel';
 export function ChannelsSettingsContent() {
   const vm = useChannelsSettingsViewModel();
   const connection = vm.connection;
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
-      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="page-title">Canais</h1>
           <p className="page-description">
-            Conecte multiplos números por Matriz ou filial, acompanhe a ativação via Twilio e vincule contas do Instagram para cada Operação.
+            Conecte múltiplos números por Matriz ou filial, acompanhe a ativação via Twilio e vincule contas do Instagram para cada Operação.
           </p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="glass-card">
-          <CardContent className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">
-              Escopos
-            </p>
-            <p className="mt-2 text-2xl font-bold text-foreground">{vm.stats.totalScopes}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Matriz e filiais disponiveis para conexão.
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card">
-          <CardContent className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">
-              WhatsApp ativo
-            </p>
-            <p className="mt-2 text-2xl font-bold text-foreground">
-              {vm.stats.whatsappConnectedCount}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              números prontos para operar na Twilio.
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="glass-card">
-          <CardContent className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-muted-foreground">
-              Instagram ativo
-            </p>
-            <p className="mt-2 text-2xl font-bold text-foreground">
-              {vm.stats.instagramConnectedCount}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Contas vinculadas ao escopo operacional.
-            </p>
-          </CardContent>
-        </Card>
+        <KPICard
+          title="Escopos"
+          value={vm.stats.totalScopes}
+          subtitle="Matriz e filiais disponíveis para conexão."
+        />
+        <KPICard
+          title="WhatsApp ativo"
+          value={vm.stats.whatsappConnectedCount}
+          subtitle="números prontos para operar na Twilio."
+        />
+        <KPICard
+          title="Instagram ativo"
+          value={vm.stats.instagramConnectedCount}
+          subtitle="Contas vinculadas ao escopo operacional."
+        />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
@@ -317,7 +296,7 @@ export function ChannelsSettingsContent() {
                   onChange={(event) => vm.setInstagramAccountId(event.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Se preferir, voce ainda pode colar o ID manualmente. Esse escopo ficara responsavel pelas conversas deste canal.
+                  Se preferir, você ainda pode colar o ID manualmente. Esse escopo ficará responsável pelas conversas deste canal.
                 </p>
               </div>
 
