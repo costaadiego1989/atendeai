@@ -12,7 +12,7 @@ type Props = {
 
 export function ProposalsKPIs({ total, draft, scheduled, sent, totalValue }: Props) {
   return (
-    <div className="card-grid mb-6">
+    <div className="card-grid">
       <KPICard
         title="Propostas"
         value={total}
