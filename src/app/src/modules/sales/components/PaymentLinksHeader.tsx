@@ -1,4 +1,4 @@
-import { CreditCard, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PaymentLinksHeaderProps {
@@ -8,12 +8,9 @@ interface PaymentLinksHeaderProps {
 
 export function PaymentLinksHeader({ onNewLink, isAccountConfigured }: PaymentLinksHeaderProps) {
   return (
-    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between mb-8">
+    <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
-        <h1 className="page-title flex items-center gap-2">
-          <CreditCard className="h-6 w-6 text-primary" />
-          Cobranças
-        </h1>
+        <h1 className="page-title">Cobranças</h1>
         <p className="page-description mt-1">
           Crie cobranças com split para a empresa, envie pelo WhatsApp e acompanhe o status do checkout como parte da operação financeira.
         </p>
