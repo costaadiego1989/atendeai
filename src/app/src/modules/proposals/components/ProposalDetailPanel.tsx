@@ -1,5 +1,6 @@
 import { CalendarClock, FileText, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
@@ -60,8 +61,8 @@ type ProposalMetaInfoCardProps = {
 
 function ProposalMetaInfoCard({ title, value }: ProposalMetaInfoCardProps) {
   return (
-    <div className="rounded-3xl border border-border/60 bg-background/60 p-4 shadow-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+    <div className="rounded-2xl border border-border/60 bg-background/60 p-4 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
         {title}
       </p>
       <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
@@ -105,7 +106,7 @@ export function ProposalDetailPanel({
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-2">
-              <CardTitle className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground">
                 Detalhes da proposta
               </CardTitle>
               <div className="flex flex-wrap items-center gap-2">
@@ -140,23 +141,23 @@ export function ProposalDetailPanel({
 
       <CardContent className="space-y-5 p-5">
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)]">
-          <div className="rounded-3xl border border-border/60 bg-background/60 p-5 shadow-sm">
+          <div className="rounded-2xl border border-border/60 bg-background/60 p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Valor
               </p>
               {finalPrice !== null ? (
                 <Badge variant="outline" className="shrink-0 rounded-full px-2.5 py-1 text-[11px]">
-                  Preco final
+                  Preço final
                 </Badge>
               ) : null}
             </div>
             <div className="mt-3 space-y-1">
-              <p className="text-3xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(effectiveTotal) ?? 'R$ 0,00'}
               </p>
               <p className="text-sm text-muted-foreground">
-                {proposal.items.length} item(s) compoem esta proposta
+                {proposal.items.length} item(s) compõem esta proposta
               </p>
               {finalPrice !== null ? (
                 <p className="text-xs text-muted-foreground">
@@ -166,8 +167,8 @@ export function ProposalDetailPanel({
             </div>
           </div>
 
-          <div className="rounded-3xl border border-border/60 bg-background/60 p-5 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+          <div className="rounded-2xl border border-border/60 bg-background/60 p-5 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Jornada comercial
             </p>
             <div className="mt-3 grid gap-2.5">
@@ -187,7 +188,7 @@ export function ProposalDetailPanel({
         <div className="grid gap-4 md:grid-cols-2">
           <ProposalMetaInfoCard
             title="Agendamento"
-            value={proposal.scheduledAt ? 'Programado' : 'Nao programado'}
+            value={proposal.scheduledAt ? 'Programado' : 'Não programado'}
           />
           <ProposalMetaInfoCard
             title="Validade"
@@ -202,17 +203,17 @@ export function ProposalDetailPanel({
         {proposal.description || proposal.benefits ? (
           <div className="grid gap-4 lg:grid-cols-2">
             {proposal.description ? (
-              <div className="rounded-3xl border border-border/60 bg-background/60 p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                  Descricao
+              <div className="rounded-2xl border border-border/60 bg-background/60 p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Descrição
                 </p>
                 <p className="mt-3 text-sm leading-6 text-foreground/90">{proposal.description}</p>
               </div>
             ) : null}
             {proposal.benefits ? (
-              <div className="rounded-3xl border border-border/60 bg-background/60 p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                  Beneficios
+              <div className="rounded-2xl border border-border/60 bg-background/60 p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Benefícios
                 </p>
                 <p className="mt-3 text-sm leading-6 text-foreground/90">{proposal.benefits}</p>
               </div>
@@ -222,7 +223,7 @@ export function ProposalDetailPanel({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               Itens da proposta
             </h3>
             <Badge variant="secondary">{proposal.items.length} item(s)</Badge>
@@ -232,7 +233,7 @@ export function ProposalDetailPanel({
             {proposal.items.map((item, index) => (
               <div
                 key={`${item.name}-${index}`}
-                className="rounded-3xl border border-border/60 bg-background/60 p-4"
+                className="rounded-2xl border border-border/60 bg-background/60 p-4"
               >
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-1">
@@ -241,7 +242,7 @@ export function ProposalDetailPanel({
                       <p className="text-sm text-muted-foreground">{item.description}</p>
                     ) : null}
                     <p className="text-xs text-muted-foreground">
-                      Quantidade: {item.quantity} | Valor unitario:{' '}
+                      Quantidade: {item.quantity} | Valor unitário:{' '}
                       {formatCurrency(item.unitPrice) ?? 'R$ 0,00'}
                     </p>
                   </div>
@@ -254,38 +255,35 @@ export function ProposalDetailPanel({
           </div>
         </div>
 
-        <div className="rounded-3xl border border-primary/15 bg-primary/5 p-5">
+        <div className="rounded-2xl border border-primary/15 bg-primary/5 p-5">
           <p className="text-sm font-semibold text-foreground">Fluxo de envio automatizado</p>
           <p className="mt-1 text-sm text-muted-foreground">
             O envio principal desta proposta acontece pela conversa com um link do contrato digital.
-            Depois do aceite, o cliente segue para o pagamento e o webhook confirma a conclusao no chat.
+            Depois do aceite, o cliente segue para o pagamento e o webhook confirma a conclusão no chat.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="inline-flex items-center rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onSend(proposal)}
             >
               Enviar na conversa
-            </button>
+            </Button>
             {proposal.pdfUrl ? (
-              <button
-                type="button"
-                className="inline-flex items-center rounded-xl border border-border/60 bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => onGeneratePdf(proposal)}
               >
                 Baixar PDF gerado
-              </button>
+              </Button>
             ) : null}
             {publicUrl ? (
-              <a
-                href={publicUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center rounded-xl border border-border/60 bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/40"
-              >
-                Abrir contrato
-              </a>
+              <Button asChild variant="outline" size="sm">
+                <a href={publicUrl} target="_blank" rel="noreferrer">
+                  Abrir contrato
+                </a>
+              </Button>
             ) : null}
           </div>
         </div>
