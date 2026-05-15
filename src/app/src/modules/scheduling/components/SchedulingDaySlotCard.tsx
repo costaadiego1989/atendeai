@@ -237,7 +237,7 @@ export function SchedulingDaySlotCard({
           {slot.payment ? (
             <p className="mt-1">
               {slot.status === 'PRE_RESERVED'
-                ? `Pagamento pendente ate ${slot.payment.expiresAt?.slice(11, 16) ?? 'o prazo configurado'}.`
+                ? `Pagamento pendente até ${slot.payment.expiresAt?.slice(11, 16) ?? 'o prazo configurado'}.`
                 : `Pagamento ${slot.payment.status === 'PAID' ? 'confirmado' : 'registrado'}.`}
             </p>
           ) : null}
