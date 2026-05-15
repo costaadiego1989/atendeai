@@ -61,9 +61,6 @@ export function PaymentLinksPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">Relatório de Cobranças</p>
-              <p className="text-xs text-muted-foreground">
-                Indicadores, lista e CSV usam o mesmo periodo.
-              </p>
             </div>
           </div>
 
@@ -90,7 +87,7 @@ export function PaymentLinksPage() {
         </CardContent>
       </Card>
 
-      <div className="card-grid mb-6">
+      <div className="card-grid">
         <KPICard
           title="Cobranças geradas"
           value={summary?.totalLinks ?? 0}
