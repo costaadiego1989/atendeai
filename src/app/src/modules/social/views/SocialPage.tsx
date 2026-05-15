@@ -18,26 +18,20 @@ export function SocialPage() {
   const vm = useSocialPageViewModel();
 
   return (
-    <div className="flex flex-col gap-6 p-6 max-w-[1400px] mx-auto w-full page-container animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+    <div className="page-container animate-fade-in">
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Engajamento Social
-              </h1>
-              <p className="text-muted-foreground mt-1 text-sm flex items-center gap-2">
-                Central de automação de Instagram e interações de redes sociais.
-                <Badge variant="secondary" className="px-2 font-normal text-[10px] uppercase tracking-widest bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">Beta</Badge>
-              </p>
-            </div>
-          </div>
+          <h1 className="page-title">Engajamento Social</h1>
+          <p className="page-description mt-1 flex items-center gap-2">
+            Responda comentários do Instagram automaticamente com IA.
+            <Badge variant="secondary" className="px-2 font-normal text-[10px] uppercase tracking-widest bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">Beta</Badge>
+          </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2" onClick={() => vm.actions.setSettingsOpen(true)}>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => vm.actions.setSettingsOpen(true)}>
             <Settings2 className="w-4 h-4" /> Configurações
           </Button>
-          <Button className="gap-2 shadow-lg shadow-primary/20" onClick={() => vm.actions.setNewRuleOpen(true)}>
+          <Button size="sm" className="gap-2" onClick={() => vm.actions.setNewRuleOpen(true)}>
             <Plus className="w-4 h-4" /> Nova Regra
           </Button>
         </div>
@@ -164,7 +158,7 @@ export function SocialPage() {
                         </div>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center justify-between">
-                          <p className="text-sm font-bold truncate tracking-tight">@{c.authorUsername || 'usuario'}</p>
+                          <p className="text-sm font-bold truncate tracking-tight">@{c.authorUsername || 'usuário'}</p>
                             <span className="text-xs text-muted-foreground">{new Date(c.receivedAt).toLocaleString('pt-BR')}</span>
                           </div>
                           <p className="text-sm text-foreground/90 py-1">{c.text}</p>
@@ -207,7 +201,7 @@ export function SocialPage() {
                             {(vm.state.selectedComment?.authorUsername?.[0] || 'U').toUpperCase()}
                           </div>
                           <div className="bg-muted p-3.5 rounded-2xl rounded-tl-sm text-sm border shadow-sm">
-                            <p className="font-semibold text-xs mb-1 text-primary">@{vm.state.selectedComment?.authorUsername || 'usuario'}</p>
+                            <p className="font-semibold text-xs mb-1 text-primary">@{vm.state.selectedComment?.authorUsername || 'usuário'}</p>
                             {vm.state.selectedComment?.text}
                           </div>
                         </div>
