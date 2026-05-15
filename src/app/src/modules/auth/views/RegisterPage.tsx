@@ -192,7 +192,7 @@ export default function RegisterPage() {
             <Input
               id="ownerEmail"
               type="email"
-              placeholder="voce@empresa.com"
+              placeholder="você@empresa.com"
               {...register('ownerEmail')}
             />
             {errors.ownerEmail && (
