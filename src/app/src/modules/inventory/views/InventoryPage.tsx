@@ -37,7 +37,7 @@ export default function InventoryPage() {
 
       <AsyncOperationsPanel
         title="Processamentos em andamento"
-        description="As exportações grandes do estoque continuam em segundo plano sem travar a operação."
+        description="Processando em segundo plano — você pode continuar usando normalmente."
         items={vm.activeJobItems}
       />
 
@@ -49,9 +49,6 @@ export default function InventoryPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">Relatório do estoque</p>
-              <p className="text-xs text-muted-foreground">
-                A lista e o CSV usam busca, disponibilidade e status selecionados.
-              </p>
             </div>
           </div>
 
@@ -59,7 +56,7 @@ export default function InventoryPage() {
             <div className="grid grid-cols-3 rounded-xl border border-border/60 bg-background/60 p-1">
               {[
                 { value: 'ALL', label: 'Todos' },
-                { value: 'AVAILABLE', label: 'Disponivel' },
+                { value: 'AVAILABLE', label: 'Disponível' },
                 { value: 'LOW_STOCK', label: 'Baixo' },
               ].map((option) => (
                 <Button
@@ -126,12 +123,13 @@ export default function InventoryPage() {
             connections={connections}
             isLoading={vm.connectionsQuery.isLoading}
             onNewConnection={() => navigate('/app/settings/integrations')}
-            onSyncConnection={(id) => vm.syncConnectionMutation.mutate(id)}
+            onSyncConnection={(id, name) => vm.syncConnectionMutation.mutate({ connectionId: id, providerName: name })}
             syncPendingConnectionId={
               vm.syncConnectionMutation.isPending && vm.syncConnectionMutation.variables != null
-                ? vm.syncConnectionMutation.variables
+                ? vm.syncConnectionMutation.variables.connectionId
                 : null
             }
+            lastSyncResult={vm.lastSyncResult}
           />
         </TabsContent>
 
