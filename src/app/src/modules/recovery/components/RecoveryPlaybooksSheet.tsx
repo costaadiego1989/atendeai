@@ -42,14 +42,14 @@ export function RecoveryPlaybooksSheet({ vm }: { vm: RecoveryPageViewModel }) {
       await qc.invalidateQueries({ queryKey: ['recovery-cases', tenantId], exact: false });
       setNewName('');
       toast({
-        title: 'Playbook criado',
+        title: 'Roteiro criado',
         description:
-          'Revise as fases abaixo e clique em Activar para que novos casos usem este roteiro (com RECOVERY_PLAYBOOKS_ENABLED na API).',
+          'Revise as fases abaixo e clique em Ativar para que novos casos usem este roteiro.',
       });
     },
     onError: (error) => {
       toast({
-        title: 'Falha ao criar playbook',
+        title: 'Falha ao criar roteiro',
         description: getFriendlyErrorMessage(error, {
           fallbackMessage: 'Verifique os dados e tente novamente.',
         }),
@@ -66,13 +66,12 @@ export function RecoveryPlaybooksSheet({ vm }: { vm: RecoveryPageViewModel }) {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <BookMarked className="h-5 w-5" />
-            Playbooks de cobrança
+            Roteiros de cobrança
           </SheetTitle>
           <SheetDescription className="text-left leading-relaxed">
-            Um playbook é um <strong>roteiro em fases</strong>: você define quando cada mensagem pode ser enviada (dias em atraso,
+            Um roteiro é uma <strong>sequência em fases</strong>: você define quando cada mensagem pode ser enviada (dias em atraso,
             tempo desde o envio anterior) e se o texto vem da <strong>IA</strong> ou de um <strong>modelo</strong> com variáveis.
-            Novos casos podem ser ligados ao playbook activo automaticamente quando a API está com{' '}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">RECOVERY_PLAYBOOKS_ENABLED=true</code>.
+            Novos casos podem ser ligados ao roteiro ativo automaticamente quando a configuração estiver habilitada.
           </SheetDescription>
         </SheetHeader>
 
@@ -90,15 +89,15 @@ export function RecoveryPlaybooksSheet({ vm }: { vm: RecoveryPageViewModel }) {
                 A preparar…
               </>
             ) : (
-              'Garantir playbook padrão'
+              'Garantir roteiro padrão'
             )}
           </Button>
         </div>
 
         <div className="mt-8 space-y-3 rounded-xl border border-border/60 bg-muted/15 p-4">
-          <p className="text-sm font-semibold text-foreground">Criar playbook simples</p>
+          <p className="text-sm font-semibold text-foreground">Criar roteiro simples</p>
           <p className="text-xs text-muted-foreground">
-            Uma primeira fase em modo IA no WhatsApp. Depois pode criar outros playbooks pela API ou expandir este fluxo.
+            Uma primeira fase em modo IA no WhatsApp. Depois você pode criar outros roteiros ou expandir este fluxo.
           </p>
           <div className="space-y-2">
             <Label htmlFor="recovery-new-playbook-name">Nome</Label>
@@ -121,18 +120,18 @@ export function RecoveryPlaybooksSheet({ vm }: { vm: RecoveryPageViewModel }) {
                 Criando…
               </>
             ) : (
-              'Criar playbook'
+              'Criar roteiro'
             )}
           </Button>
         </div>
 
         <div className="mt-8">
-          <p className="text-sm font-semibold text-foreground">Playbooks do tenant</p>
+          <p className="text-sm font-semibold text-foreground">Roteiros do tenant</p>
           {vm.playbooksQuery.isLoading ? (
             <p className="mt-3 text-sm text-muted-foreground">A carregar…</p>
           ) : rows.length === 0 ? (
             <p className="mt-3 text-sm text-muted-foreground">
-              Nenhum playbook ainda. Use &quot;Garantir playbook padrão&quot; para criar o modelo inicial do sistema.
+              Nenhum roteiro ainda. Use &quot;Garantir roteiro padrão&quot; para criar o modelo inicial do sistema.
             </p>
           ) : (
             <ul className="mt-3 space-y-2">
