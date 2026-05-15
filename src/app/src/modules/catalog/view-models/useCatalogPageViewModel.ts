@@ -381,7 +381,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao exportar catalogo',
         description:
-          activeReportJob.errorMessage ?? 'não foi possivel gerar o CSV do catalogo.',
+          activeReportJob.errorMessage ?? 'não foi possível gerar o CSV do catalogo.',
         variant: 'destructive',
       });
     }
@@ -414,7 +414,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao importar catalogo',
         description:
-          activeImportJob.errorMessage ?? 'não foi possivel processar a base agora.',
+          activeImportJob.errorMessage ?? 'não foi possível processar a base agora.',
         variant: 'destructive',
       });
     }
@@ -474,7 +474,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao criar categoria',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar a categoria agora.',
+          fallbackMessage: 'não foi possível criar a categoria agora.',
         }),
         variant: 'destructive',
       });
@@ -501,7 +501,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao atualizar categoria',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel atualizar a categoria agora.',
+          fallbackMessage: 'não foi possível atualizar a categoria agora.',
         }),
         variant: 'destructive',
       });
@@ -523,7 +523,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao remover categoria',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel remover a categoria agora.',
+          fallbackMessage: 'não foi possível remover a categoria agora.',
         }),
         variant: 'destructive',
       });
@@ -562,7 +562,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao criar item',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar o item agora.',
+          fallbackMessage: 'não foi possível criar o item agora.',
         }),
         variant: 'destructive',
       });
@@ -597,7 +597,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao atualizar item',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel atualizar o item agora.',
+          fallbackMessage: 'não foi possível atualizar o item agora.',
         }),
         variant: 'destructive',
       });
@@ -619,7 +619,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao remover item',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel remover o item agora.',
+          fallbackMessage: 'não foi possível remover o item agora.',
         }),
         variant: 'destructive',
       });
@@ -642,7 +642,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha no upload',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel carregar a imagem.',
+          fallbackMessage: 'não foi possível carregar a imagem.',
         }),
         variant: 'destructive',
       });
@@ -674,7 +674,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao iniciar exportação',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enfileirar o relatorio agora.',
+          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
         }),
         variant: 'destructive',
       });
@@ -736,7 +736,7 @@ export function useCatalogPageViewModel() {
       toast({
         title: 'Falha ao iniciar importação',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enfileirar a importação agora.',
+          fallbackMessage: 'não foi possível enfileirar a importação agora.',
         }),
         variant: 'destructive',
       });
