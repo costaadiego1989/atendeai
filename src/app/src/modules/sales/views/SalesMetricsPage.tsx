@@ -19,62 +19,61 @@ export function SalesMetricsPage() {
 
   return (
     <div className="page-container animate-fade-in">
-      <div className="page-header space-y-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="space-y-2">
-            <h1 className="page-title">Metricas de vendas</h1>
-            <p className="page-description">
-              Painel executivo do funil comercial e das Cobranças emitidas em {vm.rangeLabel}.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <ModuleAgentRuleButton moduleId="sales" buttonSize="sm" />
-            <div className="rounded-2xl border border-border/60 bg-background/80 p-1">
-              <Button
-                size="sm"
-                variant={vm.range === '7d' ? 'default' : 'ghost'}
-                onClick={() => vm.setRange('7d')}
-              >
-                7 dias
-              </Button>
-              <Button
-                size="sm"
-                variant={vm.range === '30d' ? 'default' : 'ghost'}
-                onClick={() => vm.setRange('30d')}
-              >
-                30 dias
-              </Button>
-              <Button
-                size="sm"
-                variant={vm.range === '90d' ? 'default' : 'ghost'}
-                onClick={() => vm.setRange('90d')}
-              >
-                90 dias
-              </Button>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                void vm.metricsQuery.refetch();
-                void vm.recentChargesQuery.refetch();
-              }}
-            >
-              Atualizar
-            </Button>
-          </div>
+      <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-2">
+          <h1 className="page-title">Métricas de vendas</h1>
+          <p className="page-description">
+            Acompanhe suas vendas e cobranças dos últimos {vm.rangeLabel}.
+          </p>
         </div>
 
-        <Card className="glass-card overflow-hidden border-primary/15">
+        <div className="flex flex-wrap items-center gap-2">
+          <ModuleAgentRuleButton moduleId="sales" buttonSize="sm" />
+          <div className="rounded-2xl border border-border/60 bg-background/80 p-1">
+            <Button
+              size="sm"
+              variant={vm.range === '7d' ? 'default' : 'ghost'}
+              onClick={() => vm.setRange('7d')}
+            >
+              7 dias
+            </Button>
+            <Button
+              size="sm"
+              variant={vm.range === '30d' ? 'default' : 'ghost'}
+              onClick={() => vm.setRange('30d')}
+            >
+              30 dias
+            </Button>
+            <Button
+              size="sm"
+              variant={vm.range === '90d' ? 'default' : 'ghost'}
+              onClick={() => vm.setRange('90d')}
+            >
+              90 dias
+            </Button>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              void vm.metricsQuery.refetch();
+              void vm.recentChargesQuery.refetch();
+            }}
+          >
+            Atualizar
+          </Button>
+        </div>
+      </div>
+
+      <Card className="glass-card overflow-hidden border-primary/15">
           <CardContent className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-2">
               <Badge className="rounded-full bg-primary/10 px-3 py-1 text-primary hover:bg-primary/10">
-                Radar comercial
+                Resumo do período
               </Badge>
               <p className="max-w-3xl text-sm text-muted-foreground">
-                Leia aqui a intensidade do interesse comercial, a velocidade de emissao
-                de checkouts e o quanto disso ja virou receita capturada.
+                Leia aqui a intensidade do interesse comercial, a velocidade de emissão
+                de checkouts e o quanto disso já virou receita capturada.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -105,9 +104,8 @@ export function SalesMetricsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="card-grid mb-6">
+      <div className="card-grid">
         <KPICard
           title="Mensagens comerciais"
           value={vm.summary.totalMessages}
@@ -145,7 +143,7 @@ export function SalesMetricsPage() {
           <CardContent className="flex min-h-[260px] items-center justify-center">
             <EmptyState
               icon={BarChart3}
-              title="não foi possivel carregar o painel"
+              title="Não foi possível carregar o painel"
               description="Tente atualizar em instantes para buscar as metricas do comercial."
             />
           </CardContent>
@@ -201,8 +199,8 @@ export function SalesMetricsPage() {
               <CardHeader className="space-y-2">
                 <CardTitle className="text-base">Leitura executiva</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Indicadores para decidir se o gargalo esta no interesse, na emissao
-                  de Cobranças ou na conversao em receita.
+                  Indicadores para decidir se o gargalo está no interesse, na emissão
+                  de Cobranças ou na conversão em receita.
                 </p>
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-2">
@@ -225,7 +223,7 @@ export function SalesMetricsPage() {
                     {formatSalesCurrency(vm.commercialRevenue.newSaleRevenue)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Valor ja confirmado em novos pedidos e checkouts
+                    Valor já confirmado em novos pedidos e checkouts
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border/60 bg-background/60 p-4">
