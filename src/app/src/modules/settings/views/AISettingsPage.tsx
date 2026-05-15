@@ -30,7 +30,7 @@ export function AISettingsPage() {
   const recoveryEnabled = watch('recovery.enabled');
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
+    <div className="page-container animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">IA Comercial</h1>
         <p className="page-description">
@@ -146,7 +146,7 @@ export function AISettingsPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Limiar de handoff</Label>
+                  <Label>Limiar de transferência</Label>
                   <p className="text-xs text-muted-foreground">
                     Define quando a conversa deve sair da IA e ir para o humano. Um valor maior deixa a IA mais
                     cautelosa; um valor menor deixa a automação tocar mais conversas sozinha.
@@ -159,7 +159,7 @@ export function AISettingsPage() {
                     {...register('confidenceThreshold')}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Isso impacta produtividade do time: mais handoff aumenta controle humano; menos handoff aumenta
+                    Isso impacta produtividade do time: mais transferências aumentam controle humano; menos transferências aumentam
                     escala da automação.
                   </p>
                 </div>
@@ -171,7 +171,7 @@ export function AISettingsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Mensagem de handoff</Label>
+                <Label>Mensagem de transferência</Label>
                 <p className="text-xs text-muted-foreground">
                   É o texto que o cliente recebe quando a IA chama o time humano. Uma boa mensagem reduz atrito e
                   preserva a sensação de continuidade no atendimento.
