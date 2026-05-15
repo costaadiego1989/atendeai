@@ -1,4 +1,4 @@
-import { ShieldAlert } from 'lucide-react';
+import { Search, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,21 +76,19 @@ export default function PlatformTenantsPage() {
     <div className="page-container animate-fade-in">
       <PlatformTenantsHeader />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-md space-y-2">
-          <label htmlFor="platform-tenant-search" className="text-sm font-medium text-foreground">
-            Buscar empresa
-          </label>
-          <Input
-            id="platform-tenant-search"
-            placeholder="Empresa, CNPJ ou ID (parâmetro search na API)"
-            value={vm.listSearch}
-            onChange={(e) => vm.setListSearch(e.target.value)}
-            disabled={q.isFetching && !q.data}
-          />
-          <p className="text-xs text-muted-foreground">
-            Filtro repassado como <span className="font-mono">search</span> em GET /platform/tenants quando a API suportar.
-          </p>
+      <div className="glass-card p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative flex-1 lg:max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="platform-tenant-search"
+              placeholder="Buscar empresa, CNPJ ou ID..."
+              className="pl-9"
+              value={vm.listSearch}
+              onChange={(e) => vm.setListSearch(e.target.value)}
+              disabled={q.isFetching && !q.data}
+            />
+          </div>
         </div>
       </div>
 
