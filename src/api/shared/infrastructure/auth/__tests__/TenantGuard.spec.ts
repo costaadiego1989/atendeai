@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { TenantGuard } from '../guards/TenantGuard';
-import { UnauthorizedException } from '../../../domain/exceptions/DomainExceptions';
+import { ForbiddenException, UnauthorizedException } from '../../../domain/exceptions/DomainExceptions';
 
 describe('TenantGuard — Tenant Isolation', () => {
   let guard: TenantGuard;
@@ -41,7 +41,7 @@ describe('TenantGuard — Tenant Isolation', () => {
       { tenantId: 'tenant-1', sub: 'user-1', role: 'OWNER' },
     );
 
-    expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
+    expect(() => guard.canActivate(ctx)).toThrow(ForbiddenException);
     expect(() => guard.canActivate(ctx)).toThrow('tenant mismatch');
   });
 
@@ -51,7 +51,7 @@ describe('TenantGuard — Tenant Isolation', () => {
       { tenantId: 'tenant-victim', sub: 'malicious-user', role: 'AGENT' },
     );
 
-    expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
+    expect(() => guard.canActivate(ctx)).toThrow(ForbiddenException);
   });
 
   it('should throw MISSING_USER when no user is attached to request', () => {
@@ -89,7 +89,7 @@ describe('TenantGuard — Tenant Isolation', () => {
       { tenantId: 'tenant-1', sub: 'user-1', role: 'OWNER' },
     );
 
-    expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
+    expect(() => guard.canActivate(ctx)).toThrow(ForbiddenException);
   });
 
   it('should prevent horizontal privilege escalation between tenants', () => {
@@ -104,7 +104,7 @@ describe('TenantGuard — Tenant Isolation', () => {
           { tenantId: attackerTenant, sub: 'user-x', role: 'OWNER' },
         );
 
-        expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
+        expect(() => guard.canActivate(ctx)).toThrow(ForbiddenException);
       }
     }
   });
