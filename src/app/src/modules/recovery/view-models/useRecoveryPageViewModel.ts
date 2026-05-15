@@ -221,7 +221,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao activar playbook',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel activar agora.',
+          fallbackMessage: 'não foi possível activar agora.',
         }),
         variant: 'destructive',
       });
@@ -336,7 +336,7 @@ export function useRecoveryPageViewModel() {
         title: 'Falha ao exportar cobranças',
         description:
           recoveryActiveReportJob.errorMessage ??
-          'não foi possivel gerar o CSV da carteira.',
+          'não foi possível gerar o CSV da carteira.',
         variant: 'destructive',
       });
     }
@@ -436,7 +436,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao criar caso',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar o caso agora.',
+          fallbackMessage: 'não foi possível criar o caso agora.',
         }),
         variant: 'destructive',
       });
@@ -471,7 +471,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao preparar o primeiro contato',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel preparar a mensagem agora.',
+          fallbackMessage: 'não foi possível preparar a mensagem agora.',
         }),
         variant: 'destructive',
       });
@@ -521,7 +521,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao preparar primeiro contato',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel gerar a previa agora.',
+          fallbackMessage: 'não foi possível gerar a previa agora.',
         }),
         variant: 'destructive',
       });
@@ -558,7 +558,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao atualizar sugestão',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel gerar a sugestão agora.',
+          fallbackMessage: 'não foi possível gerar a sugestão agora.',
         }),
         variant: 'destructive',
       });
@@ -579,7 +579,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao enviar sugestão',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enviar a sugestão agora.',
+          fallbackMessage: 'não foi possível enviar a sugestão agora.',
         }),
         variant: 'destructive',
       });
@@ -615,7 +615,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao enviar cobrança',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel gerar a cobrança agora.',
+          fallbackMessage: 'não foi possível gerar a cobrança agora.',
         }),
         variant: 'destructive',
       });
@@ -644,7 +644,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao atualizar status',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel atualizar o status agora.',
+          fallbackMessage: 'não foi possível atualizar o status agora.',
         }),
         variant: 'destructive',
       });
@@ -678,7 +678,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao iniciar exportação',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enfileirar o relatorio agora.',
+          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
         }),
         variant: 'destructive',
       });
@@ -756,7 +756,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao agendar recorrência',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel agendar a recorrência agora.',
+          fallbackMessage: 'não foi possível agendar a recorrência agora.',
         }),
         variant: 'destructive',
       });
@@ -781,7 +781,7 @@ export function useRecoveryPageViewModel() {
       toast({
         title: 'Falha ao cancelar recorrência',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel cancelar a recorrência agora.',
+          fallbackMessage: 'não foi possível cancelar a recorrência agora.',
         }),
         variant: 'destructive',
       });
