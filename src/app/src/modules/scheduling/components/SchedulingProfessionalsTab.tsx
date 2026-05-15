@@ -101,7 +101,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
     ? vm.categories.find((category) => category.id === selectedRecurrence.categoryId)
     : null;
   function deleteRecurrence(recurrenceId: string) {
-    if (!window.confirm('Excluir este atendimento recorrente? As sessoes ja geradas permanecem na agenda.')) {
+    if (!window.confirm('Excluir este atendimento recorrente? As sessões já geradas permanecem na agenda.')) {
       return;
     }
 
@@ -133,7 +133,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
           <SheetHeader>
             <SheetTitle>Detalhes do recorrente</SheetTitle>
             <SheetDescription>
-              Contrato recorrente e sessoes geradas na agenda do profissional.
+              Contrato recorrente e sessões geradas na agenda do profissional.
             </SheetDescription>
           </SheetHeader>
 
@@ -149,9 +149,9 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
               </div>
               <div className="rounded-2xl border border-border/60 bg-muted/15 p-4 text-sm text-muted-foreground">
                 <p>{frequencyLabels[selectedRecurrence.period]} a cada {selectedRecurrence.interval} ciclo(s)</p>
-                <p className="mt-1">{selectedRecurrence.occurrencesCreated}/{selectedRecurrence.maxOccurrences} sessoes geradas</p>
+                <p className="mt-1">{selectedRecurrence.occurrencesCreated}/{selectedRecurrence.maxOccurrences} sessões geradas</p>
                 {selectedRecurrence.nextDate ? (
-                  <p className="mt-1">Proxima geracao em {formatRecurrenceDateRange(selectedRecurrence.nextDate)}</p>
+                  <p className="mt-1">Próxima geração em {formatRecurrenceDateRange(selectedRecurrence.nextDate)}</p>
                 ) : null}
               </div>
               <div className="rounded-2xl border border-border/60 bg-muted/15 p-4 text-sm">
@@ -171,7 +171,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
               {selectedRecurrence.isOnline ? (
                 <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-muted-foreground">
                   <p className="font-medium text-foreground">Consulta online</p>
-                  <p className="mt-1">O link do Google Meet aparece nos detalhes de cada sessao ja gerada na agenda do dia.</p>
+                  <p className="mt-1">O link do Google Meet aparece nos detalhes de cada sessão já gerada na agenda do dia.</p>
                 </div>
               ) : null}
               {selectedRecurrence.notes ? (
@@ -543,7 +543,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                             ciclo(s)
                           </p>
                           <p className="mt-1">
-                            {recurrence.occurrencesCreated}/{recurrence.maxOccurrences} sessoes
+                            {recurrence.occurrencesCreated}/{recurrence.maxOccurrences} sessões
                             geradas
                           </p>
                           {recurrence.nextDate ? (
@@ -589,7 +589,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                   <EmptyState
                     icon={CalendarRange}
                     title="Sem atendimentos recorrentes"
-                    description="Crie um pacote recorrente para vender sessoes por cliente, servico e horario."
+                    description="Crie um pacote recorrente para vender sessões por cliente, serviço e horário."
                   />
                 )}
               </>
@@ -921,7 +921,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                     <EmptyState
                       icon={Clock3}
                       title="Sem slots abertos neste dia"
-                      description="Os horários disponiveis e bloqueados aparecem aqui."
+                      description="Os horários disponíveis e bloqueados aparecem aqui."
                     />
                   )}
                 </TabsContent>
@@ -997,7 +997,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                               {slot.payment ? (
                                 <p className="mt-1">
                                   {slot.status === 'PRE_RESERVED'
-                                    ? `Pagamento pendente ate ${slot.payment.expiresAt?.slice(11, 16) ?? 'o prazo configurado'}.`
+                                    ? `Pagamento pendente até ${slot.payment.expiresAt?.slice(11, 16) ?? 'o prazo configurado'}.`
                                     : `Pagamento ${slot.payment.status === 'PAID' ? 'confirmado' : 'registrado'}.`}
                                 </p>
                               ) : null}
