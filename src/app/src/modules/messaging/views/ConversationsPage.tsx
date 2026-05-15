@@ -647,6 +647,7 @@ export default function ConversationsPage() {
             </Select>
           </div>
         </div>
+        </div>
       </div>
 
       <div className="flex h-[calc(100vh-10rem)] min-h-[680px] gap-4">
