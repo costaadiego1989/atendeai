@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O modulo cobre sessao de compra, carrinho, cupom, checkout, abandono e fulfillment. Ele e um dos caminhos mais diretos para gerar receita dentro da conversa.
+O modulo cobre sessão de compra, carrinho, cupom, checkout, abandono e fulfillment. Ele e um dos caminhos mais diretos para gerar receita dentro da conversa.
 
 ## Features de alto valor
 
