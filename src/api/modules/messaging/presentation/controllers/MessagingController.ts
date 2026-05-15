@@ -152,7 +152,7 @@ export class MessagingController {
     );
 
     if (!fileUrl) {
-      throw new BadRequestException('Nao foi possivel armazenar o arquivo');
+      throw new BadRequestException('Nao foi possível armazenar o arquivo');
     }
 
     const output = await this.sendHumanUseCase.execute({
