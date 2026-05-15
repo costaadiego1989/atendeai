@@ -187,7 +187,7 @@ async function ensureFacebookSdk(appId: string): Promise<FacebookSdk> {
 
       const finishInit = () => {
         if (!window.FB) {
-          reject(new Error('não foi possivel carregar o SDK do Facebook.'));
+          reject(new Error('não foi possível carregar o SDK do Facebook.'));
           return;
         }
 
@@ -210,7 +210,7 @@ async function ensureFacebookSdk(appId: string): Promise<FacebookSdk> {
         facebookSdkPromise = null;
         reject(
           new Error(
-            'não foi possivel carregar o SDK do Facebook para conectar o WhatsApp.',
+            'não foi possível carregar o SDK do Facebook para conectar o WhatsApp.',
           ),
         );
       };

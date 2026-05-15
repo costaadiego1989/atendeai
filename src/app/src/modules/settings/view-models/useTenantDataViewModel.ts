@@ -185,7 +185,7 @@ export function useTenantDataViewModel() {
         toast({
           title: 'Falha ao salvar filial',
           description: getFriendlyErrorMessage(error, {
-            fallbackMessage: 'não foi possivel salvar os dados da filial agora.',
+            fallbackMessage: 'não foi possível salvar os dados da filial agora.',
           }),
           variant: 'destructive',
         });

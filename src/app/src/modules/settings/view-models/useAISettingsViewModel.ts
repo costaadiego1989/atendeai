@@ -171,7 +171,7 @@ export function useAISettingsViewModel() {
       toast({
         title: 'Falha ao salvar IA',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar os guardrails agora.',
+          fallbackMessage: 'não foi possível salvar os guardrails agora.',
         }),
         variant: 'destructive',
       });

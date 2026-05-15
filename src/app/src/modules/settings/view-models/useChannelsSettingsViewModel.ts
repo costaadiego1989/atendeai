@@ -153,7 +153,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao iniciar onboarding',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel iniciar a conexão do WhatsApp agora.',
+          fallbackMessage: 'não foi possível iniciar a conexão do WhatsApp agora.',
         }),
         variant: 'destructive',
       });
@@ -204,7 +204,7 @@ export function useChannelsSettingsViewModel() {
           error instanceof Error && error.message
             ? error.message
             : getFriendlyErrorMessage(error, {
-              fallbackMessage: 'não foi possivel iniciar a conexão do WhatsApp agora.',
+              fallbackMessage: 'não foi possível iniciar a conexão do WhatsApp agora.',
             }),
         variant: 'destructive',
       });
@@ -233,7 +233,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao verificar codigo',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel validar o codigo OTP agora.',
+          fallbackMessage: 'não foi possível validar o codigo OTP agora.',
         }),
         variant: 'destructive',
       });
@@ -257,7 +257,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao atualizar status',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel consultar o status do sender agora.',
+          fallbackMessage: 'não foi possível consultar o status do sender agora.',
         }),
         variant: 'destructive',
       });
@@ -281,7 +281,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao configurar Instagram',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar a configuração do Instagram agora.',
+          fallbackMessage: 'não foi possível salvar a configuração do Instagram agora.',
         }),
         variant: 'destructive',
       });
@@ -311,7 +311,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao iniciar Meta',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel iniciar a conexão com Meta agora.',
+          fallbackMessage: 'não foi possível iniciar a conexão com Meta agora.',
         }),
         variant: 'destructive',
       });
@@ -339,7 +339,7 @@ export function useChannelsSettingsViewModel() {
         toast({
           title: 'Falha ao conectar Instagram',
           description:
-            data.message || 'não foi possivel concluir a autorização na Meta.',
+            data.message || 'não foi possível concluir a autorização na Meta.',
           variant: 'destructive',
         });
         return;

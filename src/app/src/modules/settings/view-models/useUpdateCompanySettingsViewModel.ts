@@ -60,7 +60,7 @@ export function useUpdateCompanySettingsViewModel(tenantId?: string) {
       toast({
         title: 'Falha ao salvar',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar os dados da empresa agora.',
+          fallbackMessage: 'não foi possível salvar os dados da empresa agora.',
         }),
         variant: 'destructive',
       });
