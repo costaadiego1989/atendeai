@@ -357,7 +357,7 @@ export function SchedulingReserveSlotSheet({ vm }: Props) {
                       notes: event.target.value,
                     }))
                   }
-                  placeholder="Ex: reserva feita apos conversa no WhatsApp."
+                  placeholder="Ex: reserva feita após conversa no WhatsApp."
                 />
               </div>
             </>
