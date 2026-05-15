@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="voce@empresa.com"
+            placeholder="você@empresa.com"
             {...register('email')}
           />
           {errors.email && (
