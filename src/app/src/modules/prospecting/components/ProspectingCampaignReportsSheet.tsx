@@ -166,7 +166,7 @@ export function ProspectingCampaignReportsSheet({ vm }: Props) {
                 `CSV pronto${vm.activeReportJob.fileName ? `: ${vm.activeReportJob.fileName}` : ''}.`}
               {vm.activeReportJob.status === 'FAILED' &&
                 (vm.activeReportJob.errorMessage ??
-                  'não foi possivel gerar o CSV deste Relatório.')}
+                  'não foi possível gerar o CSV deste Relatório.')}
             </p>
           </div>
         ) : null}
