@@ -8,7 +8,7 @@ export function TenantPageHeader({ tenantData }: { tenantData?: Tenant }) {
       <div>
         <h1 className="page-title">Dados da empresa</h1>
         <p className="page-description">
-          Painel do tenant com posicionamento comercial, endereço e horário de funcionamento.
+          Painel do negócio com posicionamento comercial, endereço e horário de funcionamento.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
