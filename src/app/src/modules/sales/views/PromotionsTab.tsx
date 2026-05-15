@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Plus, Pencil, Trash2, CalendarDays, Percent, Tag, TrendingDown, ShoppingCart } from 'lucide-react';
+import { Filter, Search, Plus, Pencil, Trash2, CalendarDays, Percent, Tag, TrendingDown, ShoppingCart } from 'lucide-react';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { CardSkeleton } from '@/shared/ui/Skeletons';
 import { formatDate } from '@/shared/lib/formatters';
@@ -54,26 +54,41 @@ export function PromotionsTab() {
         />
       </div>
 
-      <div className="flex items-center gap-3 glass-card p-4 rounded-xl">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar campanhas..."
-            className="pl-9"
-            value={vm.search}
-            onChange={(e) => vm.setSearch(e.target.value)}
-          />
+      <div className="glass-card p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative flex-1 lg:max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar campanhas..."
+              className="pl-9"
+              value={vm.search}
+              onChange={(e) => vm.setSearch(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Select value={vm.statusFilter} onValueChange={(v: any) => vm.setStatusFilter(v)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos os status</SelectItem>
+                <SelectItem value="ACTIVE">Ativas</SelectItem>
+                <SelectItem value="EXPIRED">Expiradas</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!vm.search && vm.statusFilter === 'ALL'}
+              onClick={() => { vm.setSearch(''); vm.setStatusFilter('ALL'); }}
+            >
+              Limpar filtros
+            </Button>
+          </div>
         </div>
-        <Select value={vm.statusFilter} onValueChange={(v: any) => vm.setStatusFilter(v)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Todos os status</SelectItem>
-            <SelectItem value="ACTIVE">Ativas</SelectItem>
-            <SelectItem value="EXPIRED">Expiradas</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {vm.query.isLoading ? (
