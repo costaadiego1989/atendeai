@@ -160,10 +160,10 @@ export function ImportContactsSheet({
             value={form.rawText}
             onChange={(event) => onFormChange('rawText', event.target.value)}
             className="min-h-[260px] font-mono text-sm"
-            placeholder={`Maria da Silva; +55 21 99999-0001; 12345678901; maria@email.com; vip|quente; Prefere contato apos 14h\nJoao Pereira; +55 21 99999-0002`}
+            placeholder={`Maria da Silva; +55 21 99999-0001; 12345678901; maria@email.com; vip|quente; Prefere contato após 14h\nJoao Pereira; +55 21 99999-0002`}
           />
           <p className="text-xs text-muted-foreground">
-            {previewCount} linhas detectadas. Se vier so o telefone, geramos um nome provisorio.
+            {previewCount} linhas detectadas. Se vier só o telefone, geramos um nome provisório.
           </p>
         </div>
 
