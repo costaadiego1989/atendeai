@@ -16,7 +16,7 @@ export function AlertsKPIs({
   sentCount,
 }: AlertsKPIsProps) {
   return (
-    <div className="card-grid mb-8">
+    <div className="card-grid">
       <KPICard
         title="Seu WhatsApp"
         value={resolvedPhone ? formatPhone(resolvedPhone) : 'Não encontrado'}
