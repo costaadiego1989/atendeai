@@ -98,15 +98,15 @@ function buildRecoveryWorkflowUI(
       description:
         outreachDisabled && contactDone
           ? item.lastContactedAt
-            ? `Ultima mensagem enviada em ${formatDate(item.lastContactedAt)}.`
-            : 'O cliente ja recebeu a primeira abordagem.'
+            ? `Última mensagem enviada em ${formatDate(item.lastContactedAt)}.`
+            : 'O cliente já recebeu a primeira abordagem.'
           : contactDone && item.playbookId && allowAnotherOutreach
             ? 'Este caso segue um roteiro de cobrança: envie a próxima fase quando as regras de prazo forem atendidas.'
             : !contactDone
               ? 'Abra a conversa com o cliente antes de qualquer Cobrança.'
               : item.lastContactedAt
-                ? `Ultima mensagem enviada em ${formatDate(item.lastContactedAt)}.`
-                : 'O cliente ja foi abordado.',
+                ? `Última mensagem enviada em ${formatDate(item.lastContactedAt)}.`
+                : 'O cliente já foi abordado.',
       state: outreachDisabled ? 'DONE' : 'CURRENT',
       action: {
         key: 'OUTREACH',
@@ -118,7 +118,7 @@ function buildRecoveryWorkflowUI(
               : 'Fazer primeiro contato',
         description:
           item.playbookId && allowAnotherOutreach
-            ? 'Envia a mensagem da fase actual do playbook (IA ou modelo).'
+            ? 'Envia a mensagem da fase atual do roteiro (IA ou modelo).'
             : 'Envia a mensagem inicial ao cliente.',
         icon: Send,
         variant: outreachDisabled ? 'outline' : 'default',
@@ -130,9 +130,9 @@ function buildRecoveryWorkflowUI(
       label: 'Conversa',
       title: paymentLinkDone ? 'Link enviado' : 'Enviar link de pagamento',
       description: !contactDone
-        ? 'Disponivel depois que o contato for realizado.'
+        ? 'Disponível depois que o contato for realizado.'
         : paymentLinkDone
-          ? 'A Cobrança ja foi enviada ao cliente.'
+          ? 'A Cobrança já foi enviada ao cliente.'
           : item.amountDue == null
             ? 'Configure um valor para liberar a Cobrança.'
             : guidanceAlreadySent || item.status === 'NEGOTIATING' || item.status === 'PROMISE_TO_PAY'
@@ -153,7 +153,7 @@ function buildRecoveryWorkflowUI(
       label: 'Fechamento',
       title: 'Atualizar status do caso',
       description: !paymentLinkDone
-        ? 'Disponivel depois que a Cobrança for enviada.'
+        ? 'Disponível depois que a Cobrança for enviada.'
         : item.status === 'PAID'
           ? 'Pagamento confirmado. Revise ou encerre o caso se precisar.'
           : 'Registre promessa, pagamento, pausa ou encerramento.',
@@ -171,14 +171,14 @@ function buildRecoveryWorkflowUI(
   const currentStep = steps.find((step) => step.state === 'CURRENT') ?? steps[0];
 
   let title = 'Comece pelo primeiro contato';
-  let description = 'Aborde o cliente para abrir a conversa antes de avancar.';
+   let description = 'Aborde o cliente para abrir a conversa antes de avançar.';
   let summaryItems: RecoverySignal[] = [
     {
       label: 'Situação',
       value: 'Nenhuma mensagem enviada ainda.',
     },
     {
-      label: 'Proximo passo',
+      label: 'Próximo passo',
       value: 'Enviar o primeiro contato ao cliente.',
     },
   ];
@@ -186,19 +186,19 @@ function buildRecoveryWorkflowUI(
   if (workflowStep === 2) {
     title = paymentLinkDone ? 'Cobrança enviada' : 'Hora de enviar a Cobrança';
     description = paymentLinkDone
-      ? 'O link ja foi enviado. Agora acompanhe a resposta e avance o status do caso.'
-      : 'O contato ja foi feito. Agora envie o link de pagamento para seguir com a Cobrança.';
+      ? 'O link já foi enviado. Agora acompanhe a resposta e avance o status do caso.'
+      : 'O contato já foi feito. Agora envie o link de pagamento para seguir com a Cobrança.';
     summaryItems = [
       {
         label: 'Contato realizado',
         value: item.lastContactedAt
           ? `Mensagem enviada em ${formatDate(item.lastContactedAt)}.`
-          : 'O cliente ja foi abordado.',
+          : 'O cliente já foi abordado.',
       },
       {
         label: 'Status da Cobrança',
         value: paymentLinkDone
-          ? 'O link de pagamento ja foi enviado ao cliente.'
+          ? 'O link de pagamento já foi enviado ao cliente.'
           : item.amountDue == null
             ? 'Falta valor configurado para liberar o link.'
             : 'Link ainda não enviado.',
@@ -209,7 +209,7 @@ function buildRecoveryWorkflowUI(
   if (workflowStep === 3) {
     title = 'Fechamento do caso';
     description =
-      'A Cobrança ja foi enviada. Agora atualize o status para registrar promessa, pagamento ou encerramento.';
+      'A Cobrança já foi enviada. Agora atualize o status para registrar promessa, pagamento ou encerramento.';
     summaryItems = [
       {
         label: 'Cobrança enviada',
@@ -218,7 +218,7 @@ function buildRecoveryWorkflowUI(
           : 'Link de pagamento enviado ao cliente.',
       },
       {
-        label: 'Proximo passo',
+        label: 'Próximo passo',
         value:
           item.status === 'PAID'
             ? 'Pagamento confirmado.'
@@ -268,9 +268,9 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
   const guidanceAlreadySent = vm.guidanceAlreadySent;
   const guidanceHelperText = canUseGuidance
     ? guidanceAlreadySent
-      ? 'A sugestão atual ja foi enviada ao cliente. Gere uma nova versao se precisar responder de outro jeito.'
-      : 'A IA pode sugerir a melhor resposta com base na ultima mensagem do cliente.'
-    : 'A sugestão fica indisponivel apenas para casos encerrados ou com contato invalido.';
+      ? 'A sugestão atual já foi enviada ao cliente. Gere uma nova versão se precisar responder de outro jeito.'
+      : 'A IA pode sugerir a melhor resposta com base na última mensagem do cliente.'
+    : 'A sugestão fica indisponível apenas para casos encerrados ou com contato inválido.';
   const contactDone = Boolean(item?.lastContactedAt);
   const playbookUiTitle =
     item?.playbookId && vm.playbooksQuery.data
@@ -422,10 +422,10 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
               {item.playbookId ? (
                 <div className="rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    Roteiro automático (playbook)
+                    Roteiro automático
                   </p>
                   <p className="mt-1 font-medium text-foreground">
-                    {playbookUiTitle ?? 'Playbook ligado ao caso'}
+                    {playbookUiTitle ?? 'Roteiro ligado ao caso'}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Próximo envio pelo roteiro: fase {(item.playbookPhaseIndex ?? 0) + 1}
