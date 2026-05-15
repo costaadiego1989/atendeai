@@ -566,7 +566,7 @@ export function useContactsListViewModel() {
       toast({
         title: 'Falha ao atualizar estágio em lote',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel atualizar os contatos selecionados agora.',
+          fallbackMessage: 'não foi possível atualizar os contatos selecionados agora.',
         }),
         variant: 'destructive',
       });
@@ -638,7 +638,7 @@ export function useContactsListViewModel() {
       toast({
         title: 'Falha ao atualizar tags em lote',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel ajustar as tags agora.',
+          fallbackMessage: 'não foi possível ajustar as tags agora.',
         }),
         variant: 'destructive',
       });
@@ -664,7 +664,7 @@ export function useContactsListViewModel() {
       toast({
         title: 'Falha ao excluir contatos',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel excluir os contatos selecionados agora.',
+          fallbackMessage: 'não foi possível excluir os contatos selecionados agora.',
         }),
         variant: 'destructive',
       });
