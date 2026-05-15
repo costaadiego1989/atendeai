@@ -28,9 +28,13 @@ import { MediaUnderstandingService } from './MediaUnderstandingService';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 import { AiSafetyGate } from './AiSafetyGate';
 import { Tenant } from '../../../tenant/domain/entities/Tenant';
+import { IRAGResponseCache } from '../ports/IRAGResponseCache';
+import { IEmbeddingProvider } from '../ports/IEmbeddingProvider';
 
 export class ProcessAIResponseService {
   private readonly logger = new Logger(ProcessAIResponseService.name);
+
+  private static readonly RAG_CACHE_THRESHOLD = 0.95;
 
   constructor(
     private readonly aiEngine: IAIEngine,
@@ -47,6 +51,8 @@ export class ProcessAIResponseService {
     private readonly tenantAgentRuleService: TenantAgentRuleService,
     private readonly aiSafetyGate: AiSafetyGate,
     private readonly mediaUnderstandingService?: MediaUnderstandingService,
+    private readonly ragResponseCache?: IRAGResponseCache,
+    private readonly embeddingProvider?: IEmbeddingProvider,
   ) {}
 
   async process(
@@ -159,6 +165,40 @@ export class ProcessAIResponseService {
       this.aiSafetyGate.appendPlatformLimits(promptWithAgentRule);
 
     try {
+      // RAG cache check: only when PDF context was used
+      const ragCacheEnabled =
+        !!diagnostics.tenantPDFContextFound &&
+        !!this.ragResponseCache &&
+        !!this.embeddingProvider;
+
+      let queryEmbedding: number[] | null = null;
+
+      if (ragCacheEnabled) {
+        queryEmbedding = await this.embeddingProvider!.generateEmbedding(userMessage);
+        const cachedResponse = await this.ragResponseCache!.findSimilarResponse(
+          input.tenantId,
+          queryEmbedding,
+          ProcessAIResponseService.RAG_CACHE_THRESHOLD,
+        );
+
+        if (cachedResponse) {
+          this.logger.debug(
+            `[RAGCache] serving cached response tenant=${input.tenantId} conversation=${input.conversationId}`,
+          );
+
+          await this.persistTurn(
+            input,
+            aiSession.id,
+            cachedResponse,
+            { tokensUsed: 0, intent: 'RAG_CACHED', sentiment: 'NEUTRAL', confidence: 1 },
+            { ...diagnostics, ragCacheHit: true },
+            userMessage,
+          );
+
+          return { success: true };
+        }
+      }
+
       const response = await traceAsync(
         'ai.ProcessAIResponseService.generateAssistantTurn',
         {
@@ -205,12 +245,21 @@ export class ProcessAIResponseService {
         },
       );
 
+      // Cache the response if RAG was involved and response completed normally
+      if (ragCacheEnabled && queryEmbedding && response.finishReason === 'stop') {
+        await this.ragResponseCache!.cacheResponse(
+          input.tenantId,
+          queryEmbedding,
+          processedText,
+        );
+      }
+
       await this.persistTurn(
         input,
         aiSession.id,
         processedText,
         response,
-        diagnostics,
+        { ...diagnostics, ragCacheHit: false },
         userMessage,
       );
 

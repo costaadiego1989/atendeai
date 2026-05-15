@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { PrismaTenantRepository } from './infrastructure/persistence/repositories/PrismaTenantRepository';
 import { TENANT_REPOSITORY } from './domain/repositories/ITenantRepository';
 import { CreateTenantUseCase } from './application/use-cases/CreateTenantUseCase';
@@ -80,6 +81,8 @@ import { TenantTwilioProvisioningHandler } from './application/handlers/TenantTw
 import { TenantPDFResumeRepository } from './infrastructure/persistence/repositories/TenantPDFResumeRepository';
 import { UpsertTenantPDFResumeUseCase } from './application/use-cases/UpsertTenantPDFResumeUseCase';
 import { ListTenantPDFResumesUseCase } from './application/use-cases/ListTenantPDFResumesUseCase';
+import { DOCUMENT_CHUNK_REPOSITORY } from '@modules/ai/application/ports/IDocumentChunkRepository';
+import { PrismaDocumentChunkRepository } from '@modules/ai/infrastructure/persistence/PrismaDocumentChunkRepository';
 
 const TENANT_REPOSITORY_PROVIDERS = [
   {
@@ -97,6 +100,10 @@ const TENANT_REPOSITORY_PROVIDERS = [
   {
     provide: TENANT_AUDIT_LOG_REPOSITORY,
     useClass: PrismaTenantAuditLogRepository,
+  },
+  {
+    provide: DOCUMENT_CHUNK_REPOSITORY,
+    useClass: PrismaDocumentChunkRepository,
   },
   TenantPDFResumeRepository,
 ];
@@ -209,7 +216,7 @@ const TENANT_BILLING_PROVIDERS = [
 ];
 
 @Module({
-  imports: [AuthModule, ConfigModule],
+  imports: [AuthModule, ConfigModule, BullModule.registerQueue({ name: 'pdf-processing' })],
   controllers: [
     TenantController,
     TenantWhatsAppController,

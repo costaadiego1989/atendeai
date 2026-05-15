@@ -18,6 +18,7 @@ export class RecoveryRecurringChargeScheduler implements OnModuleInit, OnModuleD
   private readonly logger = new Logger(RecoveryRecurringChargeScheduler.name);
   private timer: NodeJS.Timeout | null = null;
   private isTicking = false;
+  private disabled = false;
 
   constructor(
     private readonly configService: ConfigService,
@@ -45,7 +46,7 @@ export class RecoveryRecurringChargeScheduler implements OnModuleInit, OnModuleD
   }
 
   async tick(): Promise<void> {
-    if (this.isTicking) {
+    if (this.isTicking || this.disabled) {
       return;
     }
 
@@ -71,11 +72,22 @@ export class RecoveryRecurringChargeScheduler implements OnModuleInit, OnModuleD
         );
       }
     } catch (error) {
-      this.logger.error(
-        `Recovery recurring charge scheduler failed: ${
-          error instanceof Error ? error.message : 'unknown error'
-        }`,
-      );
+      const message = error instanceof Error ? error.message : 'unknown error';
+      const isTableMissing =
+        message.includes('42P01') || message.includes('não existe') || message.includes('does not exist');
+
+      if (isTableMissing) {
+        this.logger.warn(
+          'Recovery recurring charges table not found. Scheduler disabled until migration is applied.',
+        );
+        this.disabled = true;
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+      } else {
+        this.logger.error(`Recovery recurring charge scheduler failed: ${message}`);
+      }
     } finally {
       this.isTicking = false;
     }

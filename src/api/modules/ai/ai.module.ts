@@ -1,5 +1,8 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
+import Redis from 'ioredis';
+import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import { ProcessAIResponseUseCase } from '@modules/ai/application/use-cases/ProcessAIResponseUseCase';
 import { IProcessAIResponseUseCase } from '@modules/ai/application/use-cases/interfaces/IProcessAIResponseUseCase';
 import { AI_ENGINE, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
@@ -48,8 +51,17 @@ import {
   ITenantPDFContextProvider,
   TENANT_PDF_CONTEXT_PROVIDER,
 } from './application/ports/ITenantPDFContextProvider';
+import { EMBEDDING_PROVIDER, IEmbeddingProvider } from './application/ports/IEmbeddingProvider';
+import { DOCUMENT_CHUNK_REPOSITORY } from './application/ports/IDocumentChunkRepository';
+import { IRAGResponseCache, RAG_RESPONSE_CACHE } from './application/ports/IRAGResponseCache';
 import { CommerceContextProvider } from './infrastructure/adapters/CommerceContextProvider';
 import { TenantPDFContextProvider } from './infrastructure/adapters/TenantPDFContextProvider';
+import { OpenAIEmbeddingAdapter } from './infrastructure/adapters/OpenAIEmbeddingAdapter';
+import { PrismaDocumentChunkRepository } from './infrastructure/persistence/PrismaDocumentChunkRepository';
+import { RedisRAGResponseCache } from './infrastructure/persistence/RedisRAGResponseCache';
+import { DocumentChunkingService } from './domain/services/DocumentChunkingService';
+import { ProcessDocumentForRAGUseCase } from './application/use-cases/ProcessDocumentForRAGUseCase';
+import { PDFProcessingProcessor } from './infrastructure/queue/PDFProcessingProcessor';
 import { CommerceModule } from '@modules/commerce/commerce.module';
 import { AgentRulesModule } from '@modules/agent-rules/agent-rules.module';
 import { ContactModule } from '@modules/contact/contact.module';
@@ -93,6 +105,7 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
 @Module({
   imports: [
     ConfigModule,
+    BullModule.registerQueue({ name: 'pdf-processing' }),
     TenantModule,
     forwardRef(() => SalesModule),
     BillingModule,
@@ -144,6 +157,30 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
       provide: TENANT_PDF_CONTEXT_PROVIDER,
       useClass: TenantPDFContextProvider,
     },
+    {
+      provide: EMBEDDING_PROVIDER,
+      useClass: OpenAIEmbeddingAdapter,
+    },
+    {
+      provide: DOCUMENT_CHUNK_REPOSITORY,
+      useClass: PrismaDocumentChunkRepository,
+    },
+    {
+      provide: RAG_RESPONSE_CACHE,
+      useFactory: (redis: Redis, config: ConfigService) => {
+        const ttl = Number(config.get<string>('RAG_CACHE_TTL_SECONDS')) || 3600;
+        const maxEntries =
+          Number(config.get<string>('RAG_CACHE_MAX_ENTRIES_PER_TENANT')) || 100;
+        return new RedisRAGResponseCache(redis, ttl, maxEntries);
+      },
+      inject: [REDIS_CLIENT, ConfigService],
+    },
+    {
+      provide: DocumentChunkingService,
+      useFactory: () => new DocumentChunkingService(),
+    },
+    ProcessDocumentForRAGUseCase,
+    PDFProcessingProcessor,
     {
       provide: LeadScoringService,
       useFactory: () => new LeadScoringService(),
@@ -255,6 +292,8 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
         tenantAgentRuleService: TenantAgentRuleService,
         aiSafetyGate: AiSafetyGate,
         mediaUnderstandingService: MediaUnderstandingService,
+        ragResponseCache: IRAGResponseCache,
+        embeddingProvider: IEmbeddingProvider,
       ) =>
         new ProcessAIResponseService(
           aiEngine,
@@ -271,6 +310,8 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
           tenantAgentRuleService,
           aiSafetyGate,
           mediaUnderstandingService,
+          ragResponseCache,
+          embeddingProvider,
         ),
       inject: [
         AI_ENGINE,
@@ -287,6 +328,8 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
         TenantAgentRuleService,
         AiSafetyGate,
         MediaUnderstandingService,
+        RAG_RESPONSE_CACHE,
+        EMBEDDING_PROVIDER,
       ],
     },
     {
@@ -310,6 +353,9 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
     PromptBuilder,
     AIResponseProcessor,
     MediaUnderstandingService,
+    EMBEDDING_PROVIDER,
+    DOCUMENT_CHUNK_REPOSITORY,
+    DocumentChunkingService,
   ],
 })
 export class AIModule { }
