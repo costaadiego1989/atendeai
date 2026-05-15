@@ -56,7 +56,7 @@ type Props = {
 export function SchedulingReserveSlotSheet({ vm }: Props) {
   const [contactPickerOpen, setContactPickerOpen] = useState(false);
   const [reserveStep, setReserveStep] = useState<1 | 2 | 3>(1);
-  const reserveContactReady = Boolean(vm.reserveForm.contactId);
+  const reserveContactReady = Boolean(vm.reserveForm.contactId && vm.reserveForm.contactId !== 'none');
   const reserveModeReady = Boolean(
     vm.reserveForm.isFree || Number(vm.reserveForm.paymentTimeoutHours || '0') > 0,
   );

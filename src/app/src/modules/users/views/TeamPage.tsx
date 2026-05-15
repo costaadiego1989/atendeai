@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +35,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageSkeleton } from '@/shared/ui/Skeletons';
 import { Pencil, Trash2, Users } from 'lucide-react';
 import { useTeamPageViewModel } from '@/modules/users/view-models/useTeamPageViewModel';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { formatPhone } from '@/shared/lib/masks';
 import { TeamHeader } from '../components/TeamHeader';
 import { TeamKPIs } from '../components/TeamKPIs';
@@ -64,6 +66,15 @@ type EditTeamMemberForm = z.infer<typeof editTeamMemberSchema>;
 
 export default function TeamPage() {
   const vm = useTeamPageViewModel();
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.role !== 'OWNER' && user.role !== 'ADMIN') {
+      navigate('/app', { replace: true });
+    }
+  }, [user, navigate]);
+
   const createForm = useForm<CreateTeamMemberForm>({
     resolver: zodResolver(createTeamMemberSchema),
     defaultValues: {
@@ -173,6 +184,9 @@ export default function TeamPage() {
                   <th className="px-4 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
                     Status
                   </th>
+                  <th className="px-4 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                    Último login
+                  </th>
                   <th className="px-4 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
                     Gerenciar
                   </th>
@@ -211,6 +225,17 @@ export default function TeamPage() {
                         {teamUser.mustChangePassword ? 'Pendente' : 'Confirmado'}
                       </Badge>
                     </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {teamUser.lastLoginAt
+                        ? new Date(teamUser.lastLoginAt).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : '—'}
+                    </td>
                     <td className="px-4 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         {vm.canEditTeamMember(teamUser) && (
@@ -240,7 +265,7 @@ export default function TeamPage() {
                 ))}
                 {vm.users.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-muted-foreground text-sm">
+                    <td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">
                       Nenhum membro encontrado com os filtros aplicados.
                     </td>
                   </tr>

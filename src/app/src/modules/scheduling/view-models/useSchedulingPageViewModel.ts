@@ -369,7 +369,7 @@ export function useSchedulingPageViewModel() {
       }));
       toast({
         title: 'Atendimento recorrente criado',
-        description: 'As sessoes serao geradas conforme a frequencia e o horario contratados.',
+        description: 'As sessões serao geradas conforme a frequência e o horario contratados.',
       });
     },
     onError: (error) => {

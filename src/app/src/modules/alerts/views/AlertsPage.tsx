@@ -76,7 +76,7 @@ export default function AlertsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Frequencia</Label>
+              <Label>Frequência</Label>
               <Select
                 value={vm.form.frequency}
                 onValueChange={(value: 'ONCE' | 'DAILY') =>

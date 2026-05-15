@@ -1640,7 +1640,7 @@ export default function ConversationsPage() {
               <div>
                 <Label htmlFor="conversation-charge-recurring">Recorrente</Label>
                 <p className="text-xs text-muted-foreground">
-                  Define frequencia, inicio e fim para cobrancas recorrentes.
+                  Define frequência, inicio e fim para cobrancas recorrentes.
                 </p>
               </div>
               <Switch
@@ -1662,7 +1662,7 @@ export default function ConversationsPage() {
             {vm.chargeForm.recurring ? (
               <div className="grid gap-2 sm:grid-cols-3">
                 <div className="grid gap-2">
-                  <Label>Frequencia</Label>
+                  <Label>Frequência</Label>
                   <Select
                     value={vm.chargeForm.recurrenceFrequency}
                     onValueChange={(value) =>

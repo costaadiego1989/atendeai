@@ -231,7 +231,9 @@ export function AppLayout({ children }: { children?: ReactNode }) {
           <Separator className="my-2 bg-sidebar-border" />
           <NavSection
             title="Configuracoes"
-            items={settingsNav}
+            items={user?.role === 'AGENT'
+              ? settingsNav.filter((item) => item.path !== '/app/team')
+              : settingsNav}
             collapsed={sidebarCollapsed}
             currentPath={location.pathname}
           />

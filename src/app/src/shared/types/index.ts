@@ -8,6 +8,7 @@ export interface User {
   phone?: string;
   cpf?: string;
   mustChangePassword?: boolean;
+  lastLoginAt?: string | null;
   avatarUrl?: string;
 }
 
