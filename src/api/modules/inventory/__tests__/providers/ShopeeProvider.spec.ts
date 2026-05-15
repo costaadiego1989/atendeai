@@ -83,9 +83,7 @@ describe('ShopeeProvider', () => {
   // ─── fetchStock ────────────────────────────────────────────────────────────
 
   it('INV-T-067c: fetchStock step 1 busca item list com offset pagination', async () => {
-    const fetchMock = jest.fn()
-      .mockResolvedValueOnce(makeItemListResponse([]))
-      as unknown as typeof fetch;
+    const fetchMock = jest.fn().mockResolvedValueOnce(makeItemListResponse([])) as unknown as typeof fetch;
     global.fetch = fetchMock;
 
     for await (const _ of provider.fetchStock(config)) { }
@@ -98,8 +96,7 @@ describe('ShopeeProvider', () => {
   it('INV-T-067d: fetchStock step 2 busca detalhes via get_item_base_info', async () => {
     const fetchMock = jest.fn()
       .mockResolvedValueOnce(makeItemListResponse([123456]))
-      .mockResolvedValueOnce(makeItemDetailResponse([{ id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.90 }]))
-      as unknown as typeof fetch;
+      .mockResolvedValueOnce(makeItemDetailResponse([{ id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.90 }])) as unknown as typeof fetch;
     global.fetch = fetchMock;
 
     for await (const _ of provider.fetchStock(config)) { }
@@ -112,8 +109,7 @@ describe('ShopeeProvider', () => {
   it('INV-T-067e: fetchStock mapeia item_sku, stock_info.normal_stock e price_info para snapshot', async () => {
     global.fetch = jest.fn()
       .mockResolvedValueOnce(makeItemListResponse([123456]))
-      .mockResolvedValueOnce(makeItemDetailResponse([{ id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.90 }]))
-      as unknown as typeof fetch;
+      .mockResolvedValueOnce(makeItemDetailResponse([{ id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.90 }])) as unknown as typeof fetch;
 
     const batches: any[][] = [];
     for await (const batch of provider.fetchStock(config)) {
@@ -147,9 +143,7 @@ describe('ShopeeProvider', () => {
   });
 
   it('INV-T-067g: fetchStock para quando item list retorna array vazio', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      makeItemListResponse([]),
-    ) as unknown as typeof fetch;
+    global.fetch = jest.fn().mockResolvedValue(makeItemListResponse([])) as unknown as typeof fetch;
 
     const batches: unknown[] = [];
     for await (const batch of provider.fetchStock(config)) {

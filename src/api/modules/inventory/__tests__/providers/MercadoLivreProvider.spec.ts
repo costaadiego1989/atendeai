@@ -127,7 +127,7 @@ describe('MercadoLivreProvider', () => {
   it('INV-T-066g: fetchStock pagina incrementando offset por 50', async () => {
     const page1Ids = Array.from({ length: 50 }, (_, i) => `MLB${i + 1}`);
     const fetchMock = jest.fn()
-      .mockResolvedValueOnce(makeSearchResponse(page1Ids))
+      .mockResolvedValueOnce(makeSearchResponse(page1Ids, 100)) // total=100 → continua paginando
       .mockResolvedValueOnce({
         ok: true,
         json: async () => page1Ids.map((id, i) => ({
@@ -135,8 +135,7 @@ describe('MercadoLivreProvider', () => {
           body: { id, title: `P${i}`, available_quantity: 1, price: 10, currency_id: 'BRL', seller_custom_field: `SKU-${i}` },
         })),
       })
-      .mockResolvedValueOnce(makeSearchResponse([]))
-      as unknown as typeof fetch;
+      .mockResolvedValueOnce(makeSearchResponse([])) as unknown as typeof fetch;
     global.fetch = fetchMock;
 
     for await (const _ of provider.fetchStock(config)) { }
