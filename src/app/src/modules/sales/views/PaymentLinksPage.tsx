@@ -161,8 +161,8 @@ export function PaymentLinksPage() {
 
       <div className="space-y-4">
         <div className="glass-card p-4">
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px_180px_auto]">
-            <div className="relative">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="relative flex-1 lg:max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
@@ -171,34 +171,36 @@ export function PaymentLinksPage() {
                 placeholder="Buscar por título, descrição ou contato"
               />
             </div>
-            <Select value={vm.statusFilter} onValueChange={vm.setStatusFilter}>
-              <SelectTrigger>
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Select value={vm.statusFilter} onValueChange={vm.setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[220px]">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_LINK_STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={vm.sourceFilter} onValueChange={vm.setSourceFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_LINK_STATUS_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={vm.sourceFilter} onValueChange={vm.setSourceFilter}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Todas as origens</SelectItem>
-                <SelectItem value="MANUAL">Manual</SelectItem>
-                <SelectItem value="AI">IA</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={vm.resetFilters} disabled={!vm.hasFilters}>
-              Limpar filtros
-            </Button>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Todas as origens</SelectItem>
+                  <SelectItem value="MANUAL">Manual</SelectItem>
+                  <SelectItem value="AI">IA</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" onClick={vm.resetFilters} disabled={!vm.hasFilters}>
+                Limpar filtros
+              </Button>
+            </div>
           </div>
         </div>
 
