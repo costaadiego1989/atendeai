@@ -172,7 +172,7 @@ export function TenantBranchesTab({
       toast({
         title: editingBranchId ? 'Falha ao atualizar filial' : 'Falha ao cadastrar filial',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar os dados da filial agora.',
+          fallbackMessage: 'não foi possível salvar os dados da filial agora.',
         }),
         variant: 'destructive',
       });
@@ -206,7 +206,7 @@ export function TenantBranchesTab({
       toast({
         title: 'Falha ao excluir filial',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel excluir a filial agora.',
+          fallbackMessage: 'não foi possível excluir a filial agora.',
         }),
         variant: 'destructive',
       });
@@ -386,7 +386,7 @@ export function TenantBranchesTab({
                     />
                     {editingBranchId && (
                       <p className="text-[10px] text-muted-foreground">
-                        CNPJ da filial fica travado apos o cadastro.
+                        CNPJ da filial fica travado após o cadastro.
                       </p>
                     )}
                   </div>
