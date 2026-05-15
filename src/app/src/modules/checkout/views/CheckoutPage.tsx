@@ -106,7 +106,7 @@ export default function CheckoutPage() {
   const shippingPolicy = vm.shippingPolicyQuery.data;
 
   return (
-    <div className="page-container animate-in fade-in duration-500 space-y-6">
+    <div className="page-container animate-fade-in">
       <CheckoutHeader
         onOpenShippingPolicy={() => vm.setShippingPolicySheetOpen(true)}
         onOpenAbandonmentConfig={() => vm.setAbandonmentConfigOpen(true)}
@@ -120,9 +120,6 @@ export default function CheckoutPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">Relatório do checkout</p>
-              <p className="text-xs text-muted-foreground">
-                KPIs, funil, pedidos e CSV seguem o mesmo periodo.
-              </p>
             </div>
           </div>
 
