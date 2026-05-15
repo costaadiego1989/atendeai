@@ -71,7 +71,7 @@ export function useTeamPageViewModel() {
       toast({
         title: 'Falha ao adicionar membro',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel adicionar este membro agora.',
+          fallbackMessage: 'não foi possível adicionar este membro agora.',
         }),
         variant: 'destructive',
       });
@@ -121,7 +121,7 @@ export function useTeamPageViewModel() {
       toast({
         title: 'Falha ao atualizar membro',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel atualizar este membro agora.',
+          fallbackMessage: 'não foi possível atualizar este membro agora.',
         }),
         variant: 'destructive',
       });
@@ -160,7 +160,7 @@ export function useTeamPageViewModel() {
       toast({
         title: 'Falha ao remover membro',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel remover este membro agora.',
+          fallbackMessage: 'não foi possível remover este membro agora.',
         }),
         variant: 'destructive',
       });
