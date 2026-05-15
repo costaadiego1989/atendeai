@@ -15,7 +15,7 @@ export function CatalogKPIs({
   productsCount,
 }: CatalogKPIsProps) {
   return (
-    <div className="card-grid mb-6">
+    <div className="card-grid">
       <KPICard
         title="Itens ativos"
         value={activeItemsCount}
