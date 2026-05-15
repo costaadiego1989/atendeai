@@ -289,7 +289,7 @@ export function useProspectingSearchesViewModel() {
         title: 'Falha ao enviar mensagem',
         description: getFriendlyErrorMessage(error, {
           fallbackMessage:
-            'Nao foi possivel enviar a primeira mensagem agora. A fila nao foi disparada novamente.',
+            'Nao foi possível enviar a primeira mensagem agora. A fila nao foi disparada novamente.',
         }),
         variant: 'destructive',
       });
