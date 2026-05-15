@@ -42,22 +42,22 @@ import { TeamKPIs } from '../components/TeamKPIs';
 import { TeamFilters } from '../components/TeamFilters';
 
 const roleLabels: Record<'OWNER' | 'ADMIN' | 'AGENT', string> = {
-  OWNER: 'Proprietario',
+  OWNER: 'Proprietário',
   ADMIN: 'Administrador',
   AGENT: 'Agente',
 };
 
 const createTeamMemberSchema = z.object({
   name: z.string().min(3, 'Informe o nome completo'),
-  email: z.string().email('Informe um email valido'),
-  phone: z.string().min(10, 'Informe um telefone valido'),
+  email: z.string().email('Informe um e-mail válido'),
+  phone: z.string().min(10, 'Informe um telefone válido'),
   role: z.enum(['ADMIN', 'AGENT']),
 });
 
 const editTeamMemberSchema = z.object({
   name: z.string().min(3, 'Informe o nome completo'),
-  email: z.string().email('Informe um email valido'),
-  phone: z.string().min(10, 'Informe um telefone valido'),
+  email: z.string().email('Informe um e-mail válido'),
+  phone: z.string().min(10, 'Informe um telefone válido'),
   role: z.enum(['OWNER', 'ADMIN', 'AGENT']),
 });
 
@@ -140,7 +140,7 @@ export default function TeamPage() {
       <div className="page-container animate-fade-in">
         <EmptyState
           icon={Users}
-          title="não foi possivel carregar a equipe"
+          title="Não foi possível carregar a equipe"
           description="Tente novamente em instantes para listar os membros do tenant."
         />
       </div>
@@ -455,7 +455,7 @@ export default function TeamPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remover membro</AlertDialogTitle>
             <AlertDialogDescription>
-              Atenção: Essa ação remove o acesso desse usuario ao tenant atual.
+              Atenção: Essa ação remove o acesso desse usuário ao tenant atual.
               {vm.deleteTarget?.role === 'OWNER' ? (
                 <>
                   {' '}
