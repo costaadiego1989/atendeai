@@ -16,7 +16,7 @@ export default function ProposalsPage() {
   const vm = useProposalsPageViewModel();
 
   return (
-    <div className="page-container animate-fade-in space-y-6">
+    <div className="page-container animate-fade-in">
       <ProposalsHeader onNewProposal={vm.openCreateEditor} />
 
       <ProposalsKPIs
@@ -75,7 +75,7 @@ export default function ProposalsPage() {
               </SelectContent>
             </Select>
 
-            <Button variant="outline" onClick={vm.resetFilters} disabled={!vm.hasFilters}>
+            <Button variant="outline" size="sm" onClick={vm.resetFilters} disabled={!vm.hasFilters}>
               Limpar filtros
             </Button>
           </div>
