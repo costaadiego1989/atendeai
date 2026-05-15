@@ -1,3 +1,4 @@
+import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
@@ -50,28 +51,52 @@ export function AsyncOperationsPanel({
 
       <div className="grid gap-3 lg:grid-cols-2">
         {items.map((item) => (
-          <div key={item.id} className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+          <div
+            key={item.id}
+            className={[
+              'rounded-2xl border p-4 transition-colors duration-300',
+              item.status === 'COMPLETED'
+                ? 'border-green-500/30 bg-green-500/5'
+                : item.status === 'FAILED'
+                  ? 'border-destructive/30 bg-destructive/5'
+                  : 'border-border/60 bg-muted/20',
+            ].join(' ')}
+          >
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{item.title}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
+              <div className="min-w-0 flex items-start gap-2">
+                {item.status === 'PROCESSING' || item.status === 'QUEUED' ? (
+                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" />
+                ) : item.status === 'COMPLETED' ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                ) : (
+                  <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                )}
+                <div>
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
+                </div>
               </div>
-              <Badge variant="secondary" className="shrink-0">
+              <Badge
+                variant={item.status === 'FAILED' ? 'destructive' : 'secondary'}
+                className="shrink-0"
+              >
                 {getStatusLabel(item.status)}
               </Badge>
             </div>
 
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{item.progress}%</span>
-                {typeof item.totalItems === 'number' && item.totalItems > 0 ? (
-                  <span>
-                    {item.processedItems ?? 0}/{item.totalItems}
-                  </span>
-                ) : null}
+            {item.status !== 'COMPLETED' && item.status !== 'FAILED' && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{item.progress}%</span>
+                  {typeof item.totalItems === 'number' && item.totalItems > 0 ? (
+                    <span>
+                      {item.processedItems ?? 0}/{item.totalItems}
+                    </span>
+                  ) : null}
+                </div>
+                <Progress value={item.progress} className="h-2.5" />
               </div>
-              <Progress value={item.progress} className="h-2.5" />
-            </div>
+            )}
           </div>
         ))}
       </div>
