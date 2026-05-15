@@ -22,7 +22,6 @@ import { SyncInventoryItemUseCase } from '../../application/use-cases/SyncInvent
 import { ListInventoryItemsUseCase } from '../../application/use-cases/ListInventoryItemsUseCase';
 import { CreateInventoryConnectionUseCase } from '../../application/use-cases/CreateInventoryConnectionUseCase';
 import { ListInventoryConnectionsUseCase } from '../../application/use-cases/ListInventoryConnectionsUseCase';
-import { SyncInventoryConnectionUseCase } from '../../application/use-cases/SyncInventoryConnectionUseCase';
 import {
   CreateInventoryConnectionDTO,
   GenerateInventoryReportDTO,
@@ -39,7 +38,6 @@ export class InventoryController {
     private readonly listInventoryItemsUseCase: ListInventoryItemsUseCase,
     private readonly createInventoryConnectionUseCase: CreateInventoryConnectionUseCase,
     private readonly listInventoryConnectionsUseCase: ListInventoryConnectionsUseCase,
-    private readonly syncInventoryConnectionUseCase: SyncInventoryConnectionUseCase,
     private readonly generateInventoryReportUseCase: GenerateInventoryReportUseCase,
     private readonly inventoryAsyncJobsService: InventoryAsyncJobsService,
     @InjectQueue('inventory-async-jobs')
@@ -73,9 +71,35 @@ export class InventoryController {
   async syncConnection(
     @Param('tenantId') tenantId: string,
     @Param('connectionId') connectionId: string,
+    @Req() req: any,
   ) {
-    await this.syncInventoryConnectionUseCase.execute({ tenantId, connectionId });
-    return { message: 'Sync started', connectionId };
+    const asyncJob = await this.inventoryAsyncJobsService.createJob({
+      tenantId,
+      type: 'SYNC_INVENTORY_CONNECTION',
+      requestedByUserId: req.user?.sub,
+      requestedByUserEmail: req.user?.email,
+      payload: { connectionId },
+    });
+
+    const queueJob = await this.inventoryAsyncQueue.add(
+      'sync-inventory-connection',
+      {
+        asyncJobId: asyncJob.id,
+        type: 'SYNC_INVENTORY_CONNECTION',
+        tenantId,
+        connectionId,
+      },
+      {
+        jobId: asyncJob.id,
+        attempts: 1,
+        removeOnComplete: 50,
+        removeOnFail: 20,
+      },
+    );
+
+    await this.inventoryAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+
+    return this.inventoryAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
   @Post('items/sync')
