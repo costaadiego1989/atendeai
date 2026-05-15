@@ -416,7 +416,7 @@ export function useBillingPageViewModel() {
       } catch {
         toast({
           title: 'Falha ao confirmar plano',
-          description: 'não foi possivel iniciar a alteração de plano.',
+          description: 'não foi possível iniciar a alteração de plano.',
           variant: 'destructive',
         });
       }

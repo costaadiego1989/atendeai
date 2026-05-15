@@ -23,7 +23,7 @@ export function useCancelSubscriptionViewModel(tenantId?: string) {
       toast({
         title: 'Falha ao cancelar assinatura',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel cancelar a assinatura agora.',
+          fallbackMessage: 'não foi possível cancelar a assinatura agora.',
         }),
         variant: 'destructive',
       });

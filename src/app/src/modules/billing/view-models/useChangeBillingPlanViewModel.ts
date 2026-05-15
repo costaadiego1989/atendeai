@@ -56,7 +56,7 @@ export function useChangeBillingPlanViewModel(
       toast({
         title: 'Falha ao alterar plano',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel alterar o plano agora.',
+          fallbackMessage: 'não foi possível alterar o plano agora.',
         }),
         variant: 'destructive',
       });
