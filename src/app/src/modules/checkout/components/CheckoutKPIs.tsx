@@ -14,7 +14,7 @@ interface CheckoutKPIsProps {
 
 export const CheckoutKPIs: React.FC<CheckoutKPIsProps> = ({ summary }) => {
   return (
-    <div className="card-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="card-grid">
       <KPICard
         title="Pedidos em aberto"
         value={summary.openCount}
