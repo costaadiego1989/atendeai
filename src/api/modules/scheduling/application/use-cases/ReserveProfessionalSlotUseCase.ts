@@ -159,7 +159,7 @@ export class ReserveProfessionalSlotUseCase {
       professionalName: professional?.name,
       date: input.date,
       slot: finalSlot,
-      createGoogleMeet: Boolean(input.isOnline || reservedSlot.isOnline || reservedSlot.reservedFor?.isOnline),
+      createGoogleMeet: isFree && Boolean(input.isOnline || reservedSlot.isOnline || reservedSlot.reservedFor?.isOnline),
     });
 
     const slotWithMeeting =
