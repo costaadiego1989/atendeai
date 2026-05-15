@@ -56,7 +56,7 @@ export function getCategoryUnitLabel(
   unit?: 'PER_MINUTE' | 'PER_SESSION' | 'PER_CONSULTATION',
 ) {
   if (unit === 'PER_SESSION') {
-    return 'Por sessao';
+    return 'Por sessão';
   }
 
   if (unit === 'PER_CONSULTATION') {

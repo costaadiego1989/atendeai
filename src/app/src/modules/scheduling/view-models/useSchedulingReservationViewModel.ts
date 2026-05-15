@@ -144,7 +144,7 @@ export function useSchedulingReservationViewModel({
       toast({
         title: 'Falha ao reservar horário',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel reservar este horário agora.',
+          fallbackMessage: 'não foi possível reservar este horário agora.',
         }),
         variant: 'destructive',
       });

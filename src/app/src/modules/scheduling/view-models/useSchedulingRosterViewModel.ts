@@ -147,7 +147,7 @@ export function useSchedulingRosterViewModel({
       toast({
         title: 'Falha ao salvar disponibilidade',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar a disponibilidade agora.',
+          fallbackMessage: 'não foi possível salvar a disponibilidade agora.',
         }),
         variant: 'destructive',
       });
@@ -309,7 +309,7 @@ export function useSchedulingRosterViewModel({
       toast({
         title: 'Falha ao gerar slots',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel gerar os slots em lote agora.',
+          fallbackMessage: 'não foi possível gerar os slots em lote agora.',
         }),
         variant: 'destructive',
       });
@@ -348,7 +348,7 @@ export function useSchedulingRosterViewModel({
       toast({
         title: 'Falha ao vincular categorias',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel salvar as categorias agora.',
+          fallbackMessage: 'não foi possível salvar as categorias agora.',
         }),
         variant: 'destructive',
       });

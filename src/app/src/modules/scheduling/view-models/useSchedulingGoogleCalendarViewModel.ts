@@ -62,7 +62,7 @@ export function useSchedulingGoogleCalendarViewModel() {
       toast({
         title: 'Falha ao iniciar conexão',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel iniciar a conexão com Google Calendar.',
+          fallbackMessage: 'não foi possível iniciar a conexão com Google Calendar.',
         }),
         variant: 'destructive',
       });
@@ -82,7 +82,7 @@ export function useSchedulingGoogleCalendarViewModel() {
       toast({
         title: 'Falha ao desconectar',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel desconectar o Google Calendar agora.',
+          fallbackMessage: 'não foi possível desconectar o Google Calendar agora.',
         }),
         variant: 'destructive',
       });
@@ -103,7 +103,7 @@ export function useSchedulingGoogleCalendarViewModel() {
       toast({
         title: 'Falha ao selecionar calendario',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel selecionar o calendario agora.',
+          fallbackMessage: 'não foi possível selecionar o calendario agora.',
         }),
         variant: 'destructive',
       });
@@ -128,7 +128,7 @@ export function useSchedulingGoogleCalendarViewModel() {
 
       toast({
         title: 'Falha ao conectar Google Calendar',
-        description: data.message || 'não foi possivel concluir a autorização.',
+        description: data.message || 'não foi possível concluir a autorização.',
         variant: 'destructive',
       });
     };

@@ -266,7 +266,7 @@ export function useSchedulingPageViewModel() {
       toast({
         title: 'Falha ao criar profissional',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar este profissional agora.',
+          fallbackMessage: 'não foi possível criar este profissional agora.',
         }),
         variant: 'destructive',
       });
@@ -306,7 +306,7 @@ export function useSchedulingPageViewModel() {
       toast({
         title: 'Falha ao criar categoria',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar esta categoria agora.',
+          fallbackMessage: 'não foi possível criar esta categoria agora.',
         }),
         variant: 'destructive',
       });
@@ -376,7 +376,7 @@ export function useSchedulingPageViewModel() {
       toast({
         title: 'Falha ao criar atendimento recorrente',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'nao foi possivel criar este atendimento recorrente agora.',
+          fallbackMessage: 'nao foi possível criar este atendimento recorrente agora.',
         }),
         variant: 'destructive',
       });
@@ -399,7 +399,7 @@ export function useSchedulingPageViewModel() {
       toast({
         title: 'Falha ao cancelar atendimento recorrente',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'nao foi possivel cancelar este atendimento recorrente agora.',
+          fallbackMessage: 'nao foi possível cancelar este atendimento recorrente agora.',
         }),
         variant: 'destructive',
       });
@@ -422,7 +422,7 @@ export function useSchedulingPageViewModel() {
       toast({
         title: 'Falha ao excluir atendimento recorrente',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'nao foi possivel excluir este atendimento recorrente agora.',
+          fallbackMessage: 'nao foi possível excluir este atendimento recorrente agora.',
         }),
         variant: 'destructive',
       });
@@ -499,7 +499,7 @@ export function useSchedulingPageViewModel() {
       toast({
         title: 'Falha ao atualizar horário',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel atualizar este horário agora.',
+          fallbackMessage: 'não foi possível atualizar este horário agora.',
         }),
         variant: 'destructive',
       });
@@ -557,7 +557,7 @@ export function useSchedulingPageViewModel() {
       toast({
         title: 'Falha ao remarcar reserva',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel remarcar este horário agora.',
+          fallbackMessage: 'não foi possível remarcar este horário agora.',
         }),
         variant: 'destructive',
       });

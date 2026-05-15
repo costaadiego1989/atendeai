@@ -132,7 +132,7 @@ export function useSchedulingReportsViewModel({
       toast({
         title: 'Falha ao exportar agenda',
         description:
-          activeReportJob.errorMessage ?? 'não foi possivel gerar o CSV da agenda.',
+          activeReportJob.errorMessage ?? 'não foi possível gerar o CSV da agenda.',
         variant: 'destructive',
       });
     }
@@ -175,7 +175,7 @@ export function useSchedulingReportsViewModel({
       toast({
         title: 'Falha ao iniciar exportação',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel enfileirar o relatorio agora.',
+          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
         }),
         variant: 'destructive',
       });
