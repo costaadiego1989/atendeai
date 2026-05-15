@@ -58,7 +58,7 @@ export function useProspectingAdsLeadsViewModel() {
       toast({
         title: 'Falha ao sincronizar leads',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel sincronizar os leads agora.',
+          fallbackMessage: 'não foi possível sincronizar os leads agora.',
         }),
         variant: 'destructive',
       });
@@ -78,7 +78,7 @@ export function useProspectingAdsLeadsViewModel() {
       toast({
         title: 'Falha ao importar leads',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel importar os leads agora.',
+          fallbackMessage: 'não foi possível importar os leads agora.',
         }),
         variant: 'destructive',
       });
@@ -108,7 +108,7 @@ export function useProspectingAdsLeadsViewModel() {
       toast({
         title: 'Falha ao gerar mensagem',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel gerar a mensagem com IA agora.',
+          fallbackMessage: 'não foi possível gerar a mensagem com IA agora.',
         }),
         variant: 'destructive',
       });
@@ -145,7 +145,7 @@ export function useProspectingAdsLeadsViewModel() {
       toast({
         title: 'Falha ao prospectar leads',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel criar a campanha a partir dos leads agora.',
+          fallbackMessage: 'não foi possível criar a campanha a partir dos leads agora.',
         }),
         variant: 'destructive',
       });
