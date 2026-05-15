@@ -18,13 +18,13 @@ export function useRegisterViewModel() {
       setSession(session.user, session.tenant);
       toast({
         title: 'Conta criada',
-        description: 'Seu acesso foi criado e a sessao ja esta ativa.',
+        description: 'Seu acesso foi criado e a sessão ja esta ativa.',
       });
       navigate('/app/dashboard', { replace: true });
     },
     onError: (error) => {
       const message = getFriendlyErrorMessage(error, {
-        fallbackMessage: 'não foi possivel criar sua conta agora.',
+        fallbackMessage: 'não foi possível criar sua conta agora.',
       });
 
       toast({
