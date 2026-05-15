@@ -1027,7 +1027,7 @@ describe('RecoveryController (e2e)', () => {
         phone: '5511997771007',
         debtorCompanyName: 'Clinica Horizonte',
         chargeType: 'CONSULTATION',
-        chargeTitle: 'Sessao em aberto',
+        chargeTitle: 'sessão em aberto',
         amountDue: '130.00',
         dueDate: '2030-08-21',
       })
