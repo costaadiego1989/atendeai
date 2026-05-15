@@ -1,7 +1,7 @@
-import { Filter, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProposalActionsDialogs } from '@/modules/proposals/components/ProposalActionsDialogs';
@@ -27,21 +27,9 @@ export default function ProposalsPage() {
         totalValue={vm.summary.totalValue}
       />
 
-      <Card className="glass-card border-border/40 bg-background/30">
-        <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/70">
-              <Filter className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground">Filtro de propostas</p>
-              <p className="text-xs text-muted-foreground">
-                Busque por título, contato, descrição ou status sem sair do layout atual.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="glass-card p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-1 items-center gap-3">
             <Badge
               variant="secondary"
               className="hidden h-9 items-center whitespace-nowrap rounded-md border-border/60 bg-muted/30 px-3.5 lg:inline-flex"
@@ -52,7 +40,7 @@ export default function ProposalsPage() {
               </span>
             </Badge>
 
-            <div className="relative flex-1 sm:min-w-[320px]">
+            <div className="relative flex-1 lg:max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
@@ -61,7 +49,9 @@ export default function ProposalsPage() {
                 placeholder="Buscar propostas..."
               />
             </div>
+          </div>
 
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Select value={vm.statusFilter} onValueChange={vm.setStatusFilter}>
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Status" />
@@ -79,8 +69,8 @@ export default function ProposalsPage() {
               Limpar filtros
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
         <Card className="glass-card overflow-hidden">
