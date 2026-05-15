@@ -55,7 +55,7 @@ export function useGoogleAdsConnectionViewModel() {
       toast({
         title: 'Falha ao iniciar conexão',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel iniciar a conexão com Google Ads.',
+          fallbackMessage: 'não foi possível iniciar a conexão com Google Ads.',
         }),
         variant: 'destructive',
       });
@@ -77,7 +77,7 @@ export function useGoogleAdsConnectionViewModel() {
         title: 'Falha ao selecionar conta',
         description: getFriendlyErrorMessage(error, {
           fallbackMessage:
-            'não foi possivel selecionar a conta Google Ads agora.',
+            'não foi possível selecionar a conta Google Ads agora.',
         }),
         variant: 'destructive',
       });
@@ -97,7 +97,7 @@ export function useGoogleAdsConnectionViewModel() {
       toast({
         title: 'Falha ao desconectar',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possivel desconectar o Google Ads agora.',
+          fallbackMessage: 'não foi possível desconectar o Google Ads agora.',
         }),
         variant: 'destructive',
       });
@@ -123,7 +123,7 @@ export function useGoogleAdsConnectionViewModel() {
 
       toast({
         title: 'Falha ao conectar Google Ads',
-        description: data.message || 'não foi possivel concluir a autorização.',
+        description: data.message || 'não foi possível concluir a autorização.',
         variant: 'destructive',
       });
     };
