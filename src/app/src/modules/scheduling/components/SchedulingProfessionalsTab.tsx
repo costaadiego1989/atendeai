@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,7 @@ import {
   Lock,
   Plus,
   Repeat2,
+  Search,
   Trash2,
   Unlock,
   UserRound,
@@ -61,6 +62,10 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
   const [selectedRecurrence, setSelectedRecurrence] = useState<
     (typeof vm.recurrences)[number] | null
   >(null);
+  const [reservedSearch, setReservedSearch] = useState('');
+  const [openSlotsVisible, setOpenSlotsVisible] = useState(12);
+  const [reservedSlotsVisible, setReservedSlotsVisible] = useState(12);
+  const SLOTS_PAGE_SIZE = 12;
 
   useEffect(() => {
     vm.syncAvailabilityDraftFromLoaded();
@@ -68,6 +73,9 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
 
   useEffect(() => {
     setSlotsDayTab('open');
+    setReservedSearch('');
+    setOpenSlotsVisible(12);
+    setReservedSlotsVisible(12);
   }, [vm.selectedProfessionalId, vm.selectedDate]);
 
   const isRangeView = vm.calendarView !== 'day';
@@ -85,6 +93,17 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
       slot.status === 'COMPLETED' ||
       slot.status === 'NO_SHOW',
   );
+  const filteredReservedSlots = useMemo(() => {
+    const q = reservedSearch.trim().toLowerCase();
+    if (!q) return reservedSlots;
+    return reservedSlots.filter((slot) => {
+      const rf = slot.reservedFor;
+      return [rf?.contactName, rf?.contactPhone, rf?.contactEmail, rf?.categoryName]
+        .filter(Boolean)
+        .some((v) => v!.toLowerCase().includes(q));
+    });
+  }, [reservedSlots, reservedSearch]);
+
   const activeRecurrences = vm.recurrences.filter((recurrence) => recurrence.status === 'ACTIVE');
   const generatedRecurrencesCount = vm.recurrences.reduce(
     (total, recurrence) => total + recurrence.occurrencesCreated,
@@ -816,10 +835,10 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                   ]}
                 />
 
-                <TabsContent value="open" className="space-y-0">
+                <TabsContent value="open" className="space-y-4">
                   {openSlots.length ? (
                     <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-                      {openSlots.map((slot) => {
+                      {openSlots.slice(0, openSlotsVisible).map((slot) => {
                         const tone = getSlotTone(slot.status);
                         const ToneIcon = tone.Icon;
 
@@ -924,12 +943,40 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                       description="Os horários disponíveis e bloqueados aparecem aqui."
                     />
                   )}
+                  {openSlots.length > openSlotsVisible ? (
+                    <div className="flex justify-center pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl"
+                        onClick={() => setOpenSlotsVisible((v) => v + SLOTS_PAGE_SIZE)}
+                      >
+                        Ver mais ({openSlots.length - openSlotsVisible} restantes)
+                      </Button>
+                    </div>
+                  ) : null}
                 </TabsContent>
 
-                <TabsContent value="reserved" className="space-y-0">
+                <TabsContent value="reserved" className="space-y-4">
                   {reservedSlots.length ? (
-                    <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-                      {reservedSlots.map((slot) => {
+                    <>
+                      <div className="glass-card p-3">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            className="pl-9"
+                            value={reservedSearch}
+                            onChange={(e) => {
+                              setReservedSearch(e.target.value);
+                              setReservedSlotsVisible(12);
+                            }}
+                            placeholder="Buscar por cliente, celular, email ou categoria..."
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+                      {filteredReservedSlots.slice(0, reservedSlotsVisible).map((slot) => {
                         const tone = getSlotTone(slot.status);
                         const ToneIcon = tone.Icon;
 
@@ -1034,6 +1081,27 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                         );
                       })}
                     </div>
+                    {filteredReservedSlots.length === 0 ? (
+                      <EmptyState
+                        icon={Calendar}
+                        title="Nenhum resultado para esta busca"
+                        description="Tente buscar por outro nome, celular, email ou categoria."
+                      />
+                    ) : null}
+                    {filteredReservedSlots.length > reservedSlotsVisible ? (
+                      <div className="flex justify-center pt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl"
+                          onClick={() => setReservedSlotsVisible((v) => v + SLOTS_PAGE_SIZE)}
+                        >
+                          Ver mais ({filteredReservedSlots.length - reservedSlotsVisible} restantes)
+                        </Button>
+                      </div>
+                    ) : null}
+                  </>
                   ) : (
                     <EmptyState
                       icon={Calendar}
