@@ -108,7 +108,7 @@ function AdvisorPillGroup<T extends string>({
                 'rounded-2xl border px-4 py-3 text-left transition-all',
                 active
                   ? 'border-primary/40 bg-primary/[0.08] shadow-[0_0_0_1px_rgba(20,184,166,0.12)]'
-                  : 'border-border/70 bg-card/80 hover:border-primary/20 hover:bg-muted/40',
+                  : 'border-border/60 bg-card/80 hover:border-primary/20 hover:bg-muted/40',
               )}
             >
               <div className="flex items-center justify-between gap-3">
@@ -137,7 +137,7 @@ interface AdvisorQuestionRowProps {
 
 function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-card/60 p-4">
+    <div className="rounded-2xl border border-border/60 bg-card/60 p-4">
       <div className="mb-3">
         <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
           {question.label}
@@ -157,7 +157,7 @@ function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
                 'min-h-[132px] rounded-xl border px-4 py-3 text-left transition-all',
                 active
                   ? 'border-primary/40 bg-primary/[0.08] shadow-[0_0_0_1px_rgba(20,184,166,0.12)]'
-                  : 'border-border/70 bg-card/80 hover:border-primary/20 hover:bg-muted/40',
+                  : 'border-border/60 bg-card/80 hover:border-primary/20 hover:bg-muted/40',
               )}
             >
               <div className="flex items-center justify-between gap-3">
@@ -444,7 +444,7 @@ export default function BillingUsagePage() {
                 ))}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 border-t border-border/70 pt-4">
+              <div className="flex flex-wrap items-center gap-3 border-t border-border/60 pt-4">
                 <Button onClick={vm.openRecommendedPlan}>
                   Ver e contratar plano indicado
                 </Button>
@@ -522,7 +522,7 @@ export default function BillingUsagePage() {
                 ))}
               </div>
 
-              <div className="rounded-2xl border border-border/70 bg-card/80 p-4">
+              <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
                   Add-ons do nicho
                 </p>
@@ -730,7 +730,7 @@ export default function BillingUsagePage() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-border/70 bg-card/70 p-4">
+            <div className="rounded-2xl border border-border/60 bg-card/70 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
                 Importante
               </p>
