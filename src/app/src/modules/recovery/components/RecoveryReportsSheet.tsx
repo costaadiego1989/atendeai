@@ -32,7 +32,7 @@ export function RecoveryReportsSheet({ vm }: Props) {
         </SheetHeader>
 
         <div className="mt-6 grid gap-4">
-          <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
               Periodo
             </p>
@@ -101,13 +101,13 @@ export function RecoveryReportsSheet({ vm }: Props) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+        <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
           O arquivo sai com devedor, empresa, telefone, origem, status, titulo da Cobrança,
           valor, vencimento, referências, tags e historico operacional principal.
         </div>
 
         {vm.recoveryActiveReportJob ? (
-          <div className="mt-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="mt-4 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">{vm.recoveryActiveReportJob.status}</Badge>
               <Badge variant="secondary">{vm.recoveryActiveReportJob.progress}%</Badge>
