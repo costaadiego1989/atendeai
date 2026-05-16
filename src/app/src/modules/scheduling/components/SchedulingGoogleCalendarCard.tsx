@@ -16,7 +16,7 @@ export function SchedulingGoogleCalendarCard() {
   const branchScoped = Boolean(vm.activeBranchId);
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/70 p-5 mb-5">
+    <div className="rounded-2xl border border-border/60 bg-card/70 p-5 mb-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/20 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
