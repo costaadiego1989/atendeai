@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bot, CalendarClock, CircleDollarSign, ListOrdered, Loader2, Search, Send, Sparkles, XCircle } from 'lucide-react';
+import { Bot, CalendarClock, CircleDollarSign, Loader2, Search, Send, Sparkles, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -447,8 +447,7 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
           <SheetHeader>
             <SheetTitle>Contato ao cliente</SheetTitle>
             <SheetDescription>
-              Escolha entre mensagem livre (manual ou IA) ou seguir o <strong>roteiro de cobrança</strong> ligado ao caso —
-              com regras de prazo e texto gerado conforme cada fase.
+              Escreva a mensagem manualmente ou gere uma sugestão com IA para enviar ao cliente.
             </SheetDescription>
           </SheetHeader>
           <div className="space-y-4 mt-6">
@@ -458,36 +457,6 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
                 {vm.selectedCase?.chargeTitle || 'Caso sem título de cobrança'}
               </p>
             </div>
-
-            <div className="space-y-2">
-              <Label>Modo de envio</Label>
-              <Select
-                value={vm.outreachForm.outreachMode}
-                onValueChange={(value: 'free' | 'playbook') =>
-                  vm.setOutreachForm((current) => ({
-                    ...current,
-                    outreachMode: value,
-                    previewText: '',
-                    previewGeneratedWithAI: false,
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Escolha o modo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="free">Mensagem livre (manual ou IA)</SelectItem>
-                  <SelectItem value="playbook">Seguir roteiro de cobrança</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {vm.outreachForm.outreachMode === 'playbook' && !vm.selectedCase?.playbookId ? (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                Este caso não está ligado a um roteiro. Ative um roteiro na página de recuperação e crie novos casos com a
-                configuração habilitada, ou associe um roteiro quando existir essa opção.
-              </div>
-            ) : null}
 
             <div className="rounded-2xl border border-primary/20 bg-primary/[0.04] p-4">
               <div className="flex items-start gap-3">
@@ -505,42 +474,23 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {vm.outreachForm.previewText ||
-                      (vm.outreachForm.outreachMode === 'playbook'
-                        ? 'Gere a prévia da fase actual do roteiro antes de enviar.'
-                        : 'Gere uma sugestão com IA ou edite o texto manualmente abaixo.')}
+                      'Gere uma sugestão com IA ou edite o texto manualmente abaixo.'}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {vm.outreachForm.outreachMode === 'playbook' ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="gap-1.5"
-                  onClick={() => vm.previewOutreachMutation.mutate('playbook')}
-                  disabled={
-                    vm.previewOutreachMutation.isPending ||
-                    !vm.selectedCase?.playbookId ||
-                    vm.outreachFlowExhausted
-                  }
-                >
-                  <ListOrdered className="h-4 w-4" />
-                  Pré-visualizar fase do roteiro
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="gap-1.5"
-                  onClick={() => vm.previewOutreachMutation.mutate('ai')}
-                  disabled={vm.previewOutreachMutation.isPending}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {vm.outreachForm.previewGeneratedWithAI ? 'Gerar outra com IA' : 'Gerar com IA'}
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => vm.previewOutreachMutation.mutate('ai')}
+                disabled={vm.previewOutreachMutation.isPending}
+              >
+                <Sparkles className="h-4 w-4" />
+                {vm.outreachForm.previewGeneratedWithAI ? 'Gerar outra com IA' : 'Gerar com IA'}
+              </Button>
             </div>
 
             <div className="space-y-2">
@@ -554,17 +504,10 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
                     messageText: event.target.value,
                   }))
                 }
-                placeholder={
-                  vm.outreachForm.outreachMode === 'playbook'
-                    ? 'Use Pré-visualizar fase do roteiro. O envio volta a gerar o texto na API (esta caixa é só leitura).'
-                    : 'Edite a mensagem final que sera enviada ao cliente.'
-                }
-                readOnly={vm.outreachForm.outreachMode === 'playbook'}
+                placeholder="Edite a mensagem final que será enviada ao cliente."
               />
               <p className="text-xs text-muted-foreground">
-                {vm.outreachForm.outreachMode === 'playbook'
-                  ? 'A prévia ajuda a rever o teor; ao confirmar, a API gera novamente conforme a fase (edições aqui não são enviadas).'
-                  : 'Você pode aceitar a prévia da IA como está ou ajustar o texto antes de confirmar o envio.'}
+                Você pode aceitar a prévia da IA como está ou ajustar o texto antes de confirmar o envio.
               </p>
             </div>
           </div>
@@ -577,8 +520,7 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
               disabled={
                 vm.outreachMutation.isPending ||
                 vm.outreachFlowExhausted ||
-                !vm.outreachForm.messageText.trim() ||
-                (vm.outreachForm.outreachMode === 'playbook' && !vm.selectedCase?.playbookId)
+                !vm.outreachForm.messageText.trim()
               }
             >
               {vm.outreachMutation.isPending ? (
