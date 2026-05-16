@@ -247,7 +247,7 @@ export default function AlertsPage() {
               ))}
 
               {!vm.reminders.length && (
-                <div className="rounded-2xl border border-dashed border-border/70 p-12 text-center">
+                <div className="rounded-2xl border border-dashed border-border/60 p-12 text-center">
                   <Send className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
                   <p className="text-lg font-bold text-foreground">Nenhum alerta disponível</p>
                   <p className="text-sm text-muted-foreground mb-6">
