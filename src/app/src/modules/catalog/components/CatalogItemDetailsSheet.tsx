@@ -123,7 +123,7 @@ export function CatalogItemDetailsSheet({
                   return (
                     <div
                       key={`${variant.reference ?? variant.sku ?? index}`}
-                      className="rounded-lg border border-border/70 bg-muted/10 p-4"
+                      className="rounded-lg border border-border/60 bg-muted/10 p-4"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
@@ -187,7 +187,7 @@ export function CatalogItemDetailsSheet({
                     : [];
 
                   return (
-                    <div key={`${group.name ?? index}`} className="rounded-lg border border-border/70 bg-muted/10 p-4">
+                    <div key={`${group.name ?? index}`} className="rounded-lg border border-border/60 bg-muted/10 p-4">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-sm font-semibold text-foreground">
