@@ -100,7 +100,7 @@ export function ContactStageBoard({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex min-h-[132px] items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/10 px-4 text-center text-sm text-muted-foreground">
+                  <div className="flex min-h-[132px] items-center justify-center rounded-2xl border border-dashed border-border/60 bg-muted/10 px-4 text-center text-sm text-muted-foreground">
                     Solte aqui para mover para {option.label.toLowerCase()}.
                   </div>
                 )}
