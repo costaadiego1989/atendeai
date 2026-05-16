@@ -137,13 +137,13 @@ export function ContactReportsSheet({
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+        <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
           O arquivo sai com nome, telefone, documento, e-mail, estagio, tags, ultima
           interação, canais e tipos de evento da timeline.
         </div>
 
         {activeJob && (
-          <div className="mt-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="mt-4 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">{activeJob.status}</Badge>
               <Badge variant="secondary">{activeJob.progress}%</Badge>
