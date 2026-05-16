@@ -116,13 +116,13 @@ export function ProspectingSearchReportsSheet({ vm }: Props) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+        <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
           O arquivo sai com termo pesquisado, territorio, status, volume encontrado, quantidade com WhatsApp,
           Instagram, email e timestamps operacionais.
         </div>
 
         {vm.activeReportJob ? (
-          <div className="mt-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="mt-4 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">{vm.activeReportJob.status}</Badge>
               <Badge variant="secondary">{vm.activeReportJob.progress}%</Badge>
