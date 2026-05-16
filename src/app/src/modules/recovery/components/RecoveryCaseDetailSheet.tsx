@@ -18,6 +18,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   formatCurrency as formatCurrencyValue,
   formatDateTime,
@@ -266,11 +267,15 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
     item.status !== 'INVALID_CONTACT';
   const hasSuggestion = Boolean(item?.suggestedReply?.trim());
   const guidanceAlreadySent = vm.guidanceAlreadySent;
-  const guidanceHelperText = canUseGuidance
-    ? guidanceAlreadySent
-      ? 'A sugestão atual já foi enviada ao cliente. Gere uma nova versão se precisar responder de outro jeito.'
-      : 'A IA pode sugerir a melhor resposta com base na última mensagem do cliente.'
-    : 'A sugestão fica indisponível apenas para casos encerrados ou com contato inválido.';
+  const hasClientInteraction = Boolean(item?.lastContactedAt);
+  const canGenerateGuidance = canUseGuidance && hasClientInteraction;
+  const guidanceHelperText = !hasClientInteraction
+    ? 'A sugestão só pode ser gerada após a primeira interação com o cliente.'
+    : canUseGuidance
+      ? guidanceAlreadySent
+        ? 'A sugestão atual já foi enviada ao cliente. Gere uma nova versão se precisar responder de outro jeito.'
+        : 'A IA pode sugerir a melhor resposta com base na última mensagem do cliente.'
+      : 'A sugestão fica indisponível apenas para casos encerrados ou com contato inválido.';
   const contactDone = Boolean(item?.lastContactedAt);
   const playbookUiTitle =
     item?.playbookId && vm.playbooksQuery.data
@@ -336,7 +341,13 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
               </div>
             </SheetHeader>
 
-            <div className="mt-6 flex-1 space-y-6 overflow-y-auto px-6 pb-6">
+            <Tabs defaultValue="details" className="mt-6 flex-1 overflow-hidden flex flex-col">
+              <TabsList className="mx-6 w-fit">
+                <TabsTrigger value="details">Detalhes</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="flex-1 overflow-y-auto px-6 pb-6 mt-4 space-y-6">
               <div className="grid gap-4 lg:grid-cols-2">
                 <Card className="glass-card border-border/60">
                   <CardContent className="space-y-3 p-4">
@@ -345,7 +356,7 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                         Empresa
                       </p>
                       <p className="mt-2 text-base font-semibold text-foreground">
-                        {item.debtorCompanyName || 'não informada'}
+                        {item.debtorCompanyName || 'Empresa não informada'}
                       </p>
                     </div>
                     <div>
@@ -403,21 +414,6 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                   </CardContent>
                 </Card>
               </div>
-
-              {commercial ? (
-                <div className="rounded-xl border border-border/60 bg-background/60 px-4 py-3 text-sm">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className={getRecoveryCommercialToneClassName(commercial.tone)}
-                    >
-                      {commercial.kindLabel}
-                    </Badge>
-                    <span className="font-medium text-foreground">{commercial.statusLabel}</span>
-                  </div>
-                  <p className="mt-2 text-muted-foreground">{commercial.summary}</p>
-                </div>
-              ) : null}
 
               {item.playbookId ? (
                 <div className="rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm">
@@ -530,8 +526,7 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                 </Card>
               ) : null}
 
-              <div className="grid gap-4 lg:grid-cols-[1.3fr_0.9fr]">
-                <Card className="glass-card border-border/60">
+              <Card className="glass-card border-border/60">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-2">
@@ -578,7 +573,9 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                         Resposta sugerida
                       </p>
                       <p className="mt-2 text-sm text-foreground">
-                        {item.suggestedReply || 'Ainda não existe sugestão pronta para este caso.'}
+                        {item.suggestedReply || (hasClientInteraction
+                          ? 'Ainda não existe sugestão pronta para este caso.'
+                          : 'A sugestão será gerada após a primeira interação com o cliente.')}
                       </p>
                     </div>
                     {!hasSuggestion ? (
@@ -586,12 +583,17 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                         type="button"
                         size="sm"
                         className="gap-1.5"
-                        disabled={!canUseGuidance}
+                        disabled={!canGenerateGuidance}
                         onClick={() => vm.setGuidanceOpen(true)}
                       >
                         <Sparkles className="h-4 w-4" />
-                        Gerar sugestao
+                        Gerar sugestão
                       </Button>
+                    ) : null}
+                    {!hasClientInteraction && !hasSuggestion ? (
+                      <p className="text-xs text-muted-foreground">
+                        Disponível após a primeira interação com o cliente.
+                      </p>
                     ) : null}
                     <div className={`rounded-2xl border border-border/60 bg-muted/25 p-4 ${item.suggestedNextAction ? '' : 'hidden'}`}>
                       <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
@@ -604,18 +606,41 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                   </CardContent>
                 </Card>
 
+              {item.externalReference ||
+                item.relatedEntityLabel ||
+                item.relatedEntityType ||
+                visibleAssignedTags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {item.relatedEntityLabel || item.relatedEntityType ? (
+                    <Badge variant="outline">
+                      {item.relatedEntityLabel || item.relatedEntityType}
+                    </Badge>
+                  ) : null}
+                  {item.externalReference ? (
+                    <Badge variant="outline">Ref. {item.externalReference}</Badge>
+                  ) : null}
+                  {visibleAssignedTags.map((tag) => (
+                    <Badge key={tag} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
+              </TabsContent>
+
+              <TabsContent value="timeline" className="flex-1 overflow-y-auto px-6 pb-6 mt-4 space-y-4">
                 <Card className="glass-card border-border/60">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Timeline visual do caso</CardTitle>
+                    <CardTitle className="text-base">Timeline do caso</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {vm.timelineQuery.isLoading && item.contactId ? (
                       <div className="rounded-2xl border border-dashed border-border/60 px-4 py-6 text-sm text-muted-foreground">
-                        Carregando historico operacional deste cliente...
+                        Carregando histórico operacional deste cliente...
                       </div>
                     ) : timelineItems.length === 0 ? (
                       <div className="rounded-2xl border border-dashed border-border/60 px-4 py-6 text-sm text-muted-foreground">
-                        Ainda não ha eventos suficientes para compor a timeline deste caso.
+                        Ainda não há eventos suficientes para compor a timeline deste caso.
                       </div>
                     ) : (
                       timelineItems.map((timelineItem, index) => (
@@ -653,29 +678,8 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                     )}
                   </CardContent>
                 </Card>
-              </div>
-
-              {item.externalReference ||
-                item.relatedEntityLabel ||
-                item.relatedEntityType ||
-                visibleAssignedTags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {item.relatedEntityLabel || item.relatedEntityType ? (
-                    <Badge variant="outline">
-                      {item.relatedEntityLabel || item.relatedEntityType}
-                    </Badge>
-                  ) : null}
-                  {item.externalReference ? (
-                    <Badge variant="outline">Ref. {item.externalReference}</Badge>
-                  ) : null}
-                  {visibleAssignedTags.map((tag) => (
-                    <Badge key={tag} variant="outline">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+              </TabsContent>
+            </Tabs>
 
             <Separator />
 
