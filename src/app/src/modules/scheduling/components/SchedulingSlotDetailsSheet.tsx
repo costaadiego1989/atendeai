@@ -1,7 +1,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { CalendarDays, Clock, ExternalLink, Video } from 'lucide-react';
+import {
+  CalendarDays,
+  Clock,
+  CreditCard,
+  ExternalLink,
+  User,
+  Video,
+  Tag,
+  FileText,
+} from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -12,7 +21,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
@@ -27,6 +35,20 @@ import { toast } from '@/hooks/use-toast';
 type Props = {
   vm: SchedulingPageViewModel;
 };
+
+function resolveSlotPrice(
+  vm: SchedulingPageViewModel,
+): number | null {
+  const slot = vm.selectedSlotDetails;
+  if (!slot) return null;
+  if (slot.payment?.amount != null) return slot.payment.amount;
+  if (slot.customPrice != null) return slot.customPrice;
+  const categoryPrice = vm.categories.find(
+    (c) => c.id === slot.reservedFor?.categoryId,
+  )?.basePrice;
+  if (categoryPrice != null) return categoryPrice;
+  return null;
+}
 
 export function SchedulingSlotDetailsSheet({ vm }: Props) {
   const [paymentBillingType, setPaymentBillingType] =
@@ -48,7 +70,6 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
         vm.selectedProfessional?.name,
       );
 
-      // Open the meeting URL
       window.open(result.meetingUrl, '_blank');
 
       if (result.messageSent) {
@@ -74,113 +95,155 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
     }
   };
 
-  const isFreeSlot = vm.selectedSlotDetails?.status === 'RESERVED' && !vm.selectedSlotDetails?.payment;
+  const isFreeSlot =
+    vm.selectedSlotDetails?.status === 'RESERVED' && !vm.selectedSlotDetails?.payment;
+  const slotPrice = resolveSlotPrice(vm);
+  const isReserved =
+    vm.selectedSlotDetails?.status === 'RESERVED' ||
+    vm.selectedSlotDetails?.status === 'PRE_RESERVED' ||
+    vm.selectedSlotDetails?.status === 'COMPLETED' ||
+    vm.selectedSlotDetails?.status === 'NO_SHOW';
 
   return (
     <Sheet open={vm.slotDetailsOpen} onOpenChange={vm.setSlotDetailsOpen}>
       <SheetContent side="right" className="w-[560px] sm:max-w-[560px] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Detalhes do agendamento</SheetTitle>
-          <SheetDescription>
-            Ajuste a reserva, veja o cliente vinculado ou libere o horário novamente.
-          </SheetDescription>
+        <SheetHeader className="pb-4 border-b border-border/40">
+          <SheetTitle className="text-lg">Detalhes do agendamento</SheetTitle>
         </SheetHeader>
-        <div className="mt-6 space-y-4">
-          <div className="rounded-2xl border border-border/60 bg-muted/15 p-4 text-sm">
-            <p className="font-medium text-foreground">
-              {vm.selectedSlotDetails
-                ? `${formatScheduleDate(vm.selectedDate)} das ${vm.selectedSlotDetails.startsAt} às ${vm.selectedSlotDetails.endsAt}`
-                : 'Nenhum horário selecionado'}
-            </p>
-            {vm.selectedSlotDetails?.customPrice ? (
-              <p className="mt-1 text-muted-foreground">
-                {formatCurrency(vm.selectedSlotDetails.customPrice)}
-              </p>
-            ) : (
-              <p className="mt-1 text-muted-foreground">
-                {formatCurrency(vm.selectedSlotDetails?.customPrice || 0)}
-              </p>
+
+        <div className="mt-5 space-y-5">
+          {/* --- Header card: date/time + price --- */}
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/10 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                <CalendarDays className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {vm.selectedSlotDetails
+                    ? formatScheduleDate(vm.selectedDate)
+                    : 'Nenhum horário selecionado'}
+                </p>
+                {vm.selectedSlotDetails && (
+                  <p className="text-xs text-muted-foreground">
+                    {vm.selectedSlotDetails.startsAt} – {vm.selectedSlotDetails.endsAt}
+                  </p>
+                )}
+              </div>
+            </div>
+            {slotPrice != null && (
+              <span className="text-base font-semibold text-foreground">
+                {formatCurrency(slotPrice)}
+              </span>
             )}
           </div>
 
-          {vm.selectedSlotDetails?.status === 'RESERVED' ||
-            vm.selectedSlotDetails?.status === 'PRE_RESERVED' ||
-            vm.selectedSlotDetails?.status === 'COMPLETED' ||
-            vm.selectedSlotDetails?.status === 'NO_SHOW' ? (
+          {isReserved ? (
             <>
-              <div className="space-y-2">
-                <Label>Contato</Label>
-                <p className="rounded-2xl border border-border/60 bg-muted/15 p-3 text-sm">
-                  {vm.selectedSlotDetails.reservedFor?.contactName || 'Cliente não identificado'}
-                </p>
+              {/* --- Contact --- */}
+              <div className="flex items-center gap-3 rounded-xl border border-border/50 px-4 py-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                  <User className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Contato</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {vm.selectedSlotDetails?.reservedFor?.contactName || 'Cliente não identificado'}
+                  </p>
+                </div>
               </div>
-              {vm.selectedSlotDetails.payment ? (
-                <div className="rounded-2xl border border-border/60 bg-muted/15 p-3 text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">
-                    {vm.selectedSlotDetails.status === 'PRE_RESERVED'
-                      ? 'Pagamento pendente'
-                      : 'Pagamento do agendamento'}
-                  </p>
-                  <p className="mt-1">
-                    Status: {vm.selectedSlotDetails.payment.status === 'PAID' ? 'Pago' : 'Pendente'}
-                  </p>
-                  <p className="mt-1">
-                    Valor: {formatCurrency(vm.selectedSlotDetails.payment.amount)}
-                  </p>
-                  {vm.selectedSlotDetails.payment.linkUrl ? (
-                    <Button asChild size="sm" className="mt-3 rounded-xl">
+
+              {/* --- Payment status --- */}
+              {vm.selectedSlotDetails?.payment ? (
+                <div className="rounded-xl border border-border/50 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">Pagamento</span>
+                    </div>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        vm.selectedSlotDetails.payment.status === 'PAID'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {vm.selectedSlotDetails.payment.status === 'PAID' ? 'Pago' : 'Pendente'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Valor</p>
+                      <p className="font-medium">{formatCurrency(vm.selectedSlotDetails.payment.amount)}</p>
+                    </div>
+                    {vm.selectedSlotDetails.payment.expiresAt && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Expira em</p>
+                        <p className="font-medium">
+                          {(() => {
+                            const d = new Date(vm.selectedSlotDetails!.payment!.expiresAt!);
+                            return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                          })()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {vm.selectedSlotDetails.payment.linkUrl && (
+                    <Button asChild variant="outline" size="sm" className="w-full rounded-lg">
                       <a
                         href={vm.selectedSlotDetails.payment.linkUrl}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        <ExternalLink className="mr-2 h-4 w-4" />
+                        <ExternalLink className="mr-2 h-3.5 w-3.5" />
                         Abrir link de pagamento
                       </a>
                     </Button>
-                  ) : null}
-                  {vm.selectedSlotDetails.payment.expiresAt ? (
-                    <p className="mt-1">
-                      Expira em{' '}
-                      {vm.selectedSlotDetails.payment.expiresAt.slice(0, 16).replace('T', ' ')}
-                    </p>
-                  ) : null}
+                  )}
                 </div>
               ) : isFreeSlot ? (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-900">
-                  <p className="font-medium">Atendimento gratuito</p>
-                  <p className="mt-1 text-emerald-700">
-                    Este horário foi confirmado sem cobrança.
-                  </p>
+                <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/50 px-4 py-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100">
+                    <CreditCard className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-emerald-900">Atendimento gratuito</p>
+                    <p className="text-xs text-emerald-700">
+                      Confirmado sem cobrança.
+                    </p>
+                  </div>
                 </div>
               ) : null}
-              {(vm.selectedSlotDetails.status === 'RESERVED' ||
-                vm.selectedSlotDetails.status === 'PRE_RESERVED') &&
+
+              {/* --- Generate payment link --- */}
+              {(vm.selectedSlotDetails?.status === 'RESERVED' ||
+                vm.selectedSlotDetails?.status === 'PRE_RESERVED') &&
               !isFreeSlot &&
-              (!vm.selectedSlotDetails.payment ||
-                vm.selectedSlotDetails.payment.status === 'PENDING') ? (
-                <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/15 p-4">
-                  <Label htmlFor="slot-payment-billing">Forma de cobrança</Label>
+              !vm.selectedSlotDetails?.payment ? (
+                <div className="rounded-xl border border-border/50 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">Forma de cobrança</span>
+                  </div>
                   <Select
                     value={paymentBillingType}
                     onValueChange={(value) =>
                       setPaymentBillingType(value as SchedulingSlotBillingType)
                     }
                   >
-                    <SelectTrigger id="slot-payment-billing">
+                    <SelectTrigger className="rounded-lg">
                       <SelectValue placeholder="Escolha a forma" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="PIX">PIX</SelectItem>
                       <SelectItem value="BOLETO">Boleto</SelectItem>
-                      <SelectItem value="CREDIT_CARD">Cartão</SelectItem>
-                      <SelectItem value="UNDEFINED">Automático</SelectItem>
+                      <SelectItem value="CREDIT_CARD">Cartão de crédito</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button
                     type="button"
                     size="sm"
-                    className="rounded-xl"
+                    className="w-full rounded-lg"
                     disabled={vm.createSlotPaymentLinkMutation.isPending}
                     onClick={() =>
                       vm.createSlotPaymentLinkMutation.mutate(paymentBillingType)
@@ -192,25 +255,30 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
                   </Button>
                 </div>
               ) : null}
-              {vm.selectedSlotDetails.reservedFor?.meetingUrl ? (
-                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm">
+
+              {/* --- Online meeting --- */}
+              {vm.selectedSlotDetails?.reservedFor?.meetingUrl ? (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <Video className="h-4 w-4 text-emerald-700" />
-                    <p className="font-medium text-foreground">Consulta online</p>
+                    <span className="text-sm font-medium text-foreground">Consulta online</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                    <CalendarDays className="h-3.5 w-3.5" />
-                    <span>{formatScheduleDate(vm.selectedDate)}</span>
-                    <span>•</span>
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{vm.selectedSlotDetails.startsAt} – {vm.selectedSlotDetails.endsAt}</span>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {formatScheduleDate(vm.selectedDate)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      {vm.selectedSlotDetails.startsAt} – {vm.selectedSlotDetails.endsAt}
+                    </span>
                   </div>
-                  <p className="mt-2 break-all text-xs text-muted-foreground">
+                  <p className="break-all text-xs text-muted-foreground font-mono bg-muted/30 rounded-md px-2 py-1.5">
                     {vm.selectedSlotDetails.reservedFor.meetingUrl}
                   </p>
                   <Button
                     size="sm"
-                    className="mt-3 rounded-xl"
+                    className="w-full rounded-lg"
                     disabled={joiningMeeting}
                     onClick={handleJoinMeeting}
                   >
@@ -218,117 +286,145 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
                     {joiningMeeting ? 'Entrando...' : 'Acessar sala'}
                   </Button>
                 </div>
-              ) : vm.selectedSlotDetails.reservedFor?.isOnline ? (
-                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Video className="h-4 w-4 text-amber-700" />
-                    <p className="font-medium text-foreground">Atendimento online</p>
+              ) : vm.selectedSlotDetails?.reservedFor?.isOnline ? (
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/10 px-4 py-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted/40">
+                    <Video className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <p className="mt-1">
-                    Link do Meet ainda não foi gerado. Verifique a conexão com Google Calendar.
-                  </p>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Atendimento online</p>
+                    <p className="text-xs text-muted-foreground">
+                      Link da sala ainda não foi gerado. Verifique a conexão com o Google Calendar.
+                    </p>
+                  </div>
                 </div>
               ) : null}
-              <div className="space-y-2">
-                <Label htmlFor="edit-reservation-category">Categoria</Label>
-                <Select
-                  value={vm.editReservationForm.categoryId}
-                  onValueChange={(value) =>
-                    vm.setEditReservationForm((current) => ({
-                      ...current,
-                      categoryId: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger id="edit-reservation-category">
-                    <SelectValue placeholder="Selecione a categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sem categoria</SelectItem>
-                    {vm.selectedProfessionalCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-reservation-notes">Observações</Label>
-                <Textarea
-                  id="edit-reservation-notes"
-                  value={vm.editReservationForm.notes}
-                  onChange={(event) =>
-                    vm.setEditReservationForm((current) => ({
-                      ...current,
-                      notes: event.target.value,
-                    }))
-                  }
-                />
+
+              {/* --- Category & Notes --- */}
+              <div className="rounded-xl border border-border/50 p-4 space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor="edit-reservation-category" className="text-sm font-medium">
+                      Categoria
+                    </Label>
+                  </div>
+                  <Select
+                    value={vm.editReservationForm.categoryId}
+                    onValueChange={(value) =>
+                      vm.setEditReservationForm((current) => ({
+                        ...current,
+                        categoryId: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger id="edit-reservation-category" className="rounded-lg">
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem categoria</SelectItem>
+                      {vm.selectedProfessionalCategories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor="edit-reservation-notes" className="text-sm font-medium">
+                      Observações
+                    </Label>
+                  </div>
+                  <Textarea
+                    id="edit-reservation-notes"
+                    className="rounded-lg resize-none"
+                    rows={3}
+                    value={vm.editReservationForm.notes}
+                    onChange={(event) =>
+                      vm.setEditReservationForm((current) => ({
+                        ...current,
+                        notes: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
               </div>
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Este horário esta bloqueado e pode ser liberado quando quiser.
+              Este horário está bloqueado e pode ser liberado quando quiser.
             </p>
           )}
         </div>
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-between">
-          <div className="flex gap-2">
-            {vm.selectedSlotDetails?.status === 'RESERVED' ||
-              vm.selectedSlotDetails?.status === 'PRE_RESERVED' ? (
-              <>
-                <Button variant="outline" onClick={() => vm.openRescheduleReservation()}>
-                  Remarcar
-                </Button>
-                {vm.selectedSlotDetails.status === 'RESERVED' ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        vm.selectedSlotDetails &&
-                        vm.markReservationCompleted(vm.selectedSlotDetails.id)
-                      }
-                    >
-                      Concluir
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        vm.selectedSlotDetails && vm.markReservationNoShow(vm.selectedSlotDetails.id)
-                      }
-                    >
-                      No-show
-                    </Button>
-                  </>
-                ) : null}
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    vm.selectedSlotDetails && vm.cancelReservation(vm.selectedSlotDetails.id)
-                  }
-                >
-                  Cancelar reserva
-                </Button>
-              </>
-            ) : vm.selectedSlotDetails?.status === 'BLOCKED' ? (
+
+        {/* --- Actions footer --- */}
+        <div className="mt-6 flex flex-col gap-3 border-t border-border/40 pt-4">
+          {vm.selectedSlotDetails?.status === 'RESERVED' ||
+            vm.selectedSlotDetails?.status === 'PRE_RESERVED' ? (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" className="rounded-lg" onClick={() => vm.openRescheduleReservation()}>
+                Remarcar
+              </Button>
+              {vm.selectedSlotDetails.status === 'RESERVED' && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg"
+                    onClick={() =>
+                      vm.selectedSlotDetails &&
+                      vm.markReservationCompleted(vm.selectedSlotDetails.id)
+                    }
+                  >
+                    Concluir
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg"
+                    onClick={() =>
+                      vm.selectedSlotDetails && vm.markReservationNoShow(vm.selectedSlotDetails.id)
+                    }
+                  >
+                    Não compareceu
+                  </Button>
+                </>
+              )}
               <Button
                 variant="outline"
+                size="sm"
+                className="rounded-lg text-destructive hover:text-destructive"
                 onClick={() =>
-                  vm.selectedSlotDetails && vm.unblockSlot(vm.selectedSlotDetails.id)
+                  vm.selectedSlotDetails && vm.cancelReservation(vm.selectedSlotDetails.id)
                 }
               >
-                Desbloquear
+                Cancelar reserva
               </Button>
-            ) : null}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => vm.setSlotDetailsOpen(false)}>
+            </div>
+          ) : vm.selectedSlotDetails?.status === 'BLOCKED' ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-lg"
+              onClick={() =>
+                vm.selectedSlotDetails && vm.unblockSlot(vm.selectedSlotDetails.id)
+              }
+            >
+              Desbloquear
+            </Button>
+          ) : null}
+          <div className="flex gap-2 justify-end">
+            <Button variant="ghost" size="sm" className="rounded-lg" onClick={() => vm.setSlotDetailsOpen(false)}>
               Fechar
             </Button>
-            {vm.selectedSlotDetails?.status === 'RESERVED' ||
-              vm.selectedSlotDetails?.status === 'PRE_RESERVED' ? (
+            {(vm.selectedSlotDetails?.status === 'RESERVED' ||
+              vm.selectedSlotDetails?.status === 'PRE_RESERVED') && (
               <Button
+                size="sm"
+                className="rounded-lg"
                 onClick={() =>
                   vm.selectedSlotDetails && vm.updateReservation(vm.selectedSlotDetails.id)
                 }
@@ -336,7 +432,7 @@ export function SchedulingSlotDetailsSheet({ vm }: Props) {
               >
                 Salvar ajustes
               </Button>
-            ) : null}
+            )}
           </div>
         </div>
       </SheetContent>
