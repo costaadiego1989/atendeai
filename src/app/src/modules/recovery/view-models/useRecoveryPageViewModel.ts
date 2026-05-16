@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { contactsService } from '@/modules/contacts/services/contacts-service';
 import {
@@ -44,6 +45,7 @@ export function useRecoveryPageViewModel() {
   const tenant = useAuthStore((state) => state.tenant);
   const activeBranchId = useAuthStore((state) => state.activeBranchId);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -446,9 +448,7 @@ export function useRecoveryPageViewModel() {
   const outreachMutation = useMutation({
     mutationFn: () =>
       recoveryService.triggerOutreach(tenant!.id, selectedCaseId!, {
-        ...(outreachForm.outreachMode === 'playbook'
-          ? { followPlaybook: true }
-          : { messageText: outreachForm.messageText.trim() || undefined }),
+        messageText: outreachForm.messageText.trim() || undefined,
       }),
     onSuccess: async (result) => {
       mergeCaseIntoCache(result);
@@ -461,7 +461,7 @@ export function useRecoveryPageViewModel() {
       setOutreachOpen(false);
       setOutreachForm(DEFAULT_OUTREACH_FORM);
       toast({
-        title: result.playbookPhaseId ? 'Fase do roteiro enviada' : 'Primeiro contato preparado',
+        title: 'Primeiro contato preparado',
         description: result.conversationId
           ? 'A mensagem foi enviada para a inbox do contato.'
           : 'A mensagem inicial foi preparada com sucesso.',
@@ -479,14 +479,12 @@ export function useRecoveryPageViewModel() {
   });
 
   const previewOutreachMutation = useMutation({
-    mutationFn: (mode: 'manual' | 'ai' | 'playbook') =>
+    mutationFn: (mode: 'manual' | 'ai') =>
       recoveryService.triggerOutreach(tenant!.id, selectedCaseId!, {
         previewOnly: true,
-        ...(mode === 'playbook'
-          ? { followPlaybook: true }
-          : mode === 'ai'
-            ? { generateWithAI: true }
-            : { messageText: outreachForm.messageText.trim() || undefined }),
+        ...(mode === 'ai'
+          ? { generateWithAI: true }
+          : { messageText: outreachForm.messageText.trim() || undefined }),
       }),
     onSuccess: (result, mode) => {
       const previewText = result.outreachText ?? '';
@@ -504,17 +502,13 @@ export function useRecoveryPageViewModel() {
 
       toast({
         title:
-          mode === 'playbook'
-            ? 'Prévia da fase do roteiro'
-            : mode === 'ai'
-              ? 'sugestão pronta'
-              : 'Mensagem preparada',
+          mode === 'ai'
+            ? 'sugestão pronta'
+            : 'Mensagem preparada',
         description:
-          mode === 'playbook'
-            ? 'Revise o texto gerado conforme as regras da fase antes de enviar.'
-            : mode === 'ai'
-              ? 'A IA gerou um primeiro contato para voce revisar antes do envio.'
-              : 'Revise a mensagem antes de confirmar o envio.',
+          mode === 'ai'
+            ? 'A IA gerou um primeiro contato para voce revisar antes do envio.'
+            : 'Revise a mensagem antes de confirmar o envio.',
       });
     },
     onError: (error) => {
@@ -530,12 +524,8 @@ export function useRecoveryPageViewModel() {
 
   useEffect(() => {
     if (!outreachOpen) return;
-    setOutreachForm(
-      selectedCase?.playbookId
-        ? { ...DEFAULT_OUTREACH_FORM, outreachMode: 'playbook' }
-        : { ...DEFAULT_OUTREACH_FORM },
-    );
-  }, [outreachOpen, selectedCaseId, selectedCase?.playbookId]);
+    setOutreachForm({ ...DEFAULT_OUTREACH_FORM });
+  }, [outreachOpen, selectedCaseId]);
 
   const regenerateGuidanceMutation = useMutation({
     mutationFn: () =>
@@ -788,6 +778,23 @@ export function useRecoveryPageViewModel() {
     },
   });
 
+  const openConversationMutation = useMutation({
+    mutationFn: (contactId: string) =>
+      contactsService.openConversation(tenant!.id, contactId),
+    onSuccess: (result) => {
+      navigate(`/app/conversations/${result.conversationId}`);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao abrir conversa',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível abrir a conversa deste contato agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
   return {
     tenant,
     page,
@@ -953,6 +960,7 @@ export function useRecoveryPageViewModel() {
     recurringChargesQuery,
     scheduleRecurringChargeMutation,
     cancelRecurringChargeMutation,
+    openConversationMutation,
   };
 }
 
