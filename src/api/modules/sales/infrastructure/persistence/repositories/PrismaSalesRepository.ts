@@ -293,6 +293,9 @@ export class PrismaSalesRepository implements ISalesRepository {
         LOWER(payment_links.name) LIKE ${pattern} ESCAPE '\\'
         OR LOWER(COALESCE(payment_links.description, '')) LIKE ${pattern} ESCAPE '\\'
         OR LOWER(COALESCE(payment_links.label, '')) LIKE ${pattern} ESCAPE '\\'
+        OR LOWER(COALESCE(contacts.name, '')) LIKE ${pattern} ESCAPE '\\'
+        OR LOWER(COALESCE(contacts.email, '')) LIKE ${pattern} ESCAPE '\\'
+        OR LOWER(COALESCE(contacts.phone, '')) LIKE ${pattern} ESCAPE '\\'
       )`);
     }
 
@@ -311,9 +314,14 @@ export class PrismaSalesRepository implements ISalesRepository {
       OFFSET ${offset}
     `);
 
+    const contactJoin = Prisma.sql`LEFT JOIN contact_schema.contacts AS contacts
+        ON contacts.id = payment_links.contact_id
+       AND contacts.tenant_id = payment_links.tenant_id`;
+
     const totalRows = await this.prisma.$queryRaw<Array<{ total: number }>>(Prisma.sql`
       SELECT COUNT(*)::int AS total
       FROM sales_schema.payment_links AS payment_links
+      ${contactJoin}
       WHERE ${whereClause}
     `);
 
@@ -327,6 +335,7 @@ export class PrismaSalesRepository implements ISalesRepository {
         COALESCE(SUM(COALESCE(payment_links.recurrence_total_value, payment_links.value)), 0)::numeric AS estimated_revenue,
         COALESCE(SUM(payment_links.value) FILTER (WHERE payment_links.status = 'PAID'), 0)::numeric AS paid_revenue
       FROM sales_schema.payment_links AS payment_links
+      ${contactJoin}
       WHERE ${whereClause} AND payment_links.status <> 'DELETED'
     `);
 
