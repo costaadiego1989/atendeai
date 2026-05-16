@@ -82,16 +82,18 @@ function MetricCard({
 }) {
   return (
     <Card className="glass-card">
-      <CardContent className="flex items-start justify-between p-5">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            {title}
-          </p>
-          <p className="mt-3 text-3xl font-semibold text-foreground">{value}</p>
-          <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-        </div>
-        <div className="rounded-2xl bg-primary/10 p-3 text-primary">
-          <Icon className="h-5 w-5" />
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {title}
+            </p>
+            <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+          </div>
+          <div className="rounded-2xl bg-primary/10 p-3">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -233,7 +235,7 @@ function ProspectingPlacesContent({
                     type="button"
                     onClick={() => vm.setSelectedSearchId(search.id)}
                     className={`w-full rounded-2xl border p-4 text-left transition-all ${active
-                      ? 'border-primary/25 bg-primary/5 shadow-sm'
+                      ? 'border-primary/30 bg-primary/5 shadow-sm'
                       : 'border-border/60 bg-background/70 hover:bg-muted/20'
                       }`}
                   >
@@ -372,7 +374,7 @@ function ProspectingPlacesContent({
                           }
                         }}
                         className={`rounded-2xl border p-4 transition-all ${checked
-                          ? 'border-primary/25 bg-primary/5'
+                          ? 'border-primary/30 bg-primary/5'
                           : 'border-border/60 bg-background/70 hover:bg-muted/20'
                           } cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`}
                       >
@@ -968,7 +970,7 @@ function ProspectingAdsInsightsContent({
                     type="button"
                     onClick={() => vm.setSelectedQueryId(query.id)}
                     className={`w-full rounded-2xl border p-4 text-left transition-all ${active
-                      ? 'border-primary/25 bg-primary/5 shadow-sm'
+                      ? 'border-primary/30 bg-primary/5 shadow-sm'
                       : 'border-border/60 bg-background/70 hover:bg-muted/20'
                       }`}
                   >
@@ -1388,7 +1390,7 @@ function ProspectingAdsLeadsContent({
                   <div
                     key={lead.id}
                     className={`rounded-2xl border p-4 transition-all ${checked
-                      ? 'border-primary/25 bg-primary/5'
+                      ? 'border-primary/30 bg-primary/5'
                       : 'border-border/60 bg-background/70'
                       }`}
                   >
