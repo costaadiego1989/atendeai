@@ -191,8 +191,8 @@ export default function ConversationsPage() {
       </div>
 
       <div className="flex h-[calc(100vh-10rem)] min-h-[680px] gap-4">
-        <section className="flex w-[340px] min-w-[340px] flex-col overflow-hidden rounded-[28px] border border-border/70 bg-card">
-          <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
+        <section className="flex w-[340px] min-w-[340px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
             <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
               Fila de conversas
             </h2>
@@ -208,7 +208,7 @@ export default function ConversationsPage() {
                 Carregando conversas...
               </div>
             ) : vm.conversations.length ? (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {vm.conversations.map((conversation) => (
                   <ConversationListItem
                     key={conversation.id}
@@ -220,7 +220,7 @@ export default function ConversationsPage() {
                 ))}
               </div>
             ) : (
-              <div className="flex h-full flex-col items-center justify-center rounded-[28px] border border-dashed border-border/70 px-6 text-center">
+              <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 px-6 text-center">
                 <MessageSquareText className="h-10 w-10 text-muted-foreground" />
                 <h2 className="mt-4 text-lg font-semibold text-foreground">
                   Nenhuma conversa encontrada
@@ -233,10 +233,10 @@ export default function ConversationsPage() {
           </div>
         </section>
 
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-border/70 bg-card">
+        <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border/60 bg-card">
           {vm.selectedConversation ? (
             <>
-              <div className="border-b border-border/70 px-6 py-5">
+              <div className="border-b border-border/60 px-6 py-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex items-center gap-3">
@@ -311,7 +311,7 @@ export default function ConversationsPage() {
                     <div ref={messagesEndRef} className="h-px" />
                   </div>
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center rounded-[28px] border border-dashed border-border/70 px-6 text-center">
+              <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 px-6 text-center">
                     <MessageSquareText className="h-12 w-12 text-muted-foreground" />
                     <h3 className="mt-4 text-2xl font-semibold text-foreground">
                       Sem mensagens ainda
@@ -323,7 +323,7 @@ export default function ConversationsPage() {
                 )}
               </div>
 
-              <div className="border-t border-border/70 px-6 py-4">
+              <div className="border-t border-border/60 px-6 py-4">
                 {vm.selectedConversation.status === 'PENDING_HUMAN' ? (
                   <div className="mb-3 rounded-2xl border border-primary/15 bg-primary/5 px-3 py-3">
                     <div className="flex items-center justify-between gap-3">
@@ -343,7 +343,7 @@ export default function ConversationsPage() {
                   </div>
                 ) : null}
                 {vm.selectedAttachment ? (
-                  <div className="mb-3 flex items-center justify-between rounded-2xl border border-border/70 bg-muted/30 px-3 py-2 text-sm">
+                  <div className="mb-3 flex items-center justify-between rounded-2xl border border-border/60 bg-muted/30 px-3 py-2 text-sm">
                     <div className="flex min-w-0 items-center gap-2">
                       {getAttachmentIcon()}
                       <span className="truncate font-medium">{vm.selectedAttachment.name}</span>
