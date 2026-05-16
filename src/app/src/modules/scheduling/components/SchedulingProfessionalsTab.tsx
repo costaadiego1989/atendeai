@@ -241,7 +241,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                 className={cn(
                   'w-full rounded-2xl border p-4 text-left transition-all',
                   vm.selectedProfessionalId === professional.id
-                    ? 'border-primary/30 bg-primary/[0.05]'
+                    ? 'border-primary/30 bg-primary/5'
                     : 'border-border/60 hover:bg-muted/20',
                 )}
               >
@@ -529,7 +529,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                             setSelectedRecurrence(recurrence);
                           }
                         }}
-                        className="self-start cursor-pointer rounded-3xl border border-border/60 bg-background/90 p-5 transition-shadow duration-200 hover:shadow-[0_24px_60px_-38px_rgba(15,23,42,0.45)] focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="self-start cursor-pointer rounded-2xl border border-border/60 bg-background/90 p-5 transition-shadow duration-200 hover:shadow-[0_20px_48px_-32px_rgba(15,23,42,0.35)] focus:outline-none focus:ring-2 focus:ring-primary/40"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3">
@@ -631,7 +631,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
             {isRangeView ? (
               vm.calendarRange.length ? (
                 <div className="space-y-4">
-                  <div className="rounded-3xl border border-border/60 bg-muted/[0.16] p-4">
+                  <div className="rounded-2xl border border-border/60 bg-muted/[0.16] p-4">
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                       <div className="space-y-1">
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -670,7 +670,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                             {rangeTotals.reserved}
                           </p>
                         </div>
-                        <div className="min-w-[136px] rounded-2xl border border-border/70 bg-background/80 px-4 py-3">
+                        <div className="min-w-[136px] rounded-2xl border border-border/60 bg-background/80 px-4 py-3">
                           <p className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                             Bloqueados
                           </p>
@@ -698,7 +698,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                       return (
                         <div
                           key={entry.date}
-                          className="rounded-3xl border border-border/60 bg-background/90 p-5 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.4)]"
+                          className="rounded-2xl border border-border/60 bg-background/90 p-5 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.4)]"
                         >
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div className="space-y-1">
@@ -846,7 +846,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                           <div
                             key={slot.id}
                             className={cn(
-                              'self-start rounded-3xl border p-5 transition-shadow duration-200 hover:shadow-[0_24px_60px_-38px_rgba(15,23,42,0.45)]',
+                              'self-start rounded-2xl border p-5 transition-shadow duration-200 hover:shadow-[0_20px_48px_-32px_rgba(15,23,42,0.35)]',
                               tone.cardClass,
                             )}
                           >
@@ -984,7 +984,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                           <div
                             key={slot.id}
                             className={cn(
-                              'self-start rounded-3xl border p-5 transition-shadow duration-200 hover:shadow-[0_24px_60px_-38px_rgba(15,23,42,0.45)]',
+                              'self-start rounded-2xl border p-5 transition-shadow duration-200 hover:shadow-[0_20px_48px_-32px_rgba(15,23,42,0.35)]',
                               tone.cardClass,
                             )}
                           >
