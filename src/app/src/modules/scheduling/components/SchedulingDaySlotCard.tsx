@@ -256,7 +256,7 @@ export function SchedulingDaySlotCard({
             </Button>
           ) : null}
           <p className="mt-1">
-            {slot.reservedFor?.notes || 'horário reservado para atendimento.'}
+            {slot.reservedFor?.notes || 'Horário reservado para atendimento.'}
           </p>
           {slot.reservedAt ? (
             <p className="mt-1">Registrado em {formatDateTime(slot.reservedAt)}</p>
