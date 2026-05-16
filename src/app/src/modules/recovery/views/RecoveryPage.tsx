@@ -237,7 +237,7 @@ export default function RecoveryPage() {
                     >
                       <TableCell>
                         <div>
-                          <p className="font-medium text-foreground">{item.debtorName}</p>
+                          <p className="text-sm font-semibold text-foreground">{item.debtorName}</p>
                           <p className="text-xs text-muted-foreground">
                             {item.debtorCompanyName || formatPhone(item.phone)}
                           </p>
@@ -245,7 +245,7 @@ export default function RecoveryPage() {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <p className="text-sm font-medium text-foreground">
+                          <p className="text-sm font-semibold text-foreground">
                             {item.chargeTitle || 'Cobrança manual'}
                           </p>
                           <p className="text-xs text-muted-foreground">
