@@ -125,7 +125,7 @@ export function getSlotTone(
 
   if (status === 'NO_SHOW') {
     return {
-      label: 'No-show',
+      label: 'Não compareceu',
       cardClass:
         'border-rose-500/25 bg-rose-500/[0.08] shadow-[0_20px_46px_-30px_rgba(244,63,94,0.2)]',
       iconClass: 'border-rose-500/20 bg-rose-500/10 text-rose-500',
@@ -138,9 +138,9 @@ export function getSlotTone(
   if (status === 'BLOCKED') {
     return {
       label: 'Bloqueado',
-      cardClass: 'border-border/70 bg-muted/[0.14]',
+      cardClass: 'border-border/60 bg-muted/[0.14]',
       iconClass: 'border-border/60 bg-background/70 text-muted-foreground',
-      badgeClass: 'border-border/70 bg-background/70 text-muted-foreground',
+      badgeClass: 'border-border/60 bg-background/70 text-muted-foreground',
       detailClass: 'border-border/60 bg-background/60',
       Icon: Ban,
     };
