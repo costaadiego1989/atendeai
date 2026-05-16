@@ -248,7 +248,7 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'RECOVERY_AUTOMATION',
     displayName: 'Regua de cobranca',
-    description: 'Cadencias, promessas de pagamento, negociacao e follow-up.',
+    description: 'Cadencias, promessas de pagamento, negociação e follow-up.',
     category: 'RECOVERY',
     monthlyPrice: 147,
     salesPitch: 'Aumenta recuperacao com cadencia controlada.',
