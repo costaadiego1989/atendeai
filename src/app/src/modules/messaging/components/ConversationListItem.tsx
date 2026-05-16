@@ -34,13 +34,13 @@ export function ConversationListItem({
       type="button"
       onClick={() => onSelect(conversation.id)}
       className={cn(
-        'block w-full rounded-[24px] border text-left transition-all',
+        'block w-full rounded-2xl border text-left transition-all',
         isSelected
           ? 'border-primary/30 bg-primary/5 shadow-sm'
-          : 'border-border/70 bg-background hover:border-primary/20 hover:bg-muted/20',
+          : 'border-border/60 bg-background hover:bg-muted/20',
       )}
     >
-      <div className="flex items-start gap-3 px-3 py-3">
+      <div className="flex items-start gap-3 p-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
           {conversation.contactName.charAt(0).toUpperCase()}
         </div>
@@ -48,11 +48,11 @@ export function ConversationListItem({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-base font-semibold text-foreground">
+              <p className="truncate text-sm font-semibold text-foreground">
                 {conversation.contactName}
               </p>
               {isProspectConversation(conversation) ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/25 px-2.5 py-1 text-[11px] font-semibold text-amber-400">
                   <Megaphone className="h-3 w-3" />
                   Prospect
                 </span>
@@ -81,12 +81,12 @@ export function ConversationListItem({
 
           <div className="mt-2 flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground shrink-0">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground shrink-0">
                 {conversation.channel ?? 'WHATSAPP'}
               </span>
               <span
                 className={cn(
-                  'inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[10px] font-medium',
+                  'inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-medium',
                   getSignalClassName(signal.tone),
                 )}
               >
