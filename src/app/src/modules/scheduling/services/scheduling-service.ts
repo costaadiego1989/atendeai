@@ -807,7 +807,7 @@ export const schedulingService = {
         `/tenants/${tenantId}/scheduling/professionals/${professionalId}/availability/slots/${slotId}/payment-link`,
         branchId,
       ),
-      { billingType },
+      { date, billingType },
     );
 
     return mapSlot(response, professionalId, date);
