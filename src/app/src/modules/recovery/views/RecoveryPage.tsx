@@ -214,6 +214,11 @@ export default function RecoveryPage() {
         ) : (
           <div className="space-y-4">
             <Card className="glass-card overflow-hidden">
+              <div className="p-4 border-b border-border/40 bg-muted/20">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80">
+                  Casos de recuperação
+                </h2>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -238,7 +243,7 @@ export default function RecoveryPage() {
                       <TableCell>
                         <div>
                           <p className="text-sm font-semibold text-foreground">{item.debtorName}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {item.debtorCompanyName || formatPhone(item.phone)}
                           </p>
                         </div>
@@ -248,7 +253,7 @@ export default function RecoveryPage() {
                           <p className="text-sm font-semibold text-foreground">
                             {item.chargeTitle || 'Cobrança manual'}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {item.chargeDescription || item.relatedEntityLabel || 'Sem contexto adicional'}
                           </p>
                         </div>
