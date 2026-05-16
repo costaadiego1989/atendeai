@@ -168,7 +168,7 @@ export function ImportContactsSheet({
         </div>
 
         {activeJob && (
-          <div className="mt-6 rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="mt-6 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">{activeJob.status}</Badge>
               <Badge variant="secondary">{activeJob.progress}%</Badge>
@@ -192,7 +192,7 @@ export function ImportContactsSheet({
         )}
 
         {(result || activeJob?.resultSummary) && (
-          <div className="mt-6 space-y-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="mt-6 space-y-4 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">
                 Linhas {result?.totalRows ?? Number(activeJob?.resultSummary?.totalRows ?? 0)}
