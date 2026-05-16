@@ -95,7 +95,7 @@ export function SchedulingDaySlotCard({
         }
       }}
       className={cn(
-        'self-start rounded-3xl border p-5 transition-shadow duration-200 hover:shadow-[0_24px_60px_-38px_rgba(15,23,42,0.45)]',
+        'self-start rounded-2xl border p-4 transition-all hover:shadow-[0_20px_48px_-32px_rgba(15,23,42,0.35)]',
         mode === 'reserved' ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40' : '',
         tone.cardClass,
       )}
@@ -104,7 +104,7 @@ export function SchedulingDaySlotCard({
         <div className="flex items-start gap-3">
           <div
             className={cn(
-              'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border',
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border',
               tone.iconClass,
             )}
           >
@@ -153,7 +153,7 @@ export function SchedulingDaySlotCard({
         slot.status === 'BLOCKED' ? (
           <div
             className={cn(
-              'mt-4 rounded-2xl border p-3.5 text-xs text-muted-foreground',
+              'mt-4 rounded-2xl border p-3 text-xs text-muted-foreground',
               tone.detailClass,
             )}
           >
@@ -174,7 +174,7 @@ export function SchedulingDaySlotCard({
             <Button
               type="button"
               size="sm"
-              className="h-11 flex-1 rounded-xl"
+              className="h-10 flex-1 rounded-xl"
               onClick={() =>
                 onReserve({
                   id: slot.id,
@@ -190,7 +190,7 @@ export function SchedulingDaySlotCard({
               type="button"
               size="sm"
               variant="outline"
-              className="h-11 rounded-xl px-3"
+              className="h-10 rounded-xl px-3"
               onClick={() => onBlock(slot.id)}
             >
               <Lock className="h-4 w-4" />
@@ -200,7 +200,7 @@ export function SchedulingDaySlotCard({
       ) : (
         <div
           className={cn(
-            'mt-4 rounded-2xl border p-3.5 text-xs text-muted-foreground',
+            'mt-4 rounded-2xl border p-3 text-xs text-muted-foreground',
             tone.detailClass,
           )}
         >
