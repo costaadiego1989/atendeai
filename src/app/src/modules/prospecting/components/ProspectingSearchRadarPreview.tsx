@@ -29,7 +29,7 @@ export function ProspectingSearchRadarPreview({
     : null;
 
   return (
-    <div className="mt-6 overflow-hidden rounded-3xl border border-border/70 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.10),transparent_42%),linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--muted)/0.45)_100%)]">
+    <div className="mt-6 overflow-hidden rounded-2xl border border-border/60 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.10),transparent_42%),linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--muted)/0.45)_100%)]">
       <div className="grid gap-6 p-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch">
         <div className="overflow-hidden rounded-3xl border border-primary/15 bg-background/60">
           {mapSrc ? (
