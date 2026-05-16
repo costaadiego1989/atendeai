@@ -117,6 +117,11 @@ export function InventoryItemsTab({
       ) : (
         <div className="space-y-4">
           <Card className="glass-card overflow-hidden">
+            <div className="p-4 border-b border-border/40 bg-muted/20">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80">
+                Itens operacionais
+              </h2>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -137,7 +142,7 @@ export function InventoryItemsTab({
                   >
                     <TableCell>
                       <div>
-                        <p className="font-medium text-foreground">{item.name}</p>
+                        <p className="text-sm font-semibold text-foreground">{item.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {item.lastSyncedAt
                             ? `Atualizado em ${new Date(item.lastSyncedAt).toLocaleString('pt-BR')}`
