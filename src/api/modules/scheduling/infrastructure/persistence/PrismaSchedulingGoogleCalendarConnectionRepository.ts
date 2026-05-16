@@ -12,47 +12,53 @@ export class PrismaSchedulingGoogleCalendarConnectionRepository
 {
   constructor(private readonly prisma: PrismaService) {}
 
-  private buildScopeKey(tenantId: string, branchId?: string | null) {
-    return `${tenantId}:${branchId ?? 'global'}`;
-  }
-
   async save(connection: SchedulingGoogleCalendarConnection): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
+    const existing = await this.findByScope(connection.tenantId, connection.branchId);
+
+    if (existing) {
+      await this.prisma.$executeRaw(Prisma.sql`
+        UPDATE scheduling_schema.google_calendar_connection_scopes
+        SET
+          refresh_token = ${connection.refreshToken},
+          calendar_id = ${connection.calendarId ?? null},
+          status = ${connection.status},
+          updated_at = NOW()
+        WHERE tenant_id = ${connection.tenantId}::uuid
+          AND ${connection.branchId ? Prisma.sql`branch_id = ${connection.branchId}::uuid` : Prisma.sql`branch_id IS NULL`}
+      `);
+    } else {
+      await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO scheduling_schema.google_calendar_connection_scopes (
-          scope_key, tenant_id, branch_id, google_email, refresh_token, calendar_id, status, connected_at, updated_at
+          tenant_id, branch_id, user_id, refresh_token, calendar_id, status, created_at, updated_at
         ) VALUES (
-          ${this.buildScopeKey(connection.tenantId, connection.branchId)},
           ${connection.tenantId}::uuid,
           ${connection.branchId ?? null}::uuid,
-          ${connection.googleEmail ?? null},
+          ${connection.tenantId}::uuid,
           ${connection.refreshToken},
-          ${connection.calendarId},
+          ${connection.calendarId ?? null},
           ${connection.status},
-          ${connection.connectedAt}::timestamptz,
-          ${connection.updatedAt}::timestamptz
+          NOW(),
+          NOW()
         )
-        ON CONFLICT (scope_key) DO UPDATE SET
-          tenant_id = EXCLUDED.tenant_id,
-          branch_id = EXCLUDED.branch_id,
-          google_email = EXCLUDED.google_email,
-          refresh_token = EXCLUDED.refresh_token,
-          calendar_id = EXCLUDED.calendar_id,
-          status = EXCLUDED.status,
-          connected_at = EXCLUDED.connected_at,
-          updated_at = EXCLUDED.updated_at
       `);
+    }
   }
 
   async findByScope(
     tenantId: string,
     branchId?: string | null,
   ): Promise<SchedulingGoogleCalendarConnection | null> {
+    const branchCondition = branchId
+      ? Prisma.sql`branch_id = ${branchId}::uuid`
+      : Prisma.sql`branch_id IS NULL`;
+
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
-        SELECT *
-        FROM scheduling_schema.google_calendar_connection_scopes
-        WHERE scope_key = ${this.buildScopeKey(tenantId, branchId)}
-        LIMIT 1
-      `);
+      SELECT *
+      FROM scheduling_schema.google_calendar_connection_scopes
+      WHERE tenant_id = ${tenantId}::uuid
+        AND ${branchCondition}
+      LIMIT 1
+    `);
 
     const row = rows[0];
     if (!row) {
@@ -62,11 +68,10 @@ export class PrismaSchedulingGoogleCalendarConnectionRepository
     return {
       tenantId: row.tenant_id,
       branchId: row.branch_id ?? undefined,
-      googleEmail: row.google_email ?? undefined,
       refreshToken: row.refresh_token,
       calendarId: row.calendar_id,
       status: row.status,
-      connectedAt: new Date(row.connected_at).toISOString(),
+      connectedAt: new Date(row.created_at).toISOString(),
       updatedAt: new Date(row.updated_at).toISOString(),
     };
   }
@@ -86,9 +91,14 @@ export class PrismaSchedulingGoogleCalendarConnectionRepository
   }
 
   async deleteByScope(tenantId: string, branchId?: string | null): Promise<void> {
+    const branchCondition = branchId
+      ? Prisma.sql`branch_id = ${branchId}::uuid`
+      : Prisma.sql`branch_id IS NULL`;
+
     await this.prisma.$executeRaw(Prisma.sql`
-        DELETE FROM scheduling_schema.google_calendar_connection_scopes
-        WHERE scope_key = ${this.buildScopeKey(tenantId, branchId)}
-      `);
+      DELETE FROM scheduling_schema.google_calendar_connection_scopes
+      WHERE tenant_id = ${tenantId}::uuid
+        AND ${branchCondition}
+    `);
   }
 }
