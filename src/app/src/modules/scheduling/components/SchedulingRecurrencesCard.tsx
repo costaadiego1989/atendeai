@@ -633,7 +633,7 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
                               setSelectedRecurrence(recurrence);
                             }
                           }}
-                          className="self-start cursor-pointer rounded-3xl border border-border/60 bg-background/90 p-5 transition-shadow duration-200 hover:shadow-[0_24px_60px_-38px_rgba(15,23,42,0.45)] focus:outline-none focus:ring-2 focus:ring-primary/40"
+                          className="self-start cursor-pointer rounded-2xl border border-border/60 bg-background/90 p-5 transition-shadow duration-200 hover:shadow-[0_20px_48px_-32px_rgba(15,23,42,0.35)] focus:outline-none focus:ring-2 focus:ring-primary/40"
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start gap-3">
