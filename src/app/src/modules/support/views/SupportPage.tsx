@@ -185,7 +185,7 @@ export default function SupportPage() {
               {vm.feedbacks.map((feedback) => (
                 <div
                   key={feedback.id}
-                  className="rounded-2xl border border-border/60 bg-background/50 hover:bg-background/80 transition-colors p-4"
+                  className="rounded-2xl border border-border/60 bg-background/50 p-4 transition-all hover:bg-muted/20"
                 >
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-2 flex-1">
@@ -201,21 +201,21 @@ export default function SupportPage() {
                         <Badge variant="secondary">{typeLabel(feedback.type)}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2">{feedback.description}</p>
-                      <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
-                        <span className="rounded-full bg-secondary/50 px-3 py-1">
+                      <div className="flex flex-wrap gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                        <span className="rounded-full bg-secondary/50 px-2.5 py-1">
                           {new Date(feedback.createdAt).toLocaleString('pt-BR')}
                         </span>
                         {feedback.pagePath && (
-                          <span className="rounded-full bg-secondary/50 px-3 py-1">
+                          <span className="rounded-full bg-secondary/50 px-2.5 py-1">
                             {feedback.pagePath}
                           </span>
                         )}
                         {feedback.appModule && (
-                          <span className="rounded-full bg-primary/10 px-3 py-1 text-primary/90">
+                          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">
                             {feedbackModuleLabel(feedback.appModule)}
                           </span>
                         )}
-                        <span className="rounded-full bg-secondary/50 px-3 py-1">
+                        <span className="rounded-full bg-secondary/50 px-2.5 py-1">
                           {feedback.userName}
                         </span>
                       </div>
@@ -225,7 +225,7 @@ export default function SupportPage() {
               ))}
 
               {!vm.feedbacks.length && (
-                <div className="rounded-2xl border border-dashed border-border/70 p-12 text-center">
+                <div className="rounded-2xl border border-dashed border-border/60 p-12 text-center">
                   <Wrench className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
                   <p className="text-lg font-bold text-foreground">Nenhum feedback encontrado</p>
                   <p className="text-sm text-muted-foreground mt-2">
