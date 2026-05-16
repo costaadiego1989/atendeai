@@ -19,6 +19,11 @@ interface CatalogItemsTableProps {
 export function CatalogItemsTable({ items, onSelectItem }: CatalogItemsTableProps) {
   return (
     <Card className="glass-card overflow-hidden">
+      <div className="p-4 border-b border-border/40 bg-muted/20">
+        <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80">
+          Itens do catálogo
+        </h2>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -35,15 +40,15 @@ export function CatalogItemsTable({ items, onSelectItem }: CatalogItemsTableProp
             <TableRow key={item.id} className="cursor-pointer" onClick={() => onSelectItem(item)}>
               <TableCell>
                 <div>
-                  <p className="font-medium text-foreground">{item.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{item.name}</p>
                   <p className="text-xs text-muted-foreground">{item.description || 'Sem descrição comercial'}</p>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">{formatType(item.type)}</Badge>
+                  <Badge variant="secondary" className="rounded-full px-2.5 py-1 text-[11px]">{formatType(item.type)}</Badge>
                   {requiresInventoryControl(item.type) ? (
-                    <Badge variant="outline">Controla estoque</Badge>
+                    <Badge variant="outline" className="rounded-full px-2.5 py-1 text-[11px]">Controla estoque</Badge>
                   ) : null}
                 </div>
               </TableCell>
