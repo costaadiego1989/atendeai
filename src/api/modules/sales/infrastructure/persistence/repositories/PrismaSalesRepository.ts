@@ -275,10 +275,6 @@ export class PrismaSalesRepository implements ISalesRepository {
       conditions.push(Prisma.sql`payment_links.source = ${filters.source}`);
     }
 
-    if (filters.branchId) {
-      conditions.push(Prisma.sql`payment_links.branch_id = ${filters.branchId}::uuid`);
-    }
-
     if (filters.dateFrom) {
       conditions.push(Prisma.sql`payment_links.created_at >= ${filters.dateFrom}`);
     }
