@@ -19,7 +19,7 @@ export function RecoveryMetricCard({
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{title}</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
             <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
             <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
           </div>
