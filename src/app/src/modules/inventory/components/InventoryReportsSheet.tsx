@@ -81,7 +81,7 @@ export function InventoryReportsSheet({ vm }: InventoryReportsSheetProps) {
         </div>
 
         {vm.activeReportJob && (
-          <div className="mt-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="mt-4 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">{vm.activeReportJob.status}</Badge>
               <Badge variant="secondary">{vm.activeReportJob.progress}%</Badge>
