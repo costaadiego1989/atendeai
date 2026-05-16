@@ -1029,17 +1029,21 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                                 tone.detailClass,
                               )}
                             >
-                              <p className="font-medium text-foreground">
-                                {slot.reservedFor?.contactName || 'Cliente não identificado'}
-                              </p>
-                              {slot.reservedFor?.categoryName ? (
-                                <p className="mt-1">Categoria: {slot.reservedFor.categoryName}</p>
-                              ) : null}
+                              <div className="flex items-center gap-2 justify-between">
+                                <p className="font-medium text-foreground">
+                                  {slot.reservedFor?.contactName || 'Cliente não identificado'}
+                                </p>
+                                {slot.reservedFor?.categoryName ? (
+                                  <p className="mt-1 text-xs text-emerald-600">
+                                    {slot.reservedFor.categoryName}
+                                  </p>
+                                ) : null}
+                              </div>
                               {slot.reservedFor?.contactPhone ? (
-                                <p className="mt-1">Celular: {slot.reservedFor.contactPhone}</p>
+                                <p className="mt-1">{formatPhone(slot.reservedFor.contactPhone)}</p>
                               ) : null}
                               {slot.reservedFor?.contactEmail ? (
-                                <p className="mt-1">Email: {slot.reservedFor.contactEmail}</p>
+                                <p className="mt-1">{slot.reservedFor.contactEmail}</p>
                               ) : null}
                               {slot.payment ? (
                                 <p className="mt-1">
@@ -1049,7 +1053,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
                                 </p>
                               ) : null}
                               <p className="mt-1">
-                                {slot.reservedFor?.notes || 'horário reservado para atendimento.'}
+                                {slot.reservedFor?.notes || 'Horário reservado para atendimento.'}
                               </p>
                               {slot.reservedAt ? (
                                 <p className="mt-1">
