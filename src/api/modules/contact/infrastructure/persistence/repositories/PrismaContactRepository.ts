@@ -44,11 +44,6 @@ export class PrismaContactRepository implements IContactRepository {
         SET branch_id = ${data.branchId}::uuid
         WHERE id = ${data.id}::uuid
       `);
-    await this.prisma.$executeRaw(Prisma.sql`
-        UPDATE contact_schema.contacts
-        SET document = ${data.document}
-        WHERE id = ${data.id}::uuid
-      `);
   }
 
   async findById(tenantId: string, id: string): Promise<Contact | null> {
@@ -62,14 +57,11 @@ export class PrismaContactRepository implements IContactRepository {
     });
     if (!raw) return null;
 
-    const [documentById, branchById] = await Promise.all([
-      this.findDocumentsByContactIds([raw.id]),
-      this.findBranchIdsByContactIds([raw.id]),
-    ]);
+    const branchById = await this.findBranchIdsByContactIds([raw.id]);
     return ContactMapper.toDomain({
       ...raw,
       branchId: branchById.get(raw.id) ?? null,
-      document: documentById.get(raw.id) ?? null,
+      document: null,
     });
   }
 
@@ -79,14 +71,11 @@ export class PrismaContactRepository implements IContactRepository {
     });
     if (!raw) return null;
 
-    const [documentById, branchById] = await Promise.all([
-      this.findDocumentsByContactIds([raw.id]),
-      this.findBranchIdsByContactIds([raw.id]),
-    ]);
+    const branchById = await this.findBranchIdsByContactIds([raw.id]);
     return ContactMapper.toDomain({
       ...raw,
       branchId: branchById.get(raw.id) ?? null,
-      document: documentById.get(raw.id) ?? null,
+      document: null,
     });
   }
 
@@ -121,8 +110,8 @@ export class PrismaContactRepository implements IContactRepository {
       )
     `;
 
-    const rows = await this.prisma.$queryRaw<Array<Prisma.ContactGetPayload<{}> & { document: string | null; branchId?: string | null }>>`
-      SELECT c.*, c.document, c.branch_id AS "branchId"
+    const rows = await this.prisma.$queryRaw<Array<Prisma.ContactGetPayload<{}> & { branchId?: string | null }>>`
+      SELECT c.*, c.branch_id AS "branchId"
       FROM contact_schema.contacts c
       WHERE c.tenant_id = ${tenantId}::uuid
       ${excludeUsersClause}
@@ -144,13 +133,11 @@ export class PrismaContactRepository implements IContactRepository {
       ${branchClause}
     `;
 
-    const documentById = await this.findDocumentsByContactIds(rows.map((item) => item.id));
-
     return {
       data: rows.map((item) =>
         ContactMapper.toDomain({
           ...item,
-          document: documentById.get(item.id) ?? null,
+          document: null,
         }),
       ),
       total: Number(totalRows[0]?.total ?? 0),
@@ -193,26 +180,6 @@ export class PrismaContactRepository implements IContactRepository {
         },
       });
     });
-  }
-
-  private async findDocumentsByContactIds(
-    contactIds: string[],
-  ): Promise<Map<string, string | null>> {
-    if (!contactIds.length) {
-      return new Map();
-    }
-
-    const rows = await this.prisma.$queryRaw<
-      Array<{ id: string; document: string | null }>
-    >(Prisma.sql`
-        SELECT id, document
-        FROM contact_schema.contacts
-        WHERE id IN (${Prisma.join(
-          contactIds.map((contactId) => Prisma.sql`${contactId}::uuid`),
-        )})
-      `);
-
-    return new Map(rows.map((row) => [row.id, row.document ?? null]));
   }
 
   private async findBranchIdsByContactIds(
