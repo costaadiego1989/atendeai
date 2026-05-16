@@ -32,10 +32,10 @@ export function getRecoveryCommercialContext(
       kindLabel: 'Recovery em andamento',
       statusLabel: 'Promessa de pagamento',
       summary:
-        'O cliente sinalizou pagamento, mas a receita ainda depende da confirmacao final.',
+        'O cliente sinalizou pagamento, mas a receita ainda depende da confirmação final.',
       tone: 'warning',
       badgeLabel: 'Recovery em andamento',
-      confirmationLabel: 'Aguardando confirmacao final',
+      confirmationLabel: 'Aguardando confirmação final',
     });
   }
 
@@ -45,22 +45,22 @@ export function getRecoveryCommercialContext(
       kindLabel: 'Recovery em andamento',
       statusLabel: 'Negociacao ativa',
       summary:
-        'O caso esta em recuperacao ativa e ainda nao representa receita realizada.',
+        'O caso esta em recuperação ativa e ainda nao representa receita realizada.',
       tone: 'info',
       badgeLabel: 'Recovery em andamento',
-      confirmationLabel: 'Aguardando avancos',
+      confirmationLabel: 'Aguardando avanços',
     });
   }
 
   return createCommercialContext({
     kind: 'RECOVERY',
     kindLabel: 'Recovery em aberto',
-    statusLabel: 'Aguardando avancos',
+    statusLabel: 'Aguardando avanços',
     summary:
-      'O caso ainda precisa de contato, cobranca ou confirmacao para virar receita recuperada.',
+      'O caso ainda precisa de contato, cobranca ou confirmação para virar receita recuperada.',
     tone: 'muted',
     badgeLabel: 'Recovery em aberto',
-    confirmationLabel: 'Sem confirmacao ainda',
+    confirmationLabel: 'Sem confirmação ainda',
   });
 }
 
