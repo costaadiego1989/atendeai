@@ -149,7 +149,7 @@ export function ConversationChargeDialog({
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2">
+          <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
             <div>
               <Label htmlFor="conversation-charge-recurring">Recorrente</Label>
               <p className="text-xs text-muted-foreground">
