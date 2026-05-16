@@ -234,7 +234,7 @@ export function TenantBranchesTab({
       {branches.length ? (
         <div className="grid gap-4 xl:grid-cols-2">
           {branches.map((branch) => (
-            <Card key={branch.id} className="glass-card border-border/70 p-5">
+            <Card key={branch.id} className="glass-card border-border/60 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
