@@ -31,7 +31,7 @@ export function MessageBubble({
           'max-w-[82%] rounded-3xl px-4 py-3 shadow-sm',
           isOutbound
             ? 'bg-primary text-primary-foreground'
-            : 'border border-border/70 bg-background text-foreground',
+            : 'border border-border/60 bg-background text-foreground',
         )}
       >
         <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] opacity-80">
