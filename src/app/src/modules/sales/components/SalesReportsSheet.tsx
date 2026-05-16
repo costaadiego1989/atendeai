@@ -125,7 +125,7 @@ export function SalesReportsSheet({ vm }: { vm: PaymentLinksPageViewModel }) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+        <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
           O CSV sai com nome, valor, vencimento, status, origem, contato e link do checkout.
         </div>
 
