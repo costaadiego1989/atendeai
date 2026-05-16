@@ -44,7 +44,7 @@ export default function TenantDataPage() {
         mondayClosed={Boolean(watch('operatingHours.monday.closed'))}
       />
 
-      <Card className="glass-card border-border/70">
+      <Card className="glass-card border-border/60">
         <TenantSupportMeta tenantData={tenantData} owner={owner} />
 
         <form onSubmit={submit} className="space-y-6 px-6 pb-6">
