@@ -56,7 +56,7 @@ export function AuthShell({
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              <Card className="border-border/70 bg-background/70">
+              <Card className="border-border/60 bg-background/70">
                 <CardContent className="p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     Automação
@@ -66,7 +66,7 @@ export function AuthShell({
                   </p>
                 </CardContent>
               </Card>
-              <Card className="border-border/70 bg-background/70">
+              <Card className="border-border/60 bg-background/70">
                 <CardContent className="p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     CRM
@@ -76,7 +76,7 @@ export function AuthShell({
                   </p>
                 </CardContent>
               </Card>
-              <Card className="border-border/70 bg-background/70">
+              <Card className="border-border/60 bg-background/70">
                 <CardContent className="p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     Financeiro
