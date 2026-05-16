@@ -48,7 +48,8 @@
     "seed:conversations": "node scripts/seed-conversations.js",
     "seed:checkout": "node scripts/seed-checkout.js",
     "seed:contact-timeline": "node scripts/seed-contact-timeline.js",
-    "seed:recovery": "node scripts/seed-recovery.js"
+    "seed:recovery": "node scripts/seed-recovery.js",
+    "seed:all": "npx tsx scripts/seed-all-modules.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1027.0",
