@@ -1,4 +1,5 @@
-import { Filter, Search, Warehouse } from 'lucide-react';
+import { Search, Warehouse } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -60,22 +61,25 @@ export function InventoryItemsTab({
     <div className="space-y-4">
       <div className="glass-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="relative flex-1 lg:max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Buscar por SKU, nome ou referência..."
-              className="pl-9"
-            />
+          <div className="flex flex-1 items-center gap-3">
+            <Badge variant="secondary" className="hidden lg:inline-flex items-center whitespace-nowrap h-9 px-3.5 rounded-md border-border/60 bg-muted/30">
+              <span className="font-bold text-foreground mr-1.5">{totalItems}</span>
+              <span className="font-normal text-muted-foreground">{totalItems === 1 ? 'item' : 'itens'}</span>
+            </Badge>
+            <div className="relative flex-1 lg:max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder="Buscar por SKU, nome ou referência..."
+                className="pl-9"
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <Select value={statusFilter} onValueChange={onStatusFilterChange}>
               <SelectTrigger className="w-full sm:w-[190px]">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue />
-                </div>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Todos os status</SelectItem>
@@ -91,14 +95,6 @@ export function InventoryItemsTab({
               onClick={onToggleAvailableOnly}
             >
               {showAvailableOnly ? 'Somente disponíveis' : 'Filtrar disponíveis'}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!search && statusFilter === 'ALL' && !showAvailableOnly}
-              onClick={() => { onSearchChange(''); onStatusFilterChange('ALL'); if (showAvailableOnly) onToggleAvailableOnly(); }}
-            >
-              Limpar filtros
             </Button>
           </div>
         </div>

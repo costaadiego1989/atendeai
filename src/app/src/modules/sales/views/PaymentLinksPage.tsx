@@ -13,9 +13,10 @@ import {
   formatSalesCurrency,
 } from '@/modules/sales/components/sales-view-helpers';
 import { usePaymentLinksPageViewModel } from '@/modules/sales/view-models/usePaymentLinksPageViewModel';
+import { Badge } from '@/components/ui/badge';
 import { KPICard } from '@/shared/ui/KPICard';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, CalendarDays, CreditCard, Download, Filter, PlayCircle, Plus, Search } from 'lucide-react';
+import { BarChart3, CalendarDays, CreditCard, Download, PlayCircle, Plus, Search } from 'lucide-react';
 import { PaymentLinksHeader } from '../components/PaymentLinksHeader';
 import { SalesReportsSheet } from '../components/SalesReportsSheet';
 
@@ -162,22 +163,25 @@ export function PaymentLinksPage() {
       <div className="space-y-4">
         <div className="glass-card p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative flex-1 lg:max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                value={vm.search}
-                onChange={(event) => vm.setSearch(event.target.value)}
-                placeholder="Buscar por título, descrição ou contato"
-              />
+            <div className="flex flex-1 items-center gap-3">
+              <Badge variant="secondary" className="hidden lg:inline-flex items-center whitespace-nowrap h-9 px-3.5 rounded-md border-border/60 bg-muted/30">
+                <span className="font-bold text-foreground mr-1.5">{vm.items.length}</span>
+                <span className="font-normal text-muted-foreground">{vm.items.length === 1 ? 'cobrança' : 'cobranças'}</span>
+              </Badge>
+              <div className="relative flex-1 lg:max-w-md">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  value={vm.search}
+                  onChange={(event) => vm.setSearch(event.target.value)}
+                  placeholder="Buscar por título, email, celular ou contato"
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <Select value={vm.statusFilter} onValueChange={vm.setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-[220px]">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue />
-                  </div>
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {PAYMENT_LINK_STATUS_OPTIONS.map((option) => (
@@ -197,9 +201,6 @@ export function PaymentLinksPage() {
                   <SelectItem value="AI">IA</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm" onClick={vm.resetFilters} disabled={!vm.hasFilters}>
-                Limpar filtros
-              </Button>
             </div>
           </div>
         </div>
