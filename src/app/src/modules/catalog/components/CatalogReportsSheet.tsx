@@ -98,13 +98,13 @@ export function CatalogReportsSheet({ vm }: Props) {
           </Button>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-dashed border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+        <div className="mt-6 rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
           O arquivo sai com nome, tipo, categoria, status, preço base, tags, origem,
           referência externa e datas de criação e atualização.
         </div>
 
         {vm.activeReportJob && (
-          <div className="mt-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <div className="mt-4 rounded-2xl border border-border/60 bg-muted/20 p-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">{vm.activeReportJob.status}</Badge>
               <Badge variant="secondary">{vm.activeReportJob.progress}%</Badge>
