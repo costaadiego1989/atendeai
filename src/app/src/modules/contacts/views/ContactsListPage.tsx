@@ -88,6 +88,11 @@ export default function ContactsListPage() {
         </div>
 
         <Card className="glass-card overflow-hidden">
+          <div className="p-4 border-b border-border/40 bg-muted/20">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80">
+              Base de contatos
+            </h2>
+          </div>
           {vm.contactsQuery.isLoading ? (
             <div className="p-6">
               <TableSkeleton cols={5} />
