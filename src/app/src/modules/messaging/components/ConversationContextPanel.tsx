@@ -40,8 +40,8 @@ export function ConversationContextPanel({
   onOpenSaleDialog,
 }: ConversationContextPanelProps) {
   return (
-    <aside className="flex w-[320px] min-w-[320px] flex-col overflow-hidden rounded-[28px] border border-border/70 bg-card">
-      <div className="border-b border-border/70 px-5 py-5">
+    <aside className="flex w-[320px] min-w-[320px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card">
+      <div className="border-b border-border/60 px-5 py-5">
         <h2 className="text-[1.15rem] font-semibold text-foreground">Contexto e ações</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           O operador pode assumir, devolver ao fluxo ou agir rápido sem sair da conversa.
@@ -133,7 +133,7 @@ export function ConversationContextPanel({
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-border/70 bg-muted/20 p-4">
+            <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -172,7 +172,7 @@ export function ConversationContextPanel({
                   {vm.selectedConversation.intelligence.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-border/70 bg-background/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
+                      className="rounded-full border border-border/60 bg-background/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
                     >
                       {tag}
                     </span>
@@ -181,7 +181,7 @@ export function ConversationContextPanel({
               ) : null}
             </div>
 
-            <div className="rounded-[24px] border border-sky-500/20 bg-sky-500/5 p-4">
+            <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4">
               {(() => {
                 const guide = getHandoffGuide(vm.selectedConversation, vm.currentUserId);
 
@@ -210,7 +210,7 @@ export function ConversationContextPanel({
             </div>
 
             {vm.selectedCheckoutOrder ? (
-              <div className="rounded-[24px] border border-border/70 p-4">
+              <div className="rounded-2xl border border-border/60 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -222,7 +222,7 @@ export function ConversationContextPanel({
                       )}
                     </p>
                   </div>
-                  <span className="rounded-full border border-border/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                  <span className="rounded-full border border-border/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                     {vm.selectedCheckoutOrder.fulfillmentType === 'DELIVERY'
                       ? 'Entrega'
                       : 'Retirada'}
@@ -384,7 +384,7 @@ export function ConversationContextPanel({
               </div>
             ) : null}
 
-            <div className="rounded-[24px] border border-border/70 bg-muted/20 p-4">
+            <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                 Sinal da fila
               </p>
@@ -408,7 +408,7 @@ export function ConversationContextPanel({
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-border/70 p-4">
+            <div className="rounded-2xl border border-border/60 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                 Contato
               </p>
