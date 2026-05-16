@@ -51,23 +51,23 @@ function DebtorInfoCard({ detail }: { detail: RecoveryCaseDetailViewModel }) {
     <Card className="glass-card border-border/60">
       <CardContent className="space-y-3 p-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Empresa</p>
-          <p className="mt-2 text-base font-semibold text-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Empresa</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">
             {item.debtorCompanyName || 'Empresa não informada'}
           </p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Documento</p>
-          <p className="mt-2 text-sm text-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Documento</p>
+          <p className="mt-1 text-sm text-foreground">
             {item.debtorDocument || 'não informado'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline">
+          <Badge variant="outline" className="rounded-full px-2.5 py-1 text-[11px]">
             {recoverySourceLabels[item.source] ?? item.source}
           </Badge>
           {item.referencePeriod ? (
-            <Badge variant="outline">Periodo {item.referencePeriod}</Badge>
+            <Badge variant="outline" className="rounded-full px-2.5 py-1 text-[11px]">Periodo {item.referencePeriod}</Badge>
           ) : null}
         </div>
       </CardContent>
@@ -81,24 +81,24 @@ function ChargeInfoCard({ detail }: { detail: RecoveryCaseDetailViewModel }) {
     <Card className="glass-card border-border/60">
       <CardContent className="space-y-3 p-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Cobrança</p>
-          <p className="mt-2 text-base font-semibold text-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Cobrança</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">
             {item.chargeTitle || 'Titulo não informado'}
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             {item.chargeDescription || 'Sem descrição adicional'}
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Valor</p>
-            <p className="mt-2 text-sm font-semibold text-foreground">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Valor</p>
+            <p className="mt-1 text-sm font-semibold text-foreground">
               {formatCurrency(item.amountDue)}
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Vencimento</p>
-            <p className="mt-2 text-sm font-semibold text-foreground">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Vencimento</p>
+            <p className="mt-1 text-sm font-semibold text-foreground">
               {item.dueDate
                 ? new Date(item.dueDate).toLocaleDateString('pt-BR')
                 : 'não informado'}
@@ -115,11 +115,11 @@ function PlaybookBanner({ detail }: { detail: RecoveryCaseDetailViewModel }) {
   if (!item.playbookId) return null;
 
   return (
-    <div className="rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-sm">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+    <div className="rounded-2xl border border-primary/20 bg-primary/[0.06] p-4 text-sm">
+      <p className="text-xs font-medium uppercase tracking-wider text-primary">
         Roteiro automático
       </p>
-      <p className="mt-1 font-medium text-foreground">
+      <p className="mt-1 text-sm font-semibold text-foreground">
         {playbookUiTitle ?? 'Roteiro ligado ao caso'}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
@@ -141,10 +141,10 @@ function WorkflowCard({ detail, vm }: { detail: RecoveryCaseDetailViewModel; vm:
       <CardHeader className="pb-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <CardTitle className="text-base">Proxima etapa recomendada</CardTitle>
-            <p className="mt-2 text-sm text-muted-foreground">{workflow.description}</p>
+            <CardTitle className="text-sm font-semibold">Proxima etapa recomendada</CardTitle>
+            <p className="mt-1 text-xs text-muted-foreground">{workflow.description}</p>
           </div>
-          <Badge variant="outline" className="w-fit">
+          <Badge variant="outline" className="w-fit rounded-full px-2.5 py-1 text-[11px]">
             Etapa {workflow.workflowStep} de 3
           </Badge>
         </div>
@@ -158,30 +158,30 @@ function WorkflowCard({ detail, vm }: { detail: RecoveryCaseDetailViewModel; vm:
             return (
               <div
                 key={stepConfig.label}
-                className={`rounded-2xl border px-4 py-3 ${active
-                  ? 'border-primary/30 bg-primary/[0.08]'
+                className={`rounded-2xl border p-4 ${active
+                  ? 'border-primary/30 bg-primary/5'
                   : 'border-border/60 bg-muted/10'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Etapa {stepConfig.step}
                   </p>
                   {active ? (
-                    <Badge variant="outline" className="whitespace-nowrap text-[11px]">
+                    <Badge variant="outline" className="whitespace-nowrap rounded-full px-2.5 py-1 text-[11px]">
                       Atual
                     </Badge>
                   ) : done ? (
-                    <Badge variant="outline" className="gap-1 whitespace-nowrap text-[11px]">
+                    <Badge variant="outline" className="gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px]">
                       <CheckCircle2 className="h-3 w-3" />
                       Concluida
                     </Badge>
                   ) : null}
                 </div>
-                <p className="mt-2 text-sm font-semibold text-foreground">
+                <p className="mt-1 text-sm font-semibold text-foreground">
                   {stepConfig.label}
                 </p>
-                <p className="mt-2 break-words text-xs text-muted-foreground">
+                <p className="mt-1 break-words text-xs text-muted-foreground">
                   {stepConfig.description}
                 </p>
               </div>
@@ -191,26 +191,26 @@ function WorkflowCard({ detail, vm }: { detail: RecoveryCaseDetailViewModel; vm:
 
         <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
           <p className="text-sm font-semibold text-foreground">{workflow.title}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             {workflow.currentStep.description}
           </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
             {workflow.summaryItems.map((summaryItem) => (
               <div
                 key={summaryItem.label}
-                className="rounded-2xl border border-border/60 bg-muted/10 px-4 py-3"
+                className="rounded-2xl border border-border/60 bg-muted/10 p-4"
               >
-                <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                   {summaryItem.label}
                 </p>
-                <p className="mt-2 break-words text-sm text-foreground">
+                <p className="mt-1 break-words text-sm text-foreground">
                   {summaryItem.value}
                 </p>
               </div>
             ))}
           </div>
           {workflow.showCurrentStepAction ? (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Button
                 className="gap-1.5"
                 onClick={() => runRecoveryAction(vm, workflow.currentStep.action.key)}
@@ -235,9 +235,9 @@ function GuidanceCard({ detail, vm }: { detail: RecoveryCaseDetailViewModel; vm:
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <CardTitle className="text-base">Apoio da IA</CardTitle>
+            <CardTitle className="text-sm font-semibold">Apoio da IA</CardTitle>
             {guidanceAlreadySent ? (
-              <Badge variant="outline" className="border-success/20 bg-success/10 text-success">
+              <Badge variant="outline" className="rounded-full px-2.5 py-1 text-[11px] border-success/20 bg-success/10 text-success">
                 sugestão enviada
               </Badge>
             ) : null}
@@ -265,12 +265,12 @@ function GuidanceCard({ detail, vm }: { detail: RecoveryCaseDetailViewModel; vm:
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div className="rounded-2xl border border-primary/20 bg-primary/[0.04] p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Resposta sugerida
           </p>
-          <p className="mt-2 text-sm text-foreground">
+          <p className="mt-1 text-sm text-foreground">
             {item.suggestedReply || (hasClientInteraction
               ? 'Ainda não existe sugestão pronta para este caso.'
               : 'A sugestão será gerada após a primeira interação com o cliente.')}
@@ -294,10 +294,10 @@ function GuidanceCard({ detail, vm }: { detail: RecoveryCaseDetailViewModel; vm:
           </p>
         ) : null}
         <div className={`rounded-2xl border border-border/60 bg-muted/25 p-4 ${item.suggestedNextAction ? '' : 'hidden'}`}>
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Proxima ação
           </p>
-          <p className="mt-2 text-sm text-foreground">
+          <p className="mt-1 text-sm text-foreground">
             {item.suggestedNextAction || 'Sem proxima ação sugerida no momento.'}
           </p>
         </div>
@@ -312,7 +312,7 @@ function TimelineTab({ detail, vm }: { detail: RecoveryCaseDetailViewModel; vm: 
   return (
     <Card className="glass-card border-border/60">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Timeline do caso</CardTitle>
+        <CardTitle className="text-sm font-semibold">Timeline do caso</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {vm.timelineQuery.isLoading && item.contactId ? (
@@ -438,7 +438,7 @@ export function RecoveryCaseDetailSheet({ vm }: { vm: RecoveryPageViewModel }) {
                 <TabsTrigger value="timeline">Timeline</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="details" className="flex-1 overflow-y-auto px-6 pb-6 mt-4 space-y-6">
+              <TabsContent value="details" className="flex-1 overflow-y-auto px-6 pb-6 mt-4 space-y-4">
                 <div className="grid gap-4 lg:grid-cols-2">
                   <DebtorInfoCard detail={detail} />
                   <ChargeInfoCard detail={detail} />
