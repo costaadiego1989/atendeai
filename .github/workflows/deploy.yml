@@ -163,6 +163,11 @@ jobs:
         working-directory: ./terraform
         run: terraform init
 
+      - name: Terraform Force Unlock (if locked)
+        working-directory: ./terraform
+        continue-on-error: true
+        run: terraform force-unlock -force 3fc2d32a-b1d2-39dc-e77d-8ba915422e24
+
       - name: Terraform Apply
         working-directory: ./terraform
         run: |
