@@ -17,8 +17,3 @@ output "redis_sg_id" {
   description = "The ID of the Redis security group"
   value       = aws_security_group.redis.id
 }
-
-output "mq_sg_id" {
-  description = "The ID of the Amazon MQ security group"
-  value       = aws_security_group.mq.id
-}

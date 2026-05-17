@@ -13,21 +13,6 @@ output "ecs_cluster_name" {
   value       = module.ecs.cluster_name
 }
 
-output "api_service_name" {
-  description = "The ECS service name for the API"
-  value       = module.ecs.api_service_name
-}
-
-output "worker_service_names" {
-  description = "The ECS service names for background workers"
-  value       = module.ecs.worker_service_names
-}
-
-output "frontend_service_names" {
-  description = "The ECS service names for app and web"
-  value       = module.ecs.frontend_service_names
-}
-
 output "rds_endpoint" {
   description = "The endpoint of the RDS instance"
   value       = "${module.rds.address}:${module.rds.port}"
@@ -38,7 +23,17 @@ output "redis_endpoint" {
   value       = "${module.elasticache.primary_endpoint_address}:${module.elasticache.port}"
 }
 
-output "rabbitmq_endpoint" {
-  description = "The endpoint of the RabbitMQ broker"
-  value       = module.mq.amqp_endpoint
+output "api_ecr_repository_url" {
+  description = "API ECR repository URL"
+  value       = module.ecs.api_ecr_repository_url
+}
+
+output "app_ecr_repository_url" {
+  description = "App ECR repository URL"
+  value       = module.ecs.app_ecr_repository_url
+}
+
+output "web_ecr_repository_url" {
+  description = "Web ECR repository URL"
+  value       = module.ecs.web_ecr_repository_url
 }

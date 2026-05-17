@@ -13,8 +13,8 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "private_subnets" {
-  description = "List of private subnet IDs"
+variable "public_subnets" {
+  description = "List of public subnet IDs (ECS runs here to avoid NAT Gateway cost)"
   type        = list(string)
 }
 
@@ -41,6 +41,18 @@ variable "task_role_arn" {
 variable "http_listener_arn" {
   description = "HTTP listener ARN used to route public services"
   type        = string
+}
+
+variable "https_listener_arn" {
+  description = "HTTPS listener ARN used to route public services (empty if no certificate)"
+  type        = string
+  default     = ""
+}
+
+variable "domain_name" {
+  description = "Base domain name for host-based routing (e.g. atende-ai.tech)"
+  type        = string
+  default     = ""
 }
 
 variable "ssm_parameter_prefix" {
@@ -75,7 +87,7 @@ variable "asg_desired_capacity" {
 variable "asg_max_size" {
   description = "Maximum size for the ECS Auto Scaling Group"
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "api_image_uri" {
@@ -132,8 +144,51 @@ variable "frontend_container_port" {
   default     = 80
 }
 
+variable "use_spot_instances" {
+  description = "Enable Spot Instances via mixed instances policy"
+  type        = bool
+  default     = true
+}
+
+variable "spot_instance_types" {
+  description = "List of instance types for Spot diversification (increases availability)"
+  type        = list(string)
+  default     = ["t3.medium", "t3a.medium", "t2.medium"]
+}
+
+variable "on_demand_base_capacity" {
+  description = "Number of On-Demand instances guaranteed as base (0 = all Spot, On-Demand only as fallback)"
+  type        = number
+  default     = 0
+}
+
+variable "spot_allocation_strategy" {
+  description = "Spot allocation strategy: lowest-price or capacity-optimized"
+  type        = string
+  default     = "capacity-optimized"
+}
+
+variable "enable_scheduling" {
+  description = "Enable scheduled start/stop of the ASG"
+  type        = bool
+  default     = false
+}
+
+variable "schedule_stop_cron" {
+  description = "Cron expression to scale down. Uses America/Sao_Paulo timezone."
+  type        = string
+  default     = "0 0 * * *"
+}
+
+variable "schedule_start_cron" {
+  description = "Cron expression to scale up. Uses America/Sao_Paulo timezone."
+  type        = string
+  default     = "0 7 * * *"
+}
+
 variable "tags" {
   description = "Common tags"
   type        = map(string)
   default     = {}
 }
+

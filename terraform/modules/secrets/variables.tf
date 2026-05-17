@@ -34,30 +34,16 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "redis_endpoint" {
-  description = "Redis endpoint"
+variable "redis_host" {
+  description = "Redis host (localhost when running as sidecar container)"
   type        = string
+  default     = "127.0.0.1"
 }
 
 variable "redis_port" {
   description = "Redis port"
   type        = number
-}
-
-variable "mq_endpoint" {
-  description = "RabbitMQ endpoint"
-  type        = string
-}
-
-variable "mq_username" {
-  description = "RabbitMQ username"
-  type        = string
-}
-
-variable "mq_password" {
-  description = "RabbitMQ password"
-  type        = string
-  sensitive   = true
+  default     = 6379
 }
 
 variable "tags" {

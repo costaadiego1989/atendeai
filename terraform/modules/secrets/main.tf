@@ -3,11 +3,6 @@ locals {
 
   # Prisma URL format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
   prisma_url = "postgresql://${var.db_username}:${var.db_password}@${var.db_endpoint}:${var.db_port}/${var.db_name}?schema=public"
-
-  # RabbitMQ URL format: amqps://USER:PASSWORD@HOST:PORT
-  # The endpoint from AWS MQ often includes the protocol. We strip it if needed, or just construct it.
-  # For simplicity, assuming amqps:// prefix is standard for AWS MQ
-  rabbitmq_url = replace(var.mq_endpoint, "amqps://", "amqps://${var.mq_username}:${var.mq_password}@")
 }
 
 resource "aws_ssm_parameter" "prisma_database_url" {
@@ -23,7 +18,7 @@ resource "aws_ssm_parameter" "redis_host" {
   name        = "${local.name_prefix}/REDIS_HOST"
   description = "Redis host address"
   type        = "String"
-  value       = var.redis_endpoint
+  value       = var.redis_host
 
   tags = var.tags
 }
@@ -37,16 +32,7 @@ resource "aws_ssm_parameter" "redis_port" {
   tags = var.tags
 }
 
-resource "aws_ssm_parameter" "rabbitmq_url" {
-  name        = "${local.name_prefix}/RABBITMQ_URL"
-  description = "RabbitMQ connection string"
-  type        = "SecureString"
-  value       = local.rabbitmq_url
-
-  tags = var.tags
-}
-
-# Placeholder for manual secrets that Terraform shouldn't manage values for, but creates the parameter
+# Placeholder for manual secrets that Terraform shouldn't manage values for
 resource "aws_ssm_parameter" "jwt_access_secret" {
   name        = "${local.name_prefix}/JWT_ACCESS_SECRET"
   description = "JWT Access Secret"

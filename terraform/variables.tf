@@ -13,17 +13,11 @@ variable "project_name" {
 variable "environment" {
   description = "Nome do ambiente, como dev, staging ou prod."
   type        = string
-  default     = "dev"
+  default     = "prod"
 }
 
 variable "db_password" {
   description = "Senha do banco de dados principal."
-  type        = string
-  sensitive   = true
-}
-
-variable "mq_password" {
-  description = "Senha do RabbitMQ."
   type        = string
   sensitive   = true
 }
@@ -35,7 +29,7 @@ variable "image_tag" {
 }
 
 variable "ec2_instance_type" {
-  description = "Tipo da instancia EC2 usada pelo ECS. Para inicio barato, t3.medium; para mais folga, t3.large."
+  description = "Tipo da instancia EC2 usada pelo ECS. Para inicio barato, t3.medium."
   type        = string
   default     = "t3.medium"
 }
@@ -55,7 +49,7 @@ variable "asg_desired_capacity" {
 variable "asg_max_size" {
   description = "Capacidade maxima do Auto Scaling Group."
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "api_image_uri" {
@@ -100,12 +94,71 @@ variable "worker_desired_count" {
   default     = 1
 }
 
+# --- Domain & SSL ---
+
+variable "domain_name" {
+  description = "Dominio base para roteamento por host (ex: atende-ai.tech)."
+  type        = string
+  default     = ""
+}
+
+variable "certificate_arn" {
+  description = "ARN do certificado ACM para HTTPS. Se vazio, apenas HTTP."
+  type        = string
+  default     = ""
+}
+
+# --- Spot Instances ---
+
+variable "use_spot_instances" {
+  description = "Habilitar Spot Instances via mixed instances policy no ASG do ECS."
+  type        = bool
+  default     = true
+}
+
+variable "spot_instance_types" {
+  description = "Lista de tipos de instancia para diversificacao Spot."
+  type        = list(string)
+  default     = ["t3.medium", "t3a.medium", "t2.medium"]
+}
+
+variable "on_demand_base_capacity" {
+  description = "Quantidade de instancias On-Demand como base (0 = tudo Spot, On-Demand so como fallback)."
+  type        = number
+  default     = 0
+}
+
+# --- Scheduling ---
+
+variable "enable_scheduling" {
+  description = "Habilitar desligamento/ligamento automatico do ASG por horario."
+  type        = bool
+  default     = false
+}
+
+variable "schedule_stop_cron" {
+  description = "Cron para desligar (timezone America/Sao_Paulo)."
+  type        = string
+  default     = "0 0 * * *"
+}
+
+variable "schedule_start_cron" {
+  description = "Cron para ligar (timezone America/Sao_Paulo)."
+  type        = string
+  default     = "0 7 * * *"
+}
+
 variable "tags" {
   description = "Tags comuns para todos os recursos."
   type        = map(string)
   default = {
-    Project     = "atendeai"
-    Environment = "dev"
-    ManagedBy   = "terraform"
+    Project      = "atendeai"
+    Environment  = "prod"
+    ManagedBy    = "terraform"
+    CostStrategy = "spot-optimized"
+    Scheduling   = "auto-stop-midnight"
+    Team         = "engineering"
   }
 }
+
+
