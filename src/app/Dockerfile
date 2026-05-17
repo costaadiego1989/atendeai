@@ -3,9 +3,10 @@ FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package.json ./
 
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm \
+  npm install --no-audit --no-fund
 
 COPY . .
 
