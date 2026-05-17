@@ -70,7 +70,7 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
       initPhone = initPhone.replace(/^\+55\s?/, '');
       
       const formatInitial = (v: string) => {
-        let clean = v.replace(/\D/g, '');
+        const clean = v.replace(/\D/g, '');
         if (clean.length === 11) {
           return `(${clean.slice(0,2)}) ${clean.slice(2,7)}-${clean.slice(7)}`;
         } else if (clean.length === 10) {
@@ -95,7 +95,7 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
     try {
       setIsSubmitting(true);
       
-      let cleanPhone = data.phone ? data.phone.replace(/\D/g, '') : '';
+      const cleanPhone = data.phone ? data.phone.replace(/\D/g, '') : '';
       const payload: any = { name: data.name, email: data.email, phone: cleanPhone };
       if (data.password && data.password.trim() !== '') {
         payload.password = data.password;

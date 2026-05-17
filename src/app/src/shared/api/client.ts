@@ -2,7 +2,7 @@ function resolveApiOrigin() {
   const apiOrigin = (import.meta.env.VITE_API_ORIGIN as string | undefined);
   const apiUrl = (import.meta.env.VITE_API_URL as string | undefined);
 
-  let rawOrigin = apiOrigin || apiUrl;
+  const rawOrigin = apiOrigin || apiUrl;
 
   if (rawOrigin) {
     return rawOrigin.replace(/\/$/, '').replace(/\/api\/v1$/, '');
