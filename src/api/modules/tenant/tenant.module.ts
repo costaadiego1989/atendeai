@@ -24,6 +24,7 @@ import { TenantBranchController } from './presentation/controllers/TenantBranchC
 import { IntegrationController } from './presentation/controllers/IntegrationController';
 import { UserController } from './presentation/controllers/UserController';
 import { InstagramMetaConnectionController } from './presentation/controllers/InstagramMetaConnectionController';
+import { MetaDataDeletionController } from './presentation/controllers/MetaDataDeletionController';
 import { AuthModule } from '../auth/auth.module';
 import { BcryptPasswordHasher } from '@shared/infrastructure/services/BcryptPasswordHasher';
 import { PASSWORD_HASHER } from '@shared/application/ports/IPasswordHasher';
@@ -216,7 +217,11 @@ const TENANT_BILLING_PROVIDERS = [
 ];
 
 @Module({
-  imports: [AuthModule, ConfigModule, BullModule.registerQueue({ name: 'pdf-processing' })],
+  imports: [
+    AuthModule,
+    ConfigModule,
+    BullModule.registerQueue({ name: 'pdf-processing' }),
+  ],
   controllers: [
     TenantController,
     TenantWhatsAppController,
@@ -224,6 +229,7 @@ const TENANT_BILLING_PROVIDERS = [
     IntegrationController,
     UserController,
     InstagramMetaConnectionController,
+    MetaDataDeletionController,
   ],
   providers: [
     ...TENANT_REPOSITORY_PROVIDERS,
