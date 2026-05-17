@@ -1,4 +1,5 @@
-import { Zap, Users, CreditCard, HelpCircle, ArrowUp, Gift, BrainCircuit } from "lucide-react";
+import { Zap, Users, CreditCard, HelpCircle, ArrowUp, Gift, BrainCircuit, Shield, FileText } from "lucide-react";
+import { Link } from "react-router-dom";
 import WhatsAppIcon from "./WhatsAppIcon";
 import logo from "@/assets/logo.png";
 
@@ -66,7 +67,18 @@ const Footer = () => (
         </div>
       </div>
 
-      <div className="border-t border-primary/5 pt-6 text-center">
+      <div className="border-t border-primary/5 pt-6 text-center space-y-2">
+        <div className="flex items-center justify-center gap-4">
+          <Link to="/privacidade" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Shield className="w-3.5 h-3.5" />
+            Politica de Privacidade
+          </Link>
+          <span className="text-xs text-muted-foreground/50">|</span>
+          <Link to="/termos" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <FileText className="w-3.5 h-3.5" />
+            Termos de Uso
+          </Link>
+        </div>
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} AtendeAI. Todos os direitos reservados.
         </p>
