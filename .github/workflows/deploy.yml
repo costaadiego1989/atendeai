@@ -12,7 +12,6 @@ name: CI/CD Pipeline - AtendeAi
 #
 # 🗄️ PARÂMETROS DE INFRAESTRUTURA (Obrigatórias - Injetadas via Terraform):
 #   - DB_PASSWORD: Senha de produção/staging do banco de dados RDS PostgreSQL.
-#   - MQ_PASSWORD: Senha de produção/staging do RabbitMQ no Amazon MQ.
 #
 # 🌐 CONFIGURAÇÕES DE BUILD DO FRONTEND (Opcionais - Build-time Args):
 #   - VITE_API_ORIGIN: Origem HTTP da API (ex: https://api.atendeai.com).
@@ -36,7 +35,7 @@ permissions:
 env:
   AWS_REGION: us-east-1
   PROJECT_NAME: atendeai
-  ENVIRONMENT: dev
+  ENVIRONMENT: prod
 
 jobs:
   validate:
@@ -167,11 +166,13 @@ jobs:
         run: |
           terraform apply -auto-approve \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
-            -var="mq_password=${{ secrets.MQ_PASSWORD }}" \
             -var="image_tag=${{ env.IMAGE_TAG }}" \
             -var="environment=${{ env.ENVIRONMENT }}" \
             -var="project_name=${{ env.PROJECT_NAME }}" \
-            -var="aws_region=${{ env.AWS_REGION }}"
+            -var="aws_region=${{ env.AWS_REGION }}" \
+            -var="enable_scheduling=true" \
+            -var="domain_name=atende-ai.tech" \
+            -var="certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }}"
 
       # 5. Run Prisma Migrations as an ECS One-off Task
       # Rodamos a migration usando a nova imagem construída (que foi aplicada nas task definitions via terraform)
@@ -218,3 +219,5 @@ jobs:
           fi
           
           echo "Migração do banco de dados Prisma concluída com sucesso!"
+
+
