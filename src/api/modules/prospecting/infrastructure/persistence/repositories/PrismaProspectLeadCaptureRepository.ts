@@ -10,9 +10,8 @@ import {
 import { ProspectLeadCaptureMapper } from '../mappers/ProspectLeadCaptureMapper';
 
 @Injectable()
-export class PrismaProspectLeadCaptureRepository
-  implements IProspectLeadCaptureRepository {
-  constructor(private readonly prisma: PrismaService) { }
+export class PrismaProspectLeadCaptureRepository implements IProspectLeadCaptureRepository {
+  constructor(private readonly prisma: PrismaService) {}
 
   async saveMany(leads: ProspectLeadCapture[]): Promise<void> {
     for (const lead of leads) {
@@ -57,25 +56,35 @@ export class PrismaProspectLeadCaptureRepository
     const conditions = [Prisma.sql`tenant_id = ${tenantId}::uuid`];
 
     if (filters.campaignName?.trim()) {
-      conditions.push(Prisma.sql`COALESCE(campaign_name, '') ILIKE ${`%${filters.campaignName.trim()}%`}`);
+      conditions.push(
+        Prisma.sql`COALESCE(campaign_name, '') ILIKE ${`%${filters.campaignName.trim()}%`}`,
+      );
     }
 
     if (filters.importStatus?.trim() && filters.importStatus !== 'ALL') {
-      conditions.push(Prisma.sql`import_status = ${filters.importStatus.trim()}`);
+      conditions.push(
+        Prisma.sql`import_status = ${filters.importStatus.trim()}`,
+      );
     }
 
     if (filters.channel === 'WHATSAPP') {
       conditions.push(Prisma.sql`phone IS NOT NULL AND phone <> ''`);
     } else if (filters.channel === 'INSTAGRAM') {
-      conditions.push(Prisma.sql`instagram_handle IS NOT NULL AND instagram_handle <> ''`);
+      conditions.push(
+        Prisma.sql`instagram_handle IS NOT NULL AND instagram_handle <> ''`,
+      );
     }
 
     if (filters.dateFrom) {
-      conditions.push(Prisma.sql`submission_at >= ${filters.dateFrom}::timestamptz`);
+      conditions.push(
+        Prisma.sql`submission_at >= ${filters.dateFrom}::timestamptz`,
+      );
     }
 
     if (filters.dateTo) {
-      conditions.push(Prisma.sql`submission_at <= ${filters.dateTo}::timestamptz`);
+      conditions.push(
+        Prisma.sql`submission_at <= ${filters.dateTo}::timestamptz`,
+      );
     }
 
     const whereClause = Prisma.join(conditions, ' AND ');
@@ -90,7 +99,9 @@ export class PrismaProspectLeadCaptureRepository
         OFFSET ${offset}
       `);
 
-    const totalRows = await this.prisma.$queryRaw<Array<{ total: bigint }>>(Prisma.sql`
+    const totalRows = await this.prisma.$queryRaw<
+      Array<{ total: bigint }>
+    >(Prisma.sql`
         SELECT COUNT(*)::bigint AS total
         FROM prospecting_schema.prospect_lead_captures
         WHERE ${whereClause}
@@ -106,7 +117,10 @@ export class PrismaProspectLeadCaptureRepository
     };
   }
 
-  async findManyByIds(tenantId: string, leadIds: string[]): Promise<ProspectLeadCapture[]> {
+  async findManyByIds(
+    tenantId: string,
+    leadIds: string[],
+  ): Promise<ProspectLeadCapture[]> {
     if (!leadIds.length) {
       return [];
     }

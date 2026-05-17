@@ -1,6 +1,4 @@
-import {
-  GoogleAdsConnection,
-} from '../types/GoogleAdsConnection';
+import { GoogleAdsConnection } from '../types/GoogleAdsConnection';
 
 export interface IGoogleAdsConnectionRepository {
   save(connection: GoogleAdsConnection): Promise<void>;

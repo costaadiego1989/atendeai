@@ -6,9 +6,11 @@ describe('SalesIntegrationHandlers contract', () => {
   it('should process serialized payload events without instanceof checks', async () => {
     let subscribedHandler: ((event: unknown) => Promise<void>) | undefined;
     const eventBus = {
-      subscribe: jest.fn((_: string, handler: (event: unknown) => Promise<void>) => {
-        subscribedHandler = handler;
-      }),
+      subscribe: jest.fn(
+        (_: string, handler: (event: unknown) => Promise<void>) => {
+          subscribedHandler = handler;
+        },
+      ),
     } as unknown as IEventBus;
 
     const messagingFacade = {
@@ -43,9 +45,11 @@ describe('SalesIntegrationHandlers contract', () => {
   it('should ignore invalid payload contracts', async () => {
     let subscribedHandler: ((event: unknown) => Promise<void>) | undefined;
     const eventBus = {
-      subscribe: jest.fn((_: string, handler: (event: unknown) => Promise<void>) => {
-        subscribedHandler = handler;
-      }),
+      subscribe: jest.fn(
+        (_: string, handler: (event: unknown) => Promise<void>) => {
+          subscribedHandler = handler;
+        },
+      ),
     } as unknown as IEventBus;
 
     const messagingFacade = {
@@ -62,9 +66,11 @@ describe('SalesIntegrationHandlers contract', () => {
   it('should queue a conversation confirmation when payment is confirmed', async () => {
     const subscriptions = new Map<string, (event: unknown) => Promise<void>>();
     const eventBus = {
-      subscribe: jest.fn((eventName: string, handler: (event: unknown) => Promise<void>) => {
-        subscriptions.set(eventName, handler);
-      }),
+      subscribe: jest.fn(
+        (eventName: string, handler: (event: unknown) => Promise<void>) => {
+          subscriptions.set(eventName, handler);
+        },
+      ),
     } as unknown as IEventBus;
 
     const messagingFacade = {

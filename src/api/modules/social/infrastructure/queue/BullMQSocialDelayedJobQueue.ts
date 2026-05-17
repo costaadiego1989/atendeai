@@ -8,11 +8,11 @@ import {
 
 @Injectable()
 export class BullMQSocialDelayedJobQueue implements ISocialDelayedJobQueue {
-  constructor(
-    @InjectQueue('social-delayed') private readonly queue: Queue,
-  ) {}
+  constructor(@InjectQueue('social-delayed') private readonly queue: Queue) {}
 
-  async addDelayedInboxMessage(payload: DelayedInboxMessagePayload): Promise<void> {
+  async addDelayedInboxMessage(
+    payload: DelayedInboxMessagePayload,
+  ): Promise<void> {
     const { delayMs, ...data } = payload;
 
     await this.queue.add('send-delayed-inbox-message', data, {

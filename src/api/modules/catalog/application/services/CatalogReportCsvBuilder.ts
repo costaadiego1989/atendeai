@@ -43,7 +43,11 @@ export class CatalogReportCsvBuilder {
       fileName: `relatorio-catalogo-${new Date().toISOString().slice(0, 10)}.csv`,
       mimeType: 'text/csv;charset=utf-8',
       content: rows
-        .map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(';'))
+        .map((row) =>
+          row
+            .map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`)
+            .join(';'),
+        )
         .join('\n'),
     };
   }

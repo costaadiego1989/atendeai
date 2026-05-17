@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ALERT_REMINDER_REPOSITORY, IAlertReminderRepository } from '../../domain/repositories/IAlertReminderRepository';
+import {
+  ALERT_REMINDER_REPOSITORY,
+  IAlertReminderRepository,
+} from '../../domain/repositories/IAlertReminderRepository';
 import { AlertReminder } from '../../domain/types/AlertReminder';
 
 @Injectable()

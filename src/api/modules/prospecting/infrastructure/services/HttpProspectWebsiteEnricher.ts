@@ -17,7 +17,9 @@ export class HttpProspectWebsiteEnricher implements IProspectWebsiteEnricher {
     );
   }
 
-  async enrich(input: { website?: string }): Promise<ProspectWebsiteEnrichment> {
+  async enrich(input: {
+    website?: string;
+  }): Promise<ProspectWebsiteEnrichment> {
     if (!input.website?.trim()) {
       return {};
     }
@@ -62,36 +64,37 @@ export class HttpProspectWebsiteEnricher implements IProspectWebsiteEnricher {
 
   private extractContactPageUrl(baseUrl: string, html: string): string | null {
     const hrefMatch =
-      html.match(/href=["']([^"']*(contato|contact|fale-conosco)[^"']*)["']/i) ||
-      html.match(/href=["']([^"']*(sobre|about)[^"']*)["']/i);
+      html.match(
+        /href=["']([^"']*(contato|contact|fale-conosco)[^"']*)["']/i,
+      ) || html.match(/href=["']([^"']*(sobre|about)[^"']*)["']/i);
 
     if (!hrefMatch?.[1]) {
       return null;
     }
 
     try {
-      return new URL(hrefMatch[1], `${baseUrl}/`).toString().replace(/\/+$/, '');
+      return new URL(hrefMatch[1], `${baseUrl}/`)
+        .toString()
+        .replace(/\/+$/, '');
     } catch {
       return null;
     }
   }
 
   private extractEmail(html: string): string | undefined {
-    const mailtoMatch = html.match(/mailto:([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i);
+    const mailtoMatch = html.match(
+      /mailto:([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i,
+    );
     if (mailtoMatch?.[1]) {
       return mailtoMatch[1].toLowerCase();
     }
 
-    const plainMatch = html.match(
-      /([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i,
-    );
+    const plainMatch = html.match(/([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i);
     return plainMatch?.[1]?.toLowerCase();
   }
 
   private extractPhone(html: string): string | undefined {
-    const phoneMatch = html.match(
-      /(\+?\d[\d\s().-]{8,}\d)/,
-    );
+    const phoneMatch = html.match(/(\+?\d[\d\s().-]{8,}\d)/);
 
     if (!phoneMatch?.[1]) {
       return undefined;

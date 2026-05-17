@@ -90,13 +90,16 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
           sourceModule: event.sourceModule,
           version: event.version ?? 1,
           aggregateId:
-            event.aggregateId ?? this.extractString(event.payload, 'aggregateId'),
+            event.aggregateId ??
+            this.extractString(event.payload, 'aggregateId'),
           tenantId:
             event.tenantId ?? this.extractString(event.payload, 'tenantId'),
           correlationId:
-            event.correlationId ?? this.extractString(event.payload, 'correlationId'),
+            event.correlationId ??
+            this.extractString(event.payload, 'correlationId'),
           causationId:
-            event.causationId ?? this.extractString(event.payload, 'causationId'),
+            event.causationId ??
+            this.extractString(event.payload, 'causationId'),
           occurredAt: event.timestamp,
           timestamp: event.timestamp,
           queue: event.queue,
@@ -133,7 +136,8 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
       : queue;
 
     if (options?.consumerName) {
-      const consumerQueues = this.consumerQueues.get(queue) ?? new Set<string>();
+      const consumerQueues =
+        this.consumerQueues.get(queue) ?? new Set<string>();
       consumerQueues.add(workerQueueName);
       this.consumerQueues.set(queue, consumerQueues);
     }

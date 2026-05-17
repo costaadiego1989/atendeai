@@ -1,5 +1,8 @@
 import { ConfigService } from '@nestjs/config';
-import { TwilioManagementAcl, TwilioSubaccountRecord } from '../infrastructure/acl/TwilioManagementAcl';
+import {
+  TwilioManagementAcl,
+  TwilioSubaccountRecord,
+} from '../infrastructure/acl/TwilioManagementAcl';
 
 describe('Twilio Subaccount Provisioning (E2E)', () => {
   let twilioAcl: TwilioManagementAcl;
@@ -11,11 +14,19 @@ describe('Twilio Subaccount Provisioning (E2E)', () => {
     const configService = new ConfigService({
       TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
       TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
-      TWILIO_MESSAGING_BASE_URL: process.env.TWILIO_MESSAGING_BASE_URL || 'https://messaging.twilio.com/v2',
-      TWILIO_API_BASE_URL: process.env.TWILIO_API_BASE_URL || 'https://api.twilio.com/2010-04-01',
+      TWILIO_MESSAGING_BASE_URL:
+        process.env.TWILIO_MESSAGING_BASE_URL ||
+        'https://messaging.twilio.com/v2',
+      TWILIO_API_BASE_URL:
+        process.env.TWILIO_API_BASE_URL || 'https://api.twilio.com/2010-04-01',
     });
 
-    const structuredLog = { emit: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() } as any;
+    const structuredLog = {
+      emit: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as any;
     twilioAcl = new TwilioManagementAcl(configService, structuredLog);
   });
 

@@ -38,7 +38,8 @@ import { DEVICE_ID_COOKIE_NAME } from '@shared/infrastructure/http/interceptors/
 import { RequiresActivePlan } from '@shared/infrastructure/auth/decorators/requires-active-plan.decorator';
 import { SubscriptionActiveGuard } from '@shared/infrastructure/auth/guards/SubscriptionActiveGuard';
 
-const isProd = process.env['NODE_ENV'] === 'production' || process.env['RENDER'] === 'true';
+const isProd =
+  process.env['NODE_ENV'] === 'production' || process.env['RENDER'] === 'true';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -136,10 +137,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     this.ensureDeviceCookie(req, res);
 
     await this.logoutUseCase.execute({
@@ -233,7 +231,7 @@ export class AuthController {
     const rawCookieHeader = req.headers['cookie'];
     const incomingCookies = Array.isArray(rawCookieHeader)
       ? rawCookieHeader.join('; ')
-      : rawCookieHeader ?? '';
+      : (rawCookieHeader ?? '');
     const hasIncomingDeviceCookie = incomingCookies.includes(
       `${DEVICE_ID_COOKIE_NAME}=`,
     );

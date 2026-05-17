@@ -12,7 +12,7 @@ export class SelectGoogleAdsAccountUseCase {
     @Inject(GOOGLE_ADS_CONNECTION_REPOSITORY)
     private readonly repository: IGoogleAdsConnectionRepository,
     private readonly oauthService: GoogleAdsOAuthService,
-  ) { }
+  ) {}
 
   async execute(input: { tenantId: string; customerId: string }) {
     const connection = await this.repository.findByTenantId(input.tenantId);

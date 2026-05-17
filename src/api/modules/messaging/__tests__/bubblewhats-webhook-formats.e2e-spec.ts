@@ -312,7 +312,9 @@ describe('BubbleWhats webhook formats (e2e)', () => {
     expect(persisted).not.toBeNull();
 
     const listResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/conversations?page=1&limit=20&status=ACTIVE`)
+      .get(
+        `/api/v1/tenants/${tenantId}/conversations?page=1&limit=20&status=ACTIVE`,
+      )
       .set('Cookie', authCookies)
       .expect(200);
 

@@ -73,4 +73,4 @@ import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule'
     CATALOG_QUERY_PORT,
   ],
 })
-export class CatalogModule { }
+export class CatalogModule {}

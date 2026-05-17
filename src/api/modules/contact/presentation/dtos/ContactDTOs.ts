@@ -84,7 +84,9 @@ export class GenerateContactsReportDTO {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @IsIn(['LEAD', 'PROSPECT', 'OPPORTUNITY', 'CUSTOMER', 'INACTIVE'], { each: true })
+  @IsIn(['LEAD', 'PROSPECT', 'OPPORTUNITY', 'CUSTOMER', 'INACTIVE'], {
+    each: true,
+  })
   stages?: string[];
 
   @IsOptional()

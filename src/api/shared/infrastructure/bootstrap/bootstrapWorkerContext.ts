@@ -14,7 +14,10 @@ export async function bootstrapWorkerContext(
     registerShutdownHooks(app, logger);
     logger.log('Worker context started');
   } catch (error) {
-    logger.error('Worker bootstrap failed', error instanceof Error ? error.stack : undefined);
+    logger.error(
+      'Worker bootstrap failed',
+      error instanceof Error ? error.stack : undefined,
+    );
     process.exit(1);
   }
 }

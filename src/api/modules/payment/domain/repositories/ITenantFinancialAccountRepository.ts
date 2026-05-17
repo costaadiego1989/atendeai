@@ -10,7 +10,9 @@ export interface TenantFinancialAccountRecord {
 }
 
 export interface ITenantFinancialAccountRepository {
-  findByTenantId(tenantId: string): Promise<TenantFinancialAccountRecord | null>;
+  findByTenantId(
+    tenantId: string,
+  ): Promise<TenantFinancialAccountRecord | null>;
   save(
     record: Omit<TenantFinancialAccountRecord, 'createdAt' | 'updatedAt'>,
   ): Promise<TenantFinancialAccountRecord>;

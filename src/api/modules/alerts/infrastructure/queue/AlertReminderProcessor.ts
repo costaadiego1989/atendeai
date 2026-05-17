@@ -25,7 +25,9 @@ export class AlertReminderProcessor implements OnModuleInit, OnModuleDestroy {
 
     this.worker = new Worker(
       'alert-reminders',
-      async (job: Job<{ tenantId: string; reminderId: string; runAt: string }>) => {
+      async (
+        job: Job<{ tenantId: string; reminderId: string; runAt: string }>,
+      ) => {
         const jid = job.id ?? 'n/a';
         this.logger.log(
           `[alert-reminders] start job=${jid} tenant=${job.data.tenantId} reminder=${job.data.reminderId} runAt=${job.data.runAt}`,

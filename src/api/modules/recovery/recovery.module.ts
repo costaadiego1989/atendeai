@@ -35,9 +35,7 @@ import { ScheduleRecoveryRecurringChargeUseCase } from './application/use-cases/
 import { ListRecoveryRecurringChargesUseCase } from './application/use-cases/ListRecoveryRecurringChargesUseCase';
 import { CancelRecoveryRecurringChargeUseCase } from './application/use-cases/CancelRecoveryRecurringChargeUseCase';
 import { ProcessRecoveryRecurringChargeUseCase } from './application/use-cases/ProcessRecoveryRecurringChargeUseCase';
-import {
-  RECOVERY_RECURRING_CHARGE_REPOSITORY,
-} from './domain/ports/IRecoveryRecurringChargeRepository';
+import { RECOVERY_RECURRING_CHARGE_REPOSITORY } from './domain/ports/IRecoveryRecurringChargeRepository';
 import { PrismaRecoveryRecurringChargeRepository } from './infrastructure/persistence/repositories/PrismaRecoveryRecurringChargeRepository';
 import { RECOVERY_PLAYBOOK_REPOSITORY } from './domain/ports/IRecoveryPlaybookRepository';
 import { PrismaRecoveryPlaybookRepository } from './infrastructure/persistence/repositories/PrismaRecoveryPlaybookRepository';

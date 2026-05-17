@@ -35,32 +35,35 @@ describe('GetWhatsAppConnectionUseCase', () => {
       credentials: {
         senderId: 'sender-1',
         senderSid: 'sid-1',
-        wabaId: 'waba-1'
+        wabaId: 'waba-1',
       },
-      webhookSecret: null
+      webhookSecret: null,
     });
 
-    const tenant = Tenant.reconstitute({
-      companyName: CompanyName.create('Test Corp'),
-      cnpj: CNPJ.create('12345678000195'),
-      plan: Plan.essencial(),
-      planStatus: 'ACTIVE',
-      ownerUserId: 'user-1',
-      users: [],
-      whatsAppConfig: whatsAppConfig,
-      instagramConfig: null,
-      aiConfig: null,
-      businessType: null,
-      ownerBirthDate: null,
-      description: null,
-      services: null,
-      address: null,
-      catalogUrl: null,
-      catalogFiles: [],
-      operatingHours: null,
-      promotions: [],
-      apiKey: 'api-key',
-    }, new UniqueEntityID(tenantId));
+    const tenant = Tenant.reconstitute(
+      {
+        companyName: CompanyName.create('Test Corp'),
+        cnpj: CNPJ.create('12345678000195'),
+        plan: Plan.essencial(),
+        planStatus: 'ACTIVE',
+        ownerUserId: 'user-1',
+        users: [],
+        whatsAppConfig: whatsAppConfig,
+        instagramConfig: null,
+        aiConfig: null,
+        businessType: null,
+        ownerBirthDate: null,
+        description: null,
+        services: null,
+        address: null,
+        catalogUrl: null,
+        catalogFiles: [],
+        operatingHours: null,
+        promotions: [],
+        apiKey: 'api-key',
+      },
+      new UniqueEntityID(tenantId),
+    );
 
     tenantRepository.findById.mockResolvedValue(tenant);
 
@@ -87,27 +90,30 @@ describe('GetWhatsAppConnectionUseCase', () => {
 
   it('should return null connection when WhatsApp is not configured', async () => {
     const tenantId = 'tenant-1';
-    const tenant = Tenant.reconstitute({
-      companyName: CompanyName.create('Test Corp'),
-      cnpj: CNPJ.create('12345678000195'),
-      plan: Plan.essencial(),
-      planStatus: 'ACTIVE',
-      ownerUserId: 'user-1',
-      users: [],
-      whatsAppConfig: null,
-      instagramConfig: null,
-      aiConfig: null,
-      businessType: null,
-      ownerBirthDate: null,
-      description: null,
-      services: null,
-      address: null,
-      catalogUrl: null,
-      catalogFiles: [],
-      operatingHours: null,
-      promotions: [],
-      apiKey: 'api-key',
-    }, new UniqueEntityID(tenantId));
+    const tenant = Tenant.reconstitute(
+      {
+        companyName: CompanyName.create('Test Corp'),
+        cnpj: CNPJ.create('12345678000195'),
+        plan: Plan.essencial(),
+        planStatus: 'ACTIVE',
+        ownerUserId: 'user-1',
+        users: [],
+        whatsAppConfig: null,
+        instagramConfig: null,
+        aiConfig: null,
+        businessType: null,
+        ownerBirthDate: null,
+        description: null,
+        services: null,
+        address: null,
+        catalogUrl: null,
+        catalogFiles: [],
+        operatingHours: null,
+        promotions: [],
+        apiKey: 'api-key',
+      },
+      new UniqueEntityID(tenantId),
+    );
 
     tenantRepository.findById.mockResolvedValue(tenant);
     configService.get.mockReturnValue(null);
@@ -121,6 +127,8 @@ describe('GetWhatsAppConnectionUseCase', () => {
   it('should throw NotFoundException if tenant is not found', async () => {
     tenantRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('invalid-id')).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('invalid-id')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });

@@ -14,7 +14,11 @@ export class IdentifyNeedStepHandler {
     private readonly conversationSearchService: CommerceConversationSearchService,
   ) {}
 
-  async handle({ input, session, userMessage }: CommerceConversationHandlerContext) {
+  async handle({
+    input,
+    session,
+    userMessage,
+  }: CommerceConversationHandlerContext) {
     const matches = await this.conversationSearchService.searchCatalog(
       input.tenantId,
       userMessage,

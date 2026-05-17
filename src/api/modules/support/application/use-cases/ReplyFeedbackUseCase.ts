@@ -66,7 +66,10 @@ export class ReplyFeedbackUseCase {
           stage: 'CUSTOMER',
         });
 
-        const whatsappText = this.buildReplyMessage(input.message, feedback.title);
+        const whatsappText = this.buildReplyMessage(
+          input.message,
+          feedback.title,
+        );
 
         const result = await this.messaging.queueSystemMessage({
           tenantId: feedback.tenantId,

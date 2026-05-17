@@ -1,5 +1,10 @@
 import { VoidConversationSaleUseCase } from '../application/use-cases/VoidConversationSaleUseCase';
-import { EntityNotFoundException, ForbiddenException, UnauthorizedException, ValidationErrorException } from '@shared/domain/exceptions/DomainExceptions';
+import {
+  EntityNotFoundException,
+  ForbiddenException,
+  UnauthorizedException,
+  ValidationErrorException,
+} from '@shared/domain/exceptions/DomainExceptions';
 
 describe('VoidConversationSaleUseCase', () => {
   let sut: VoidConversationSaleUseCase;

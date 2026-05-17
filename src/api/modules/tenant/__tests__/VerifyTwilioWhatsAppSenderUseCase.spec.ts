@@ -46,42 +46,45 @@ describe('VerifyTwilioWhatsAppSenderUseCase', () => {
       provider: 'TWILIO',
       whatsappNumber: '5511999998888',
       credentials: { senderSid: 'sid-123', wabaId: 'waba-old' },
-      webhookSecret: null
+      webhookSecret: null,
     });
 
-    const tenant = Tenant.reconstitute({
-      companyName: CompanyName.create('Test'),
-      cnpj: CNPJ.create('12345678000195'),
-      plan: Plan.essencial(),
-      planStatus: 'ACTIVE',
-      ownerUserId: 'user-1',
-      users: [],
-      whatsAppConfig,
-      instagramConfig: null,
-      aiConfig: null,
-      businessType: null,
-      ownerBirthDate: null,
-      description: null,
-      services: null,
-      address: null,
-      catalogUrl: null,
-      catalogFiles: [],
-      operatingHours: null,
-      promotions: [],
-      apiKey: 'api-key',
-    }, new UniqueEntityID(tenantId));
+    const tenant = Tenant.reconstitute(
+      {
+        companyName: CompanyName.create('Test'),
+        cnpj: CNPJ.create('12345678000195'),
+        plan: Plan.essencial(),
+        planStatus: 'ACTIVE',
+        ownerUserId: 'user-1',
+        users: [],
+        whatsAppConfig,
+        instagramConfig: null,
+        aiConfig: null,
+        businessType: null,
+        ownerBirthDate: null,
+        description: null,
+        services: null,
+        address: null,
+        catalogUrl: null,
+        catalogFiles: [],
+        operatingHours: null,
+        promotions: [],
+        apiKey: 'api-key',
+      },
+      new UniqueEntityID(tenantId),
+    );
 
     tenantRepository.findById.mockResolvedValue(tenant);
     twilioManagementAcl.verifySender.mockResolvedValue({
       sid: 'sid-123',
       senderId: 'sender-123',
       status: 'ONLINE',
-      configuration: { wabaId: 'waba-new' }
+      configuration: { wabaId: 'waba-new' },
     } as any);
 
     const result = await useCase.execute({
       tenantId,
-      verificationCode: '123456'
+      verificationCode: '123456',
     });
 
     expect(result.status).toBe('ONLINE');
@@ -93,27 +96,30 @@ describe('VerifyTwilioWhatsAppSenderUseCase', () => {
 
   it('should verify sender in a branch scope when branchId is provided', async () => {
     const tenantId = 'tenant-branch';
-    const tenant = Tenant.reconstitute({
-      companyName: CompanyName.create('Test'),
-      cnpj: CNPJ.create('12345678000195'),
-      plan: Plan.essencial(),
-      planStatus: 'ACTIVE',
-      ownerUserId: 'user-1',
-      users: [],
-      whatsAppConfig: null,
-      instagramConfig: null,
-      aiConfig: null,
-      businessType: null,
-      ownerBirthDate: null,
-      description: null,
-      services: null,
-      address: null,
-      catalogUrl: null,
-      catalogFiles: [],
-      operatingHours: null,
-      promotions: [],
-      apiKey: 'api-key',
-    }, new UniqueEntityID(tenantId));
+    const tenant = Tenant.reconstitute(
+      {
+        companyName: CompanyName.create('Test'),
+        cnpj: CNPJ.create('12345678000195'),
+        plan: Plan.essencial(),
+        planStatus: 'ACTIVE',
+        ownerUserId: 'user-1',
+        users: [],
+        whatsAppConfig: null,
+        instagramConfig: null,
+        aiConfig: null,
+        businessType: null,
+        ownerBirthDate: null,
+        description: null,
+        services: null,
+        address: null,
+        catalogUrl: null,
+        catalogFiles: [],
+        operatingHours: null,
+        promotions: [],
+        apiKey: 'api-key',
+      },
+      new UniqueEntityID(tenantId),
+    );
     const branch = TenantBranch.create({
       tenantId,
       name: 'Filial Norte',

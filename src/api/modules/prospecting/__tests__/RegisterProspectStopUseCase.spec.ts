@@ -1,7 +1,5 @@
 import { TenantId } from '@shared/domain/TenantId';
-import {
-  IProspectExecutionRepository,
-} from '../domain/repositories/IProspectExecutionRepository';
+import { IProspectExecutionRepository } from '../domain/repositories/IProspectExecutionRepository';
 import { ProspectExecution } from '../domain/entities/ProspectExecution';
 import { ProspectChannelVO } from '../domain/value-objects/ProspectChannel';
 import { RegisterProspectStopUseCase } from '../application/use-cases/RegisterProspectStopUseCase';

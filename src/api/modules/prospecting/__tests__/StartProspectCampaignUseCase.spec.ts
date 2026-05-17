@@ -116,7 +116,9 @@ describe('StartProspectCampaignUseCase', () => {
     });
 
     campaignRepository.findById.mockResolvedValue(campaign);
-    executionRepository.findAllByCampaign.mockResolvedValue([existingExecution]);
+    executionRepository.findAllByCampaign.mockResolvedValue([
+      existingExecution,
+    ]);
 
     const result = await useCase.execute({
       tenantId: campaign.tenantId.toString(),

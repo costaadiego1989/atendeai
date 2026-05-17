@@ -81,24 +81,66 @@ describe('Messaging Commerce Cart Flow (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [CommerceController],
       providers: [
-        { provide: ConfigureShippingPolicyUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: ConfigureShippingPolicyUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: GetShippingPolicyUseCase, useValue: { execute: jest.fn() } },
-        { provide: SearchCommerceCatalogUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: SearchCommerceCatalogUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: StartShoppingSessionUseCase, useValue: startSessionUseCase },
-        { provide: GetShoppingSessionUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: GetShoppingSessionUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: AddItemToShoppingSessionUseCase, useValue: addItemUseCase },
-        { provide: ApplyCouponToShoppingSessionUseCase, useValue: applyCouponUseCase },
-        { provide: UpdateShoppingSessionFulfillmentUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: ApplyCouponToShoppingSessionUseCase,
+          useValue: applyCouponUseCase,
+        },
+        {
+          provide: UpdateShoppingSessionFulfillmentUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: CheckoutShoppingSessionUseCase, useValue: checkoutUseCase },
-        { provide: ListCommerceOrdersUseCase, useValue: { execute: jest.fn() } },
-        { provide: GetCommerceOrderDetailsUseCase, useValue: { execute: jest.fn() } },
-        { provide: UpdateCommerceOrderStatusUseCase, useValue: { execute: jest.fn() } },
-        { provide: UpdateCommerceAbandonmentStateUseCase, useValue: { execute: jest.fn() } },
-        { provide: TriggerCommerceAbandonmentTouchUseCase, useValue: { execute: jest.fn() } },
-        { provide: GetAbandonmentConfigUseCase, useValue: { execute: jest.fn() } },
-        { provide: UpdateAbandonmentConfigUseCase, useValue: { execute: jest.fn() } },
-        { provide: GenerateAbandonmentMessageUseCase, useValue: { execute: jest.fn() } },
-        { provide: CommerceOrdersReportCsvBuilder, useValue: { build: jest.fn() } },
+        {
+          provide: ListCommerceOrdersUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GetCommerceOrderDetailsUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdateCommerceOrderStatusUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdateCommerceAbandonmentStateUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: TriggerCommerceAbandonmentTouchUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GetAbandonmentConfigUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdateAbandonmentConfigUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GenerateAbandonmentMessageUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: CommerceOrdersReportCsvBuilder,
+          useValue: { build: jest.fn() },
+        },
       ],
     })
       .overrideGuard(JwtCookieGuard)

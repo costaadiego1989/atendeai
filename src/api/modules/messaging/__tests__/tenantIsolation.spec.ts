@@ -157,7 +157,11 @@ describe('Messaging — Tenant Isolation', () => {
     });
 
     it('setAssignedUser requires tenantId parameter', async () => {
-      await conversationRepository.setAssignedUser(TENANT_A, 'conv-1', 'user-1');
+      await conversationRepository.setAssignedUser(
+        TENANT_A,
+        'conv-1',
+        'user-1',
+      );
 
       expect(conversationRepository.setAssignedUser).toHaveBeenCalledWith(
         TENANT_A,

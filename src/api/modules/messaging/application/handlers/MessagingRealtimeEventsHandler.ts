@@ -27,7 +27,9 @@ export class MessagingRealtimeEventsHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'messaging.message-received',
       async (event) => {
-        await this.handleMessageReceived(event as MessageReceivedIntegrationEvent);
+        await this.handleMessageReceived(
+          event as MessageReceivedIntegrationEvent,
+        );
       },
       { consumerName: 'messaging-realtime-message-received' },
     );

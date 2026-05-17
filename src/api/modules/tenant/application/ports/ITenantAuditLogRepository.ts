@@ -33,4 +33,6 @@ export interface ITenantAuditLogRepository {
   listRecent(tenantId: string, limit?: number): Promise<TenantAuditLogEntry[]>;
 }
 
-export const TENANT_AUDIT_LOG_REPOSITORY = Symbol('TENANT_AUDIT_LOG_REPOSITORY');
+export const TENANT_AUDIT_LOG_REPOSITORY = Symbol(
+  'TENANT_AUDIT_LOG_REPOSITORY',
+);

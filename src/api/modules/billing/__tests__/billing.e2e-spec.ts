@@ -54,26 +54,26 @@ describe('BillingModule (e2e)', () => {
     if (tenantId) {
       await prisma.usageRecord
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
     if (paidTenantId) {
       await prisma.usageRecord
         .deleteMany({ where: { tenantId: paidTenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId: paidTenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.user
         .deleteMany({ where: { tenantId: paidTenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.tenant
         .delete({ where: { id: paidTenantId } })
-        .catch(() => { });
+        .catch(() => {});
     }
     if (app) {
       await app.close();

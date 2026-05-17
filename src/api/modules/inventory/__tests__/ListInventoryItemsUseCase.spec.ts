@@ -1,11 +1,16 @@
 import { ListInventoryItemsUseCase } from '../application/use-cases/ListInventoryItemsUseCase';
-import { IInventoryRepository, InventoryItemRecord } from '../domain/ports/IInventoryRepository';
+import {
+  IInventoryRepository,
+  InventoryItemRecord,
+} from '../domain/ports/IInventoryRepository';
 
 describe('ListInventoryItemsUseCase', () => {
   let useCase: ListInventoryItemsUseCase;
   let inventoryRepository: jest.Mocked<IInventoryRepository>;
 
-  const makeItem = (overrides: Partial<InventoryItemRecord> = {}): InventoryItemRecord => ({
+  const makeItem = (
+    overrides: Partial<InventoryItemRecord> = {},
+  ): InventoryItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     catalogItemId: null,

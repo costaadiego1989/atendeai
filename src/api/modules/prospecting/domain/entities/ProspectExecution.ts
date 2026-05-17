@@ -121,4 +121,26 @@ export class ProspectExecution extends AggregateRoot<ProspectExecutionProps> {
     this.props.stopReason = reason;
     this.updatedAt = new Date();
   }
+
+  public markAsOptedOut(): void {
+    if (!['PENDING', 'CONTACTED'].includes(this.props.status.value)) {
+      return;
+    }
+
+    this.props.status = ProspectExecutionStatusVO.create('STOPPED');
+    this.props.stopReason = ProspectStopReasonVO.create('OPT_OUT');
+    this.updatedAt = new Date();
+  }
+
+  public markAsFailedDispatch(reason: ProspectStopReasonVO): void {
+    if (this.props.status.value !== 'PENDING') {
+      throw new ValidationErrorException(
+        'Only pending executions can be marked as dispatch-failed',
+      );
+    }
+
+    this.props.status = ProspectExecutionStatusVO.create('STOPPED');
+    this.props.stopReason = reason;
+    this.updatedAt = new Date();
+  }
 }

@@ -60,7 +60,8 @@ export class TenantTwilioAccountService {
       return existing;
     }
 
-    const friendlyName = `AtendeAi ${input.companyName} ${input.tenantId}`.slice(0, 64);
+    const friendlyName =
+      `AtendeAi ${input.companyName} ${input.tenantId}`.slice(0, 64);
     const account = await this.twilioManagementAcl.createSubaccount(
       { friendlyName },
       { tenantId: input.tenantId },
@@ -93,7 +94,9 @@ export class TenantTwilioAccountService {
         updated_at = NOW()
     `);
 
-    this.logger.log(`Twilio subaccount provisioned for tenant ${input.tenantId}`);
+    this.logger.log(
+      `Twilio subaccount provisioned for tenant ${input.tenantId}`,
+    );
 
     return {
       tenantId: input.tenantId,

@@ -8,7 +8,9 @@ describe('GenerateCatalogReportUseCase', () => {
   let repository: jest.Mocked<Pick<ICatalogRepository, 'listItems'>>;
   let sut: GenerateCatalogReportUseCase;
 
-  const itemRecord = (over?: Partial<CatalogItemRecord>): CatalogItemRecord => ({
+  const itemRecord = (
+    over?: Partial<CatalogItemRecord>,
+  ): CatalogItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     categoryId: 'cat-1',
@@ -42,9 +44,24 @@ describe('GenerateCatalogReportUseCase', () => {
 
   it('generates report with correct summary', async () => {
     const items = [
-      itemRecord({ id: 'item-1', type: 'PRODUCT', active: true, basePrice: '10.00' }),
-      itemRecord({ id: 'item-2', type: 'SERVICE', active: true, basePrice: '50.00' }),
-      itemRecord({ id: 'item-3', type: 'PRODUCT', active: false, basePrice: '20.00' }),
+      itemRecord({
+        id: 'item-1',
+        type: 'PRODUCT',
+        active: true,
+        basePrice: '10.00',
+      }),
+      itemRecord({
+        id: 'item-2',
+        type: 'SERVICE',
+        active: true,
+        basePrice: '50.00',
+      }),
+      itemRecord({
+        id: 'item-3',
+        type: 'PRODUCT',
+        active: false,
+        basePrice: '20.00',
+      }),
     ];
     repository.listItems.mockResolvedValue(items);
 

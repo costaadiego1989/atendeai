@@ -101,11 +101,13 @@ describe('CreatePaymentLinkUseCase', () => {
       id: 'link-123',
       url: 'https://pay.example/link-123',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
     salesRepository.incrementMetric.mockResolvedValue();
 
     const result = await useCase.execute({
@@ -167,11 +169,13 @@ describe('CreatePaymentLinkUseCase', () => {
       id: 'link-undefined',
       url: 'https://pay.example/link-undefined',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
     salesRepository.incrementMetric.mockResolvedValue();
 
     await useCase.execute({
@@ -196,11 +200,13 @@ describe('CreatePaymentLinkUseCase', () => {
       id: 'link-expiration',
       url: 'https://pay.example/link-expiration',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
     salesRepository.incrementMetric.mockResolvedValue();
 
     const RealDate = Date;
@@ -246,11 +252,13 @@ describe('CreatePaymentLinkUseCase', () => {
       id: 'link-branch',
       url: 'https://pay.example/link-branch',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
     salesRepository.incrementMetric.mockResolvedValue();
 
     await useCase.execute({
@@ -274,11 +282,13 @@ describe('CreatePaymentLinkUseCase', () => {
       id: 'link-recurring',
       url: 'https://pay.example/link-recurring',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
     salesRepository.incrementMetric.mockResolvedValue();
 
     const result = await useCase.execute({

@@ -4,7 +4,11 @@ import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExcepti
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 
 export type SchedulingAsyncJobType = 'EXPORT_SCHEDULING_REPORT_CSV';
-export type SchedulingAsyncJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type SchedulingAsyncJobStatus =
+  | 'QUEUED'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED';
 
 interface SchedulingAsyncJobRow {
   id: string;
@@ -66,7 +70,9 @@ export class SchedulingAsyncJobsService {
     payload: Record<string, unknown>;
     totalItems?: number;
   }): Promise<SchedulingAsyncJobView> {
-    const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      SchedulingAsyncJobRow[]
+    >(Prisma.sql`
       INSERT INTO scheduling_schema.scheduling_async_jobs (
         tenant_id,
         branch_id,
@@ -108,7 +114,10 @@ export class SchedulingAsyncJobsService {
     `);
   }
 
-  async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }): Promise<void> {
+  async markProcessing(
+    jobId: string,
+    input?: { progress?: number; totalItems?: number },
+  ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_async_jobs
       SET status = 'PROCESSING',
@@ -163,8 +172,13 @@ export class SchedulingAsyncJobsService {
     `);
   }
 
-  async listJobs(tenantId: string, limit = 15): Promise<SchedulingAsyncJobView[]> {
-    const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
+  async listJobs(
+    tenantId: string,
+    limit = 15,
+  ): Promise<SchedulingAsyncJobView[]> {
+    const rows = await this.prisma.$queryRaw<
+      SchedulingAsyncJobRow[]
+    >(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_async_jobs
       WHERE tenant_id = ${tenantId}::uuid
@@ -175,8 +189,13 @@ export class SchedulingAsyncJobsService {
     return rows.map((row) => this.toView(row));
   }
 
-  async getJob(tenantId: string, jobId: string): Promise<SchedulingAsyncJobView> {
-    const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
+  async getJob(
+    tenantId: string,
+    jobId: string,
+  ): Promise<SchedulingAsyncJobView> {
+    const rows = await this.prisma.$queryRaw<
+      SchedulingAsyncJobRow[]
+    >(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_async_jobs
       WHERE tenant_id = ${tenantId}::uuid
@@ -200,7 +219,9 @@ export class SchedulingAsyncJobsService {
     fileContent?: string | null;
     fileUrl?: string | null;
   }> {
-    const rows = await this.prisma.$queryRaw<SchedulingAsyncJobRow[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      SchedulingAsyncJobRow[]
+    >(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_async_jobs
       WHERE tenant_id = ${tenantId}::uuid

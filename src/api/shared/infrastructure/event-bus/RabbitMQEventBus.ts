@@ -108,9 +108,11 @@ export class RabbitMQEventBus implements IEventBus, OnModuleDestroy {
         version: event.version ?? 1,
         aggregateId:
           event.aggregateId ?? this.extractString(event.payload, 'aggregateId'),
-        tenantId: event.tenantId ?? this.extractString(event.payload, 'tenantId'),
+        tenantId:
+          event.tenantId ?? this.extractString(event.payload, 'tenantId'),
         correlationId:
-          event.correlationId ?? this.extractString(event.payload, 'correlationId'),
+          event.correlationId ??
+          this.extractString(event.payload, 'correlationId'),
         causationId:
           event.causationId ?? this.extractString(event.payload, 'causationId'),
         occurredAt: event.timestamp,
@@ -156,7 +158,10 @@ export class RabbitMQEventBus implements IEventBus, OnModuleDestroy {
     const connection = await this.getConnection();
     const channel = await connection.createChannel();
     const exchange = await this.assertExchange(channel);
-    const consumerQueue = this.buildQueueName(routingKey, options?.consumerName);
+    const consumerQueue = this.buildQueueName(
+      routingKey,
+      options?.consumerName,
+    );
     const deadLetterQueue = `${consumerQueue}.dlq`;
 
     await channel.assertExchange(this.getDeadLetterExchange(), 'topic', {
@@ -268,15 +273,14 @@ export class RabbitMQEventBus implements IEventBus, OnModuleDestroy {
     return exchange;
   }
 
-  private buildQueueName(
-    routingKey: string,
-    consumerName?: string,
-  ): string {
+  private buildQueueName(routingKey: string, consumerName?: string): string {
     const prefix = this.configService.get<string>(
       'RABBITMQ_QUEUE_PREFIX',
       'atendeai',
     );
-    const safeRoutingKey = routingKey.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase();
+    const safeRoutingKey = routingKey
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .toLowerCase();
     const safeConsumerName = (consumerName ?? routingKey)
       .replace(/[^a-zA-Z0-9]+/g, '-')
       .toLowerCase();

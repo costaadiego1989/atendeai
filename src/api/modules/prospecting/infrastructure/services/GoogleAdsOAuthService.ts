@@ -110,7 +110,9 @@ export class GoogleAdsOAuthService {
     return token;
   }
 
-  async listAccessibleAccounts(refreshToken: string): Promise<GoogleAdsAccessibleAccount[]> {
+  async listAccessibleAccounts(
+    refreshToken: string,
+  ): Promise<GoogleAdsAccessibleAccount[]> {
     const accessToken = await this.getAccessToken(refreshToken);
     const developerToken = this.getDeveloperToken();
 
@@ -154,8 +156,7 @@ export class GoogleAdsOAuthService {
         const firstRow = details.data?.[0]?.results?.[0]?.customer;
         accounts.push({
           customerId,
-          descriptiveName:
-            firstRow?.descriptiveName || `Conta ${customerId}`,
+          descriptiveName: firstRow?.descriptiveName || `Conta ${customerId}`,
           isManager: Boolean(firstRow?.manager),
         });
       } catch {
@@ -196,6 +197,8 @@ export class GoogleAdsOAuthService {
   }
 
   getRedirectUri(): string {
-    return this.configService.get<string>('GOOGLE_ADS_OAUTH_REDIRECT_URI') || '';
+    return (
+      this.configService.get<string>('GOOGLE_ADS_OAUTH_REDIRECT_URI') || ''
+    );
   }
 }

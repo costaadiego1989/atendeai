@@ -129,7 +129,10 @@ export class Dialog360Adapter implements IMessagingGateway {
     }
   }
 
-  private buildPayload(to: string, content: MessagingContent): Record<string, unknown> {
+  private buildPayload(
+    to: string,
+    content: MessagingContent,
+  ): Record<string, unknown> {
     if (content.type.toLowerCase() === 'image' && content.url) {
       return {
         messaging_product: 'whatsapp',

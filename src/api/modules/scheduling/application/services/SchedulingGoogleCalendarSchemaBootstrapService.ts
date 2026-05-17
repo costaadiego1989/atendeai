@@ -6,7 +6,9 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
  */
 @Injectable()
 export class SchedulingGoogleCalendarSchemaBootstrapService implements OnModuleInit {
-  private readonly logger = new Logger(SchedulingGoogleCalendarSchemaBootstrapService.name);
+  private readonly logger = new Logger(
+    SchedulingGoogleCalendarSchemaBootstrapService.name,
+  );
 
   async onModuleInit() {
     this.logger.log('Schema bootstrap skipped — managed by Prisma migrations');

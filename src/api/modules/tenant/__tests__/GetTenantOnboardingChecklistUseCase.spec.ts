@@ -15,7 +15,9 @@ import { AIConfig } from '../domain/entities/AIConfig';
 describe('GetTenantOnboardingChecklistUseCase', () => {
   let useCase: GetTenantOnboardingChecklistUseCase;
   let tenantRepository: jest.Mocked<ITenantRepository>;
-  let pdfRepository: jest.Mocked<Pick<TenantPDFResumeRepository, 'listByTenant'>>;
+  let pdfRepository: jest.Mocked<
+    Pick<TenantPDFResumeRepository, 'listByTenant'>
+  >;
 
   beforeEach(() => {
     tenantRepository = {
@@ -106,13 +108,15 @@ describe('GetTenantOnboardingChecklistUseCase', () => {
 
     const result = await useCase.execute(tenant.id.toValue());
 
-    expect(result.items.find((i) => i.key === 'business_profile')?.completed).toBe(
-      true,
-    );
+    expect(
+      result.items.find((i) => i.key === 'business_profile')?.completed,
+    ).toBe(true);
     expect(
       result.items.find((i) => i.key === 'catalog_or_documents')?.completed,
     ).toBe(true);
-    expect(result.items.find((i) => i.key === 'ai_configured')?.completed).toBe(true);
+    expect(result.items.find((i) => i.key === 'ai_configured')?.completed).toBe(
+      true,
+    );
     expect(result.completionRatio).toBe(0.6);
   });
 });

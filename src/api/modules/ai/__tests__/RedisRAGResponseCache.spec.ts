@@ -23,14 +23,14 @@ describe('RedisRAGResponseCache', () => {
     it('should return null when no entries exist', async () => {
       mockRedis.lrange.mockResolvedValue([]);
 
-      const result = await cache.findSimilarResponse(
-        tenantId,
-        [1, 0, 0],
-        0.95,
-      );
+      const result = await cache.findSimilarResponse(tenantId, [1, 0, 0], 0.95);
 
       expect(result).toBeNull();
-      expect(mockRedis.lrange).toHaveBeenCalledWith('rag_cache:tenant-123', 0, -1);
+      expect(mockRedis.lrange).toHaveBeenCalledWith(
+        'rag_cache:tenant-123',
+        0,
+        -1,
+      );
     });
 
     it('should return cached response when similarity exceeds threshold', async () => {
@@ -120,11 +120,7 @@ describe('RedisRAGResponseCache', () => {
     it('should return null on Redis error without throwing', async () => {
       mockRedis.lrange.mockRejectedValue(new Error('Redis connection lost'));
 
-      const result = await cache.findSimilarResponse(
-        tenantId,
-        [1, 0, 0],
-        0.95,
-      );
+      const result = await cache.findSimilarResponse(tenantId, [1, 0, 0], 0.95);
 
       expect(result).toBeNull();
     });
@@ -152,7 +148,10 @@ describe('RedisRAGResponseCache', () => {
     it('should set TTL on the key', async () => {
       await cache.cacheResponse(tenantId, [1, 0, 0], 'response');
 
-      expect(mockRedis.expire).toHaveBeenCalledWith('rag_cache:tenant-123', 3600);
+      expect(mockRedis.expire).toHaveBeenCalledWith(
+        'rag_cache:tenant-123',
+        3600,
+      );
     });
 
     it('should enforce max entries by removing oldest', async () => {

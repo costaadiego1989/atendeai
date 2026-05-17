@@ -9,7 +9,11 @@ export interface MarkConversationReadOutput {
   success: true;
 }
 
-export interface IMarkConversationReadUseCase
-  extends IUseCase<MarkConversationReadInput, MarkConversationReadOutput> {}
+export interface IMarkConversationReadUseCase extends IUseCase<
+  MarkConversationReadInput,
+  MarkConversationReadOutput
+> {}
 
-export const IMarkConversationReadUseCase = Symbol('IMarkConversationReadUseCase');
+export const IMarkConversationReadUseCase = Symbol(
+  'IMarkConversationReadUseCase',
+);

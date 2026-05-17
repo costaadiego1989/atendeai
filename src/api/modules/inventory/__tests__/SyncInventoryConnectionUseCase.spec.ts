@@ -15,7 +15,9 @@ describe('SyncInventoryConnectionUseCase', () => {
   let useCase: SyncInventoryConnectionUseCase;
   let inventoryRepository: jest.Mocked<IInventoryRepository>;
   let providerFactory: jest.Mocked<IInventoryProviderFactory>;
-  let syncInventoryItemUseCase: jest.Mocked<Pick<SyncInventoryItemUseCase, 'execute'>>;
+  let syncInventoryItemUseCase: jest.Mocked<
+    Pick<SyncInventoryItemUseCase, 'execute'>
+  >;
 
   const baseConnection = (): InventoryConnectionRecord => ({
     id: 'conn-1',

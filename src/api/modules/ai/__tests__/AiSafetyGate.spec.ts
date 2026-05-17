@@ -216,7 +216,9 @@ describe('AiSafetyGate', () => {
 
       const gate = AiSafetyGate.fromEnvLike(config);
 
-      expect(gate.evaluateUserMessage('minha senha')).toEqual({ blocked: false });
+      expect(gate.evaluateUserMessage('minha senha')).toEqual({
+        blocked: false,
+      });
     });
 
     it('should handle undefined config values gracefully', () => {
@@ -226,7 +228,9 @@ describe('AiSafetyGate', () => {
 
       const gate = AiSafetyGate.fromEnvLike(config);
 
-      expect(gate.evaluateUserMessage('qualquer coisa')).toEqual({ blocked: false });
+      expect(gate.evaluateUserMessage('qualquer coisa')).toEqual({
+        blocked: false,
+      });
       expect(gate.appendPlatformLimits('base')).toBe('base');
     });
 
@@ -264,7 +268,9 @@ describe('AiSafetyGate', () => {
 
       const gate = AiSafetyGate.fromEnvLike(config);
 
-      expect(gate.evaluateUserMessage('texto normal')).toEqual({ blocked: false });
+      expect(gate.evaluateUserMessage('texto normal')).toEqual({
+        blocked: false,
+      });
       expect(gate.evaluateUserMessage('minha senha')).toEqual({
         blocked: true,
         pattern: 'senha',

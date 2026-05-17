@@ -108,4 +108,4 @@ import { RedeemCouponUseCase } from './application/use-cases/RedeemCouponUseCase
     CreateSplitPaymentChargeUseCase,
   ],
 })
-export class SalesModule { }
+export class SalesModule {}

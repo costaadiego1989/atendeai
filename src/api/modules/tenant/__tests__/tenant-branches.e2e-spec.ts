@@ -23,7 +23,9 @@ describe('Tenant Branches (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     app.useGlobalFilters(new GlobalExceptionFilter());
     app.useGlobalInterceptors(new SuccessResponseInterceptor());
     app.setGlobalPrefix('api/v1');
@@ -46,20 +48,26 @@ describe('Tenant Branches (e2e)', () => {
       });
 
     if (createTenantRes.status !== 201) {
-      console.error('Tenant setup failed:', createTenantRes.status, JSON.stringify(createTenantRes.body));
+      console.error(
+        'Tenant setup failed:',
+        createTenantRes.status,
+        JSON.stringify(createTenantRes.body),
+      );
       throw new Error(`Tenant creation failed`);
     }
 
     const loginRes = await request(app.getHttpServer())
       .post('/api/v1/auth/login')
       .send({ email: testEmail, password: 'password123' });
-    
+
     if (loginRes.status !== 200) {
       throw new Error(`Login failed: ${JSON.stringify(loginRes.body)}`);
     }
 
     authCookie = loginRes.get('Set-Cookie') || [];
-    const tenant = await prisma.tenant.findUnique({ where: { cnpj: testCnpj } });
+    const tenant = await prisma.tenant.findUnique({
+      where: { cnpj: testCnpj },
+    });
     tenantId = tenant!.id;
   });
 
@@ -67,8 +75,12 @@ describe('Tenant Branches (e2e)', () => {
     const tenant = await prisma.tenant.findUnique({ where: { cnpj } });
     if (tenant) {
       const tid = tenant.id;
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${tid}::uuid`);
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM tenant_schema.tenant_branches WHERE tenant_id = ${tid}::uuid`);
+      await prisma.$executeRaw(
+        Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${tid}::uuid`,
+      );
+      await prisma.$executeRaw(
+        Prisma.sql`DELETE FROM tenant_schema.tenant_branches WHERE tenant_id = ${tid}::uuid`,
+      );
       await prisma.whatsAppConfig.deleteMany({ where: { tenantId: tid } });
       await prisma.aIConfig.deleteMany({ where: { tenantId: tid } });
       await prisma.tenantAgentRule.deleteMany({ where: { tenantId: tid } });
@@ -94,18 +106,20 @@ describe('Tenant Branches (e2e)', () => {
         name: 'Sucursal Centro',
         cnpj: '00.000.000/0001-91',
         phone: '11999990000',
-        active: true
+        active: true,
       });
 
     expect(createRes.status).toBe(201);
-    
+
     // Handle double-wrapping
     const data = createRes.body.data?.data || createRes.body.data;
     const branchId = data?.id;
     expect(branchId).toBeDefined();
 
     // Verify via DB (Safe Raw SQL)
-    const branches = await prisma.$queryRaw<any[]>(Prisma.sql`SELECT * FROM tenant_schema.tenant_branches WHERE id = ${branchId}::uuid`);
+    const branches = await prisma.$queryRaw<any[]>(
+      Prisma.sql`SELECT * FROM tenant_schema.tenant_branches WHERE id = ${branchId}::uuid`,
+    );
     expect(branches.length).toBe(1);
     expect(branches[0].name).toBe('Sucursal Centro');
 
@@ -115,11 +129,13 @@ describe('Tenant Branches (e2e)', () => {
       .set('Cookie', authCookie)
       .send({
         name: 'Sucursal Centro v2',
-        active: false
+        active: false,
       });
 
     expect(updateRes.status).toBe(200);
-    const updatedBranches = await prisma.$queryRaw<any[]>(Prisma.sql`SELECT * FROM tenant_schema.tenant_branches WHERE id = ${branchId}::uuid`);
+    const updatedBranches = await prisma.$queryRaw<any[]>(
+      Prisma.sql`SELECT * FROM tenant_schema.tenant_branches WHERE id = ${branchId}::uuid`,
+    );
     expect(updatedBranches[0].name).toBe('Sucursal Centro v2');
     expect(updatedBranches[0].active).toBe(false);
 
@@ -129,51 +145,61 @@ describe('Tenant Branches (e2e)', () => {
       .set('Cookie', authCookie);
 
     expect(deleteRes.status).toBe(200);
-    const deletedBranches = await prisma.$queryRaw<any[]>(Prisma.sql`SELECT * FROM tenant_schema.tenant_branches WHERE id = ${branchId}::uuid`);
+    const deletedBranches = await prisma.$queryRaw<any[]>(
+      Prisma.sql`SELECT * FROM tenant_schema.tenant_branches WHERE id = ${branchId}::uuid`,
+    );
     expect(deletedBranches.length).toBe(0);
   });
 
   it('should reject branch creation for unauthorized roles (MEMBER)', async () => {
-      // Create a MEMBER user
-      const memberEmail = 'member@test.com';
-      await prisma.user.deleteMany({ where: { email: memberEmail } });
-      
-      const userCreateRes = await request(app.getHttpServer())
-        .post(`/api/v1/tenants/${tenantId}/users`)
-        .set('Cookie', authCookie)
-        .send({
-            name: 'Member User',
-            email: memberEmail,
-            phone: '11999990000',
-            role: 'AGENT'
-        });
-      
-      expect(userCreateRes.status).toBe(201);
-      const memberId = (userCreateRes.body.data?.id || userCreateRes.body.data?.data?.id);
+    // Create a MEMBER user
+    const memberEmail = 'member@test.com';
+    await prisma.user.deleteMany({ where: { email: memberEmail } });
 
-      // Manually set password to 'password123' to bypass temporary password
-      const passwordHash = '$2b$10$EP779.6y/U5vSnt16mD/Uu7Wn8S0xK.5sS8YhG.00hX5fS/0S0S0S'; // password123 hash
-      await prisma.$executeRaw(Prisma.sql`UPDATE tenant_schema.users SET password_hash = ${passwordHash} WHERE id = ${memberId}::uuid`);
+    const userCreateRes = await request(app.getHttpServer())
+      .post(`/api/v1/tenants/${tenantId}/users`)
+      .set('Cookie', authCookie)
+      .send({
+        name: 'Member User',
+        email: memberEmail,
+        phone: '11999990000',
+        role: 'AGENT',
+      });
 
-      const loginMemberRes = await request(app.getHttpServer())
-        .post('/api/v1/auth/login')
-        .send({ email: memberEmail, password: 'password123' });
-      
-      if (loginMemberRes.status !== 200) {
-          console.error('Member login failed:', loginMemberRes.status, JSON.stringify(loginMemberRes.body));
-      }
-      expect(loginMemberRes.status).toBe(200);
+    expect(userCreateRes.status).toBe(201);
+    const memberId =
+      userCreateRes.body.data?.id || userCreateRes.body.data?.data?.id;
 
-      const memberCookie = loginMemberRes.get('Set-Cookie') || [];
+    // Manually set password to 'password123' to bypass temporary password
+    const passwordHash =
+      '$2b$10$EP779.6y/U5vSnt16mD/Uu7Wn8S0xK.5sS8YhG.00hX5fS/0S0S0S'; // password123 hash
+    await prisma.$executeRaw(
+      Prisma.sql`UPDATE tenant_schema.users SET password_hash = ${passwordHash} WHERE id = ${memberId}::uuid`,
+    );
 
-      const response = await request(app.getHttpServer())
-        .post(`/api/v1/tenants/${tenantId}/branches`)
-        .set('Cookie', memberCookie)
-        .send({
-          name: 'Unauthorized Branch',
-          cnpj: '00.000.000/0001-91'
-        });
+    const loginMemberRes = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({ email: memberEmail, password: 'password123' });
 
-      expect(response.status).toBe(403);
+    if (loginMemberRes.status !== 200) {
+      console.error(
+        'Member login failed:',
+        loginMemberRes.status,
+        JSON.stringify(loginMemberRes.body),
+      );
+    }
+    expect(loginMemberRes.status).toBe(200);
+
+    const memberCookie = loginMemberRes.get('Set-Cookie') || [];
+
+    const response = await request(app.getHttpServer())
+      .post(`/api/v1/tenants/${tenantId}/branches`)
+      .set('Cookie', memberCookie)
+      .send({
+        name: 'Unauthorized Branch',
+        cnpj: '00.000.000/0001-91',
+      });
+
+    expect(response.status).toBe(403);
   });
 });

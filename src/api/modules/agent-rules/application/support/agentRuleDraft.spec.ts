@@ -28,7 +28,9 @@ describe('agentRuleDraft', () => {
 
     it('recusa texto acima do limite maximo', () => {
       const long = 'a'.repeat(MAX_AGENT_RULE_PROMPT_LENGTH + 1);
-      expect(() => normalizeAgentPrompt(long)).toThrow(ValidationErrorException);
+      expect(() => normalizeAgentPrompt(long)).toThrow(
+        ValidationErrorException,
+      );
     });
   });
 });

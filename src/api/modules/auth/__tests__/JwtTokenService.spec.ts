@@ -94,19 +94,23 @@ describe('JwtTokenService', () => {
   });
 
   it('should return the numeric refresh TTL directly', () => {
-    configService.get.mockImplementation((key: string, defaultValue?: unknown) => {
-      if (key === 'JWT_REFRESH_EXPIRATION') return 3600;
-      return defaultValue;
-    });
+    configService.get.mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'JWT_REFRESH_EXPIRATION') return 3600;
+        return defaultValue;
+      },
+    );
 
     expect(service.getRefreshTokenTtlSeconds()).toBe(3600);
   });
 
   it('should fallback to 7 days when the refresh TTL is invalid', () => {
-    configService.get.mockImplementation((key: string, defaultValue?: unknown) => {
-      if (key === 'JWT_REFRESH_EXPIRATION') return 'invalid';
-      return defaultValue;
-    });
+    configService.get.mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'JWT_REFRESH_EXPIRATION') return 'invalid';
+        return defaultValue;
+      },
+    );
 
     expect(service.getRefreshTokenTtlSeconds()).toBe(7 * 24 * 60 * 60);
   });

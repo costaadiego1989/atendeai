@@ -11,7 +11,10 @@ export class DeleteSchedulingRecurrenceUseCase {
     private readonly recurringReservationRepository: ISchedulingRecurringReservationRepository,
   ) {}
 
-  async execute(input: { tenantId: string; recurrenceId: string }): Promise<void> {
+  async execute(input: {
+    tenantId: string;
+    recurrenceId: string;
+  }): Promise<void> {
     await this.recurringReservationRepository.delete(input);
   }
 }

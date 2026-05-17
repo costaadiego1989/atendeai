@@ -24,20 +24,48 @@ export class SocialAccount extends AggregateRoot<SocialAccountProps> {
     super(props, id);
   }
 
-  get tenantId(): string { return this.props.tenantId; }
-  get platform(): string { return this.props.platform; }
-  get externalAccountId(): string { return this.props.externalAccountId; }
-  get username(): string | null { return this.props.username; }
-  get displayName(): string | null { return this.props.displayName; }
-  get profilePictureUrl(): string | null { return this.props.profilePictureUrl; }
-  get accessToken(): string { return this.props.accessToken; }
-  get refreshToken(): string | null { return this.props.refreshToken; }
-  get tokenExpiresAt(): Date | null { return this.props.tokenExpiresAt; }
-  get pageId(): string | null { return this.props.pageId; }
-  get webhookSecret(): string | null { return this.props.webhookSecret; }
-  get status(): SocialAccountStatus { return this.props.status; }
-  get connectedAt(): Date { return this.props.connectedAt; }
-  get isActive(): boolean { return this.props.status === 'ACTIVE'; }
+  get tenantId(): string {
+    return this.props.tenantId;
+  }
+  get platform(): string {
+    return this.props.platform;
+  }
+  get externalAccountId(): string {
+    return this.props.externalAccountId;
+  }
+  get username(): string | null {
+    return this.props.username;
+  }
+  get displayName(): string | null {
+    return this.props.displayName;
+  }
+  get profilePictureUrl(): string | null {
+    return this.props.profilePictureUrl;
+  }
+  get accessToken(): string {
+    return this.props.accessToken;
+  }
+  get refreshToken(): string | null {
+    return this.props.refreshToken;
+  }
+  get tokenExpiresAt(): Date | null {
+    return this.props.tokenExpiresAt;
+  }
+  get pageId(): string | null {
+    return this.props.pageId;
+  }
+  get webhookSecret(): string | null {
+    return this.props.webhookSecret;
+  }
+  get status(): SocialAccountStatus {
+    return this.props.status;
+  }
+  get connectedAt(): Date {
+    return this.props.connectedAt;
+  }
+  get isActive(): boolean {
+    return this.props.status === 'ACTIVE';
+  }
   get isTokenExpired(): boolean {
     if (!this.props.tokenExpiresAt) return false;
     return this.props.tokenExpiresAt < new Date();
@@ -53,7 +81,10 @@ export class SocialAccount extends AggregateRoot<SocialAccountProps> {
     );
   }
 
-  static reconstitute(props: SocialAccountProps, id: UniqueEntityID): SocialAccount {
+  static reconstitute(
+    props: SocialAccountProps,
+    id: UniqueEntityID,
+  ): SocialAccount {
     return new SocialAccount(props, id);
   }
 

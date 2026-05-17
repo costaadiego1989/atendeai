@@ -12,7 +12,10 @@ export class ListSupportFeedbacksUseCase {
     private readonly repository: ISupportFeedbackRepository,
   ) {}
 
-  async execute(input: { tenantId: string; branchId?: string }): Promise<SupportFeedback[]> {
+  async execute(input: {
+    tenantId: string;
+    branchId?: string;
+  }): Promise<SupportFeedback[]> {
     return this.repository.findAllByTenant(input.tenantId, input.branchId);
   }
 }

@@ -19,8 +19,10 @@ export interface PauseProspectCampaignOutput {
   createdAt: Date;
 }
 
-export interface IPauseProspectCampaignUseCase
-  extends IUseCase<PauseProspectCampaignInput, PauseProspectCampaignOutput> {}
+export interface IPauseProspectCampaignUseCase extends IUseCase<
+  PauseProspectCampaignInput,
+  PauseProspectCampaignOutput
+> {}
 
 export const IPauseProspectCampaignUseCase = Symbol(
   'IPauseProspectCampaignUseCase',

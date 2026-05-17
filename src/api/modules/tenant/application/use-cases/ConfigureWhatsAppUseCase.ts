@@ -36,10 +36,14 @@ export class ConfigureWhatsAppUseCase implements IConfigureWhatsAppUseCase {
     const currentWhatsappNumber = tenant.whatsAppConfig?.whatsappNumber ?? '';
     const isAddingWhatsapp =
       !!input.whatsappNumber?.trim() &&
-      input.whatsappNumber.replace(/\D/g, '') !== currentWhatsappNumber.replace(/\D/g, '');
+      input.whatsappNumber.replace(/\D/g, '') !==
+        currentWhatsappNumber.replace(/\D/g, '');
 
     if (isAddingWhatsapp) {
-      await this.billingCapacityService.assertCanAdd(input.tenantId, 'whatsappNumbers');
+      await this.billingCapacityService.assertCanAdd(
+        input.tenantId,
+        'whatsappNumbers',
+      );
     }
 
     const provider = input.provider ?? 'BUBBLEWHATS';

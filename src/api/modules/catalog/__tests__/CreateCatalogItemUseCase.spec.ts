@@ -10,16 +10,17 @@ import { IEventBus } from '@shared/application/ports/IEventBus';
 
 describe('CreateCatalogItemUseCase', () => {
   let catalogRepository: jest.Mocked<
-    Pick<
-      ICatalogRepository,
-      'findCategoryById' | 'createItem' | 'saveAuditLog'
-    >
+    Pick<ICatalogRepository, 'findCategoryById' | 'createItem' | 'saveAuditLog'>
   >;
   let eventBus: jest.Mocked<IEventBus>;
-  let syncInventoryItemUseCase: jest.Mocked<Pick<SyncInventoryItemUseCase, 'execute'>>;
+  let syncInventoryItemUseCase: jest.Mocked<
+    Pick<SyncInventoryItemUseCase, 'execute'>
+  >;
   let useCase: CreateCatalogItemUseCase;
 
-  const itemRecord = (over?: Partial<CatalogItemRecord>): CatalogItemRecord => ({
+  const itemRecord = (
+    over?: Partial<CatalogItemRecord>,
+  ): CatalogItemRecord => ({
     id: 'catalog-item-1',
     tenantId: 'tenant-1',
     categoryId: null,

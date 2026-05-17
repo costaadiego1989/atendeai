@@ -7,9 +7,9 @@ export interface AiSafetyGateOptions {
 export class AiSafetyGate {
   constructor(private readonly options: AiSafetyGateOptions) {}
 
-  evaluateUserMessage(raw: string):
-    | { blocked: false }
-    | { blocked: true; pattern: string } {
+  evaluateUserMessage(
+    raw: string,
+  ): { blocked: false } | { blocked: true; pattern: string } {
     if (!this.options.safetyModeEnabled) {
       return { blocked: false };
     }

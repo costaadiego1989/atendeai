@@ -10,13 +10,11 @@ interface TenantBranchProps {
   email: string | null;
   whatsappNumber: string | null;
   instagramAccountId: string | null;
-  whatsAppConfigOverride:
-    | {
-        provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
-        credentials: Record<string, string>;
-        webhookSecret?: string | null;
-      }
-    | null;
+  whatsAppConfigOverride: {
+    provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+    credentials: Record<string, string>;
+    webhookSecret?: string | null;
+  } | null;
   address: Address | null;
   operatingHours: OperatingHours | null;
   isHeadquarters: boolean;
@@ -63,18 +61,17 @@ export class TenantBranch {
     return this.props.instagramAccountId;
   }
 
-  get whatsAppConfigOverride():
-    | {
-        provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
-        credentials: Record<string, string>;
-        webhookSecret?: string | null;
-      }
-    | null {
+  get whatsAppConfigOverride(): {
+    provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+    credentials: Record<string, string>;
+    webhookSecret?: string | null;
+  } | null {
     return this.props.whatsAppConfigOverride
       ? {
           provider: this.props.whatsAppConfigOverride.provider,
           credentials: { ...this.props.whatsAppConfigOverride.credentials },
-          webhookSecret: this.props.whatsAppConfigOverride.webhookSecret ?? null,
+          webhookSecret:
+            this.props.whatsAppConfigOverride.webhookSecret ?? null,
         }
       : null;
   }

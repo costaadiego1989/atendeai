@@ -1,6 +1,12 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
-import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
-import { ISocialPlatformAdapter, SOCIAL_PLATFORM_ADAPTER } from '../../domain/ports/ISocialPlatformAdapter';
+import {
+  ISocialRepository,
+  SOCIAL_REPOSITORY,
+} from '../../domain/ports/ISocialRepository';
+import {
+  ISocialPlatformAdapter,
+  SOCIAL_PLATFORM_ADAPTER,
+} from '../../domain/ports/ISocialPlatformAdapter';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { SocialManualReplySentIntegrationEvent } from '../../domain/events/integration/SocialManualReplySentIntegrationEvent';
 
@@ -8,7 +14,8 @@ import { SocialManualReplySentIntegrationEvent } from '../../domain/events/integ
 export class ReplyToCommentUseCase {
   constructor(
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
-    @Inject(SOCIAL_PLATFORM_ADAPTER) private readonly adapter: ISocialPlatformAdapter,
+    @Inject(SOCIAL_PLATFORM_ADAPTER)
+    private readonly adapter: ISocialPlatformAdapter,
     @Optional() @Inject(EVENT_BUS) private readonly eventBus?: IEventBus,
   ) {}
 
@@ -18,12 +25,18 @@ export class ReplyToCommentUseCase {
     text: string;
     userId?: string;
   }): Promise<{ success: boolean; replyId?: string; error?: string }> {
-    const comment = await this.repo.findCommentById(input.tenantId, input.commentId);
+    const comment = await this.repo.findCommentById(
+      input.tenantId,
+      input.commentId,
+    );
     if (!comment) {
       return { success: false, error: 'Comentário não encontrado' };
     }
 
-    const account = await this.repo.findAccountById(input.tenantId, comment.socialAccountId);
+    const account = await this.repo.findAccountById(
+      input.tenantId,
+      comment.socialAccountId,
+    );
     if (!account || !account.isActive) {
       return { success: false, error: 'Conta social desconectada ou inválida' };
     }
@@ -45,13 +58,21 @@ export class ReplyToCommentUseCase {
     });
 
     if (result.success) {
-      await this.repo.updateCommentStatus(input.tenantId, input.commentId, 'REPLIED', new Date());
+      await this.repo.updateCommentStatus(
+        input.tenantId,
+        input.commentId,
+        'REPLIED',
+        new Date(),
+      );
       await this.repo.logAudit(input.tenantId, {
         event: 'MANUAL_REPLY_SENT',
         entityId: input.commentId,
         entityType: 'COMMENT',
         platform: comment.platform,
-        metadata: { userId: input.userId, textPreview: input.text.substring(0, 100) },
+        metadata: {
+          userId: input.userId,
+          textPreview: input.text.substring(0, 100),
+        },
       });
       await this.eventBus?.publish(
         new SocialManualReplySentIntegrationEvent({

@@ -45,7 +45,9 @@ describe('InventorySyncWorker', () => {
       .fn()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce(undefined);
-    const syncUseCase = { execute: syncExecute } as unknown as SyncInventoryConnectionUseCase;
+    const syncUseCase = {
+      execute: syncExecute,
+    } as unknown as SyncInventoryConnectionUseCase;
 
     const worker = new InventorySyncWorker(prisma, syncUseCase);
     await worker.handleHourlySync();

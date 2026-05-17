@@ -23,7 +23,9 @@ export class Dialog360ManagementAcl {
       'https://waba-v2.360dialog.io';
   }
 
-  async configurePhoneWebhook(input: ConfigureDialog360WebhookInput): Promise<void> {
+  async configurePhoneWebhook(
+    input: ConfigureDialog360WebhookInput,
+  ): Promise<void> {
     try {
       await axios.post(
         `${this.baseUrl}/v1/configs/webhook`,

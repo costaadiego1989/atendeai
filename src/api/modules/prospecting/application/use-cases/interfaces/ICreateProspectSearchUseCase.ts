@@ -25,8 +25,10 @@ export interface CreateProspectSearchOutput {
   createdAt: Date;
 }
 
-export interface ICreateProspectSearchUseCase
-  extends IUseCase<CreateProspectSearchInput, CreateProspectSearchOutput> {}
+export interface ICreateProspectSearchUseCase extends IUseCase<
+  CreateProspectSearchInput,
+  CreateProspectSearchOutput
+> {}
 
 export const ICreateProspectSearchUseCase = Symbol(
   'ICreateProspectSearchUseCase',

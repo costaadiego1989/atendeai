@@ -94,8 +94,7 @@ export class MetaDataDeletionController {
       return {};
     }
 
-    const appSecret =
-      this.configService.get<string>('META_APP_SECRET') || '';
+    const appSecret = this.configService.get<string>('META_APP_SECRET') || '';
 
     // Verify signature
     const expectedSig = crypto

@@ -61,13 +61,17 @@ describe('CreateUserUseCase', () => {
     };
 
     messagingFacade = {
-      queueSystemMessage: jest.fn().mockResolvedValue({ conversationId: 'conv-1', messageId: 'msg-1' }),
+      queueSystemMessage: jest
+        .fn()
+        .mockResolvedValue({ conversationId: 'conv-1', messageId: 'msg-1' }),
     };
 
     contactFacade = {
       identifyContact: jest.fn(),
       getContactById: jest.fn(),
-      ensureContact: jest.fn().mockResolvedValue({ contactId: 'contact-1', created: true }),
+      ensureContact: jest
+        .fn()
+        .mockResolvedValue({ contactId: 'contact-1', created: true }),
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
     };
@@ -113,7 +117,9 @@ describe('CreateUserUseCase', () => {
       role: 'ADMIN',
     });
 
-    expect(passwordHasher.hash).toHaveBeenCalledWith(expect.stringMatching(/^Atd!/));
+    expect(passwordHasher.hash).toHaveBeenCalledWith(
+      expect.stringMatching(/^Atd!/),
+    );
     expect(billingCapacityService.assertCanAdd).toHaveBeenCalledWith(
       'tenant-1',
       'users',
@@ -177,7 +183,9 @@ describe('CreateUserUseCase', () => {
   it('should not fail user creation if WhatsApp notification fails', async () => {
     userRepo.findByEmail.mockResolvedValue(null);
     passwordHasher.hash.mockResolvedValue('hashed-password');
-    contactFacade.ensureContact.mockRejectedValue(new Error('WhatsApp not configured'));
+    contactFacade.ensureContact.mockRejectedValue(
+      new Error('WhatsApp not configured'),
+    );
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',
@@ -215,6 +223,8 @@ describe('CreateUserUseCase', () => {
 
     expect(passwordHasher.hash).not.toHaveBeenCalled();
     expect(userRepo.saveWithTenant).not.toHaveBeenCalled();
-    expect(userDomainEventPublisher.publishFromAggregate).not.toHaveBeenCalled();
+    expect(
+      userDomainEventPublisher.publishFromAggregate,
+    ).not.toHaveBeenCalled();
   });
 });

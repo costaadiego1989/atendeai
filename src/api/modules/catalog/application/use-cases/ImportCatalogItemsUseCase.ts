@@ -53,7 +53,9 @@ export class ImportCatalogItemsUseCase {
     private readonly syncInventoryItemUseCase: SyncInventoryItemUseCase,
   ) {}
 
-  async execute(input: ImportCatalogItemsInput): Promise<ImportCatalogItemsOutput> {
+  async execute(
+    input: ImportCatalogItemsInput,
+  ): Promise<ImportCatalogItemsOutput> {
     const rows = this.catalogImportParser.parseRows(input.rawText, {
       defaultType: input.defaultType,
       defaultCategoryName: input.defaultCategoryName,
@@ -68,7 +70,9 @@ export class ImportCatalogItemsUseCase {
     let failed = 0;
     let inventorySynced = 0;
 
-    const existingCategories = await this.catalogRepository.listCategories(input.tenantId);
+    const existingCategories = await this.catalogRepository.listCategories(
+      input.tenantId,
+    );
     existingCategories.forEach((category) => {
       categoryCache.set(this.normalizeKey(category.name), category);
     });
@@ -111,11 +115,15 @@ export class ImportCatalogItemsUseCase {
               categoryId: category?.id ?? existingItem.categoryId ?? undefined,
               type: itemType,
               name: row.name,
-              description: row.description ?? existingItem.description ?? undefined,
+              description:
+                row.description ?? existingItem.description ?? undefined,
               basePrice: row.basePrice ?? existingItem.basePrice ?? undefined,
               currency: row.currency ?? existingItem.currency,
               tags: mergedTags,
-              externalReference: row.externalReference ?? existingItem.externalReference ?? undefined,
+              externalReference:
+                row.externalReference ??
+                existingItem.externalReference ??
+                undefined,
               imageUrl: row.imageUrl ?? existingItem.imageUrl ?? undefined,
             })
           : await this.createCatalogItemUseCase.execute({
@@ -168,7 +176,10 @@ export class ImportCatalogItemsUseCase {
           name: row.name,
           type: row.type,
           categoryName: row.categoryName,
-          reason: error instanceof Error ? error.message : 'Falha ao importar a linha.',
+          reason:
+            error instanceof Error
+              ? error.message
+              : 'Falha ao importar a linha.',
         });
       }
     }
@@ -215,17 +226,22 @@ export class ImportCatalogItemsUseCase {
     name: string,
   ) {
     if (externalReference?.trim()) {
-      const byReference = await this.catalogRepository.findItemByExternalReference(
-        tenantId,
-        externalReference.trim(),
-      );
+      const byReference =
+        await this.catalogRepository.findItemByExternalReference(
+          tenantId,
+          externalReference.trim(),
+        );
 
       if (byReference) {
         return byReference;
       }
     }
 
-    return this.catalogRepository.findItemByNameAndType(tenantId, type, name.trim());
+    return this.catalogRepository.findItemByNameAndType(
+      tenantId,
+      type,
+      name.trim(),
+    );
   }
 
   private async syncInventoryIfNeeded(
@@ -233,7 +249,11 @@ export class ImportCatalogItemsUseCase {
     row: {
       sku?: string;
       availableQuantity?: number;
-      availabilityStatus?: 'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'RESERVED';
+      availabilityStatus?:
+        | 'AVAILABLE'
+        | 'LOW_STOCK'
+        | 'UNAVAILABLE'
+        | 'RESERVED';
       currentPrice?: string;
       hasInventoryData: boolean;
     },
@@ -254,7 +274,8 @@ export class ImportCatalogItemsUseCase {
 
     const availableQuantity = row.availableQuantity ?? 0;
     const availabilityStatus =
-      row.availabilityStatus ?? (availableQuantity > 0 ? 'AVAILABLE' : 'UNAVAILABLE');
+      row.availabilityStatus ??
+      (availableQuantity > 0 ? 'AVAILABLE' : 'UNAVAILABLE');
 
     await this.syncInventoryItemUseCase.execute({
       tenantId: input.tenantId,

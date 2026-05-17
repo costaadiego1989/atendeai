@@ -38,12 +38,16 @@ export interface UpsertTenantPDFResumeRecordInput {
 export class TenantPDFResumeRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async upsert(input: UpsertTenantPDFResumeRecordInput): Promise<TenantPDFResumeRecord> {
+  async upsert(
+    input: UpsertTenantPDFResumeRecordInput,
+  ): Promise<TenantPDFResumeRecord> {
     const checksumFilter = input.checksum
       ? Prisma.sql`checksum = ${input.checksum}`
       : Prisma.sql`file_url = ${input.fileUrl}`;
 
-    const existing = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+    const existing = await this.prisma.$queryRaw<
+      Array<{ id: string }>
+    >(Prisma.sql`
       SELECT id
       FROM tenant_schema.tenant_pdf_resumes
       WHERE tenant_id = ${input.tenantId}::uuid
@@ -102,7 +106,9 @@ export class TenantPDFResumeRepository {
   }
 
   async listReadySummaries(tenantId: string): Promise<string[]> {
-    const rows = await this.prisma.$queryRaw<Array<{ summaries: unknown }>>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Array<{ summaries: unknown }>
+    >(Prisma.sql`
       SELECT summaries
       FROM tenant_schema.tenant_pdf_resumes
       WHERE tenant_id = ${tenantId}::uuid
@@ -156,7 +162,11 @@ export class TenantPDFResumeRepository {
     return [];
   }
 
-  async updateStatus(documentId: string, status: string, error?: string | null): Promise<void> {
+  async updateStatus(
+    documentId: string,
+    status: string,
+    error?: string | null,
+  ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE tenant_schema.tenant_pdf_resumes
       SET status = ${status},

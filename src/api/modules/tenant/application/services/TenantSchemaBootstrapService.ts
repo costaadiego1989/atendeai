@@ -9,7 +9,9 @@ export class TenantSchemaBootstrapService implements OnModuleInit {
   private readonly logger = new Logger(TenantSchemaBootstrapService.name);
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Tenant schema managed by Prisma migrations. No runtime DDL needed.');
+    this.logger.log(
+      'Tenant schema managed by Prisma migrations. No runtime DDL needed.',
+    );
   }
 
   async ensureSchema(): Promise<void> {

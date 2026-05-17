@@ -31,4 +31,3 @@ describe('SocialAutoReplyRule', () => {
     expect(rule.matchesComment('teste', 'post-999')).toBe(false);
   });
 });
-

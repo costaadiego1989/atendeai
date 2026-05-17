@@ -9,7 +9,10 @@ describe('ShopifyProvider', () => {
     jest.restoreAllMocks();
   });
 
-  const config = { shopUrl: 'https://minha-loja.myshopify.com', accessToken: 'shpat_token' };
+  const config = {
+    shopUrl: 'https://minha-loja.myshopify.com',
+    accessToken: 'shpat_token',
+  };
 
   function makeShopifyResponse(products: unknown[], nextCursor?: string) {
     return {
@@ -29,8 +32,12 @@ describe('ShopifyProvider', () => {
   // ─── testConnection ────────────────────────────────────────────────────────
 
   it('INV-T-064a: testConnection lança erro quando shopUrl ou accessToken ausente', async () => {
-    await expect(provider.testConnection({ accessToken: 'tok' })).rejects.toThrow(/shopUrl|credenciais/i);
-    await expect(provider.testConnection({ shopUrl: 'https://x.myshopify.com' })).rejects.toThrow(/accessToken|credenciais/i);
+    await expect(
+      provider.testConnection({ accessToken: 'tok' }),
+    ).rejects.toThrow(/shopUrl|credenciais/i);
+    await expect(
+      provider.testConnection({ shopUrl: 'https://x.myshopify.com' }),
+    ).rejects.toThrow(/accessToken|credenciais/i);
   });
 
   it('INV-T-064b: testConnection usa header X-Shopify-Access-Token', async () => {
@@ -55,18 +62,45 @@ describe('ShopifyProvider', () => {
 
     await provider.testConnection(config);
 
-    expect((fetchMock as jest.Mock).mock.calls[0][0]).toContain('/admin/api/2024-01/shop.json');
+    expect((fetchMock as jest.Mock).mock.calls[0][0]).toContain(
+      '/admin/api/2024-01/shop.json',
+    );
   });
 
   // ─── fetchStock ────────────────────────────────────────────────────────────
 
   it('INV-T-064d: fetchStock usa paginação por cursor via Link header', async () => {
-    const page1Product = { id: 1, title: 'Produto A', variants: [{ sku: 'SH-001', title: 'Padrão', inventory_quantity: 5, price: '99.90' }] };
-    const page2Product = { id: 2, title: 'Produto B', variants: [{ sku: 'SH-002', title: 'Padrão', inventory_quantity: 2, price: '49.90' }] };
+    const page1Product = {
+      id: 1,
+      title: 'Produto A',
+      variants: [
+        {
+          sku: 'SH-001',
+          title: 'Padrão',
+          inventory_quantity: 5,
+          price: '99.90',
+        },
+      ],
+    };
+    const page2Product = {
+      id: 2,
+      title: 'Produto B',
+      variants: [
+        {
+          sku: 'SH-002',
+          title: 'Padrão',
+          inventory_quantity: 2,
+          price: '49.90',
+        },
+      ],
+    };
 
-    const fetchMock = jest.fn()
+    const fetchMock = jest
+      .fn()
       .mockResolvedValueOnce(makeShopifyResponse([page1Product], 'cursor-abc'))
-      .mockResolvedValueOnce(makeShopifyResponse([page2Product])) as unknown as typeof fetch;
+      .mockResolvedValueOnce(
+        makeShopifyResponse([page2Product]),
+      ) as unknown as typeof fetch;
     global.fetch = fetchMock;
 
     const batches: any[][] = [];
@@ -84,7 +118,18 @@ describe('ShopifyProvider', () => {
   it('INV-T-064e: fetchStock mapeia variants para InventoryItemSnapshot', async () => {
     global.fetch = jest.fn().mockResolvedValue(
       makeShopifyResponse([
-        { id: 1, title: 'Camiseta Azul', variants: [{ sku: 'CAM-AZL-M', title: 'M', inventory_quantity: 15, price: '89.90' }] },
+        {
+          id: 1,
+          title: 'Camiseta Azul',
+          variants: [
+            {
+              sku: 'CAM-AZL-M',
+              title: 'M',
+              inventory_quantity: 15,
+              price: '89.90',
+            },
+          ],
+        },
       ]),
     ) as unknown as typeof fetch;
 
@@ -102,9 +147,9 @@ describe('ShopifyProvider', () => {
   });
 
   it('INV-T-064f: fetchStock para quando products está vazio e sem link next', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      makeShopifyResponse([]),
-    ) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(makeShopifyResponse([])) as unknown as typeof fetch;
 
     const batches: unknown[] = [];
     for await (const batch of provider.fetchStock(config)) {

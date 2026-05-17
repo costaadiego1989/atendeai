@@ -59,7 +59,10 @@ describe('CancelSubscriptionUseCase', () => {
   });
 
   it('should cancel a remote subscription and downgrade to ESSENCIAL immediately', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'PROFISSIONAL');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'PROFISSIONAL',
+    );
     subscription.updateAsaasInfo('cus_123', 'sub_123');
     const tenant = createTenantWithPlan('PROFISSIONAL');
 
@@ -87,7 +90,10 @@ describe('CancelSubscriptionUseCase', () => {
   });
 
   it('should downgrade a local subscription without remote cancellation call', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'PROFISSIONAL');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'PROFISSIONAL',
+    );
     const tenant = createTenantWithPlan('PROFISSIONAL');
 
     billingRepository.findSubscription.mockResolvedValue(subscription);

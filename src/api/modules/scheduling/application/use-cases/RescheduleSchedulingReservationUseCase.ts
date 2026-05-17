@@ -33,7 +33,7 @@ export class RescheduleSchedulingReservationUseCase {
     @Inject(SCHEDULING_REMINDER_QUEUE)
     private readonly schedulingReminderQueue: ISchedulingReminderQueue,
     private readonly googleCalendarSyncService: SchedulingGoogleCalendarSyncService,
-  ) { }
+  ) {}
 
   async execute(input: {
     tenantId: string;
@@ -48,7 +48,9 @@ export class RescheduleSchedulingReservationUseCase {
       input.sourceDate === input.targetDate &&
       input.sourceSlotId === input.targetSlotId
     ) {
-      throw new ConflictException('Target slot must be different from source slot');
+      throw new ConflictException(
+        'Target slot must be different from source slot',
+      );
     }
 
     const sourceSlot = await this.schedulingStore.getAvailabilitySlot(
@@ -61,12 +63,13 @@ export class RescheduleSchedulingReservationUseCase {
       throw new NotFoundException('Source availability slot not found');
     }
 
-    const targetAvailabilitySlot = await this.schedulingStore.getAvailabilitySlot(
-      input.tenantId,
-      input.professionalId,
-      input.targetDate,
-      input.targetSlotId,
-    );
+    const targetAvailabilitySlot =
+      await this.schedulingStore.getAvailabilitySlot(
+        input.tenantId,
+        input.professionalId,
+        input.targetDate,
+        input.targetSlotId,
+      );
     if (!targetAvailabilitySlot) {
       throw new NotFoundException('Target availability slot not found');
     }
@@ -85,23 +88,26 @@ export class RescheduleSchedulingReservationUseCase {
     }
 
     const professional = (
-      await this.schedulingStore.listProfessionals(input.tenantId, input.branchId)
+      await this.schedulingStore.listProfessionals(
+        input.tenantId,
+        input.branchId,
+      )
     ).find((entry) => entry.id === input.professionalId);
 
-    const calendarSync = await this.googleCalendarSyncService.rescheduleReservation({
-      tenantId: input.tenantId,
-      branchId: input.branchId ?? professional?.branchId ?? null,
-      sourceProfessionalId: input.professionalId,
-      sourceDate: input.sourceDate,
-      sourceSlotId: input.sourceSlotId,
-      targetProfessionalId: input.professionalId,
-      targetProfessionalName: professional?.name,
-      targetDate: input.targetDate,
-      targetSlot: rescheduled.targetSlot,
-    });
-    const slotWithMeeting =
-      calendarSync?.meetingUrl
-        ? await this.schedulingStore.attachMeetingLinkToReservedSlot({
+    const calendarSync =
+      await this.googleCalendarSyncService.rescheduleReservation({
+        tenantId: input.tenantId,
+        branchId: input.branchId ?? professional?.branchId ?? null,
+        sourceProfessionalId: input.professionalId,
+        sourceDate: input.sourceDate,
+        sourceSlotId: input.sourceSlotId,
+        targetProfessionalId: input.professionalId,
+        targetProfessionalName: professional?.name,
+        targetDate: input.targetDate,
+        targetSlot: rescheduled.targetSlot,
+      });
+    const slotWithMeeting = calendarSync?.meetingUrl
+      ? await this.schedulingStore.attachMeetingLinkToReservedSlot({
           tenantId: input.tenantId,
           professionalId: input.professionalId,
           date: input.targetDate,
@@ -109,31 +115,35 @@ export class RescheduleSchedulingReservationUseCase {
           meetingProvider: 'GOOGLE_MEET',
           meetingUrl: calendarSync.meetingUrl,
         })
-        : null;
+      : null;
     const targetSlot = slotWithMeeting ?? rescheduled.targetSlot;
 
     const reservedFor = targetSlot.reservedFor;
-    const contact =
-      reservedFor?.contactId
-        ? await this.contactFacade.getContactById(input.tenantId, reservedFor.contactId)
-        : null;
+    const contact = reservedFor?.contactId
+      ? await this.contactFacade.getContactById(
+          input.tenantId,
+          reservedFor.contactId,
+        )
+      : null;
 
     if (contact?.contactId) {
-      await this.eventBus.publish(new ProfessionalSlotRescheduledIntegrationEvent({
-        tenantId: input.tenantId,
-        contactId: contact.contactId,
-        contactName: reservedFor?.contactName,
-        professionalName: professional?.name || 'Profissional',
-        categoryName: reservedFor?.categoryName || 'Serviço',
-        date: input.targetDate,
-        startsAt: targetSlot.startsAt,
-        endsAt: targetSlot.endsAt,
-        branchId: input.branchId ?? professional?.branchId ?? null,
-        pendingPayment: targetSlot.status === 'PRE_RESERVED',
-        paymentUrl: targetSlot.payment?.linkUrl,
-        paymentExpiresAt: targetSlot.payment?.expiresAt,
-        meetingUrl: targetSlot.reservedFor?.meetingUrl,
-      }));
+      await this.eventBus.publish(
+        new ProfessionalSlotRescheduledIntegrationEvent({
+          tenantId: input.tenantId,
+          contactId: contact.contactId,
+          contactName: reservedFor?.contactName,
+          professionalName: professional?.name || 'Profissional',
+          categoryName: reservedFor?.categoryName || 'Serviço',
+          date: input.targetDate,
+          startsAt: targetSlot.startsAt,
+          endsAt: targetSlot.endsAt,
+          branchId: input.branchId ?? professional?.branchId ?? null,
+          pendingPayment: targetSlot.status === 'PRE_RESERVED',
+          paymentUrl: targetSlot.payment?.linkUrl,
+          paymentExpiresAt: targetSlot.payment?.expiresAt,
+          meetingUrl: targetSlot.reservedFor?.meetingUrl,
+        }),
+      );
 
       await this.scheduleReservationReminders({
         tenantId: input.tenantId,

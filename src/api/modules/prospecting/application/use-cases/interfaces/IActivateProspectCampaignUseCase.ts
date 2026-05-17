@@ -19,11 +19,10 @@ export interface ActivateProspectCampaignOutput {
   createdAt: Date;
 }
 
-export interface IActivateProspectCampaignUseCase
-  extends IUseCase<
-    ActivateProspectCampaignInput,
-    ActivateProspectCampaignOutput
-  > {}
+export interface IActivateProspectCampaignUseCase extends IUseCase<
+  ActivateProspectCampaignInput,
+  ActivateProspectCampaignOutput
+> {}
 
 export const IActivateProspectCampaignUseCase = Symbol(
   'IActivateProspectCampaignUseCase',

@@ -64,14 +64,21 @@ describe('AutoReplyEngine', () => {
     } as any;
 
     const delayedJobQueue = { schedule: jest.fn() } as any;
-    const sut = new AutoReplyEngine(repo, adapter, delayedJobQueue, undefined, eventBus);
+    const sut = new AutoReplyEngine(
+      repo,
+      adapter,
+      delayedJobQueue,
+      undefined,
+      eventBus,
+    );
 
     const ruleId = await sut.evaluate(comment, 'token-x', 'post-1');
 
     expect(ruleId).toBe(rule.id.toValue());
     expect(adapter.replyToComment).toHaveBeenCalledTimes(1);
-    expect(adapter.replyToComment.mock.calls[0][2]).toContain('Obrigado pelo comentário');
+    expect(adapter.replyToComment.mock.calls[0][2]).toContain(
+      'Obrigado pelo comentário',
+    );
     expect(eventBus.publish).toHaveBeenCalled();
   });
 });
-

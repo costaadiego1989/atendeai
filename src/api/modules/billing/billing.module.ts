@@ -51,7 +51,11 @@ import { BillingProspectingQuotaService } from './application/services/BillingPr
       name: 'billing-plan-changes',
     }),
   ],
-  controllers: [UsageController, SubscriptionController, PublicBillingController],
+  controllers: [
+    UsageController,
+    SubscriptionController,
+    PublicBillingController,
+  ],
   providers: [
     BillingTenantHandlers,
     BillingUsageHandlers,

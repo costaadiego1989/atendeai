@@ -23,7 +23,9 @@ export class WooCommerceProvider implements IInventoryProvider {
     });
 
     if (!response.ok) {
-      throw new Error(`WooCommerce Autenticação falhou: ${response.statusText}`);
+      throw new Error(
+        `WooCommerce Autenticação falhou: ${response.statusText}`,
+      );
     }
 
     return true;

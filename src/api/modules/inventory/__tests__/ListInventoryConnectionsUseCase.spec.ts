@@ -1,11 +1,16 @@
 import { ListInventoryConnectionsUseCase } from '../application/use-cases/ListInventoryConnectionsUseCase';
-import { IInventoryRepository, InventoryConnectionRecord } from '../domain/ports/IInventoryRepository';
+import {
+  IInventoryRepository,
+  InventoryConnectionRecord,
+} from '../domain/ports/IInventoryRepository';
 
 describe('ListInventoryConnectionsUseCase', () => {
   let useCase: ListInventoryConnectionsUseCase;
   let inventoryRepository: jest.Mocked<IInventoryRepository>;
 
-  const makeConnection = (overrides: Partial<InventoryConnectionRecord> = {}): InventoryConnectionRecord => ({
+  const makeConnection = (
+    overrides: Partial<InventoryConnectionRecord> = {},
+  ): InventoryConnectionRecord => ({
     id: 'conn-1',
     tenantId: 'tenant-1',
     sourceType: 'BLING',
@@ -33,13 +38,18 @@ describe('ListInventoryConnectionsUseCase', () => {
   });
 
   it('should list connections for a given tenant', async () => {
-    const connections = [makeConnection(), makeConnection({ id: 'conn-2', sourceType: 'TINY' })];
+    const connections = [
+      makeConnection(),
+      makeConnection({ id: 'conn-2', sourceType: 'TINY' }),
+    ];
     inventoryRepository.listConnections.mockResolvedValue(connections);
 
     const result = await useCase.execute('tenant-1');
 
     expect(result).toHaveLength(2);
-    expect(inventoryRepository.listConnections).toHaveBeenCalledWith('tenant-1');
+    expect(inventoryRepository.listConnections).toHaveBeenCalledWith(
+      'tenant-1',
+    );
   });
 
   it('should return empty list when no connections exist', async () => {
@@ -57,7 +67,13 @@ describe('ListInventoryConnectionsUseCase', () => {
     await useCase.execute('tenant-B');
 
     expect(inventoryRepository.listConnections).toHaveBeenCalledTimes(2);
-    expect(inventoryRepository.listConnections).toHaveBeenNthCalledWith(1, 'tenant-A');
-    expect(inventoryRepository.listConnections).toHaveBeenNthCalledWith(2, 'tenant-B');
+    expect(inventoryRepository.listConnections).toHaveBeenNthCalledWith(
+      1,
+      'tenant-A',
+    );
+    expect(inventoryRepository.listConnections).toHaveBeenNthCalledWith(
+      2,
+      'tenant-B',
+    );
   });
 });

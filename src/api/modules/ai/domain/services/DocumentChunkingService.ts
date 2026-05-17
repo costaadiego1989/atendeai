@@ -56,9 +56,7 @@ export class DocumentChunkingService {
     let currentChunk = '';
 
     for (const part of parts) {
-      const candidate = currentChunk
-        ? currentChunk + separator + part
-        : part;
+      const candidate = currentChunk ? currentChunk + separator + part : part;
 
       if (candidate.length <= chunkSize) {
         currentChunk = candidate;
@@ -91,10 +89,7 @@ export class DocumentChunkingService {
     return chunks;
   }
 
-  private findBestSeparator(
-    text: string,
-    separators: string[],
-  ): string | null {
+  private findBestSeparator(text: string, separators: string[]): string | null {
     for (const sep of separators) {
       if (text.includes(sep)) {
         return sep;

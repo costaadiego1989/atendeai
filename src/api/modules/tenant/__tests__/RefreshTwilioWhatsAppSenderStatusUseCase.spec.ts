@@ -47,37 +47,40 @@ describe('RefreshTwilioWhatsAppSenderStatusUseCase', () => {
       provider: 'TWILIO',
       whatsappNumber: '5511999998888',
       credentials: { senderSid: 'sid-123' },
-      webhookSecret: null
+      webhookSecret: null,
     });
 
-    const tenant = Tenant.reconstitute({
-      companyName: CompanyName.create('Test'),
-      cnpj: CNPJ.create('12345678000195'),
-      plan: Plan.essencial(),
-      planStatus: 'ACTIVE',
-      ownerUserId: 'user-1',
-      users: [],
-      whatsAppConfig,
-      instagramConfig: null,
-      aiConfig: null,
-      businessType: null,
-      ownerBirthDate: null,
-      description: null,
-      services: null,
-      address: null,
-      catalogUrl: null,
-      catalogFiles: [],
-      operatingHours: null,
-      promotions: [],
-      apiKey: 'api-key',
-    }, new UniqueEntityID(tenantId));
+    const tenant = Tenant.reconstitute(
+      {
+        companyName: CompanyName.create('Test'),
+        cnpj: CNPJ.create('12345678000195'),
+        plan: Plan.essencial(),
+        planStatus: 'ACTIVE',
+        ownerUserId: 'user-1',
+        users: [],
+        whatsAppConfig,
+        instagramConfig: null,
+        aiConfig: null,
+        businessType: null,
+        ownerBirthDate: null,
+        description: null,
+        services: null,
+        address: null,
+        catalogUrl: null,
+        catalogFiles: [],
+        operatingHours: null,
+        promotions: [],
+        apiKey: 'api-key',
+      },
+      new UniqueEntityID(tenantId),
+    );
 
     tenantRepository.findById.mockResolvedValue(tenant);
     twilioManagementAcl.getSender.mockResolvedValue({
       sid: 'sid-123',
       senderId: 'sender-123',
       status: 'ONLINE',
-      configuration: { wabaId: 'waba-123' }
+      configuration: { wabaId: 'waba-123' },
     } as any);
 
     const result = await useCase.execute(tenantId);
@@ -91,65 +94,75 @@ describe('RefreshTwilioWhatsAppSenderStatusUseCase', () => {
   it('should throw EntityNotFoundException if tenant has no WhatsApp config', async () => {
     tenantRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('none')).rejects.toThrow(EntityNotFoundException);
+    await expect(useCase.execute('none')).rejects.toThrow(
+      EntityNotFoundException,
+    );
   });
 
   it('should throw error if provider is not TWILIO', async () => {
-     const tenant = Tenant.reconstitute({
-      companyName: CompanyName.create('Test'),
-      cnpj: CNPJ.create('12345678000195'),
-      plan: Plan.essencial(),
-      planStatus: 'ACTIVE',
-      ownerUserId: 'user-1',
-      users: [],
-      whatsAppConfig: WhatsAppConfig.create({ 
-        provider: 'BUBBLEWHATS', 
-        whatsappNumber: '1', 
-        credentials: { id: '7071', token: 'token', apiUrl: 'http://test' },
-        webhookSecret: null
-      }),
-      instagramConfig: null,
-      aiConfig: null,
-      businessType: null,
-      ownerBirthDate: null,
-      description: null,
-      services: null,
-      address: null,
-      catalogUrl: null,
-      catalogFiles: [],
-      operatingHours: null,
-      promotions: [],
-      apiKey: 'api-key',
-    } as any, new UniqueEntityID('t1'));
+    const tenant = Tenant.reconstitute(
+      {
+        companyName: CompanyName.create('Test'),
+        cnpj: CNPJ.create('12345678000195'),
+        plan: Plan.essencial(),
+        planStatus: 'ACTIVE',
+        ownerUserId: 'user-1',
+        users: [],
+        whatsAppConfig: WhatsAppConfig.create({
+          provider: 'BUBBLEWHATS',
+          whatsappNumber: '1',
+          credentials: { id: '7071', token: 'token', apiUrl: 'http://test' },
+          webhookSecret: null,
+        }),
+        instagramConfig: null,
+        aiConfig: null,
+        businessType: null,
+        ownerBirthDate: null,
+        description: null,
+        services: null,
+        address: null,
+        catalogUrl: null,
+        catalogFiles: [],
+        operatingHours: null,
+        promotions: [],
+        apiKey: 'api-key',
+      } as any,
+      new UniqueEntityID('t1'),
+    );
 
     tenantRepository.findById.mockResolvedValue(tenant);
 
-    await expect(useCase.execute('t1')).rejects.toThrow('Tenant WhatsApp provider is not Twilio');
+    await expect(useCase.execute('t1')).rejects.toThrow(
+      'Tenant WhatsApp provider is not Twilio',
+    );
   });
 
   it('should refresh sender status in a branch scope', async () => {
     const tenantId = 'tenant-branch';
-    const tenant = Tenant.reconstitute({
-      companyName: CompanyName.create('Test'),
-      cnpj: CNPJ.create('12345678000195'),
-      plan: Plan.essencial(),
-      planStatus: 'ACTIVE',
-      ownerUserId: 'user-1',
-      users: [],
-      whatsAppConfig: null,
-      instagramConfig: null,
-      aiConfig: null,
-      businessType: null,
-      ownerBirthDate: null,
-      description: null,
-      services: null,
-      address: null,
-      catalogUrl: null,
-      catalogFiles: [],
-      operatingHours: null,
-      promotions: [],
-      apiKey: 'api-key',
-    }, new UniqueEntityID(tenantId));
+    const tenant = Tenant.reconstitute(
+      {
+        companyName: CompanyName.create('Test'),
+        cnpj: CNPJ.create('12345678000195'),
+        plan: Plan.essencial(),
+        planStatus: 'ACTIVE',
+        ownerUserId: 'user-1',
+        users: [],
+        whatsAppConfig: null,
+        instagramConfig: null,
+        aiConfig: null,
+        businessType: null,
+        ownerBirthDate: null,
+        description: null,
+        services: null,
+        address: null,
+        catalogUrl: null,
+        catalogFiles: [],
+        operatingHours: null,
+        promotions: [],
+        apiKey: 'api-key',
+      },
+      new UniqueEntityID(tenantId),
+    );
     const branch = TenantBranch.create({
       tenantId,
       name: 'Filial Sul',

@@ -24,9 +24,7 @@ export class SendTenantManualWhatsAppUseCase {
   ) {}
 
   async execute(input: { tenantId: string; text: string }) {
-    const owner = await this.users.findOwnerPrincipalByTenantId(
-      input.tenantId,
-    );
+    const owner = await this.users.findOwnerPrincipalByTenantId(input.tenantId);
     if (!owner) {
       throw new BadRequestException('Owner user not found for tenant');
     }

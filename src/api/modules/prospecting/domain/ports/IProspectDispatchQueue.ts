@@ -4,7 +4,10 @@ export interface ProspectDispatchJob {
 }
 
 export interface IProspectDispatchQueue {
-  scheduleNextDispatch(job: ProspectDispatchJob, delayMs: number): Promise<void>;
+  scheduleNextDispatch(
+    job: ProspectDispatchJob,
+    delayMs: number,
+  ): Promise<void>;
 }
 
 export const PROSPECT_DISPATCH_QUEUE = Symbol('IProspectDispatchQueue');

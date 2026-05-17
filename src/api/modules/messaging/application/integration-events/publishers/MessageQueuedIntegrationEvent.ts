@@ -12,7 +12,7 @@ export type MessageQueuedIntegrationEventPayload = {
     text?: string;
     url?: string;
   };
-}
+};
 
 export class MessageQueuedIntegrationEvent extends IntegrationEvent {
   readonly queue = 'messaging.message-queued';
@@ -26,7 +26,10 @@ export class MessageQueuedIntegrationEvent extends IntegrationEvent {
     return this.payload.messageId;
   }
 
-  constructor(public readonly payload: MessageQueuedIntegrationEventPayload, eventId?: string) {
+  constructor(
+    public readonly payload: MessageQueuedIntegrationEventPayload,
+    eventId?: string,
+  ) {
     super(eventId);
   }
 }

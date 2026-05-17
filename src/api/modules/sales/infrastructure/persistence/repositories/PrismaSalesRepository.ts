@@ -14,11 +14,11 @@ import { UniqueEntityID } from '../../../../../shared/domain/UniqueEntityID';
 
 @Injectable()
 export class PrismaSalesRepository implements ISalesRepository {
-  constructor(
-    private readonly prisma: PrismaService,
-  ) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  private mapPaymentLink(record: Record<string, unknown>): SalesPaymentLinkRecord {
+  private mapPaymentLink(
+    record: Record<string, unknown>,
+  ): SalesPaymentLinkRecord {
     return {
       id: String(record.id),
       tenantId: String(record.tenant_id),
@@ -30,23 +30,39 @@ export class PrismaSalesRepository implements ISalesRepository {
       label: (record.label as string | null | undefined) ?? null,
       value: Number(record.value),
       url: String(record.url),
-      billingType: String(record.billing_type) as SalesPaymentLinkRecord['billingType'],
+      billingType: String(
+        record.billing_type,
+      ) as SalesPaymentLinkRecord['billingType'],
       status: String(record.status) as SalesPaymentLinkStatus,
       source: String(record.source) as SalesPaymentLinkRecord['source'],
-      resourceType: String(record.resource_type ?? 'PAYMENT_LINK') as SalesPaymentLinkRecord['resourceType'],
+      resourceType: String(
+        record.resource_type ?? 'PAYMENT_LINK',
+      ) as SalesPaymentLinkRecord['resourceType'],
       contactId: (record.contact_id as string | null | undefined) ?? null,
       contactName: (record.contact_name as string | null | undefined) ?? null,
-      conversationId: (record.conversation_id as string | null | undefined) ?? null,
-      catalogItemId: (record.catalog_item_id as string | null | undefined) ?? null,
-      catalogItemSku: (record.catalog_item_sku as string | null | undefined) ?? null,
-      catalogItemName: (record.catalog_item_name as string | null | undefined) ?? null,
+      conversationId:
+        (record.conversation_id as string | null | undefined) ?? null,
+      catalogItemId:
+        (record.catalog_item_id as string | null | undefined) ?? null,
+      catalogItemSku:
+        (record.catalog_item_sku as string | null | undefined) ?? null,
+      catalogItemName:
+        (record.catalog_item_name as string | null | undefined) ?? null,
       expiresAt: record.expires_at ? new Date(String(record.expires_at)) : null,
       recurrenceEnabled: Boolean(record.recurrence_enabled ?? false),
-      recurrenceFrequency: (record.recurrence_frequency as SalesPaymentLinkRecord['recurrenceFrequency']) ?? null,
-      recurrenceStartDate: record.recurrence_start_date ? new Date(String(record.recurrence_start_date)) : null,
-      recurrenceEndDate: record.recurrence_end_date ? new Date(String(record.recurrence_end_date)) : null,
+      recurrenceFrequency:
+        (record.recurrence_frequency as SalesPaymentLinkRecord['recurrenceFrequency']) ??
+        null,
+      recurrenceStartDate: record.recurrence_start_date
+        ? new Date(String(record.recurrence_start_date))
+        : null,
+      recurrenceEndDate: record.recurrence_end_date
+        ? new Date(String(record.recurrence_end_date))
+        : null,
       recurrenceTotalValue:
-        record.recurrence_total_value != null ? Number(record.recurrence_total_value) : null,
+        record.recurrence_total_value != null
+          ? Number(record.recurrence_total_value)
+          : null,
       recurrenceNextRunAt: record.recurrence_next_run_at
         ? new Date(String(record.recurrence_next_run_at))
         : null,
@@ -182,9 +198,9 @@ export class PrismaSalesRepository implements ISalesRepository {
   async createPaymentLink(
     record: Omit<SalesPaymentLinkRecord, 'createdAt' | 'updatedAt'>,
   ): Promise<SalesPaymentLinkRecord> {
-
-
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       INSERT INTO sales_schema.payment_links (
         id,
         tenant_id,
@@ -261,8 +277,6 @@ export class PrismaSalesRepository implements ISalesRepository {
     total: number;
     summary: SalesPaymentLinksSummary;
   }> {
-
-
     const conditions: Prisma.Sql[] = [
       Prisma.sql`payment_links.tenant_id = ${tenantId}::uuid`,
     ];
@@ -276,11 +290,15 @@ export class PrismaSalesRepository implements ISalesRepository {
     }
 
     if (filters.dateFrom) {
-      conditions.push(Prisma.sql`payment_links.created_at >= ${filters.dateFrom}`);
+      conditions.push(
+        Prisma.sql`payment_links.created_at >= ${filters.dateFrom}`,
+      );
     }
 
     if (filters.dateTo) {
-      conditions.push(Prisma.sql`payment_links.created_at <= ${filters.dateTo}`);
+      conditions.push(
+        Prisma.sql`payment_links.created_at <= ${filters.dateTo}`,
+      );
     }
 
     if (filters.search?.trim()) {
@@ -298,7 +316,9 @@ export class PrismaSalesRepository implements ISalesRepository {
     const whereClause = Prisma.join(conditions, ' AND ');
     const offset = Math.max(0, (filters.page - 1) * filters.pageSize);
 
-    const items = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const items = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT payment_links.*, contacts.name AS contact_name
       FROM sales_schema.payment_links AS payment_links
       LEFT JOIN contact_schema.contacts AS contacts
@@ -314,14 +334,18 @@ export class PrismaSalesRepository implements ISalesRepository {
         ON contacts.id = payment_links.contact_id
        AND contacts.tenant_id = payment_links.tenant_id`;
 
-    const totalRows = await this.prisma.$queryRaw<Array<{ total: number }>>(Prisma.sql`
+    const totalRows = await this.prisma.$queryRaw<
+      Array<{ total: number }>
+    >(Prisma.sql`
       SELECT COUNT(*)::int AS total
       FROM sales_schema.payment_links AS payment_links
       ${contactJoin}
       WHERE ${whereClause}
     `);
 
-    const summaryRows = await this.prisma.$queryRaw<Array<Record<string, unknown>>>(Prisma.sql`
+    const summaryRows = await this.prisma.$queryRaw<
+      Array<Record<string, unknown>>
+    >(Prisma.sql`
       SELECT
         COUNT(*)::int AS total_links,
         COUNT(*) FILTER (WHERE payment_links.status = 'ACTIVE')::int AS active_links,
@@ -356,9 +380,9 @@ export class PrismaSalesRepository implements ISalesRepository {
     tenantId: string,
     paymentLinkId: string,
   ): Promise<SalesPaymentLinkRecord | null> {
-
-
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT payment_links.*, contacts.name AS contact_name
       FROM sales_schema.payment_links AS payment_links
       LEFT JOIN contact_schema.contacts AS contacts
@@ -378,9 +402,9 @@ export class PrismaSalesRepository implements ISalesRepository {
     status: SalesPaymentLinkStatus,
     deletedAt?: Date | null,
   ): Promise<SalesPaymentLinkRecord | null> {
-
-
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       UPDATE sales_schema.payment_links
       SET
         status = ${status},
@@ -398,9 +422,9 @@ export class PrismaSalesRepository implements ISalesRepository {
     externalReference: string,
     status: 'PAID' | 'OVERDUE' | 'REFUNDED',
   ): Promise<SalesPaymentLinkRecord | null> {
-
-
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       UPDATE sales_schema.payment_links
       SET
         status = ${status},
@@ -416,16 +440,20 @@ export class PrismaSalesRepository implements ISalesRepository {
     return value.replace(/[\\%_]/g, '\\$&');
   }
 
-  private mapPromotion(record: any): import('../../../domain/repositories/ISalesRepository').SalesPromotionRecord {
+  private mapPromotion(
+    record: any,
+  ): import('../../../domain/repositories/ISalesRepository').SalesPromotionRecord {
     const targets = this.mapTargets(record.targets, record.catalogItemId);
     return {
       id: record.id,
       tenantId: record.tenantId,
       title: record.title,
       description: record.description,
-      discountType: record.discountType as import('../../../domain/repositories/ISalesRepository').SalesDiscountType,
+      discountType:
+        record.discountType as import('../../../domain/repositories/ISalesRepository').SalesDiscountType,
       discountValue: Number(record.discountValue),
-      minimumOrder: record.minimumOrder != null ? Number(record.minimumOrder) : null,
+      minimumOrder:
+        record.minimumOrder != null ? Number(record.minimumOrder) : null,
       imageUrl: record.imageUrl ?? null,
       startsAt: record.startsAt,
       expiresAt: record.expiresAt ?? null,
@@ -437,7 +465,10 @@ export class PrismaSalesRepository implements ISalesRepository {
     };
   }
 
-  private mapTargets(records?: any[], legacyCatalogItemId?: string | null): SalesPromotionTargetRecord[] {
+  private mapTargets(
+    records?: any[],
+    legacyCatalogItemId?: string | null,
+  ): SalesPromotionTargetRecord[] {
     const explicitTargets = (records ?? []).map((target) => ({
       targetType: target.targetType as SalesPromotionTargetRecord['targetType'],
       targetId: target.targetId,
@@ -455,7 +486,10 @@ export class PrismaSalesRepository implements ISalesRepository {
     const normalized = new Map<string, SalesPromotionTargetRecord>();
 
     for (const target of targets ?? []) {
-      if (!target?.targetId || !['ITEM', 'CATEGORY'].includes(target.targetType)) {
+      if (
+        !target?.targetId ||
+        !['ITEM', 'CATEGORY'].includes(target.targetType)
+      ) {
         continue;
       }
       normalized.set(`${target.targetType}:${target.targetId}`, {
@@ -465,18 +499,28 @@ export class PrismaSalesRepository implements ISalesRepository {
     }
 
     if (catalogItemId && normalized.size === 0) {
-      normalized.set(`ITEM:${catalogItemId}`, { targetType: 'ITEM', targetId: catalogItemId });
+      normalized.set(`ITEM:${catalogItemId}`, {
+        targetType: 'ITEM',
+        targetId: catalogItemId,
+      });
     }
 
     return Array.from(normalized.values());
   }
 
-  private firstItemTargetId(targets: SalesPromotionTargetRecord[]): string | null {
-    return targets.find((target) => target.targetType === 'ITEM')?.targetId ?? null;
+  private firstItemTargetId(
+    targets: SalesPromotionTargetRecord[],
+  ): string | null {
+    return (
+      targets.find((target) => target.targetType === 'ITEM')?.targetId ?? null
+    );
   }
 
   async createPromotion(
-    record: Omit<import('../../../domain/repositories/ISalesRepository').SalesPromotionRecord, 'createdAt' | 'updatedAt'>,
+    record: Omit<
+      import('../../../domain/repositories/ISalesRepository').SalesPromotionRecord,
+      'createdAt' | 'updatedAt'
+    >,
   ) {
     const targets = this.normalizeTargets(record.targets, record.catalogItemId);
     const created = await this.prisma.salesPromotion.create({
@@ -505,7 +549,11 @@ export class PrismaSalesRepository implements ISalesRepository {
     return this.mapPromotion(created);
   }
 
-  async updatePromotion(tenantId: string, id: string, data: Record<string, any>) {
+  async updatePromotion(
+    tenantId: string,
+    id: string,
+    data: Record<string, any>,
+  ) {
     const existing = await this.prisma.salesPromotion.findFirst({
       where: { id, tenantId },
     });
@@ -515,14 +563,20 @@ export class PrismaSalesRepository implements ISalesRepository {
     const updated = await this.prisma.$transaction(async (tx) => {
       let effectiveData = promotionData;
       if (targets !== undefined) {
-        const normalizedTargets = this.normalizeTargets(targets, promotionData.catalogItemId);
+        const normalizedTargets = this.normalizeTargets(
+          targets,
+          promotionData.catalogItemId,
+        );
         effectiveData = {
           ...promotionData,
-          catalogItemId: promotionData.catalogItemId !== undefined
-            ? promotionData.catalogItemId
-            : this.firstItemTargetId(normalizedTargets),
+          catalogItemId:
+            promotionData.catalogItemId !== undefined
+              ? promotionData.catalogItemId
+              : this.firstItemTargetId(normalizedTargets),
         };
-        await tx.salesPromotionTarget.deleteMany({ where: { promotionId: id } });
+        await tx.salesPromotionTarget.deleteMany({
+          where: { promotionId: id },
+        });
         if (normalizedTargets.length > 0) {
           await tx.salesPromotionTarget.createMany({
             data: normalizedTargets.map((target) => ({
@@ -569,7 +623,9 @@ export class PrismaSalesRepository implements ISalesRepository {
     return records.map((r: any) => this.mapPromotion(r));
   }
 
-  private mapCoupon(record: any): import('../../../domain/repositories/ISalesRepository').SalesCouponRecord {
+  private mapCoupon(
+    record: any,
+  ): import('../../../domain/repositories/ISalesRepository').SalesCouponRecord {
     const targets = this.mapTargets(record.targets, record.catalogItemId);
     return {
       id: record.id,
@@ -577,7 +633,8 @@ export class PrismaSalesRepository implements ISalesRepository {
       promotionId: record.promotionId ?? null,
       code: record.code,
       description: record.description ?? null,
-      discountType: record.discountType as import('../../../domain/repositories/ISalesRepository').SalesDiscountType,
+      discountType:
+        record.discountType as import('../../../domain/repositories/ISalesRepository').SalesDiscountType,
       discountValue: Number(record.discountValue),
       maxUses: record.maxUses,
       usedCount: record.usedCount,
@@ -592,7 +649,10 @@ export class PrismaSalesRepository implements ISalesRepository {
   }
 
   async createCoupon(
-    record: Omit<import('../../../domain/repositories/ISalesRepository').SalesCouponRecord, 'createdAt' | 'updatedAt' | 'usedCount'>,
+    record: Omit<
+      import('../../../domain/repositories/ISalesRepository').SalesCouponRecord,
+      'createdAt' | 'updatedAt' | 'usedCount'
+    >,
   ) {
     const targets = this.normalizeTargets(record.targets, record.catalogItemId);
     const created = await this.prisma.salesCoupon.create({
@@ -632,12 +692,16 @@ export class PrismaSalesRepository implements ISalesRepository {
     const updated = await this.prisma.$transaction(async (tx) => {
       let effectiveData = couponData;
       if (targets !== undefined) {
-        const normalizedTargets = this.normalizeTargets(targets, couponData.catalogItemId);
+        const normalizedTargets = this.normalizeTargets(
+          targets,
+          couponData.catalogItemId,
+        );
         effectiveData = {
           ...couponData,
-          catalogItemId: couponData.catalogItemId !== undefined
-            ? couponData.catalogItemId
-            : this.firstItemTargetId(normalizedTargets),
+          catalogItemId:
+            couponData.catalogItemId !== undefined
+              ? couponData.catalogItemId
+              : this.firstItemTargetId(normalizedTargets),
         };
         await tx.salesCouponTarget.deleteMany({ where: { couponId: id } });
         if (normalizedTargets.length > 0) {

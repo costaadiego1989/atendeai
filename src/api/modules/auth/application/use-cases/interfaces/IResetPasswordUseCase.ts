@@ -11,7 +11,9 @@ export interface ResetPasswordOutput {
   message: string;
 }
 
-export interface IResetPasswordUseCase
-  extends IUseCase<ResetPasswordInput, ResetPasswordOutput> {}
+export interface IResetPasswordUseCase extends IUseCase<
+  ResetPasswordInput,
+  ResetPasswordOutput
+> {}
 
 export const IResetPasswordUseCase = Symbol('IResetPasswordUseCase');

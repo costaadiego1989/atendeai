@@ -1,4 +1,7 @@
-import { ProspectCampaign as PrismaProspectCampaign } from '@prisma/client';
+import {
+  Prisma,
+  ProspectCampaign as PrismaProspectCampaign,
+} from '@prisma/client';
 import { ProspectCampaign } from '../../../domain/entities/ProspectCampaign';
 import { TenantId } from '@shared/domain/TenantId';
 import { UniqueEntityID } from '@shared/domain/UniqueEntityID';
@@ -17,8 +20,19 @@ export class ProspectCampaignMapper {
         channel: ProspectChannelVO.create(raw.channel),
         targetContactIds: (raw.targetContactIds as string[] | null) ?? [],
         messageTemplate: raw.messageTemplate ?? undefined,
+        templateName: raw.templateName ?? undefined,
+        languageCode: raw.languageCode,
+        templateVariableMapping:
+          (raw.templateVariableMapping as Record<string, string> | null) ??
+          undefined,
+        aiVariableGeneration: raw.aiVariableGeneration,
+        cooldownDays: raw.cooldownDays,
+        minDelaySeconds: raw.minDelaySeconds,
+        maxDelaySeconds: raw.maxDelaySeconds,
+        blockRateThreshold: raw.blockRateThreshold,
         dailyLimit: raw.dailyLimit,
         status: ProspectCampaignStatusVO.create(raw.status),
+        pauseReason: (raw as any).pauseReason ?? undefined,
       },
       new UniqueEntityID(raw.id),
       raw.createdAt,
@@ -36,6 +50,15 @@ export class ProspectCampaignMapper {
       channel: campaign.channel.value,
       targetContactIds: campaign.targetContactIds,
       messageTemplate: campaign.messageTemplate ?? null,
+      templateName: campaign.templateName ?? null,
+      languageCode: campaign.languageCode,
+      templateVariableMapping:
+        campaign.templateVariableMapping ?? Prisma.JsonNull,
+      aiVariableGeneration: campaign.aiVariableGeneration,
+      cooldownDays: campaign.cooldownDays,
+      minDelaySeconds: campaign.minDelaySeconds,
+      maxDelaySeconds: campaign.maxDelaySeconds,
+      blockRateThreshold: campaign.blockRateThreshold,
       dailyLimit: campaign.dailyLimit,
       status: campaign.status.value,
       createdAt: campaign.createdAt,

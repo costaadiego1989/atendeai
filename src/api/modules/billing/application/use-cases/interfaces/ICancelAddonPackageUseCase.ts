@@ -9,7 +9,9 @@ export interface CancelAddonPackageOutput {
   status: 'CANCELED';
 }
 
-export interface ICancelAddonPackageUseCase
-  extends IUseCase<CancelAddonPackageInput, CancelAddonPackageOutput> {}
+export interface ICancelAddonPackageUseCase extends IUseCase<
+  CancelAddonPackageInput,
+  CancelAddonPackageOutput
+> {}
 
 export const ICancelAddonPackageUseCase = Symbol('ICancelAddonPackageUseCase');

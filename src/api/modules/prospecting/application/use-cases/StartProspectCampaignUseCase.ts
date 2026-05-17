@@ -24,9 +24,7 @@ import {
 } from './interfaces/IStartProspectCampaignUseCase';
 
 @Injectable()
-export class StartProspectCampaignUseCase
-  implements IStartProspectCampaignUseCase
-{
+export class StartProspectCampaignUseCase implements IStartProspectCampaignUseCase {
   constructor(
     @Inject(PROSPECT_CAMPAIGN_REPOSITORY)
     private readonly campaignRepository: IProspectCampaignRepository,
@@ -59,9 +57,7 @@ export class StartProspectCampaignUseCase
     );
 
     if (audienceContactIds.length === 0) {
-      throw new ValidationErrorException(
-        'Prospect campaign audience is empty',
-      );
+      throw new ValidationErrorException('Prospect campaign audience is empty');
     }
 
     const existingExecutions = await this.executionRepository.findAllByCampaign(

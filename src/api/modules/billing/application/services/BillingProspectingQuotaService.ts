@@ -18,7 +18,10 @@ export class BillingProspectingQuotaService {
     now?: Date;
   }): Promise<{ used: number; quota: number; remaining: number }> {
     const quota = await this.resolveDailyQuota(input.tenantId);
-    const used = await this.getDailyUsage(input.tenantId, input.now ?? new Date());
+    const used = await this.getDailyUsage(
+      input.tenantId,
+      input.now ?? new Date(),
+    );
     const requested = Math.max(1, input.requested);
 
     if (used + requested > quota) {
@@ -52,14 +55,17 @@ export class BillingProspectingQuotaService {
 
     return Number.isFinite(configuredLimit) && configuredLimit > 0
       ? configuredLimit
-      : DEFAULT_DAILY_PROSPECTING_LIMITS[plan] ?? DEFAULT_DAILY_PROSPECTING_LIMITS.ESSENCIAL;
+      : (DEFAULT_DAILY_PROSPECTING_LIMITS[plan] ??
+          DEFAULT_DAILY_PROSPECTING_LIMITS.ESSENCIAL);
   }
 
   private async getDailyUsage(tenantId: string, now: Date): Promise<number> {
     const { dayStart, dayEnd } = this.getSaoPauloDayWindow(now);
 
     try {
-      const [row] = await this.prisma.$queryRaw<Array<{ used: number }>>(Prisma.sql`
+      const [row] = await this.prisma.$queryRaw<
+        Array<{ used: number }>
+      >(Prisma.sql`
         SELECT COALESCE(SUM(max_results), 0)::int AS used
         FROM prospecting_schema.prospect_searches
         WHERE tenant_id = ${tenantId}::uuid

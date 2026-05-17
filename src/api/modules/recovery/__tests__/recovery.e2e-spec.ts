@@ -86,7 +86,7 @@ describe('RecoveryController (e2e)', () => {
         provider: 'ASAAS',
         eventType:
           payload.event === 'PAYMENT_RECEIVED' ||
-            payload.event === 'PAYMENT_CONFIRMED'
+          payload.event === 'PAYMENT_CONFIRMED'
             ? 'PAYMENT_CONFIRMED'
             : payload.event,
         paymentId: payload.payment.id,
@@ -287,7 +287,9 @@ describe('RecoveryController (e2e)', () => {
       ON payment_schema.payment_webhook_receipts (receipt_key)
     `);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => { });
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -318,48 +320,58 @@ describe('RecoveryController (e2e)', () => {
     if (tenantId) {
       await prisma.message
         .deleteMany({ where: { conversation: { tenantId } } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.conversation
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma
-        .$executeRaw(Prisma.sql`
+        .$executeRaw(
+          Prisma.sql`
           DELETE FROM recovery_schema.recovery_recurring_charge_runs
           WHERE tenant_id = ${tenantId}::uuid
-        `)
-        .catch(() => { });
+        `,
+        )
+        .catch(() => {});
       await prisma
-        .$executeRaw(Prisma.sql`
+        .$executeRaw(
+          Prisma.sql`
           DELETE FROM recovery_schema.recovery_recurring_charges
           WHERE tenant_id = ${tenantId}::uuid
-        `)
-        .catch(() => { });
+        `,
+        )
+        .catch(() => {});
       await prisma
-        .$executeRaw(Prisma.sql`
+        .$executeRaw(
+          Prisma.sql`
           DELETE FROM recovery_schema.recovery_async_jobs
           WHERE tenant_id = ${tenantId}::uuid
-        `)
-        .catch(() => { });
+        `,
+        )
+        .catch(() => {});
       await prisma
-        .$executeRaw(Prisma.sql`
+        .$executeRaw(
+          Prisma.sql`
           DELETE FROM recovery_schema.recovery_cases
           WHERE tenant_id = ${tenantId}::uuid
-        `)
-        .catch(() => { });
+        `,
+        )
+        .catch(() => {});
       await prisma
-        .$executeRaw(Prisma.sql`
+        .$executeRaw(
+          Prisma.sql`
           DELETE FROM payment_schema.payment_webhook_receipts
           WHERE tenant_id = ${tenantId}::uuid
-        `)
-        .catch(() => { });
-      await prisma.contact
-        .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        `,
+        )
+        .catch(() => {});
+      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {
@@ -526,7 +538,9 @@ describe('RecoveryController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/tenants/${tenantId}/recovery/cases/${secondCaseResponse.body.id}/status`)
+      .patch(
+        `/api/v1/tenants/${tenantId}/recovery/cases/${secondCaseResponse.body.id}/status`,
+      )
       .set('Cookie', [authCookie])
       .send({
         status: 'PROMISE_TO_PAY',
@@ -567,7 +581,9 @@ describe('RecoveryController (e2e)', () => {
     );
 
     const downloadResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/recovery/jobs/${jobResponse.body.id}/download`)
+      .get(
+        `/api/v1/tenants/${tenantId}/recovery/jobs/${jobResponse.body.id}/download`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 
@@ -598,7 +614,9 @@ describe('RecoveryController (e2e)', () => {
       .expect(201);
 
     const outreachResponse = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/recovery/cases/${createCaseResponse.body.id}/outreach`)
+      .post(
+        `/api/v1/tenants/${tenantId}/recovery/cases/${createCaseResponse.body.id}/outreach`,
+      )
       .set('Cookie', [authCookie])
       .send({
         messageText:
@@ -749,7 +767,9 @@ describe('RecoveryController (e2e)', () => {
       .expect(201);
 
     const contactedResponse = await request(app.getHttpServer())
-      .patch(`/api/v1/tenants/${tenantId}/recovery/cases/${createCaseResponse.body.id}/status`)
+      .patch(
+        `/api/v1/tenants/${tenantId}/recovery/cases/${createCaseResponse.body.id}/status`,
+      )
       .set('Cookie', [authCookie])
       .send({
         status: 'CONTACTED',
@@ -765,7 +785,9 @@ describe('RecoveryController (e2e)', () => {
     );
 
     const promiseToPayResponse = await request(app.getHttpServer())
-      .patch(`/api/v1/tenants/${tenantId}/recovery/cases/${createCaseResponse.body.id}/status`)
+      .patch(
+        `/api/v1/tenants/${tenantId}/recovery/cases/${createCaseResponse.body.id}/status`,
+      )
       .set('Cookie', [authCookie])
       .send({
         status: 'PROMISE_TO_PAY',
@@ -983,7 +1005,8 @@ describe('RecoveryController (e2e)', () => {
       )
       .set('Cookie', [authCookie])
       .send({
-        messageText: 'Oi, Ricardo. Posso te ajudar a regularizar essa pendencia por aqui.',
+        messageText:
+          'Oi, Ricardo. Posso te ajudar a regularizar essa pendencia por aqui.',
       })
       .expect(201);
 
@@ -1010,12 +1033,20 @@ describe('RecoveryController (e2e)', () => {
         .expect(200);
 
       expect(caseDetailsResponse.body.status).toBe('NEGOTIATING');
-      expect(caseDetailsResponse.body.suggestedReply).toEqual(expect.any(String));
+      expect(caseDetailsResponse.body.suggestedReply).toEqual(
+        expect.any(String),
+      );
       expect(caseDetailsResponse.body.suggestedReply.length).toBeGreaterThan(0);
-      expect(caseDetailsResponse.body.suggestedNextAction).toEqual(expect.any(String));
-      expect(caseDetailsResponse.body.suggestedNextAction.length).toBeGreaterThan(0);
+      expect(caseDetailsResponse.body.suggestedNextAction).toEqual(
+        expect.any(String),
+      );
+      expect(
+        caseDetailsResponse.body.suggestedNextAction.length,
+      ).toBeGreaterThan(0);
       expect(caseDetailsResponse.body.guidanceGeneratedAt).not.toBeNull();
-      expect(caseDetailsResponse.body.debtorCompanyName).toBe('Construtora Sol');
+      expect(caseDetailsResponse.body.debtorCompanyName).toBe(
+        'Construtora Sol',
+      );
       expect(caseDetailsResponse.body.chargeTitle).toBe('Parcela de serviço');
     });
 
@@ -1146,7 +1177,8 @@ describe('RecoveryController (e2e)', () => {
       )
       .set('Cookie', [authCookie])
       .send({
-        messageText: 'Oi, Helena. Posso te ajudar a regularizar essa pendencia.',
+        messageText:
+          'Oi, Helena. Posso te ajudar a regularizar essa pendencia.',
       })
       .expect(201);
 

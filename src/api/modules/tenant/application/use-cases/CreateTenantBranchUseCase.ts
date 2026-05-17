@@ -15,13 +15,11 @@ interface CreateTenantBranchInput {
   email?: string | null;
   whatsappNumber?: string | null;
   instagramAccountId?: string | null;
-  whatsAppConfigOverride?:
-  | {
+  whatsAppConfigOverride?: {
     provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
     credentials: Record<string, string>;
     webhookSecret?: string | null;
-  }
-  | null;
+  } | null;
   zipcode?: string | null;
   street?: string | null;
   streetNumber?: string | null;
@@ -42,13 +40,16 @@ export class CreateTenantBranchUseCase {
     private readonly tenantRepository: ITenantRepository,
     private readonly tenantAuditService: TenantAuditService,
     private readonly billingCapacityService: TenantBillingCapacityService,
-  ) { }
+  ) {}
 
   async execute(input: CreateTenantBranchInput) {
     await this.billingCapacityService.assertCanAdd(input.tenantId, 'branches');
 
     if (input.whatsappNumber?.trim()) {
-      await this.billingCapacityService.assertCanAdd(input.tenantId, 'whatsappNumbers');
+      await this.billingCapacityService.assertCanAdd(
+        input.tenantId,
+        'whatsappNumbers',
+      );
     }
 
     const branch = await this.tenantRepository.createBranch({

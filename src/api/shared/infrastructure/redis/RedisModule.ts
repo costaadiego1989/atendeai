@@ -20,8 +20,9 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
         const url = clean(redisUrl);
         const host = clean(redisHost);
 
-        const connectionString = (url?.includes('://') ? url : null) || 
-                                (host?.includes('://') ? host : null);
+        const connectionString =
+          (url?.includes('://') ? url : null) ||
+          (host?.includes('://') ? host : null);
 
         if (connectionString) {
           try {
@@ -29,8 +30,12 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
             const options = {
               host: parsed.hostname,
               port: Number(parsed.port) || 6379,
-              password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
-              db: parsed.pathname ? parseInt(parsed.pathname.substring(1)) || 0 : 0,
+              password: parsed.password
+                ? decodeURIComponent(parsed.password)
+                : undefined,
+              db: parsed.pathname
+                ? parseInt(parsed.pathname.substring(1)) || 0
+                : 0,
               maxRetriesPerRequest: null,
               keepAlive: 30000,
               enableReadyCheck: false,
@@ -42,11 +47,15 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
             };
 
             const redis = new Redis(options);
-            redis.on('error', (err) => console.error('[RedisModule] Connection Error:', err.message));
+            redis.on('error', (err) =>
+              console.error('[RedisModule] Connection Error:', err.message),
+            );
             return redis;
           } catch (e) {
             // Se falhar o parse, tenta limpar o host manualmente
-            const fallbackHost = connectionString.replace(/^redis[s]?:\/\//, '').split(':')[0];
+            const fallbackHost = connectionString
+              .replace(/^redis[s]?:\/\//, '')
+              .split(':')[0];
             return new Redis({
               host: fallbackHost,
               port: 6379,
@@ -65,11 +74,13 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
           connectTimeout: 10000,
           retryStrategy: (times: number) => Math.min(times * 100, 3000),
         });
-        redis.on('error', (err) => console.error('[RedisModule] Error:', err.message));
+        redis.on('error', (err) =>
+          console.error('[RedisModule] Error:', err.message),
+        );
         return redis;
       },
     },
   ],
   exports: [REDIS_CLIENT],
 })
-export class RedisModule { }
+export class RedisModule {}

@@ -21,7 +21,10 @@ export interface GoogleAdsLeadItem {
 }
 
 export interface IGoogleAdsLeadSource {
-  pullLeads(input: { tenantId: string; limit?: number }): Promise<GoogleAdsLeadItem[]>;
+  pullLeads(input: {
+    tenantId: string;
+    limit?: number;
+  }): Promise<GoogleAdsLeadItem[]>;
 }
 
 export const GOOGLE_ADS_LEAD_SOURCE = Symbol('IGoogleAdsLeadSource');

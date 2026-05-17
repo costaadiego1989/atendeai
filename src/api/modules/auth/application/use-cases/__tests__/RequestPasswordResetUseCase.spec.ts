@@ -12,7 +12,14 @@ describe('RequestPasswordResetUseCase', () => {
   let authAuditLogRepository: any;
   let configService: any;
 
-  function createMockUser(overrides: Partial<{ id: string; email: string; name: string; tenantId: string }> = {}) {
+  function createMockUser(
+    overrides: Partial<{
+      id: string;
+      email: string;
+      name: string;
+      tenantId: string;
+    }> = {},
+  ) {
     return AuthUser.create(
       {
         tenantId: overrides.tenantId ?? 'tenant-1',
@@ -48,7 +55,10 @@ describe('RequestPasswordResetUseCase', () => {
   });
 
   it('should generate token and send email when user exists', async () => {
-    const mockUser = createMockUser({ email: 'user@test.com', name: 'Test User' });
+    const mockUser = createMockUser({
+      email: 'user@test.com',
+      name: 'Test User',
+    });
     authUserRepository.findByEmail.mockResolvedValue(mockUser);
 
     const result = await useCase.execute({ email: 'user@test.com' });
@@ -66,7 +76,9 @@ describe('RequestPasswordResetUseCase', () => {
       expect.objectContaining({
         email: 'user@test.com',
         name: 'Test User',
-        resetUrl: expect.stringContaining('https://app.atendeai.com/reset-password?token='),
+        resetUrl: expect.stringContaining(
+          'https://app.atendeai.com/reset-password?token=',
+        ),
         expiresAt: expect.any(Date),
       }),
     );
@@ -103,10 +115,14 @@ describe('RequestPasswordResetUseCase', () => {
 
     await useCase.execute({ email: 'user@test.com' });
 
-    expect(passwordResetTokenStore.invalidateForUser).toHaveBeenCalledWith('user-1');
+    expect(passwordResetTokenStore.invalidateForUser).toHaveBeenCalledWith(
+      'user-1',
+    );
     // invalidateForUser should be called before create
-    const invalidateOrder = passwordResetTokenStore.invalidateForUser.mock.invocationCallOrder[0];
-    const createOrder = passwordResetTokenStore.create.mock.invocationCallOrder[0];
+    const invalidateOrder =
+      passwordResetTokenStore.invalidateForUser.mock.invocationCallOrder[0];
+    const createOrder =
+      passwordResetTokenStore.create.mock.invocationCallOrder[0];
     expect(invalidateOrder).toBeLessThan(createOrder);
   });
 
@@ -128,7 +144,11 @@ describe('RequestPasswordResetUseCase', () => {
 
     await useCase.execute({
       email: 'user@test.com',
-      context: { ipAddress: '10.0.0.1', userAgent: 'Chrome', deviceId: 'dev-1' },
+      context: {
+        ipAddress: '10.0.0.1',
+        userAgent: 'Chrome',
+        deviceId: 'dev-1',
+      },
     });
 
     expect(authAuditLogRepository.record).toHaveBeenCalledWith(
@@ -151,6 +171,8 @@ describe('RequestPasswordResetUseCase', () => {
     await useCase.execute({ email: 'user@test.com' });
 
     const sendCall = passwordResetEmailSender.send.mock.calls[0][0];
-    expect(sendCall.resetUrl).toContain('http://localhost:8080/reset-password?token=');
+    expect(sendCall.resetUrl).toContain(
+      'http://localhost:8080/reset-password?token=',
+    );
   });
 });

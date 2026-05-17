@@ -54,7 +54,10 @@ export class MessagingGatewayRegistry implements IMessagingGatewayRegistry {
     );
   }
 
-  private getKey(channel: MessagingChannel, provider: MessagingProvider): string {
+  private getKey(
+    channel: MessagingChannel,
+    provider: MessagingProvider,
+  ): string {
     return `${channel}:${provider}`;
   }
 }

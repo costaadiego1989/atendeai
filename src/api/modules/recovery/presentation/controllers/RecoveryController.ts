@@ -114,7 +114,10 @@ export class RecoveryController {
     @Param('tenantId') tenantId: string,
     @Param('playbookId') playbookId: string,
   ) {
-    return this.activateRecoveryPlaybookUseCase.execute({ tenantId, playbookId });
+    return this.activateRecoveryPlaybookUseCase.execute({
+      tenantId,
+      playbookId,
+    });
   }
 
   @Post('cases')
@@ -212,7 +215,10 @@ export class RecoveryController {
       },
     );
 
-    await this.recoveryAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.recoveryAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.recoveryAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -224,7 +230,10 @@ export class RecoveryController {
 
   @Get('jobs/:jobId')
   @Roles('OWNER', 'ADMIN')
-  async getJob(@Param('tenantId') tenantId: string, @Param('jobId') jobId: string) {
+  async getJob(
+    @Param('tenantId') tenantId: string,
+    @Param('jobId') jobId: string,
+  ) {
     return this.recoveryAsyncJobsService.getJob(tenantId, jobId);
   }
 
@@ -235,11 +244,17 @@ export class RecoveryController {
     @Param('jobId') jobId: string,
     @Res() res: Response,
   ) {
-    const file = await this.recoveryAsyncJobsService.getDownloadPayload(tenantId, jobId);
+    const file = await this.recoveryAsyncJobsService.getDownloadPayload(
+      tenantId,
+      jobId,
+    );
 
     if (file.fileContent) {
       res.setHeader('Content-Type', file.fileMimeType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file.fileName}"`,
+      );
       return res.send(file.fileContent);
     }
 

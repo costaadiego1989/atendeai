@@ -50,10 +50,11 @@ export class PurchaseAddonPackageUseCase implements IPurchaseAddonPackageUseCase
       );
     }
 
-    const existingModule = await this.billingRepository.findActiveSubscriptionModule(
-      input.tenantId,
-      ADDON_PACKAGE_MODULE_CODE,
-    );
+    const existingModule =
+      await this.billingRepository.findActiveSubscriptionModule(
+        input.tenantId,
+        ADDON_PACKAGE_MODULE_CODE,
+      );
 
     if (existingModule) {
       throw new DomainException(
@@ -72,7 +73,10 @@ export class PurchaseAddonPackageUseCase implements IPurchaseAddonPackageUseCase
       subscription.plan,
     );
     if (!planCatalog) {
-      throw new EntityNotFoundException('BillingPlanCatalog', subscription.plan);
+      throw new EntityNotFoundException(
+        'BillingPlanCatalog',
+        subscription.plan,
+      );
     }
 
     const packagePrice = Math.round(

@@ -18,8 +18,10 @@ export interface ProspectCampaignListItem {
   createdAt: Date;
 }
 
-export interface IListProspectCampaignsUseCase
-  extends IUseCase<ListProspectCampaignsInput, ProspectCampaignListItem[]> {}
+export interface IListProspectCampaignsUseCase extends IUseCase<
+  ListProspectCampaignsInput,
+  ProspectCampaignListItem[]
+> {}
 
 export const IListProspectCampaignsUseCase = Symbol(
   'IListProspectCampaignsUseCase',

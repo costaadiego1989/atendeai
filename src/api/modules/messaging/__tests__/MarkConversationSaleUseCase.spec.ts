@@ -207,7 +207,8 @@ describe('MarkConversationSaleUseCase', () => {
     expect(prisma.conversationSaleEvent.create).not.toHaveBeenCalled();
     expect(result).toEqual({
       approved: false,
-      reason: 'Pagamento confirmado em recovery conta como receita recuperada, não como nova venda.',
+      reason:
+        'Pagamento confirmado em recovery conta como receita recuperada, não como nova venda.',
       confidence: 1,
       conversationId: 'conversation-3',
       commercialKind: 'RECOVERY',

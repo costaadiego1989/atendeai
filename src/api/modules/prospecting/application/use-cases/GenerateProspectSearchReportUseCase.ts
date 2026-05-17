@@ -62,7 +62,9 @@ export class GenerateProspectSearchReportUseCase {
   async execute(
     input: GenerateProspectSearchReportInput,
   ): Promise<GenerateProspectSearchReportOutput> {
-    const searches = await this.prospectSearchRepository.findAllByTenant(input.tenantId);
+    const searches = await this.prospectSearchRepository.findAllByTenant(
+      input.tenantId,
+    );
     const statusFilters = new Set((input.statuses ?? []).filter(Boolean));
     const sourceFilters = new Set((input.sources ?? []).filter(Boolean));
     const normalizedQuery = input.query?.trim().toLowerCase() ?? '';
@@ -92,10 +94,11 @@ export class GenerateProspectSearchReportUseCase {
 
     const rows = await Promise.all(
       filteredSearches.map(async (search) => {
-        const results = await this.prospectSearchResultRepository.findAllBySearch(
-          input.tenantId,
-          search.id.toString(),
-        );
+        const results =
+          await this.prospectSearchResultRepository.findAllBySearch(
+            input.tenantId,
+            search.id.toString(),
+          );
 
         return {
           searchId: search.id.toString(),
@@ -108,8 +111,12 @@ export class GenerateProspectSearchReportUseCase {
           maxResults: search.maxResults,
           discoveredCount: search.discoveredCount,
           actualResultsCount: results.length,
-          whatsappReadyCount: results.filter((item) => Boolean(item.whatsappPhone)).length,
-          instagramReadyCount: results.filter((item) => Boolean(item.instagramUrl)).length,
+          whatsappReadyCount: results.filter((item) =>
+            Boolean(item.whatsappPhone),
+          ).length,
+          instagramReadyCount: results.filter((item) =>
+            Boolean(item.instagramUrl),
+          ).length,
           emailCount: results.filter((item) => Boolean(item.email)).length,
           failureReason: search.failureReason,
           createdAt: search.createdAt.toISOString(),
@@ -125,12 +132,25 @@ export class GenerateProspectSearchReportUseCase {
         runningSearches: rows.filter(
           (row) => row.status === 'PENDING' || row.status === 'RUNNING',
         ).length,
-        completedSearches: rows.filter((row) => row.status === 'COMPLETED').length,
+        completedSearches: rows.filter((row) => row.status === 'COMPLETED')
+          .length,
         failedSearches: rows.filter((row) => row.status === 'FAILED').length,
-        totalDiscovered: rows.reduce((total, row) => total + row.discoveredCount, 0),
-        actualResultsCount: rows.reduce((total, row) => total + row.actualResultsCount, 0),
-        whatsappReadyCount: rows.reduce((total, row) => total + row.whatsappReadyCount, 0),
-        instagramReadyCount: rows.reduce((total, row) => total + row.instagramReadyCount, 0),
+        totalDiscovered: rows.reduce(
+          (total, row) => total + row.discoveredCount,
+          0,
+        ),
+        actualResultsCount: rows.reduce(
+          (total, row) => total + row.actualResultsCount,
+          0,
+        ),
+        whatsappReadyCount: rows.reduce(
+          (total, row) => total + row.whatsappReadyCount,
+          0,
+        ),
+        instagramReadyCount: rows.reduce(
+          (total, row) => total + row.instagramReadyCount,
+          0,
+        ),
         emailCount: rows.reduce((total, row) => total + row.emailCount, 0),
       },
       rows,

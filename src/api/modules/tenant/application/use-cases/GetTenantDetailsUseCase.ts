@@ -25,7 +25,8 @@ export class GetTenantDetailsUseCase implements IGetTenantDetailsUseCase {
     }
 
     const ownerUser = tenant.owner;
-    const billingAccess = await this.tenantModuleAccessService.getSummary(tenantId);
+    const billingAccess =
+      await this.tenantModuleAccessService.getSummary(tenantId);
 
     return {
       id: tenant.id.toValue(),

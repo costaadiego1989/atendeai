@@ -43,9 +43,9 @@ export class DeviceAwareThrottlerGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<
-      Request & { deviceId?: string }
-    >();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { deviceId?: string }>();
 
     const deviceId = resolveAuthThrottleDeviceId(request);
     const ipAddress = resolveAuthThrottleIp(request);

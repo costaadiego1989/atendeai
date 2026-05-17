@@ -1,5 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { SALES_REPOSITORY, ISalesPromotionRepository, SalesPromotionTargetRecord } from '../../domain/repositories/ISalesRepository';
+import {
+  SALES_REPOSITORY,
+  ISalesPromotionRepository,
+  SalesPromotionTargetRecord,
+} from '../../domain/repositories/ISalesRepository';
 import { randomUUID } from 'crypto';
 
 export interface CreatePromotionInput {

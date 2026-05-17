@@ -97,7 +97,9 @@ abstract class HttpMediaUnderstandingAdapter {
     }
   }
 
-  private normalizeResponse(data: Record<string, unknown>): MediaUnderstandingOutput {
+  private normalizeResponse(
+    data: Record<string, unknown>,
+  ): MediaUnderstandingOutput {
     return {
       provider: (data.provider as string) || this.providerName,
       extractedText:
@@ -126,7 +128,9 @@ export class HttpImageOcrAdapter
     );
   }
 
-  extractTextFromImage(input: MediaUnderstandingInput): Promise<MediaUnderstandingOutput> {
+  extractTextFromImage(
+    input: MediaUnderstandingInput,
+  ): Promise<MediaUnderstandingOutput> {
     return this.requestExtraction(input);
   }
 }
@@ -145,7 +149,9 @@ export class HttpAudioTranscriptionAdapter
     );
   }
 
-  transcribe(input: MediaUnderstandingInput): Promise<MediaUnderstandingOutput> {
+  transcribe(
+    input: MediaUnderstandingInput,
+  ): Promise<MediaUnderstandingOutput> {
     return this.requestExtraction(input);
   }
 }
@@ -164,7 +170,9 @@ export class HttpDocumentTextExtractorAdapter
     );
   }
 
-  extractText(input: MediaUnderstandingInput): Promise<MediaUnderstandingOutput> {
+  extractText(
+    input: MediaUnderstandingInput,
+  ): Promise<MediaUnderstandingOutput> {
     return this.requestExtraction(input);
   }
 }

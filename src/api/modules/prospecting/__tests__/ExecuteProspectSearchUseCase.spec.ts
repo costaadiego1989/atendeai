@@ -250,14 +250,18 @@ describe('ExecuteProspectSearchUseCase', () => {
       status: 'FAILED',
       discoveredCount: 0,
     });
-    expect(search.failureReason).toBe('AI token quota exceeded for prospect search');
+    expect(search.failureReason).toBe(
+      'AI token quota exceeded for prospect search',
+    );
   });
 
   it('should fail before hitting the source when the daily prospecting quota is exceeded', async () => {
     const search = makePendingSearch();
     searchRepository.findBySearchId.mockResolvedValue(search);
     prospectingQuotaService.assertCanConsume.mockRejectedValue(
-      new Error('Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.'),
+      new Error(
+        'Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.',
+      ),
     );
 
     const output = await useCase.execute({

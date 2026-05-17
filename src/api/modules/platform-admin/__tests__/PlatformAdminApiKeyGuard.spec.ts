@@ -2,7 +2,9 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PlatformAdminApiKeyGuard } from '../presentation/guards/PlatformAdminApiKeyGuard';
 
-function mockContext(headers: Record<string, string | undefined>): ExecutionContext {
+function mockContext(
+  headers: Record<string, string | undefined>,
+): ExecutionContext {
   return {
     switchToHttp: () => ({
       getRequest: () => ({ headers }),

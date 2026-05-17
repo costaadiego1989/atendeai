@@ -23,10 +23,7 @@ describe('BillingPlanChangeProcessor', () => {
       publish: jest.fn(),
     };
 
-    processor = new BillingPlanChangeProcessor(
-      billingRepository,
-      eventBus,
-    );
+    processor = new BillingPlanChangeProcessor(billingRepository, eventBus);
   });
 
   it('should apply scheduled downgrade to ESSENCIAL and reset usage', async () => {
@@ -47,7 +44,9 @@ describe('BillingPlanChangeProcessor', () => {
 
     expect(subscription.plan).toBe('ESSENCIAL');
     expect(subscription.scheduledPlan).toBeUndefined();
-    expect(billingRepository.saveSubscription).toHaveBeenCalledWith(subscription);
+    expect(billingRepository.saveSubscription).toHaveBeenCalledWith(
+      subscription,
+    );
     expect(billingRepository.saveUsage).toHaveBeenCalledTimes(1);
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(BillingSubscriptionActivatedIntegrationEvent),

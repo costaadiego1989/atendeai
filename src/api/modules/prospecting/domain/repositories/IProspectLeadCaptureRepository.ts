@@ -24,7 +24,10 @@ export interface IProspectLeadCaptureRepository {
     tenantId: string,
     filters: ProspectLeadCaptureFilters,
   ): Promise<ProspectLeadCapturePage>;
-  findManyByIds(tenantId: string, leadIds: string[]): Promise<ProspectLeadCapture[]>;
+  findManyByIds(
+    tenantId: string,
+    leadIds: string[],
+  ): Promise<ProspectLeadCapture[]>;
 }
 
 export const PROSPECT_LEAD_CAPTURE_REPOSITORY = Symbol(

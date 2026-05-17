@@ -21,7 +21,10 @@ import { IMarkConversationReadUseCase } from '../../application/use-cases/interf
 import { ISendHumanMessageUseCase } from '../../application/use-cases/interfaces/ISendHumanMessageUseCase';
 import { IEnsureConversationForContactUseCase } from '../../application/use-cases/interfaces/IEnsureConversationForContactUseCase';
 import { IUpdateConversationStatusUseCase } from '../../application/use-cases/interfaces/IUpdateConversationStatusUseCase';
-import { SUGGEST_AGENT_REPLY_USE_CASE, ISuggestAgentReplyUseCase } from '../../application/use-cases/interfaces/ISuggestAgentReplyUseCase';
+import {
+  SUGGEST_AGENT_REPLY_USE_CASE,
+  ISuggestAgentReplyUseCase,
+} from '../../application/use-cases/interfaces/ISuggestAgentReplyUseCase';
 import {
   MARK_CONVERSATION_SALE_USE_CASE,
   IMarkConversationSaleUseCase,
@@ -174,10 +177,7 @@ export class MessagingController {
   }
 
   @Post(':id/read')
-  async markRead(
-    @Param('tenantId') tenantId: string,
-    @Param('id') id: string,
-  ) {
+  async markRead(@Param('tenantId') tenantId: string, @Param('id') id: string) {
     return this.markConversationReadUseCase.execute({
       tenantId,
       conversationId: id,
@@ -284,7 +284,9 @@ export class MessagingController {
     });
   }
 
-  private detectAttachmentType(mimeType?: string): 'IMAGE' | 'AUDIO' | 'VIDEO' | 'DOCUMENT' {
+  private detectAttachmentType(
+    mimeType?: string,
+  ): 'IMAGE' | 'AUDIO' | 'VIDEO' | 'DOCUMENT' {
     if (mimeType?.startsWith('image/')) {
       return 'IMAGE';
     }

@@ -7,11 +7,16 @@ import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExcepti
 
 describe('UpdateCatalogCategoryUseCase', () => {
   let repository: jest.Mocked<
-    Pick<ICatalogRepository, 'findCategoryById' | 'updateCategory' | 'saveAuditLog'>
+    Pick<
+      ICatalogRepository,
+      'findCategoryById' | 'updateCategory' | 'saveAuditLog'
+    >
   >;
   let sut: UpdateCatalogCategoryUseCase;
 
-  const categoryRecord = (over?: Partial<CatalogCategoryRecord>): CatalogCategoryRecord => ({
+  const categoryRecord = (
+    over?: Partial<CatalogCategoryRecord>,
+  ): CatalogCategoryRecord => ({
     id: 'category-1',
     tenantId: 'tenant-1',
     parentCategoryId: null,

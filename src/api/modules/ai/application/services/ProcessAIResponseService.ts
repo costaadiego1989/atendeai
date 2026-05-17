@@ -174,7 +174,8 @@ export class ProcessAIResponseService {
       let queryEmbedding: number[] | null = null;
 
       if (ragCacheEnabled) {
-        queryEmbedding = await this.embeddingProvider!.generateEmbedding(userMessage);
+        queryEmbedding =
+          await this.embeddingProvider!.generateEmbedding(userMessage);
         const cachedResponse = await this.ragResponseCache!.findSimilarResponse(
           input.tenantId,
           queryEmbedding,
@@ -190,7 +191,12 @@ export class ProcessAIResponseService {
             input,
             aiSession.id,
             cachedResponse,
-            { tokensUsed: 0, intent: 'RAG_CACHED', sentiment: 'NEUTRAL', confidence: 1 },
+            {
+              tokensUsed: 0,
+              intent: 'RAG_CACHED',
+              sentiment: 'NEUTRAL',
+              confidence: 1,
+            },
             { ...diagnostics, ragCacheHit: true },
             userMessage,
           );
@@ -246,7 +252,11 @@ export class ProcessAIResponseService {
       );
 
       // Cache the response if RAG was involved and response completed normally
-      if (ragCacheEnabled && queryEmbedding && response.finishReason === 'stop') {
+      if (
+        ragCacheEnabled &&
+        queryEmbedding &&
+        response.finishReason === 'stop'
+      ) {
         await this.ragResponseCache!.cacheResponse(
           input.tenantId,
           queryEmbedding,

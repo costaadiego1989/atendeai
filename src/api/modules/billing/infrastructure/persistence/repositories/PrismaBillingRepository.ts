@@ -3,8 +3,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { Subscription } from '@modules/billing/domain/entities/Subscription';
 import { UsageRecord } from '@modules/billing/domain/entities/UsageRecord';
-import { 
-  IBillingRepository, 
+import {
+  IBillingRepository,
   BillingPlanCatalogRecord,
   BillingModuleRecord,
   BusinessNicheRecord,
@@ -15,7 +15,7 @@ import { PlanType } from '@modules/billing/domain/value-objects/Quotas';
 
 @Injectable()
 export class PrismaBillingRepository implements IBillingRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findSubscription(tenantId: string): Promise<Subscription | null> {
     const [raw] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
@@ -140,7 +140,9 @@ export class PrismaBillingRepository implements IBillingRepository {
     return rows.map((row) => this.mapPlan(row));
   }
 
-  async findPlanByCode(code: PlanType): Promise<BillingPlanCatalogRecord | null> {
+  async findPlanByCode(
+    code: PlanType,
+  ): Promise<BillingPlanCatalogRecord | null> {
     const [row] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT
           code,
@@ -252,7 +254,7 @@ export class PrismaBillingRepository implements IBillingRepository {
       ORDER BY n.display_name ASC
     `);
 
-    return niches.map(n => ({
+    return niches.map((n) => ({
       code: n.code,
       displayName: n.display_name,
       description: n.description,
@@ -284,7 +286,7 @@ export class PrismaBillingRepository implements IBillingRepository {
       ORDER BY display_name ASC
     `);
 
-    return modules.map(m => ({
+    return modules.map((m) => ({
       code: m.code,
       displayName: m.display_name,
       description: m.description,
@@ -296,7 +298,7 @@ export class PrismaBillingRepository implements IBillingRepository {
       quotaImpact: m.quota_impact || {},
       includedInPlans: m.included_in_plans || [],
       config: m.config || {},
-      active: Boolean(m.active)
+      active: Boolean(m.active),
     }));
   }
 
@@ -339,7 +341,9 @@ export class PrismaBillingRepository implements IBillingRepository {
   async replaceSubscriptionModules(
     subscriptionId: string,
     tenantId: string,
-    modules: Array<Omit<SubscriptionModuleRecord, 'subscriptionId' | 'tenantId'>>,
+    modules: Array<
+      Omit<SubscriptionModuleRecord, 'subscriptionId' | 'tenantId'>
+    >,
   ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       DELETE FROM billing_schema.subscription_modules

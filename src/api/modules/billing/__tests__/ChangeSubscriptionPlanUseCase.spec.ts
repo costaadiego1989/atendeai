@@ -43,7 +43,10 @@ describe('ChangeSubscriptionPlanUseCase', () => {
   });
 
   it('should require immediate checkout for upgrades without changing the plan immediately', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'ESSENCIAL');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'ESSENCIAL',
+    );
 
     billingRepository.findSubscription.mockResolvedValue(subscription);
     tenantRepository.findById.mockResolvedValue({
@@ -85,7 +88,10 @@ describe('ChangeSubscriptionPlanUseCase', () => {
   });
 
   it('should schedule downgrade to ESSENCIAL and queue local application for cycle end', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'PROFISSIONAL');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'PROFISSIONAL',
+    );
     subscription.updateAsaasInfo('cus_123', 'sub_123');
 
     billingRepository.findSubscription.mockResolvedValue(subscription);
@@ -121,7 +127,10 @@ describe('ChangeSubscriptionPlanUseCase', () => {
   });
 
   it('should schedule downgrade between paid plans and update future recurring billing', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'ESCALA');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'ESCALA',
+    );
     subscription.updateAsaasInfo('cus_123', 'sub_123');
 
     billingRepository.findSubscription.mockResolvedValue(subscription);

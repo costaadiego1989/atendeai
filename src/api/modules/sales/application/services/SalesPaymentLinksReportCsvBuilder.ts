@@ -57,7 +57,9 @@ export class SalesPaymentLinksReportCsvBuilder {
       ]),
     ];
 
-    return rows.map((row) => row.map((value) => this.escape(value)).join(';')).join('\n');
+    return rows
+      .map((row) => row.map((value) => this.escape(value)).join(';'))
+      .join('\n');
   }
 
   private escape(value: unknown): string {
@@ -65,7 +67,9 @@ export class SalesPaymentLinksReportCsvBuilder {
   }
 
   private formatMoney(value: number | string | null | undefined): string {
-    return Number(value ?? 0).toFixed(2).replace('.', ',');
+    return Number(value ?? 0)
+      .toFixed(2)
+      .replace('.', ',');
   }
 
   private formatDate(value?: Date | string | null): string {

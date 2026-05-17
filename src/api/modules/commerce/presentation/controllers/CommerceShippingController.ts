@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';

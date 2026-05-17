@@ -6,7 +6,11 @@ import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 export type ProspectingAsyncJobType =
   | 'EXPORT_PROSPECT_SEARCHES_CSV'
   | 'EXPORT_PROSPECT_CAMPAIGNS_CSV';
-export type ProspectingAsyncJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type ProspectingAsyncJobStatus =
+  | 'QUEUED'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED';
 
 interface ProspectingAsyncJobRow {
   id: string;
@@ -65,7 +69,9 @@ export class ProspectingAsyncJobsService {
     payload: Record<string, unknown>;
     totalItems?: number;
   }): Promise<ProspectingAsyncJobView> {
-    const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      ProspectingAsyncJobRow[]
+    >(Prisma.sql`
       INSERT INTO prospecting_schema.prospecting_async_jobs (
         tenant_id,
         type,
@@ -105,7 +111,10 @@ export class ProspectingAsyncJobsService {
     `);
   }
 
-  async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }) {
+  async markProcessing(
+    jobId: string,
+    input?: { progress?: number; totalItems?: number },
+  ) {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET status = 'PROCESSING',
@@ -160,8 +169,13 @@ export class ProspectingAsyncJobsService {
     `);
   }
 
-  async listJobs(tenantId: string, limit = 15): Promise<ProspectingAsyncJobView[]> {
-    const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
+  async listJobs(
+    tenantId: string,
+    limit = 15,
+  ): Promise<ProspectingAsyncJobView[]> {
+    const rows = await this.prisma.$queryRaw<
+      ProspectingAsyncJobRow[]
+    >(Prisma.sql`
       SELECT *
       FROM prospecting_schema.prospecting_async_jobs
       WHERE tenant_id = ${tenantId}::uuid
@@ -172,8 +186,13 @@ export class ProspectingAsyncJobsService {
     return rows.map((row) => this.toView(row));
   }
 
-  async getJob(tenantId: string, jobId: string): Promise<ProspectingAsyncJobView> {
-    const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
+  async getJob(
+    tenantId: string,
+    jobId: string,
+  ): Promise<ProspectingAsyncJobView> {
+    const rows = await this.prisma.$queryRaw<
+      ProspectingAsyncJobRow[]
+    >(Prisma.sql`
       SELECT *
       FROM prospecting_schema.prospecting_async_jobs
       WHERE tenant_id = ${tenantId}::uuid
@@ -189,7 +208,9 @@ export class ProspectingAsyncJobsService {
   }
 
   async getDownloadPayload(tenantId: string, jobId: string) {
-    const rows = await this.prisma.$queryRaw<ProspectingAsyncJobRow[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      ProspectingAsyncJobRow[]
+    >(Prisma.sql`
       SELECT *
       FROM prospecting_schema.prospecting_async_jobs
       WHERE tenant_id = ${tenantId}::uuid
@@ -235,5 +256,4 @@ export class ProspectingAsyncJobsService {
       failedAt: row.failed_at,
     };
   }
-
 }

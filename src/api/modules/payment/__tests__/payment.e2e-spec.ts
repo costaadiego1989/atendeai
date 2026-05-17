@@ -47,19 +47,19 @@ describe('PaymentModule (e2e)', () => {
       const tId = t.id;
       await prisma.usageRecord
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma as any).user
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
-      await prisma.tenant.delete({ where: { id: tId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.tenant.delete({ where: { id: tId } }).catch(() => {});
     }
 
     await (prisma as any).user
       .deleteMany({ where: { email: 'payment-test@test.com' } })
-      .catch(() => { });
+      .catch(() => {});
 
     const createTenant = app.get<ICreateTenantUseCase>(ICreateTenantUseCase);
     const tenantResult = await createTenant.execute({
@@ -96,12 +96,14 @@ describe('PaymentModule (e2e)', () => {
     if (tenantId) {
       await prisma.subscription
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.usageRecord
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await (prisma as any).user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await (prisma as any).user
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
     await app.close();
   });
@@ -288,16 +290,16 @@ describe('PaymentModule (e2e)', () => {
       if (realTenantId) {
         await prisma.subscription
           .deleteMany({ where: { tenantId: realTenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await prisma.usageRecord
           .deleteMany({ where: { tenantId: realTenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await (prisma as any).user
           .deleteMany({ where: { tenantId: realTenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await prisma.tenant
           .delete({ where: { id: realTenantId } })
-          .catch(() => { });
+          .catch(() => {});
       }
     });
   });

@@ -79,8 +79,7 @@ export class GooglePlacesProspectSearchSource implements IProspectSearchSource {
           businessName: place.displayName?.text || 'Unknown business',
           city: input.city,
           state: input.state,
-          phone:
-            place.nationalPhoneNumber || place.internationalPhoneNumber,
+          phone: place.nationalPhoneNumber || place.internationalPhoneNumber,
           website: place.websiteUri,
           email: undefined,
         });

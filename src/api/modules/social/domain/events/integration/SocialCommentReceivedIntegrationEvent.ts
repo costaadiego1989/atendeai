@@ -16,4 +16,3 @@ export class SocialCommentReceivedIntegrationEvent extends IntegrationEvent {
     super();
   }
 }
-

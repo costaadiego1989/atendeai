@@ -121,10 +121,11 @@ export class TriggerRecoveryOutreachUseCase {
       );
     }
 
-    const playbookWithPhases = await this.playbookRepository.findPlaybookWithPhases(
-      command.tenantId,
-      recoveryCase.playbookId,
-    );
+    const playbookWithPhases =
+      await this.playbookRepository.findPlaybookWithPhases(
+        command.tenantId,
+        recoveryCase.playbookId,
+      );
 
     if (!playbookWithPhases) {
       throw new ValidationErrorException('Playbook do caso não foi encontrado');
@@ -164,8 +165,7 @@ export class TriggerRecoveryOutreachUseCase {
           'Registo de execução da fase anterior em falta; não é possível aplicar o intervalo mínimo.',
         );
       }
-      const hours =
-        (Date.now() - new Date(lastAt).getTime()) / 3_600_000;
+      const hours = (Date.now() - new Date(lastAt).getTime()) / 3_600_000;
       if (hours < phase.minDelayHoursSincePrevious) {
         throw new ValidationErrorException(
           `Aguarde pelo menos ${phase.minDelayHoursSincePrevious} hora(s) desde a fase anterior (decorridas ~${Math.floor(hours)}h).`,
@@ -186,7 +186,9 @@ export class TriggerRecoveryOutreachUseCase {
     let messageText: string | null = null;
     if (phase.mode === 'TEMPLATE') {
       if (!phase.templateBody?.trim()) {
-        throw new ValidationErrorException('Fase TEMPLATE sem template_body configurado');
+        throw new ValidationErrorException(
+          'Fase TEMPLATE sem template_body configurado',
+        );
       }
       messageText = applyRecoveryPlaybookTemplate(
         phase.templateBody,
@@ -210,7 +212,9 @@ export class TriggerRecoveryOutreachUseCase {
     }
 
     if (!messageText) {
-      throw new ValidationErrorException('Não foi possível gerar a mensagem desta fase');
+      throw new ValidationErrorException(
+        'Não foi possível gerar a mensagem desta fase',
+      );
     }
 
     if (command.previewOnly) {

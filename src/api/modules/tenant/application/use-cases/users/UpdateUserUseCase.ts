@@ -27,7 +27,10 @@ export class UpdateUserUseCase {
   ) {}
 
   async execute(input: UpdateUserInput): Promise<void> {
-    const user = await this.userRepo.findByIdAndTenant(input.id, input.tenantId);
+    const user = await this.userRepo.findByIdAndTenant(
+      input.id,
+      input.tenantId,
+    );
     if (!user) {
       throw new NotFoundException('User not found');
     }

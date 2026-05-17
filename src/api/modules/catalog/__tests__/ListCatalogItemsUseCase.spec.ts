@@ -8,7 +8,9 @@ describe('ListCatalogItemsUseCase', () => {
   let repository: jest.Mocked<Pick<ICatalogRepository, 'listItems'>>;
   let sut: ListCatalogItemsUseCase;
 
-  const itemRecord = (over?: Partial<CatalogItemRecord>): CatalogItemRecord => ({
+  const itemRecord = (
+    over?: Partial<CatalogItemRecord>,
+  ): CatalogItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     categoryId: null,

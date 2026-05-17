@@ -31,26 +31,56 @@ export class Promotion extends Entity<PromotionProps> {
     super(props, id);
   }
 
-  get tenantId(): string { return this.props.tenantId; }
-  get title(): string { return this.props.title; }
-  get description(): string { return this.props.description; }
-  get discountType(): PromotionDiscountType { return this.props.discountType; }
-  get discountValue(): number { return this.props.discountValue; }
-  get minimumOrder(): number | null | undefined { return this.props.minimumOrder; }
-  get imageUrl(): string | null | undefined { return this.props.imageUrl; }
-  get startsAt(): Date { return this.props.startsAt; }
-  get expiresAt(): Date | null | undefined { return this.props.expiresAt; }
-  get active(): boolean { return this.props.active; }
-  get catalogItemId(): string | null | undefined { return this.props.catalogItemId; }
-  get targets(): PromotionTarget[] { return this.props.targets ?? []; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get tenantId(): string {
+    return this.props.tenantId;
+  }
+  get title(): string {
+    return this.props.title;
+  }
+  get description(): string {
+    return this.props.description;
+  }
+  get discountType(): PromotionDiscountType {
+    return this.props.discountType;
+  }
+  get discountValue(): number {
+    return this.props.discountValue;
+  }
+  get minimumOrder(): number | null | undefined {
+    return this.props.minimumOrder;
+  }
+  get imageUrl(): string | null | undefined {
+    return this.props.imageUrl;
+  }
+  get startsAt(): Date {
+    return this.props.startsAt;
+  }
+  get expiresAt(): Date | null | undefined {
+    return this.props.expiresAt;
+  }
+  get active(): boolean {
+    return this.props.active;
+  }
+  get catalogItemId(): string | null | undefined {
+    return this.props.catalogItemId;
+  }
+  get targets(): PromotionTarget[] {
+    return this.props.targets ?? [];
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   public appliesTo(target: PromotionTarget): boolean {
     const targets = this.effectiveTargets();
     if (targets.length === 0) return true;
-    return targets.some((candidate) =>
-      candidate.targetType === target.targetType && candidate.targetId === target.targetId,
+    return targets.some(
+      (candidate) =>
+        candidate.targetType === target.targetType &&
+        candidate.targetId === target.targetId,
     );
   }
 
@@ -74,7 +104,9 @@ export class Promotion extends Entity<PromotionProps> {
   }
 
   public static create(
-    props: Omit<PromotionProps, 'createdAt' | 'updatedAt' | 'active'> & { active?: boolean },
+    props: Omit<PromotionProps, 'createdAt' | 'updatedAt' | 'active'> & {
+      active?: boolean;
+    },
     id?: UniqueEntityID,
   ): Promotion {
     return new Promotion(
@@ -88,7 +120,10 @@ export class Promotion extends Entity<PromotionProps> {
     );
   }
 
-  public static reconstitute(props: PromotionProps, id: UniqueEntityID): Promotion {
+  public static reconstitute(
+    props: PromotionProps,
+    id: UniqueEntityID,
+  ): Promotion {
     return new Promotion(props, id);
   }
 }

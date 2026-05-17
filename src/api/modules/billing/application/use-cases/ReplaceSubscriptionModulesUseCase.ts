@@ -17,9 +17,7 @@ import {
 } from './interfaces/IReplaceSubscriptionModulesUseCase';
 
 @Injectable()
-export class ReplaceSubscriptionModulesUseCase
-  implements IReplaceSubscriptionModulesUseCase
-{
+export class ReplaceSubscriptionModulesUseCase implements IReplaceSubscriptionModulesUseCase {
   constructor(
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepository: IBillingRepository,
@@ -39,11 +37,14 @@ export class ReplaceSubscriptionModulesUseCase
       );
     }
 
-    const [planDefinition, modules, currentSubscriptionModules] = await Promise.all([
-      this.billingRepository.findPlanByCode(subscription.plan),
-      this.billingRepository.listModules(),
-      this.billingRepository.listSubscriptionModules(subscription.id.toString()),
-    ]);
+    const [planDefinition, modules, currentSubscriptionModules] =
+      await Promise.all([
+        this.billingRepository.findPlanByCode(subscription.plan),
+        this.billingRepository.listModules(),
+        this.billingRepository.listSubscriptionModules(
+          subscription.id.toString(),
+        ),
+      ]);
 
     if (!planDefinition) {
       throw new NotFoundException(
@@ -136,14 +137,18 @@ export class ReplaceSubscriptionModulesUseCase
       metadata: {
         moduleCodes: activeModuleCodes,
         includedModules: requestedModuleCodes.filter((moduleCode) =>
-          addonCatalog.get(moduleCode)?.includedInPlans?.includes(subscription.plan),
+          addonCatalog
+            .get(moduleCode)
+            ?.includedInPlans?.includes(subscription.plan),
         ),
       },
     });
 
     return {
       tenantId: input.tenantId,
-      subscription: await this.tenantModuleAccessService.getSummary(input.tenantId),
+      subscription: await this.tenantModuleAccessService.getSummary(
+        input.tenantId,
+      ),
     };
   }
 }

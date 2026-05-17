@@ -12,7 +12,7 @@ import {
 export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
   readonly platform = 'INSTAGRAM';
 
-  constructor(private readonly configService: ConfigService) { }
+  constructor(private readonly configService: ConfigService) {}
 
   private get graphVersion(): string {
     return this.configService.get<string>('META_GRAPH_API_VERSION') || 'v21.0';
@@ -36,7 +36,9 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
       return { success: true, replyId: response.data?.id };
     } catch (err: any) {
       const msg = err?.response?.data?.error?.message || err.message;
-      console.error(`[InstagramGraphCommentAdapter] replyToComment failed: ${msg}`);
+      console.error(
+        `[InstagramGraphCommentAdapter] replyToComment failed: ${msg}`,
+      );
       return { success: false, error: msg };
     }
   }
@@ -93,7 +95,9 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
       return { success: true, messageId: response.data?.message_id };
     } catch (err: any) {
       const msg = err?.response?.data?.error?.message || err.message;
-      console.error(`[InstagramGraphCommentAdapter] sendInboxMessage failed: ${msg}`);
+      console.error(
+        `[InstagramGraphCommentAdapter] sendInboxMessage failed: ${msg}`,
+      );
       return { success: false, error: msg };
     }
   }
@@ -108,7 +112,10 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
       });
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err?.response?.data?.error?.message || err.message };
+      return {
+        success: false,
+        error: err?.response?.data?.error?.message || err.message,
+      };
     }
   }
 
@@ -125,7 +132,10 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
       );
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err?.response?.data?.error?.message || err.message };
+      return {
+        success: false,
+        error: err?.response?.data?.error?.message || err.message,
+      };
     }
   }
 
@@ -160,7 +170,9 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
       const nextCursor = response.data?.paging?.cursors?.after;
       return { comments, nextCursor };
     } catch (err: any) {
-      console.error(`[InstagramGraphCommentAdapter] fetchComments failed: ${err.message}`);
+      console.error(
+        `[InstagramGraphCommentAdapter] fetchComments failed: ${err.message}`,
+      );
       return { comments: [] };
     }
   }
@@ -170,15 +182,12 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
     postExternalId: string,
   ): Promise<ExternalPost | null> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/${postExternalId}`,
-        {
-          params: {
-            access_token: accessToken,
-            fields: 'id,media_type,caption,media_url,permalink,timestamp',
-          },
+      const response = await axios.get(`${this.baseUrl}/${postExternalId}`, {
+        params: {
+          access_token: accessToken,
+          fields: 'id,media_type,caption,media_url,permalink,timestamp',
         },
-      );
+      });
 
       const d = response.data;
       return {
@@ -190,7 +199,9 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
         timestamp: d.timestamp ? new Date(d.timestamp) : undefined,
       };
     } catch (err: any) {
-      console.error(`[InstagramGraphCommentAdapter] fetchPostDetails failed: ${err.message}`);
+      console.error(
+        `[InstagramGraphCommentAdapter] fetchPostDetails failed: ${err.message}`,
+      );
       return null;
     }
   }

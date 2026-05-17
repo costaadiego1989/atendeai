@@ -10,9 +10,7 @@ import {
 } from './interfaces/IRegisterProspectResponseUseCase';
 
 @Injectable()
-export class RegisterProspectResponseUseCase
-  implements IRegisterProspectResponseUseCase
-{
+export class RegisterProspectResponseUseCase implements IRegisterProspectResponseUseCase {
   constructor(
     @Inject(PROSPECT_EXECUTION_REPOSITORY)
     private readonly executionRepository: IProspectExecutionRepository,

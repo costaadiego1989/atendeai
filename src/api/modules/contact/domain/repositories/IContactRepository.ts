@@ -15,6 +15,9 @@ export interface IContactRepository {
     },
   ): Promise<{ data: Contact[]; total: number }>;
   delete(tenantId: string, id: string): Promise<void>;
+  findAllByPhone(
+    phone: string,
+  ): Promise<Array<{ tenantId: string; contactId: string }>>;
 }
 
 export const CONTACT_REPOSITORY = Symbol('IContactRepository');

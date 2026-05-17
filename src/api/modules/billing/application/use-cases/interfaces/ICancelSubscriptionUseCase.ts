@@ -9,9 +9,9 @@ export interface CancelSubscriptionOutput {
   status: string;
 }
 
-export interface ICancelSubscriptionUseCase
-  extends IUseCase<CancelSubscriptionInput, CancelSubscriptionOutput> {}
+export interface ICancelSubscriptionUseCase extends IUseCase<
+  CancelSubscriptionInput,
+  CancelSubscriptionOutput
+> {}
 
-export const ICancelSubscriptionUseCase = Symbol(
-  'ICancelSubscriptionUseCase',
-);
+export const ICancelSubscriptionUseCase = Symbol('ICancelSubscriptionUseCase');

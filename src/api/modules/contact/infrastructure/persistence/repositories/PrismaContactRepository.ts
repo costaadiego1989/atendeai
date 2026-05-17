@@ -13,10 +13,10 @@ export class PrismaContactRepository implements IContactRepository {
     const data = ContactMapper.toPersistence(contact);
     await this.prisma.contact.upsert({
       where: { id: data.id },
-        create: {
-          id: data.id,
-          tenantId: data.tenantId,
-          name: data.name,
+      create: {
+        id: data.id,
+        tenantId: data.tenantId,
+        name: data.name,
         phone: data.phone,
         email: data.email,
         stage: data.stage,
@@ -26,19 +26,20 @@ export class PrismaContactRepository implements IContactRepository {
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
       },
-        update: {
-          tenantId: data.tenantId,
-          name: data.name,
+      update: {
+        tenantId: data.tenantId,
+        name: data.name,
         phone: data.phone,
         email: data.email,
         stage: data.stage,
         tags: data.tags,
         notes: data.notes,
         lastInteraction: data.lastInteraction,
+        prospectingOptOut: data.prospectingOptOut,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-        },
-      });
+      },
+    });
     await this.prisma.$executeRaw(Prisma.sql`
         UPDATE contact_schema.contacts
         SET branch_id = ${data.branchId}::uuid
@@ -110,7 +111,9 @@ export class PrismaContactRepository implements IContactRepository {
       )
     `;
 
-    const rows = await this.prisma.$queryRaw<Array<Prisma.ContactGetPayload<{}> & { branchId?: string | null }>>`
+    const rows = await this.prisma.$queryRaw<
+      Array<Prisma.ContactGetPayload<{}> & { branchId?: string | null }>
+    >`
       SELECT c.*, c.branch_id AS "branchId"
       FROM contact_schema.contacts c
       WHERE c.tenant_id = ${tenantId}::uuid
@@ -123,7 +126,9 @@ export class PrismaContactRepository implements IContactRepository {
       LIMIT ${limit}
     `;
 
-    const totalRows = await this.prisma.$queryRaw<Array<{ total: bigint | number }>>`
+    const totalRows = await this.prisma.$queryRaw<
+      Array<{ total: bigint | number }>
+    >`
       SELECT COUNT(*) AS total
       FROM contact_schema.contacts c
       WHERE c.tenant_id = ${tenantId}::uuid
@@ -180,6 +185,22 @@ export class PrismaContactRepository implements IContactRepository {
         },
       });
     });
+  }
+
+  async findAllByPhone(
+    phone: string,
+  ): Promise<Array<{ tenantId: string; contactId: string }>> {
+    const rows = await this.prisma.$queryRaw<
+      Array<{ tenant_id: string; id: string }>
+    >(
+      Prisma.sql`
+        SELECT tenant_id, id
+        FROM contact_schema.contacts
+        WHERE phone = ${phone}
+        LIMIT 20
+      `,
+    );
+    return rows.map((r) => ({ tenantId: r.tenant_id, contactId: r.id }));
   }
 
   private async findBranchIdsByContactIds(

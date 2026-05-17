@@ -8,9 +8,7 @@ import {
 } from '../../domain/repositories/ITenantFinancialAccountRepository';
 
 @Injectable()
-export class PrismaTenantFinancialAccountRepository
-  implements ITenantFinancialAccountRepository
-{
+export class PrismaTenantFinancialAccountRepository implements ITenantFinancialAccountRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByTenantId(

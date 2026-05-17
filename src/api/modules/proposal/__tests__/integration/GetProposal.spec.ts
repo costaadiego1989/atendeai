@@ -1,7 +1,10 @@
 import { GetProposalUseCase } from '../../application/use-cases/GetProposalUseCase';
 import { GetProposalService } from '../../application/services/implementations/GetProposalService';
 import { ProposalNotFoundError } from '../../domain/errors/ProposalNotFoundError';
-import { buildProposal, createProposalRepositoryMock } from '../proposal-test-utils';
+import {
+  buildProposal,
+  createProposalRepositoryMock,
+} from '../proposal-test-utils';
 
 describe('GetProposalUseCase', () => {
   let getProposalUseCase: GetProposalUseCase;
@@ -32,8 +35,8 @@ describe('GetProposalUseCase', () => {
   it('throws a domain error when the proposal does not exist', async () => {
     mockRepository.findById.mockResolvedValue(null);
 
-    await expect(getProposalUseCase.execute('missing-proposal')).rejects.toBeInstanceOf(
-      ProposalNotFoundError,
-    );
+    await expect(
+      getProposalUseCase.execute('missing-proposal'),
+    ).rejects.toBeInstanceOf(ProposalNotFoundError);
   });
 });

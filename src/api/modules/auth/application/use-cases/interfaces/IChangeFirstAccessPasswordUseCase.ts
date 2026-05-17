@@ -11,11 +11,10 @@ export interface ChangeFirstAccessPasswordOutput {
   message: string;
 }
 
-export interface IChangeFirstAccessPasswordUseCase
-  extends IUseCase<
-    ChangeFirstAccessPasswordInput,
-    ChangeFirstAccessPasswordOutput
-  > {}
+export interface IChangeFirstAccessPasswordUseCase extends IUseCase<
+  ChangeFirstAccessPasswordInput,
+  ChangeFirstAccessPasswordOutput
+> {}
 
 export const IChangeFirstAccessPasswordUseCase = Symbol(
   'IChangeFirstAccessPasswordUseCase',

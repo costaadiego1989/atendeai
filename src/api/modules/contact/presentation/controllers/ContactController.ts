@@ -155,7 +155,10 @@ export class ContactController {
       },
     );
 
-    await this.contactAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.contactAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.contactAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -225,7 +228,10 @@ export class ContactController {
       },
     );
 
-    await this.contactAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.contactAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.contactAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -235,7 +241,10 @@ export class ContactController {
   }
 
   @Get('jobs/:jobId')
-  async getJob(@Param('tenantId') tenantId: string, @Param('jobId') jobId: string) {
+  async getJob(
+    @Param('tenantId') tenantId: string,
+    @Param('jobId') jobId: string,
+  ) {
     return this.contactAsyncJobsService.getJob(tenantId, jobId);
   }
 
@@ -245,11 +254,17 @@ export class ContactController {
     @Param('jobId') jobId: string,
     @Res() res: Response,
   ) {
-    const file = await this.contactAsyncJobsService.getDownloadPayload(tenantId, jobId);
+    const file = await this.contactAsyncJobsService.getDownloadPayload(
+      tenantId,
+      jobId,
+    );
 
     if (file.fileContent) {
       res.setHeader('Content-Type', file.fileMimeType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file.fileName}"`,
+      );
       return res.send(file.fileContent);
     }
 
@@ -280,10 +295,7 @@ export class ContactController {
   }
 
   @Get(':id/timeline')
-  async timeline(
-    @Param('tenantId') tenantId: string,
-    @Param('id') id: string,
-  ) {
+  async timeline(@Param('tenantId') tenantId: string, @Param('id') id: string) {
     return this.getContactTimelineUseCase.execute({
       tenantId,
       contactId: id,

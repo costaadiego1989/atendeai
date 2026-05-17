@@ -29,7 +29,11 @@ describe('AI Config Validation (e2e)', () => {
     const calcDigit = (digits: string, weights: number[]) => {
       const sum = digits
         .split('')
-        .reduce((acc: number, digit: string, index: number) => acc + Number(digit) * weights[index], 0);
+        .reduce(
+          (acc: number, digit: string, index: number) =>
+            acc + Number(digit) * weights[index],
+          0,
+        );
       const rest = sum % 11;
       return rest < 2 ? 0 : 11 - rest;
     };
@@ -55,7 +59,10 @@ describe('AI Config Validation (e2e)', () => {
     maxTokensPerResponse: 500,
     confidenceThreshold: 0.7,
     escalationMessage: 'Transferring to a human agent...',
-    businessRules: ['Always greet the customer', 'Never share internal pricing'],
+    businessRules: [
+      'Always greet the customer',
+      'Never share internal pricing',
+    ],
   };
 
   async function login(email: string): Promise<string> {
@@ -74,9 +81,11 @@ describe('AI Config Validation (e2e)', () => {
     if (tenantIds.length === 0) return;
 
     for (const tid of tenantIds) {
-      await prisma.$executeRaw(
-        Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${tid}::uuid`,
-      ).catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${tid}::uuid`,
+        )
+        .catch(() => {});
     }
     await prisma.aIConfig
       .deleteMany({ where: { tenantId: { in: tenantIds } } })
@@ -85,7 +94,9 @@ describe('AI Config Validation (e2e)', () => {
       .deleteMany({ where: { tenantId: { in: tenantIds } } })
       .catch(() => {});
     await prisma.user
-      .deleteMany({ where: { email: { in: [ownerEmail, agentEmail, otherOwnerEmail] } } })
+      .deleteMany({
+        where: { email: { in: [ownerEmail, agentEmail, otherOwnerEmail] } },
+      })
       .catch(() => {});
     await prisma.tenant
       .deleteMany({ where: { id: { in: tenantIds } } })
@@ -114,7 +125,9 @@ describe('AI Config Validation (e2e)', () => {
 
     // Clean up any leftover data
     await prisma.user
-      .deleteMany({ where: { email: { in: [ownerEmail, agentEmail, otherOwnerEmail] } } })
+      .deleteMany({
+        where: { email: { in: [ownerEmail, agentEmail, otherOwnerEmail] } },
+      })
       .catch(() => {});
     await prisma.tenant
       .deleteMany({ where: { cnpj: { in: [tenantCnpj, otherTenantCnpj] } } })
@@ -262,14 +275,21 @@ describe('AI Config Validation (e2e)', () => {
         .expect(200);
 
       // Handle potential double-wrapping from SuccessResponseInterceptor
-      const data = response.body.data?.data || response.body.data || response.body;
+      const data =
+        response.body.data?.data || response.body.data || response.body;
       expect(data.aiConfig).toBeDefined();
       expect(data.aiConfig.systemPrompt).toBe(validPayload.systemPrompt);
       expect(data.aiConfig.tone).toBe(validPayload.tone);
       expect(data.aiConfig.language).toBe(validPayload.language);
-      expect(data.aiConfig.maxTokensPerResponse).toBe(validPayload.maxTokensPerResponse);
-      expect(data.aiConfig.confidenceThreshold).toBe(validPayload.confidenceThreshold);
-      expect(data.aiConfig.escalationMessage).toBe(validPayload.escalationMessage);
+      expect(data.aiConfig.maxTokensPerResponse).toBe(
+        validPayload.maxTokensPerResponse,
+      );
+      expect(data.aiConfig.confidenceThreshold).toBe(
+        validPayload.confidenceThreshold,
+      );
+      expect(data.aiConfig.escalationMessage).toBe(
+        validPayload.escalationMessage,
+      );
       expect(data.aiConfig.businessRules).toEqual(validPayload.businessRules);
     });
 
@@ -294,7 +314,8 @@ describe('AI Config Validation (e2e)', () => {
         .set('Cookie', [ownerCookie])
         .expect(200);
 
-      const data = response.body.data?.data || response.body.data || response.body;
+      const data =
+        response.body.data?.data || response.body.data || response.body;
       expect(data.aiConfig.tone).toBe('CASUAL');
       expect(data.aiConfig.maxTokensPerResponse).toBe(1000);
       expect(data.aiConfig.language).toBe('en-US');
@@ -316,7 +337,8 @@ describe('AI Config Validation (e2e)', () => {
         .set('Cookie', [ownerCookie])
         .expect(200);
 
-      const data = response.body.data?.data || response.body.data || response.body;
+      const data =
+        response.body.data?.data || response.body.data || response.body;
       expect(data.recentAuditLogs).toBeDefined();
       expect(Array.isArray(data.recentAuditLogs)).toBe(true);
 

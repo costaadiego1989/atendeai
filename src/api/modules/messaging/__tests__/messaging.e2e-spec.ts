@@ -57,37 +57,39 @@ describe('MessagingModule (e2e)', () => {
       const tId = t.id;
       await (prisma.message as any)
         .deleteMany({ where: { conversation: { tenantId: tId } } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.conversation as any)
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.contact as any)
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.aISession as any)
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.usageRecord as any)
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.subscription as any)
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.aIConfig as any)
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.whatsAppConfig as any)
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma as any).user
         .deleteMany({ where: { tenantId: tId } })
-        .catch(() => { });
-      await (prisma.tenant as any).delete({ where: { id: tId } }).catch(() => { });
+        .catch(() => {});
+      await (prisma.tenant as any)
+        .delete({ where: { id: tId } })
+        .catch(() => {});
     }
 
     await (prisma as any).user
       .deleteMany({ where: { email: 'messaging-test@test.com' } })
-      .catch(() => { });
+      .catch(() => {});
 
     const createTenant = app.get<ICreateTenantUseCase>(ICreateTenantUseCase);
     const tenantResult = await createTenant.execute({
@@ -130,16 +132,22 @@ describe('MessagingModule (e2e)', () => {
     if (tenantId) {
       await (prisma.message as any)
         .deleteMany({ where: { conversation: { tenantId } } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.conversation as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await (prisma.contact as any).deleteMany({ where: { tenantId } }).catch(() => { });
+        .catch(() => {});
+      await (prisma.contact as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
       await (prisma.subscription as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await (prisma as any).user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.tenant as any).delete({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await (prisma as any).user
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.tenant as any)
+        .delete({ where: { id: tenantId } })
+        .catch(() => {});
     }
     if (app) {
       await app.close();
@@ -222,8 +230,10 @@ describe('MessagingModule (e2e)', () => {
         });
 
         message = messages.find((m: any) => {
-          const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content;
-          const textResponse = content?.text || content?.content?.text || JSON.stringify(content);
+          const content =
+            typeof m.content === 'string' ? JSON.parse(m.content) : m.content;
+          const textResponse =
+            content?.text || content?.content?.text || JSON.stringify(content);
           return textResponse.includes('UNIQUE_AI_RESPONSE_123');
         });
 
@@ -235,11 +245,13 @@ describe('MessagingModule (e2e)', () => {
       expect(message).toBeDefined();
       expect(message).not.toBeNull();
 
-      const content = typeof message?.content === 'string' ? JSON.parse(message.content) : message?.content;
-      const textResponse = content?.text || content?.content?.text || JSON.stringify(content);
-      expect(textResponse).toContain(
-        'UNIQUE_AI_RESPONSE_123',
-      );
+      const content =
+        typeof message?.content === 'string'
+          ? JSON.parse(message.content)
+          : message?.content;
+      const textResponse =
+        content?.text || content?.content?.text || JSON.stringify(content);
+      expect(textResponse).toContain('UNIQUE_AI_RESPONSE_123');
     }, 25000);
   });
 
@@ -274,13 +286,18 @@ describe('MessagingModule (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post(`/api/v1/tenants/${tenantId}/conversations/${conversation!.id}/messages`)
+        .post(
+          `/api/v1/tenants/${tenantId}/conversations/${conversation!.id}/messages`,
+        )
         .set('Cookie', authTokenArr)
         .send(payload);
 
       console.log('API RESPONSE BODY:', response.body);
       expect(response.status).toBe(201);
-      const messageId = response.body?.data?.messageId || response.body?.messageId || response.body?.id;
+      const messageId =
+        response.body?.data?.messageId ||
+        response.body?.messageId ||
+        response.body?.id;
       expect(messageId).toBeDefined();
 
       let message = null;
@@ -298,8 +315,12 @@ describe('MessagingModule (e2e)', () => {
 
       expect(message).toBeDefined();
       expect(message).not.toBeNull();
-      const content = typeof message?.content === 'string' ? JSON.parse(message.content) : message?.content;
-      const textResponse = content?.text || content?.content?.text || JSON.stringify(content);
+      const content =
+        typeof message?.content === 'string'
+          ? JSON.parse(message.content)
+          : message?.content;
+      const textResponse =
+        content?.text || content?.content?.text || JSON.stringify(content);
       expect(textResponse).toBe('Olá do humano');
     }, 15000);
   });
@@ -314,12 +335,13 @@ describe('MessagingModule (e2e)', () => {
           to: whatsappNumber,
           type: 'text',
           content: { text: 'oi' },
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
 
       const hmac = crypto.createHmac('sha256', webhookSecret);
-      const invalidSignature = hmac.update(JSON.stringify(body)).digest('hex') + 'wrong';
+      const invalidSignature =
+        hmac.update(JSON.stringify(body)).digest('hex') + 'wrong';
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/webhooks/whatsapp')

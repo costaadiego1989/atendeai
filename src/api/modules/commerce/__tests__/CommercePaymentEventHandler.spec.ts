@@ -45,7 +45,11 @@ describe('CommercePaymentEventHandler', () => {
       incrementCouponUsage: jest.fn(),
     } as unknown as jest.Mocked<ISalesCouponRepository>;
 
-    handler = new CommercePaymentEventHandler(eventBus, commerceRepository, salesRepository);
+    handler = new CommercePaymentEventHandler(
+      eventBus,
+      commerceRepository,
+      salesRepository,
+    );
   });
 
   it('should subscribe to payment.confirmed on module init', () => {

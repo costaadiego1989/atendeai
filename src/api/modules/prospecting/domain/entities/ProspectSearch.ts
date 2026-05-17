@@ -69,7 +69,10 @@ export class ProspectSearch extends AggregateRoot<ProspectSearchProps> {
   }
 
   public static create(
-    props: Omit<ProspectSearchProps, 'status' | 'discoveredCount' | 'maxResults'> & {
+    props: Omit<
+      ProspectSearchProps,
+      'status' | 'discoveredCount' | 'maxResults'
+    > & {
       maxResults?: number;
     },
     id?: UniqueEntityID,

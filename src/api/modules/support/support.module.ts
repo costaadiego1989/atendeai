@@ -11,13 +11,17 @@ import { ListAllFeedbacksUseCase } from './application/use-cases/ListAllFeedback
 import { GetFeedbackDetailsUseCase } from './application/use-cases/GetFeedbackDetailsUseCase';
 import { UpdateFeedbackStatusUseCase } from './application/use-cases/UpdateFeedbackStatusUseCase';
 import { ReplyFeedbackUseCase } from './application/use-cases/ReplyFeedbackUseCase';
-import {
-  SUPPORT_FEEDBACK_REPOSITORY,
-} from './domain/repositories/ISupportFeedbackRepository';
+import { SUPPORT_FEEDBACK_REPOSITORY } from './domain/repositories/ISupportFeedbackRepository';
 import { PrismaSupportFeedbackRepository } from './infrastructure/persistence/repositories/PrismaSupportFeedbackRepository';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, ContactModule, MessagingModule, TenantModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    ContactModule,
+    MessagingModule,
+    TenantModule,
+  ],
   controllers: [SupportFeedbackController],
   providers: [
     CreateSupportFeedbackUseCase,

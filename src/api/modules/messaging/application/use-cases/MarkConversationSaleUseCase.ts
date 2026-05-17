@@ -89,15 +89,14 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
       }
     }
 
-    const existingApproved =
-      await this.prisma.conversationSaleEvent.findFirst({
-        where: {
-          tenantId: input.tenantId,
-          conversationId: input.conversationId,
-          lifecycleStatus: 'ACTIVE',
-          aiValidationStatus: 'APPROVED',
-        },
-      });
+    const existingApproved = await this.prisma.conversationSaleEvent.findFirst({
+      where: {
+        tenantId: input.tenantId,
+        conversationId: input.conversationId,
+        lifecycleStatus: 'ACTIVE',
+        aiValidationStatus: 'APPROVED',
+      },
+    });
     if (existingApproved) {
       throw new ConflictException(
         'Já existe uma venda aprovada para esta conversa.',
@@ -138,7 +137,8 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
       if (!ai.approved) {
         return {
           approved: false,
-          reason: ai.reason || 'Venda não confirmada pelo contexto da conversa.',
+          reason:
+            ai.reason || 'Venda não confirmada pelo contexto da conversa.',
           confidence: ai.confidence,
           conversationId: input.conversationId,
         };
@@ -209,7 +209,9 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
     metadata?: Prisma.JsonValue | null;
   }): MarkConversationSaleOutput {
     const objectiveEvidence =
-      row.metadata && typeof row.metadata === 'object' && !Array.isArray(row.metadata)
+      row.metadata &&
+      typeof row.metadata === 'object' &&
+      !Array.isArray(row.metadata)
         ? (row.metadata as Record<string, any>).objectiveEvidence
         : null;
 
@@ -218,16 +220,13 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
       id: row.id,
       conversationId: row.conversationId,
       attributedUserId: row.attributedUserId,
-      saleAmount:
-        row.saleAmount != null ? row.saleAmount.toString() : null,
+      saleAmount: row.saleAmount != null ? row.saleAmount.toString() : null,
       currency: row.currency,
       lifecycleStatus: row.lifecycleStatus,
       aiValidationStatus: row.aiValidationStatus,
       markedByUserId: row.markedByUserId,
       markedAt: row.markedAt.toISOString(),
-      aiValidatedAt: row.aiValidatedAt
-        ? row.aiValidatedAt.toISOString()
-        : null,
+      aiValidatedAt: row.aiValidatedAt ? row.aiValidatedAt.toISOString() : null,
       notes: row.notes,
       commercialKind:
         typeof objectiveEvidence?.commercialKind === 'string'

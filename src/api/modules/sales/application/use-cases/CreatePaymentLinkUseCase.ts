@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import {
   ICreatePaymentLinkUseCase,
@@ -25,7 +30,7 @@ export class CreatePaymentLinkUseCase implements ICreatePaymentLinkUseCase {
     private readonly tenantRepository: ITenantRepository,
     private readonly paymentLinkLifecycleService: SalesPaymentLinkLifecycleService,
     private readonly structuredLog: StructuredLogEmitter,
-  ) { }
+  ) {}
 
   async execute(
     input: CreatePaymentLinkInput,
@@ -54,7 +59,9 @@ export class CreatePaymentLinkUseCase implements ICreatePaymentLinkUseCase {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message.slice(0, 400) : String(error).slice(0, 400);
+        error instanceof Error
+          ? error.message.slice(0, 400)
+          : String(error).slice(0, 400);
       this.structuredLog.emit({
         level: 'warn',
         event: 'sales.payment_link.gateway_create_failed',
@@ -166,21 +173,20 @@ export class CreatePaymentLinkUseCase implements ICreatePaymentLinkUseCase {
     return Math.max(1, diffInDays);
   }
 
-  private resolveRecurrence(input: CreatePaymentLinkInput):
-    | {
-        frequency: 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
-        startDate: Date;
-        endDate: Date;
-        totalValue: number;
-        nextRunAt: Date | null;
-      }
-    | null {
+  private resolveRecurrence(input: CreatePaymentLinkInput): {
+    frequency: 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+    startDate: Date;
+    endDate: Date;
+    totalValue: number;
+    nextRunAt: Date | null;
+  } | null {
     if (!input.recurrence) {
       return null;
     }
 
     const frequency = input.recurrence.frequency ?? 'MONTHLY';
-    const startDate = input.recurrence.startDate ?? input.expiresAt ?? new Date();
+    const startDate =
+      input.recurrence.startDate ?? input.expiresAt ?? new Date();
     const endDate = input.recurrence.endDate;
 
     if (!endDate) {
@@ -188,14 +194,20 @@ export class CreatePaymentLinkUseCase implements ICreatePaymentLinkUseCase {
     }
 
     if (endDate < startDate) {
-      throw new BadRequestException('Data final da recorrência deve ser posterior ao inicio');
+      throw new BadRequestException(
+        'Data final da recorrência deve ser posterior ao inicio',
+      );
     }
 
     return {
       frequency,
       startDate,
       endDate,
-      totalValue: Number((input.value * this.countOccurrences(startDate, endDate, frequency)).toFixed(2)),
+      totalValue: Number(
+        (
+          input.value * this.countOccurrences(startDate, endDate, frequency)
+        ).toFixed(2),
+      ),
       nextRunAt: this.computeNextRunAt(startDate, endDate, frequency),
     };
   }

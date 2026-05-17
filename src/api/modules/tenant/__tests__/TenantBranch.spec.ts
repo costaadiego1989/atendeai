@@ -44,7 +44,9 @@ describe('TenantBranch Entity', () => {
   });
 
   it('should throw an error if name is too short', () => {
-    expect(() => makeBranch({ name: 'A' })).toThrow('Branch name must have at least 2 characters');
+    expect(() => makeBranch({ name: 'A' })).toThrow(
+      'Branch name must have at least 2 characters',
+    );
   });
 
   it('should handle whatsAppConfigOverride', () => {

@@ -124,7 +124,10 @@ export interface ICatalogRepository {
   createItem(input: CreateCatalogItemInput): Promise<CatalogItemRecord>;
   updateItem(input: UpdateCatalogItemInput): Promise<CatalogItemRecord>;
   listItems(filters: ListCatalogItemsFilters): Promise<CatalogItemRecord[]>;
-  findItemById(tenantId: string, itemId: string): Promise<CatalogItemRecord | null>;
+  findItemById(
+    tenantId: string,
+    itemId: string,
+  ): Promise<CatalogItemRecord | null>;
   findItemByExternalReference(
     tenantId: string,
     externalReference: string,

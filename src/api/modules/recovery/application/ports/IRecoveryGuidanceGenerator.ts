@@ -28,4 +28,6 @@ export interface IRecoveryGuidanceGenerator {
   generate(input: RecoveryGuidanceInput): Promise<RecoveryGuidanceOutput>;
 }
 
-export const RECOVERY_GUIDANCE_GENERATOR = Symbol('RECOVERY_GUIDANCE_GENERATOR');
+export const RECOVERY_GUIDANCE_GENERATOR = Symbol(
+  'RECOVERY_GUIDANCE_GENERATOR',
+);

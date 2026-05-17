@@ -3,8 +3,14 @@ import { Prisma } from '@prisma/client';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 
-export type CatalogAsyncJobType = 'EXPORT_CATALOG_REPORT_CSV' | 'IMPORT_CATALOG_ITEMS';
-export type CatalogAsyncJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type CatalogAsyncJobType =
+  | 'EXPORT_CATALOG_REPORT_CSV'
+  | 'IMPORT_CATALOG_ITEMS';
+export type CatalogAsyncJobStatus =
+  | 'QUEUED'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED';
 
 interface CatalogAsyncJobRow {
   id: string;
@@ -63,7 +69,6 @@ export class CatalogAsyncJobsService {
     payload: Record<string, unknown>;
     totalItems?: number;
   }): Promise<CatalogAsyncJobView> {
-
     const rows = await this.prisma.$queryRaw<CatalogAsyncJobRow[]>(Prisma.sql`
       INSERT INTO catalog_schema.catalog_async_jobs (
         tenant_id,
@@ -96,7 +101,6 @@ export class CatalogAsyncJobsService {
   }
 
   async attachQueueJobId(jobId: string, queueJobId: string): Promise<void> {
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE catalog_schema.catalog_async_jobs
       SET queue_job_id = ${queueJobId},
@@ -105,8 +109,10 @@ export class CatalogAsyncJobsService {
     `);
   }
 
-  async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }): Promise<void> {
-
+  async markProcessing(
+    jobId: string,
+    input?: { progress?: number; totalItems?: number },
+  ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE catalog_schema.catalog_async_jobs
       SET status = 'PROCESSING',
@@ -131,7 +137,6 @@ export class CatalogAsyncJobsService {
       fileContent?: string;
     },
   ): Promise<void> {
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE catalog_schema.catalog_async_jobs
       SET status = 'COMPLETED',
@@ -152,7 +157,6 @@ export class CatalogAsyncJobsService {
   }
 
   async failJob(jobId: string, errorMessage: string): Promise<void> {
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE catalog_schema.catalog_async_jobs
       SET status = 'FAILED',
@@ -164,7 +168,6 @@ export class CatalogAsyncJobsService {
   }
 
   async listJobs(tenantId: string, limit = 15): Promise<CatalogAsyncJobView[]> {
-
     const rows = await this.prisma.$queryRaw<CatalogAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM catalog_schema.catalog_async_jobs
@@ -177,7 +180,6 @@ export class CatalogAsyncJobsService {
   }
 
   async getJob(tenantId: string, jobId: string): Promise<CatalogAsyncJobView> {
-
     const rows = await this.prisma.$queryRaw<CatalogAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM catalog_schema.catalog_async_jobs
@@ -202,7 +204,6 @@ export class CatalogAsyncJobsService {
     fileContent?: string | null;
     fileUrl?: string | null;
   }> {
-
     const rows = await this.prisma.$queryRaw<CatalogAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM catalog_schema.catalog_async_jobs

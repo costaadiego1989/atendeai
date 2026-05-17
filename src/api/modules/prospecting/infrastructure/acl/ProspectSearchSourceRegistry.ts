@@ -5,9 +5,7 @@ import { IProspectSearchSourceRegistry } from '../../domain/ports/IProspectSearc
 import { GooglePlacesProspectSearchSource } from './GooglePlacesProspectSearchSource';
 
 @Injectable()
-export class ProspectSearchSourceRegistry
-  implements IProspectSearchSourceRegistry
-{
+export class ProspectSearchSourceRegistry implements IProspectSearchSourceRegistry {
   private readonly sources = new Map<string, IProspectSearchSource>();
 
   constructor(googlePlacesSource: GooglePlacesProspectSearchSource) {

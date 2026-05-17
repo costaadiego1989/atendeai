@@ -6,10 +6,14 @@ import {
 } from '../domain/ports/ICatalogRepository';
 
 describe('CatalogFacade', () => {
-  let repository: jest.Mocked<Pick<ICatalogRepository, 'listCategories' | 'listItems'>>;
+  let repository: jest.Mocked<
+    Pick<ICatalogRepository, 'listCategories' | 'listItems'>
+  >;
   let facade: CatalogFacade;
 
-  const categoryRecord = (over?: Partial<CatalogCategoryRecord>): CatalogCategoryRecord => ({
+  const categoryRecord = (
+    over?: Partial<CatalogCategoryRecord>,
+  ): CatalogCategoryRecord => ({
     id: 'category-1',
     tenantId: 'tenant-1',
     parentCategoryId: null,
@@ -24,7 +28,9 @@ describe('CatalogFacade', () => {
     ...over,
   });
 
-  const itemRecord = (over?: Partial<CatalogItemRecord>): CatalogItemRecord => ({
+  const itemRecord = (
+    over?: Partial<CatalogItemRecord>,
+  ): CatalogItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     categoryId: null,

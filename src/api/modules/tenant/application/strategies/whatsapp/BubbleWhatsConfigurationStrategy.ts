@@ -4,9 +4,7 @@ import { ConfigureWhatsAppInput } from '../../use-cases/interfaces/IConfigureWha
 import { IWhatsAppConfigurationStrategy } from './IWhatsAppConfigurationStrategy';
 
 @Injectable()
-export class BubbleWhatsConfigurationStrategy
-  implements IWhatsAppConfigurationStrategy
-{
+export class BubbleWhatsConfigurationStrategy implements IWhatsAppConfigurationStrategy {
   readonly provider = 'BUBBLEWHATS' as const;
 
   async configure(input: ConfigureWhatsAppInput): Promise<WhatsAppConfig> {

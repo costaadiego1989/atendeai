@@ -3,7 +3,9 @@ import { IConversationIntelligenceRepository } from '../domain/repositories/ICon
 
 describe('ConversationIntelligenceService', () => {
   let sut: ConversationIntelligenceService;
-  let intelligenceRepository: jest.Mocked<Pick<IConversationIntelligenceRepository, 'save' | 'findByConversationIds'>>;
+  let intelligenceRepository: jest.Mocked<
+    Pick<IConversationIntelligenceRepository, 'save' | 'findByConversationIds'>
+  >;
 
   beforeEach(() => {
     intelligenceRepository = {

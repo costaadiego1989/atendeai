@@ -80,4 +80,4 @@ import { parseRedisConnection } from './shared/infrastructure/redis/redis-connec
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

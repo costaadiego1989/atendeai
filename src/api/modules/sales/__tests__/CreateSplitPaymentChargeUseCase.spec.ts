@@ -75,7 +75,9 @@ describe('CreateSplitPaymentChargeUseCase', () => {
       phone: '11999999999',
       email: 'paciente@test.com',
     });
-    contactFinancialProfileRepository.findByTenantAndContact.mockResolvedValue(null);
+    contactFinancialProfileRepository.findByTenantAndContact.mockResolvedValue(
+      null,
+    );
     paymentService.createCustomer.mockResolvedValue({ id: 'cus_1' });
     paymentService.createPayment.mockResolvedValue({
       id: 'pay_1',
@@ -85,11 +87,13 @@ describe('CreateSplitPaymentChargeUseCase', () => {
       dueDate: '2026-04-03',
       invoiceUrl: 'https://pay.test/pay_1',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',
@@ -133,7 +137,9 @@ describe('CreateSplitPaymentChargeUseCase', () => {
       phone: '11999999999',
       email: 'paciente@test.com',
     });
-    contactFinancialProfileRepository.findByTenantAndContact.mockResolvedValue(null);
+    contactFinancialProfileRepository.findByTenantAndContact.mockResolvedValue(
+      null,
+    );
 
     await expect(
       useCase.execute({
@@ -167,11 +173,13 @@ describe('CreateSplitPaymentChargeUseCase', () => {
       dueDate: '2026-04-03',
       invoiceUrl: 'https://pay.test/pay_2',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',
@@ -228,11 +236,13 @@ describe('CreateSplitPaymentChargeUseCase', () => {
       dueDate: '2026-04-10',
       invoiceUrl: 'https://pay.test/pay_3',
     });
-    salesRepository.createPaymentLink.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    salesRepository.createPaymentLink.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',

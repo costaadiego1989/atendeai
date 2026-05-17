@@ -3,7 +3,11 @@ import {
   AIResponse,
   IAIEngine,
 } from '@modules/ai/application/ports/IAIEngine';
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
@@ -98,12 +102,18 @@ export class DeepSeekAdapter implements IAIEngine {
       const span = trace.getActiveSpan();
       if (span) {
         span.setAttribute('ai.tokens.total', tokensUsed);
-        span.setAttribute('ai.tokens.prompt', response.data.usage?.prompt_tokens ?? 0);
+        span.setAttribute(
+          'ai.tokens.prompt',
+          response.data.usage?.prompt_tokens ?? 0,
+        );
         span.setAttribute(
           'ai.tokens.completion',
           response.data.usage?.completion_tokens ?? 0,
         );
-        span.setAttribute('ai.estimated.usd.per.1m.config', String(this.estimatedUsdPerMillionTokens));
+        span.setAttribute(
+          'ai.estimated.usd.per.1m.config',
+          String(this.estimatedUsdPerMillionTokens),
+        );
         span.setAttribute(
           'ai.estimated.usd.rounded6',
           this.formatEstimatedUsd(tokensUsed),
@@ -112,7 +122,11 @@ export class DeepSeekAdapter implements IAIEngine {
 
       return aiResponse;
     } catch (error: unknown) {
-      const err = error as { message?: string; code?: string; response?: { data?: unknown; status?: number } };
+      const err = error as {
+        message?: string;
+        code?: string;
+        response?: { data?: unknown; status?: number };
+      };
       const status = err.response?.status;
       const detailRaw = err.response?.data ?? err.message ?? error;
       const detail =
@@ -136,8 +150,7 @@ export class DeepSeekAdapter implements IAIEngine {
     ) {
       return '0';
     }
-    const usd =
-      (tokensUsed / 1_000_000) * this.estimatedUsdPerMillionTokens;
+    const usd = (tokensUsed / 1_000_000) * this.estimatedUsdPerMillionTokens;
     return usd.toFixed(6);
   }
 }

@@ -61,13 +61,20 @@ describe('FollowUpWorker', () => {
       'follow-up',
       expect.any(Function),
       expect.objectContaining({
-        connection: { host: 'localhost', port: 6379, maxRetriesPerRequest: null, enableReadyCheck: false },
+        connection: {
+          host: 'localhost',
+          port: 6379,
+          maxRetriesPerRequest: null,
+          enableReadyCheck: false,
+        },
         concurrency: 10,
       }),
     );
     expect(mockWorkerOn).toHaveBeenCalledWith('failed', expect.any(Function));
 
-    const processor = mockWorkerCtor.mock.calls[0][1] as (job: any) => Promise<void>;
+    const processor = mockWorkerCtor.mock.calls[0][1] as (
+      job: any,
+    ) => Promise<void>;
     await processor({
       id: 'bull-follow-up-99',
       data: {
@@ -78,24 +85,26 @@ describe('FollowUpWorker', () => {
       },
     });
 
-    expect(conversationIntelligenceRepository.findByConversationIds).toHaveBeenCalledWith(
-      'tenant-1',
-      ['conversation-1'],
-    );
+    expect(
+      conversationIntelligenceRepository.findByConversationIds,
+    ).toHaveBeenCalledWith('tenant-1', ['conversation-1']);
     expect(followUpAuditService.record).toHaveBeenCalledWith(
       'conversation-1',
       '12h',
       'TRIGGERED',
     );
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
-    expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(FollowUpTriggeredEvent);
-    expect((eventBus.publish.mock.calls[0][0] as FollowUpTriggeredEvent).payload)
-      .toEqual({
-        conversationId: 'conversation-1',
-        tenantId: 'tenant-1',
-        contactId: 'contact-1',
-        interval: '12h',
-      });
+    expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(
+      FollowUpTriggeredEvent,
+    );
+    expect(
+      (eventBus.publish.mock.calls[0][0] as FollowUpTriggeredEvent).payload,
+    ).toEqual({
+      conversationId: 'conversation-1',
+      tenantId: 'tenant-1',
+      contactId: 'contact-1',
+      interval: '12h',
+    });
     expect(structuredLog.emit).toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'messaging.follow_up.job_started',

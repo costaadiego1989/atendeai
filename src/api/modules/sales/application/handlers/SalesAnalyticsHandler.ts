@@ -1,8 +1,5 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import {
-  IEventBus,
-  EVENT_BUS,
-} from '@shared/application/ports/IEventBus';
+import { IEventBus, EVENT_BUS } from '@shared/application/ports/IEventBus';
 import { TrackSalesMetricUseCase } from '../use-cases/TrackSalesMetricUseCase';
 
 @Injectable()

@@ -16,13 +16,11 @@ interface UpdateTenantBranchInput {
   email?: string | null;
   whatsappNumber?: string | null;
   instagramAccountId?: string | null;
-  whatsAppConfigOverride?:
-  | {
+  whatsAppConfigOverride?: {
     provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
     credentials: Record<string, string>;
     webhookSecret?: string | null;
-  }
-  | null;
+  } | null;
   zipcode?: string | null;
   street?: string | null;
   streetNumber?: string | null;
@@ -43,25 +41,32 @@ export class UpdateTenantBranchUseCase {
     private readonly tenantRepository: ITenantRepository,
     private readonly tenantAuditService: TenantAuditService,
     private readonly billingCapacityService: TenantBillingCapacityService,
-  ) { }
+  ) {}
 
   async execute(input: UpdateTenantBranchInput) {
-    const currentBranch = (await this.tenantRepository.listBranches(input.tenantId)).find(
-      (branch) => branch.id.toValue() === input.branchId,
-    );
+    const currentBranch = (
+      await this.tenantRepository.listBranches(input.tenantId)
+    ).find((branch) => branch.id.toValue() === input.branchId);
 
-    const isActivatingBranch = input.active !== false && currentBranch?.active === false;
+    const isActivatingBranch =
+      input.active !== false && currentBranch?.active === false;
     const isAddingWhatsapp =
       !!input.whatsappNumber?.trim() &&
       input.whatsappNumber.replace(/\D/g, '') !==
         (currentBranch?.whatsappNumber ?? '').replace(/\D/g, '');
 
     if (isActivatingBranch) {
-      await this.billingCapacityService.assertCanAdd(input.tenantId, 'branches');
+      await this.billingCapacityService.assertCanAdd(
+        input.tenantId,
+        'branches',
+      );
     }
 
     if (isAddingWhatsapp) {
-      await this.billingCapacityService.assertCanAdd(input.tenantId, 'whatsappNumbers');
+      await this.billingCapacityService.assertCanAdd(
+        input.tenantId,
+        'whatsappNumbers',
+      );
     }
 
     const branch = await this.tenantRepository.updateBranch(input.branchId, {

@@ -22,10 +22,7 @@ export class ListTenantAgentRuleHistoryUseCase {
   async execute(
     input: ListTenantAgentRuleHistoryInput,
   ): Promise<ListTenantAgentRuleHistoryOutput> {
-    ensureAgentRuleTenantAccess(
-      input.tenantId,
-      input.requestingUserTenantId,
-    );
+    ensureAgentRuleTenantAccess(input.tenantId, input.requestingUserTenantId);
 
     const moduleParsed = parseAgentModule(input.moduleId);
     const limit = Math.min(100, Math.max(1, input.limit ?? 25));

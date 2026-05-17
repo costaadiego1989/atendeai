@@ -13,7 +13,7 @@ export class AIResponseGeneratedHandler implements OnModuleInit {
     private readonly eventBus: IEventBus,
     private readonly sendAiMessageUseCase: SendAIMessageUseCase,
     private readonly followUpService: FollowUpService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.eventBus.subscribe(

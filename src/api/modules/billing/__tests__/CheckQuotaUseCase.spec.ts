@@ -3,7 +3,10 @@ import { Subscription } from '../domain/entities/Subscription';
 import { UsageRecord } from '../domain/entities/UsageRecord';
 import { TenantId } from '../../../shared/domain/TenantId';
 import { UsageType } from '../application/use-cases/interfaces/IRecordUsageUseCase';
-import { BillingQuotaExceededIntegrationEvent, BillingQuotaWarningIntegrationEvent } from '../application/integration-events/BillingIntegrationEvents';
+import {
+  BillingQuotaExceededIntegrationEvent,
+  BillingQuotaWarningIntegrationEvent,
+} from '../application/integration-events/BillingIntegrationEvents';
 
 describe('CheckQuotaUseCase', () => {
   let useCase: CheckQuotaUseCase;

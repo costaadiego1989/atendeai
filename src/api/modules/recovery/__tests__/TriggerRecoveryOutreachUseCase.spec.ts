@@ -100,7 +100,9 @@ describe('TriggerRecoveryOutreachUseCase', () => {
       contactId: 'contact-2',
       created: true,
     });
-    recoveryOutreachGenerator.generate.mockResolvedValue('Mensagem gerada por IA');
+    recoveryOutreachGenerator.generate.mockResolvedValue(
+      'Mensagem gerada por IA',
+    );
     messagingFacade.queueSystemMessage.mockResolvedValue({
       conversationId: 'conversation-2',
       messageId: 'message-2',

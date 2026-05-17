@@ -10,9 +10,7 @@ import {
 } from '../../domain/repositories/IProspectSearchRepository';
 
 @Injectable()
-export class ListProspectSearchesUseCase
-  implements IListProspectSearchesUseCase
-{
+export class ListProspectSearchesUseCase implements IListProspectSearchesUseCase {
   constructor(
     @Inject(PROSPECT_SEARCH_REPOSITORY)
     private readonly searchRepository: IProspectSearchRepository,
@@ -21,7 +19,9 @@ export class ListProspectSearchesUseCase
   async execute(
     input: ListProspectSearchesInput,
   ): Promise<ProspectSearchListItem[]> {
-    const searches = await this.searchRepository.findAllByTenant(input.tenantId);
+    const searches = await this.searchRepository.findAllByTenant(
+      input.tenantId,
+    );
 
     return searches.map((search) => ({
       id: search.id.toString(),

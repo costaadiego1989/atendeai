@@ -12,9 +12,7 @@ import { AsaasWebhookGuard } from '../guards/AsaasWebhookGuard';
 
 @Controller('webhooks/asaas')
 export class PaymentController {
-  constructor(
-    private readonly processWebhookUseCase: ProcessWebhookUseCase,
-  ) { }
+  constructor(private readonly processWebhookUseCase: ProcessWebhookUseCase) {}
 
   @Post()
   @UseGuards(AsaasWebhookGuard)

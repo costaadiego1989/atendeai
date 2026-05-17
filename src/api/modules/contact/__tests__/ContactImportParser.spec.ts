@@ -8,7 +8,8 @@ describe('ContactImportParser', () => {
   });
 
   it('should parse valid CSV with headers', () => {
-    const rawText = 'nome;telefone;documento;email;tags\nJohn Doe;5511999999999;12345678900;john@test.com;VIP|Premium';
+    const rawText =
+      'nome;telefone;documento;email;tags\nJohn Doe;5511999999999;12345678900;john@test.com;VIP|Premium';
 
     const rows = parser.parseRows(rawText, []);
 
@@ -34,7 +35,8 @@ describe('ContactImportParser', () => {
   });
 
   it('should handle special characters in names', () => {
-    const rawText = 'nome,telefone\nJosé María,5511999999999\nO\'Brien,5511888888888';
+    const rawText =
+      "nome,telefone\nJosé María,5511999999999\nO'Brien,5511888888888";
 
     const rows = parser.parseRows(rawText, []);
 
@@ -52,7 +54,8 @@ describe('ContactImportParser', () => {
   });
 
   it('should return array of parsed contacts with line numbers', () => {
-    const rawText = 'nome,telefone\nAlice,5511111111111\nBob,5511222222222\nCharlie,5511333333333';
+    const rawText =
+      'nome,telefone\nAlice,5511111111111\nBob,5511222222222\nCharlie,5511333333333';
 
     const rows = parser.parseRows(rawText, []);
 

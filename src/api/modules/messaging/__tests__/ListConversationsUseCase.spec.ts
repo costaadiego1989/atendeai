@@ -95,23 +95,27 @@ describe('ListConversationsUseCase', () => {
       limit: 20,
     });
 
-    expect(conversationRepository.findAllByTenant).toHaveBeenCalledWith('tenant-1', {
-      branchId: undefined,
-      page: 1,
-      limit: 20,
-      status: undefined,
-      assignedUserId: undefined,
-    });
-    expect(conversationRepository.findAssignedUsers).toHaveBeenCalledWith('tenant-1', [
-      'conversation-1',
-    ]);
-    expect(conversationRepository.findQueueState).toHaveBeenCalledWith('tenant-1', [
-      'conversation-1',
-    ]);
-    expect(conversationIntelligenceRepository.findByConversationIds).toHaveBeenCalledWith(
+    expect(conversationRepository.findAllByTenant).toHaveBeenCalledWith(
+      'tenant-1',
+      {
+        branchId: undefined,
+        page: 1,
+        limit: 20,
+        status: undefined,
+        assignedUserId: undefined,
+      },
+    );
+    expect(conversationRepository.findAssignedUsers).toHaveBeenCalledWith(
       'tenant-1',
       ['conversation-1'],
     );
+    expect(conversationRepository.findQueueState).toHaveBeenCalledWith(
+      'tenant-1',
+      ['conversation-1'],
+    );
+    expect(
+      conversationIntelligenceRepository.findByConversationIds,
+    ).toHaveBeenCalledWith('tenant-1', ['conversation-1']);
     expect(result.data).toEqual([
       expect.objectContaining({
         id: 'conversation-1',
@@ -176,13 +180,16 @@ describe('ListConversationsUseCase', () => {
       requesterRole: 'AGENT',
     });
 
-    expect(conversationRepository.findAllByTenant).toHaveBeenCalledWith('tenant-1', {
-      branchId: undefined,
-      page: 1,
-      limit: 20,
-      status: undefined,
-      assignedUserId: 'agent-1',
-    });
+    expect(conversationRepository.findAllByTenant).toHaveBeenCalledWith(
+      'tenant-1',
+      {
+        branchId: undefined,
+        page: 1,
+        limit: 20,
+        status: undefined,
+        assignedUserId: 'agent-1',
+      },
+    );
   });
 
   it('should let owner users list every conversation in the tenant', async () => {
@@ -199,12 +206,15 @@ describe('ListConversationsUseCase', () => {
       requesterRole: 'OWNER',
     });
 
-    expect(conversationRepository.findAllByTenant).toHaveBeenCalledWith('tenant-1', {
-      branchId: undefined,
-      page: 1,
-      limit: 20,
-      status: undefined,
-      assignedUserId: undefined,
-    });
+    expect(conversationRepository.findAllByTenant).toHaveBeenCalledWith(
+      'tenant-1',
+      {
+        branchId: undefined,
+        page: 1,
+        limit: 20,
+        status: undefined,
+        assignedUserId: undefined,
+      },
+    );
   });
 });

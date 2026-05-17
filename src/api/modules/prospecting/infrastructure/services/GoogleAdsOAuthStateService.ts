@@ -30,10 +30,7 @@ export class GoogleAdsOAuthStateService {
 
     const expectedSignature = this.signValue(encoded);
     if (
-      !timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature),
-      )
+      !timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
     ) {
       throw new ValidationErrorException('Google Ads OAuth state is invalid');
     }

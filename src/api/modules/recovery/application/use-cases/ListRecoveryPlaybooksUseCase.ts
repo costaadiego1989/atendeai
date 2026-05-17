@@ -12,9 +12,13 @@ export class ListRecoveryPlaybooksUseCase {
     private readonly playbookRepository: IRecoveryPlaybookRepository,
   ) {}
 
-  async execute(input: { tenantId: string }): Promise<RecoveryPlaybookWithPhases[]> {
+  async execute(input: {
+    tenantId: string;
+  }): Promise<RecoveryPlaybookWithPhases[]> {
     await this.playbookRepository.ensureSystemDefaultPlaybook(input.tenantId);
-    const playbooks = await this.playbookRepository.listPlaybooks(input.tenantId);
+    const playbooks = await this.playbookRepository.listPlaybooks(
+      input.tenantId,
+    );
     const withPhases: RecoveryPlaybookWithPhases[] = [];
     for (const pb of playbooks) {
       const phases = await this.playbookRepository.listPhases(pb.id);

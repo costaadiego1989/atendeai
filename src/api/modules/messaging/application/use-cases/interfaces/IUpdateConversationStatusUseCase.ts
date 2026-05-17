@@ -12,11 +12,10 @@ export interface UpdateConversationStatusOutput {
   status: 'ACTIVE' | 'PENDING_HUMAN' | 'ARCHIVED';
 }
 
-export interface IUpdateConversationStatusUseCase
-  extends IUseCase<
-    UpdateConversationStatusInput,
-    UpdateConversationStatusOutput
-  > {}
+export interface IUpdateConversationStatusUseCase extends IUseCase<
+  UpdateConversationStatusInput,
+  UpdateConversationStatusOutput
+> {}
 
 export const IUpdateConversationStatusUseCase = Symbol(
   'IUpdateConversationStatusUseCase',

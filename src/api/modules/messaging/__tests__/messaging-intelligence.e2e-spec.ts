@@ -83,18 +83,22 @@ describe('Messaging conversation intelligence (e2e)', () => {
   afterAll(async () => {
     if (prisma && tenantId) {
       await prisma
-        .$executeRaw(Prisma.sql`
+        .$executeRaw(
+          Prisma.sql`
           DELETE FROM messaging_schema.conversation_intelligence
           WHERE tenant_id = ${tenantId}::uuid
-        `)
-        .catch(() => { });
+        `,
+        )
+        .catch(() => {});
       await prisma.message
         .deleteMany({ where: { conversation: { tenantId } } })
-        .catch(() => { });
-      await prisma.conversation.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.conversation
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
 
     if (app) {
@@ -129,7 +133,9 @@ describe('Messaging conversation intelligence (e2e)', () => {
     });
 
     const listResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/conversations?page=1&limit=20&status=ACTIVE`)
+      .get(
+        `/api/v1/tenants/${tenantId}/conversations?page=1&limit=20&status=ACTIVE`,
+      )
       .set('Cookie', authCookies)
       .expect(200);
 
@@ -168,7 +174,9 @@ describe('Messaging conversation intelligence (e2e)', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${conversation.id}/messages`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversation.id}/messages`,
+      )
       .set('Cookie', authCookies)
       .send({
         content: {
@@ -179,7 +187,9 @@ describe('Messaging conversation intelligence (e2e)', () => {
       .expect(201);
 
     const listResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/conversations?page=1&limit=20&status=PENDING_HUMAN`)
+      .get(
+        `/api/v1/tenants/${tenantId}/conversations?page=1&limit=20&status=PENDING_HUMAN`,
+      )
       .set('Cookie', authCookies)
       .expect(200);
 

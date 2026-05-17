@@ -9,9 +9,9 @@ describe('renderAlertReminderBody', () => {
   };
 
   it('substitui tokens', () => {
-    expect(
-      renderAlertReminderBody('x {title} y {tenant_id}', baseValues),
-    ).toBe('x T y t1');
+    expect(renderAlertReminderBody('x {title} y {tenant_id}', baseValues)).toBe(
+      'x T y t1',
+    );
   });
 
   // ─── NEW scenarios ────────────────────────────────────────────────────────────
@@ -27,8 +27,13 @@ describe('renderAlertReminderBody', () => {
       reminderId: 'r-special&chars',
       tenantId: 't/slash',
     };
-    const result = renderAlertReminderBody('{title} | {message} | {reminder_id} | {tenant_id}', values);
-    expect(result).toBe('<script>alert("xss")</script> | line1\nline2\ttab | r-special&chars | t/slash');
+    const result = renderAlertReminderBody(
+      '{title} | {message} | {reminder_id} | {tenant_id}',
+      values,
+    );
+    expect(result).toBe(
+      '<script>alert("xss")</script> | line1\nline2\ttab | r-special&chars | t/slash',
+    );
   });
 
   it('replaces multiple occurrences of the same token', () => {
@@ -52,7 +57,8 @@ describe('renderAlertReminderBody', () => {
   });
 
   it('replaces all four tokens in default template', () => {
-    const template = 'Lembrete: {title}\n\n{message}\n\nID: {reminder_id} Tenant: {tenant_id}';
+    const template =
+      'Lembrete: {title}\n\n{message}\n\nID: {reminder_id} Tenant: {tenant_id}';
     const result = renderAlertReminderBody(template, baseValues);
     expect(result).toBe('Lembrete: T\n\nM\n\nID: r1 Tenant: t1');
   });

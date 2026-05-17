@@ -25,8 +25,10 @@ export interface CreateProspectCampaignOutput {
   createdAt: Date;
 }
 
-export interface ICreateProspectCampaignUseCase
-  extends IUseCase<CreateProspectCampaignInput, CreateProspectCampaignOutput> {}
+export interface ICreateProspectCampaignUseCase extends IUseCase<
+  CreateProspectCampaignInput,
+  CreateProspectCampaignOutput
+> {}
 
 export const ICreateProspectCampaignUseCase = Symbol(
   'ICreateProspectCampaignUseCase',

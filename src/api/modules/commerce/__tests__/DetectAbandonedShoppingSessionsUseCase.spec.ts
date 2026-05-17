@@ -121,21 +121,30 @@ describe('DetectAbandonedShoppingSessionsUseCase', () => {
     const now = new Date('2026-04-08T21:00:00.000Z');
     const result = await useCase.execute({ now, limitPerInterval: 20 });
 
-    expect(commerceRepository.listAbandonedSessions).toHaveBeenNthCalledWith(1, {
-      interval: '1h',
-      staleBefore: new Date('2026-04-08T20:00:00.000Z'),
-      limit: 20,
-    });
-    expect(commerceRepository.listAbandonedSessions).toHaveBeenNthCalledWith(2, {
-      interval: '1d',
-      staleBefore: new Date('2026-04-07T21:00:00.000Z'),
-      limit: 20,
-    });
-    expect(commerceRepository.listAbandonedSessions).toHaveBeenNthCalledWith(3, {
-      interval: '7d',
-      staleBefore: new Date('2026-04-01T21:00:00.000Z'),
-      limit: 20,
-    });
+    expect(commerceRepository.listAbandonedSessions).toHaveBeenNthCalledWith(
+      1,
+      {
+        interval: '1h',
+        staleBefore: new Date('2026-04-08T20:00:00.000Z'),
+        limit: 20,
+      },
+    );
+    expect(commerceRepository.listAbandonedSessions).toHaveBeenNthCalledWith(
+      2,
+      {
+        interval: '1d',
+        staleBefore: new Date('2026-04-07T21:00:00.000Z'),
+        limit: 20,
+      },
+    );
+    expect(commerceRepository.listAbandonedSessions).toHaveBeenNthCalledWith(
+      3,
+      {
+        interval: '7d',
+        staleBefore: new Date('2026-04-01T21:00:00.000Z'),
+        limit: 20,
+      },
+    );
 
     expect(eventBus.publish).toHaveBeenCalledTimes(2);
     expect(eventBus.publish).toHaveBeenNthCalledWith(

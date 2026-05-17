@@ -66,7 +66,11 @@ describe('StartShoppingSessionUseCase', () => {
     commerceRepo.createSession.mockResolvedValue(mockSession as any);
     eventBus.publish.mockResolvedValue(undefined);
 
-    const result = await useCase.execute({ tenantId, conversationId, contactId });
+    const result = await useCase.execute({
+      tenantId,
+      conversationId,
+      contactId,
+    });
 
     expect(result).toEqual(mockSession);
     expect(commerceRepo.createSession).toHaveBeenCalledWith({
@@ -89,9 +93,15 @@ describe('StartShoppingSessionUseCase', () => {
   });
 
   it('should return existing session if one is already active for the conversation', async () => {
-    commerceRepo.findActiveSessionByConversation.mockResolvedValue(mockSession as any);
+    commerceRepo.findActiveSessionByConversation.mockResolvedValue(
+      mockSession as any,
+    );
 
-    const result = await useCase.execute({ tenantId, conversationId, contactId });
+    const result = await useCase.execute({
+      tenantId,
+      conversationId,
+      contactId,
+    });
 
     expect(result).toEqual(mockSession);
     expect(commerceRepo.createSession).not.toHaveBeenCalled();
@@ -119,7 +129,11 @@ describe('StartShoppingSessionUseCase', () => {
     } as any);
     eventBus.publish.mockResolvedValue(undefined);
 
-    await useCase.execute({ tenantId: otherTenantId, conversationId, contactId });
+    await useCase.execute({
+      tenantId: otherTenantId,
+      conversationId,
+      contactId,
+    });
 
     expect(commerceRepo.findActiveSessionByConversation).toHaveBeenCalledWith(
       otherTenantId,

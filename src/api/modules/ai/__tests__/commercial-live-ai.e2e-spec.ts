@@ -60,7 +60,12 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
         'preço',
       ],
       minimumSignals: 2,
-      ctaSignals: ['posso separar', 'faco seu pedido', 'quer reservar', 'se quiser'],
+      ctaSignals: [
+        'posso separar',
+        'faco seu pedido',
+        'quer reservar',
+        'se quiser',
+      ],
     },
     {
       key: 'petshop',
@@ -96,7 +101,12 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
         'visual',
       ],
       minimumSignals: 2,
-      ctaSignals: ['agendar', 'reservar horário', 'posso te indicar', 'quer que eu'],
+      ctaSignals: [
+        'agendar',
+        'reservar horário',
+        'posso te indicar',
+        'quer que eu',
+      ],
     },
     {
       key: 'clinica',
@@ -104,7 +114,8 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
       companyType: 'clinica',
       description: 'Clinica odontologica com foco em estetica dental.',
       services: 'Avaliação, limpeza, clareamento e lentes de resina',
-      inboundText: 'Quero marcar um clareamento amanha e ja reservar o horário.',
+      inboundText:
+        'Quero marcar um clareamento amanha e ja reservar o horário.',
       expectedContextSignals: [
         'clareamento',
         'agendar',
@@ -124,7 +135,8 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
       description:
         'Escola de idiomas com cursos intensivos e acompanhamento individual.',
       services: 'Matricula, intensivo de ingles, aulas em grupo e mentoria',
-      inboundText: 'Quero garantir minha matricula no intensivo de ingles hoje.',
+      inboundText:
+        'Quero garantir minha matricula no intensivo de ingles hoje.',
       expectedContextSignals: [
         'matricula',
         'intensivo',
@@ -134,7 +146,12 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
         'garantir',
       ],
       minimumSignals: 2,
-      ctaSignals: ['garantir sua vaga', 'prosseguir com a matricula', 'quer que eu', 'posso te'],
+      ctaSignals: [
+        'garantir sua vaga',
+        'prosseguir com a matricula',
+        'quer que eu',
+        'posso te',
+      ],
     },
   ];
 
@@ -421,7 +438,7 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
 
   afterEach(async () => {
     for (const conversationId of createdConversationIds) {
-      await chatHistory.clearHistory(conversationId).catch(() => { });
+      await chatHistory.clearHistory(conversationId).catch(() => {});
     }
     createdConversationIds.length = 0;
   });
@@ -434,18 +451,32 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
             conversation: { tenantId },
           },
         })
-        .catch(() => { });
-      await prisma.conversation.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.inventoryItem.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.catalogItem.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.catalogCategory.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.salesMetric.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.usageRecord.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.aIConfig.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.conversation
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.inventoryItem
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.catalogItem
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.catalogCategory
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.salesMetric
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.usageRecord
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.aIConfig.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
 
     if (app) {
@@ -456,7 +487,10 @@ describeRealAI('Commercial live AI mapping (e2e)', () => {
   for (const [index, scenario] of scenarios.entries()) {
     it(`should map ${scenario.companyType} context with live AI for ${scenario.key}`, async () => {
       const tenantId = await createScenarioTenant(scenario, index + 1);
-      const { contactId, conversationId } = await seedConversation(tenantId, scenario);
+      const { contactId, conversationId } = await seedConversation(
+        tenantId,
+        scenario,
+      );
 
       const result = await processAI.execute({
         tenantId,

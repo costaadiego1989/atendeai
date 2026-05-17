@@ -11,12 +11,14 @@ describe('ChangeFirstAccessPasswordUseCase', () => {
   let passwordHasher: any;
   let authAuditLogRepository: any;
 
-  function createMockUser(overrides: Partial<{
-    id: string;
-    tenantId: string;
-    email: string;
-    mustChangePassword: boolean;
-  }> = {}) {
+  function createMockUser(
+    overrides: Partial<{
+      id: string;
+      tenantId: string;
+      email: string;
+      mustChangePassword: boolean;
+    }> = {},
+  ) {
     return AuthUser.create(
       {
         tenantId: overrides.tenantId ?? 'tenant-1',
@@ -86,13 +88,20 @@ describe('ChangeFirstAccessPasswordUseCase', () => {
   });
 
   it('should register audit FIRST_ACCESS_PASSWORD_CHANGED', async () => {
-    const mockUser = createMockUser({ email: 'user@test.com', tenantId: 'tenant-1' });
+    const mockUser = createMockUser({
+      email: 'user@test.com',
+      tenantId: 'tenant-1',
+    });
     authUserRepository.findById.mockResolvedValue(mockUser);
 
     await useCase.execute({
       userId: 'user-1',
       password: 'NewPass123!',
-      context: { ipAddress: '192.168.1.1', userAgent: 'Firefox', deviceId: 'dev-2' },
+      context: {
+        ipAddress: '192.168.1.1',
+        userAgent: 'Firefox',
+        deviceId: 'dev-2',
+      },
     });
 
     expect(authAuditLogRepository.record).toHaveBeenCalledWith(
@@ -127,7 +136,11 @@ describe('ChangeFirstAccessPasswordUseCase', () => {
     await useCase.execute({
       userId: 'user-1',
       password: 'Pass123!',
-      context: { ipAddress: '10.0.0.1', userAgent: 'Safari', deviceId: 'iphone-1' },
+      context: {
+        ipAddress: '10.0.0.1',
+        userAgent: 'Safari',
+        deviceId: 'iphone-1',
+      },
     });
 
     expect(authAuditLogRepository.record).toHaveBeenCalledWith(

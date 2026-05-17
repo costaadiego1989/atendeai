@@ -39,7 +39,8 @@ export function buildSubscriptionCommercialState(
     ),
     baseMonthlyPrice: Number(planDefinition.monthlyPrice || 0),
     addonsMonthlyPrice,
-    totalMonthlyPrice: Number(planDefinition.monthlyPrice || 0) + addonsMonthlyPrice,
+    totalMonthlyPrice:
+      Number(planDefinition.monthlyPrice || 0) + addonsMonthlyPrice,
     pricingVersion: planDefinition.pricingVersion ?? undefined,
     pricingSnapshot: {
       plan: {

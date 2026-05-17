@@ -42,7 +42,9 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
   async execute(
     input: ChangeSubscriptionPlanInput,
   ): Promise<ChangeSubscriptionPlanOutput> {
-    const subscription = await this.billingRepository.findSubscription(input.tenantId);
+    const subscription = await this.billingRepository.findSubscription(
+      input.tenantId,
+    );
 
     if (!subscription) {
       throw new EntityNotFoundException('Subscription', input.tenantId);
@@ -69,9 +71,10 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
       if (!targetPlanDefinition) {
         throw new EntityNotFoundException('BillingPlan', input.targetPlan);
       }
-      const subscriptionModules = await this.billingRepository.listSubscriptionModules(
-        subscription.id.toString(),
-      );
+      const subscriptionModules =
+        await this.billingRepository.listSubscriptionModules(
+          subscription.id.toString(),
+        );
       const commercialState = buildSubscriptionCommercialState(
         targetPlanDefinition,
         subscriptionModules,
@@ -106,7 +109,9 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
 
     if (input.targetPlan === 'ESSENCIAL') {
       if (subscription.asaasSubscriptionId) {
-        await this.paymentService.cancelSubscription(subscription.asaasSubscriptionId);
+        await this.paymentService.cancelSubscription(
+          subscription.asaasSubscriptionId,
+        );
         subscription.clearAsaasSubscription();
       }
 
@@ -147,9 +152,10 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
       if (!targetPlanDefinition) {
         throw new EntityNotFoundException('BillingPlan', input.targetPlan);
       }
-      const subscriptionModules = await this.billingRepository.listSubscriptionModules(
-        subscription.id.toString(),
-      );
+      const subscriptionModules =
+        await this.billingRepository.listSubscriptionModules(
+          subscription.id.toString(),
+        );
       const commercialState = buildSubscriptionCommercialState(
         targetPlanDefinition,
         subscriptionModules,

@@ -93,7 +93,9 @@ describe('PromptBuilder', () => {
     expect(prompt).toContain('Description: Atendimento premium');
     expect(prompt).toContain('Services/Products: Corte, barba e pigmentação');
     expect(prompt).toContain('Catalog: https://empresa.test/catalogo');
-    expect(prompt).toContain('Location: Rua Central, Centro, Sao Paulo, SP, 01000-000');
+    expect(prompt).toContain(
+      'Location: Rua Central, Centro, Sao Paulo, SP, 01000-000',
+    );
     expect(prompt).toContain('Response Tone: PROFESSIONAL');
     expect(prompt).toContain('Specific Business Rules:');
     expect(prompt).toContain('- não prometer desconto sem autorização');
@@ -123,7 +125,9 @@ describe('PromptBuilder', () => {
     expect(prompt).toContain('RECURRING PACKAGE SALES');
     expect(prompt).toContain('pacote vendavel');
     expect(prompt).toContain('Para academia, studio ou personal');
-    expect(prompt).toContain('[PAYMENT_LINK: Nome do pacote recorrente, Valor]');
+    expect(prompt).toContain(
+      '[PAYMENT_LINK: Nome do pacote recorrente, Valor]',
+    );
     expect(prompt).toContain('vincula o pacote ao cadastro do cliente');
   });
 });

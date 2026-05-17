@@ -6,7 +6,9 @@ describe('GetTenantFinancialAccountStatusUseCase', () => {
       findByTenantId: jest.fn().mockResolvedValue(null),
     };
 
-    const useCase = new GetTenantFinancialAccountStatusUseCase(repository as any);
+    const useCase = new GetTenantFinancialAccountStatusUseCase(
+      repository as any,
+    );
 
     await expect(useCase.execute('tenant-1')).resolves.toEqual({
       configured: false,
@@ -29,7 +31,9 @@ describe('GetTenantFinancialAccountStatusUseCase', () => {
       }),
     };
 
-    const useCase = new GetTenantFinancialAccountStatusUseCase(repository as any);
+    const useCase = new GetTenantFinancialAccountStatusUseCase(
+      repository as any,
+    );
 
     await expect(useCase.execute('tenant-1')).resolves.toEqual({
       configured: true,

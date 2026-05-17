@@ -30,7 +30,10 @@ describe('RecordUsageUseCase', () => {
   });
 
   it('should create new usage record if none exists and record usage', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'ESSENCIAL');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'ESSENCIAL',
+    );
     billingRepo.findSubscription.mockResolvedValue(subscription);
     billingRepo.getUsage.mockResolvedValue(null);
 
@@ -42,7 +45,10 @@ describe('RecordUsageUseCase', () => {
   });
 
   it('should update existing usage record', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'ESSENCIAL');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'ESSENCIAL',
+    );
     const existingUsage = UsageRecord.create(
       TenantId.create('tenant-1'),
       subscription.billingCycleStart,
@@ -63,7 +69,10 @@ describe('RecordUsageUseCase', () => {
   });
 
   it('delegates execution to traceAsync with billing.record_usage span', async () => {
-    const subscription = Subscription.create(TenantId.create('tenant-1'), 'ESSENCIAL');
+    const subscription = Subscription.create(
+      TenantId.create('tenant-1'),
+      'ESSENCIAL',
+    );
     billingRepo.findSubscription.mockResolvedValue(subscription);
     billingRepo.getUsage.mockResolvedValue(null);
 

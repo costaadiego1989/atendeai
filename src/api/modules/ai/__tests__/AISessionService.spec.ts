@@ -1,5 +1,8 @@
 import { AISessionService } from '../application/services/AISessionService';
-import { IAISessionRepository, AISessionDto } from '../application/ports/IAISessionRepository';
+import {
+  IAISessionRepository,
+  AISessionDto,
+} from '../application/ports/IAISessionRepository';
 
 function makeSessionDto(overrides: Partial<AISessionDto> = {}): AISessionDto {
   return {
@@ -32,10 +35,18 @@ describe('AISessionService', () => {
       const existing = makeSessionDto();
       repository.findActive.mockResolvedValue(existing);
 
-      const result = await service.getOrCreateSession('tenant-1', 'contact-1', 'conv-1');
+      const result = await service.getOrCreateSession(
+        'tenant-1',
+        'contact-1',
+        'conv-1',
+      );
 
       expect(result).toBe(existing);
-      expect(repository.findActive).toHaveBeenCalledWith('tenant-1', 'contact-1', 'conv-1');
+      expect(repository.findActive).toHaveBeenCalledWith(
+        'tenant-1',
+        'contact-1',
+        'conv-1',
+      );
       expect(repository.createActive).not.toHaveBeenCalled();
     });
 
@@ -44,11 +55,23 @@ describe('AISessionService', () => {
       repository.findActive.mockResolvedValue(null);
       repository.createActive.mockResolvedValue(created);
 
-      const result = await service.getOrCreateSession('tenant-1', 'contact-1', 'conv-1');
+      const result = await service.getOrCreateSession(
+        'tenant-1',
+        'contact-1',
+        'conv-1',
+      );
 
       expect(result).toBe(created);
-      expect(repository.findActive).toHaveBeenCalledWith('tenant-1', 'contact-1', 'conv-1');
-      expect(repository.createActive).toHaveBeenCalledWith('tenant-1', 'contact-1', 'conv-1');
+      expect(repository.findActive).toHaveBeenCalledWith(
+        'tenant-1',
+        'contact-1',
+        'conv-1',
+      );
+      expect(repository.createActive).toHaveBeenCalledWith(
+        'tenant-1',
+        'contact-1',
+        'conv-1',
+      );
     });
   });
 
@@ -56,7 +79,9 @@ describe('AISessionService', () => {
     it('should record a message with tokens and diagnostics', async () => {
       repository.recordMessage.mockResolvedValue(undefined);
 
-      await service.recordMessage('session-123', 'user', 'Olá', 10, { latency: 200 });
+      await service.recordMessage('session-123', 'user', 'Olá', 10, {
+        latency: 200,
+      });
 
       expect(repository.recordMessage).toHaveBeenCalledWith({
         sessionId: 'session-123',

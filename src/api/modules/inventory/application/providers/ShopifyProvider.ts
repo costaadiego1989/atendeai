@@ -7,7 +7,9 @@ export class ShopifyProvider implements IInventoryProvider {
   async testConnection(config: Record<string, unknown>): Promise<boolean> {
     const { shopUrl, accessToken } = config;
     if (!shopUrl || !accessToken) {
-      throw new Error('As credenciais do Shopify exigem shopUrl e accessToken.');
+      throw new Error(
+        'As credenciais do Shopify exigem shopUrl e accessToken.',
+      );
     }
 
     const domain = String(shopUrl).replace(/\/$/, '');
@@ -36,12 +38,15 @@ export class ShopifyProvider implements IInventoryProvider {
       'Content-Type': 'application/json',
     };
 
-    let url: string | null = `${domain}/admin/api/2024-01/products.json?limit=50`;
+    let url: string | null =
+      `${domain}/admin/api/2024-01/products.json?limit=50`;
 
     while (url) {
       const response: Response = await fetch(url, { method: 'GET', headers });
       if (!response.ok) {
-        throw new Error(`Erro buscando produtos no Shopify: ${response.statusText}`);
+        throw new Error(
+          `Erro buscando produtos no Shopify: ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
@@ -74,7 +79,9 @@ export class ShopifyProvider implements IInventoryProvider {
       // Check pagination links...
       const linkHeader: string | null = response.headers.get('link');
       if (linkHeader && linkHeader.includes('rel="next"')) {
-        const match: RegExpMatchArray | null = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+        const match: RegExpMatchArray | null = linkHeader.match(
+          /<([^>]+)>;\s*rel="next"/,
+        );
         url = match ? match[1] : null;
       } else {
         url = null;

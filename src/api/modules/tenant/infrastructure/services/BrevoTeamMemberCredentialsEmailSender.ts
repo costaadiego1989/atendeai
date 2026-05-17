@@ -7,10 +7,10 @@ import {
 } from '../../application/ports/ITeamMemberCredentialsEmailSender';
 
 @Injectable()
-export class BrevoTeamMemberCredentialsEmailSender
-  implements ITeamMemberCredentialsEmailSender
-{
-  private readonly logger = new Logger(BrevoTeamMemberCredentialsEmailSender.name);
+export class BrevoTeamMemberCredentialsEmailSender implements ITeamMemberCredentialsEmailSender {
+  private readonly logger = new Logger(
+    BrevoTeamMemberCredentialsEmailSender.name,
+  );
   private readonly transporter: any;
   private readonly senderEmail: string;
   private readonly senderName: string;
@@ -19,8 +19,14 @@ export class BrevoTeamMemberCredentialsEmailSender
     const login = this.configService.getOrThrow<string>('BREVO_SMTP_LOGIN');
     const password = this.configService.getOrThrow<string>('BREVO_SMTP_KEY');
 
-    this.senderEmail = this.configService.get<string>('BREVO_SMTP_SENDER_EMAIL', login);
-    this.senderName = this.configService.get<string>('BREVO_SMTP_SENDER_NAME', 'AtendeAi');
+    this.senderEmail = this.configService.get<string>(
+      'BREVO_SMTP_SENDER_EMAIL',
+      login,
+    );
+    this.senderName = this.configService.get<string>(
+      'BREVO_SMTP_SENDER_NAME',
+      'AtendeAi',
+    );
 
     this.transporter = nodemailer.createTransport({
       host: 'smtp-relay.brevo.com',

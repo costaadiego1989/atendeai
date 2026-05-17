@@ -34,14 +34,18 @@ export class GenerateCatalogReportUseCase {
     private readonly catalogRepository: ICatalogRepository,
   ) {}
 
-  async execute(input: GenerateCatalogReportInput): Promise<GenerateCatalogReportOutput> {
+  async execute(
+    input: GenerateCatalogReportInput,
+  ): Promise<GenerateCatalogReportOutput> {
     const items = await this.catalogRepository.listItems({
       tenantId: input.tenantId,
       query: input.query,
       includeInactive: input.includeInactive,
     });
     const typeFilters = new Set<'SERVICE' | 'PRODUCT' | 'RENTAL'>(
-      (input.types ?? []).filter(Boolean) as Array<'SERVICE' | 'PRODUCT' | 'RENTAL'>,
+      (input.types ?? []).filter(Boolean) as Array<
+        'SERVICE' | 'PRODUCT' | 'RENTAL'
+      >,
     );
     const categoryFilters = new Set((input.categoryIds ?? []).filter(Boolean));
     const filteredItems = items.filter((item) => {
@@ -60,8 +64,10 @@ export class GenerateCatalogReportUseCase {
         totalItems: filteredItems.length,
         activeItems: filteredItems.filter((item) => item.active).length,
         inactiveItems: filteredItems.filter((item) => !item.active).length,
-        services: filteredItems.filter((item) => item.type === 'SERVICE').length,
-        products: filteredItems.filter((item) => item.type === 'PRODUCT').length,
+        services: filteredItems.filter((item) => item.type === 'SERVICE')
+          .length,
+        products: filteredItems.filter((item) => item.type === 'PRODUCT')
+          .length,
         rentals: filteredItems.filter((item) => item.type === 'RENTAL').length,
         estimatedBaseValue: filteredItems.reduce((total, item) => {
           const basePrice = item.basePrice == null ? 0 : Number(item.basePrice);

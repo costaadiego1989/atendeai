@@ -20,7 +20,11 @@ describe('SchedulingReminderProcessor', () => {
       warn: jest.fn(),
       error: jest.fn(),
     };
-    processor = new SchedulingReminderProcessor(schedulingStore, messagingFacade, structuredLog);
+    processor = new SchedulingReminderProcessor(
+      schedulingStore,
+      messagingFacade,
+      structuredLog,
+    );
   });
 
   it('should send reminder with Google Meet link when slot is still reserved', async () => {

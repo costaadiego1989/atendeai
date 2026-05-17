@@ -42,13 +42,18 @@ export class NuvemshopProvider implements IInventoryProvider {
     let hasMoreData = true;
 
     while (hasMoreData) {
-      const response = await fetch(`${domain}/products?page=${page}&per_page=50`, {
-        method: 'GET',
-        headers,
-      });
+      const response = await fetch(
+        `${domain}/products?page=${page}&per_page=50`,
+        {
+          method: 'GET',
+          headers,
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(`Falha ao buscar produtos Nuvemshop: ${response.status}`);
+        throw new Error(
+          `Falha ao buscar produtos Nuvemshop: ${response.status}`,
+        );
       }
 
       const products = await response.json();

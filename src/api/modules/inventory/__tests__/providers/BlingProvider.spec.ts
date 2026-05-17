@@ -12,7 +12,13 @@ describe('BlingProvider (extended)', () => {
   const config = { accessToken: 'bling-token' };
 
   function makeBlingPage(
-    items: Array<{ id: number; codigo: string; nome: string; estoque?: number; preco?: number }>,
+    items: Array<{
+      id: number;
+      codigo: string;
+      nome: string;
+      estoque?: number;
+      preco?: number;
+    }>,
   ) {
     return {
       ok: true,
@@ -44,7 +50,15 @@ describe('BlingProvider (extended)', () => {
 
   it('INV-T-061a: fetchStock mapeia codigo, nome, saldoVirtual e preço para snapshot', async () => {
     global.fetch = jest.fn().mockResolvedValue(
-      makeBlingPage([{ id: 1001, codigo: 'BLING-001', nome: 'Produto Bling', estoque: 10, preco: 59.9 }]),
+      makeBlingPage([
+        {
+          id: 1001,
+          codigo: 'BLING-001',
+          nome: 'Produto Bling',
+          estoque: 10,
+          preco: 59.9,
+        },
+      ]),
     ) as unknown as typeof fetch;
 
     const batches: any[][] = [];
@@ -62,9 +76,11 @@ describe('BlingProvider (extended)', () => {
   });
 
   it('INV-T-061b: fetchStock para quando página retorna <100 itens (faz 1 fetch)', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      makeBlingPage([{ id: 1, codigo: 'SKU-A', nome: 'A', estoque: 5 }]),
-    ) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        makeBlingPage([{ id: 1, codigo: 'SKU-A', nome: 'A', estoque: 5 }]),
+      ) as unknown as typeof fetch;
 
     const batches: unknown[] = [];
     for await (const batch of provider.fetchStock(config)) {
@@ -83,12 +99,14 @@ describe('BlingProvider (extended)', () => {
       estoque: 1,
     }));
 
-    const fetchMock = jest.fn()
+    const fetchMock = jest
+      .fn()
       .mockResolvedValueOnce(makeBlingPage(page1Items))
       .mockResolvedValueOnce(makeBlingPage([])) as unknown as typeof fetch;
     global.fetch = fetchMock;
 
-    for await (const _ of provider.fetchStock(config)) { }
+    for await (const _ of provider.fetchStock(config)) {
+    }
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const secondUrl = (fetchMock as jest.Mock).mock.calls[1][0] as string;
@@ -96,9 +114,13 @@ describe('BlingProvider (extended)', () => {
   });
 
   it('INV-T-061d: qty=0 → availabilityStatus UNAVAILABLE', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      makeBlingPage([{ id: 2, codigo: 'OUT-001', nome: 'Sem Estoque', estoque: 0 }]),
-    ) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        makeBlingPage([
+          { id: 2, codigo: 'OUT-001', nome: 'Sem Estoque', estoque: 0 },
+        ]),
+      ) as unknown as typeof fetch;
 
     const batches: any[][] = [];
     for await (const batch of provider.fetchStock(config)) {
@@ -110,9 +132,13 @@ describe('BlingProvider (extended)', () => {
   });
 
   it('INV-T-061e: qty>0 → availabilityStatus AVAILABLE', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      makeBlingPage([{ id: 3, codigo: 'IN-001', nome: 'Com Estoque', estoque: 7 }]),
-    ) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        makeBlingPage([
+          { id: 3, codigo: 'IN-001', nome: 'Com Estoque', estoque: 7 },
+        ]),
+      ) as unknown as typeof fetch;
 
     const batches: any[][] = [];
     for await (const batch of provider.fetchStock(config)) {

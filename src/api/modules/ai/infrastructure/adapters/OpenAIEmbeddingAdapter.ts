@@ -21,7 +21,8 @@ export class OpenAIEmbeddingAdapter implements IEmbeddingProvider {
       this.configService.get<string>('OPENAI_EMBEDDING_MODEL') ||
       'text-embedding-3-small';
     this.dimensions =
-      Number(this.configService.get<string>('OPENAI_EMBEDDING_DIMENSIONS')) || 1536;
+      Number(this.configService.get<string>('OPENAI_EMBEDDING_DIMENSIONS')) ||
+      1536;
 
     this.httpClient = axios.create({
       baseURL: 'https://api.openai.com/v1',
@@ -79,7 +80,10 @@ export class OpenAIEmbeddingAdapter implements IEmbeddingProvider {
         dimensions: this.dimensions,
       });
 
-      const data = response.data.data as Array<{ embedding: number[]; index: number }>;
+      const data = response.data.data as Array<{
+        embedding: number[];
+        index: number;
+      }>;
 
       // Sort by index to ensure order matches input
       data.sort((a, b) => a.index - b.index);
@@ -93,7 +97,7 @@ export class OpenAIEmbeddingAdapter implements IEmbeddingProvider {
       const status = err.response?.status;
       const detail = err.response?.data
         ? JSON.stringify(err.response.data).slice(0, 500)
-        : err.message ?? 'unknown';
+        : (err.message ?? 'unknown');
 
       this.logger.error(
         `[OpenAIEmbeddingAdapter] failed status=${status ?? 'na'} detail=${detail}`,

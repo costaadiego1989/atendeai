@@ -5,6 +5,6 @@ export class ListProposalsUseCase {
 
   async execute(tenantId: string) {
     const proposals = await this.listProposalsService.execute(tenantId);
-    return proposals.map(p => p.toJSON());
+    return proposals.map((p) => p.toJSON());
   }
 }

@@ -26,15 +26,18 @@ describe('ProcessInboundMessageUseCase', () => {
 
   it('should delegate to the pipeline via transactionalEventPublisher on execute', async () => {
     pipeline.execute.mockResolvedValue([
-      new MessageReceivedIntegrationEvent({
-        conversationId: 'conversation-1',
-        tenantId: 'tenant-1',
-        contactId: 'contact-1',
-        branchId: 'branch-1',
-        messageId: 'message-1',
-        content: { type: 'TEXT', text: 'Oi, tudo bem?' },
-        channel: 'WHATSAPP',
-      }, 'messaging:inbound:external-msg-1'),
+      new MessageReceivedIntegrationEvent(
+        {
+          conversationId: 'conversation-1',
+          tenantId: 'tenant-1',
+          contactId: 'contact-1',
+          branchId: 'branch-1',
+          messageId: 'message-1',
+          content: { type: 'TEXT', text: 'Oi, tudo bem?' },
+          channel: 'WHATSAPP',
+        },
+        'messaging:inbound:external-msg-1',
+      ),
     ]);
 
     await sut.execute({
@@ -63,15 +66,18 @@ describe('ProcessInboundMessageUseCase', () => {
   });
 
   it('should call pipeline.execute directly from persistInboundMessage', async () => {
-    const mockEvent = new MessageReceivedIntegrationEvent({
-      conversationId: 'conversation-1',
-      tenantId: 'tenant-1',
-      contactId: 'contact-1',
-      branchId: null,
-      messageId: 'message-2',
-      content: { type: 'TEXT', text: 'Oi' },
-      channel: 'WHATSAPP',
-    }, 'messaging:inbound:external-msg-2');
+    const mockEvent = new MessageReceivedIntegrationEvent(
+      {
+        conversationId: 'conversation-1',
+        tenantId: 'tenant-1',
+        contactId: 'contact-1',
+        branchId: null,
+        messageId: 'message-2',
+        content: { type: 'TEXT', text: 'Oi' },
+        channel: 'WHATSAPP',
+      },
+      'messaging:inbound:external-msg-2',
+    );
     pipeline.execute.mockResolvedValue([mockEvent]);
 
     const events = await sut.persistInboundMessage({

@@ -33,7 +33,11 @@ function assertProductionDatastoreEnv(): void {
   }
 
   const redisHost = process.env['REDIS_HOST']?.trim() ?? '';
-  if (!redisHost || /^127\.0\.0\.1$/i.test(redisHost) || /^localhost$/i.test(redisHost)) {
+  if (
+    !redisHost ||
+    /^127\.0\.0\.1$/i.test(redisHost) ||
+    /^localhost$/i.test(redisHost)
+  ) {
     console.error(
       '[bootstrap] REDIS_HOST deve ser o hostname do Redis gerido no Render (ex.: redis-xxxx em *.render.com), não localhost.',
     );
@@ -68,8 +72,7 @@ async function bootstrap() {
 
     const rawPort = process.env['PORT'] ?? process.env['APP_PORT'] ?? '3000';
     const port = Number.parseInt(String(rawPort), 10);
-    const listenPort =
-      Number.isFinite(port) && port > 0 ? port : 3000;
+    const listenPort = Number.isFinite(port) && port > 0 ? port : 3000;
     await app.listen(listenPort);
     console.log(`🚀 AtendeAi running on http://localhost:${listenPort}/api/v1`);
   } catch (err) {

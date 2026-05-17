@@ -32,7 +32,9 @@ export class InventoryProviderFactory implements IInventoryProviderFactory {
       case 'SHOPEE':
         return new ShopeeProvider();
       default:
-        throw new Error(`Nenhum provedor implementado para sourceType: ${sourceType}`);
+        throw new Error(
+          `Nenhum provedor implementado para sourceType: ${sourceType}`,
+        );
     }
   }
 }

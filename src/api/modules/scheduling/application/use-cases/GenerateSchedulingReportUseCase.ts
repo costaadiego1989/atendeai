@@ -11,9 +11,14 @@ export type GenerateSchedulingReportInput = {
   endDate: string;
   professionalIds?: string[] | null;
   categoryIds?: string[] | null;
-  statuses?:
-    | Array<'AVAILABLE' | 'PRE_RESERVED' | 'RESERVED' | 'COMPLETED' | 'NO_SHOW' | 'BLOCKED'>
-    | null;
+  statuses?: Array<
+    | 'AVAILABLE'
+    | 'PRE_RESERVED'
+    | 'RESERVED'
+    | 'COMPLETED'
+    | 'NO_SHOW'
+    | 'BLOCKED'
+  > | null;
 };
 
 export type GenerateSchedulingReportRow = {
@@ -58,15 +63,21 @@ export class GenerateSchedulingReportUseCase {
     private readonly listSchedulingProfessionalsUseCase: ListSchedulingProfessionalsUseCase,
     private readonly listSchedulingCategoriesUseCase: ListSchedulingCategoriesUseCase,
     private readonly getProfessionalAvailabilityUseCase: GetProfessionalAvailabilityUseCase,
-  ) { }
+  ) {}
 
   async execute(
     input: GenerateSchedulingReportInput,
   ): Promise<GenerateSchedulingReportOutput> {
     const dates = this.buildDatesBetween(input.startDate, input.endDate);
     const [professionals, categories] = await Promise.all([
-      this.listSchedulingProfessionalsUseCase.execute(input.tenantId, input.branchId),
-      this.listSchedulingCategoriesUseCase.execute(input.tenantId, input.branchId),
+      this.listSchedulingProfessionalsUseCase.execute(
+        input.tenantId,
+        input.branchId,
+      ),
+      this.listSchedulingCategoriesUseCase.execute(
+        input.tenantId,
+        input.branchId,
+      ),
     ]);
 
     const categoriesById = new Map(
@@ -78,7 +89,9 @@ export class GenerateSchedulingReportUseCase {
     const statuses = new Set((input.statuses ?? []).filter(Boolean));
 
     const selectedProfessionals = professionalIds.length
-      ? professionals.filter((professional) => professionalIds.includes(professional.id))
+      ? professionals.filter((professional) =>
+          professionalIds.includes(professional.id),
+        )
       : professionals;
 
     const rows: GenerateSchedulingReportRow[] = [];
@@ -98,10 +111,12 @@ export class GenerateSchedulingReportUseCase {
         const date = dates[index]!;
 
         slots.forEach((slot) => {
-          const matchesStatus = statuses.size === 0 || statuses.has(slot.status);
+          const matchesStatus =
+            statuses.size === 0 || statuses.has(slot.status);
           const matchesCategory =
             categoryIds.size === 0 ||
-            (slot.reservedFor?.categoryId != null && categoryIds.has(slot.reservedFor.categoryId));
+            (slot.reservedFor?.categoryId != null &&
+              categoryIds.has(slot.reservedFor.categoryId));
 
           if (!matchesStatus || !matchesCategory) {
             return;
@@ -110,7 +125,8 @@ export class GenerateSchedulingReportUseCase {
           const resolvedPrice =
             slot.customPrice ??
             (slot.reservedFor?.categoryId
-              ? (categoriesById.get(slot.reservedFor.categoryId)?.basePrice ?? null)
+              ? (categoriesById.get(slot.reservedFor.categoryId)?.basePrice ??
+                null)
               : null);
 
           rows.push({
@@ -144,13 +160,19 @@ export class GenerateSchedulingReportUseCase {
       return leftKey.localeCompare(rightKey);
     });
 
-    const reservedStatuses = new Set(['PRE_RESERVED', 'RESERVED', 'COMPLETED', 'NO_SHOW']);
+    const reservedStatuses = new Set([
+      'PRE_RESERVED',
+      'RESERVED',
+      'COMPLETED',
+      'NO_SHOW',
+    ]);
 
     return {
       generatedAt: new Date(),
       summary: {
         totalSlots: rows.length,
-        reservedSlots: rows.filter((row) => reservedStatuses.has(row.status)).length,
+        reservedSlots: rows.filter((row) => reservedStatuses.has(row.status))
+          .length,
         blockedSlots: rows.filter((row) => row.status === 'BLOCKED').length,
         availableSlots: rows.filter((row) => row.status === 'AVAILABLE').length,
         completedSlots: rows.filter((row) => row.status === 'COMPLETED').length,
@@ -165,20 +187,29 @@ export class GenerateSchedulingReportUseCase {
   }
 
   private buildDatesBetween(startDate: string, endDate: string): string[] {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(endDate)
+    ) {
       throw new BadRequestException('Periodo invalido para o relatorio.');
     }
 
     const start = new Date(`${startDate}T00:00:00.000Z`);
     const end = new Date(`${endDate}T00:00:00.000Z`);
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      start > end
+    ) {
       throw new BadRequestException('Periodo invalido para o relatorio.');
     }
 
     const diffInDays = Math.floor((end.getTime() - start.getTime()) / 86400000);
     if (diffInDays > 90) {
-      throw new BadRequestException('O relatorio aceita ate 90 dias por exportação.');
+      throw new BadRequestException(
+        'O relatorio aceita ate 90 dias por exportação.',
+      );
     }
 
     const dates: string[] = [];

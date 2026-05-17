@@ -12,7 +12,9 @@ export class CommerceConversationFlowRules {
       return null;
     }
 
-    return options.find((option) => option.optionNumber === optionNumber) ?? null;
+    return (
+      options.find((option) => option.optionNumber === optionNumber) ?? null
+    );
   }
 
   extractPositiveInteger(value: string) {

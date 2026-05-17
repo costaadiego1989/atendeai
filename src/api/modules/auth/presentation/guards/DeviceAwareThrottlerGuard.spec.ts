@@ -59,9 +59,7 @@ describe('DeviceAwareThrottlerGuard', () => {
       headers: { 'user-agent': 'Mozilla/x' },
       ip: '10.90.90.90',
       get(header: string) {
-        return header.toLowerCase() === 'user-agent'
-          ? 'Mozilla/x'
-          : undefined;
+        return header.toLowerCase() === 'user-agent' ? 'Mozilla/x' : undefined;
       },
     } as unknown as Partial<Request>);
 

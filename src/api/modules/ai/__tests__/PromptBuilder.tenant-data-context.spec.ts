@@ -155,13 +155,16 @@ describe('PromptBuilder — tenant data → AI context', () => {
     it('inclui Description quando configurado', () => {
       const tenant = makeTenant();
       tenant.updateBusinessData({
-        description: 'Barbearia premium especializada em cortes modernos e tratamentos de barba.',
+        description:
+          'Barbearia premium especializada em cortes modernos e tratamentos de barba.',
       });
 
       const prompt = builder.build(tenant);
 
       expect(prompt).toContain('Description:');
-      expect(prompt).toContain('Barbearia premium especializada em cortes modernos');
+      expect(prompt).toContain(
+        'Barbearia premium especializada em cortes modernos',
+      );
     });
 
     it('inclui Services/Products quando configurado', () => {
@@ -199,7 +202,8 @@ describe('PromptBuilder — tenant data → AI context', () => {
       const tenant = makeTenant();
       tenant.updateBusinessData({
         businessType: 'Clinica Odontológica',
-        description: 'Clinica especializada em saúde bucal com foco em estética dental.',
+        description:
+          'Clinica especializada em saúde bucal com foco em estética dental.',
         services: 'Clareamento, implante, ortodontia, limpeza, restauração',
       });
 
@@ -257,7 +261,9 @@ describe('PromptBuilder — tenant data → AI context', () => {
       const prompt = builder.build(tenant);
 
       const lines = prompt.split('\n');
-      const pdfLines = lines.filter((l) => l.startsWith('- https://storage.test/'));
+      const pdfLines = lines.filter((l) =>
+        l.startsWith('- https://storage.test/'),
+      );
       expect(pdfLines).toHaveLength(3);
     });
 
@@ -321,8 +327,16 @@ describe('PromptBuilder — tenant data → AI context', () => {
       const tenant = makeTenant();
       tenant.updateBusinessData({
         promotions: [
-          Promotion.create({ title: 'Promo A', description: 'Descricao promocao A', value: '29.90' }),
-          Promotion.create({ title: 'Promo B', description: 'Descricao promocao B', value: '59.90' }),
+          Promotion.create({
+            title: 'Promo A',
+            description: 'Descricao promocao A',
+            value: '29.90',
+          }),
+          Promotion.create({
+            title: 'Promo B',
+            description: 'Descricao promocao B',
+            value: '59.90',
+          }),
         ],
       });
 
@@ -348,7 +362,8 @@ describe('PromptBuilder — tenant data → AI context', () => {
       const tenant = makeTenant();
       tenant.updateBusinessData({
         businessType: 'Restaurante',
-        description: 'Restaurante contemporâneo com culinária brasileira artesanal.',
+        description:
+          'Restaurante contemporâneo com culinária brasileira artesanal.',
         services: 'Almoço, jantar, delivery, eventos privados',
         catalogUrl: 'https://restaurante.test/cardapio',
         catalogFiles: ['https://storage.test/cardapio-completo.pdf'],
@@ -424,7 +439,9 @@ describe('PromptBuilder — tenant data → AI context', () => {
 
       const prompt = builder.build(tenant);
 
-      expect(prompt).toContain('a menos que isso seja relevante para a pergunta do cliente');
+      expect(prompt).toContain(
+        'a menos que isso seja relevante para a pergunta do cliente',
+      );
       expect(prompt).toContain('Conduza a conversa por descoberta');
     });
   });

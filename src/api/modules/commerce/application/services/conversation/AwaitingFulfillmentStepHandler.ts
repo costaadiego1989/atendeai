@@ -39,7 +39,9 @@ export class AwaitingFulfillmentStepHandler {
 
     if (this.conversationFlowRules.isDelivery(normalizedMessage)) {
       const shippingPolicy =
-        await this.commerceRepository.findShippingPolicyByTenantId(input.tenantId);
+        await this.commerceRepository.findShippingPolicyByTenantId(
+          input.tenantId,
+        );
 
       if (
         shippingPolicy?.mode === 'FIXED' &&

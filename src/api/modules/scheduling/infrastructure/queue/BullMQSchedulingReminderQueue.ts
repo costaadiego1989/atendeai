@@ -9,7 +9,8 @@ import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connect
 
 @Injectable()
 export class BullMQSchedulingReminderQueue
-  implements ISchedulingReminderQueue, OnModuleDestroy {
+  implements ISchedulingReminderQueue, OnModuleDestroy
+{
   private readonly queue: Queue<SchedulingReminderQueueJob>;
 
   constructor(private readonly configService: ConfigService) {

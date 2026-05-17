@@ -331,7 +331,9 @@ export interface ICommerceRepository {
   findAbandonmentConfigByTenantId(
     tenantId: string,
   ): Promise<CommerceAbandonmentConfigRecord | null>;
-  createSession(input: CreateCommerceSessionInput): Promise<CommerceSessionRecord>;
+  createSession(
+    input: CreateCommerceSessionInput,
+  ): Promise<CommerceSessionRecord>;
   findActiveSessionByConversation(
     tenantId: string,
     conversationId: string,

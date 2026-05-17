@@ -108,7 +108,9 @@ export class SchedulingReminderProcessor extends WorkerHost {
     categoryName?: string;
     meetingUrl?: string;
   }): string {
-    const formattedDate = new Date(`${input.date}T12:00:00`).toLocaleDateString('pt-BR');
+    const formattedDate = new Date(`${input.date}T12:00:00`).toLocaleDateString(
+      'pt-BR',
+    );
     const offsetLabel =
       input.offsetHours === 24
         ? 'Amanhã'

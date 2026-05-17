@@ -5,7 +5,7 @@ export type ConversationPendingHumanIntegrationEventPayload = {
   conversationId: string;
   contactId: string;
   channel: string;
-}
+};
 
 export class ConversationPendingHumanIntegrationEvent extends IntegrationEvent {
   readonly queue = 'messaging.conversation-pending-human';

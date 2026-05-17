@@ -58,7 +58,8 @@ export class TwilioManagementAcl {
     this.messagingBaseUrl =
       this.configService.get<string>('TWILIO_MESSAGING_BASE_URL') ||
       'https://messaging.twilio.com/v2';
-    this.accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID') || '';
+    this.accountSid =
+      this.configService.get<string>('TWILIO_ACCOUNT_SID') || '';
     this.authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN') || '';
   }
 
@@ -83,7 +84,12 @@ export class TwilioManagementAcl {
 
       return this.mapSubaccount(response.data);
     } catch (error) {
-      this.emitFailure('tenant.channel.twilio.subaccount.failed', 'Twilio subaccount create failed', context, error);
+      this.emitFailure(
+        'tenant.channel.twilio.subaccount.failed',
+        'Twilio subaccount create failed',
+        context,
+        error,
+      );
       throw error;
     }
   }
@@ -218,7 +224,9 @@ export class TwilioManagementAcl {
     });
   }
 
-  private getAuthConfig(account?: TwilioAccountCredentials): AxiosRequestConfig {
+  private getAuthConfig(
+    account?: TwilioAccountCredentials,
+  ): AxiosRequestConfig {
     const accountSid = account?.accountSid || this.accountSid;
     const authToken = account?.authToken || this.authToken;
 
@@ -245,8 +253,7 @@ export class TwilioManagementAcl {
       configuration: input.configuration
         ? {
             wabaId: input.configuration.waba_id ?? null,
-            verificationMethod:
-              input.configuration.verification_method ?? null,
+            verificationMethod: input.configuration.verification_method ?? null,
           }
         : null,
     };

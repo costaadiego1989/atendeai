@@ -192,7 +192,10 @@ describeLive('Messaging live conversation flows by niche (e2e)', () => {
       id: `plink-${Date.now()}`,
       url: `https://pay.test/${slugify(name || 'pedido')}`,
     })),
-    removePaymentLink: jest.fn(async (id: string) => ({ id, status: 'DELETED' })),
+    removePaymentLink: jest.fn(async (id: string) => ({
+      id,
+      status: 'DELETED',
+    })),
     restorePaymentLink: jest.fn(async (id: string) => ({
       id,
       status: 'ACTIVE',
@@ -328,8 +331,7 @@ describeLive('Messaging live conversation flows by niche (e2e)', () => {
               (messages) =>
                 messages.filter(
                   (message) =>
-                    message.direction === 'OUTBOUND' &&
-                    message.sentBy === 'AI',
+                    message.direction === 'OUTBOUND' && message.sentBy === 'AI',
                 ).length >=
                 index + 1,
             );
@@ -589,8 +591,7 @@ describeLive('Messaging live conversation flows by niche (e2e)', () => {
         .createHash('sha1')
         .update(externalId)
         .digest('hex')}`;
-      const requestUrl =
-        'https://atendeai-e2e.test/api/v1/webhooks/whatsapp';
+      const requestUrl = 'https://atendeai-e2e.test/api/v1/webhooks/whatsapp';
       const body = {
         MessageSid: messageSid,
         SmsMessageSid: messageSid,
@@ -647,7 +648,10 @@ describeLive('Messaging live conversation flows by niche (e2e)', () => {
       .sort()
       .reduce((acc, key) => `${acc}${key}${body[key]}`, requestUrl);
 
-    return crypto.createHmac('sha1', authToken).update(payload).digest('base64');
+    return crypto
+      .createHmac('sha1', authToken)
+      .update(payload)
+      .digest('base64');
   }
 
   function readAuthToken(credentials: Prisma.JsonValue): string {
@@ -655,7 +659,9 @@ describeLive('Messaging live conversation flows by niche (e2e)', () => {
     const token = value?.authToken || process.env.TWILIO_AUTH_TOKEN;
 
     if (!token) {
-      throw new Error('Twilio authToken is required to sign live webhook input.');
+      throw new Error(
+        'Twilio authToken is required to sign live webhook input.',
+      );
     }
 
     return token;
@@ -709,16 +715,16 @@ describeLive('Messaging live conversation flows by niche (e2e)', () => {
     conversationId: string,
   ) {
     if (
-      ![
-        'COMMERCE_SESSION',
-        'COMMERCE_CHECKOUT',
-        'ABANDONMENT_TOUCH',
-      ].includes(scenario.expectation)
+      !['COMMERCE_SESSION', 'COMMERCE_CHECKOUT', 'ABANDONMENT_TOUCH'].includes(
+        scenario.expectation,
+      )
     ) {
       return;
     }
 
-    const sessions = await prisma.$queryRaw<Array<{ id: string; status: string }>>(
+    const sessions = await prisma.$queryRaw<
+      Array<{ id: string; status: string }>
+    >(
       Prisma.sql`
         SELECT id::text, status
         FROM commerce_schema.shopping_sessions

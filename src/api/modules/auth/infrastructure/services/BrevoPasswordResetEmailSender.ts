@@ -12,8 +12,7 @@ export class BrevoPasswordResetEmailSender implements IPasswordResetEmailSender 
 
   constructor(private readonly configService: ConfigService) {
     const login = this.configService.getOrThrow<string>('BREVO_SMTP_LOGIN');
-    const password =
-      this.configService.getOrThrow<string>('BREVO_SMTP_KEY');
+    const password = this.configService.getOrThrow<string>('BREVO_SMTP_KEY');
 
     this.senderEmail = this.configService.get<string>(
       'BREVO_SMTP_SENDER_EMAIL',

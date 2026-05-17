@@ -31,7 +31,7 @@ export class ScheduleRecoveryRecurringChargeUseCase {
     private readonly recoveryRepository: IRecoveryRepository,
     @Inject(RECOVERY_RECURRING_CHARGE_REPOSITORY)
     private readonly recurringChargeRepository: IRecoveryRecurringChargeRepository,
-  ) { }
+  ) {}
 
   async execute(command: ScheduleRecoveryRecurringChargeCommand) {
     this.validate(command);
@@ -73,9 +73,10 @@ export class ScheduleRecoveryRecurringChargeUseCase {
     await this.recoveryRepository.updateCaseStatus({
       tenantId: command.tenantId,
       caseId: recoveryCase.id,
-      status: recoveryCase.status === 'READY_TO_CONTACT'
-        ? 'CONTACTED'
-        : recoveryCase.status,
+      status:
+        recoveryCase.status === 'READY_TO_CONTACT'
+          ? 'CONTACTED'
+          : recoveryCase.status,
       nextActionAt: recurrence.nextRunAt ?? null,
     });
 

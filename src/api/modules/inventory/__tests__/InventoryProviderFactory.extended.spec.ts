@@ -36,9 +36,13 @@ describe('InventoryProviderFactory (extended)', () => {
 
   it('should create correct providers for all supported types', () => {
     expect(factory.getProvider('SHOPIFY')).toBeInstanceOf(ShopifyProvider);
-    expect(factory.getProvider('WOOCOMMERCE')).toBeInstanceOf(WooCommerceProvider);
+    expect(factory.getProvider('WOOCOMMERCE')).toBeInstanceOf(
+      WooCommerceProvider,
+    );
     expect(factory.getProvider('NUVEMSHOP')).toBeInstanceOf(NuvemshopProvider);
-    expect(factory.getProvider('MERCADOLIVRE')).toBeInstanceOf(MercadoLivreProvider);
+    expect(factory.getProvider('MERCADOLIVRE')).toBeInstanceOf(
+      MercadoLivreProvider,
+    );
     expect(factory.getProvider('SHOPEE')).toBeInstanceOf(ShopeeProvider);
   });
 });

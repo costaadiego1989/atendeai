@@ -41,7 +41,9 @@ export class CreateSchedulingCategoryDTO {
   @IsEnum(SCHEDULING_CATEGORY_UNITS)
   unit!: SchedulingCategoryUnit;
 
-  @ValidateIf((object: CreateSchedulingCategoryDTO) => object.unit === 'PER_MINUTE')
+  @ValidateIf(
+    (object: CreateSchedulingCategoryDTO) => object.unit === 'PER_MINUTE',
+  )
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -241,7 +243,14 @@ export class GenerateSchedulingReportDTO {
     },
     { each: true },
   )
-  statuses?: Array<'AVAILABLE' | 'PRE_RESERVED' | 'RESERVED' | 'COMPLETED' | 'NO_SHOW' | 'BLOCKED'>;
+  statuses?: Array<
+    | 'AVAILABLE'
+    | 'PRE_RESERVED'
+    | 'RESERVED'
+    | 'COMPLETED'
+    | 'NO_SHOW'
+    | 'BLOCKED'
+  >;
 }
 
 export class AssignProfessionalCategoriesDTO {

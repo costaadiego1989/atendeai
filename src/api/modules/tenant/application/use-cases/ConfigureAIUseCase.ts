@@ -31,15 +31,18 @@ export class ConfigureAIUseCase implements IConfigureAIUseCase {
     // Reuse existing config ID for idempotent upsert
     const existingId = tenant.aiConfig?.id ?? undefined;
 
-    const config = AIConfig.create({
-      systemPrompt: input.systemPrompt,
-      tone: input.tone as ToneType,
-      language: input.language ?? 'pt-BR',
-      maxTokensPerResponse: input.maxTokensPerResponse ?? 500,
-      confidenceThreshold: input.confidenceThreshold ?? 0.7,
-      escalationMessage: input.escalationMessage || null,
-      businessRules: input.businessRules ?? [],
-    }, existingId);
+    const config = AIConfig.create(
+      {
+        systemPrompt: input.systemPrompt,
+        tone: input.tone as ToneType,
+        language: input.language ?? 'pt-BR',
+        maxTokensPerResponse: input.maxTokensPerResponse ?? 500,
+        confidenceThreshold: input.confidenceThreshold ?? 0.7,
+        escalationMessage: input.escalationMessage || null,
+        businessRules: input.businessRules ?? [],
+      },
+      existingId,
+    );
 
     tenant.configureAI(config);
     await this.tenantRepo.save(tenant);

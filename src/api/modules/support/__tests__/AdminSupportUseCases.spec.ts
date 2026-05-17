@@ -53,7 +53,13 @@ describe('Admin Support Use Cases', () => {
     it('should pass filters to repository', async () => {
       repository.findAll.mockResolvedValue({ data: [], total: 0 });
 
-      await useCase.execute({ page: 2, limit: 10, type: 'BUG', status: 'OPEN', tenantId: 'tenant-1' });
+      await useCase.execute({
+        page: 2,
+        limit: 10,
+        type: 'BUG',
+        status: 'OPEN',
+        tenantId: 'tenant-1',
+      });
 
       expect(repository.findAll).toHaveBeenCalledWith({
         page: 2,
@@ -88,7 +94,9 @@ describe('Admin Support Use Cases', () => {
     it('should throw NotFoundException when feedback does not exist', async () => {
       repository.findById.mockResolvedValue(null);
 
-      await expect(useCase.execute('nonexistent')).rejects.toBeInstanceOf(NotFoundException);
+      await expect(useCase.execute('nonexistent')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
     });
   });
 
@@ -120,7 +128,12 @@ describe('Admin Support Use Cases', () => {
     let useCase: ReplyFeedbackUseCase;
 
     beforeEach(() => {
-      useCase = new ReplyFeedbackUseCase(repository, users, contacts, messaging);
+      useCase = new ReplyFeedbackUseCase(
+        repository,
+        users,
+        contacts,
+        messaging,
+      );
     });
 
     it('should save reply and send WhatsApp message', async () => {
@@ -132,9 +145,15 @@ describe('Admin Support Use Cases', () => {
         status: 'OPEN',
       };
       repository.findById.mockResolvedValue(feedback);
-      users.findById.mockResolvedValue({ name: 'João', phone: { value: '5511999990000' } });
+      users.findById.mockResolvedValue({
+        name: 'João',
+        phone: { value: '5511999990000' },
+      });
       contacts.ensureContact.mockResolvedValue({ contactId: 'contact-1' });
-      messaging.queueSystemMessage.mockResolvedValue({ messageId: 'msg-1', conversationId: 'conv-1' });
+      messaging.queueSystemMessage.mockResolvedValue({
+        messageId: 'msg-1',
+        conversationId: 'conv-1',
+      });
       repository.createReply.mockResolvedValue({
         id: 'reply-1',
         feedbackId: 'fb-1',
@@ -227,7 +246,11 @@ describe('Admin Support Use Cases', () => {
       repository.findById.mockResolvedValue(null);
 
       await expect(
-        useCase.execute({ feedbackId: 'nonexistent', message: 'test', authorName: 'Admin' }),
+        useCase.execute({
+          feedbackId: 'nonexistent',
+          message: 'test',
+          authorName: 'Admin',
+        }),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
   });

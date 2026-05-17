@@ -58,11 +58,13 @@ describe('OutboxEventBus', () => {
   });
 
   it('should publish immediately when mode is immediate', async () => {
-    configService.get.mockImplementation((key: string, defaultValue?: unknown) => {
-      if (key === 'EVENT_BUS_MODE') return 'immediate';
-      if (key === 'EVENT_BUS_TRANSPORT') return 'bullmq';
-      return defaultValue;
-    });
+    configService.get.mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'EVENT_BUS_MODE') return 'immediate';
+        if (key === 'EVENT_BUS_TRANSPORT') return 'bullmq';
+        return defaultValue;
+      },
+    );
     const event = new TestIntegrationEvent({ tenantId: 'tenant-1' });
 
     await sut.publish(event);
@@ -72,11 +74,13 @@ describe('OutboxEventBus', () => {
   });
 
   it('should delegate subscriptions to the configured transport bus', () => {
-    configService.get.mockImplementation((key: string, defaultValue?: unknown) => {
-      if (key === 'EVENT_BUS_MODE') return 'outbox';
-      if (key === 'EVENT_BUS_TRANSPORT') return 'rabbitmq';
-      return defaultValue;
-    });
+    configService.get.mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'EVENT_BUS_MODE') return 'outbox';
+        if (key === 'EVENT_BUS_TRANSPORT') return 'rabbitmq';
+        return defaultValue;
+      },
+    );
     const handler = jest.fn();
 
     sut.subscribe('payment.confirmed', handler, {

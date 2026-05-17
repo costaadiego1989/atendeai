@@ -34,8 +34,7 @@ export class HttpStructuredLoggingInterceptor implements NestInterceptor {
         const status = res.statusCode;
         const tenantId = user.user?.tenantId ?? '';
 
-        const level =
-          status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
+        const level = status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
 
         this.log.emit({
           level,

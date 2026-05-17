@@ -2,7 +2,10 @@ import { Proposal } from '../Proposal';
 import { ProposalEmptyItemsError } from '../../errors/ProposalEmptyItemsError';
 import { ProposalTitleTooShortError } from '../../errors/ProposalTitleTooShortError';
 import { ProposalItemNameRequiredError } from '../../errors/ProposalItemNameRequiredError';
-import { buildProposal, buildProposalItem } from '../../../__tests__/proposal-test-utils';
+import {
+  buildProposal,
+  buildProposalItem,
+} from '../../../__tests__/proposal-test-utils';
 import { ProposalTitle } from '../../value-objects/ProposalTitle';
 
 describe('Proposal Entity', () => {
@@ -33,9 +36,9 @@ describe('Proposal Entity', () => {
       items: [],
     });
 
-    expect(() => proposal.markAsScheduled(new Date(Date.now() + 60_000))).toThrow(
-      ProposalEmptyItemsError,
-    );
+    expect(() =>
+      proposal.markAsScheduled(new Date(Date.now() + 60_000)),
+    ).toThrow(ProposalEmptyItemsError);
   });
 
   it('updates status to SCHEDULED when a valid date is provided', () => {
@@ -60,7 +63,9 @@ describe('Proposal Entity', () => {
   });
 
   it('validates proposal title with a domain error', () => {
-    expect(() => ProposalTitle.create('Ab')).toThrow(ProposalTitleTooShortError);
+    expect(() => ProposalTitle.create('Ab')).toThrow(
+      ProposalTitleTooShortError,
+    );
   });
 
   it('validates proposal items with a domain error', () => {

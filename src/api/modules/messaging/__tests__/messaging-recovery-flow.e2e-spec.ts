@@ -41,7 +41,16 @@ describe('Messaging Recovery Flow (e2e)', () => {
             }),
           },
         },
-        { provide: RecoveryAsyncJobsService, useValue: { createJob: jest.fn(), attachQueueJobId: jest.fn(), getJob: jest.fn(), listJobs: jest.fn(), getDownloadPayload: jest.fn() } },
+        {
+          provide: RecoveryAsyncJobsService,
+          useValue: {
+            createJob: jest.fn(),
+            attachQueueJobId: jest.fn(),
+            getJob: jest.fn(),
+            listJobs: jest.fn(),
+            getDownloadPayload: jest.fn(),
+          },
+        },
         {
           provide: GenerateRecoveryPaymentLinkUseCase,
           useValue: {
@@ -51,7 +60,10 @@ describe('Messaging Recovery Flow (e2e)', () => {
             }),
           },
         },
-        { provide: GenerateRecoveryReportUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: GenerateRecoveryReportUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: GetRecoveryCaseUseCase, useValue: { execute: jest.fn() } },
         {
           provide: ListRecoveryCasesUseCase,
@@ -66,9 +78,18 @@ describe('Messaging Recovery Flow (e2e)', () => {
             ]),
           },
         },
-        { provide: RegenerateRecoveryGuidanceUseCase, useValue: { execute: jest.fn() } },
-        { provide: SendRecoveryGuidanceUseCase, useValue: { execute: jest.fn() } },
-        { provide: TriggerRecoveryOutreachUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: RegenerateRecoveryGuidanceUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: SendRecoveryGuidanceUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: TriggerRecoveryOutreachUseCase,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: UpdateRecoveryCaseStatusUseCase,
           useValue: {
@@ -78,14 +99,38 @@ describe('Messaging Recovery Flow (e2e)', () => {
             }),
           },
         },
-        { provide: ListRecoveryPlaybooksUseCase, useValue: { execute: jest.fn() } },
-        { provide: SeedDefaultRecoveryPlaybookUseCase, useValue: { execute: jest.fn() } },
-        { provide: CreateRecoveryPlaybookUseCase, useValue: { execute: jest.fn() } },
-        { provide: ActivateRecoveryPlaybookUseCase, useValue: { execute: jest.fn() } },
-        { provide: ScheduleRecoveryRecurringChargeUseCase, useValue: { execute: jest.fn() } },
-        { provide: ListRecoveryRecurringChargesUseCase, useValue: { execute: jest.fn() } },
-        { provide: CancelRecoveryRecurringChargeUseCase, useValue: { execute: jest.fn() } },
-        { provide: 'BullQueue_recovery-async-jobs', useValue: { add: jest.fn() } },
+        {
+          provide: ListRecoveryPlaybooksUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: SeedDefaultRecoveryPlaybookUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: CreateRecoveryPlaybookUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ActivateRecoveryPlaybookUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ScheduleRecoveryRecurringChargeUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ListRecoveryRecurringChargesUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: CancelRecoveryRecurringChargeUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: 'BullQueue_recovery-async-jobs',
+          useValue: { add: jest.fn() },
+        },
       ],
     })
       .overrideGuard(JwtCookieGuard)

@@ -22,7 +22,10 @@ describe('UpdateShoppingSessionFulfillmentUseCase', () => {
     } as any;
 
     // UseCase takes commerceRepo and salesRepo (to be added)
-    useCase = new UpdateShoppingSessionFulfillmentUseCase(commerceRepo, salesRepo);
+    useCase = new UpdateShoppingSessionFulfillmentUseCase(
+      commerceRepo,
+      salesRepo,
+    );
   });
 
   it('should recalculate total with coupon when fulfillment type changes to delivery', async () => {
@@ -39,7 +42,7 @@ describe('UpdateShoppingSessionFulfillmentUseCase', () => {
     };
 
     commerceRepo.findSessionById.mockResolvedValue(sessionWithCoupon as any);
-    
+
     commerceRepo.findShippingPolicyByTenantId.mockResolvedValue({
       mode: 'FIXED',
       fixedAmount: 15,
@@ -68,11 +71,13 @@ describe('UpdateShoppingSessionFulfillmentUseCase', () => {
     // Freight: 15
     // Discount (10% of 100): 10
     // Total: 100 + 15 - 10 = 105
-    expect(commerceRepo.updateSessionState).toHaveBeenCalledWith(expect.objectContaining({
-      fulfillmentType: 'DELIVERY',
-      freightAmount: 15,
-      discountAmount: 10,
-      totalAmount: 105,
-    }));
+    expect(commerceRepo.updateSessionState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fulfillmentType: 'DELIVERY',
+        freightAmount: 15,
+        discountAmount: 10,
+        totalAmount: 105,
+      }),
+    );
   });
 });

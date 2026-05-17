@@ -30,14 +30,18 @@ export class CancelSubscriptionUseCase implements ICancelSubscriptionUseCase {
   async execute(
     input: CancelSubscriptionInput,
   ): Promise<CancelSubscriptionOutput> {
-    const subscription = await this.billingRepository.findSubscription(input.tenantId);
+    const subscription = await this.billingRepository.findSubscription(
+      input.tenantId,
+    );
 
     if (!subscription) {
       throw new EntityNotFoundException('Subscription', input.tenantId);
     }
 
     if (subscription.asaasSubscriptionId) {
-      await this.paymentService.cancelSubscription(subscription.asaasSubscriptionId);
+      await this.paymentService.cancelSubscription(
+        subscription.asaasSubscriptionId,
+      );
       subscription.clearAsaasSubscription();
     }
 
@@ -47,7 +51,8 @@ export class CancelSubscriptionUseCase implements ICancelSubscriptionUseCase {
       [],
     );
 
-    const essentialPlan = await this.billingRepository.findPlanByCode('ESSENCIAL');
+    const essentialPlan =
+      await this.billingRepository.findPlanByCode('ESSENCIAL');
     subscription.changePlan(
       'ESSENCIAL',
       essentialPlan

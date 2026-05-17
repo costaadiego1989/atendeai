@@ -7,7 +7,7 @@ export class DeleteProposalService {
   constructor(
     @Inject('IProposalRepository')
     private readonly proposalRepository: IProposalRepository,
-  ) { }
+  ) {}
 
   async execute(id: string): Promise<void> {
     const proposal = await this.proposalRepository.findById(id);

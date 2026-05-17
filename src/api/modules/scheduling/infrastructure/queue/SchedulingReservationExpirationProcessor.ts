@@ -40,7 +40,9 @@ export class SchedulingReservationExpirationProcessor
         }>,
       ) => {
         try {
-          await this.expirePendingSchedulingReservationUseCase.execute(job.data);
+          await this.expirePendingSchedulingReservationUseCase.execute(
+            job.data,
+          );
           this.structuredLog.emit({
             level: 'info',
             event: 'scheduling.pending_slot.expiration_job_ok',

@@ -27,7 +27,10 @@ describe('DeleteAlertReminderUseCase', () => {
       reminderId: 'reminder-1',
     });
 
-    expect(reminderRepository.delete).toHaveBeenCalledWith('tenant-1', 'reminder-1');
+    expect(reminderRepository.delete).toHaveBeenCalledWith(
+      'tenant-1',
+      'reminder-1',
+    );
   });
 
   it('throws when reminder belongs to a different user (ownership check)', async () => {
@@ -73,7 +76,10 @@ describe('DeleteAlertReminderUseCase', () => {
       reminderId: 'reminder-99',
     });
 
-    expect(reminderRepository.delete).toHaveBeenCalledWith('tenant-5', 'reminder-99');
+    expect(reminderRepository.delete).toHaveBeenCalledWith(
+      'tenant-5',
+      'reminder-99',
+    );
     expect(reminderRepository.delete).toHaveBeenCalledTimes(1);
   });
 });

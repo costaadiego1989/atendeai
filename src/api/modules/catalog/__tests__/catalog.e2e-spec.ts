@@ -70,7 +70,9 @@ describe('CatalogController (e2e)', () => {
 
     prisma = app.get(PrismaService);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => { });
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -99,27 +101,45 @@ describe('CatalogController (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await prisma.$executeRaw(Prisma.sql`
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM inventory_schema.inventory_items
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM catalog_schema.catalog_async_jobs
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM catalog_schema.catalog_items
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM catalog_schema.catalog_categories
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
+      `,
+        )
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {
@@ -175,7 +195,9 @@ describe('CatalogController (e2e)', () => {
     );
 
     const updatedServicesCategory = await request(app.getHttpServer())
-      .put(`/api/v1/tenants/${tenantId}/catalog/categories/${servicesCategoryId}`)
+      .put(
+        `/api/v1/tenants/${tenantId}/catalog/categories/${servicesCategoryId}`,
+      )
       .set('Cookie', [authCookie])
       .send({
         name: 'serviços premium',
@@ -229,7 +251,9 @@ describe('CatalogController (e2e)', () => {
     );
 
     const updatedProductItemResponse = await request(app.getHttpServer())
-      .put(`/api/v1/tenants/${tenantId}/catalog/items/${productItemResponse.body.id}`)
+      .put(
+        `/api/v1/tenants/${tenantId}/catalog/items/${productItemResponse.body.id}`,
+      )
       .set('Cookie', [authCookie])
       .send({
         type: 'PRODUCT',
@@ -250,7 +274,9 @@ describe('CatalogController (e2e)', () => {
     );
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/tenants/${tenantId}/catalog/categories/${servicesCategoryId}`)
+      .delete(
+        `/api/v1/tenants/${tenantId}/catalog/categories/${servicesCategoryId}`,
+      )
       .set('Cookie', [authCookie])
       .expect(422);
 
@@ -356,7 +382,9 @@ describe('CatalogController (e2e)', () => {
       .expect(200);
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/tenants/${tenantId}/catalog/categories/${servicesCategoryId}`)
+      .delete(
+        `/api/v1/tenants/${tenantId}/catalog/categories/${servicesCategoryId}`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 
@@ -514,7 +542,9 @@ describe('CatalogController (e2e)', () => {
     );
 
     const listResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/catalog/items?categoryId=${shirtsResponse.body.id}`)
+      .get(
+        `/api/v1/tenants/${tenantId}/catalog/items?categoryId=${shirtsResponse.body.id}`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 
@@ -541,7 +571,9 @@ describe('CatalogController (e2e)', () => {
     ]);
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/tenants/${tenantId}/catalog/categories/${apparelResponse.body.id}`)
+      .delete(
+        `/api/v1/tenants/${tenantId}/catalog/categories/${apparelResponse.body.id}`,
+      )
       .set('Cookie', [authCookie])
       .expect(422);
   });
@@ -655,7 +687,9 @@ describe('CatalogController (e2e)', () => {
       .expect(201);
 
     const baseInventoryResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/inventory/items?query=FILTRO-COMP-BIVOLT`)
+      .get(
+        `/api/v1/tenants/${tenantId}/inventory/items?query=FILTRO-COMP-BIVOLT`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 

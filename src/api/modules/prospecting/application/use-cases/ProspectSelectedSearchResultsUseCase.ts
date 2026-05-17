@@ -32,8 +32,7 @@ import {
 } from './interfaces/IProspectSelectedSearchResultsUseCase';
 
 @Injectable()
-export class ProspectSelectedSearchResultsUseCase
-  implements IProspectSelectedSearchResultsUseCase {
+export class ProspectSelectedSearchResultsUseCase implements IProspectSelectedSearchResultsUseCase {
   constructor(
     @Inject(PROSPECT_SEARCH_REPOSITORY)
     private readonly searchRepository: IProspectSearchRepository,
@@ -44,7 +43,7 @@ export class ProspectSelectedSearchResultsUseCase
     @Inject(PROSPECT_CAMPAIGN_REPOSITORY)
     private readonly campaignRepository: IProspectCampaignRepository,
     private readonly dispatchPolicy: ProspectDispatchPolicy,
-  ) { }
+  ) {}
 
   async execute(
     input: ProspectSelectedSearchResultsInput,
@@ -200,7 +199,10 @@ export class ProspectSelectedSearchResultsUseCase
     return parts.length > 0 ? parts.join(' | ') : undefined;
   }
 
-  private buildCampaignName(search: { businessTypeQuery: string; city: string }): string {
+  private buildCampaignName(search: {
+    businessTypeQuery: string;
+    city: string;
+  }): string {
     return `Abordagem ${search.businessTypeQuery} - ${search.city}`;
   }
 

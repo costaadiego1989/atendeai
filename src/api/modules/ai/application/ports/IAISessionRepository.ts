@@ -27,7 +27,10 @@ export interface IAISessionRepository {
     conversationId: string,
   ): Promise<AISessionDto>;
   recordMessage(data: AISessionMessageData): Promise<void>;
-  close(sessionId: string, status: 'CLOSED' | 'EXPIRED' | 'HANDOFF'): Promise<void>;
+  close(
+    sessionId: string,
+    status: 'CLOSED' | 'EXPIRED' | 'HANDOFF',
+  ): Promise<void>;
 }
 
 export const AI_SESSION_REPOSITORY = Symbol('AI_SESSION_REPOSITORY');

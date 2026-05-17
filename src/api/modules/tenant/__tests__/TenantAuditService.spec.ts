@@ -1,5 +1,8 @@
 import { TenantAuditService } from '../application/services/TenantAuditService.js';
-import { ITenantAuditLogRepository, TenantAuditLogInput } from '../application/ports/ITenantAuditLogRepository.js';
+import {
+  ITenantAuditLogRepository,
+  TenantAuditLogInput,
+} from '../application/ports/ITenantAuditLogRepository.js';
 
 describe('TenantAuditService', () => {
   let service: TenantAuditService;
@@ -29,12 +32,14 @@ describe('TenantAuditService', () => {
 
   it('should not throw error and just log a warning if repository fails', async () => {
     repository.record.mockRejectedValue(new Error('Database error'));
-    
+
     // We expect it NOT to throw, as it has a try-catch block
-    await expect(service.record({
-      tenantId: 'tenant-1',
-      eventType: 'AI_CONFIG_UPDATED',
-    })).resolves.not.toThrow();
+    await expect(
+      service.record({
+        tenantId: 'tenant-1',
+        eventType: 'AI_CONFIG_UPDATED',
+      }),
+    ).resolves.not.toThrow();
 
     expect(repository.record).toHaveBeenCalled();
   });

@@ -5,7 +5,9 @@ import { CatalogItemUpdatedIntegrationEvent } from '../application/integration-e
 import { CatalogItemRecord } from '../domain/ports/ICatalogRepository';
 
 describe('UpdateCatalogItemUseCase', () => {
-  const itemRecord = (overrides: Partial<CatalogItemRecord> = {}): CatalogItemRecord => ({
+  const itemRecord = (
+    overrides: Partial<CatalogItemRecord> = {},
+  ): CatalogItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     categoryId: 'category-1',

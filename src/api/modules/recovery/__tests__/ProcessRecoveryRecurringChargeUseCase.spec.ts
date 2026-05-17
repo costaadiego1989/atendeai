@@ -68,8 +68,7 @@ describe('ProcessRecoveryRecurringChargeUseCase', () => {
       tenantId: 'tenant-1',
       caseId: 'case-1',
       billingType: 'PIX',
-      messageText:
-        'Oi, Ana. Reenviando mensalidade no valor 120.00: {{link}}',
+      messageText: 'Oi, Ana. Reenviando mensalidade no valor 120.00: {{link}}',
     });
     expect(recurringChargeRepository.markRunSucceeded).toHaveBeenCalledWith({
       runId: 'run-1',

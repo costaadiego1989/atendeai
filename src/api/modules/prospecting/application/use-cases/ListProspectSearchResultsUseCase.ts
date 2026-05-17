@@ -15,9 +15,7 @@ import {
 } from './interfaces/IListProspectSearchResultsUseCase';
 
 @Injectable()
-export class ListProspectSearchResultsUseCase
-  implements IListProspectSearchResultsUseCase
-{
+export class ListProspectSearchResultsUseCase implements IListProspectSearchResultsUseCase {
   constructor(
     @Inject(PROSPECT_SEARCH_REPOSITORY)
     private readonly searchRepository: IProspectSearchRepository,

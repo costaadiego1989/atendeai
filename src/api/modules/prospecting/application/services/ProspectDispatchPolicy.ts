@@ -1,13 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ValidationErrorException } from '@shared/domain/exceptions/DomainExceptions';
 import { ProspectCampaign } from '../../domain/entities/ProspectCampaign';
 import { ProspectExecution } from '../../domain/entities/ProspectExecution';
+import {
+  IProspectExecutionRepository,
+  PROSPECT_EXECUTION_REPOSITORY,
+} from '../../domain/repositories/IProspectExecutionRepository';
+import {
+  ProspectCooldownActiveError,
+  ProspectNoWhatsAppPhoneError,
+  ProspectOptOutError,
+} from '../../domain/errors/ProspectingErrors';
 
 export const ASSISTED_LOCAL_PROSPECTING_OBJECTIVE_PREFIX =
   'Abordagem assistida de prospecção local';
 
 @Injectable()
 export class ProspectDispatchPolicy {
+  constructor(
+    @Inject(PROSPECT_EXECUTION_REPOSITORY)
+    private readonly executionRepository: IProspectExecutionRepository,
+  ) {}
+
   assertCanStartCampaign(campaign: ProspectCampaign): void {
     if (campaign.status.value !== 'ACTIVE') {
       throw new ValidationErrorException(
@@ -25,6 +39,8 @@ export class ProspectDispatchPolicy {
   ): void {
     this.assertCampaignIsNotAssistedLocalQueue(campaign);
     this.assertExecutionCanDispatch(execution);
+
+    if (campaign.templateName) return;
 
     if (!campaign.messageTemplate?.trim()) {
       throw new ValidationErrorException(
@@ -72,6 +88,36 @@ export class ProspectDispatchPolicy {
       throw new ValidationErrorException(
         'Prospect campaign message template must include {{name}} or {{first_name}}',
       );
+    }
+  }
+
+  async assertContactEligible(
+    campaign: ProspectCampaign,
+    execution: ProspectExecution,
+    contact: { phone: string; prospectingOptOut: boolean },
+  ): Promise<void> {
+    if (contact.prospectingOptOut) {
+      throw new ProspectOptOutError(execution.contactId);
+    }
+
+    if (campaign.channel.value === 'WHATSAPP' && !contact.phone?.trim()) {
+      throw new ProspectNoWhatsAppPhoneError(execution.contactId);
+    }
+
+    const lastContactedAt = await this.executionRepository.findLastContactedAt(
+      execution.tenantId.toString(),
+      execution.contactId,
+    );
+
+    if (lastContactedAt) {
+      const cooldownMs = campaign.cooldownDays * 24 * 60 * 60 * 1000;
+      const cutoff = new Date(Date.now() - cooldownMs);
+      if (lastContactedAt > cutoff) {
+        throw new ProspectCooldownActiveError(
+          execution.contactId,
+          campaign.cooldownDays,
+        );
+      }
     }
   }
 }

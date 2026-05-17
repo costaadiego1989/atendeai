@@ -92,9 +92,7 @@ describe('PurchaseAddonPackageUseCase', () => {
     const sub = Subscription.create(TenantId.create('t1'), 'TRIAL');
     billingRepo.findSubscription.mockResolvedValue(sub);
 
-    await expect(useCase.execute({ tenantId: 't1' })).rejects.toThrow(
-      /Trial/,
-    );
+    await expect(useCase.execute({ tenantId: 't1' })).rejects.toThrow(/Trial/);
   });
 
   it('3.4 should reject if addon package already active', async () => {
@@ -225,7 +223,9 @@ describe('GetAddonPackageInfoUseCase', () => {
     expect(result.active).toBe(false);
     expect(result.package).not.toBeNull();
     expect(result.package!.price).toBe(Math.round(49700 * 0.5));
-    expect(result.package!.messages).toBe(Math.floor(PLAN_QUOTAS.ESCALA.messages / 2));
+    expect(result.package!.messages).toBe(
+      Math.floor(PLAN_QUOTAS.ESCALA.messages / 2),
+    );
   });
 
   it('should return active=true when addon is active', async () => {

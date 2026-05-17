@@ -90,20 +90,49 @@ describe('Channels guards (e2e)', () => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     const tenant = await prisma.tenant.create({
-      data: { companyName: 'Channels Guards Store', cnpj: tenantCnpj, plan: 'PROFISSIONAL' },
+      data: {
+        companyName: 'Channels Guards Store',
+        cnpj: tenantCnpj,
+        plan: 'PROFISSIONAL',
+      },
     });
     tenantId = tenant.id;
 
     const otherTenant = await prisma.tenant.create({
-      data: { companyName: 'Other Channels Store', cnpj: otherTenantCnpj, plan: 'ESSENCIAL' },
+      data: {
+        companyName: 'Other Channels Store',
+        cnpj: otherTenantCnpj,
+        plan: 'ESSENCIAL',
+      },
     });
     otherTenantId = otherTenant.id;
 
     await prisma.user.createMany({
       data: [
-        { tenantId, name: 'Owner', email: ownerEmail, phone: '11970000020', passwordHash, role: 'OWNER' },
-        { tenantId, name: 'Agent', email: agentEmail, phone: '11970000021', passwordHash, role: 'AGENT' },
-        { tenantId: otherTenantId, name: 'Other Owner', email: otherOwnerEmail, phone: '11970000022', passwordHash, role: 'OWNER' },
+        {
+          tenantId,
+          name: 'Owner',
+          email: ownerEmail,
+          phone: '11970000020',
+          passwordHash,
+          role: 'OWNER',
+        },
+        {
+          tenantId,
+          name: 'Agent',
+          email: agentEmail,
+          phone: '11970000021',
+          passwordHash,
+          role: 'AGENT',
+        },
+        {
+          tenantId: otherTenantId,
+          name: 'Other Owner',
+          email: otherOwnerEmail,
+          phone: '11970000022',
+          passwordHash,
+          role: 'OWNER',
+        },
       ],
     });
 
@@ -114,13 +143,19 @@ describe('Channels guards (e2e)', () => {
 
   afterAll(async () => {
     await prisma.whatsAppConfig
-      .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
       .catch(() => {});
     await prisma.user
-      .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
       .catch(() => {});
     await prisma.tenant
-      .deleteMany({ where: { id: { in: [tenantId, otherTenantId].filter(Boolean) } } })
+      .deleteMany({
+        where: { id: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
       .catch(() => {});
     await app.close();
   });

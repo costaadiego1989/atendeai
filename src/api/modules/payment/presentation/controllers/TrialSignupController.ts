@@ -1,4 +1,11 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Inject,
+} from '@nestjs/common';
 import { InitiateTrialSubscriptionUseCase } from '../../application/use-cases/InitiateTrialSubscriptionUseCase';
 import { ICreateTenantUseCase } from '../../../tenant/application/use-cases/interfaces/ICreateTenantUseCase';
 import { TrialSignupDTO } from '../dtos/TrialSignupDTO';
@@ -9,7 +16,7 @@ export class TrialSignupController {
     private readonly initiateTrialSubscriptionUseCase: InitiateTrialSubscriptionUseCase,
     @Inject(ICreateTenantUseCase)
     private readonly createTenantUseCase: ICreateTenantUseCase,
-  ) { }
+  ) {}
 
   @Post('trial/signup')
   @HttpCode(HttpStatus.CREATED)

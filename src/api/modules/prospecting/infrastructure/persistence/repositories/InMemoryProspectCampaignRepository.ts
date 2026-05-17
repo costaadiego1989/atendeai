@@ -3,9 +3,7 @@ import { ProspectCampaign } from '../../../domain/entities/ProspectCampaign';
 import { IProspectCampaignRepository } from '../../../domain/repositories/IProspectCampaignRepository';
 
 @Injectable()
-export class InMemoryProspectCampaignRepository
-  implements IProspectCampaignRepository
-{
+export class InMemoryProspectCampaignRepository implements IProspectCampaignRepository {
   private readonly campaigns = new Map<string, ProspectCampaign>();
 
   async save(campaign: ProspectCampaign): Promise<void> {

@@ -12,9 +12,10 @@ export class HumanHandoffPolicy {
     confidenceThreshold: number;
   }): HumanHandoffDecision {
     const normalizedMessage = input.userMessage.toLowerCase();
-    const requestedHuman = /(humano|atendente|pessoa|vendedor|especialista)/i.test(
-      normalizedMessage,
-    );
+    const requestedHuman =
+      /(humano|atendente|pessoa|vendedor|especialista)/i.test(
+        normalizedMessage,
+      );
 
     if (requestedHuman) {
       return {

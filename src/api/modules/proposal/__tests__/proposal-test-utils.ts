@@ -32,11 +32,20 @@ export function buildProposal(
     description: overrides.description ?? 'Proposta comercial detalhada',
     benefits: overrides.benefits ?? 'Aceleração de vendas',
     items: overrides.items ?? [
-      buildProposalItem({ name: 'Diagnóstico inicial', quantity: 1, unitPrice: 1000 }),
-      buildProposalItem({ name: 'Execução assistida', quantity: 1, unitPrice: 2500 }),
+      buildProposalItem({
+        name: 'Diagnóstico inicial',
+        quantity: 1,
+        unitPrice: 1000,
+      }),
+      buildProposalItem({
+        name: 'Execução assistida',
+        quantity: 1,
+        unitPrice: 2500,
+      }),
     ],
     status: overrides.status,
-    validUntil: overrides.validUntil ?? new Date(Date.now() + 24 * 60 * 60 * 1000),
+    validUntil:
+      overrides.validUntil ?? new Date(Date.now() + 24 * 60 * 60 * 1000),
     scheduledAt: overrides.scheduledAt ?? null,
     pdfUrl: overrides.pdfUrl ?? null,
     notes: overrides.notes ?? null,
@@ -58,12 +67,22 @@ export function buildCreateProposalData(
     title: overrides.title ?? 'Proposta Comercial',
     description: overrides.description ?? 'Proposta comercial detalhada',
     benefits: overrides.benefits ?? 'Aceleração de vendas',
-    items:
-      overrides.items ?? [
-        { name: 'Diagnóstico inicial', quantity: 1, unitPrice: 1000, description: 'Entrada' },
-        { name: 'Execução assistida', quantity: 1, unitPrice: 2500, description: 'Entrega' },
-      ],
-    validUntil: overrides.validUntil ?? new Date(Date.now() + 24 * 60 * 60 * 1000),
+    items: overrides.items ?? [
+      {
+        name: 'Diagnóstico inicial',
+        quantity: 1,
+        unitPrice: 1000,
+        description: 'Entrada',
+      },
+      {
+        name: 'Execução assistida',
+        quantity: 1,
+        unitPrice: 2500,
+        description: 'Entrega',
+      },
+    ],
+    validUntil:
+      overrides.validUntil ?? new Date(Date.now() + 24 * 60 * 60 * 1000),
   };
 }
 
@@ -89,7 +108,9 @@ export class InMemoryProposalRepository implements IProposalRepository {
   }
 
   async findByTenantId(tenantId: string): Promise<Proposal[]> {
-    return [...this.store.values()].filter((proposal) => proposal.tenantId === tenantId);
+    return [...this.store.values()].filter(
+      (proposal) => proposal.tenantId === tenantId,
+    );
   }
 
   async update(proposal: Proposal): Promise<void> {
@@ -118,10 +139,16 @@ export function createQueueMock() {
 
   return {
     jobs,
-    add: jest.fn(async (name: string, data: unknown, options?: Record<string, unknown>) => {
-      jobs.push({ name, data, options });
-      return { name, data, options };
-    }),
+    add: jest.fn(
+      async (
+        name: string,
+        data: unknown,
+        options?: Record<string, unknown>,
+      ) => {
+        jobs.push({ name, data, options });
+        return { name, data, options };
+      },
+    ),
   };
 }
 

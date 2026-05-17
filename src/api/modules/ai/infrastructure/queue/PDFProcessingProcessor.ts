@@ -22,7 +22,9 @@ export class PDFProcessingProcessor extends WorkerHost {
 
   async process(job: Job<PDFProcessingJobPayload>): Promise<void> {
     if (job.name !== 'process-document') {
-      this.logger.warn(`[PDFProcessingProcessor] unknown job name: ${job.name}`);
+      this.logger.warn(
+        `[PDFProcessingProcessor] unknown job name: ${job.name}`,
+      );
       return;
     }
 

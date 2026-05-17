@@ -1,7 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import { TenantPDFContextProvider } from '../infrastructure/adapters/TenantPDFContextProvider';
 import { IEmbeddingProvider } from '../application/ports/IEmbeddingProvider';
-import { IDocumentChunkRepository, SimilarChunkResult } from '../application/ports/IDocumentChunkRepository';
+import {
+  IDocumentChunkRepository,
+  SimilarChunkResult,
+} from '../application/ports/IDocumentChunkRepository';
 import { TenantPDFResumeRepository } from '@modules/tenant/infrastructure/persistence/repositories/TenantPDFResumeRepository';
 
 describe('TenantPDFContextProvider (RAG)', () => {

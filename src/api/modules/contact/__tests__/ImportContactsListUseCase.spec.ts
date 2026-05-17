@@ -37,7 +37,8 @@ describe('ImportContactsListUseCase', () => {
   it('should import valid CSV data and create contacts', async () => {
     mockRepo.findByPhone.mockResolvedValue(null);
 
-    const rawText = 'nome,telefone,documento,email\nJohn Doe,5511999999999,12345678900,john@test.com';
+    const rawText =
+      'nome,telefone,documento,email\nJohn Doe,5511999999999,12345678900,john@test.com';
 
     const result = await useCase.execute({ tenantId, rawText });
 
@@ -91,7 +92,10 @@ describe('ImportContactsListUseCase', () => {
 
     await useCase.execute({ tenantId, rawText });
 
-    expect(mockRepo.findByPhone).toHaveBeenCalledWith(tenantId, '5511999999999');
+    expect(mockRepo.findByPhone).toHaveBeenCalledWith(
+      tenantId,
+      '5511999999999',
+    );
   });
 
   it('should publish events for each created contact', async () => {
@@ -109,7 +113,8 @@ describe('ImportContactsListUseCase', () => {
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null);
 
-    const rawText = 'nome,telefone\nJohn,5511999999999\nBad,123\nJane,5511888888888';
+    const rawText =
+      'nome,telefone\nJohn,5511999999999\nBad,123\nJane,5511888888888';
 
     const result = await useCase.execute({ tenantId, rawText });
 

@@ -1,4 +1,7 @@
-import { applyRecoveryPlaybookTemplate, daysPastDue } from './recoveryPlaybookTemplate';
+import {
+  applyRecoveryPlaybookTemplate,
+  daysPastDue,
+} from './recoveryPlaybookTemplate';
 import { RecoveryCaseRecord } from '../../domain/ports/IRecoveryRepository';
 
 function baseCase(over: Partial<RecoveryCaseRecord> = {}): RecoveryCaseRecord {

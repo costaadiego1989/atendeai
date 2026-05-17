@@ -54,18 +54,23 @@ function fromBase64Url(value: string): string {
 }
 
 function signPayload(encodedPayload: string, secret: string): string {
-  return createHmac('sha256', secret).update(encodedPayload).digest('base64url');
+  return createHmac('sha256', secret)
+    .update(encodedPayload)
+    .digest('base64url');
 }
 
 export function normalizeProposalMetadata(
   metadata: Record<string, unknown> | null | undefined,
 ): ProposalMetadataShape {
-  const base = metadata && typeof metadata === 'object' && !Array.isArray(metadata)
-    ? ({ ...metadata } as ProposalMetadataShape)
-    : ({} as ProposalMetadataShape);
+  const base =
+    metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+      ? ({ ...metadata } as ProposalMetadataShape)
+      : ({} as ProposalMetadataShape);
 
   const commercialSource =
-    base.commercial && typeof base.commercial === 'object' && !Array.isArray(base.commercial)
+    base.commercial &&
+    typeof base.commercial === 'object' &&
+    !Array.isArray(base.commercial)
       ? (base.commercial as ProposalCommercialMetadata)
       : undefined;
 
@@ -151,7 +156,9 @@ export function verifyProposalPublicToken(
   }
 
   try {
-    const parsed = JSON.parse(fromBase64Url(encodedPayload)) as ProposalTokenPayload;
+    const parsed = JSON.parse(
+      fromBase64Url(encodedPayload),
+    ) as ProposalTokenPayload;
     if (
       typeof parsed?.proposalId !== 'string' ||
       !parsed.proposalId.trim() ||
@@ -170,7 +177,8 @@ export function verifyProposalPublicToken(
 export function resolveProposalFinalAmount(proposal: Proposal): number {
   const metadata = normalizeProposalMetadata(proposal.metadata);
   const finalPrice =
-    typeof metadata.finalPrice === 'number' && Number.isFinite(metadata.finalPrice)
+    typeof metadata.finalPrice === 'number' &&
+    Number.isFinite(metadata.finalPrice)
       ? metadata.finalPrice
       : null;
 

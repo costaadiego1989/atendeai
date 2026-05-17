@@ -75,20 +75,25 @@ describe('UpdateTenantBranchUseCase', () => {
 
     const result = await useCase.execute(updateInput);
 
-    expect(tenantRepository.updateBranch).toHaveBeenCalledWith(updateInput.branchId, expect.objectContaining({
-      name: updateInput.name,
-      cnpj: updateInput.cnpj,
-      isHeadquarters: updateInput.isHeadquarters,
-    }));
-
-    expect(tenantAuditService.record).toHaveBeenCalledWith(expect.objectContaining({
-      tenantId: 'tenant-1',
-      eventType: 'BRANCH_UPDATED',
-      metadata: expect.objectContaining({
-        branchId: 'branch-1',
-        branchName: 'Loja Centro Atualizada',
+    expect(tenantRepository.updateBranch).toHaveBeenCalledWith(
+      updateInput.branchId,
+      expect.objectContaining({
+        name: updateInput.name,
+        cnpj: updateInput.cnpj,
+        isHeadquarters: updateInput.isHeadquarters,
       }),
-    }));
+    );
+
+    expect(tenantAuditService.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        eventType: 'BRANCH_UPDATED',
+        metadata: expect.objectContaining({
+          branchId: 'branch-1',
+          branchName: 'Loja Centro Atualizada',
+        }),
+      }),
+    );
 
     expect(result.success).toBe(true);
     expect(result.data.id).toBe('branch-1');

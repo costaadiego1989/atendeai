@@ -109,7 +109,9 @@ export class RedisSchedulingStore implements ISchedulingStore {
       input.tenantId,
       input.professionalId,
     );
-    const currentCategoryIds = await this.redis.smembers(professionalCategoriesKey);
+    const currentCategoryIds = await this.redis.smembers(
+      professionalCategoriesKey,
+    );
 
     const multi = this.redis.multi();
 
@@ -393,7 +395,8 @@ export class RedisSchedulingStore implements ISchedulingStore {
             contactEmail: input.contactEmail ?? slot.reservedFor?.contactEmail,
             categoryId: input.categoryId ?? slot.reservedFor?.categoryId,
             categoryName: input.categoryName ?? slot.reservedFor?.categoryName,
-            conversationId: input.conversationId ?? slot.reservedFor?.conversationId,
+            conversationId:
+              input.conversationId ?? slot.reservedFor?.conversationId,
             notes: input.notes ?? slot.reservedFor?.notes,
             isOnline: input.isOnline ?? slot.reservedFor?.isOnline,
             meetingProvider:
@@ -403,7 +406,10 @@ export class RedisSchedulingStore implements ISchedulingStore {
         };
       }
 
-      if (input.action === 'MARK_COMPLETED' || input.action === 'MARK_NO_SHOW') {
+      if (
+        input.action === 'MARK_COMPLETED' ||
+        input.action === 'MARK_NO_SHOW'
+      ) {
         if (slot.status !== 'RESERVED') {
           await this.redis.unwatch();
           return null;
@@ -478,7 +484,8 @@ export class RedisSchedulingStore implements ISchedulingStore {
       const targetSlot = JSON.parse(rawTargetSlot) as AvailabilitySlotRecord;
 
       if (
-        (sourceSlot.status !== 'RESERVED' && sourceSlot.status !== 'PRE_RESERVED') ||
+        (sourceSlot.status !== 'RESERVED' &&
+          sourceSlot.status !== 'PRE_RESERVED') ||
         targetSlot.status !== 'AVAILABLE'
       ) {
         await this.redis.unwatch();
@@ -506,7 +513,11 @@ export class RedisSchedulingStore implements ISchedulingStore {
       const execResult = await this.redis
         .multi()
         .hset(sourceKey, input.sourceSlotId, JSON.stringify(clearedSourceSlot))
-        .hset(targetKey, input.targetSlotId, JSON.stringify(rescheduledTargetSlot))
+        .hset(
+          targetKey,
+          input.targetSlotId,
+          JSON.stringify(rescheduledTargetSlot),
+        )
         .exec();
 
       if (!execResult) {

@@ -31,7 +31,10 @@ import {
   SCHEDULING_REMINDER_QUEUE,
 } from '../../domain/ports/ISchedulingReminderQueue';
 import { SchedulingGoogleCalendarSyncService } from '../services/SchedulingGoogleCalendarSyncService';
-import { EVENT_BUS, IEventBus } from '../../../../shared/application/ports/IEventBus';
+import {
+  EVENT_BUS,
+  IEventBus,
+} from '../../../../shared/application/ports/IEventBus';
 import { ProfessionalSlotReservedIntegrationEvent } from '../../domain/events/integration/ProfessionalSlotReservedIntegrationEvent';
 import { ProfessionalSlotPaymentPendingIntegrationEvent } from '../../domain/events/integration/ProfessionalSlotPaymentPendingIntegrationEvent';
 import {
@@ -62,11 +65,13 @@ export class ReserveProfessionalSlotUseCase {
     private readonly recurringReservationRepository: ISchedulingRecurringReservationRepository,
     private readonly recurrenceDateService: SchedulingRecurrenceDateService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   private defaultPaymentHoldTimeoutHours(): number {
     const fallback = 3;
-    const raw = this.configService.get<string>('SCHEDULING_PENDING_PAYMENT_TIMEOUT_HOURS')?.trim();
+    const raw = this.configService
+      .get<string>('SCHEDULING_PENDING_PAYMENT_TIMEOUT_HOURS')
+      ?.trim();
     if (!raw) {
       return fallback;
     }
@@ -97,16 +102,18 @@ export class ReserveProfessionalSlotUseCase {
       input.branchId,
       input.professionalId,
     );
-    const contact =
-      input.contactId
-        ? await this.contactFacade.getContactById(input.tenantId, input.contactId)
-        : null;
+    const contact = input.contactId
+      ? await this.contactFacade.getContactById(input.tenantId, input.contactId)
+      : null;
     const category = this.resolveCategoryForReservation(
       input,
       linkedCategories,
     );
     const professional = (
-      await this.schedulingStore.listProfessionals(input.tenantId, input.branchId)
+      await this.schedulingStore.listProfessionals(
+        input.tenantId,
+        input.branchId,
+      )
     ).find((entry) => entry.id === input.professionalId);
     const isFree = input.isFree ?? true;
 
@@ -138,19 +145,19 @@ export class ReserveProfessionalSlotUseCase {
 
     const finalSlot = isFree
       ? await this.finalizeFreeReservation({
-        input,
-        reservedSlot,
-        contact,
-        category,
-        professionalName: professional?.name,
-      })
+          input,
+          reservedSlot,
+          contact,
+          category,
+          professionalName: professional?.name,
+        })
       : await this.finalizePaidPreReservation({
-        input,
-        reservedSlot,
-        contact,
-        category,
-        professionalName: professional?.name,
-      });
+          input,
+          reservedSlot,
+          contact,
+          category,
+          professionalName: professional?.name,
+        });
 
     const calendarSync = await this.googleCalendarSyncService.syncReservation({
       tenantId: input.tenantId,
@@ -159,12 +166,17 @@ export class ReserveProfessionalSlotUseCase {
       professionalName: professional?.name,
       date: input.date,
       slot: finalSlot,
-      createGoogleMeet: isFree && Boolean(input.isOnline || reservedSlot.isOnline || reservedSlot.reservedFor?.isOnline),
+      createGoogleMeet:
+        isFree &&
+        Boolean(
+          input.isOnline ||
+          reservedSlot.isOnline ||
+          reservedSlot.reservedFor?.isOnline,
+        ),
     });
 
-    const slotWithMeeting =
-      calendarSync?.meetingUrl
-        ? await this.schedulingStore.attachMeetingLinkToReservedSlot({
+    const slotWithMeeting = calendarSync?.meetingUrl
+      ? await this.schedulingStore.attachMeetingLinkToReservedSlot({
           tenantId: input.tenantId,
           professionalId: input.professionalId,
           date: input.date,
@@ -172,7 +184,7 @@ export class ReserveProfessionalSlotUseCase {
           meetingProvider: 'GOOGLE_MEET',
           meetingUrl: calendarSync.meetingUrl,
         })
-        : null;
+      : null;
 
     const persistedSlot = slotWithMeeting ?? finalSlot;
 
@@ -182,17 +194,19 @@ export class ReserveProfessionalSlotUseCase {
       !input.suppressCustomerNotification &&
       persistedSlot.reservedFor?.contactId
     ) {
-      await this.eventBus.publish(new ProfessionalSlotReservedIntegrationEvent({
-        tenantId: input.tenantId,
-        contactId: persistedSlot.reservedFor.contactId,
-        professionalName: professional?.name || 'Profissional',
-        categoryName: persistedSlot.reservedFor.categoryName || 'ServiÃ§o',
-        date: input.date,
-        startsAt: persistedSlot.startsAt,
-        endsAt: persistedSlot.endsAt,
-        branchId: input.branchId ?? professional?.branchId ?? null,
-        meetingUrl: persistedSlot.reservedFor.meetingUrl,
-      }));
+      await this.eventBus.publish(
+        new ProfessionalSlotReservedIntegrationEvent({
+          tenantId: input.tenantId,
+          contactId: persistedSlot.reservedFor.contactId,
+          professionalName: professional?.name || 'Profissional',
+          categoryName: persistedSlot.reservedFor.categoryName || 'ServiÃ§o',
+          date: input.date,
+          startsAt: persistedSlot.startsAt,
+          endsAt: persistedSlot.endsAt,
+          branchId: input.branchId ?? professional?.branchId ?? null,
+          meetingUrl: persistedSlot.reservedFor.meetingUrl,
+        }),
+      );
     }
 
     if (input.isRecurring && !input.skipRecurringSchedule) {
@@ -218,7 +232,10 @@ export class ReserveProfessionalSlotUseCase {
     branchId: string | null | undefined,
     professionalId: string,
   ) {
-    const categories = await this.schedulingFacade.listCategories(tenantId, branchId);
+    const categories = await this.schedulingFacade.listCategories(
+      tenantId,
+      branchId,
+    );
     const availabilityByCategory = await Promise.all(
       categories.map(async (category) => ({
         category,
@@ -232,7 +249,9 @@ export class ReserveProfessionalSlotUseCase {
 
     return availabilityByCategory
       .filter((entry) =>
-        entry.professionals.some((professional) => professional.id === professionalId),
+        entry.professionals.some(
+          (professional) => professional.id === professionalId,
+        ),
       )
       .map((entry) => entry.category);
   }
@@ -240,7 +259,9 @@ export class ReserveProfessionalSlotUseCase {
   private resolveCategoryForReservation(
     input: ReserveAvailabilitySlotInput,
     linkedCategories: Awaited<
-      ReturnType<ReserveProfessionalSlotUseCase['resolveProfessionalCategories']>
+      ReturnType<
+        ReserveProfessionalSlotUseCase['resolveProfessionalCategories']
+      >
     >,
   ) {
     if (!linkedCategories.length) {
@@ -282,7 +303,12 @@ export class ReserveProfessionalSlotUseCase {
       suppressCustomerNotification?: boolean;
     };
     reservedSlot: AvailabilitySlotRecord;
-    contact: { contactId: string; name: string; phone: string; email?: string } | null;
+    contact: {
+      contactId: string;
+      name: string;
+      phone: string;
+      email?: string;
+    } | null;
     category: { id: string; name: string } | null;
     professionalName?: string;
   }) {
@@ -294,16 +320,18 @@ export class ReserveProfessionalSlotUseCase {
       return input.reservedSlot;
     }
 
-    await this.eventBus.publish(new ProfessionalSlotReservedIntegrationEvent({
-      tenantId: input.input.tenantId,
-      contactId: input.contact.contactId,
-      professionalName: input.professionalName || 'Profissional',
-      categoryName: input.category?.name || 'Serviço',
-      date: input.input.date,
-      startsAt: input.reservedSlot.startsAt,
-      endsAt: input.reservedSlot.endsAt,
-      branchId: input.input.branchId ?? null,
-    }));
+    await this.eventBus.publish(
+      new ProfessionalSlotReservedIntegrationEvent({
+        tenantId: input.input.tenantId,
+        contactId: input.contact.contactId,
+        professionalName: input.professionalName || 'Profissional',
+        categoryName: input.category?.name || 'Serviço',
+        date: input.input.date,
+        startsAt: input.reservedSlot.startsAt,
+        endsAt: input.reservedSlot.endsAt,
+        branchId: input.input.branchId ?? null,
+      }),
+    );
 
     const updatedWithReservation = await this.schedulingStore.updateSlot({
       tenantId: input.input.tenantId,
@@ -330,7 +358,12 @@ export class ReserveProfessionalSlotUseCase {
       suppressCustomerNotification?: boolean;
     };
     reservedSlot: AvailabilitySlotRecord;
-    contact: { contactId: string; name: string; phone: string; email?: string } | null;
+    contact: {
+      contactId: string;
+      name: string;
+      phone: string;
+      email?: string;
+    } | null;
     category: { id: string; name: string; basePrice?: number | null } | null;
     professionalName?: string;
   }) {
@@ -341,7 +374,8 @@ export class ReserveProfessionalSlotUseCase {
       );
     }
 
-    const amount = input.reservedSlot.customPrice ?? input.category?.basePrice ?? null;
+    const amount =
+      input.reservedSlot.customPrice ?? input.category?.basePrice ?? null;
 
     if (amount == null) {
       await this.cancelReservationSilently(input.input);
@@ -364,7 +398,9 @@ export class ReserveProfessionalSlotUseCase {
       slotId: input.input.slotId,
     });
     const serviceName =
-      input.category?.name || input.reservedSlot.label || 'Agendamento de serviço';
+      input.category?.name ||
+      input.reservedSlot.label ||
+      'Agendamento de serviço';
 
     let paymentLinkId: string | null = null;
 
@@ -401,18 +437,20 @@ export class ReserveProfessionalSlotUseCase {
       }
 
       if (!input.input.suppressCustomerNotification) {
-        await this.eventBus.publish(new ProfessionalSlotPaymentPendingIntegrationEvent({
-          tenantId: input.input.tenantId,
-          contactId: input.contact.contactId,
-          professionalName: input.professionalName || 'Profissional',
-          categoryName: input.category?.name || 'Serviço',
-          date: input.input.date,
-          startsAt: slotWithPayment.startsAt,
-          endsAt: slotWithPayment.endsAt,
-          paymentUrl: paymentLink.url,
-          expiresAt: paymentExpiresAt,
-          branchId: input.input.branchId ?? null,
-        }));
+        await this.eventBus.publish(
+          new ProfessionalSlotPaymentPendingIntegrationEvent({
+            tenantId: input.input.tenantId,
+            contactId: input.contact.contactId,
+            professionalName: input.professionalName || 'Profissional',
+            categoryName: input.category?.name || 'Serviço',
+            date: input.input.date,
+            startsAt: slotWithPayment.startsAt,
+            endsAt: slotWithPayment.endsAt,
+            paymentUrl: paymentLink.url,
+            expiresAt: paymentExpiresAt,
+            branchId: input.input.branchId ?? null,
+          }),
+        );
       }
 
       const updatedWithReservation = await this.schedulingStore.updateSlot({
@@ -517,11 +555,17 @@ export class ReserveProfessionalSlotUseCase {
     date: string;
     slot: AvailabilitySlotRecord;
   }): Promise<void> {
-    if (!input.slot.reservedFor?.contactId || input.slot.status !== 'RESERVED') {
+    if (
+      !input.slot.reservedFor?.contactId ||
+      input.slot.status !== 'RESERVED'
+    ) {
       return;
     }
 
-    const appointmentAt = this.getAppointmentDate(input.date, input.slot.startsAt);
+    const appointmentAt = this.getAppointmentDate(
+      input.date,
+      input.slot.startsAt,
+    );
     const offsets = [24, 3, 1] as const;
 
     await Promise.all(

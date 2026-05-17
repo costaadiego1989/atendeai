@@ -40,7 +40,13 @@ describe('InventoryEventBus (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     app.useGlobalFilters(new GlobalExceptionFilter());
     app.setGlobalPrefix('api/v1');
     await app.init();
@@ -48,16 +54,29 @@ describe('InventoryEventBus (e2e)', () => {
     prisma = app.get(PrismaService);
     eventBus = app.get<IEventBus>(EVENT_BUS);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => { });
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const tenant = await prisma.tenant.create({
-      data: { companyName: 'Event Bus Store', cnpj: tenantCnpj, plan: 'ESSENCIAL' },
+      data: {
+        companyName: 'Event Bus Store',
+        cnpj: tenantCnpj,
+        plan: 'ESSENCIAL',
+      },
     });
     tenantId = tenant.id;
 
     const passwordHash = await bcrypt.hash(password, 10);
     await prisma.user.create({
-      data: { tenantId, name: 'Event Bus Owner', email: ownerEmail, phone: '11970000080', passwordHash, role: 'OWNER' },
+      data: {
+        tenantId,
+        name: 'Event Bus Owner',
+        email: ownerEmail,
+        phone: '11970000080',
+        passwordHash,
+        role: 'OWNER',
+      },
     });
 
     authCookie = await login();
@@ -65,9 +84,11 @@ describe('InventoryEventBus (e2e)', () => {
 
   beforeEach(() => {
     publishedEvents = [];
-    jest.spyOn(eventBus, 'publish').mockImplementation(async (event: IntegrationEvent) => {
-      publishedEvents.push(event);
-    });
+    jest
+      .spyOn(eventBus, 'publish')
+      .mockImplementation(async (event: IntegrationEvent) => {
+        publishedEvents.push(event);
+      });
   });
 
   afterEach(() => {
@@ -79,11 +100,23 @@ describe('InventoryEventBus (e2e)', () => {
     global.fetch = originalFetch;
     jest.restoreAllMocks();
     if (tenantId) {
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM inventory_schema.inventory_items WHERE tenant_id = ${tenantId}::uuid`).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM inventory_schema.inventory_connections WHERE tenant_id = ${tenantId}::uuid`).catch(() => { });
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => { });
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM inventory_schema.inventory_items WHERE tenant_id = ${tenantId}::uuid`,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM inventory_schema.inventory_connections WHERE tenant_id = ${tenantId}::uuid`,
+        )
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
     if (app) await app.close();
   });
@@ -104,7 +137,9 @@ describe('InventoryEventBus (e2e)', () => {
       })
       .expect(201);
 
-    const syncedEvents = publishedEvents.filter((e) => e.eventName === 'inventory.item.synced.v1');
+    const syncedEvents = publishedEvents.filter(
+      (e) => e.eventName === 'inventory.item.synced.v1',
+    );
     expect(syncedEvents).toHaveLength(1);
     expect(syncedEvents[0].payload).toMatchObject({
       tenantId,
@@ -129,11 +164,22 @@ describe('InventoryEventBus (e2e)', () => {
       })
       .expect(201);
 
-    expect(publishedEvents.filter((e) => e.eventName === 'inventory.item.synced.v1')).toHaveLength(1);
-    expect(publishedEvents.filter((e) => e.eventName === 'inventory.item.unavailable.v1')).toHaveLength(1);
+    expect(
+      publishedEvents.filter((e) => e.eventName === 'inventory.item.synced.v1'),
+    ).toHaveLength(1);
+    expect(
+      publishedEvents.filter(
+        (e) => e.eventName === 'inventory.item.unavailable.v1',
+      ),
+    ).toHaveLength(1);
 
-    const unavailableEvent = publishedEvents.find((e) => e.eventName === 'inventory.item.unavailable.v1');
-    expect(unavailableEvent!.payload).toMatchObject({ tenantId, sku: 'EVT-ZERO-001' });
+    const unavailableEvent = publishedEvents.find(
+      (e) => e.eventName === 'inventory.item.unavailable.v1',
+    );
+    expect(unavailableEvent!.payload).toMatchObject({
+      tenantId,
+      sku: 'EVT-ZERO-001',
+    });
   });
 
   // ─── INV-T-092c: connection created event ────────────────────────────────
@@ -142,10 +188,16 @@ describe('InventoryEventBus (e2e)', () => {
     const connRes = await request(app.getHttpServer())
       .post(`/api/v1/tenants/${tenantId}/inventory/connections`)
       .set('Cookie', [authCookie])
-      .send({ sourceType: 'MANUAL_SNAPSHOT', providerName: 'Evento Manual', config: {} })
+      .send({
+        sourceType: 'MANUAL_SNAPSHOT',
+        providerName: 'Evento Manual',
+        config: {},
+      })
       .expect(201);
 
-    const connEvents = publishedEvents.filter((e) => e.eventName === 'inventory.connection.created.v1');
+    const connEvents = publishedEvents.filter(
+      (e) => e.eventName === 'inventory.connection.created.v1',
+    );
     expect(connEvents).toHaveLength(1);
     expect(connEvents[0].payload).toMatchObject({
       connectionId: connRes.body.id,
@@ -186,7 +238,9 @@ describe('InventoryEventBus (e2e)', () => {
       })
       .expect(201);
 
-    const priceEvents = publishedEvents.filter((e) => e.eventName === 'inventory.price.changed.v1');
+    const priceEvents = publishedEvents.filter(
+      (e) => e.eventName === 'inventory.price.changed.v1',
+    );
     expect(priceEvents).toHaveLength(1);
     expect(priceEvents[0].payload).toMatchObject({
       sku: 'EVT-PRICE-001',

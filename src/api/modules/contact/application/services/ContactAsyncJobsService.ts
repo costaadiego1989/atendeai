@@ -4,7 +4,11 @@ import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExcepti
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 
 export type ContactAsyncJobType = 'IMPORT_CONTACTS' | 'EXPORT_CONTACTS_CSV';
-export type ContactAsyncJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type ContactAsyncJobStatus =
+  | 'QUEUED'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED';
 
 interface ContactAsyncJobRow {
   id: string;
@@ -108,7 +112,10 @@ export class ContactAsyncJobsService {
     `);
   }
 
-  async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }): Promise<void> {
+  async markProcessing(
+    jobId: string,
+    input?: { progress?: number; totalItems?: number },
+  ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE contact_schema.contact_async_jobs
       SET status = 'PROCESSING',
@@ -248,5 +255,4 @@ export class ContactAsyncJobsService {
       failedAt: row.failed_at,
     };
   }
-
 }

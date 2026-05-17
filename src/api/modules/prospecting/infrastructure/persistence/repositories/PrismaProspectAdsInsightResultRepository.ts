@@ -2,15 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { ProspectAdsInsightResult } from '../../../domain/entities/ProspectAdsInsightResult';
-import {
-  IProspectAdsInsightResultRepository,
-} from '../../../domain/repositories/IProspectAdsInsightResultRepository';
+import { IProspectAdsInsightResultRepository } from '../../../domain/repositories/IProspectAdsInsightResultRepository';
 import { ProspectAdsInsightResultMapper } from '../mappers/ProspectAdsInsightResultMapper';
 
 @Injectable()
-export class PrismaProspectAdsInsightResultRepository
-  implements IProspectAdsInsightResultRepository {
-  constructor(private readonly prisma: PrismaService) { }
+export class PrismaProspectAdsInsightResultRepository implements IProspectAdsInsightResultRepository {
+  constructor(private readonly prisma: PrismaService) {}
 
   async saveMany(results: ProspectAdsInsightResult[]): Promise<void> {
     for (const result of results) {
@@ -43,7 +40,10 @@ export class PrismaProspectAdsInsightResultRepository
       `);
   }
 
-  async findAllByQuery(tenantId: string, queryId: string): Promise<ProspectAdsInsightResult[]> {
+  async findAllByQuery(
+    tenantId: string,
+    queryId: string,
+  ): Promise<ProspectAdsInsightResult[]> {
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT *
         FROM prospecting_schema.prospect_ads_insight_results

@@ -1,8 +1,16 @@
-import { IsString, IsBoolean, IsOptional, MaxLength, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class UpsertTenantAgentRuleDto {
   @IsString()
-  @MinLength(10, { message: 'Describe a rule with at least 10 characters to be effective' })
+  @MinLength(10, {
+    message: 'Describe a rule with at least 10 characters to be effective',
+  })
   @MaxLength(500, { message: 'The rule is too long (maximum 500 characters)' })
   customPrompt: string;
 
@@ -16,6 +24,8 @@ export class UpsertTenantAgentRuleDto {
 
   @IsString()
   @IsOptional()
-  @MaxLength(500, { message: 'The internal note must have a maximum of 500 characters' })
+  @MaxLength(500, {
+    message: 'The internal note must have a maximum of 500 characters',
+  })
   notes?: string;
 }

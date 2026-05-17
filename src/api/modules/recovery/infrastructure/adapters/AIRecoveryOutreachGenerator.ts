@@ -10,7 +10,7 @@ export class AIRecoveryOutreachGenerator implements IRecoveryOutreachGenerator {
   constructor(
     @Inject(AI_ENGINE)
     private readonly aiEngine: IAIEngine,
-  ) { }
+  ) {}
 
   async generate(input: RecoveryOutreachInput): Promise<string> {
     try {

@@ -14,10 +14,7 @@ export interface StoredOutboxEvent {
 }
 
 export interface IOutboxStore {
-  append(
-    event: IntegrationEvent,
-    tx?: Prisma.TransactionClient,
-  ): Promise<void>;
+  append(event: IntegrationEvent, tx?: Prisma.TransactionClient): Promise<void>;
   claimPending(batchSize: number): Promise<StoredOutboxEvent[]>;
   markPublished(id: string): Promise<void>;
   markFailed(id: string, errorMessage: string): Promise<void>;

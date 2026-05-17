@@ -2,10 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SeverityNumber, logs } from '@opentelemetry/api-logs';
 import type { StructuredEmitInput } from './log-emission-types';
 
-const LEVEL_TO_OTEL: Record<
-  StructuredEmitInput['level'],
-  SeverityNumber
-> = {
+const LEVEL_TO_OTEL: Record<StructuredEmitInput['level'], SeverityNumber> = {
   debug: SeverityNumber.DEBUG,
   info: SeverityNumber.INFO,
   warn: SeverityNumber.WARN,

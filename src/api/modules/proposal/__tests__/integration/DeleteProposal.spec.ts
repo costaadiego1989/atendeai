@@ -1,7 +1,10 @@
 import { DeleteProposalUseCase } from '../../application/use-cases/DeleteProposalUseCase';
 import { DeleteProposalService } from '../../application/services/implementations/DeleteProposalService';
 import { ProposalNotFoundError } from '../../domain/errors/ProposalNotFoundError';
-import { buildProposal, createProposalRepositoryMock } from '../proposal-test-utils';
+import {
+  buildProposal,
+  createProposalRepositoryMock,
+} from '../proposal-test-utils';
 
 describe('DeleteProposalUseCase', () => {
   let deleteProposalUseCase: DeleteProposalUseCase;
@@ -27,9 +30,9 @@ describe('DeleteProposalUseCase', () => {
   it('throws a domain error when the proposal does not exist', async () => {
     mockRepository.findById.mockResolvedValue(null);
 
-    await expect(deleteProposalUseCase.execute('missing-proposal')).rejects.toBeInstanceOf(
-      ProposalNotFoundError,
-    );
+    await expect(
+      deleteProposalUseCase.execute('missing-proposal'),
+    ).rejects.toBeInstanceOf(ProposalNotFoundError);
     expect(mockRepository.delete).not.toHaveBeenCalled();
   });
 });

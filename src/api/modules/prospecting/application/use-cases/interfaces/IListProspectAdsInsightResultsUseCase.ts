@@ -17,11 +17,10 @@ export interface ProspectAdsInsightResultListItem {
   createdAt: Date;
 }
 
-export interface IListProspectAdsInsightResultsUseCase
-  extends IUseCase<
-    ListProspectAdsInsightResultsInput,
-    ProspectAdsInsightResultListItem[]
-  > {}
+export interface IListProspectAdsInsightResultsUseCase extends IUseCase<
+  ListProspectAdsInsightResultsInput,
+  ProspectAdsInsightResultListItem[]
+> {}
 
 export const IListProspectAdsInsightResultsUseCase = Symbol(
   'IListProspectAdsInsightResultsUseCase',

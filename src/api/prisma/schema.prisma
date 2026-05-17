@@ -246,10 +246,12 @@ model Contact {
   stage           String         @default("LEAD") @db.VarChar(20)
   tags            Json?          @default("[]")
   notes           String?
-  lastInteraction DateTime?      @map("last_interaction") @db.Timestamptz
-  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  conversations   Conversation[]
+  lastInteraction      DateTime? @map("last_interaction") @db.Timestamptz
+  prospectingOptOut    Boolean   @default(false) @map("prospecting_opt_out")
+  prospectingOptOutAt  DateTime? @map("prospecting_opt_out_at") @db.Timestamptz
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  conversations        Conversation[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, phone])
@@ -901,11 +903,19 @@ model ProspectCampaign {
   audienceType     String   @map("audience_type") @db.VarChar(30)
   channel          String   @db.VarChar(20)
   targetContactIds Json?    @default("[]") @map("target_contact_ids")
-  messageTemplate  String?  @map("message_template") @db.Text
-  dailyLimit       Int      @default(50) @map("daily_limit")
-  status           String   @default("DRAFT") @db.VarChar(20)
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  messageTemplate         String?  @map("message_template") @db.Text
+  templateName            String?  @map("template_name") @db.VarChar(255)
+  languageCode            String   @default("pt_BR") @map("language_code") @db.VarChar(10)
+  templateVariableMapping Json?    @map("template_variable_mapping")
+  aiVariableGeneration    Boolean  @default(false) @map("ai_variable_generation")
+  cooldownDays            Int      @default(30) @map("cooldown_days")
+  minDelaySeconds         Int      @default(30) @map("min_delay_seconds")
+  maxDelaySeconds         Int      @default(120) @map("max_delay_seconds")
+  blockRateThreshold      Float    @default(0.05) @map("block_rate_threshold")
+  dailyLimit              Int      @default(50) @map("daily_limit")
+  status                  String   @default("DRAFT") @db.VarChar(20)
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt               DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([tenantId, id])
   @@index([tenantId, status], name: "idx_prospect_campaigns_tenant_status")
@@ -927,6 +937,7 @@ model ProspectExecution {
 
   @@unique([tenantId, campaignId, contactId])
   @@index([tenantId, campaignId], name: "idx_prospect_executions_tenant_campaign")
+  @@index([tenantId, contactId, status], name: "idx_prospect_executions_tenant_contact_status")
   @@map("prospect_executions")
   @@schema("prospecting_schema")
 }

@@ -130,6 +130,8 @@ describe('ContactReportCsvBuilder', () => {
     expect(lines[1]).toContain('alice@test.com');
     expect(lines[1]).toContain('PROSPECT');
     expect(lines[1]).toContain('VIP | Premium');
-    expect(result.fileName).toMatch(/relatorio-contatos-\d{4}-\d{2}-\d{2}\.csv/);
+    expect(result.fileName).toMatch(
+      /relatorio-contatos-\d{4}-\d{2}-\d{2}\.csv/,
+    );
   });
 });

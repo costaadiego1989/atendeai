@@ -2,7 +2,10 @@ import { SyncInventoryConnectionUseCase } from '../application/use-cases/SyncInv
 import { SyncInventoryItemUseCase } from '../application/use-cases/SyncInventoryItemUseCase';
 import { InMemoryInventoryRepository } from './helpers/InMemoryInventoryRepository';
 import { InMemoryEventBus } from './helpers/InMemoryEventBus';
-import { IInventoryProviderFactory, InventoryItemSnapshot } from '../application/ports/IInventoryProvider';
+import {
+  IInventoryProviderFactory,
+  InventoryItemSnapshot,
+} from '../application/ports/IInventoryProvider';
 import { InventoryConnectionNotFoundError } from '../domain/errors/InventoryConnectionNotFoundError';
 
 describe('SyncInventoryConnectionUseCase (integration)', () => {
@@ -42,7 +45,13 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
     eventBus.reset();
   });
 
-  async function seedConnection(overrides: { tenantId?: string; sourceType?: string; providerName?: string } = {}) {
+  async function seedConnection(
+    overrides: {
+      tenantId?: string;
+      sourceType?: string;
+      providerName?: string;
+    } = {},
+  ) {
     return repository.createConnection({
       tenantId: overrides.tenantId ?? TENANT,
       sourceType: overrides.sourceType ?? 'BLING',
@@ -56,8 +65,19 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
   it('INV-INT-001: sincroniza itens do provider e persiste no repositório', async () => {
     const conn = await seedConnection();
     const items: InventoryItemSnapshot[] = [
-      { sku: 'INT-SKU-001', name: 'Produto A', availableQuantity: 10, availabilityStatus: 'AVAILABLE', currentPrice: '50.00' },
-      { sku: 'INT-SKU-002', name: 'Produto B', availableQuantity: 0, availabilityStatus: 'UNAVAILABLE' },
+      {
+        sku: 'INT-SKU-001',
+        name: 'Produto A',
+        availableQuantity: 10,
+        availabilityStatus: 'AVAILABLE',
+        currentPrice: '50.00',
+      },
+      {
+        sku: 'INT-SKU-002',
+        name: 'Produto B',
+        availableQuantity: 0,
+        availabilityStatus: 'UNAVAILABLE',
+      },
     ];
 
     providerFactory.getProvider.mockReturnValue(makeProvider([items]));
@@ -68,8 +88,16 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
     expect(stored).toHaveLength(2);
     expect(stored).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ sku: 'INT-SKU-001', availableQuantity: 10, availabilityStatus: 'AVAILABLE' }),
-        expect.objectContaining({ sku: 'INT-SKU-002', availableQuantity: 0, availabilityStatus: 'UNAVAILABLE' }),
+        expect.objectContaining({
+          sku: 'INT-SKU-001',
+          availableQuantity: 10,
+          availabilityStatus: 'AVAILABLE',
+        }),
+        expect.objectContaining({
+          sku: 'INT-SKU-002',
+          availableQuantity: 0,
+          availabilityStatus: 'UNAVAILABLE',
+        }),
       ]),
     );
   });
@@ -79,8 +107,18 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
   it('INV-INT-002: publica inventory.item.synced.v1 e inventory.item.unavailable.v1 para itens zerados', async () => {
     const conn = await seedConnection();
     const items: InventoryItemSnapshot[] = [
-      { sku: 'EVT-001', name: 'Disponível', availableQuantity: 5, availabilityStatus: 'AVAILABLE' },
-      { sku: 'EVT-002', name: 'Zerado', availableQuantity: 0, availabilityStatus: 'UNAVAILABLE' },
+      {
+        sku: 'EVT-001',
+        name: 'Disponível',
+        availableQuantity: 5,
+        availabilityStatus: 'AVAILABLE',
+      },
+      {
+        sku: 'EVT-002',
+        name: 'Zerado',
+        availableQuantity: 0,
+        availabilityStatus: 'UNAVAILABLE',
+      },
     ];
 
     providerFactory.getProvider.mockReturnValue(makeProvider([items]));
@@ -88,9 +126,14 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
     await useCase.execute({ tenantId: TENANT, connectionId: conn.id });
 
     expect(eventBus.getByEventName('inventory.item.synced.v1')).toHaveLength(2);
-    const unavailable = eventBus.getByEventName('inventory.item.unavailable.v1');
+    const unavailable = eventBus.getByEventName(
+      'inventory.item.unavailable.v1',
+    );
     expect(unavailable).toHaveLength(1);
-    expect(unavailable[0].payload).toMatchObject({ tenantId: TENANT, sku: 'EVT-002' });
+    expect(unavailable[0].payload).toMatchObject({
+      tenantId: TENANT,
+      sku: 'EVT-002',
+    });
   });
 
   // ─── INV-INT-003: lastSyncedAt atualizado ────────────────────────────────
@@ -123,7 +166,12 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
     await seedConnection({ tenantId: 'tenant-B', providerName: 'Bling B' });
 
     const items: InventoryItemSnapshot[] = [
-      { sku: 'ISO-001', name: 'Produto A', availableQuantity: 5, availabilityStatus: 'AVAILABLE' },
+      {
+        sku: 'ISO-001',
+        name: 'Produto A',
+        availableQuantity: 5,
+        availabilityStatus: 'AVAILABLE',
+      },
     ];
     providerFactory.getProvider.mockReturnValue(makeProvider([items]));
 
@@ -141,9 +189,30 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
   it('INV-INT-006: processa múltiplos batches do AsyncGenerator e persiste todos os itens', async () => {
     const conn = await seedConnection();
     const batches: InventoryItemSnapshot[][] = [
-      [{ sku: 'BATCH-001', name: 'A', availableQuantity: 1, availabilityStatus: 'AVAILABLE' }],
-      [{ sku: 'BATCH-002', name: 'B', availableQuantity: 2, availabilityStatus: 'AVAILABLE' }],
-      [{ sku: 'BATCH-003', name: 'C', availableQuantity: 0, availabilityStatus: 'UNAVAILABLE' }],
+      [
+        {
+          sku: 'BATCH-001',
+          name: 'A',
+          availableQuantity: 1,
+          availabilityStatus: 'AVAILABLE',
+        },
+      ],
+      [
+        {
+          sku: 'BATCH-002',
+          name: 'B',
+          availableQuantity: 2,
+          availabilityStatus: 'AVAILABLE',
+        },
+      ],
+      [
+        {
+          sku: 'BATCH-003',
+          name: 'C',
+          availableQuantity: 0,
+          availabilityStatus: 'UNAVAILABLE',
+        },
+      ],
     ];
     providerFactory.getProvider.mockReturnValue(makeProvider(batches));
 
@@ -161,7 +230,7 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
       testConnection: jest.fn().mockResolvedValue(true),
       fetchStock: jest.fn().mockImplementation(async function* () {
         throw new Error('Provider unavailable');
-        // eslint-disable-next-line no-unreachable
+
         yield [];
       }),
     };
@@ -181,8 +250,18 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
   it('INV-INT-008: item com SKU vazio é ignorado e demais itens são persistidos', async () => {
     const conn = await seedConnection();
     const items: InventoryItemSnapshot[] = [
-      { sku: '', name: 'Sem SKU', availableQuantity: 1, availabilityStatus: 'AVAILABLE' },
-      { sku: 'VALID-001', name: 'Válido', availableQuantity: 5, availabilityStatus: 'AVAILABLE' },
+      {
+        sku: '',
+        name: 'Sem SKU',
+        availableQuantity: 1,
+        availabilityStatus: 'AVAILABLE',
+      },
+      {
+        sku: 'VALID-001',
+        name: 'Válido',
+        availableQuantity: 5,
+        availabilityStatus: 'AVAILABLE',
+      },
     ];
     providerFactory.getProvider.mockReturnValue(makeProvider([items]));
 
@@ -198,15 +277,25 @@ describe('SyncInventoryConnectionUseCase (integration)', () => {
   it('INV-INT-009: segundo sync com preço diferente publica inventory.price.changed.v1', async () => {
     const conn = await seedConnection();
     const mkItem = (price: string): InventoryItemSnapshot[] => [
-      { sku: 'PRICE-001', name: 'Produto Preço', availableQuantity: 5, availabilityStatus: 'AVAILABLE', currentPrice: price },
+      {
+        sku: 'PRICE-001',
+        name: 'Produto Preço',
+        availableQuantity: 5,
+        availabilityStatus: 'AVAILABLE',
+        currentPrice: price,
+      },
     ];
 
-    providerFactory.getProvider.mockReturnValue(makeProvider([mkItem('100.00')]));
+    providerFactory.getProvider.mockReturnValue(
+      makeProvider([mkItem('100.00')]),
+    );
     await useCase.execute({ tenantId: TENANT, connectionId: conn.id });
 
     eventBus.reset();
 
-    providerFactory.getProvider.mockReturnValue(makeProvider([mkItem('150.00')]));
+    providerFactory.getProvider.mockReturnValue(
+      makeProvider([mkItem('150.00')]),
+    );
     await useCase.execute({ tenantId: TENANT, connectionId: conn.id });
 
     const priceEvents = eventBus.getByEventName('inventory.price.changed.v1');

@@ -15,7 +15,11 @@ export interface InstagramConfig {
   status: string;
 }
 
-export type MessagingProvider = 'BUBBLEWHATS' | 'TWILIO' | 'D360' | 'META_GRAPH';
+export type MessagingProvider =
+  | 'BUBBLEWHATS'
+  | 'TWILIO'
+  | 'D360'
+  | 'META_GRAPH';
 
 export type MessagingChannel = 'WHATSAPP' | 'INSTAGRAM';
 
@@ -35,7 +39,11 @@ export interface ITenantFacade {
   getWhatsAppConfigByNumber(
     phoneNumber?: string | null,
     bubbleWhatsId?: string | null,
-  ): Promise<{ tenantId: string; branchId?: string | null; config: WhatsAppConfig } | null>;
+  ): Promise<{
+    tenantId: string;
+    branchId?: string | null;
+    config: WhatsAppConfig;
+  } | null>;
   getChannelConfig(
     tenantId: string,
     channel: MessagingChannel,

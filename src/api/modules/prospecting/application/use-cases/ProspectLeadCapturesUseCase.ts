@@ -41,9 +41,13 @@ export class ProspectLeadCapturesUseCase implements IProspectLeadCapturesUseCase
     private readonly dispatchPolicy: ProspectDispatchPolicy,
   ) {}
 
-  async execute(input: ProspectLeadCapturesInput): Promise<ProspectLeadCapturesOutput> {
+  async execute(
+    input: ProspectLeadCapturesInput,
+  ): Promise<ProspectLeadCapturesOutput> {
     if (!input.messageTemplate?.trim()) {
-      throw new ValidationErrorException('Prospect message template is required');
+      throw new ValidationErrorException(
+        'Prospect message template is required',
+      );
     }
     this.dispatchPolicy.assertTemplateSupportsPersonalization(
       input.messageTemplate,
@@ -56,7 +60,9 @@ export class ProspectLeadCapturesUseCase implements IProspectLeadCapturesUseCase
     );
 
     if (!leads.length) {
-      throw new ValidationErrorException('No selected Google Ads leads were found');
+      throw new ValidationErrorException(
+        'No selected Google Ads leads were found',
+      );
     }
 
     let importedCount = 0;
@@ -159,7 +165,10 @@ export class ProspectLeadCapturesUseCase implements IProspectLeadCapturesUseCase
   }
 
   private buildObjective(
-    leads: Array<{ campaignName?: string; interests?: Record<string, unknown> }>,
+    leads: Array<{
+      campaignName?: string;
+      interests?: Record<string, unknown>;
+    }>,
   ) {
     const campaignName = leads[0]?.campaignName?.trim();
     return campaignName

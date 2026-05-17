@@ -1,7 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  EntityNotFoundException,
-} from '@shared/domain/exceptions/DomainExceptions';
+import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
   IProspectCampaignRepository,
   PROSPECT_CAMPAIGN_REPOSITORY,
@@ -13,9 +11,7 @@ import {
 } from './interfaces/IActivateProspectCampaignUseCase';
 
 @Injectable()
-export class ActivateProspectCampaignUseCase
-  implements IActivateProspectCampaignUseCase
-{
+export class ActivateProspectCampaignUseCase implements IActivateProspectCampaignUseCase {
   constructor(
     @Inject(PROSPECT_CAMPAIGN_REPOSITORY)
     private readonly campaignRepository: IProspectCampaignRepository,

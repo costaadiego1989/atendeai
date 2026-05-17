@@ -27,26 +27,63 @@ export class SocialComment extends Entity<SocialCommentProps> {
     super(props, id);
   }
 
-  get tenantId(): string { return this.props.tenantId; }
-  get socialAccountId(): string { return this.props.socialAccountId; }
-  get postId(): string { return this.props.postId; }
-  get platform(): string { return this.props.platform; }
-  get externalCommentId(): string { return this.props.externalCommentId; }
-  get parentCommentId(): string | null { return this.props.parentCommentId; }
-  get authorExternalId(): string | null { return this.props.authorExternalId; }
-  get authorUsername(): string | null { return this.props.authorUsername; }
-  get authorName(): string | null { return this.props.authorName; }
-  get text(): string { return this.props.text; }
-  get sentiment(): CommentSentiment | null { return this.props.sentiment; }
-  get status(): CommentStatus { return this.props.status; }
-  get isHidden(): boolean { return this.props.isHidden; }
-  get receivedAt(): Date { return this.props.receivedAt; }
-  get repliedAt(): Date | null { return this.props.repliedAt; }
-  get isPending(): boolean { return this.props.status === 'PENDING'; }
-  get isQuestion(): boolean { return this.props.sentiment === 'QUESTION'; }
+  get tenantId(): string {
+    return this.props.tenantId;
+  }
+  get socialAccountId(): string {
+    return this.props.socialAccountId;
+  }
+  get postId(): string {
+    return this.props.postId;
+  }
+  get platform(): string {
+    return this.props.platform;
+  }
+  get externalCommentId(): string {
+    return this.props.externalCommentId;
+  }
+  get parentCommentId(): string | null {
+    return this.props.parentCommentId;
+  }
+  get authorExternalId(): string | null {
+    return this.props.authorExternalId;
+  }
+  get authorUsername(): string | null {
+    return this.props.authorUsername;
+  }
+  get authorName(): string | null {
+    return this.props.authorName;
+  }
+  get text(): string {
+    return this.props.text;
+  }
+  get sentiment(): CommentSentiment | null {
+    return this.props.sentiment;
+  }
+  get status(): CommentStatus {
+    return this.props.status;
+  }
+  get isHidden(): boolean {
+    return this.props.isHidden;
+  }
+  get receivedAt(): Date {
+    return this.props.receivedAt;
+  }
+  get repliedAt(): Date | null {
+    return this.props.repliedAt;
+  }
+  get isPending(): boolean {
+    return this.props.status === 'PENDING';
+  }
+  get isQuestion(): boolean {
+    return this.props.sentiment === 'QUESTION';
+  }
 
   static create(
-    props: Omit<SocialCommentProps, 'status' | 'isHidden' | 'receivedAt' | 'repliedAt' | 'sentiment'> & {
+    props: Omit<
+      SocialCommentProps,
+      'status' | 'isHidden' | 'receivedAt' | 'repliedAt' | 'sentiment'
+    > & {
       sentiment?: CommentSentiment | null;
     },
     id?: UniqueEntityID,
@@ -64,7 +101,10 @@ export class SocialComment extends Entity<SocialCommentProps> {
     );
   }
 
-  static reconstitute(props: SocialCommentProps, id: UniqueEntityID): SocialComment {
+  static reconstitute(
+    props: SocialCommentProps,
+    id: UniqueEntityID,
+  ): SocialComment {
     return new SocialComment(props, id);
   }
 

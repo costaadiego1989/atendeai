@@ -1,5 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { SALES_REPOSITORY, ISalesCouponRepository } from '../../domain/repositories/ISalesRepository';
+import {
+  SALES_REPOSITORY,
+  ISalesCouponRepository,
+} from '../../domain/repositories/ISalesRepository';
 
 @Injectable()
 export class DeleteCouponUseCase {

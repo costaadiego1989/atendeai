@@ -45,7 +45,7 @@ describe('IntegrationController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     await prisma.tenant
       .deleteMany({
@@ -55,7 +55,7 @@ describe('IntegrationController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     const tenant = await prisma.tenant.create({
       data: {
@@ -99,7 +99,7 @@ describe('IntegrationController (e2e)', () => {
   afterAll(async () => {
     await prisma.subscription
       .deleteMany({ where: { tenantId } })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.user
       .deleteMany({
         where: {
@@ -108,7 +108,7 @@ describe('IntegrationController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.tenant
       .deleteMany({
         where: {
@@ -117,7 +117,7 @@ describe('IntegrationController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
   });
 
   it('should return external store config when the API key is valid', async () => {

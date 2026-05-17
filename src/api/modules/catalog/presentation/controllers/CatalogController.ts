@@ -39,7 +39,10 @@ import {
 } from '../dtos/CatalogDTOs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FILE_STORAGE_SERVICE, FileStorageService } from '@shared/domain/services/FileStorageService';
+import {
+  FILE_STORAGE_SERVICE,
+  FileStorageService,
+} from '@shared/domain/services/FileStorageService';
 import { GenerateCatalogReportUseCase } from '../../application/use-cases/GenerateCatalogReportUseCase';
 import { CatalogAsyncJobsService } from '../../application/services/CatalogAsyncJobsService';
 import { CatalogImportParser } from '../../application/services/CatalogImportParser';
@@ -215,7 +218,10 @@ export class CatalogController {
       },
     );
 
-    await this.catalogAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.catalogAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.catalogAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -271,7 +277,10 @@ export class CatalogController {
       },
     );
 
-    await this.catalogAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.catalogAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.catalogAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -283,7 +292,10 @@ export class CatalogController {
 
   @Get('jobs/:jobId')
   @Roles('OWNER', 'ADMIN')
-  async getJob(@Param('tenantId') tenantId: string, @Param('jobId') jobId: string) {
+  async getJob(
+    @Param('tenantId') tenantId: string,
+    @Param('jobId') jobId: string,
+  ) {
     return this.catalogAsyncJobsService.getJob(tenantId, jobId);
   }
 
@@ -294,11 +306,17 @@ export class CatalogController {
     @Param('jobId') jobId: string,
     @Res() res: Response,
   ) {
-    const file = await this.catalogAsyncJobsService.getDownloadPayload(tenantId, jobId);
+    const file = await this.catalogAsyncJobsService.getDownloadPayload(
+      tenantId,
+      jobId,
+    );
 
     if (file.fileContent) {
       res.setHeader('Content-Type', file.fileMimeType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file.fileName}"`,
+      );
       return res.send(file.fileContent);
     }
 

@@ -29,11 +29,9 @@ export class MetaInstagramOAuthService {
       client_id: this.getClientId(),
       redirect_uri: this.getRedirectUri(),
       response_type: 'code',
-      scope: [
-        'pages_show_list',
-        'business_management',
-        'instagram_basic',
-      ].join(','),
+      scope: ['pages_show_list', 'business_management', 'instagram_basic'].join(
+        ',',
+      ),
       state,
     });
 
@@ -113,7 +111,9 @@ export class MetaInstagramOAuthService {
         },
       );
 
-      const pages = Array.isArray(response.data?.data) ? response.data.data : [];
+      const pages = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
       const deduped = new Map<string, MetaInstagramSelectableAccount>();
 
       for (const page of pages) {
@@ -160,7 +160,11 @@ export class MetaInstagramOAuthService {
   }
 
   ensurePlatformConfigured() {
-    if (!this.getClientId() || !this.getClientSecret() || !this.getRedirectUri()) {
+    if (
+      !this.getClientId() ||
+      !this.getClientSecret() ||
+      !this.getRedirectUri()
+    ) {
       throw new ValidationErrorException(
         'Meta Instagram OAuth platform credentials are not configured',
       );
@@ -176,7 +180,9 @@ export class MetaInstagramOAuthService {
   }
 
   getRedirectUri(): string {
-    return this.configService.get<string>('META_INSTAGRAM_OAUTH_REDIRECT_URI') || '';
+    return (
+      this.configService.get<string>('META_INSTAGRAM_OAUTH_REDIRECT_URI') || ''
+    );
   }
 
   getGraphApiVersion(): string {

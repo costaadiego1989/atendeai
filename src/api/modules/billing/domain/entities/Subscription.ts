@@ -89,7 +89,7 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
    */
   public isModuleEnabled(moduleCode: string, userRole?: string): boolean {
     if (userRole === 'ADMIN') return true;
-    
+
     const modules = this.props.config?.modules || {};
     return !!modules[moduleCode?.toLowerCase()] || !!modules[moduleCode];
   }
@@ -247,7 +247,8 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
       cycleEnd.setMonth(now.getMonth() + 1);
     }
 
-    const status = (plan === 'ESSENCIAL' || plan === 'TRIAL') ? 'ACTIVE' : 'PENDING';
+    const status =
+      plan === 'ESSENCIAL' || plan === 'TRIAL' ? 'ACTIVE' : 'PENDING';
 
     return new Subscription({
       tenantId,

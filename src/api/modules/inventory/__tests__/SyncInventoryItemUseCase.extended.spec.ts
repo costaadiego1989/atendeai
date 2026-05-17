@@ -1,5 +1,8 @@
 import { SyncInventoryItemUseCase } from '../application/use-cases/SyncInventoryItemUseCase';
-import { IInventoryRepository, InventoryItemRecord } from '../domain/ports/IInventoryRepository';
+import {
+  IInventoryRepository,
+  InventoryItemRecord,
+} from '../domain/ports/IInventoryRepository';
 import { IEventBus } from '@shared/application/ports/IEventBus';
 import {
   InventoryItemSyncedIntegrationEvent,
@@ -12,7 +15,9 @@ describe('SyncInventoryItemUseCase (extended)', () => {
   let inventoryRepository: jest.Mocked<IInventoryRepository>;
   let eventBus: jest.Mocked<IEventBus>;
 
-  const makeItem = (overrides: Partial<InventoryItemRecord> = {}): InventoryItemRecord => ({
+  const makeItem = (
+    overrides: Partial<InventoryItemRecord> = {},
+  ): InventoryItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     catalogItemId: null,
@@ -147,7 +152,10 @@ describe('SyncInventoryItemUseCase (extended)', () => {
 
   it('should update existing item (upsert behavior) and publish synced event', async () => {
     const existingItem = makeItem({ currentPrice: '10.00' });
-    const updatedItem = makeItem({ name: 'Produto Atualizado', currentPrice: '10.00' });
+    const updatedItem = makeItem({
+      name: 'Produto Atualizado',
+      currentPrice: '10.00',
+    });
 
     inventoryRepository.findItemBySku.mockResolvedValue(existingItem);
     inventoryRepository.syncItem.mockResolvedValue(updatedItem);

@@ -1,11 +1,7 @@
 import { IEventBus } from '@shared/infrastructure/event-bus';
 import { ProspectMessageReceivedHandler } from '../application/handlers/ProspectMessageReceivedHandler';
-import {
-  IRegisterProspectResponseUseCase,
-} from '../application/use-cases/interfaces/IRegisterProspectResponseUseCase';
-import {
-  IRegisterProspectStopUseCase,
-} from '../application/use-cases/interfaces/IRegisterProspectStopUseCase';
+import { IRegisterProspectResponseUseCase } from '../application/use-cases/interfaces/IRegisterProspectResponseUseCase';
+import { IRegisterProspectStopUseCase } from '../application/use-cases/interfaces/IRegisterProspectStopUseCase';
 import { ProspectOptOutPolicy } from '../application/services/ProspectOptOutPolicy';
 
 describe('ProspectMessageReceivedHandler', () => {
@@ -68,15 +64,13 @@ describe('ProspectMessageReceivedHandler', () => {
 
     await subscribedHandler!({ payload });
 
-    expect(registerProspectResponseUseCase.execute).toHaveBeenCalledWith(
-      {
-        tenantId: 'tenant-1',
-        contactId: 'contact-1',
-        conversationId: 'conversation-1',
-        messageId: 'message-1',
-        messageText: 'Tenho interesse',
-      },
-    );
+    expect(registerProspectResponseUseCase.execute).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      contactId: 'contact-1',
+      conversationId: 'conversation-1',
+      messageId: 'message-1',
+      messageText: 'Tenho interesse',
+    });
     expect(registerProspectStopUseCase.execute).not.toHaveBeenCalled();
   });
 

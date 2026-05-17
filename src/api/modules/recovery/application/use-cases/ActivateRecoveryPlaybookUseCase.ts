@@ -20,6 +20,9 @@ export class ActivateRecoveryPlaybookUseCase {
     if (!found) {
       throw new EntityNotFoundException('RecoveryPlaybook', input.playbookId);
     }
-    return this.playbookRepository.activatePlaybook(input.tenantId, input.playbookId);
+    return this.playbookRepository.activatePlaybook(
+      input.tenantId,
+      input.playbookId,
+    );
   }
 }

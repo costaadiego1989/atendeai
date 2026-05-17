@@ -29,8 +29,11 @@ export class DetectAbandonedShoppingSessionsUseCase {
   async execute(input: DetectAbandonedShoppingSessionsInput = {}) {
     const now = input.now ?? new Date();
     const limit = input.limitPerInterval ?? 100;
-    const triggered: Array<{ sessionId: string; tenantId: string; interval: string }> =
-      [];
+    const triggered: Array<{
+      sessionId: string;
+      tenantId: string;
+      interval: string;
+    }> = [];
 
     for (const interval of this.intervals) {
       const staleBefore = new Date(now.getTime() - interval.delayMs);

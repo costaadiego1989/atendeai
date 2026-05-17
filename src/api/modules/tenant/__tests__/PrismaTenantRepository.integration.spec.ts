@@ -152,32 +152,36 @@ describe('PrismaTenantRepository (integration)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
   });
 
   afterAll(async () => {
     if (tenantIds.length > 0) {
       await prisma.usageRecord
         .deleteMany({ where: { tenantId: { in: tenantIds } } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId: { in: tenantIds } } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.aIConfig
         .deleteMany({ where: { tenantId: { in: tenantIds } } })
-        .catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM tenant_schema.instagram_configs WHERE tenant_id = ANY(${tenantIds}::uuid[])
-      `).catch(() => { });
+      `,
+        )
+        .catch(() => {});
       await prisma.whatsAppConfig
         .deleteMany({ where: { tenantId: { in: tenantIds } } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.user
         .deleteMany({ where: { tenantId: { in: tenantIds } } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.tenant
         .deleteMany({ where: { id: { in: tenantIds } } })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     if (app) {
@@ -223,9 +227,9 @@ describe('PrismaTenantRepository (integration)', () => {
     expect(byWhatsApp?.id.toValue()).toBe(tenant.id.toValue());
     expect(byApiKey?.id.toValue()).toBe(tenant.id.toValue());
     expect(list.total).toBeGreaterThanOrEqual(2);
-    expect(list.data.some((item) => item.id.toValue() === tenant.id.toValue())).toBe(
-      true,
-    );
+    expect(
+      list.data.some((item) => item.id.toValue() === tenant.id.toValue()),
+    ).toBe(true);
     expect(exists).toBe(true);
   });
 

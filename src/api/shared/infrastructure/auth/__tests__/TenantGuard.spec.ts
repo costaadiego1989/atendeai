@@ -1,7 +1,10 @@
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { TenantGuard } from '../guards/TenantGuard';
-import { ForbiddenException, UnauthorizedException } from '../../../domain/exceptions/DomainExceptions';
+import {
+  ForbiddenException,
+  UnauthorizedException,
+} from '../../../domain/exceptions/DomainExceptions';
 
 describe('TenantGuard — Tenant Isolation', () => {
   let guard: TenantGuard;
@@ -15,7 +18,10 @@ describe('TenantGuard — Tenant Isolation', () => {
     guard = new TenantGuard(reflector);
   });
 
-  function createMockContext(params: Record<string, string>, user?: any): ExecutionContext {
+  function createMockContext(
+    params: Record<string, string>,
+    user?: any,
+  ): ExecutionContext {
     const request = { params, user };
     return {
       switchToHttp: () => ({

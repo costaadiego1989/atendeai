@@ -34,13 +34,31 @@ describe('Messaging Promotions and Coupons Flow (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [IntegrationController, CommerceController],
       providers: [
-        { provide: CreateExternalTenantUseCase, useValue: { execute: jest.fn() } },
-        { provide: ConfigureShippingPolicyUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: CreateExternalTenantUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ConfigureShippingPolicyUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: GetShippingPolicyUseCase, useValue: { execute: jest.fn() } },
-        { provide: SearchCommerceCatalogUseCase, useValue: { execute: jest.fn() } },
-        { provide: StartShoppingSessionUseCase, useValue: { execute: jest.fn() } },
-        { provide: GetShoppingSessionUseCase, useValue: { execute: jest.fn() } },
-        { provide: AddItemToShoppingSessionUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: SearchCommerceCatalogUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: StartShoppingSessionUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GetShoppingSessionUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: AddItemToShoppingSessionUseCase,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: ApplyCouponToShoppingSessionUseCase,
           useValue: {
@@ -52,17 +70,50 @@ describe('Messaging Promotions and Coupons Flow (e2e)', () => {
             }),
           },
         },
-        { provide: UpdateShoppingSessionFulfillmentUseCase, useValue: { execute: jest.fn() } },
-        { provide: CheckoutShoppingSessionUseCase, useValue: { execute: jest.fn() } },
-        { provide: ListCommerceOrdersUseCase, useValue: { execute: jest.fn() } },
-        { provide: GetCommerceOrderDetailsUseCase, useValue: { execute: jest.fn() } },
-        { provide: UpdateCommerceOrderStatusUseCase, useValue: { execute: jest.fn() } },
-        { provide: UpdateCommerceAbandonmentStateUseCase, useValue: { execute: jest.fn() } },
-        { provide: TriggerCommerceAbandonmentTouchUseCase, useValue: { execute: jest.fn() } },
-        { provide: GetAbandonmentConfigUseCase, useValue: { execute: jest.fn() } },
-        { provide: UpdateAbandonmentConfigUseCase, useValue: { execute: jest.fn() } },
-        { provide: GenerateAbandonmentMessageUseCase, useValue: { execute: jest.fn() } },
-        { provide: CommerceOrdersReportCsvBuilder, useValue: { build: jest.fn() } },
+        {
+          provide: UpdateShoppingSessionFulfillmentUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: CheckoutShoppingSessionUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ListCommerceOrdersUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GetCommerceOrderDetailsUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdateCommerceOrderStatusUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdateCommerceAbandonmentStateUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: TriggerCommerceAbandonmentTouchUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GetAbandonmentConfigUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UpdateAbandonmentConfigUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GenerateAbandonmentMessageUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: CommerceOrdersReportCsvBuilder,
+          useValue: { build: jest.fn() },
+        },
       ],
     })
       .overrideGuard(ApiKeyGuard)

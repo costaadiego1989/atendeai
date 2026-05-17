@@ -71,7 +71,10 @@ describe('BillingCommercialConfig', () => {
         },
       ];
 
-      const result = buildSubscriptionCommercialState(basePlanDefinition, modules);
+      const result = buildSubscriptionCommercialState(
+        basePlanDefinition,
+        modules,
+      );
 
       expect(result.addonsMonthlyPrice).toBe(88);
       expect(result.totalMonthlyPrice).toBe(297 + 88);
@@ -101,7 +104,10 @@ describe('BillingCommercialConfig', () => {
         },
       ];
 
-      const result = buildSubscriptionCommercialState(basePlanDefinition, modules);
+      const result = buildSubscriptionCommercialState(
+        basePlanDefinition,
+        modules,
+      );
 
       expect(result.config.modules.prospecting).toBe(true);
       expect(result.config.modules.crm).toBe(true);
@@ -135,7 +141,10 @@ describe('BillingCommercialConfig', () => {
         },
       ];
 
-      const result = buildSubscriptionCommercialState(basePlanDefinition, modules);
+      const result = buildSubscriptionCommercialState(
+        basePlanDefinition,
+        modules,
+      );
 
       expect(result.addonsMonthlyPrice).toBe(0);
       expect(result.totalMonthlyPrice).toBe(297);

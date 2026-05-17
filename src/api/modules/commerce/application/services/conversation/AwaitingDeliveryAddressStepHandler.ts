@@ -16,9 +16,15 @@ export class AwaitingDeliveryAddressStepHandler {
     private readonly conversationFlowRules: CommerceConversationFlowRules,
   ) {}
 
-  async handle({ input, session, userMessage }: CommerceConversationHandlerContext) {
+  async handle({
+    input,
+    session,
+    userMessage,
+  }: CommerceConversationHandlerContext) {
     const shippingPolicy =
-      await this.commerceRepository.findShippingPolicyByTenantId(input.tenantId);
+      await this.commerceRepository.findShippingPolicyByTenantId(
+        input.tenantId,
+      );
 
     if (
       !shippingPolicy ||

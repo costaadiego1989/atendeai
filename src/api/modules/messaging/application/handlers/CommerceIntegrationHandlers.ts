@@ -17,11 +17,15 @@ type CommerceOrderStatusEnvelope = {
 const STATUS_MESSAGES: Record<CommerceOrderStatus, string | null> = {
   AWAITING_PAYMENT: null,
   PAID: 'Recebemos o pagamento do seu pedido. Ja vamos iniciar o processamento por aqui.',
-  PREPARING: 'Seu pedido ja esta em preparacao. Avisaremos por aqui assim que avancar para a proxima etapa.',
-  READY_FOR_PICKUP: 'Seu pedido esta pronto para retirada. Quando chegar, e so informar seu nome ou numero do pedido.',
-  OUT_FOR_DELIVERY: 'Seu pedido saiu para entrega. Fique de olho no WhatsApp para qualquer atualizacao do entregador.',
+  PREPARING:
+    'Seu pedido ja esta em preparacao. Avisaremos por aqui assim que avancar para a proxima etapa.',
+  READY_FOR_PICKUP:
+    'Seu pedido esta pronto para retirada. Quando chegar, e so informar seu nome ou numero do pedido.',
+  OUT_FOR_DELIVERY:
+    'Seu pedido saiu para entrega. Fique de olho no WhatsApp para qualquer atualizacao do entregador.',
   DELIVERED: 'Seu pedido foi entregue. Obrigado pela preferencia!',
-  CANCELLED: 'Seu pedido foi cancelado. Se quiser refazer ou ajustar algo, responda por aqui que ajudamos voce.',
+  CANCELLED:
+    'Seu pedido foi cancelado. Se quiser refazer ou ajustar algo, responda por aqui que ajudamos voce.',
 };
 
 @Injectable()
@@ -61,7 +65,10 @@ export class CommerceIntegrationHandlers implements OnModuleInit {
       return;
     }
 
-    const order = await this.commerceRepository.findOrderById(tenantId, orderId);
+    const order = await this.commerceRepository.findOrderById(
+      tenantId,
+      orderId,
+    );
     if (!order?.contactId) {
       return;
     }

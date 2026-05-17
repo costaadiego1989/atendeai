@@ -1,4 +1,8 @@
-export type SchedulingRecurrencePeriod = 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY';
+export type SchedulingRecurrencePeriod =
+  | 'DAILY'
+  | 'WEEKLY'
+  | 'BIWEEKLY'
+  | 'MONTHLY';
 export type SchedulingRecurringReservationStatus =
   | 'ACTIVE'
   | 'COMPLETED'
@@ -90,7 +94,10 @@ export interface ISchedulingRecurringReservationRepository {
     professionalId?: string | null;
     status?: SchedulingRecurringReservationStatus | null;
   }): Promise<SchedulingRecurringReservationRecord[]>;
-  claimDue(now: Date, limit: number): Promise<SchedulingRecurringReservationRecord[]>;
+  claimDue(
+    now: Date,
+    limit: number,
+  ): Promise<SchedulingRecurringReservationRecord[]>;
   releaseLease(input: {
     tenantId: string;
     recurrenceId: string;
@@ -117,10 +124,7 @@ export interface ISchedulingRecurringReservationRepository {
     recurrenceId: string;
     reason?: string;
   }): Promise<SchedulingRecurringReservationRecord>;
-  delete(input: {
-    tenantId: string;
-    recurrenceId: string;
-  }): Promise<void>;
+  delete(input: { tenantId: string; recurrenceId: string }): Promise<void>;
 }
 
 export const SCHEDULING_RECURRING_RESERVATION_REPOSITORY = Symbol(

@@ -17,7 +17,12 @@ export class Plan extends ValueObject<PlanProps> {
   }
 
   public static create(plan: string): Plan {
-    const validPlans: PlanType[] = ['ESSENCIAL', 'PROFISSIONAL', 'ESCALA', 'TRIAL'];
+    const validPlans: PlanType[] = [
+      'ESSENCIAL',
+      'PROFISSIONAL',
+      'ESCALA',
+      'TRIAL',
+    ];
     const upper = plan.toUpperCase() as PlanType;
 
     if (!validPlans.includes(upper)) {

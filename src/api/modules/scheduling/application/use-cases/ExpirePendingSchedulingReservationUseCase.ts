@@ -55,7 +55,11 @@ export class ExpirePendingSchedulingReservationUseCase {
         message:
           'Slot is not in pre-reservation; automatic cancellation due to lack of payment not applicable',
         tenantId: input.tenantId,
-        attributes: { ...baseAttrs, reason: 'not_pre_reserved', status: slot.status },
+        attributes: {
+          ...baseAttrs,
+          reason: 'not_pre_reserved',
+          status: slot.status,
+        },
       });
       return null;
     }

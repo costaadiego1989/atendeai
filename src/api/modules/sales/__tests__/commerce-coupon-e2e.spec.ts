@@ -11,11 +11,11 @@ import { TenantGuard } from '../../../shared/infrastructure/auth/guards/TenantGu
 
 describe('Commerce Coupon E2E', () => {
   let app: INestApplication;
-  let commerceRepo = {
+  const commerceRepo = {
     findSessionById: jest.fn(),
     updateSessionState: jest.fn(),
   };
-  let salesRepo = {
+  const salesRepo = {
     findCouponByCode: jest.fn(),
   };
 
@@ -77,7 +77,9 @@ describe('Commerce Coupon E2E', () => {
     // Subtotal: 200
     // Discount: 30 (15% of 200)
     // Total: 200 + 20 - 30 = 190
-    commerceRepo.updateSessionState.mockImplementation((dto) => Promise.resolve({ ...dto }));
+    commerceRepo.updateSessionState.mockImplementation((dto) =>
+      Promise.resolve({ ...dto }),
+    );
 
     const response = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/commerce/sessions/${sessionId}/coupon`)

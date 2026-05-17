@@ -3,9 +3,7 @@ import {
   CONVERSATION_REPOSITORY,
   IConversationRepository,
 } from '../../domain/repositories/IConversationRepository';
-import {
-  MessagingChannel,
-} from '../../domain/ports/IMessagingGateway';
+import { MessagingChannel } from '../../domain/ports/IMessagingGateway';
 import {
   IMessagingGatewayRegistry,
   MESSAGING_GATEWAY_REGISTRY,
@@ -125,11 +123,16 @@ export class ProcessOutboundMessageUseCase {
       });
       message.updateStatus('FAILED');
       await this.conversationRepository.save(conversation);
-      await this.publishFailedEvent(conversation, message.id.toString(), {
-        type: message.contentType,
-        text: message.content.text ?? '',
-        ...(message.content.url ? { url: message.content.url } : {}),
-      }, reason);
+      await this.publishFailedEvent(
+        conversation,
+        message.id.toString(),
+        {
+          type: message.contentType,
+          text: message.content.text ?? '',
+          ...(message.content.url ? { url: message.content.url } : {}),
+        },
+        reason,
+      );
       return;
     }
 
@@ -239,7 +242,9 @@ export class ProcessOutboundMessageUseCase {
           retries_exhausted: String(result.exhaustedRetries),
         },
       });
-      throw new Error(`Failed to send message after ${result.attempts} attempt(s): ${result.error}`);
+      throw new Error(
+        `Failed to send message after ${result.attempts} attempt(s): ${result.error}`,
+      );
     }
   }
 
@@ -268,7 +273,9 @@ export class ProcessOutboundMessageUseCase {
   }
 
   private async publishFailedEvent(
-    conversation: Awaited<ReturnType<IConversationRepository['findByMessageId']>>,
+    conversation: Awaited<
+      ReturnType<IConversationRepository['findByMessageId']>
+    >,
     messageId: string,
     content: { type: string; text?: string; url?: string },
     reason: string,

@@ -10,15 +10,12 @@ import {
 } from '../../domain/ports/ISchedulingRecurringReservationRepository';
 
 @Injectable()
-export class PrismaSchedulingRecurringReservationRepository
-  implements ISchedulingRecurringReservationRepository
-{
+export class PrismaSchedulingRecurringReservationRepository implements ISchedulingRecurringReservationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
     input: CreateSchedulingRecurringReservationInput,
   ): Promise<SchedulingRecurringReservationRecord> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO scheduling_schema.scheduling_recurring_reservations (
         tenant_id,
@@ -73,7 +70,6 @@ export class PrismaSchedulingRecurringReservationRepository
     tenantId: string,
     recurrenceId: string,
   ): Promise<SchedulingRecurringReservationRecord | null> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_recurring_reservations
@@ -89,7 +85,6 @@ export class PrismaSchedulingRecurringReservationRepository
     professionalId?: string | null;
     status?: SchedulingRecurringReservationStatus | null;
   }): Promise<SchedulingRecurringReservationRecord[]> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM scheduling_schema.scheduling_recurring_reservations
@@ -105,7 +100,6 @@ export class PrismaSchedulingRecurringReservationRepository
     now: Date,
     limit: number,
   ): Promise<SchedulingRecurringReservationRecord[]> {
-
     const leaseUntil = new Date(now.getTime() + 5 * 60 * 1000);
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations AS recurrence
@@ -133,7 +127,6 @@ export class PrismaSchedulingRecurringReservationRepository
     recurrenceId: string;
     errorMessage?: string | null;
   }): Promise<void> {
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations
       SET lease_until = NULL,
@@ -150,7 +143,6 @@ export class PrismaSchedulingRecurringReservationRepository
     occurrenceNumber: number;
     targetDate: string;
   }): Promise<SchedulingRecurringReservationRunRecord | null> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO scheduling_schema.scheduling_recurring_reservation_runs (
         recurrence_id,
@@ -176,7 +168,6 @@ export class PrismaSchedulingRecurringReservationRepository
     runId: string;
     slotId: string;
   }): Promise<void> {
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservation_runs
       SET status = 'SUCCEEDED',
@@ -190,7 +181,6 @@ export class PrismaSchedulingRecurringReservationRepository
     runId: string;
     errorMessage: string;
   }): Promise<void> {
-
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservation_runs
       SET status = 'FAILED',
@@ -200,8 +190,10 @@ export class PrismaSchedulingRecurringReservationRepository
     `);
   }
 
-  async markRunSkipped(input: { runId: string; reason: string }): Promise<void> {
-
+  async markRunSkipped(input: {
+    runId: string;
+    reason: string;
+  }): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservation_runs
       SET status = 'SKIPPED',
@@ -218,7 +210,6 @@ export class PrismaSchedulingRecurringReservationRepository
     nextDate?: string | null;
     nextRunAt?: Date | null;
   }): Promise<SchedulingRecurringReservationRecord> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations
       SET occurrences_created = ${input.occurrencesCreated},
@@ -239,7 +230,6 @@ export class PrismaSchedulingRecurringReservationRepository
     recurrenceId: string;
     reason?: string;
   }): Promise<SchedulingRecurringReservationRecord> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       UPDATE scheduling_schema.scheduling_recurring_reservations
       SET status = 'CANCELLED',
@@ -260,7 +250,6 @@ export class PrismaSchedulingRecurringReservationRepository
     tenantId: string;
     recurrenceId: string;
   }): Promise<void> {
-
     await this.prisma.$transaction(async (transaction) => {
       await transaction.$executeRaw(Prisma.sql`
         DELETE FROM scheduling_schema.scheduling_recurring_reservation_runs
@@ -334,6 +323,8 @@ export class PrismaSchedulingRecurringReservationRepository
   }
 
   private toDateString(value: Date | string): string {
-    return value instanceof Date ? value.toISOString().slice(0, 10) : String(value).slice(0, 10);
+    return value instanceof Date
+      ? value.toISOString().slice(0, 10)
+      : String(value).slice(0, 10);
   }
 }

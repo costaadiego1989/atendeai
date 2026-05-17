@@ -12,7 +12,11 @@ import {
   ITenantRepository,
 } from '@modules/tenant/domain/repositories/ITenantRepository';
 import { WhatsAppConfig } from '@modules/tenant/domain/entities/WhatsAppConfig';
-import { AI_ENGINE, IAIEngine, AIResponse } from '@modules/ai/application/ports/IAIEngine';
+import {
+  AI_ENGINE,
+  IAIEngine,
+  AIResponse,
+} from '@modules/ai/application/ports/IAIEngine';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { IntegrationEvent } from '../../../shared/application/ports/IntegrationEvent';
@@ -34,14 +38,16 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
   const ownerPassword = 'SenhaForte123!';
 
   const mockAiEngine: IAIEngine = {
-    generateResponse: jest.fn(async (request): Promise<AIResponse> => ({
-      text: `Mocked response for testing configs`,
-      tokensUsed: 10,
-      confidence: 0.95,
-      finishReason: 'stop',
-      intent: 'GENERAL',
-      sentiment: 'NEUTRAL',
-    })),
+    generateResponse: jest.fn(
+      async (request): Promise<AIResponse> => ({
+        text: `Mocked response for testing configs`,
+        tokensUsed: 10,
+        confidence: 0.95,
+        finishReason: 'stop',
+        intent: 'GENERAL',
+        sentiment: 'NEUTRAL',
+      }),
+    ),
   };
 
   const subscribedHandlers = new Map<
@@ -73,7 +79,9 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
       const handlers = subscribedHandlers.get(queue) || [];
       handlers.push({
         consumerName: options?.consumerName,
-        handle: handler as unknown as (event: Record<string, unknown>) => Promise<void>,
+        handle: handler as unknown as (
+          event: Record<string, unknown>,
+        ) => Promise<void>,
       });
       subscribedHandlers.set(queue, handlers);
     },
@@ -99,25 +107,53 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
 
     const tenantsToDelete = await (prisma.tenant as any).findMany({
       where: {
-        OR: [{ cnpj: testCnpj }, { cnpj: cleanCnpj }, { users: { some: { email: ownerEmail } } }],
+        OR: [
+          { cnpj: testCnpj },
+          { cnpj: cleanCnpj },
+          { users: { some: { email: ownerEmail } } },
+        ],
       },
     });
 
     for (const t of tenantsToDelete) {
       const tId = t.id;
-      await (prisma.message as any).deleteMany({ where: { conversation: { tenantId: tId } } }).catch(() => { });
-      await (prisma.conversation as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.contact as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.aISession as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.usageRecord as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.subscription as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.aIConfig as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.whatsAppConfig as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.tenantAgentRule as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma as any).user.deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.tenant as any).delete({ where: { id: tId } }).catch(() => { });
+      await (prisma.message as any)
+        .deleteMany({ where: { conversation: { tenantId: tId } } })
+        .catch(() => {});
+      await (prisma.conversation as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.contact as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.aISession as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.usageRecord as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.subscription as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.aIConfig as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.whatsAppConfig as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.tenantAgentRule as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma as any).user
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.tenant as any)
+        .delete({ where: { id: tId } })
+        .catch(() => {});
     }
-    await (prisma as any).user.deleteMany({ where: { email: ownerEmail } }).catch(() => { });
+    await (prisma as any).user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const createTenant = app.get<ICreateTenantUseCase>(ICreateTenantUseCase);
     const tenantResult = await createTenant.execute({
@@ -155,16 +191,36 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await (prisma.message as any).deleteMany({ where: { conversation: { tenantId } } }).catch(() => { });
-      await (prisma.conversation as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.contact as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.usageRecord as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.subscription as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.aIConfig as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.whatsAppConfig as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.tenantAgentRule as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma as any).user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.tenant as any).delete({ where: { id: tenantId } }).catch(() => { });
+      await (prisma.message as any)
+        .deleteMany({ where: { conversation: { tenantId } } })
+        .catch(() => {});
+      await (prisma.conversation as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.contact as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.usageRecord as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.subscription as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.aIConfig as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.whatsAppConfig as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.tenantAgentRule as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma as any).user
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.tenant as any)
+        .delete({ where: { id: tenantId } })
+        .catch(() => {});
     }
     if (app) {
       await app.close();
@@ -199,9 +255,13 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
 
   async function waitForMessages(phone: string, minOutbound: number = 1) {
     for (let i = 0; i < 20; i++) {
-      const contact = await (prisma.contact as any).findFirst({ where: { tenantId, phone } });
+      const contact = await (prisma.contact as any).findFirst({
+        where: { tenantId, phone },
+      });
       if (contact) {
-        const conversation = await (prisma.conversation as any).findFirst({ where: { tenantId, contactId: contact.id } });
+        const conversation = await (prisma.conversation as any).findFirst({
+          where: { tenantId, contactId: contact.id },
+        });
         if (conversation) {
           const messages = await (prisma.message as any).findMany({
             where: { conversationId: conversation.id, direction: 'OUTBOUND' },
@@ -209,7 +269,7 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
           if (messages.length >= minOutbound) return messages;
         }
       }
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
     }
     return null;
   }
@@ -239,10 +299,13 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
       expect(messages).not.toBeNull();
 
       expect(mockAiEngine.generateResponse).toHaveBeenCalledTimes(1);
-      const aiCallArgs = (mockAiEngine.generateResponse as jest.Mock).mock.calls[0][0];
+      const aiCallArgs = (mockAiEngine.generateResponse as jest.Mock).mock
+        .calls[0][0];
 
       expect(aiCallArgs.maxTokens).toBe(250);
-      expect(aiCallArgs.systemPrompt).toContain('Você é um assistente cirúrgico focado em vendas.');
+      expect(aiCallArgs.systemPrompt).toContain(
+        'Você é um assistente cirúrgico focado em vendas.',
+      );
       expect(aiCallArgs.systemPrompt).toContain('Response Tone: PROFESSIONAL');
       expect(aiCallArgs.systemPrompt).toContain('Preferred Language: pt-BR');
     });
@@ -254,7 +317,8 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
         .put(`/api/v1/tenants/${tenantId}/agent-rules/messaging`)
         .set('Cookie', authTokenArr)
         .send({
-          customPrompt: 'SEMPRE termine suas frases com: "Posso agendar sua consulta?"',
+          customPrompt:
+            'SEMPRE termine suas frases com: "Posso agendar sua consulta?"',
           fallbackToGlobal: true,
           isActive: true,
         });
@@ -269,28 +333,45 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
       const messages = await waitForMessages(phone);
       expect(messages).not.toBeNull();
 
-      const aiCallArgs = (mockAiEngine.generateResponse as jest.Mock).mock.calls[0][0];
+      const aiCallArgs = (mockAiEngine.generateResponse as jest.Mock).mock
+        .calls[0][0];
 
-      expect(aiCallArgs.systemPrompt).toContain('Você é um assistente cirúrgico focado em vendas.');
-      expect(aiCallArgs.systemPrompt).toContain('[DIRETRIZES PERSONALIZADAS DE CONVERSAS DO TENANT]:');
-      expect(aiCallArgs.systemPrompt).toContain('SEMPRE termine suas frases com: "Posso agendar sua consulta?"');
+      expect(aiCallArgs.systemPrompt).toContain(
+        'Você é um assistente cirúrgico focado em vendas.',
+      );
+      expect(aiCallArgs.systemPrompt).toContain(
+        '[DIRETRIZES PERSONALIZADAS DE CONVERSAS DO TENANT]:',
+      );
+      expect(aiCallArgs.systemPrompt).toContain(
+        'SEMPRE termine suas frases com: "Posso agendar sua consulta?"',
+      );
     });
 
     it('should override global prompt if fallbackToGlobal is false', async () => {
       await request(app.getHttpServer())
         .put(`/api/v1/tenants/${tenantId}/agent-rules/messaging`)
         .set('Cookie', authTokenArr)
-        .send({ customPrompt: 'SEMPRE termine suas frases com: "Posso agendar sua consulta?"', fallbackToGlobal: false, isActive: true });
+        .send({
+          customPrompt:
+            'SEMPRE termine suas frases com: "Posso agendar sua consulta?"',
+          fallbackToGlobal: false,
+          isActive: true,
+        });
 
       const phone = '5511900000003';
       await sendInboundWebhook(phone, 'Qual o valor?');
 
       await waitForMessages(phone);
 
-      const aiCallArgs = (mockAiEngine.generateResponse as jest.Mock).mock.calls[0][0];
+      const aiCallArgs = (mockAiEngine.generateResponse as jest.Mock).mock
+        .calls[0][0];
 
-      expect(aiCallArgs.systemPrompt).toContain('[ATENCAO: AS DIRETRIZES DO TENANT ABAIXO DEVEM TER PRIORIDADE SOBRE O TOM PADRAO.]');
-      expect(aiCallArgs.systemPrompt).toContain('SEMPRE termine suas frases com: "Posso agendar sua consulta?"');
+      expect(aiCallArgs.systemPrompt).toContain(
+        '[ATENCAO: AS DIRETRIZES DO TENANT ABAIXO DEVEM TER PRIORIDADE SOBRE O TOM PADRAO.]',
+      );
+      expect(aiCallArgs.systemPrompt).toContain(
+        'SEMPRE termine suas frases com: "Posso agendar sua consulta?"',
+      );
     });
   });
 
@@ -306,13 +387,18 @@ describe('AI Config & Agent Treasure Injection (e2e)', () => {
       });
 
       const phone = '5511900000004';
-      await sendInboundWebhook(phone, 'Quero falar de um problema cirúrgico complexo');
+      await sendInboundWebhook(
+        phone,
+        'Quero falar de um problema cirúrgico complexo',
+      );
 
       const messages = await waitForMessages(phone);
       expect(messages).not.toBeNull();
 
       const lastMessage = messages![messages!.length - 1];
-      expect(lastMessage.content.text).toBe('Transferindo para a equipe médica.');
+      expect(lastMessage.content.text).toBe(
+        'Transferindo para a equipe médica.',
+      );
       expect(lastMessage.sentBy).toBe('AI');
     });
   });

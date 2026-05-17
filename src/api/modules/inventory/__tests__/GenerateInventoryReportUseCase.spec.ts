@@ -1,11 +1,16 @@
 import { GenerateInventoryReportUseCase } from '../application/use-cases/GenerateInventoryReportUseCase';
-import { IInventoryRepository, InventoryItemRecord } from '../domain/ports/IInventoryRepository';
+import {
+  IInventoryRepository,
+  InventoryItemRecord,
+} from '../domain/ports/IInventoryRepository';
 
 describe('GenerateInventoryReportUseCase', () => {
   let useCase: GenerateInventoryReportUseCase;
   let inventoryRepository: jest.Mocked<IInventoryRepository>;
 
-  const makeItem = (overrides: Partial<InventoryItemRecord> = {}): InventoryItemRecord => ({
+  const makeItem = (
+    overrides: Partial<InventoryItemRecord> = {},
+  ): InventoryItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     catalogItemId: null,
@@ -39,7 +44,12 @@ describe('GenerateInventoryReportUseCase', () => {
   it('should generate report with filters applied', async () => {
     const items = [
       makeItem({ availabilityStatus: 'AVAILABLE' }),
-      makeItem({ id: 'item-2', sku: 'SKU-002', availabilityStatus: 'UNAVAILABLE', availableQuantity: 0 }),
+      makeItem({
+        id: 'item-2',
+        sku: 'SKU-002',
+        availabilityStatus: 'UNAVAILABLE',
+        availableQuantity: 0,
+      }),
     ];
     inventoryRepository.listItems.mockResolvedValue(items);
 
@@ -59,9 +69,25 @@ describe('GenerateInventoryReportUseCase', () => {
 
   it('should calculate summary correctly', async () => {
     const items = [
-      makeItem({ availabilityStatus: 'AVAILABLE', availableQuantity: 10, currentPrice: '20.00' }),
-      makeItem({ id: 'item-2', sku: 'SKU-002', availabilityStatus: 'LOW_STOCK', availableQuantity: 2, currentPrice: '15.00' }),
-      makeItem({ id: 'item-3', sku: 'SKU-003', availabilityStatus: 'UNAVAILABLE', availableQuantity: 0, currentPrice: '50.00' }),
+      makeItem({
+        availabilityStatus: 'AVAILABLE',
+        availableQuantity: 10,
+        currentPrice: '20.00',
+      }),
+      makeItem({
+        id: 'item-2',
+        sku: 'SKU-002',
+        availabilityStatus: 'LOW_STOCK',
+        availableQuantity: 2,
+        currentPrice: '15.00',
+      }),
+      makeItem({
+        id: 'item-3',
+        sku: 'SKU-003',
+        availabilityStatus: 'UNAVAILABLE',
+        availableQuantity: 0,
+        currentPrice: '50.00',
+      }),
     ];
     inventoryRepository.listItems.mockResolvedValue(items);
 
@@ -72,7 +98,9 @@ describe('GenerateInventoryReportUseCase', () => {
     expect(result.summary.availableItems).toBe(1);
     expect(result.summary.lowStockItems).toBe(1);
     expect(result.summary.unavailableItems).toBe(1);
-    expect(result.summary.estimatedInventoryValue).toBe(10 * 20 + 2 * 15 + 0 * 50);
+    expect(result.summary.estimatedInventoryValue).toBe(
+      10 * 20 + 2 * 15 + 0 * 50,
+    );
   });
 
   it('should handle empty inventory', async () => {
@@ -93,7 +121,9 @@ describe('GenerateInventoryReportUseCase', () => {
     const result = await useCase.execute({ tenantId: 'tenant-1' });
     const after = new Date();
 
-    expect(result.generatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    expect(result.generatedAt.getTime()).toBeGreaterThanOrEqual(
+      before.getTime(),
+    );
     expect(result.generatedAt.getTime()).toBeLessThanOrEqual(after.getTime());
   });
 
@@ -103,7 +133,13 @@ describe('GenerateInventoryReportUseCase', () => {
     await useCase.execute({ tenantId: 'tenant-A' });
     await useCase.execute({ tenantId: 'tenant-B' });
 
-    expect(inventoryRepository.listItems).toHaveBeenNthCalledWith(1, expect.objectContaining({ tenantId: 'tenant-A' }));
-    expect(inventoryRepository.listItems).toHaveBeenNthCalledWith(2, expect.objectContaining({ tenantId: 'tenant-B' }));
+    expect(inventoryRepository.listItems).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ tenantId: 'tenant-A' }),
+    );
+    expect(inventoryRepository.listItems).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ tenantId: 'tenant-B' }),
+    );
   });
 });

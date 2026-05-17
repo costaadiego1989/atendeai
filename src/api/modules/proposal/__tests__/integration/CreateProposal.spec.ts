@@ -2,7 +2,10 @@ import { CreateProposalUseCase } from '../../application/use-cases/CreateProposa
 import { CreateProposalService } from '../../application/services/implementations/CreateProposalService';
 import { ProposalTitleTooShortError } from '../../domain/errors/ProposalTitleTooShortError';
 import { ProposalItemNameRequiredError } from '../../domain/errors/ProposalItemNameRequiredError';
-import { createProposalRepositoryMock, buildCreateProposalData } from '../proposal-test-utils';
+import {
+  createProposalRepositoryMock,
+  buildCreateProposalData,
+} from '../proposal-test-utils';
 
 describe('CreateProposalUseCase', () => {
   let createProposalUseCase: CreateProposalUseCase;

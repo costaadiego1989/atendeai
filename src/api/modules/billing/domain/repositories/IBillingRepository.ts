@@ -86,7 +86,9 @@ export interface IBillingRepository {
   saveAuditLog(log: BillingAuditLogRecord): Promise<void>;
   listNiches(): Promise<BusinessNicheRecord[]>;
   listModules(): Promise<BillingModuleRecord[]>;
-  listSubscriptionModules(subscriptionId: string): Promise<SubscriptionModuleRecord[]>;
+  listSubscriptionModules(
+    subscriptionId: string,
+  ): Promise<SubscriptionModuleRecord[]>;
   findActiveSubscriptionModule(
     tenantId: string,
     moduleCode: string,
@@ -105,7 +107,9 @@ export interface IBillingRepository {
   replaceSubscriptionModules(
     subscriptionId: string,
     tenantId: string,
-    modules: Array<Omit<SubscriptionModuleRecord, 'subscriptionId' | 'tenantId'>>,
+    modules: Array<
+      Omit<SubscriptionModuleRecord, 'subscriptionId' | 'tenantId'>
+    >,
   ): Promise<void>;
 }
 

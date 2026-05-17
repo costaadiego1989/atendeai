@@ -22,7 +22,9 @@ export class ContactImportParser {
       return [];
     }
 
-    const firstColumns = this.splitLine(lines[0]).map((part) => this.normalizeHeader(part));
+    const firstColumns = this.splitLine(lines[0]).map((part) =>
+      this.normalizeHeader(part),
+    );
     const hasHeader =
       firstColumns.includes('nome') ||
       firstColumns.includes('name') ||
@@ -34,7 +36,8 @@ export class ContactImportParser {
 
     return rows.map((line, index) => {
       const columns = this.splitLine(line).map((part) => part.trim());
-      const phoneFromSingleColumn = columns.length === 1 ? this.normalizePhone(columns[0]) : '';
+      const phoneFromSingleColumn =
+        columns.length === 1 ? this.normalizePhone(columns[0]) : '';
       const nameFromSingleColumn = phoneFromSingleColumn
         ? `Contato ${phoneFromSingleColumn.slice(-4)}`
         : '';
@@ -48,9 +51,15 @@ export class ContactImportParser {
 
       return {
         lineNumber: hasHeader ? index + 2 : index + 1,
-        name: columns[0] && !phoneFromSingleColumn ? columns[0] : nameFromSingleColumn,
-        phone: this.normalizePhone(columns.length > 1 ? columns[1] : columns[0]),
-        document: columns.length > 2 ? this.normalizeEmpty(columns[2]) : undefined,
+        name:
+          columns[0] && !phoneFromSingleColumn
+            ? columns[0]
+            : nameFromSingleColumn,
+        phone: this.normalizePhone(
+          columns.length > 1 ? columns[1] : columns[0],
+        ),
+        document:
+          columns.length > 2 ? this.normalizeEmpty(columns[2]) : undefined,
         email: columns.length > 3 ? this.normalizeEmpty(columns[3]) : undefined,
         tags: [...new Set([...defaultTags, ...tags])],
         notes: columns.length > 5 ? this.normalizeEmpty(columns[5]) : undefined,

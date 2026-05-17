@@ -11,7 +11,10 @@ import {
   ICommerceRepository,
 } from '../../domain/ports/ICommerceRepository';
 
-import { SALES_REPOSITORY, ISalesCouponRepository } from '@modules/sales/domain/repositories/ISalesRepository';
+import {
+  SALES_REPOSITORY,
+  ISalesCouponRepository,
+} from '@modules/sales/domain/repositories/ISalesRepository';
 
 export interface UpdateShoppingSessionFulfillmentInput {
   tenantId: string;
@@ -70,19 +73,25 @@ export class UpdateShoppingSessionFulfillmentUseCase {
       });
     }
 
-    const shippingPolicy = await this.commerceRepository.findShippingPolicyByTenantId(
-      input.tenantId,
-    );
+    const shippingPolicy =
+      await this.commerceRepository.findShippingPolicyByTenantId(
+        input.tenantId,
+      );
 
     if (!shippingPolicy || !shippingPolicy.active) {
-      throw new ConflictException('Configure an active shipping policy before delivery');
+      throw new ConflictException(
+        'Configure an active shipping policy before delivery',
+      );
     }
 
     if (!input.deliveryAddress?.trim()) {
       throw new BadRequestException('Delivery address is required');
     }
 
-    const freightAmount = this.calculateFreight(shippingPolicy, input.distanceKm ?? null);
+    const freightAmount = this.calculateFreight(
+      shippingPolicy,
+      input.distanceKm ?? null,
+    );
 
     const discountAmount = await this.getDiscountAmount(
       input.tenantId,
@@ -114,7 +123,10 @@ export class UpdateShoppingSessionFulfillmentUseCase {
   ): Promise<number> {
     if (!couponCode) return 0;
 
-    const coupon = await this.salesRepository.findCouponByCode(tenantId, couponCode);
+    const coupon = await this.salesRepository.findCouponByCode(
+      tenantId,
+      couponCode,
+    );
     if (!coupon || !coupon.active) return 0;
 
     if (coupon.discountType === 'FIXED_AMOUNT') {
@@ -135,7 +147,9 @@ export class UpdateShoppingSessionFulfillmentUseCase {
     }
 
     if (distanceKm == null || distanceKm < 0) {
-      throw new BadRequestException('Distance in km is required for per-km shipping');
+      throw new BadRequestException(
+        'Distance in km is required for per-km shipping',
+      );
     }
 
     const calculated = Number(policy.pricePerKm ?? 0) * Number(distanceKm);

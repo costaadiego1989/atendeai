@@ -1,6 +1,12 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
-import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
-import { ISocialPlatformAdapter, SOCIAL_PLATFORM_ADAPTER } from '../../domain/ports/ISocialPlatformAdapter';
+import {
+  ISocialRepository,
+  SOCIAL_REPOSITORY,
+} from '../../domain/ports/ISocialRepository';
+import {
+  ISocialPlatformAdapter,
+  SOCIAL_PLATFORM_ADAPTER,
+} from '../../domain/ports/ISocialPlatformAdapter';
 import { SocialComment } from '../../domain/entities/SocialComment';
 import { AutoReplyEngine } from '../services/AutoReplyEngine';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
@@ -24,17 +30,21 @@ export interface ProcessIncomingCommentInput {
 export class ProcessIncomingCommentUseCase {
   constructor(
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
-    @Inject(SOCIAL_PLATFORM_ADAPTER) private readonly _adapter: ISocialPlatformAdapter,
+    @Inject(SOCIAL_PLATFORM_ADAPTER)
+    private readonly _adapter: ISocialPlatformAdapter,
     private readonly autoReplyEngine: AutoReplyEngine,
     @Optional() @Inject(EVENT_BUS) private readonly eventBus?: IEventBus,
-  ) { }
+  ) {}
 
   async execute(input: ProcessIncomingCommentInput): Promise<{
     commentId: string;
     autoReplied: boolean;
     ruleId?: string;
   }> {
-    const existing = await this.repo.findCommentByExternalId(input.tenantId, input.externalCommentId);
+    const existing = await this.repo.findCommentByExternalId(
+      input.tenantId,
+      input.externalCommentId,
+    );
     if (existing) {
       return { commentId: existing.id.toValue(), autoReplied: false };
     }

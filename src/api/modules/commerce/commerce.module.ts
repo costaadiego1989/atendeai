@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '@modules/auth/auth.module';
 import { CatalogModule } from '@modules/catalog/catalog.module';
 import { InventoryModule } from '@modules/inventory/inventory.module';
- import { PaymentModule } from '@modules/payment/payment.module';
+import { PaymentModule } from '@modules/payment/payment.module';
 import { SalesModule } from '@modules/sales/sales.module';
 import { ApplyCouponToShoppingSessionUseCase } from './application/use-cases/ApplyCouponToShoppingSessionUseCase';
 import { CommerceController } from './presentation/controllers/CommerceController';
@@ -43,7 +43,13 @@ import { AwaitingOrderNoteStepHandler } from './application/services/conversatio
 import { ReadyForCheckoutStepHandler } from './application/services/conversation/ReadyForCheckoutStepHandler';
 
 @Module({
-  imports: [AuthModule, CatalogModule, InventoryModule, PaymentModule, SalesModule],
+  imports: [
+    AuthModule,
+    CatalogModule,
+    InventoryModule,
+    PaymentModule,
+    SalesModule,
+  ],
   controllers: [
     CommerceController,
     CommerceShippingController,

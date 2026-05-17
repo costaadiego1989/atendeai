@@ -48,8 +48,10 @@ export interface GetSubscriptionCatalogOutput {
   }>;
 }
 
-export interface IGetSubscriptionCatalogUseCase
-  extends IUseCase<GetSubscriptionCatalogInput, GetSubscriptionCatalogOutput> {}
+export interface IGetSubscriptionCatalogUseCase extends IUseCase<
+  GetSubscriptionCatalogInput,
+  GetSubscriptionCatalogOutput
+> {}
 
 export const IGetSubscriptionCatalogUseCase = Symbol(
   'IGetSubscriptionCatalogUseCase',

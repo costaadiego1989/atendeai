@@ -1,7 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { FILE_STORAGE_SERVICE, FileStorageService } from '@shared/domain/services/FileStorageService';
+import {
+  FILE_STORAGE_SERVICE,
+  FileStorageService,
+} from '@shared/domain/services/FileStorageService';
 import { ContactAsyncJobsService } from '../../application/services/ContactAsyncJobsService';
 import { ContactReportCsvBuilder } from '../../application/services/ContactReportCsvBuilder';
 import { IGenerateContactsReportUseCase } from '../../application/use-cases/interfaces/IGenerateContactsReportUseCase';
@@ -25,7 +28,9 @@ type ContactAsyncJobPayload =
       branchId?: string;
       stages?: string[];
       tags?: string[];
-      timelineTypes?: Array<'MESSAGING' | 'RECOVERY' | 'PAYMENT' | 'SCHEDULING'>;
+      timelineTypes?: Array<
+        'MESSAGING' | 'RECOVERY' | 'PAYMENT' | 'SCHEDULING'
+      >;
       channels?: Array<'WHATSAPP' | 'INSTAGRAM' | 'CRM'>;
       dateFrom?: string;
       dateTo?: string;
@@ -61,7 +66,9 @@ export class ContactAsyncJobProcessor extends WorkerHost {
     }
   }
 
-  private async handleImportJob(job: Job<ContactAsyncJobPayload>): Promise<void> {
+  private async handleImportJob(
+    job: Job<ContactAsyncJobPayload>,
+  ): Promise<void> {
     const data = job.data;
     if (data.type !== 'IMPORT_CONTACTS') {
       return;
@@ -91,17 +98,24 @@ export class ContactAsyncJobProcessor extends WorkerHost {
           updated: result.updated,
           skipped: result.skipped,
           failed: result.failed,
-          previewItems: result.items.filter((item) => item.status !== 'CREATED').slice(0, 25),
+          previewItems: result.items
+            .filter((item) => item.status !== 'CREATED')
+            .slice(0, 25),
         },
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Falha ao processar importação.';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Falha ao processar importação.';
       await this.contactAsyncJobsService.failJob(data.asyncJobId, message);
       throw error;
     }
   }
 
-  private async handleExportJob(job: Job<ContactAsyncJobPayload>): Promise<void> {
+  private async handleExportJob(
+    job: Job<ContactAsyncJobPayload>,
+  ): Promise<void> {
     const data = job.data;
     if (data.type !== 'EXPORT_CONTACTS_CSV') {
       return;
@@ -160,7 +174,8 @@ export class ContactAsyncJobProcessor extends WorkerHost {
         fileContent,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Falha ao gerar exportação.';
+      const message =
+        error instanceof Error ? error.message : 'Falha ao gerar exportação.';
       await this.contactAsyncJobsService.failJob(data.asyncJobId, message);
       throw error;
     }

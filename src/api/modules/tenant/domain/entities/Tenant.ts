@@ -92,7 +92,9 @@ export class Tenant extends AggregateRoot<TenantProps> {
       return undefined;
     }
 
-    return this.props.users.find((u) => u.id.toValue() === this.props.ownerUserId);
+    return this.props.users.find(
+      (u) => u.id.toValue() === this.props.ownerUserId,
+    );
   }
 
   get whatsAppConfig(): WhatsAppConfig | null {
@@ -165,11 +167,18 @@ export class Tenant extends AggregateRoot<TenantProps> {
       | 'promotions'
       | 'apiKey'
       | 'planStatus'
-    > & { promotions?: Promotion[]; apiKey?: string; ownerPassword?: string; isTrial?: boolean; planStatus?: string },
+    > & {
+      promotions?: Promotion[];
+      apiKey?: string;
+      ownerPassword?: string;
+      isTrial?: boolean;
+      planStatus?: string;
+    },
     id?: UniqueEntityID,
   ): Tenant {
     const inferredOwnerUserId =
-      props.users.find((user) => user.role.value === 'OWNER')?.id.toValue() ?? null;
+      props.users.find((user) => user.role.value === 'OWNER')?.id.toValue() ??
+      null;
 
     const tenant = new Tenant(
       {

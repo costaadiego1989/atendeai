@@ -1,7 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { FILE_STORAGE_SERVICE, FileStorageService } from '@shared/domain/services/FileStorageService';
+import {
+  FILE_STORAGE_SERVICE,
+  FileStorageService,
+} from '@shared/domain/services/FileStorageService';
 import { CatalogAsyncJobsService } from '../../application/services/CatalogAsyncJobsService';
 import { CatalogReportCsvBuilder } from '../../application/services/CatalogReportCsvBuilder';
 import { GenerateCatalogReportUseCase } from '../../application/use-cases/GenerateCatalogReportUseCase';
@@ -49,7 +52,9 @@ export class CatalogAsyncJobProcessor extends WorkerHost {
     }
   }
 
-  private async handleImportJob(job: Job<CatalogAsyncJobPayload>): Promise<void> {
+  private async handleImportJob(
+    job: Job<CatalogAsyncJobPayload>,
+  ): Promise<void> {
     await this.catalogAsyncJobsService.markProcessing(job.data.asyncJobId, {
       progress: 20,
     });
@@ -81,13 +86,17 @@ export class CatalogAsyncJobProcessor extends WorkerHost {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao importar itens do catalogo.';
+        error instanceof Error
+          ? error.message
+          : 'Falha ao importar itens do catalogo.';
       await this.catalogAsyncJobsService.failJob(job.data.asyncJobId, message);
       throw error;
     }
   }
 
-  private async handleExportJob(job: Job<CatalogAsyncJobPayload>): Promise<void> {
+  private async handleExportJob(
+    job: Job<CatalogAsyncJobPayload>,
+  ): Promise<void> {
     await this.catalogAsyncJobsService.markProcessing(job.data.asyncJobId, {
       progress: 30,
     });
@@ -143,7 +152,9 @@ export class CatalogAsyncJobProcessor extends WorkerHost {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao exportar relatorio do catalogo.';
+        error instanceof Error
+          ? error.message
+          : 'Falha ao exportar relatorio do catalogo.';
       await this.catalogAsyncJobsService.failJob(job.data.asyncJobId, message);
       throw error;
     }

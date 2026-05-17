@@ -1,4 +1,7 @@
-import { CreateProposalService, CreateProposalData } from '../services/implementations/CreateProposalService';
+import {
+  CreateProposalService,
+  CreateProposalData,
+} from '../services/implementations/CreateProposalService';
 
 export class CreateProposalUseCase {
   constructor(private readonly createProposalService: CreateProposalService) {}

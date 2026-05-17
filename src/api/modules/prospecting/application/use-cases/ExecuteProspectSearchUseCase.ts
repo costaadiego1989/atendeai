@@ -33,9 +33,7 @@ import {
 import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
 
 @Injectable()
-export class ExecuteProspectSearchUseCase
-  implements IExecuteProspectSearchUseCase
-{
+export class ExecuteProspectSearchUseCase implements IExecuteProspectSearchUseCase {
   constructor(
     @Inject(PROSPECT_SEARCH_REPOSITORY)
     private readonly searchRepository: IProspectSearchRepository,
@@ -146,7 +144,10 @@ export class ExecuteProspectSearchUseCase
       await this.recordUsageUseCase.execute({
         tenantId: search.tenantId.toString(),
         type: UsageType.AI_TOKEN,
-        amount: this.calculateTokenConsumption(search.maxResults, results.length),
+        amount: this.calculateTokenConsumption(
+          search.maxResults,
+          results.length,
+        ),
       });
 
       search.markAsCompleted(results.length);

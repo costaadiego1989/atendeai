@@ -10,9 +10,7 @@ import {
 } from '../../domain/repositories/IProspectCampaignRepository';
 
 @Injectable()
-export class ListProspectCampaignsUseCase
-  implements IListProspectCampaignsUseCase
-{
+export class ListProspectCampaignsUseCase implements IListProspectCampaignsUseCase {
   constructor(
     @Inject(PROSPECT_CAMPAIGN_REPOSITORY)
     private readonly campaignRepository: IProspectCampaignRepository,

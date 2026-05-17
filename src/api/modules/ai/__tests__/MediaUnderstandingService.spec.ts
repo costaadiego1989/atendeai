@@ -108,11 +108,15 @@ describe('MediaUnderstandingService', () => {
       text: 'pedido em pdf',
     });
     expect(output).toContain('Cliente enviou documento pelo WhatsApp.');
-    expect(output).toContain('Conteudo extraido: Pedido numero 123 com endereco de entrega');
+    expect(output).toContain(
+      'Conteudo extraido: Pedido numero 123 com endereco de entrega',
+    );
   });
 
   it('should fall back to the media URL when the provider is unavailable', async () => {
-    imageOcrProvider.extractTextFromImage.mockRejectedValue(new Error('ocr down'));
+    imageOcrProvider.extractTextFromImage.mockRejectedValue(
+      new Error('ocr down'),
+    );
 
     const output = await sut.buildAiMessage({
       tenantId: 'tenant-1',
@@ -123,6 +127,8 @@ describe('MediaUnderstandingService', () => {
 
     expect(output).toContain('Cliente enviou imagem pelo WhatsApp.');
     expect(output).toContain('Arquivo: https://media.test/image.jpg');
-    expect(output).toContain('Nao foi possível extrair o conteudo da midia automaticamente.');
+    expect(output).toContain(
+      'Nao foi possível extrair o conteudo da midia automaticamente.',
+    );
   });
 });

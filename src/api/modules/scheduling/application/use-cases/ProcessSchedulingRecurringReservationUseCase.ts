@@ -12,7 +12,9 @@ import { SchedulingRecurrenceDateService } from '../services/SchedulingRecurrenc
 
 @Injectable()
 export class ProcessSchedulingRecurringReservationUseCase {
-  private readonly logger = new Logger(ProcessSchedulingRecurringReservationUseCase.name);
+  private readonly logger = new Logger(
+    ProcessSchedulingRecurringReservationUseCase.name,
+  );
 
   constructor(
     @Inject(SCHEDULING_RECURRING_RESERVATION_REPOSITORY)
@@ -23,7 +25,10 @@ export class ProcessSchedulingRecurringReservationUseCase {
     private readonly recurrenceDateService: SchedulingRecurrenceDateService,
   ) {}
 
-  async execute(input: { tenantId: string; recurrenceId: string }): Promise<void> {
+  async execute(input: {
+    tenantId: string;
+    recurrenceId: string;
+  }): Promise<void> {
     const recurrence = await this.recurringReservationRepository.findById(
       input.tenantId,
       input.recurrenceId,
@@ -104,7 +109,9 @@ export class ProcessSchedulingRecurringReservationUseCase {
         recurrenceId: recurrence.id,
         occurrencesCreated: occurrenceNumber,
         nextDate: hasNext ? nextDate : null,
-        nextRunAt: hasNext ? this.recurrenceDateService.getRunAt(nextDate) : null,
+        nextRunAt: hasNext
+          ? this.recurrenceDateService.getRunAt(nextDate)
+          : null,
       });
       return;
     }
@@ -144,7 +151,9 @@ export class ProcessSchedulingRecurringReservationUseCase {
         recurrenceId: recurrence.id,
         occurrencesCreated: occurrenceNumber,
         nextDate: hasNext ? nextDate : null,
-        nextRunAt: hasNext ? this.recurrenceDateService.getRunAt(nextDate) : null,
+        nextRunAt: hasNext
+          ? this.recurrenceDateService.getRunAt(nextDate)
+          : null,
       });
     } catch (error) {
       const message =

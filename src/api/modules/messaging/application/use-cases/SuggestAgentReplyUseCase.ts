@@ -8,7 +8,10 @@ import {
   IConversationRepository,
   CONVERSATION_REPOSITORY,
 } from '../../domain/repositories/IConversationRepository';
-import { ITenantRepository, TENANT_REPOSITORY } from '../../../tenant/domain/repositories/ITenantRepository';
+import {
+  ITenantRepository,
+  TENANT_REPOSITORY,
+} from '../../../tenant/domain/repositories/ITenantRepository';
 import { SuggestAgentReplyService } from '../services/SuggestAgentReplyService';
 
 @Injectable()
@@ -19,10 +22,14 @@ export class SuggestAgentReplyUseCase implements ISuggestAgentReplyUseCase {
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
     private readonly suggestAgentReplyService: SuggestAgentReplyService,
-  ) { }
+  ) {}
 
-  async execute(input: SuggestAgentReplyInput): Promise<SuggestAgentReplyOutput> {
-    const conversation = await this.conversationRepository.findById(input.conversationId);
+  async execute(
+    input: SuggestAgentReplyInput,
+  ): Promise<SuggestAgentReplyOutput> {
+    const conversation = await this.conversationRepository.findById(
+      input.conversationId,
+    );
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
     }
@@ -43,4 +50,3 @@ export class SuggestAgentReplyUseCase implements ISuggestAgentReplyUseCase {
     };
   }
 }
-

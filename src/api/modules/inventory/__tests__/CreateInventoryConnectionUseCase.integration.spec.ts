@@ -2,12 +2,19 @@ import { CreateInventoryConnectionUseCase } from '../application/use-cases/Creat
 import { InMemoryInventoryRepository } from './helpers/InMemoryInventoryRepository';
 import { InMemoryEventBus } from './helpers/InMemoryEventBus';
 import { InventoryDuplicateConnectionError } from '../domain/errors/InventoryDuplicateConnectionError';
-import { IInventoryProviderFactory, IInventoryProvider } from '../application/ports/IInventoryProvider';
+import {
+  IInventoryProviderFactory,
+  IInventoryProvider,
+} from '../application/ports/IInventoryProvider';
 
-function makeProviderFactory(testConnectionFn?: () => Promise<boolean>): IInventoryProviderFactory {
+function makeProviderFactory(
+  testConnectionFn?: () => Promise<boolean>,
+): IInventoryProviderFactory {
   const provider: IInventoryProvider = {
     testConnection: testConnectionFn ?? jest.fn().mockResolvedValue(true),
-    async *fetchStock() { /* no-op */ },
+    async *fetchStock() {
+      /* no-op */
+    },
   };
   return { getProvider: () => provider };
 }
@@ -22,7 +29,11 @@ describe('CreateInventoryConnectionUseCase (integration)', () => {
     repository = new InMemoryInventoryRepository();
     eventBus = new InMemoryEventBus();
     providerFactory = makeProviderFactory();
-    useCase = new CreateInventoryConnectionUseCase(repository, eventBus, providerFactory);
+    useCase = new CreateInventoryConnectionUseCase(
+      repository,
+      eventBus,
+      providerFactory,
+    );
   });
 
   afterEach(() => {
@@ -59,11 +70,17 @@ describe('CreateInventoryConnectionUseCase (integration)', () => {
 
     await useCase.execute(cmd);
 
-    await expect(useCase.execute(cmd)).rejects.toThrow(InventoryDuplicateConnectionError);
+    await expect(useCase.execute(cmd)).rejects.toThrow(
+      InventoryDuplicateConnectionError,
+    );
   });
 
   it('INV-T-071b2: mesmo provider em tenants diferentes não é considerado duplicata', async () => {
-    const cmd = { sourceType: 'BLING', providerName: 'Bling', config: { accessToken: 'tok' } };
+    const cmd = {
+      sourceType: 'BLING',
+      providerName: 'Bling',
+      config: { accessToken: 'tok' },
+    };
 
     const connA = await useCase.execute({ ...cmd, tenantId: 'tenant-A' });
     const connB = await useCase.execute({ ...cmd, tenantId: 'tenant-B' });
@@ -96,7 +113,11 @@ describe('CreateInventoryConnectionUseCase (integration)', () => {
   it('INV-T-071d: sourceType MANUAL_SNAPSHOT cria conexão sem chamar testConnection', async () => {
     const testConnectionSpy = jest.fn().mockResolvedValue(true);
     providerFactory = makeProviderFactory(testConnectionSpy);
-    useCase = new CreateInventoryConnectionUseCase(repository, eventBus, providerFactory);
+    useCase = new CreateInventoryConnectionUseCase(
+      repository,
+      eventBus,
+      providerFactory,
+    );
 
     await useCase.execute({
       tenantId: 'tenant-001',

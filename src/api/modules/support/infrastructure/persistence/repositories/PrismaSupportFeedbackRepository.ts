@@ -8,12 +8,13 @@ import {
   CreateReplyInput,
   SupportFeedbackReply,
 } from '../../../domain/repositories/ISupportFeedbackRepository';
-import { SupportFeedback, SupportFeedbackStatus } from '../../../domain/types/SupportFeedback';
+import {
+  SupportFeedback,
+  SupportFeedbackStatus,
+} from '../../../domain/types/SupportFeedback';
 
 @Injectable()
-export class PrismaSupportFeedbackRepository
-  implements ISupportFeedbackRepository
-{
+export class PrismaSupportFeedbackRepository implements ISupportFeedbackRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(feedback: SupportFeedback): Promise<void> {
@@ -54,7 +55,10 @@ export class PrismaSupportFeedbackRepository
       `);
   }
 
-  async findAllByTenant(tenantId: string, branchId?: string): Promise<SupportFeedback[]> {
+  async findAllByTenant(
+    tenantId: string,
+    branchId?: string,
+  ): Promise<SupportFeedback[]> {
     const rows = branchId
       ? await this.prisma.$queryRaw<any[]>(Prisma.sql`
             SELECT *
@@ -73,7 +77,9 @@ export class PrismaSupportFeedbackRepository
     return rows.map(this.mapRow);
   }
 
-  async findAll(filters: ListAllFeedbacksFilters): Promise<ListAllFeedbacksResult> {
+  async findAll(
+    filters: ListAllFeedbacksFilters,
+  ): Promise<ListAllFeedbacksResult> {
     const page = filters.page || 1;
     const limit = filters.limit || 20;
     const offset = (page - 1) * limit;
@@ -89,9 +95,10 @@ export class PrismaSupportFeedbackRepository
       conditions.push(Prisma.sql`f.tenant_id = ${filters.tenantId}::uuid`);
     }
 
-    const whereClause = conditions.length > 0
-      ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
-      : Prisma.empty;
+    const whereClause =
+      conditions.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+        : Prisma.empty;
 
     const [rows, countResult] = await Promise.all([
       this.prisma.$queryRaw<any[]>(Prisma.sql`
@@ -135,7 +142,10 @@ export class PrismaSupportFeedbackRepository
     } as SupportFeedback;
   }
 
-  async updateStatus(feedbackId: string, status: SupportFeedbackStatus): Promise<void> {
+  async updateStatus(
+    feedbackId: string,
+    status: SupportFeedbackStatus,
+  ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE support_schema.feedbacks
       SET status = ${status}, updated_at = NOW()

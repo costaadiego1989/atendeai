@@ -35,7 +35,10 @@ describe('UpdateBusinessDataUseCase', () => {
       record: jest.fn(),
     } as unknown as jest.Mocked<TenantAuditService>;
 
-    useCase = new UpdateBusinessDataUseCase(tenantRepository, tenantAuditService);
+    useCase = new UpdateBusinessDataUseCase(
+      tenantRepository,
+      tenantAuditService,
+    );
   });
 
   function makeTenant() {

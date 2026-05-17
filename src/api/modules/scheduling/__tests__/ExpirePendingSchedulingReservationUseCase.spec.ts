@@ -28,9 +28,9 @@ describe('ExpirePendingSchedulingReservationUseCase', () => {
     const schedulingStore = {
       getAvailabilitySlot: jest.fn().mockResolvedValue(slot),
       updateSlot: jest.fn().mockResolvedValue({ ...slot, status: 'AVAILABLE' }),
-      listProfessionals: jest.fn().mockResolvedValue([
-        { id: professionalId, branchId: 'branch-1' },
-      ]),
+      listProfessionals: jest
+        .fn()
+        .mockResolvedValue([{ id: professionalId, branchId: 'branch-1' }]),
     };
 
     const paymentService = {

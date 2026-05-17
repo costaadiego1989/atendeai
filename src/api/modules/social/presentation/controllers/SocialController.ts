@@ -1,6 +1,15 @@
 import {
-  Controller, Get, Post, Put, Patch, Delete,
-  Body, Param, Query, UseGuards, Req,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
@@ -9,9 +18,15 @@ import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
 import { ListSocialCommentsUseCase } from '../../application/use-cases/ListSocialCommentsUseCase';
 import { ReplyToCommentUseCase } from '../../application/use-cases/ReplyToCommentUseCase';
 import { ConfigureAutoReplyRulesUseCase } from '../../application/use-cases/ConfigureAutoReplyRulesUseCase';
-import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
+import {
+  ISocialRepository,
+  SOCIAL_REPOSITORY,
+} from '../../domain/ports/ISocialRepository';
 import { SocialAccount } from '../../domain/entities/SocialAccount';
-import { ISocialPlatformAdapter, SOCIAL_PLATFORM_ADAPTER } from '../../domain/ports/ISocialPlatformAdapter';
+import {
+  ISocialPlatformAdapter,
+  SOCIAL_PLATFORM_ADAPTER,
+} from '../../domain/ports/ISocialPlatformAdapter';
 import {
   ListCommentsQueryDTO,
   ReplyToCommentDTO,
@@ -30,8 +45,9 @@ export class SocialController {
     private readonly replyToCommentUseCase: ReplyToCommentUseCase,
     private readonly configureRulesUseCase: ConfigureAutoReplyRulesUseCase,
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
-    @Inject(SOCIAL_PLATFORM_ADAPTER) private readonly adapter: ISocialPlatformAdapter,
-  ) { }
+    @Inject(SOCIAL_PLATFORM_ADAPTER)
+    private readonly adapter: ISocialPlatformAdapter,
+  ) {}
 
   @Get('accounts')
   @Roles('OWNER', 'ADMIN')
@@ -172,9 +188,15 @@ export class SocialController {
     @Param('tenantId') tenantId: string,
     @Body() body: SendInboxMessageDTO,
   ) {
-    const account = await this.repo.findAccountById(tenantId, body.socialAccountId);
+    const account = await this.repo.findAccountById(
+      tenantId,
+      body.socialAccountId,
+    );
     if (!account || !account.isActive) {
-      return { success: false, error: 'Conta social não encontrada ou desconectada' };
+      return {
+        success: false,
+        error: 'Conta social não encontrada ou desconectada',
+      };
     }
 
     const result = await this.adapter.sendInboxMessage(

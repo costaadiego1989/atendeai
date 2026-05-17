@@ -85,15 +85,17 @@ describe('TenantController guards (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
-    await prisma.tenant.deleteMany({
-      where: {
-        cnpj: {
-          in: [tenantCnpj, otherTenantCnpj],
+    await prisma.tenant
+      .deleteMany({
+        where: {
+          cnpj: {
+            in: [tenantCnpj, otherTenantCnpj],
+          },
         },
-      },
-    }).catch(() => { });
+      })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -150,23 +152,35 @@ describe('TenantController guards (e2e)', () => {
 
   afterAll(async () => {
     await prisma.aIConfig
-      .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
-      .catch(() => { });
-    await prisma.$executeRaw(
-      Prisma.sql`DELETE FROM tenant_schema.instagram_configs WHERE tenant_id = ${tenantId}::uuid OR tenant_id = ${otherTenantId}::uuid`,
-    ).catch(() => { });
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
+      .catch(() => {});
+    await prisma
+      .$executeRaw(
+        Prisma.sql`DELETE FROM tenant_schema.instagram_configs WHERE tenant_id = ${tenantId}::uuid OR tenant_id = ${otherTenantId}::uuid`,
+      )
+      .catch(() => {});
     await prisma.whatsAppConfig
-      .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
-      .catch(() => { });
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
+      .catch(() => {});
     await prisma.subscription
-      .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
-      .catch(() => { });
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
+      .catch(() => {});
     await prisma.user
-      .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
-      .catch(() => { });
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
+      .catch(() => {});
     await prisma.tenant
-      .deleteMany({ where: { id: { in: [tenantId, otherTenantId].filter(Boolean) } } })
-      .catch(() => { });
+      .deleteMany({
+        where: { id: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
+      .catch(() => {});
   });
 
   it('should return 401 without auth cookie on protected routes', async () => {

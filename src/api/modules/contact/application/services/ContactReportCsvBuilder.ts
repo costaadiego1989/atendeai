@@ -42,7 +42,11 @@ export class ContactReportCsvBuilder {
     ];
 
     const content = rows
-      .map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(';'))
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`)
+          .join(';'),
+      )
       .join('\n');
 
     return {

@@ -97,8 +97,7 @@ describe('AsaasAdapter', () => {
       dateCreated: '2026-03-20T10:00:00.000Z',
       payment: {
         id: 'pay-recovery-1',
-        externalReference:
-          'recovery|tenant-123|case-456',
+        externalReference: 'recovery|tenant-123|case-456',
         value: 89.9,
         confirmedDate: '2026-03-20T10:05:00.000Z',
       },

@@ -11,9 +11,7 @@ import {
 } from './interfaces/IRegisterProspectStopUseCase';
 
 @Injectable()
-export class RegisterProspectStopUseCase
-  implements IRegisterProspectStopUseCase
-{
+export class RegisterProspectStopUseCase implements IRegisterProspectStopUseCase {
   constructor(
     @Inject(PROSPECT_EXECUTION_REPOSITORY)
     private readonly executionRepository: IProspectExecutionRepository,

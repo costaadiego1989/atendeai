@@ -30,7 +30,7 @@ export class BootstrapTenantFinancialAccountUseCase {
     @Inject(TENANT_FINANCIAL_ACCOUNT_REPOSITORY)
     private readonly tenantFinancialAccountRepository: ITenantFinancialAccountRepository,
     private readonly paymentService: PaymentService,
-  ) { }
+  ) {}
 
   async execute(input: BootstrapTenantFinancialAccountInput) {
     const tenant = await this.tenantRepository.findById(input.tenantId);
@@ -53,7 +53,11 @@ export class BootstrapTenantFinancialAccountUseCase {
       return existing;
     }
 
-    if (!tenant.address?.zipcode || !tenant.address.street || !tenant.address.neighborhood) {
+    if (
+      !tenant.address?.zipcode ||
+      !tenant.address.street ||
+      !tenant.address.neighborhood
+    ) {
       throw new BadRequestException(
         'Complete o endereço da empresa antes de habilitar recebimentos',
       );

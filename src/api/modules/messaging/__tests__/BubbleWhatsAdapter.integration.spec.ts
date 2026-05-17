@@ -196,17 +196,21 @@ describe('BubbleWhatsAdapter', () => {
       },
     });
 
-    const result = await adapter.sendMessage({
-      channel: 'WHATSAPP',
-      provider: 'BUBBLEWHATS',
-      credentials: {
-        token: 'api-key',
+    const result = await adapter.sendMessage(
+      {
+        channel: 'WHATSAPP',
+        provider: 'BUBBLEWHATS',
+        credentials: {
+          token: 'api-key',
+        },
+        status: 'ACTIVE',
       },
-      status: 'ACTIVE',
-    }, '5511999998888', {
-      type: 'TEXT',
-      text: 'Mensagem outbound',
-    });
+      '5511999998888',
+      {
+        type: 'TEXT',
+        text: 'Mensagem outbound',
+      },
+    );
 
     expect(axios.post).toHaveBeenCalledWith(
       'https://bubblewhats.test/send-message',
@@ -237,17 +241,21 @@ describe('BubbleWhatsAdapter', () => {
       },
     });
 
-    const result = await adapter.sendMessage({
-      channel: 'WHATSAPP',
-      provider: 'BUBBLEWHATS',
-      credentials: {
-        token: 'api-key',
+    const result = await adapter.sendMessage(
+      {
+        channel: 'WHATSAPP',
+        provider: 'BUBBLEWHATS',
+        credentials: {
+          token: 'api-key',
+        },
+        status: 'ACTIVE',
       },
-      status: 'ACTIVE',
-    }, '5511999998888', {
-      type: 'TEXT',
-      text: 'Mensagem outbound',
-    });
+      '5511999998888',
+      {
+        type: 'TEXT',
+        text: 'Mensagem outbound',
+      },
+    );
 
     expect(result).toEqual({
       success: false,
@@ -262,17 +270,21 @@ describe('BubbleWhatsAdapter', () => {
       },
     });
 
-    await adapter.sendMessage({
-      channel: 'WHATSAPP',
-      provider: 'BUBBLEWHATS',
-      credentials: {
-        token: 'api-key',
+    await adapter.sendMessage(
+      {
+        channel: 'WHATSAPP',
+        provider: 'BUBBLEWHATS',
+        credentials: {
+          token: 'api-key',
+        },
+        status: 'ACTIVE',
       },
-      status: 'ACTIVE',
-    }, '(21) 99300-1883', {
-      type: 'TEXT',
-      text: 'Mensagem outbound',
-    });
+      '(21) 99300-1883',
+      {
+        type: 'TEXT',
+        text: 'Mensagem outbound',
+      },
+    );
 
     expect(axios.post).toHaveBeenCalledWith(
       'https://bubblewhats.test/send-message',

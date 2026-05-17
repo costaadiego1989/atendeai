@@ -112,7 +112,9 @@ export class PrismaDocumentChunkRepository implements IDocumentChunkRepository {
   }
 
   async countByDocument(documentId: string): Promise<number> {
-    const rows = await this.prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Array<{ count: bigint }>
+    >(Prisma.sql`
       SELECT COUNT(*) as count
       FROM tenant_schema.tenant_document_chunks
       WHERE document_id = ${documentId}::uuid

@@ -26,7 +26,7 @@ export class GenerateSchedulingPaymentLinkUseCase {
     @Inject(SCHEDULING_FACADE)
     private readonly schedulingFacade: ISchedulingFacade,
     private readonly paymentService: PaymentService,
-  ) { }
+  ) {}
 
   async execute(input: {
     tenantId: string;
@@ -76,9 +76,12 @@ export class GenerateSchedulingPaymentLinkUseCase {
       slotId: input.slotId,
     });
 
-    const serviceName = category?.name || slot.label || 'Agendamento de serviço';
+    const serviceName =
+      category?.name || slot.label || 'Agendamento de serviço';
     const customerName =
-      slot.reservedFor?.contactName || slot.reservedFor?.contactEmail || 'cliente';
+      slot.reservedFor?.contactName ||
+      slot.reservedFor?.contactEmail ||
+      'cliente';
     const billingType = input.billingType || 'PIX';
 
     const paymentLink = await this.paymentService.createPaymentLink({
@@ -91,20 +94,23 @@ export class GenerateSchedulingPaymentLinkUseCase {
       dueDateLimitDays: 3,
     });
 
-    const updatedSlot = await this.schedulingStore.attachPaymentLinkToReservedSlot({
-      tenantId: input.tenantId,
-      professionalId: input.professionalId,
-      date: input.date,
-      slotId: input.slotId,
-      reference: paymentReference,
-      linkId: paymentLink.id,
-      linkUrl: paymentLink.url,
-      amount,
-      billingType,
-    });
+    const updatedSlot =
+      await this.schedulingStore.attachPaymentLinkToReservedSlot({
+        tenantId: input.tenantId,
+        professionalId: input.professionalId,
+        date: input.date,
+        slotId: input.slotId,
+        reference: paymentReference,
+        linkId: paymentLink.id,
+        linkUrl: paymentLink.url,
+        amount,
+        billingType,
+      });
 
     if (!updatedSlot) {
-      throw new ConflictException('Could not attach payment link to reserved slot');
+      throw new ConflictException(
+        'Could not attach payment link to reserved slot',
+      );
     }
 
     return {

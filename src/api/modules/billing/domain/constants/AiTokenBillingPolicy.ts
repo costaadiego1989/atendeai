@@ -11,4 +11,3 @@ export function toBillableAiTokens(tokensUsed: number): number {
   if (safe <= 0) return 0;
   return Math.ceil(safe * AI_TOKEN_BILLING_MULTIPLIER);
 }
-

@@ -26,7 +26,12 @@ import { ListProposalsUseCase } from '../../proposal/application/use-cases/ListP
 import { GenerateProposalPdfUseCase } from '../../proposal/application/use-cases/GenerateProposalPdfUseCase';
 import { ScheduleProposalDeliveryUseCase } from '../../proposal/application/use-cases/ScheduleProposalDeliveryUseCase';
 import { SendProposalToConversationUseCase } from '../../proposal/application/use-cases/SendProposalToConversationUseCase';
-import { InMemoryProposalRepository, createFileStorageMock, createMessagingFacadeMock, createQueueMock } from '../../proposal/__tests__/proposal-test-utils';
+import {
+  InMemoryProposalRepository,
+  createFileStorageMock,
+  createMessagingFacadeMock,
+  createQueueMock,
+} from '../../proposal/__tests__/proposal-test-utils';
 import { SendProposalToConversationService } from '../../proposal/application/services/implementations/SendProposalToConversationService';
 
 describe('Messaging Proposal Flow (e2e)', () => {
@@ -81,64 +86,78 @@ describe('Messaging Proposal Flow (e2e)', () => {
         },
         {
           provide: CreateProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new CreateProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new CreateProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: UpdateProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new UpdateProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new UpdateProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: DeleteProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new DeleteProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new DeleteProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: GetProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new GetProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new GetProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: ListProposalsService,
-          useFactory: (repo: InMemoryProposalRepository) => new ListProposalsService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new ListProposalsService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: ScheduleProposalDeliveryService,
-          useFactory: (repo: InMemoryProposalRepository, queue: ReturnType<typeof createQueueMock>) =>
-            new ScheduleProposalDeliveryService(repo, queue as any),
+          useFactory: (
+            repo: InMemoryProposalRepository,
+            queue: ReturnType<typeof createQueueMock>,
+          ) => new ScheduleProposalDeliveryService(repo, queue as any),
           inject: ['IProposalRepository', 'BullQueue_proposal-delivery'],
         },
         {
           provide: CreateProposalUseCase,
-          useFactory: (service: CreateProposalService) => new CreateProposalUseCase(service),
+          useFactory: (service: CreateProposalService) =>
+            new CreateProposalUseCase(service),
           inject: [CreateProposalService],
         },
         {
           provide: UpdateProposalUseCase,
-          useFactory: (service: UpdateProposalService) => new UpdateProposalUseCase(service),
+          useFactory: (service: UpdateProposalService) =>
+            new UpdateProposalUseCase(service),
           inject: [UpdateProposalService],
         },
         {
           provide: DeleteProposalUseCase,
-          useFactory: (service: DeleteProposalService) => new DeleteProposalUseCase(service),
+          useFactory: (service: DeleteProposalService) =>
+            new DeleteProposalUseCase(service),
           inject: [DeleteProposalService],
         },
         {
           provide: GetProposalUseCase,
-          useFactory: (service: GetProposalService) => new GetProposalUseCase(service),
+          useFactory: (service: GetProposalService) =>
+            new GetProposalUseCase(service),
           inject: [GetProposalService],
         },
         {
           provide: ListProposalsUseCase,
-          useFactory: (service: ListProposalsService) => new ListProposalsUseCase(service),
+          useFactory: (service: ListProposalsService) =>
+            new ListProposalsUseCase(service),
           inject: [ListProposalsService],
         },
         {
           provide: GenerateProposalPdfUseCase,
-          useFactory: (repo: InMemoryProposalRepository, storage: ReturnType<typeof createFileStorageMock>) =>
-            new GenerateProposalPdfUseCase(repo, storage),
+          useFactory: (
+            repo: InMemoryProposalRepository,
+            storage: ReturnType<typeof createFileStorageMock>,
+          ) => new GenerateProposalPdfUseCase(repo, storage),
           inject: ['IProposalRepository', FILE_STORAGE_SERVICE],
         },
         {
@@ -159,7 +178,11 @@ describe('Messaging Proposal Flow (e2e)', () => {
               publicLinks,
               messagingFacade as any,
             ),
-          inject: ['IProposalRepository', ProposalPublicLinkService, MESSAGING_FACADE],
+          inject: [
+            'IProposalRepository',
+            ProposalPublicLinkService,
+            MESSAGING_FACADE,
+          ],
         },
         {
           provide: SendProposalToConversationUseCase,
@@ -169,8 +192,10 @@ describe('Messaging Proposal Flow (e2e)', () => {
         },
         {
           provide: ProposalPublicLinkService,
-          useFactory: (repo: InMemoryProposalRepository, config: ConfigService) =>
-            new ProposalPublicLinkService(repo, config),
+          useFactory: (
+            repo: InMemoryProposalRepository,
+            config: ConfigService,
+          ) => new ProposalPublicLinkService(repo, config),
           inject: ['IProposalRepository', ConfigService],
         },
         {
@@ -180,8 +205,19 @@ describe('Messaging Proposal Flow (e2e)', () => {
             publicLinks: ProposalPublicLinkService,
             createCharge: CreateSplitPaymentChargeUseCase,
             contacts: any,
-          ) => new PublicProposalService(repo, publicLinks, createCharge, contacts),
-          inject: ['IProposalRepository', ProposalPublicLinkService, CreateSplitPaymentChargeUseCase, CONTACT_FACADE],
+          ) =>
+            new PublicProposalService(
+              repo,
+              publicLinks,
+              createCharge,
+              contacts,
+            ),
+          inject: [
+            'IProposalRepository',
+            ProposalPublicLinkService,
+            CreateSplitPaymentChargeUseCase,
+            CONTACT_FACADE,
+          ],
         },
         {
           provide: ProposalAsyncJobProcessor,
@@ -189,8 +225,17 @@ describe('Messaging Proposal Flow (e2e)', () => {
             repo: InMemoryProposalRepository,
             messagingFacade: ReturnType<typeof createMessagingFacadeMock>,
             publicLinks: ProposalPublicLinkService,
-          ) => new ProposalAsyncJobProcessor(repo, messagingFacade as any, publicLinks),
-          inject: ['IProposalRepository', MESSAGING_FACADE, ProposalPublicLinkService],
+          ) =>
+            new ProposalAsyncJobProcessor(
+              repo,
+              messagingFacade as any,
+              publicLinks,
+            ),
+          inject: [
+            'IProposalRepository',
+            MESSAGING_FACADE,
+            ProposalPublicLinkService,
+          ],
         },
       ],
     }).compile();
@@ -225,7 +270,9 @@ describe('Messaging Proposal Flow (e2e)', () => {
     const proposal = await repository.findById(createResponse.body.id);
     expect(proposal).not.toBeNull();
 
-    const publicAccess = await proposalPublicLinkService.ensurePublicLink(proposal!);
+    const publicAccess = await proposalPublicLinkService.ensurePublicLink(
+      proposal!,
+    );
 
     const publicResponse = await request(app.getHttpServer())
       .get(`/api/v1/public/proposals/${publicAccess.token}`)

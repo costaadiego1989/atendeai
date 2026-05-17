@@ -5,7 +5,14 @@ import {
 } from '../ports/IInventoryProvider';
 
 export class ShopeeProvider implements IInventoryProvider {
-  private generateSignature(partnerId: string, partnerKey: string, apiPath: string, timestamp: number, accessToken: string, shopId: string) {
+  private generateSignature(
+    partnerId: string,
+    partnerKey: string,
+    apiPath: string,
+    timestamp: number,
+    accessToken: string,
+    shopId: string,
+  ) {
     const baseString = `${partnerId}${apiPath}${timestamp}${accessToken}${shopId}`;
     return createHmac('sha256', partnerKey).update(baseString).digest('hex');
   }
@@ -26,7 +33,7 @@ export class ShopeeProvider implements IInventoryProvider {
       apiPath,
       timestamp,
       String(accessToken),
-      String(shopId)
+      String(shopId),
     );
 
     const url = `https://partner.shopeemobile.com${apiPath}?partner_id=${partnerId}&timestamp=${timestamp}&access_token=${accessToken}&shop_id=${shopId}&sign=${sign}`;
@@ -35,7 +42,9 @@ export class ShopeeProvider implements IInventoryProvider {
     const data = await response.json();
 
     if (data.error) {
-      throw new Error(`Falha na autenticação Shopee: ${data.message || data.error}`);
+      throw new Error(
+        `Falha na autenticação Shopee: ${data.message || data.error}`,
+      );
     }
 
     return true;
@@ -59,7 +68,7 @@ export class ShopeeProvider implements IInventoryProvider {
         apiPath,
         timestamp,
         String(accessToken),
-        String(shopId)
+        String(shopId),
       );
 
       const url = `https://partner.shopeemobile.com${apiPath}?partner_id=${partnerId}&timestamp=${timestamp}&access_token=${accessToken}&shop_id=${shopId}&sign=${sign}&offset=${offset}&page_size=${pageSize}&item_status=NORMAL`;
@@ -86,7 +95,7 @@ export class ShopeeProvider implements IInventoryProvider {
         infoPath,
         infoTimestamp,
         String(accessToken),
-        String(shopId)
+        String(shopId),
       );
 
       const infoUrl = `https://partner.shopeemobile.com${infoPath}?partner_id=${partnerId}&timestamp=${infoTimestamp}&access_token=${accessToken}&shop_id=${shopId}&sign=${infoSign}&item_id_list=${itemIds}`;

@@ -87,7 +87,9 @@ describe('SchedulingContextProvider', () => {
 
     expect(result).toContain('- Window: next 30 days');
     expect(facade.getCategoryAvailability).toHaveBeenCalledTimes(30);
-    expect(result).toContain('- Availability: no scheduling records found in the selected window');
+    expect(result).toContain(
+      '- Availability: no scheduling records found in the selected window',
+    );
   });
 
   it('should expose services and professionals when the customer asks for appointments without naming a service', async () => {

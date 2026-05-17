@@ -20,14 +20,13 @@ export class RedisChatHistoryRepository implements IChatHistoryRepository {
     const key = this.getKey(conversationId);
     const data = await this.redis.lrange(key, 0, -1);
 
-    return data
-      .map((item) => {
-        const parsed = JSON.parse(item);
-        return {
-          ...parsed,
-          timestamp: new Date(parsed.timestamp),
-        };
-      });
+    return data.map((item) => {
+      const parsed = JSON.parse(item);
+      return {
+        ...parsed,
+        timestamp: new Date(parsed.timestamp),
+      };
+    });
   }
 
   async saveMessage(

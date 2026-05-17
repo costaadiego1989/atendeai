@@ -6,7 +6,8 @@ export const BILLING_PLAN_SEED = [
   {
     code: 'ESSENCIAL',
     displayName: 'Essencial',
-    description: 'Entrada para validar WhatsApp, CRM e IA em uma operação pequena.',
+    description:
+      'Entrada para validar WhatsApp, CRM e IA em uma operação pequena.',
     monthlyPrice: 297,
     messagesQuota: 15000,
     aiTokensQuota: 1500000,
@@ -37,7 +38,8 @@ export const BILLING_PLAN_SEED = [
   {
     code: 'PROFISSIONAL',
     displayName: 'Profissional',
-    description: 'Rotina diaria com mais capacidade, equipe e automacoes por nicho.',
+    description:
+      'Rotina diaria com mais capacidade, equipe e automacoes por nicho.',
     monthlyPrice: 597,
     messagesQuota: 75000,
     aiTokensQuota: 7500000,
@@ -69,7 +71,8 @@ export const BILLING_PLAN_SEED = [
   {
     code: 'ESCALA',
     displayName: 'Escala',
-    description: 'Operacao multi-time com filiais, multiplos WhatsApps e governança.',
+    description:
+      'Operacao multi-time com filiais, multiplos WhatsApps e governança.',
     monthlyPrice: 797,
     messagesQuota: 300000,
     aiTokensQuota: 30000000,
@@ -105,10 +108,12 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'EXTRA_BRANCH',
     displayName: 'Filial adicional',
-    description: 'Adiciona mais uma filial ativa acima do limite do plano base.',
+    description:
+      'Adiciona mais uma filial ativa acima do limite do plano base.',
     category: 'OPERATIONS',
     monthlyPrice: 149,
-    salesPitch: 'Para expandir por unidade sem trocar todo o plano imediatamente.',
+    salesPitch:
+      'Para expandir por unidade sem trocar todo o plano imediatamente.',
     config: {
       capacity: {
         branches: 1,
@@ -118,10 +123,12 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'EXTRA_WHATSAPP_NUMBER',
     displayName: 'WhatsApp adicional',
-    description: 'Adiciona mais um numero de WhatsApp conectado para filial, equipe ou canal.',
+    description:
+      'Adiciona mais um numero de WhatsApp conectado para filial, equipe ou canal.',
     category: 'CHANNELS',
     monthlyPrice: 79,
-    salesPitch: 'Ideal para separar matriz, filial, delivery, cobranca ou suporte.',
+    salesPitch:
+      'Ideal para separar matriz, filial, delivery, cobranca ou suporte.',
     config: {
       capacity: {
         whatsappNumbers: 1,
@@ -131,7 +138,8 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'EXTRA_USER',
     displayName: 'Usuario operacional adicional',
-    description: 'Adiciona mais um usuario operacional acima do limite do plano base.',
+    description:
+      'Adiciona mais um usuario operacional acima do limite do plano base.',
     category: 'OPERATIONS',
     monthlyPrice: 39,
     salesPitch: 'Para crescer equipe sem mudar de plano antes da hora.',
@@ -144,7 +152,8 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'TEAM_ROUTING',
     displayName: 'Roteamento de equipe',
-    description: 'Distribuicao de conversas por fila, usuario, filial e regra operacional.',
+    description:
+      'Distribuicao de conversas por fila, usuario, filial e regra operacional.',
     category: 'OPERATIONS',
     monthlyPrice: 129,
     salesPitch: 'Evita gargalo quando mais pessoas atendem no mesmo tenant.',
@@ -152,7 +161,8 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'ANALYTICS_PRO',
     displayName: 'relatórios avancados',
-    description: 'Indicadores por periodo, modulo, filial, atendente e resultado.',
+    description:
+      'Indicadores por periodo, modulo, filial, atendente e resultado.',
     category: 'ANALYTICS',
     monthlyPrice: 197,
     salesPitch: 'Transforma uso em decisao de gestao.',
@@ -160,15 +170,18 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'INTEGRATIONS_HUB',
     displayName: 'Hub de integrações',
-    description: 'Conecta operações criticas com agenda, catalogo, pagamento e sistemas externos.',
+    description:
+      'Conecta operações criticas com agenda, catalogo, pagamento e sistemas externos.',
     category: 'INTEGRATIONS',
     monthlyPrice: 297,
-    salesPitch: 'Para negocios que precisam sincronizar dados e reduzir retrabalho.',
+    salesPitch:
+      'Para negocios que precisam sincronizar dados e reduzir retrabalho.',
   },
   {
     code: 'CHECKOUT_CONVERSATIONAL',
     displayName: 'Checkout conversacional',
-    description: 'Carrinho, pagamento, status do pedido e fluxo de compra pelo WhatsApp.',
+    description:
+      'Carrinho, pagamento, status do pedido e fluxo de compra pelo WhatsApp.',
     category: 'COMMERCE',
     monthlyPrice: 197,
     salesPitch: 'Transforma atendimento em pedido pago.',
@@ -176,10 +189,12 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'CATALOG_INVENTORY',
     displayName: 'Catalogo e estoque avancado',
-    description: 'Produtos complexos, categorias, variacoes livres e snapshot de estoque.',
+    description:
+      'Produtos complexos, categorias, variacoes livres e snapshot de estoque.',
     category: 'COMMERCE',
     monthlyPrice: 147,
-    salesPitch: 'Para vender com disponibilidade real e menos erro operacional.',
+    salesPitch:
+      'Para vender com disponibilidade real e menos erro operacional.',
   },
   {
     code: 'ABANDONED_CART',
@@ -208,7 +223,8 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'SCHEDULING_PRO',
     displayName: 'Agenda profissional',
-    description: 'Categorias, profissionais, disponibilidade, reserva e reagendamento.',
+    description:
+      'Categorias, profissionais, disponibilidade, reserva e reagendamento.',
     category: 'SCHEDULING',
     monthlyPrice: 197,
     salesPitch: 'Converte conversa em horario reservado.',
@@ -216,10 +232,12 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'GOOGLE_CALENDAR_MEET',
     displayName: 'Google Calendar e Meet',
-    description: 'Sincronizacao com calendario e criacao de link online quando necessario.',
+    description:
+      'Sincronizacao com calendario e criacao de link online quando necessario.',
     category: 'SCHEDULING',
     monthlyPrice: 97,
-    salesPitch: 'Reduz agenda duplicada e melhora experiencia em consultas online.',
+    salesPitch:
+      'Reduz agenda duplicada e melhora experiencia em consultas online.',
   },
   {
     code: 'SCHEDULING_REMINDERS',
@@ -264,7 +282,8 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'LEAD_QUALIFICATION',
     displayName: 'Qualificacao de leads',
-    description: 'Playbooks para entender necessidade, urgencia, perfil e proximo passo.',
+    description:
+      'Playbooks para entender necessidade, urgencia, perfil e proximo passo.',
     category: 'SALES',
     monthlyPrice: 147,
     salesPitch: 'Ajuda servicos consultivos a vender com contexto.',
@@ -288,7 +307,8 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'PAYMENT_LINKS',
     displayName: 'Links de pagamento',
-    description: 'Gere links de pagamento rápidos para cartao, pix ou boleto diretamente na conversa.',
+    description:
+      'Gere links de pagamento rápidos para cartao, pix ou boleto diretamente na conversa.',
     category: 'PAYMENTS',
     monthlyPrice: 97,
     salesPitch: 'Agiliza a conversao e reduz a barreira de pagamento.',
@@ -300,57 +320,125 @@ export const BILLING_NICHE_SEED = [
     code: 'RETAIL',
     displayName: 'Varejo',
     description: 'Lojas com catalogo, estoque, atendimento e recompra.',
-    pains: ['responder rapido', 'mostrar disponibilidade', 'recuperar oportunidade'],
-    modules: ['CATALOG_INVENTORY', 'CHECKOUT_CONVERSATIONAL', 'COUPONS_PROMOTIONS', 'TEAM_ROUTING', 'ABANDONED_CART', 'DELIVERY_SHIPPING', 'ANALYTICS_PRO'],
+    pains: [
+      'responder rapido',
+      'mostrar disponibilidade',
+      'recuperar oportunidade',
+    ],
+    modules: [
+      'CATALOG_INVENTORY',
+      'CHECKOUT_CONVERSATIONAL',
+      'COUPONS_PROMOTIONS',
+      'TEAM_ROUTING',
+      'ABANDONED_CART',
+      'DELIVERY_SHIPPING',
+      'ANALYTICS_PRO',
+    ],
   },
   {
     code: 'ECOMMERCE',
     displayName: 'E-commerce',
     description: 'Venda online com carrinho, pagamento, entrega e abandono.',
     pains: ['converter carrinho', 'reduzir abandono', 'organizar pedidos'],
-    modules: ['CATALOG_INVENTORY', 'CHECKOUT_CONVERSATIONAL', 'ABANDONED_CART', 'DELIVERY_SHIPPING', 'COUPONS_PROMOTIONS', 'ANALYTICS_PRO', 'TEAM_ROUTING'],
+    modules: [
+      'CATALOG_INVENTORY',
+      'CHECKOUT_CONVERSATIONAL',
+      'ABANDONED_CART',
+      'DELIVERY_SHIPPING',
+      'COUPONS_PROMOTIONS',
+      'ANALYTICS_PRO',
+      'TEAM_ROUTING',
+    ],
   },
   {
     code: 'FOOD',
     displayName: 'Food & Delivery',
     description: 'Alimentos, mercado, padaria e delivery com pico operacional.',
     pains: ['atender pico', 'montar pedido', 'controlar entrega'],
-    modules: ['CATALOG_INVENTORY', 'CHECKOUT_CONVERSATIONAL', 'DELIVERY_SHIPPING', 'COUPONS_PROMOTIONS', 'ABANDONED_CART', 'ANALYTICS_PRO', 'TEAM_ROUTING'],
+    modules: [
+      'CATALOG_INVENTORY',
+      'CHECKOUT_CONVERSATIONAL',
+      'DELIVERY_SHIPPING',
+      'COUPONS_PROMOTIONS',
+      'ABANDONED_CART',
+      'ANALYTICS_PRO',
+      'TEAM_ROUTING',
+    ],
   },
   {
     code: 'HEALTH',
     displayName: 'Saude & Agenda',
-    description: 'Clinicas e servicos agendados com confirmacao e relacionamento.',
+    description:
+      'Clinicas e servicos agendados com confirmacao e relacionamento.',
     pains: ['preencher agenda', 'reduzir faltas', 'confirmar atendimento'],
-    modules: ['SCHEDULING_PRO', 'SCHEDULING_REMINDERS', 'PREPAID_BOOKING', 'GOOGLE_CALENDAR_MEET', 'ANALYTICS_PRO'],
+    modules: [
+      'SCHEDULING_PRO',
+      'SCHEDULING_REMINDERS',
+      'PREPAID_BOOKING',
+      'GOOGLE_CALENDAR_MEET',
+      'ANALYTICS_PRO',
+    ],
   },
   {
     code: 'BEAUTY',
     displayName: 'Beleza, Pet & Studios',
     description: 'Servicos recorrentes por horario, profissional e unidade.',
     pains: ['reduzir no-show', 'organizar profissionais', 'vender recorrência'],
-    modules: ['SCHEDULING_PRO', 'SCHEDULING_REMINDERS', 'PREPAID_BOOKING', 'GOOGLE_CALENDAR_MEET', 'ANALYTICS_PRO', 'TEAM_ROUTING'],
+    modules: [
+      'SCHEDULING_PRO',
+      'SCHEDULING_REMINDERS',
+      'PREPAID_BOOKING',
+      'GOOGLE_CALENDAR_MEET',
+      'ANALYTICS_PRO',
+      'TEAM_ROUTING',
+    ],
   },
   {
     code: 'RECOVERY',
     displayName: 'Cobranca & Recovery',
-    description: 'Carteira, cadencia, promessa de pagamento e receita recuperada.',
+    description:
+      'Carteira, cadencia, promessa de pagamento e receita recuperada.',
     pains: ['priorizar carteira', 'controlar promessas', 'medir recuperacao'],
-    modules: ['RECOVERY_WALLET', 'RECOVERY_AUTOMATION', 'PAYMENT_LINKS', 'RECOVERY_REPORTS', 'TEAM_ROUTING', 'ANALYTICS_PRO'],
+    modules: [
+      'RECOVERY_WALLET',
+      'RECOVERY_AUTOMATION',
+      'PAYMENT_LINKS',
+      'RECOVERY_REPORTS',
+      'TEAM_ROUTING',
+      'ANALYTICS_PRO',
+    ],
   },
   {
     code: 'HOME_SERV',
     displayName: 'Servicos consultivos',
-    description: 'Qualificacao, orcamento, proposta e acompanhamento comercial.',
+    description:
+      'Qualificacao, orcamento, proposta e acompanhamento comercial.',
     pains: ['qualificar demanda', 'gerar orcamento', 'acompanhar retorno'],
-    modules: ['LEAD_QUALIFICATION', 'PROPOSALS_QUOTES', 'PROSPECTING_ENGINE', 'TEAM_ROUTING', 'ANALYTICS_PRO'],
+    modules: [
+      'LEAD_QUALIFICATION',
+      'PROPOSALS_QUOTES',
+      'PROSPECTING_ENGINE',
+      'TEAM_ROUTING',
+      'ANALYTICS_PRO',
+    ],
   },
   {
     code: 'B2B',
     displayName: 'Empresas B2B',
-    description: 'Vendas complexas, propostas personalizadas e ciclo de venda longo.',
-    pains: ['gerar propostas rapidas', 'acompanhar aprovacao', 'organizar pipeline b2b'],
-    modules: ['PROPOSALS_QUOTES', 'LEAD_QUALIFICATION', 'PROSPECTING_ENGINE', 'TEAM_ROUTING', 'ANALYTICS_PRO'],
+    description:
+      'Vendas complexas, propostas personalizadas e ciclo de venda longo.',
+    pains: [
+      'gerar propostas rapidas',
+      'acompanhar aprovacao',
+      'organizar pipeline b2b',
+    ],
+    modules: [
+      'PROPOSALS_QUOTES',
+      'LEAD_QUALIFICATION',
+      'PROSPECTING_ENGINE',
+      'TEAM_ROUTING',
+      'ANALYTICS_PRO',
+    ],
   },
 ] as const;
 

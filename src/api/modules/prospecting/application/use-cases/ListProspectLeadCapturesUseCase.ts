@@ -10,9 +10,7 @@ import {
 } from '../../domain/repositories/IProspectLeadCaptureRepository';
 
 @Injectable()
-export class ListProspectLeadCapturesUseCase
-  implements IListProspectLeadCapturesUseCase
-{
+export class ListProspectLeadCapturesUseCase implements IListProspectLeadCapturesUseCase {
   constructor(
     @Inject(PROSPECT_LEAD_CAPTURE_REPOSITORY)
     private readonly leadCaptureRepository: IProspectLeadCaptureRepository,
@@ -21,15 +19,18 @@ export class ListProspectLeadCapturesUseCase
   async execute(
     input: ListProspectLeadCapturesInput,
   ): Promise<ListProspectLeadCapturesOutput> {
-    const page = await this.leadCaptureRepository.findAllByTenant(input.tenantId, {
-      page: input.page ?? 1,
-      limit: input.limit ?? 10,
-      campaignName: input.campaignName,
-      importStatus: input.importStatus,
-      channel: input.channel,
-      dateFrom: input.dateFrom,
-      dateTo: input.dateTo,
-    });
+    const page = await this.leadCaptureRepository.findAllByTenant(
+      input.tenantId,
+      {
+        page: input.page ?? 1,
+        limit: input.limit ?? 10,
+        campaignName: input.campaignName,
+        importStatus: input.importStatus,
+        channel: input.channel,
+        dateFrom: input.dateFrom,
+        dateTo: input.dateTo,
+      },
+    );
 
     return {
       items: page.items.map((lead) => ({

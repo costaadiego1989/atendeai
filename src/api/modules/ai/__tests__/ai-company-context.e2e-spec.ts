@@ -20,7 +20,12 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
-import { AI_ENGINE, IAIEngine, AIRequest, AIResponse } from '@modules/ai/application/ports/IAIEngine';
+import {
+  AI_ENGINE,
+  IAIEngine,
+  AIRequest,
+  AIResponse,
+} from '@modules/ai/application/ports/IAIEngine';
 import { IProcessAIResponseUseCase } from '@modules/ai/application/use-cases/interfaces/IProcessAIResponseUseCase';
 import {
   CHAT_HISTORY_REPOSITORY,
@@ -44,12 +49,18 @@ function makeValidCnpj(seedValue: number): string {
   };
   const d1 = calcDigit(base, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
   const d2 = calcDigit(`${base}${d1}`, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-  return `${base}${d1}${d2}`.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  return `${base}${d1}${d2}`.replace(
+    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+    '$1.$2.$3/$4-$5',
+  );
 }
 
 const subscribers = new Map<
   string,
-  Array<{ consumerName?: string; handle: (e: Record<string, unknown>) => Promise<void> }>
+  Array<{
+    consumerName?: string;
+    handle: (e: Record<string, unknown>) => Promise<void>;
+  }>
 >();
 
 const inMemoryEventBus: IEventBus = {
@@ -69,7 +80,9 @@ const inMemoryEventBus: IEventBus = {
     const handlers = subscribers.get(queue) || [];
     handlers.push({
       consumerName: options?.consumerName,
-      handle: handler as unknown as (e: Record<string, unknown>) => Promise<void>,
+      handle: handler as unknown as (
+        e: Record<string, unknown>,
+      ) => Promise<void>,
     });
     subscribers.set(queue, handlers);
   },
@@ -140,7 +153,14 @@ describe('AI Company Context (e2e — IA real)', () => {
 
   async function seedAddress(
     tid: string,
-    addr: { zipcode: string; street: string; streetNumber: string; neighborhood: string; city: string; state: string },
+    addr: {
+      zipcode: string;
+      street: string;
+      streetNumber: string;
+      neighborhood: string;
+      city: string;
+      state: string;
+    },
   ) {
     await prisma.$executeRaw(Prisma.sql`
       UPDATE tenant_schema.tenants
@@ -171,10 +191,20 @@ describe('AI Company Context (e2e — IA real)', () => {
 
   async function createConversation(tid: string, contactPhone: string) {
     const contact = await prisma.contact.create({
-      data: { tenantId: tid, name: 'Contato E2E', phone: contactPhone, stage: 'LEAD' },
+      data: {
+        tenantId: tid,
+        name: 'Contato E2E',
+        phone: contactPhone,
+        stage: 'LEAD',
+      },
     });
     const conversation = await prisma.conversation.create({
-      data: { tenantId: tid, contactId: contact.id, channel: 'WHATSAPP', status: 'ACTIVE' },
+      data: {
+        tenantId: tid,
+        contactId: contact.id,
+        channel: 'WHATSAPP',
+        status: 'ACTIVE',
+      },
     });
     await prisma.message.create({
       data: {
@@ -215,7 +245,13 @@ describe('AI Company Context (e2e — IA real)', () => {
 
     app = module.createNestApplication();
     app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     app.useGlobalFilters(new GlobalExceptionFilter());
     app.setGlobalPrefix('api/v1');
     await app.init();
@@ -263,19 +299,49 @@ describe('AI Company Context (e2e — IA real)', () => {
   afterAll(async () => {
     const ids = [tenantId, tenantBId].filter(Boolean);
     for (const id of ids) {
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM tenant_schema.tenant_pdf_resumes WHERE tenant_id = ${id}::uuid`).catch(() => {});
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${id}::uuid`).catch(() => {});
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM tenant_schema.tenant_agent_rules WHERE tenant_id = ${id}::uuid`).catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM tenant_schema.tenant_pdf_resumes WHERE tenant_id = ${id}::uuid`,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${id}::uuid`,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM tenant_schema.tenant_agent_rules WHERE tenant_id = ${id}::uuid`,
+        )
+        .catch(() => {});
     }
-    await prisma.message.deleteMany({ where: { conversation: { tenantId: { in: ids } } } }).catch(() => {});
-    await prisma.conversation.deleteMany({ where: { tenantId: { in: ids } } }).catch(() => {});
-    await prisma.contact.deleteMany({ where: { tenantId: { in: ids } } }).catch(() => {});
-    await prisma.aISession.deleteMany({ where: { tenantId: { in: ids } } }).catch(() => {});
-    await prisma.usageRecord.deleteMany({ where: { tenantId: { in: ids } } }).catch(() => {});
-    await prisma.subscription.deleteMany({ where: { tenantId: { in: ids } } }).catch(() => {});
-    await prisma.aIConfig.deleteMany({ where: { tenantId: { in: ids } } }).catch(() => {});
-    await prisma.user.deleteMany({ where: { tenantId: { in: ids } } }).catch(() => {});
-    await prisma.tenant.deleteMany({ where: { id: { in: ids } } }).catch(() => {});
+    await prisma.message
+      .deleteMany({ where: { conversation: { tenantId: { in: ids } } } })
+      .catch(() => {});
+    await prisma.conversation
+      .deleteMany({ where: { tenantId: { in: ids } } })
+      .catch(() => {});
+    await prisma.contact
+      .deleteMany({ where: { tenantId: { in: ids } } })
+      .catch(() => {});
+    await prisma.aISession
+      .deleteMany({ where: { tenantId: { in: ids } } })
+      .catch(() => {});
+    await prisma.usageRecord
+      .deleteMany({ where: { tenantId: { in: ids } } })
+      .catch(() => {});
+    await prisma.subscription
+      .deleteMany({ where: { tenantId: { in: ids } } })
+      .catch(() => {});
+    await prisma.aIConfig
+      .deleteMany({ where: { tenantId: { in: ids } } })
+      .catch(() => {});
+    await prisma.user
+      .deleteMany({ where: { tenantId: { in: ids } } })
+      .catch(() => {});
+    await prisma.tenant
+      .deleteMany({ where: { id: { in: ids } } })
+      .catch(() => {});
     await app.close();
   });
 
@@ -292,7 +358,10 @@ describe('AI Company Context (e2e — IA real)', () => {
         tenantId,
         conversationId: conversation.id,
         contactId: contact.id,
-        content: { type: 'TEXT', text: 'Olá, gostaria de saber mais sobre vocês.' },
+        content: {
+          type: 'TEXT',
+          text: 'Olá, gostaria de saber mais sobre vocês.',
+        },
       });
 
       expect(result).toEqual({ success: true });
@@ -331,7 +400,10 @@ describe('AI Company Context (e2e — IA real)', () => {
         tenantId,
         conversationId: conversation.id,
         contactId: contact.id,
-        content: { type: 'TEXT', text: 'Qual é o horário de atendimento de vocês?' },
+        content: {
+          type: 'TEXT',
+          text: 'Qual é o horário de atendimento de vocês?',
+        },
       });
 
       expect(result).toEqual({ success: true });
@@ -407,8 +479,10 @@ describe('AI Company Context (e2e — IA real)', () => {
   describe('4 — descrição e serviços', () => {
     it('systemPrompt contém Description e Services quando configurados', async () => {
       await seedBusinessData(tenantId, {
-        description: 'Clínica odontológica especializada em implantes, limpeza e estética dental.',
-        services: 'Implante osseointegrado, clareamento dental, ortodontia, limpeza profissional',
+        description:
+          'Clínica odontológica especializada em implantes, limpeza e estética dental.',
+        services:
+          'Implante osseointegrado, clareamento dental, ortodontia, limpeza profissional',
         businessType: 'Clínica Odontológica',
       });
 
@@ -457,7 +531,10 @@ describe('AI Company Context (e2e — IA real)', () => {
         tenantId,
         conversationId: conversation.id,
         contactId: contact.id,
-        content: { type: 'TEXT', text: 'Vocês têm tabela de preços disponível?' },
+        content: {
+          type: 'TEXT',
+          text: 'Vocês têm tabela de preços disponível?',
+        },
       });
 
       expect(result).toEqual({ success: true });
@@ -473,15 +550,11 @@ describe('AI Company Context (e2e — IA real)', () => {
 
   describe('6 — PDF context via banco (TenantPDFContextProvider)', () => {
     it('systemPrompt injeta [CONTEXTO DE DOCUMENTOS] com summaries READY do banco', async () => {
-      await seedPDFResume(
-        tenantId,
-        'cardapio-restaurante.pdf',
-        [
-          'Pizza Margherita R$42 · Pizza Calabresa R$45 · Pizza Quatro Queijos R$48',
-          'Hamburguer Artesanal R$38 · Batata Frita R$18 · Refrigerante R$8',
-          'Funcionamento: segunda a sábado das 11h30 às 23h00. Delivery disponível.',
-        ],
-      );
+      await seedPDFResume(tenantId, 'cardapio-restaurante.pdf', [
+        'Pizza Margherita R$42 · Pizza Calabresa R$45 · Pizza Quatro Queijos R$48',
+        'Hamburguer Artesanal R$38 · Batata Frita R$18 · Refrigerante R$8',
+        'Funcionamento: segunda a sábado das 11h30 às 23h00. Delivery disponível.',
+      ]);
 
       const { contact, conversation } = await createConversation(
         tenantId,
@@ -507,11 +580,9 @@ describe('AI Company Context (e2e — IA real)', () => {
     });
 
     it('PDF de outro tenant NÃO aparece no contexto do tenantId correto', async () => {
-      await seedPDFResume(
-        tenantBId,
-        'exclusivo-tenant-b.pdf',
-        ['DADO_EXCLUSIVO_TENANT_B: informação sigilosa do tenant B'],
-      );
+      await seedPDFResume(tenantBId, 'exclusivo-tenant-b.pdf', [
+        'DADO_EXCLUSIVO_TENANT_B: informação sigilosa do tenant B',
+      ]);
 
       const { contact, conversation } = await createConversation(
         tenantId,
@@ -619,8 +690,10 @@ describe('AI Company Context (e2e — IA real)', () => {
     it('IA recebe todos os campos de empresa quando tudo configurado — pipeline completo', async () => {
       await seedBusinessData(tenantId, {
         businessType: 'Restaurante Contemporâneo',
-        description: 'Restaurante especializado em culinária brasileira artesanal e contemporânea.',
-        services: 'Almoço executivo, jantar à la carte, delivery, eventos privados e buffet',
+        description:
+          'Restaurante especializado em culinária brasileira artesanal e contemporânea.',
+        services:
+          'Almoço executivo, jantar à la carte, delivery, eventos privados e buffet',
         catalogUrl: 'https://restaurante.test/cardapio-completo',
         catalogFiles: ['https://storage.test/cardapio-2025.pdf'],
         operatingHours: {
@@ -641,15 +714,11 @@ describe('AI Company Context (e2e — IA real)', () => {
         city: 'São Paulo',
         state: 'SP',
       });
-      await seedPDFResume(
-        tenantId,
-        'cardapio-completo.pdf',
-        [
-          'Prato do dia: Frango grelhado com arroz de brócolis R$42',
-          'Entrada: Ceviche de tilápia R$32 · Bruschetta de tomate R$24',
-          'Sobremesa: Petit gâteau R$28 · Pudim da casa R$18',
-        ],
-      );
+      await seedPDFResume(tenantId, 'cardapio-completo.pdf', [
+        'Prato do dia: Frango grelhado com arroz de brócolis R$42',
+        'Entrada: Ceviche de tilápia R$32 · Bruschetta de tomate R$24',
+        'Sobremesa: Petit gâteau R$28 · Pudim da casa R$18',
+      ]);
 
       const { contact, conversation } = await createConversation(
         tenantId,
@@ -706,13 +775,13 @@ describe('AI Company Context (e2e — IA real)', () => {
       it('resposta menciona horários quando usuário pergunta diretamente sobre horário', async () => {
         await seedBusinessData(tenantId, {
           operatingHours: {
-            monday:    { open: '08:00', close: '18:00', closed: false },
-            tuesday:   { open: '08:00', close: '18:00', closed: false },
+            monday: { open: '08:00', close: '18:00', closed: false },
+            tuesday: { open: '08:00', close: '18:00', closed: false },
             wednesday: { open: '08:00', close: '18:00', closed: false },
-            thursday:  { open: '08:00', close: '18:00', closed: false },
-            friday:    { open: '08:00', close: '17:00', closed: false },
-            saturday:  { open: '09:00', close: '13:00', closed: false },
-            sunday:    { open: '', close: '', closed: true },
+            thursday: { open: '08:00', close: '18:00', closed: false },
+            friday: { open: '08:00', close: '17:00', closed: false },
+            saturday: { open: '09:00', close: '13:00', closed: false },
+            sunday: { open: '', close: '', closed: true },
           },
         });
 
@@ -725,7 +794,10 @@ describe('AI Company Context (e2e — IA real)', () => {
           tenantId,
           conversationId: conversation.id,
           contactId: contact.id,
-          content: { type: 'TEXT', text: 'Qual é o horário de atendimento de vocês?' },
+          content: {
+            type: 'TEXT',
+            text: 'Qual é o horário de atendimento de vocês?',
+          },
         });
 
         expect(result).toEqual({ success: true });
@@ -765,7 +837,10 @@ describe('AI Company Context (e2e — IA real)', () => {
           tenantId,
           conversationId: conversation.id,
           contactId: contact.id,
-          content: { type: 'TEXT', text: 'Qual é o endereço de vocês? Onde fica a loja?' },
+          content: {
+            type: 'TEXT',
+            text: 'Qual é o endereço de vocês? Onde fica a loja?',
+          },
         });
 
         expect(result).toEqual({ success: true });
@@ -777,9 +852,7 @@ describe('AI Company Context (e2e — IA real)', () => {
           /paulista|são paulo|bela vista|\bsp\b|01310|avenida/i,
         );
 
-        expect(reply).not.toMatch(
-          /não (tenho|possuo|temos) (o )?endereço/i,
-        );
+        expect(reply).not.toMatch(/não (tenho|possuo|temos) (o )?endereço/i);
       });
     });
 
@@ -787,8 +860,10 @@ describe('AI Company Context (e2e — IA real)', () => {
       it('resposta menciona serviços configurados quando usuário pergunta sobre o que a empresa oferece', async () => {
         await seedBusinessData(tenantId, {
           businessType: 'Clínica Odontológica',
-          description: 'Clínica especializada em saúde bucal com foco em estética e reabilitação oral.',
-          services: 'Implante osseointegrado, clareamento dental, ortodontia, limpeza profissional',
+          description:
+            'Clínica especializada em saúde bucal com foco em estética e reabilitação oral.',
+          services:
+            'Implante osseointegrado, clareamento dental, ortodontia, limpeza profissional',
         });
 
         const { contact, conversation } = await createConversation(
@@ -800,7 +875,10 @@ describe('AI Company Context (e2e — IA real)', () => {
           tenantId,
           conversationId: conversation.id,
           contactId: contact.id,
-          content: { type: 'TEXT', text: 'Quais tratamentos e serviços vocês realizam?' },
+          content: {
+            type: 'TEXT',
+            text: 'Quais tratamentos e serviços vocês realizam?',
+          },
         });
 
         expect(result).toEqual({ success: true });
@@ -838,7 +916,10 @@ describe('AI Company Context (e2e — IA real)', () => {
           tenantId,
           conversationId: conversation.id,
           contactId: contact.id,
-          content: { type: 'TEXT', text: 'Vocês têm pizza? Pode me dizer os preços do cardápio?' },
+          content: {
+            type: 'TEXT',
+            text: 'Vocês têm pizza? Pode me dizer os preços do cardápio?',
+          },
         });
 
         expect(result).toEqual({ success: true });
@@ -879,7 +960,10 @@ describe('AI Company Context (e2e — IA real)', () => {
           tenantId: tenantBId,
           conversationId: conversation.id,
           contactId: contact.id,
-          content: { type: 'TEXT', text: 'Qual é o horário de funcionamento de vocês?' },
+          content: {
+            type: 'TEXT',
+            text: 'Qual é o horário de funcionamento de vocês?',
+          },
         });
 
         expect(result).toEqual({ success: true });

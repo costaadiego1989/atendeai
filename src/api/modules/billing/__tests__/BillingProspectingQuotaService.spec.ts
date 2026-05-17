@@ -102,7 +102,10 @@ describe('BillingProspectingQuotaService', () => {
     it('should use configured limit from planConfig when available', async () => {
       prisma.$queryRaw
         .mockResolvedValueOnce([
-          { plan: 'PROFISSIONAL', planConfig: { limits: { prospectingDaily: 500 } } },
+          {
+            plan: 'PROFISSIONAL',
+            planConfig: { limits: { prospectingDaily: 500 } },
+          },
         ])
         .mockResolvedValueOnce([{ used: 0 }]);
 

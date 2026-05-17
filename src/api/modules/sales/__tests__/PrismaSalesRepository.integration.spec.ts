@@ -9,10 +9,7 @@ describe('PrismaSalesRepository Integration', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PrismaSalesRepository,
-        PrismaService,
-      ],
+      providers: [PrismaSalesRepository, PrismaService],
     }).compile();
 
     repository = module.get<PrismaSalesRepository>(PrismaSalesRepository);
@@ -52,7 +49,9 @@ describe('PrismaSalesRepository Integration', () => {
     });
 
     it('should update the promotion', async () => {
-      const updated = await repository.updatePromotion(tenantId, promoId, { title: 'Updated Promo' });
+      const updated = await repository.updatePromotion(tenantId, promoId, {
+        title: 'Updated Promo',
+      });
       expect(updated?.title).toBe('Updated Promo');
     });
 

@@ -17,11 +17,10 @@ export interface ImportProspectLeadCapturesOutput {
   }>;
 }
 
-export interface IImportProspectLeadCapturesUseCase
-  extends IUseCase<
-    ImportProspectLeadCapturesInput,
-    ImportProspectLeadCapturesOutput
-  > {}
+export interface IImportProspectLeadCapturesUseCase extends IUseCase<
+  ImportProspectLeadCapturesInput,
+  ImportProspectLeadCapturesOutput
+> {}
 
 export const IImportProspectLeadCapturesUseCase = Symbol(
   'IImportProspectLeadCapturesUseCase',

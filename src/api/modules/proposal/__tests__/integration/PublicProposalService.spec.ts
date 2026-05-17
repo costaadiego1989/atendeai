@@ -1,6 +1,9 @@
 import { PublicProposalService } from '../../application/services/implementations/PublicProposalService';
 import { ProposalPublicLinkService } from '../../application/services/implementations/ProposalPublicLinkService';
-import { buildProposal, InMemoryProposalRepository } from '../proposal-test-utils';
+import {
+  buildProposal,
+  InMemoryProposalRepository,
+} from '../proposal-test-utils';
 
 describe('PublicProposalService', () => {
   const configService = {
@@ -21,7 +24,10 @@ describe('PublicProposalService', () => {
     const proposal = buildProposal({ id: 'proposal-public-1' });
     repository.seed(proposal);
 
-    const publicLinks = new ProposalPublicLinkService(repository as any, configService as any);
+    const publicLinks = new ProposalPublicLinkService(
+      repository as any,
+      configService as any,
+    );
     const { token } = await publicLinks.ensurePublicLink(proposal);
 
     const service = new PublicProposalService(
@@ -54,7 +60,10 @@ describe('PublicProposalService', () => {
     });
     repository.seed(proposal);
 
-    const publicLinks = new ProposalPublicLinkService(repository as any, configService as any);
+    const publicLinks = new ProposalPublicLinkService(
+      repository as any,
+      configService as any,
+    );
     const { token } = await publicLinks.ensurePublicLink(proposal);
 
     const createSplitPaymentChargeUseCase = {
@@ -113,7 +122,10 @@ describe('PublicProposalService', () => {
     const proposal = buildProposal({ id: 'proposal-public-3' });
     repository.seed(proposal);
 
-    const publicLinks = new ProposalPublicLinkService(repository as any, configService as any);
+    const publicLinks = new ProposalPublicLinkService(
+      repository as any,
+      configService as any,
+    );
     const { token } = await publicLinks.ensurePublicLink(proposal);
 
     const service = new PublicProposalService(

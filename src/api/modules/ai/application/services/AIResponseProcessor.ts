@@ -5,18 +5,18 @@ export class AIResponseProcessor {
   constructor(
     private readonly paymentLinkGenerator: IPaymentLinkGenerator,
     private readonly reserveProfessionalSlotUseCase?: IReserveProfessionalSlot,
-  ) { }
+  ) {}
 
   public async process(
     text: string,
     input:
       | string
       | {
-        tenantId: string;
-        branchId?: string | null;
-        contactId?: string;
-        conversationId?: string;
-      },
+          tenantId: string;
+          branchId?: string | null;
+          contactId?: string;
+          conversationId?: string;
+        },
   ): Promise<string> {
     let processedText = text;
     const tenantId = typeof input === 'string' ? input : input.tenantId;
@@ -48,7 +48,9 @@ export class AIResponseProcessor {
       }
     }
 
-    const scheduleSlotMatch = processedText.match(/\[SCHEDULE_SLOT:\s*([^\]]+)\]/);
+    const scheduleSlotMatch = processedText.match(
+      /\[SCHEDULE_SLOT:\s*([^\]]+)\]/,
+    );
 
     if (scheduleSlotMatch) {
       try {
@@ -73,20 +75,28 @@ export class AIResponseProcessor {
           contactId: context.contactId,
           conversationId: context.conversationId,
           isFree: action.payment !== 'required',
-          paymentTimeoutHours: action.payment === 'required' ? action.paymentTimeoutHours : undefined,
+          paymentTimeoutHours:
+            action.payment === 'required'
+              ? action.paymentTimeoutHours
+              : undefined,
           suppressCustomerNotification: true,
         });
 
-        const formattedDate = new Date(`${action.date}T12:00:00`).toLocaleDateString('pt-BR');
+        const formattedDate = new Date(
+          `${action.date}T12:00:00`,
+        ).toLocaleDateString('pt-BR');
         const timeLine = `${slot.startsAt} as ${slot.endsAt}`;
-        const categoryName = slot.reservedFor?.categoryName || slot.label || 'serviço';
+        const categoryName =
+          slot.reservedFor?.categoryName || slot.label || 'serviço';
 
-        const replacement =
-          slot.payment?.linkUrl
-            ? `Perfeito! Deixei seu horario de ${categoryName} pre-reservado para ${formattedDate}, das ${timeLine}. Para confirmar, conclua o pagamento por aqui: ${slot.payment.linkUrl}`
-            : `Perfeito! Seu agendamento de ${categoryName} ficou confirmado para ${formattedDate}, das ${timeLine}.`;
+        const replacement = slot.payment?.linkUrl
+          ? `Perfeito! Deixei seu horario de ${categoryName} pre-reservado para ${formattedDate}, das ${timeLine}. Para confirmar, conclua o pagamento por aqui: ${slot.payment.linkUrl}`
+          : `Perfeito! Seu agendamento de ${categoryName} ficou confirmado para ${formattedDate}, das ${timeLine}.`;
 
-        processedText = processedText.replace(scheduleSlotMatch[0], replacement);
+        processedText = processedText.replace(
+          scheduleSlotMatch[0],
+          replacement,
+        );
       } catch {
         processedText = processedText.replace(
           scheduleSlotMatch[0],

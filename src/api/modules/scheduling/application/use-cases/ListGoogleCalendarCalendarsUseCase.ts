@@ -14,12 +14,17 @@ export class ListGoogleCalendarCalendarsUseCase {
   ) {}
 
   async execute(input: { tenantId: string; branchId?: string | null }) {
-    const connection = await this.repository.findBestForScope(input.tenantId, input.branchId);
+    const connection = await this.repository.findBestForScope(
+      input.tenantId,
+      input.branchId,
+    );
     if (!connection) {
       throw new NotFoundException('Google Calendar is not connected');
     }
 
-    const calendars = await this.oauthService.listCalendars(connection.refreshToken);
+    const calendars = await this.oauthService.listCalendars(
+      connection.refreshToken,
+    );
 
     return calendars.map((calendar) => ({
       ...calendar,

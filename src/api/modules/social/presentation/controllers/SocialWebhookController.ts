@@ -1,13 +1,16 @@
 import { Controller, Post, Body, HttpCode, Inject } from '@nestjs/common';
 import { ProcessIncomingCommentUseCase } from '../../application/use-cases/ProcessIncomingCommentUseCase';
-import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
+import {
+  ISocialRepository,
+  SOCIAL_REPOSITORY,
+} from '../../domain/ports/ISocialRepository';
 
 @Controller('social/webhook')
 export class SocialWebhookController {
   constructor(
     private readonly processCommentUseCase: ProcessIncomingCommentUseCase,
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
-  ) { }
+  ) {}
 
   @Post('meta')
   @HttpCode(200)
@@ -27,7 +30,10 @@ export class SocialWebhookController {
 
       return { status: 'ok' };
     } catch (err: any) {
-      console.error('[SocialWebhookController] Error processing Meta webhook:', err.message);
+      console.error(
+        '[SocialWebhookController] Error processing Meta webhook:',
+        err.message,
+      );
       return { status: 'error', message: err.message };
     }
   }
@@ -41,7 +47,10 @@ export class SocialWebhookController {
     if (!instagramAccountId) return;
     // Procura a conta por tenant para processar o webhook sem exigir ENV Meta.
     // Como a API já é multi-tenant, iteramos sobre contas conhecidas no schema social.
-    const tenants = await this.repo.listKnownTenantsByPlatform('INSTAGRAM', instagramAccountId);
+    const tenants = await this.repo.listKnownTenantsByPlatform(
+      'INSTAGRAM',
+      instagramAccountId,
+    );
     if (!tenants?.length) {
       return;
     }

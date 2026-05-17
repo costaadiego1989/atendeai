@@ -1,7 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { ForbiddenException, UnauthorizedException } from '../../../domain/exceptions/DomainExceptions';
+import {
+  ForbiddenException,
+  UnauthorizedException,
+} from '../../../domain/exceptions/DomainExceptions';
 import { AuthenticatedUser } from './JwtCookieGuard';
 import { TENANT_PARAM_KEY } from '../decorators/tenant-param.decorator';
 

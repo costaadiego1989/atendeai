@@ -62,11 +62,14 @@ export class GoogleCalendarOAuthService {
     let email: string | undefined;
     if (accessToken) {
       try {
-        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+        const userInfo = await axios.get(
+          'https://www.googleapis.com/oauth2/v2/userinfo',
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           },
-        });
+        );
         email = userInfo.data?.email;
       } catch {
         email = undefined;
@@ -156,7 +159,9 @@ export class GoogleCalendarOAuthService {
 
     const id = response.data?.id;
     if (!id) {
-      throw new ValidationErrorException('Google Calendar event could not be created');
+      throw new ValidationErrorException(
+        'Google Calendar event could not be created',
+      );
     }
 
     return {
@@ -169,11 +174,14 @@ export class GoogleCalendarOAuthService {
     refreshToken: string,
   ): Promise<Array<{ id: string; summary: string; primary?: boolean }>> {
     const accessToken = await this.getAccessToken(refreshToken);
-    const response = await axios.get(`${this.apiBaseUrl}/users/me/calendarList`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await axios.get(
+      `${this.apiBaseUrl}/users/me/calendarList`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     return (response.data?.items ?? []).map((item: any) => ({
       id: item.id,
@@ -253,7 +261,11 @@ export class GoogleCalendarOAuthService {
   }
 
   ensurePlatformConfigured() {
-    if (!this.getClientId() || !this.getClientSecret() || !this.getRedirectUri()) {
+    if (
+      !this.getClientId() ||
+      !this.getClientSecret() ||
+      !this.getRedirectUri()
+    ) {
       throw new ValidationErrorException(
         'Google Calendar OAuth platform credentials are not configured',
       );
@@ -265,10 +277,14 @@ export class GoogleCalendarOAuthService {
   }
 
   getClientSecret(): string {
-    return this.configService.get<string>('GOOGLE_CALENDAR_CLIENT_SECRET') || '';
+    return (
+      this.configService.get<string>('GOOGLE_CALENDAR_CLIENT_SECRET') || ''
+    );
   }
 
   getRedirectUri(): string {
-    return this.configService.get<string>('GOOGLE_CALENDAR_OAUTH_REDIRECT_URI') || '';
+    return (
+      this.configService.get<string>('GOOGLE_CALENDAR_OAUTH_REDIRECT_URI') || ''
+    );
   }
 }

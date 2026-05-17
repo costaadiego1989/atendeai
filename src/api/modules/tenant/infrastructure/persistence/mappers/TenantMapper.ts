@@ -76,7 +76,9 @@ export class TenantMapper {
     ) as T;
   }
 
-  private static resolveLegacyPromotionId(promotion: Record<string, unknown>): string {
+  private static resolveLegacyPromotionId(
+    promotion: Record<string, unknown>,
+  ): string {
     const hash = createHash('sha1');
     hash.update(
       [
@@ -231,7 +233,9 @@ export class TenantMapper {
         planStatus: raw.planStatus || 'ACTIVE',
         ownerUserId:
           raw.ownerUserId ||
-          userEntities.find((user) => user.role.value === 'OWNER')?.id.toValue() ||
+          userEntities
+            .find((user) => user.role.value === 'OWNER')
+            ?.id.toValue() ||
           null,
         users: userEntities,
         whatsAppConfig,
@@ -252,7 +256,8 @@ export class TenantMapper {
           state: raw.state || '',
         }),
         catalogUrl: raw.catalogUrl || null,
-        catalogFiles: (raw as any).catalogFiles || (raw as any).catalog_files || [],
+        catalogFiles:
+          (raw as any).catalogFiles || (raw as any).catalog_files || [],
         operatingHours: (raw as any).operatingHours || null,
         promotions: ((raw.promotions as unknown[]) || [])
           .map((promotion) => TenantMapper.toPromotion(promotion))

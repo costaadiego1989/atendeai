@@ -32,7 +32,9 @@ describe('ShopeeProvider', () => {
     };
   }
 
-  function makeItemDetailResponse(items: Array<{ id: number; sku: string; stock: number; price: number }>) {
+  function makeItemDetailResponse(
+    items: Array<{ id: number; sku: string; stock: number; price: number }>,
+  ) {
     return {
       ok: false,
       json: async () => ({
@@ -53,10 +55,30 @@ describe('ShopeeProvider', () => {
   // ─── testConnection ────────────────────────────────────────────────────────
 
   it('INV-T-067a: testConnection lança erro quando qualquer credencial ausente', async () => {
-    await expect(provider.testConnection({ partnerKey: 'k', accessToken: 't', shopId: 's' })).rejects.toThrow();
-    await expect(provider.testConnection({ partnerId: '1', accessToken: 't', shopId: 's' })).rejects.toThrow();
-    await expect(provider.testConnection({ partnerId: '1', partnerKey: 'k', shopId: 's' })).rejects.toThrow();
-    await expect(provider.testConnection({ partnerId: '1', partnerKey: 'k', accessToken: 't' })).rejects.toThrow();
+    await expect(
+      provider.testConnection({
+        partnerKey: 'k',
+        accessToken: 't',
+        shopId: 's',
+      }),
+    ).rejects.toThrow();
+    await expect(
+      provider.testConnection({
+        partnerId: '1',
+        accessToken: 't',
+        shopId: 's',
+      }),
+    ).rejects.toThrow();
+    await expect(
+      provider.testConnection({ partnerId: '1', partnerKey: 'k', shopId: 's' }),
+    ).rejects.toThrow();
+    await expect(
+      provider.testConnection({
+        partnerId: '1',
+        partnerKey: 'k',
+        accessToken: 't',
+      }),
+    ).rejects.toThrow();
   });
 
   it('INV-T-067b: testConnection gera assinatura HMAC-SHA256 válida', async () => {
@@ -74,7 +96,9 @@ describe('ShopeeProvider', () => {
     const apiPath = '/api/v2/shop/get_shop_info';
 
     const expectedSign = createHmac('sha256', config.partnerKey)
-      .update(`${config.partnerId}${apiPath}${timestamp}${config.accessToken}${config.shopId}`)
+      .update(
+        `${config.partnerId}${apiPath}${timestamp}${config.accessToken}${config.shopId}`,
+      )
       .digest('hex');
 
     expect(sign).toBe(expectedSign);
@@ -83,10 +107,15 @@ describe('ShopeeProvider', () => {
   // ─── fetchStock ────────────────────────────────────────────────────────────
 
   it('INV-T-067c: fetchStock step 1 busca item list com offset pagination', async () => {
-    const fetchMock = jest.fn().mockResolvedValueOnce(makeItemListResponse([])) as unknown as typeof fetch;
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(
+        makeItemListResponse([]),
+      ) as unknown as typeof fetch;
     global.fetch = fetchMock;
 
-    for await (const _ of provider.fetchStock(config)) { }
+    for await (const _ of provider.fetchStock(config)) {
+    }
 
     const url = (fetchMock as jest.Mock).mock.calls[0][0] as string;
     expect(url).toContain('/api/v2/product/get_item_list');
@@ -94,12 +123,18 @@ describe('ShopeeProvider', () => {
   });
 
   it('INV-T-067d: fetchStock step 2 busca detalhes via get_item_base_info', async () => {
-    const fetchMock = jest.fn()
+    const fetchMock = jest
+      .fn()
       .mockResolvedValueOnce(makeItemListResponse([123456]))
-      .mockResolvedValueOnce(makeItemDetailResponse([{ id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.90 }])) as unknown as typeof fetch;
+      .mockResolvedValueOnce(
+        makeItemDetailResponse([
+          { id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.9 },
+        ]),
+      ) as unknown as typeof fetch;
     global.fetch = fetchMock;
 
-    for await (const _ of provider.fetchStock(config)) { }
+    for await (const _ of provider.fetchStock(config)) {
+    }
 
     const detailUrl = (fetchMock as jest.Mock).mock.calls[1][0] as string;
     expect(detailUrl).toContain('/api/v2/product/get_item_base_info');
@@ -107,9 +142,14 @@ describe('ShopeeProvider', () => {
   });
 
   it('INV-T-067e: fetchStock mapeia item_sku, stock_info.normal_stock e price_info para snapshot', async () => {
-    global.fetch = jest.fn()
+    global.fetch = jest
+      .fn()
       .mockResolvedValueOnce(makeItemListResponse([123456]))
-      .mockResolvedValueOnce(makeItemDetailResponse([{ id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.90 }])) as unknown as typeof fetch;
+      .mockResolvedValueOnce(
+        makeItemDetailResponse([
+          { id: 123456, sku: 'SHOPEE-001', stock: 12, price: 79.9 },
+        ]),
+      ) as unknown as typeof fetch;
 
     const batches: any[][] = [];
     for await (const batch of provider.fetchStock(config)) {
@@ -136,14 +176,18 @@ describe('ShopeeProvider', () => {
 
     const apiPath = '/api/v2/shop/get_shop_info';
     const expectedSign = createHmac('sha256', config.partnerKey)
-      .update(`${config.partnerId}${apiPath}${ts1}${config.accessToken}${config.shopId}`)
+      .update(
+        `${config.partnerId}${apiPath}${ts1}${config.accessToken}${config.shopId}`,
+      )
       .digest('hex');
 
     expect(sign1).toBe(expectedSign);
   });
 
   it('INV-T-067g: fetchStock para quando item list retorna array vazio', async () => {
-    global.fetch = jest.fn().mockResolvedValue(makeItemListResponse([])) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(makeItemListResponse([])) as unknown as typeof fetch;
 
     const batches: unknown[] = [];
     for await (const batch of provider.fetchStock(config)) {

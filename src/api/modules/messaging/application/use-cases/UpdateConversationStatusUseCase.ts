@@ -17,9 +17,7 @@ import { ConversationStatusChangedIntegrationEvent } from '../integration-events
 import { ConversationPendingHumanIntegrationEvent } from '../integration-events/publishers/ConversationPendingHumanIntegrationEvent';
 
 @Injectable()
-export class UpdateConversationStatusUseCase
-  implements IUpdateConversationStatusUseCase
-{
+export class UpdateConversationStatusUseCase implements IUpdateConversationStatusUseCase {
   constructor(
     @Inject(CONVERSATION_REPOSITORY)
     private readonly conversationRepository: IConversationRepository,
@@ -98,7 +96,7 @@ export class UpdateConversationStatusUseCase
           conversationId: conversation.id.toString(),
           contactId: conversation.contactId.toString(),
           channel: conversation.channel,
-        })
+        }),
       );
     }
 

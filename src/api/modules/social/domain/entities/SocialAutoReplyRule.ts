@@ -85,16 +85,36 @@ export class SocialAutoReplyRule extends AggregateRoot<SocialAutoReplyRuleProps>
     super(props, id);
   }
 
-  get tenantId(): string { return this.props.tenantId; }
-  get name(): string { return this.props.name; }
-  get isActive(): boolean { return this.props.isActive; }
-  get priority(): number { return this.props.priority; }
-  get platform(): string { return this.props.platform; }
-  get conditions(): AutoReplyConditions { return this.props.conditions; }
-  get actions(): AutoReplyActions { return this.props.actions; }
-  get limits(): AutoReplyLimits { return this.props.limits; }
-  get totalFired(): number { return this.props.totalFired; }
-  get lastFiredAt(): Date | null { return this.props.lastFiredAt; }
+  get tenantId(): string {
+    return this.props.tenantId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get priority(): number {
+    return this.props.priority;
+  }
+  get platform(): string {
+    return this.props.platform;
+  }
+  get conditions(): AutoReplyConditions {
+    return this.props.conditions;
+  }
+  get actions(): AutoReplyActions {
+    return this.props.actions;
+  }
+  get limits(): AutoReplyLimits {
+    return this.props.limits;
+  }
+  get totalFired(): number {
+    return this.props.totalFired;
+  }
+  get lastFiredAt(): Date | null {
+    return this.props.lastFiredAt;
+  }
 
   static create(
     props: Pick<SocialAutoReplyRuleProps, 'tenantId' | 'name' | 'platform'> & {
@@ -131,7 +151,10 @@ export class SocialAutoReplyRule extends AggregateRoot<SocialAutoReplyRuleProps>
     );
   }
 
-  static reconstitute(props: SocialAutoReplyRuleProps, id: UniqueEntityID): SocialAutoReplyRule {
+  static reconstitute(
+    props: SocialAutoReplyRuleProps,
+    id: UniqueEntityID,
+  ): SocialAutoReplyRule {
     return new SocialAutoReplyRule(props, id);
   }
 
@@ -204,7 +227,18 @@ export class SocialAutoReplyRule extends AggregateRoot<SocialAutoReplyRuleProps>
 
     // Question detection
     if (conditions.commentContainsQuestion) {
-      const questionIndicators = ['?', 'quanto', 'como', 'qual', 'onde', 'quando', 'quem', 'por que', 'price', 'how much'];
+      const questionIndicators = [
+        '?',
+        'quanto',
+        'como',
+        'qual',
+        'onde',
+        'quando',
+        'quem',
+        'por que',
+        'price',
+        'how much',
+      ];
       const hasQuestion = questionIndicators.some((q) => lowerText.includes(q));
       if (!hasQuestion) return false;
     }

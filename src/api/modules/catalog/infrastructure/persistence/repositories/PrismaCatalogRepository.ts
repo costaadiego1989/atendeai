@@ -23,7 +23,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   async createCategory(
     input: CreateCatalogCategoryInput,
   ): Promise<CatalogCategoryRecord> {
-
     const parent = input.parentCategoryId
       ? await this.findCategoryById(input.tenantId, input.parentCategoryId)
       : null;
@@ -56,7 +55,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   async updateCategory(
     input: UpdateCatalogCategoryInput,
   ): Promise<CatalogCategoryRecord> {
-
     const existing = await this.prisma.catalogCategory.findFirst({
       where: {
         id: input.categoryId,
@@ -74,7 +72,7 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     );
     const parentCategoryId =
       input.parentCategoryId === undefined
-        ? currentCategory?.parentCategoryId ?? null
+        ? (currentCategory?.parentCategoryId ?? null)
         : input.parentCategoryId;
 
     if (parentCategoryId === input.categoryId) {
@@ -111,7 +109,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   }
 
   async listCategories(tenantId: string): Promise<CatalogCategoryRecord[]> {
-
     const categories = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT child.*, parent.name AS parent_category_name
       FROM catalog_schema.catalog_categories child
@@ -129,7 +126,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     categoryId: string,
   ): Promise<CatalogCategoryRecord | null> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT child.*, parent.name AS parent_category_name
       FROM catalog_schema.catalog_categories child
@@ -147,7 +143,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     categoryId: string,
   ): Promise<CatalogCategoryRecord> {
-
     const existing = await this.prisma.catalogCategory.findFirst({
       where: {
         id: categoryId,
@@ -164,7 +159,9 @@ export class PrismaCatalogRepository implements ICatalogRepository {
       throw new CatalogCategoryInUseError(categoryId);
     }
 
-    const activeChildren = await this.prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
+    const activeChildren = await this.prisma.$queryRaw<
+      Array<{ count: bigint }>
+    >(Prisma.sql`
       SELECT COUNT(*)::bigint AS count
       FROM catalog_schema.catalog_categories
       WHERE tenant_id = ${tenantId}::uuid
@@ -203,7 +200,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   }
 
   async createItem(input: CreateCatalogItemInput): Promise<CatalogItemRecord> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO catalog_schema.catalog_items (
         tenant_id, category_id, type, name, description, base_price, currency, tags,
@@ -231,7 +227,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
   }
 
   async updateItem(input: UpdateCatalogItemInput): Promise<CatalogItemRecord> {
-
     const existing = await this.prisma.catalogItem.findFirst({
       where: {
         id: input.itemId,
@@ -267,8 +262,9 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     return this.mapItemWithCategory(rows[0]);
   }
 
-  async listItems(filters: ListCatalogItemsFilters): Promise<CatalogItemRecord[]> {
-
+  async listItems(
+    filters: ListCatalogItemsFilters,
+  ): Promise<CatalogItemRecord[]> {
     const items = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -293,7 +289,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     itemId: string,
   ): Promise<CatalogItemRecord | null> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -311,7 +306,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     tenantId: string,
     externalReference: string,
   ): Promise<CatalogItemRecord | null> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -330,7 +324,6 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     type: string,
     name: string,
   ): Promise<CatalogItemRecord | null> {
-
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT item.*, category.name AS category_name
       FROM catalog_schema.catalog_items item
@@ -410,8 +403,10 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     return {
       id: category.id,
       tenantId: (category.tenantId ?? category.tenant_id)!,
-      parentCategoryId: category.parentCategoryId ?? category.parent_category_id ?? null,
-      parentCategoryName: category.parentCategoryName ?? category.parent_category_name ?? null,
+      parentCategoryId:
+        category.parentCategoryId ?? category.parent_category_id ?? null,
+      parentCategoryName:
+        category.parentCategoryName ?? category.parent_category_name ?? null,
       path: category.path ?? [category.name],
       level: category.level ?? 0,
       name: category.name,
@@ -446,7 +441,9 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     } | null;
   }): CatalogItemRecord {
     const basePrice =
-      item.basePrice == null ? null : Number(item.basePrice.toString()).toFixed(2);
+      item.basePrice == null
+        ? null
+        : Number(item.basePrice.toString()).toFixed(2);
 
     return {
       id: item.id,
@@ -464,7 +461,9 @@ export class PrismaCatalogRepository implements ICatalogRepository {
       externalReference: item.externalReference,
       imageUrl: item.imageUrl,
       attributes:
-        item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)
+        item.attributes &&
+        typeof item.attributes === 'object' &&
+        !Array.isArray(item.attributes)
           ? (item.attributes as Record<string, unknown>)
           : {},
       variants: Array.isArray(item.variants)

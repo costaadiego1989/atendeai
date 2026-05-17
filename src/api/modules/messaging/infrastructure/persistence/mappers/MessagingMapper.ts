@@ -27,9 +27,17 @@ export class MessagingMapper {
         tenantId: TenantId.create(raw.tenantId),
         contactId: new UniqueEntityID(raw.contactId),
         branchId:
-          ((raw as PrismaConversationWithRelations & { branchId?: string | null }).branchId ??
-            (raw as PrismaConversationWithRelations & { branch_id?: string | null }).branch_id ??
-            null),
+          (
+            raw as PrismaConversationWithRelations & {
+              branchId?: string | null;
+            }
+          ).branchId ??
+          (
+            raw as PrismaConversationWithRelations & {
+              branch_id?: string | null;
+            }
+          ).branch_id ??
+          null,
         channel: raw.channel,
         status: raw.status as ConversationStatus,
         messages: [],

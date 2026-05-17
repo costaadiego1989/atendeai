@@ -18,6 +18,10 @@ export class GetTenantAgentRuleService {
 
     const moduleId = parseAgentModule(input.moduleId);
 
-    return this.repository.findByModule(input.tenantId, moduleId, input.branchId);
+    return this.repository.findByModule(
+      input.tenantId,
+      moduleId,
+      input.branchId,
+    );
   }
 }

@@ -61,14 +61,12 @@ export function computeNextDailyTriggerAfterLastRunUtc(
   );
 
   const { hours, minutes } = parseTimeOfDay(timeOfDay);
-  let next = anchorInZone
-    .plus({ days: 1 })
-    .set({
-      hour: hours,
-      minute: minutes,
-      second: 0,
-      millisecond: 0,
-    });
+  let next = anchorInZone.plus({ days: 1 }).set({
+    hour: hours,
+    minute: minutes,
+    second: 0,
+    millisecond: 0,
+  });
 
   if (next <= anchorInZone) {
     next = next.plus({ days: 1 });

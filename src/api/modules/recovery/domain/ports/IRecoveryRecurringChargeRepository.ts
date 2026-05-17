@@ -64,7 +64,9 @@ export interface CreateRecoveryRecurringChargeInput {
 }
 
 export interface IRecoveryRecurringChargeRepository {
-  create(input: CreateRecoveryRecurringChargeInput): Promise<RecoveryRecurringChargeRecord>;
+  create(
+    input: CreateRecoveryRecurringChargeInput,
+  ): Promise<RecoveryRecurringChargeRecord>;
   findById(
     tenantId: string,
     recurrenceId: string,

@@ -1,6 +1,9 @@
 import { ListProposalsUseCase } from '../../application/use-cases/ListProposalsUseCase';
 import { ListProposalsService } from '../../application/services/implementations/ListProposalsService';
-import { buildProposal, createProposalRepositoryMock } from '../proposal-test-utils';
+import {
+  buildProposal,
+  createProposalRepositoryMock,
+} from '../proposal-test-utils';
 
 describe('ListProposalsUseCase', () => {
   let listProposalsUseCase: ListProposalsUseCase;

@@ -11,7 +11,7 @@ export class AIRecoveryGuidanceGenerator implements IRecoveryGuidanceGenerator {
   constructor(
     @Inject(AI_ENGINE)
     private readonly aiEngine: IAIEngine,
-  ) { }
+  ) {}
 
   async generate(
     input: RecoveryGuidanceInput,
@@ -68,7 +68,9 @@ Regras:
     }
 
     try {
-      const parsed = JSON.parse(jsonMatch[0]) as Partial<RecoveryGuidanceOutput>;
+      const parsed = JSON.parse(
+        jsonMatch[0],
+      ) as Partial<RecoveryGuidanceOutput>;
       if (
         typeof parsed.suggestedReply === 'string' &&
         typeof parsed.suggestedNextAction === 'string'

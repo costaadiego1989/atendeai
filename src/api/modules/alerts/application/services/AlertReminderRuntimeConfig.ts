@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  assertValidReminderTimezone,
-} from '../helpers/alert-reminder-schedule';
+import { assertValidReminderTimezone } from '../helpers/alert-reminder-schedule';
 
 @Injectable()
 export class AlertReminderRuntimeConfig {
@@ -32,9 +30,7 @@ export class AlertReminderRuntimeConfig {
   }
 
   antiSpamRollingHours(): number {
-    const n = Number(
-      this.config.get<string>('ALERT_ANTI_SPAM_ROLLING_HOURS'),
-    );
+    const n = Number(this.config.get<string>('ALERT_ANTI_SPAM_ROLLING_HOURS'));
     if (!Number.isFinite(n) || n <= 0) {
       return 24;
     }

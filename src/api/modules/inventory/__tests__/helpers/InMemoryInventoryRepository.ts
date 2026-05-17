@@ -43,23 +43,34 @@ export class InMemoryInventoryRepository implements IInventoryRepository {
     return record;
   }
 
-  async listItems(filters: ListInventoryItemsFilters): Promise<InventoryItemRecord[]> {
+  async listItems(
+    filters: ListInventoryItemsFilters,
+  ): Promise<InventoryItemRecord[]> {
     return Array.from(this.items.values()).filter((item) => {
       if (item.tenantId !== filters.tenantId) return false;
-      if (filters.availableOnly && item.availabilityStatus === 'UNAVAILABLE') return false;
+      if (filters.availableOnly && item.availabilityStatus === 'UNAVAILABLE')
+        return false;
       if (filters.query) {
         const q = filters.query.toLowerCase();
-        return item.name.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q);
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.sku.toLowerCase().includes(q)
+        );
       }
       return true;
     });
   }
 
-  async findItemBySku(tenantId: string, sku: string): Promise<InventoryItemRecord | null> {
+  async findItemBySku(
+    tenantId: string,
+    sku: string,
+  ): Promise<InventoryItemRecord | null> {
     return this.items.get(`${tenantId}:${sku}`) ?? null;
   }
 
-  async createConnection(input: CreateInventoryConnectionInput): Promise<InventoryConnectionRecord> {
+  async createConnection(
+    input: CreateInventoryConnectionInput,
+  ): Promise<InventoryConnectionRecord> {
     const now = new Date();
     const record: InventoryConnectionRecord = {
       id: randomUUID(),
@@ -76,8 +87,12 @@ export class InMemoryInventoryRepository implements IInventoryRepository {
     return record;
   }
 
-  async listConnections(tenantId: string): Promise<InventoryConnectionRecord[]> {
-    return Array.from(this.connections.values()).filter((c) => c.tenantId === tenantId);
+  async listConnections(
+    tenantId: string,
+  ): Promise<InventoryConnectionRecord[]> {
+    return Array.from(this.connections.values()).filter(
+      (c) => c.tenantId === tenantId,
+    );
   }
 
   async findConnectionByProvider(
@@ -87,12 +102,18 @@ export class InMemoryInventoryRepository implements IInventoryRepository {
   ): Promise<InventoryConnectionRecord | null> {
     return (
       Array.from(this.connections.values()).find(
-        (c) => c.tenantId === tenantId && c.sourceType === sourceType && c.providerName === providerName,
+        (c) =>
+          c.tenantId === tenantId &&
+          c.sourceType === sourceType &&
+          c.providerName === providerName,
       ) ?? null
     );
   }
 
-  async markConnectionSyncedAt(connectionId: string, syncedAt: Date): Promise<void> {
+  async markConnectionSyncedAt(
+    connectionId: string,
+    syncedAt: Date,
+  ): Promise<void> {
     const conn = this.connections.get(connectionId);
     if (conn) {
       this.connections.set(connectionId, { ...conn, lastSyncedAt: syncedAt });

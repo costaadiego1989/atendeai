@@ -109,8 +109,8 @@ describe('InventoryAsyncJobsService', () => {
   it('should getDownloadPayload throw EntityNotFoundException when job not found or not completed', async () => {
     prisma.$queryRaw.mockResolvedValue([]);
 
-    await expect(service.getDownloadPayload('tenant-1', 'job-999')).rejects.toThrow(
-      EntityNotFoundException,
-    );
+    await expect(
+      service.getDownloadPayload('tenant-1', 'job-999'),
+    ).rejects.toThrow(EntityNotFoundException);
   });
 });

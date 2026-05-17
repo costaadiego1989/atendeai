@@ -65,7 +65,10 @@ describe('UpdateCommerceOrderStatusUseCase', () => {
       findInventoryItemById: jest.fn(),
     } as unknown as jest.Mocked<ICommerceRepository>;
 
-    useCase = new UpdateCommerceOrderStatusUseCase(commerceRepository, eventBus);
+    useCase = new UpdateCommerceOrderStatusUseCase(
+      commerceRepository,
+      eventBus,
+    );
   });
 
   it.each([

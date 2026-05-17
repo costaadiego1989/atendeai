@@ -3,7 +3,10 @@ import {
   ITenantRepository,
   TENANT_REPOSITORY,
 } from '../../domain/repositories/ITenantRepository';
-import { EntityNotFoundException, ValidationErrorException } from '../../../../shared/domain/exceptions/DomainExceptions';
+import {
+  EntityNotFoundException,
+  ValidationErrorException,
+} from '../../../../shared/domain/exceptions/DomainExceptions';
 import { TwilioManagementAcl } from '../../infrastructure/acl/TwilioManagementAcl';
 import { WhatsAppConfig } from '../../domain/entities/WhatsAppConfig';
 import { TenantDomainEventPublisher } from '../services/TenantDomainEventPublisher';
@@ -27,12 +30,16 @@ export class RefreshTwilioWhatsAppSenderStatusUseCase {
       const branch = await this.resolveBranch(tenantId, branchId);
       const override = branch.whatsAppConfigOverride;
       if (!override || override.provider !== 'TWILIO') {
-        throw new ValidationErrorException('Branch WhatsApp provider is not Twilio');
+        throw new ValidationErrorException(
+          'Branch WhatsApp provider is not Twilio',
+        );
       }
 
       const senderSid = override.credentials.senderSid;
       if (!senderSid) {
-        throw new ValidationErrorException('Twilio sender SID is not configured');
+        throw new ValidationErrorException(
+          'Twilio sender SID is not configured',
+        );
       }
 
       const sender = await this.twilioManagementAcl.getSender(
@@ -85,7 +92,9 @@ export class RefreshTwilioWhatsAppSenderStatusUseCase {
     }
 
     if (tenant.whatsAppConfig.provider !== 'TWILIO') {
-      throw new ValidationErrorException('Tenant WhatsApp provider is not Twilio');
+      throw new ValidationErrorException(
+        'Tenant WhatsApp provider is not Twilio',
+      );
     }
 
     const senderSid = tenant.whatsAppConfig.credentials.senderSid;
@@ -105,7 +114,8 @@ export class RefreshTwilioWhatsAppSenderStatusUseCase {
         senderSid: sender.sid,
         senderId: sender.senderId,
         wabaId:
-          sender.configuration?.wabaId || tenant.whatsAppConfig.credentials.wabaId,
+          sender.configuration?.wabaId ||
+          tenant.whatsAppConfig.credentials.wabaId,
       },
       whatsappNumber: tenant.whatsAppConfig.whatsappNumber,
       webhookSecret: null,

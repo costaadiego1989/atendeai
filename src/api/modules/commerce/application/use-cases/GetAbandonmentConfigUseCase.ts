@@ -13,7 +13,8 @@ export class GetAbandonmentConfigUseCase {
   ) {}
 
   async execute(tenantId: string): Promise<CommerceAbandonmentConfigRecord> {
-    const config = await this.commerceRepository.findAbandonmentConfigByTenantId(tenantId);
+    const config =
+      await this.commerceRepository.findAbandonmentConfigByTenantId(tenantId);
     if (!config) {
       // Return default config if not found
       return {

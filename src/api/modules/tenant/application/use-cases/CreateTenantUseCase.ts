@@ -32,7 +32,7 @@ export class CreateTenantUseCase implements ICreateTenantUseCase {
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: IPasswordHasher,
     private readonly tenantDomainEventPublisher: TenantDomainEventPublisher,
-  ) { }
+  ) {}
 
   async execute(input: CreateTenantInput): Promise<CreateTenantOutput> {
     const cnpjVO = CNPJ.create(input.cnpj);

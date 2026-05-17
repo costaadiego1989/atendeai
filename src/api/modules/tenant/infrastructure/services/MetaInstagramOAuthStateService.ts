@@ -19,7 +19,9 @@ export class MetaInstagramOAuthStateService {
       branchId: branchId || undefined,
       issuedAt: Date.now(),
     };
-    const encoded = Buffer.from(JSON.stringify(payload), 'utf-8').toString('base64url');
+    const encoded = Buffer.from(JSON.stringify(payload), 'utf-8').toString(
+      'base64url',
+    );
     const signature = this.signValue(encoded);
     return `${encoded}.${signature}`;
   }
@@ -27,17 +29,18 @@ export class MetaInstagramOAuthStateService {
   verify(state: string): StatePayload {
     const [encoded, signature] = state.split('.');
     if (!encoded || !signature) {
-      throw new ValidationErrorException('Meta Instagram OAuth state is invalid');
+      throw new ValidationErrorException(
+        'Meta Instagram OAuth state is invalid',
+      );
     }
 
     const expectedSignature = this.signValue(encoded);
     if (
-      !timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature),
-      )
+      !timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
     ) {
-      throw new ValidationErrorException('Meta Instagram OAuth state is invalid');
+      throw new ValidationErrorException(
+        'Meta Instagram OAuth state is invalid',
+      );
     }
 
     const payload = JSON.parse(
@@ -45,7 +48,9 @@ export class MetaInstagramOAuthStateService {
     ) as StatePayload;
 
     if (!payload.tenantId || !payload.issuedAt) {
-      throw new ValidationErrorException('Meta Instagram OAuth state is invalid');
+      throw new ValidationErrorException(
+        'Meta Instagram OAuth state is invalid',
+      );
     }
 
     if (Date.now() - payload.issuedAt > 15 * 60 * 1000) {

@@ -7,9 +7,7 @@ import {
 } from '../../domain/ports/ISchedulingGoogleCalendarEventLinkRepository';
 
 @Injectable()
-export class PrismaSchedulingGoogleCalendarEventLinkRepository
-  implements ISchedulingGoogleCalendarEventLinkRepository
-{
+export class PrismaSchedulingGoogleCalendarEventLinkRepository implements ISchedulingGoogleCalendarEventLinkRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(link: SchedulingGoogleCalendarEventLink): Promise<void> {

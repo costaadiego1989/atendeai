@@ -15,7 +15,10 @@ describe('AsaasWebhookGuard', () => {
     guard = new AsaasWebhookGuard(configService);
   });
 
-  function createContext(signature?: string, body: Record<string, unknown> = {}) {
+  function createContext(
+    signature?: string,
+    body: Record<string, unknown> = {},
+  ) {
     return {
       switchToHttp: () => ({
         getRequest: () => ({
@@ -48,7 +51,9 @@ describe('AsaasWebhookGuard', () => {
     configService.get.mockReturnValue('secret');
 
     expect(() =>
-      guard.canActivate(createContext('invalid-signature', { event: 'PAYMENT_RECEIVED' })),
+      guard.canActivate(
+        createContext('invalid-signature', { event: 'PAYMENT_RECEIVED' }),
+      ),
     ).toThrow(ForbiddenException);
   });
 

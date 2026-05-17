@@ -27,10 +27,23 @@ describe('SocialWebhookController', () => {
       platform: 'INSTAGRAM',
       conditions: { keywords: ['preço'] },
       actions: {
-        replyToComment: { enabled: true, mode: 'TEMPLATE', templates: ['Te chamei no direct 😉'] },
-        sendInboxMessage: { enabled: true, delaySeconds: 0, mode: 'TEMPLATE', templates: ['Mensagem no DM'] },
+        replyToComment: {
+          enabled: true,
+          mode: 'TEMPLATE',
+          templates: ['Te chamei no direct 😉'],
+        },
+        sendInboxMessage: {
+          enabled: true,
+          delaySeconds: 0,
+          mode: 'TEMPLATE',
+          templates: ['Mensagem no DM'],
+        },
       },
-      limits: { maxRepliesPerPost: 50, maxRepliesPerHour: 30, cooldownPerUser: 60 },
+      limits: {
+        maxRepliesPerPost: 50,
+        maxRepliesPerHour: 30,
+        cooldownPerUser: 60,
+      },
       totalFired: 0,
       lastFiredAt: null,
     },
@@ -99,8 +112,12 @@ describe('SocialWebhookController', () => {
   };
 
   const adapter = {
-    replyToComment: jest.fn().mockResolvedValue({ success: true, replyId: 'reply-meta-1' }),
-    sendInboxMessage: jest.fn().mockResolvedValue({ success: true, messageId: 'msg-meta-1' }),
+    replyToComment: jest
+      .fn()
+      .mockResolvedValue({ success: true, replyId: 'reply-meta-1' }),
+    sendInboxMessage: jest
+      .fn()
+      .mockResolvedValue({ success: true, messageId: 'msg-meta-1' }),
   };
 
   beforeAll(async () => {
@@ -111,7 +128,10 @@ describe('SocialWebhookController', () => {
         AutoReplyEngine,
         { provide: SOCIAL_REPOSITORY, useValue: repo },
         { provide: SOCIAL_PLATFORM_ADAPTER, useValue: adapter },
-        { provide: SOCIAL_DELAYED_JOB_QUEUE, useValue: { schedule: jest.fn() } },
+        {
+          provide: SOCIAL_DELAYED_JOB_QUEUE,
+          useValue: { schedule: jest.fn() },
+        },
         { provide: AI_ENGINE, useValue: null },
         {
           provide: EVENT_BUS,
@@ -170,7 +190,8 @@ describe('SocialWebhookController', () => {
     expect(audits).toContain('COMMENT_RECEIVED');
     expect(audits).toContain('AUTO_REPLY_TRIGGERED');
     expect(publishedEvents).toContain('SocialCommentReceivedIntegrationEvent');
-    expect(publishedEvents).toContain('SocialAutoReplyTriggeredIntegrationEvent');
+    expect(publishedEvents).toContain(
+      'SocialAutoReplyTriggeredIntegrationEvent',
+    );
   });
 });
-

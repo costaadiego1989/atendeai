@@ -12,7 +12,7 @@ describe('RedeemCouponUseCase', () => {
       findCouponById: jest.fn(),
       incrementCouponUsage: jest.fn(),
     } as unknown as jest.Mocked<ISalesCouponRepository>;
-    
+
     useCase = new RedeemCouponUseCase(repoMock);
   });
 
@@ -37,48 +37,61 @@ describe('RedeemCouponUseCase', () => {
       usedCount: 1,
     } as any);
 
-    const result = await useCase.execute({ tenantId: 'tenant-1', code: 'VALID' });
+    const result = await useCase.execute({
+      tenantId: 'tenant-1',
+      code: 'VALID',
+    });
 
     expect(result.discount.value).toBe(10);
     expect(result.coupon!.usedCount).toBe(1);
-    expect(repoMock.incrementCouponUsage).toHaveBeenCalledWith('tenant-1', 'id-123');
+    expect(repoMock.incrementCouponUsage).toHaveBeenCalledWith(
+      'tenant-1',
+      'id-123',
+    );
   });
 
   it('should throw NotFoundException if coupon does not exist', async () => {
     repoMock.findCouponByCode.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute({ tenantId: 't1', code: 'INVALID' }))
-      .rejects.toThrow(NotFoundException);
+    await expect(
+      useCase.execute({ tenantId: 't1', code: 'INVALID' }),
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should throw BadRequestException if coupon is inactive', async () => {
     // @ts-ignore
-    repoMock.findCouponByCode.mockResolvedValueOnce({ ...validCoupon, active: false });
+    repoMock.findCouponByCode.mockResolvedValueOnce({
+      ...validCoupon,
+      active: false,
+    });
 
-    await expect(useCase.execute({ tenantId: 't1', code: 'VALID' }))
-      .rejects.toThrow(BadRequestException);
+    await expect(
+      useCase.execute({ tenantId: 't1', code: 'VALID' }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('should throw BadRequestException if max uses reached', async () => {
     // @ts-ignore
-    repoMock.findCouponByCode.mockResolvedValueOnce({ 
-      ...validCoupon, 
-      maxUses: 2, 
-      usedCount: 2 
+    repoMock.findCouponByCode.mockResolvedValueOnce({
+      ...validCoupon,
+      maxUses: 2,
+      usedCount: 2,
     });
 
-    await expect(useCase.execute({ tenantId: 't1', code: 'VALID' }))
-      .rejects.toThrow(BadRequestException);
+    await expect(
+      useCase.execute({ tenantId: 't1', code: 'VALID' }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('should throw BadRequestException if coupon starts in the future', async () => {
     // @ts-ignore
-    repoMock.findCouponByCode.mockResolvedValueOnce({ 
-      ...validCoupon, 
-      startsAt: new Date(Date.now() + 8640000)
+    repoMock.findCouponByCode.mockResolvedValueOnce({
+      ...validCoupon,
+      startsAt: new Date(Date.now() + 8640000),
     });
 
-    await expect(useCase.execute({ tenantId: 't1', code: 'VALID' }))
-      .rejects.toThrow(BadRequestException);
+    await expect(
+      useCase.execute({ tenantId: 't1', code: 'VALID' }),
+    ).rejects.toThrow(BadRequestException);
   });
 });

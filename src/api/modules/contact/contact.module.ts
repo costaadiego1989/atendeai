@@ -111,4 +111,4 @@ import { ContactAsyncJobProcessor } from './infrastructure/queue/ContactAsyncJob
     IDeleteContactUseCase,
   ],
 })
-export class ContactModule { }
+export class ContactModule {}

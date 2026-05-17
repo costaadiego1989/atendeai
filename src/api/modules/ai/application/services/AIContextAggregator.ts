@@ -1,15 +1,7 @@
-import {
-  ICommercialContextProvider,
-} from '../ports/ICommercialContextProvider';
-import {
-  ICommerceContextProvider,
-} from '../ports/ICommerceContextProvider';
-import {
-  ISchedulingContextProvider,
-} from '../ports/ISchedulingContextProvider';
-import {
-  ITenantPDFContextProvider,
-} from '../ports/ITenantPDFContextProvider';
+import { ICommercialContextProvider } from '../ports/ICommercialContextProvider';
+import { ICommerceContextProvider } from '../ports/ICommerceContextProvider';
+import { ISchedulingContextProvider } from '../ports/ISchedulingContextProvider';
+import { ITenantPDFContextProvider } from '../ports/ITenantPDFContextProvider';
 import { PromptBuilder } from '../../domain/services/PromptBuilder';
 import { Tenant } from '../../../tenant/domain/entities/Tenant';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
@@ -87,7 +79,9 @@ export class AIContextAggregator {
 
         if (cacheEnabled) {
           while (this.cacheByKey.size >= MAX_CONTEXT_CACHE_ENTRIES) {
-            const oldest = this.cacheByKey.keys().next().value as string | undefined;
+            const oldest = this.cacheByKey.keys().next().value as
+              | string
+              | undefined;
             if (oldest === undefined) {
               break;
             }
@@ -129,39 +123,43 @@ export class AIContextAggregator {
       prompt = `${prompt}\n\n[PRIMEIRA INTERAção]: Grito brevemente e pergunto como posso ajudar. não despeje toda a informação de uma vez.`;
     }
 
-    const commercialContext = await this.commercialContextProvider.findRelevantOffer(
-      tenant.id.toString(),
-      userMessage,
-    );
+    const commercialContext =
+      await this.commercialContextProvider.findRelevantOffer(
+        tenant.id.toString(),
+        userMessage,
+      );
     if (commercialContext) {
       prompt = `${prompt}\n\n[CONTEXTO COMERCIAL]:\n${commercialContext}`;
       diagnostics.commercialContextFound = true;
     }
 
-    const commerceContext = await this.commerceContextProvider.findConversationContext({
-      tenantId: tenant.id.toString(),
-      conversationId,
-      userMessage,
-      businessType: tenant.businessType,
-    });
+    const commerceContext =
+      await this.commerceContextProvider.findConversationContext({
+        tenantId: tenant.id.toString(),
+        conversationId,
+        userMessage,
+        businessType: tenant.businessType,
+      });
     if (commerceContext) {
       prompt = `${prompt}\n\n[CONTEXTO DE NEGOCIO]:\n${commerceContext}`;
       diagnostics.commerceContextFound = true;
     }
 
-    const schedulingContext = await this.schedulingContextProvider.findRelevantAvailability(
-      tenant.id.toString(),
-      userMessage,
-    );
+    const schedulingContext =
+      await this.schedulingContextProvider.findRelevantAvailability(
+        tenant.id.toString(),
+        userMessage,
+      );
     if (schedulingContext) {
       prompt = `${prompt}\n\n[CONTEXTO DE AGENDA]:\n${schedulingContext}`;
       diagnostics.schedulingContextFound = true;
     }
 
-    const tenantPDFContext = await this.tenantPDFContextProvider?.findRelevantPDFContext(
-      tenant.id.toString(),
-      userMessage,
-    );
+    const tenantPDFContext =
+      await this.tenantPDFContextProvider?.findRelevantPDFContext(
+        tenant.id.toString(),
+        userMessage,
+      );
     if (tenantPDFContext) {
       prompt = `${prompt}\n\n[CONTEXTO DE DOCUMENTOS DA EMPRESA]:\n${tenantPDFContext}`;
       diagnostics.tenantPDFContextFound = true;

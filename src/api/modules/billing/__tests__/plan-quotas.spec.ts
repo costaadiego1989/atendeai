@@ -11,9 +11,9 @@ describe('Plan quotas (business invariants)', () => {
 
   it('should provide a realistic minimum AI token budget per contact', () => {
     for (const [plan, quotas] of Object.entries(PLAN_QUOTAS)) {
-      const minTokens = quotas.contacts * 30 * MIN_BILLABLE_TOKENS_PER_AI_MESSAGE;
+      const minTokens =
+        quotas.contacts * 30 * MIN_BILLABLE_TOKENS_PER_AI_MESSAGE;
       expect(quotas.aiTokens).toBeGreaterThanOrEqual(minTokens);
     }
   });
 });
-

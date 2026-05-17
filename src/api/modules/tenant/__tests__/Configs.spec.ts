@@ -15,21 +15,25 @@ describe('Configuration Entities', () => {
         businessRules: ['Regra 1', 'Regra 2'],
       });
 
-      expect(config.systemPrompt).toBe('Este é um prompt do sistema com mais de dez caracteres.');
+      expect(config.systemPrompt).toBe(
+        'Este é um prompt do sistema com mais de dez caracteres.',
+      );
       expect(config.tone).toBe('PROFESSIONAL');
       expect(config.maxTokensPerResponse).toBe(1000);
     });
 
     it('should throw error for short prompt', () => {
-      expect(() => AIConfig.create({
-        systemPrompt: 'Curto',
-        tone: 'CASUAL',
-        language: 'pt-BR',
-        maxTokensPerResponse: 100,
-        confidenceThreshold: 0.5,
-        escalationMessage: null,
-        businessRules: [],
-      })).toThrow('System prompt must have at least 10 characters');
+      expect(() =>
+        AIConfig.create({
+          systemPrompt: 'Curto',
+          tone: 'CASUAL',
+          language: 'pt-BR',
+          maxTokensPerResponse: 100,
+          confidenceThreshold: 0.5,
+          escalationMessage: null,
+          businessRules: [],
+        }),
+      ).toThrow('System prompt must have at least 10 characters');
     });
 
     it('should throw error for invalid confidence threshold', () => {
@@ -42,7 +46,9 @@ describe('Configuration Entities', () => {
         escalationMessage: null,
         businessRules: [],
       };
-      expect(() => AIConfig.create(props)).toThrow('Confidence threshold must be between 0 and 1');
+      expect(() => AIConfig.create(props)).toThrow(
+        'Confidence threshold must be between 0 and 1',
+      );
     });
   });
 
@@ -60,12 +66,14 @@ describe('Configuration Entities', () => {
     });
 
     it('should throw if credentials are missing for BubbleWhats', () => {
-      expect(() => WhatsAppConfig.create({
-        provider: 'BUBBLEWHATS',
-        credentials: { id: '7071' },
-        whatsappNumber: '5511999998888',
-        webhookSecret: null,
-      })).toThrow('BubbleWhats token is required');
+      expect(() =>
+        WhatsAppConfig.create({
+          provider: 'BUBBLEWHATS',
+          credentials: { id: '7071' },
+          whatsappNumber: '5511999998888',
+          webhookSecret: null,
+        }),
+      ).toThrow('BubbleWhats token is required');
     });
 
     it('should activate the config', () => {

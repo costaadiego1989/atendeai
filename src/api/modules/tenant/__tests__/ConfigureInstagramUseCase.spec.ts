@@ -87,7 +87,9 @@ describe('ConfigureInstagramUseCase', () => {
     ).rejects.toThrow(EntityNotFoundException);
 
     expect(tenantRepo.save).not.toHaveBeenCalled();
-    expect(tenantDomainEventPublisher.publishFromAggregate).not.toHaveBeenCalled();
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).not.toHaveBeenCalled();
   });
 
   it('should persist the instagram config', async () => {
@@ -101,9 +103,9 @@ describe('ConfigureInstagramUseCase', () => {
     });
 
     expect(tenantRepo.save).toHaveBeenCalledWith(tenant);
-    expect(tenantDomainEventPublisher.publishFromAggregate).toHaveBeenCalledWith(
-      tenant,
-    );
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).toHaveBeenCalledWith(tenant);
     expect(result).toEqual(
       expect.objectContaining({
         instagramAccountId: '17841400000000000',
@@ -111,9 +113,9 @@ describe('ConfigureInstagramUseCase', () => {
       }),
     );
     expect(tenant.instagramConfig?.metaAccessToken).toBe('meta-platform-token');
-    expect(tenant.domainEvents.map((event) => event.constructor.name)).toContain(
-      'InstagramConfigured',
-    );
+    expect(
+      tenant.domainEvents.map((event) => event.constructor.name),
+    ).toContain('InstagramConfigured');
   });
 
   it('should persist instagram config in a branch scope when branchId is provided', async () => {

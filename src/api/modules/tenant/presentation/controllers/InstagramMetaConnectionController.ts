@@ -28,10 +28,7 @@ export class InstagramMetaConnectionController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtCookieGuard, RolesGuard)
   @Roles('OWNER', 'ADMIN')
-  async startConnection(
-    @Req() req: any,
-    @Body() body: { branchId?: string },
-  ) {
+  async startConnection(@Req() req: any, @Body() body: { branchId?: string }) {
     return this.startMetaInstagramConnectionUseCase.execute({
       tenantId: req.user.tenantId,
       branchId: body?.branchId,

@@ -1,26 +1,26 @@
 import { IntegrationEvent } from '@shared/application/ports/IntegrationEvent';
 
 export class TrialPaymentConfirmedIntegrationEvent extends IntegrationEvent {
-    readonly queue = 'payment.trial-confirmed';
-    readonly sourceModule = 'payment';
-    readonly payload: Record<string, unknown>;
+  readonly queue = 'payment.trial-confirmed';
+  readonly sourceModule = 'payment';
+  readonly payload: Record<string, unknown>;
 
-    get eventName(): string {
-        return 'payment.trial.confirmed.v1';
-    }
+  get eventName(): string {
+    return 'payment.trial.confirmed.v1';
+  }
 
-    get aggregateId(): string | undefined {
-        return this.payload.ownerEmail as string;
-    }
+  get aggregateId(): string | undefined {
+    return this.payload.ownerEmail as string;
+  }
 
-    constructor(data: {
-        plan: string;
-        companyName: string;
-        ownerName: string;
-        ownerEmail: string;
-        ownerPhone: string;
-    }) {
-        super();
-        this.payload = data;
-    }
+  constructor(data: {
+    plan: string;
+    companyName: string;
+    ownerName: string;
+    ownerEmail: string;
+    ownerPhone: string;
+  }) {
+    super();
+    this.payload = data;
+  }
 }

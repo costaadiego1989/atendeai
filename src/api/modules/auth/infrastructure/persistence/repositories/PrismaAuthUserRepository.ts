@@ -7,7 +7,7 @@ import { AuthUserMapper } from '../mappers/AuthUserMapper';
 
 @Injectable()
 export class PrismaAuthUserRepository implements IAuthUserRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findByEmail(email: string): Promise<AuthUser | null> {
     const [user] = await this.prisma.$queryRaw<any[]>(Prisma.sql`

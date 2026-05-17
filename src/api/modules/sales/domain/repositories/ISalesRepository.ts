@@ -11,7 +11,11 @@ export type SalesPaymentLinkStatus =
 
 export type SalesPaymentLinkSource = 'MANUAL' | 'AI';
 export type SalesPaymentResourceType = 'PAYMENT_LINK' | 'PAYMENT';
-export type SalesPaymentRecurrenceFrequency = 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+export type SalesPaymentRecurrenceFrequency =
+  | 'WEEKLY'
+  | 'MONTHLY'
+  | 'QUARTERLY'
+  | 'YEARLY';
 export type SalesDiscountType = 'PERCENTAGE' | 'FIXED_AMOUNT';
 export type SalesPromotionTargetType = 'ITEM' | 'CATEGORY';
 
@@ -94,7 +98,9 @@ export interface ISalesMetricsRepository {
 }
 
 export interface ISalesPaymentLinksRepository {
-  createPaymentLink(record: Omit<SalesPaymentLinkRecord, 'createdAt' | 'updatedAt'>): Promise<SalesPaymentLinkRecord>;
+  createPaymentLink(
+    record: Omit<SalesPaymentLinkRecord, 'createdAt' | 'updatedAt'>,
+  ): Promise<SalesPaymentLinkRecord>;
   listPaymentLinks(
     tenantId: string,
     filters: ListSalesPaymentLinksFilters,
@@ -139,11 +145,23 @@ export interface SalesPromotionRecord {
 }
 
 export interface ISalesPromotionRepository {
-  createPromotion(record: Omit<SalesPromotionRecord, 'createdAt' | 'updatedAt'>): Promise<SalesPromotionRecord>;
-  updatePromotion(tenantId: string, id: string, data: Partial<Omit<SalesPromotionRecord, 'id' | 'tenantId' | 'createdAt'>>): Promise<SalesPromotionRecord | null>;
+  createPromotion(
+    record: Omit<SalesPromotionRecord, 'createdAt' | 'updatedAt'>,
+  ): Promise<SalesPromotionRecord>;
+  updatePromotion(
+    tenantId: string,
+    id: string,
+    data: Partial<Omit<SalesPromotionRecord, 'id' | 'tenantId' | 'createdAt'>>,
+  ): Promise<SalesPromotionRecord | null>;
   deletePromotion(tenantId: string, id: string): Promise<void>;
-  findPromotionById(tenantId: string, id: string): Promise<SalesPromotionRecord | null>;
-  listPromotions(tenantId: string, onlyActive?: boolean): Promise<SalesPromotionRecord[]>;
+  findPromotionById(
+    tenantId: string,
+    id: string,
+  ): Promise<SalesPromotionRecord | null>;
+  listPromotions(
+    tenantId: string,
+    onlyActive?: boolean,
+  ): Promise<SalesPromotionRecord[]>;
 }
 
 export interface SalesCouponRecord {
@@ -167,23 +185,46 @@ export interface SalesCouponRecord {
 }
 
 export interface ISalesCouponRepository {
-  createCoupon(record: Omit<SalesCouponRecord, 'createdAt' | 'updatedAt' | 'usedCount'>): Promise<SalesCouponRecord>;
-  updateCoupon(tenantId: string, id: string, data: Partial<Omit<SalesCouponRecord, 'id' | 'tenantId' | 'createdAt' | 'usedCount'>>): Promise<SalesCouponRecord | null>;
+  createCoupon(
+    record: Omit<SalesCouponRecord, 'createdAt' | 'updatedAt' | 'usedCount'>,
+  ): Promise<SalesCouponRecord>;
+  updateCoupon(
+    tenantId: string,
+    id: string,
+    data: Partial<
+      Omit<SalesCouponRecord, 'id' | 'tenantId' | 'createdAt' | 'usedCount'>
+    >,
+  ): Promise<SalesCouponRecord | null>;
   deleteCoupon(tenantId: string, id: string): Promise<void>;
-  findCouponById(tenantId: string, id: string): Promise<SalesCouponRecord | null>;
-  findCouponByCode(tenantId: string, code: string): Promise<SalesCouponRecord | null>;
-  listCoupons(tenantId: string, onlyActive?: boolean): Promise<SalesCouponRecord[]>;
-  incrementCouponUsage(tenantId: string, id: string): Promise<SalesCouponRecord | null>;
+  findCouponById(
+    tenantId: string,
+    id: string,
+  ): Promise<SalesCouponRecord | null>;
+  findCouponByCode(
+    tenantId: string,
+    code: string,
+  ): Promise<SalesCouponRecord | null>;
+  listCoupons(
+    tenantId: string,
+    onlyActive?: boolean,
+  ): Promise<SalesCouponRecord[]>;
+  incrementCouponUsage(
+    tenantId: string,
+    id: string,
+  ): Promise<SalesCouponRecord | null>;
 }
 
 export interface ISalesRepository
-  extends ISalesMetricsRepository,
-  ISalesPaymentLinksRepository,
-  ISalesPromotionRepository,
-  ISalesCouponRepository { }
+  extends
+    ISalesMetricsRepository,
+    ISalesPaymentLinksRepository,
+    ISalesPromotionRepository,
+    ISalesCouponRepository {}
 
 export const SALES_REPOSITORY = Symbol('SALES_REPOSITORY');
 export const SALES_METRICS_REPOSITORY = Symbol('SALES_METRICS_REPOSITORY');
-export const SALES_PAYMENT_LINKS_REPOSITORY = Symbol('SALES_PAYMENT_LINKS_REPOSITORY');
+export const SALES_PAYMENT_LINKS_REPOSITORY = Symbol(
+  'SALES_PAYMENT_LINKS_REPOSITORY',
+);
 export const SALES_PROMOTION_REPOSITORY = Symbol('SALES_PROMOTION_REPOSITORY');
 export const SALES_COUPON_REPOSITORY = Symbol('SALES_COUPON_REPOSITORY');

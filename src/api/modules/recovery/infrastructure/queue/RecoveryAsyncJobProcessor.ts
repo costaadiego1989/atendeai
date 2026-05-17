@@ -1,7 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { FILE_STORAGE_SERVICE, FileStorageService } from '@shared/domain/services/FileStorageService';
+import {
+  FILE_STORAGE_SERVICE,
+  FileStorageService,
+} from '@shared/domain/services/FileStorageService';
 import { RecoveryAsyncJobsService } from '../../application/services/RecoveryAsyncJobsService';
 import { RecoveryReportCsvBuilder } from '../../application/services/RecoveryReportCsvBuilder';
 import { GenerateRecoveryReportUseCase } from '../../application/use-cases/GenerateRecoveryReportUseCase';
@@ -69,7 +72,8 @@ export class RecoveryAsyncJobProcessor extends WorkerHost {
         }
       } catch (error) {
         this.logger.warn(
-          `Falling back to database file storage for recovery export ${job.data.asyncJobId}: ${error instanceof Error ? error.message : 'unknown error'
+          `Falling back to database file storage for recovery export ${job.data.asyncJobId}: ${
+            error instanceof Error ? error.message : 'unknown error'
           }`,
         );
       }
@@ -93,7 +97,9 @@ export class RecoveryAsyncJobProcessor extends WorkerHost {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao gerar relatorio de cobranças.';
+        error instanceof Error
+          ? error.message
+          : 'Falha ao gerar relatorio de cobranças.';
       await this.recoveryAsyncJobsService.failJob(job.data.asyncJobId, message);
       throw error;
     }

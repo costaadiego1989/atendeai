@@ -29,11 +29,10 @@ export interface CreateProspectAdsInsightQueryOutput {
   updatedAt: Date;
 }
 
-export interface ICreateProspectAdsInsightQueryUseCase
-  extends IUseCase<
-    CreateProspectAdsInsightQueryInput,
-    CreateProspectAdsInsightQueryOutput
-  > {}
+export interface ICreateProspectAdsInsightQueryUseCase extends IUseCase<
+  CreateProspectAdsInsightQueryInput,
+  CreateProspectAdsInsightQueryOutput
+> {}
 
 export const ICreateProspectAdsInsightQueryUseCase = Symbol(
   'ICreateProspectAdsInsightQueryUseCase',

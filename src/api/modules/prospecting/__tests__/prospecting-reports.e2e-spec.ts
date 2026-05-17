@@ -28,9 +28,7 @@ describe('Prospecting reports (e2e)', () => {
 
     const cookies = response.get('Set-Cookie');
     expect(cookies).toBeDefined();
-    return cookies!
-      .map((cookie) => cookie.split(';')[0])
-      .join('; ');
+    return cookies!.map((cookie) => cookie.split(';')[0]).join('; ');
   }
 
   async function waitForJobCompletion(jobId: string) {
@@ -71,7 +69,9 @@ describe('Prospecting reports (e2e)', () => {
 
     prisma = app.get(PrismaService);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => {});
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
     const tenant = await prisma.tenant.create({
@@ -98,10 +98,14 @@ describe('Prospecting reports (e2e)', () => {
   });
 
   beforeEach(async () => {
-    await prisma.$executeRaw(Prisma.sql`
+    await prisma
+      .$executeRaw(
+        Prisma.sql`
       DELETE FROM prospecting_schema.prospecting_async_jobs
       WHERE tenant_id = ${tenantId}::uuid
-    `).catch(() => {});
+    `,
+      )
+      .catch(() => {});
     await prisma.prospectExecution.deleteMany({ where: { tenantId } });
     await prisma.prospectCampaign.deleteMany({ where: { tenantId } });
     await prisma.prospectSearchResult.deleteMany({ where: { tenantId } });
@@ -110,17 +114,33 @@ describe('Prospecting reports (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await prisma.$executeRaw(Prisma.sql`
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM prospecting_schema.prospecting_async_jobs
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => {});
-      await prisma.prospectExecution.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.prospectCampaign.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.prospectSearchResult.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.prospectSearch.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
+      `,
+        )
+        .catch(() => {});
+      await prisma.prospectExecution
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.prospectCampaign
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.prospectSearchResult
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.prospectSearch
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
       await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {
@@ -217,7 +237,9 @@ describe('Prospecting reports (e2e)', () => {
     );
 
     const downloadResponse = await request(app.getHttpServer())
-      .get(`/api/v1/prospecting/reports/jobs/${startJobResponse.body.id}/download`)
+      .get(
+        `/api/v1/prospecting/reports/jobs/${startJobResponse.body.id}/download`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 
@@ -309,7 +331,9 @@ describe('Prospecting reports (e2e)', () => {
     );
 
     const downloadResponse = await request(app.getHttpServer())
-      .get(`/api/v1/prospecting/reports/jobs/${startJobResponse.body.id}/download`)
+      .get(
+        `/api/v1/prospecting/reports/jobs/${startJobResponse.body.id}/download`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 

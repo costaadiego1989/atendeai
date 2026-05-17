@@ -5,7 +5,11 @@ export type ProspectStopReason =
   | 'OPT_OUT'
   | 'HUMAN_HANDOFF'
   | 'DISQUALIFIED'
-  | 'CAMPAIGN_PAUSED';
+  | 'CAMPAIGN_PAUSED'
+  | 'ALREADY_CONTACTED'
+  | 'COOLDOWN_ACTIVE'
+  | 'NO_WHATSAPP_PHONE'
+  | 'TEMPLATE_UNAVAILABLE';
 
 interface ProspectStopReasonProps {
   value: ProspectStopReason;
@@ -26,6 +30,10 @@ export class ProspectStopReasonVO extends ValueObject<ProspectStopReasonProps> {
       'HUMAN_HANDOFF',
       'DISQUALIFIED',
       'CAMPAIGN_PAUSED',
+      'ALREADY_CONTACTED',
+      'COOLDOWN_ACTIVE',
+      'NO_WHATSAPP_PHONE',
+      'TEMPLATE_UNAVAILABLE',
     ];
 
     const normalized = value.toUpperCase() as ProspectStopReason;

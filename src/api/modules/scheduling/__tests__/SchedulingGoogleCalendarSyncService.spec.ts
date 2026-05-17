@@ -97,7 +97,9 @@ describe('SchedulingGoogleCalendarSyncService', () => {
       'calendar-1',
       expect.objectContaining({
         summary: '[Pendente] Consulta - Maria',
-        description: expect.stringContaining('Link de pagamento: https://pay.example.com/link-1'),
+        description: expect.stringContaining(
+          'Link de pagamento: https://pay.example.com/link-1',
+        ),
       }),
     );
     expect(eventLinkRepository.save).toHaveBeenCalledWith(

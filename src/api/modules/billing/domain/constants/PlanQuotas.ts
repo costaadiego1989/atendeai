@@ -32,10 +32,7 @@ const DEFAULT_PLAN_QUOTAS: Record<PlanType, PlanQuotaDefinition> = {
   },
 };
 
-function readPositiveIntegerEnv(
-  key: string,
-  fallback: number,
-): number {
+function readPositiveIntegerEnv(key: string, fallback: number): number {
   const raw = process.env[key];
   const parsed = Number(raw);
 

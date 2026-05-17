@@ -54,7 +54,9 @@ describe('CreateInventoryConnectionUseCase', () => {
   });
 
   it('INV-CONN-001: lança InventoryDuplicateConnectionError quando já existe mesma fonte + nome de provedor', async () => {
-    inventoryRepository.findConnectionByProvider.mockResolvedValue(savedConnection());
+    inventoryRepository.findConnectionByProvider.mockResolvedValue(
+      savedConnection(),
+    );
 
     await expect(
       useCase.execute({
@@ -91,7 +93,9 @@ describe('CreateInventoryConnectionUseCase', () => {
 
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
     const published = eventBus.publish.mock.calls[0][0];
-    expect(published).toBeInstanceOf(InventoryConnectionCreatedIntegrationEvent);
+    expect(published).toBeInstanceOf(
+      InventoryConnectionCreatedIntegrationEvent,
+    );
     expect(published.payload).toMatchObject({
       connectionId: created.id,
       tenantId: created.tenantId,
@@ -105,7 +109,9 @@ describe('CreateInventoryConnectionUseCase', () => {
     inventoryRepository.createConnection.mockResolvedValue(savedConnection());
 
     providerFactory.getProvider.mockReturnValue({
-      testConnection: jest.fn().mockRejectedValue(new Error('credencial inválida')),
+      testConnection: jest
+        .fn()
+        .mockRejectedValue(new Error('credencial inválida')),
       async *fetchStock() {
         yield [];
       },

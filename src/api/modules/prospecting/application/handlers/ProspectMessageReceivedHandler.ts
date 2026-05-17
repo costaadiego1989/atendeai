@@ -4,9 +4,7 @@ import {
   IRegisterProspectResponseUseCase,
   RegisterProspectResponseInput,
 } from '../use-cases/interfaces/IRegisterProspectResponseUseCase';
-import {
-  IRegisterProspectStopUseCase,
-} from '../use-cases/interfaces/IRegisterProspectStopUseCase';
+import { IRegisterProspectStopUseCase } from '../use-cases/interfaces/IRegisterProspectStopUseCase';
 import { ProspectOptOutPolicy } from '../services/ProspectOptOutPolicy';
 
 @Injectable()

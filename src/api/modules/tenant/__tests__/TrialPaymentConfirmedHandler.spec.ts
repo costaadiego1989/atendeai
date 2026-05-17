@@ -17,19 +17,28 @@ describe('TrialPaymentConfirmedHandler', () => {
       execute: jest.fn(),
     } as any;
 
-    handler = new TrialPaymentConfirmedHandler(eventBus, onboardTrialTenantUseCase);
+    handler = new TrialPaymentConfirmedHandler(
+      eventBus,
+      onboardTrialTenantUseCase,
+    );
   });
 
   it('should subscribe to payment.trial-confirmed on init', () => {
     handler.onModuleInit();
-    expect(eventBus.subscribe).toHaveBeenCalledWith('payment.trial-confirmed', expect.any(Function), expect.any(Object));
+    expect(eventBus.subscribe).toHaveBeenCalledWith(
+      'payment.trial-confirmed',
+      expect.any(Function),
+      expect.any(Object),
+    );
   });
 
   it('should call OnboardTrialTenantUseCase when event is received', async () => {
     handler.onModuleInit();
-    
-    const callback = eventBus.subscribe.mock.calls.find(call => call[0] === 'payment.trial-confirmed')![1];
-    
+
+    const callback = eventBus.subscribe.mock.calls.find(
+      (call) => call[0] === 'payment.trial-confirmed',
+    )![1];
+
     const event = {
       payload: {
         plan: 'ESSENCIAL',
@@ -37,11 +46,13 @@ describe('TrialPaymentConfirmedHandler', () => {
         ownerName: 'Admin',
         ownerEmail: 'admin@trial.com',
         ownerPhone: '5511999998888',
-      }
+      },
     };
 
     await callback(event as any);
 
-    expect(onboardTrialTenantUseCase.execute).toHaveBeenCalledWith(event.payload);
+    expect(onboardTrialTenantUseCase.execute).toHaveBeenCalledWith(
+      event.payload,
+    );
   });
 });

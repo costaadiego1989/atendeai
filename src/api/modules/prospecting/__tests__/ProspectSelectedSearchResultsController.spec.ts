@@ -6,21 +6,11 @@ import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
 import { UnauthorizedException } from '@shared/domain/exceptions/DomainExceptions';
 import { ProspectSearchController } from '../presentation/controllers/ProspectSearchController';
-import {
-  ICreateProspectSearchUseCase,
-} from '../application/use-cases/interfaces/ICreateProspectSearchUseCase';
-import {
-  IListProspectSearchesUseCase,
-} from '../application/use-cases/interfaces/IListProspectSearchesUseCase';
-import {
-  IListProspectSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
-import {
-  IImportProspectSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
-import {
-  IProspectSelectedSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
+import { ICreateProspectSearchUseCase } from '../application/use-cases/interfaces/ICreateProspectSearchUseCase';
+import { IListProspectSearchesUseCase } from '../application/use-cases/interfaces/IListProspectSearchesUseCase';
+import { IListProspectSearchResultsUseCase } from '../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
+import { IImportProspectSearchResultsUseCase } from '../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
+import { IProspectSelectedSearchResultsUseCase } from '../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
 
 describe('ProspectSelectedSearchResultsController', () => {
   let app: INestApplication;
@@ -40,9 +30,10 @@ describe('ProspectSelectedSearchResultsController', () => {
   const listResultsUseCase: jest.Mocked<IListProspectSearchResultsUseCase> = {
     execute: jest.fn(),
   };
-  const importResultsUseCase: jest.Mocked<IImportProspectSearchResultsUseCase> = {
-    execute: jest.fn(),
-  };
+  const importResultsUseCase: jest.Mocked<IImportProspectSearchResultsUseCase> =
+    {
+      execute: jest.fn(),
+    };
   const prospectSelectedResultsUseCase: jest.Mocked<IProspectSelectedSearchResultsUseCase> =
     {
       execute: jest.fn(),
@@ -121,13 +112,13 @@ describe('ProspectSelectedSearchResultsController', () => {
   it('should prepare selected results without dispatching messages automatically', async () => {
     prospectSelectedResultsUseCase.execute.mockResolvedValue({
       searchId: 'search-1',
-        campaignId: 'campaign-1',
-        importedCount: 1,
-        reusedExistingContacts: 1,
-        skippedMissingPhone: 1,
-        dispatchedExecutions: 0,
-        targetContactIds: ['contact-1', 'contact-2'],
-      });
+      campaignId: 'campaign-1',
+      importedCount: 1,
+      reusedExistingContacts: 1,
+      skippedMissingPhone: 1,
+      dispatchedExecutions: 0,
+      targetContactIds: ['contact-1', 'contact-2'],
+    });
 
     const response = await request(app.getHttpServer())
       .post('/api/v1/prospecting/searches/search-1/prospect')

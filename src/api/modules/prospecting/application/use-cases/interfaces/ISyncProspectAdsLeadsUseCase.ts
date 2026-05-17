@@ -19,8 +19,10 @@ export interface SyncProspectAdsLeadsOutput {
   }>;
 }
 
-export interface ISyncProspectAdsLeadsUseCase
-  extends IUseCase<SyncProspectAdsLeadsInput, SyncProspectAdsLeadsOutput> {}
+export interface ISyncProspectAdsLeadsUseCase extends IUseCase<
+  SyncProspectAdsLeadsInput,
+  SyncProspectAdsLeadsOutput
+> {}
 
 export const ISyncProspectAdsLeadsUseCase = Symbol(
   'ISyncProspectAdsLeadsUseCase',

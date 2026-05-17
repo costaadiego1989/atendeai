@@ -21,11 +21,10 @@ export interface SuggestProspectCampaignMessageOutput {
   messageTemplate: string;
 }
 
-export interface ISuggestProspectCampaignMessageUseCase
-  extends IUseCase<
-    SuggestProspectCampaignMessageInput,
-    SuggestProspectCampaignMessageOutput
-  > {}
+export interface ISuggestProspectCampaignMessageUseCase extends IUseCase<
+  SuggestProspectCampaignMessageInput,
+  SuggestProspectCampaignMessageOutput
+> {}
 
 export const ISuggestProspectCampaignMessageUseCase = Symbol(
   'ISuggestProspectCampaignMessageUseCase',

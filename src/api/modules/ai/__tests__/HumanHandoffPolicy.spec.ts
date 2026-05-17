@@ -21,24 +21,21 @@ describe('HumanHandoffPolicy', () => {
   });
 
   describe('user requested human keywords', () => {
-    it.each([
-      'humano',
-      'atendente',
-      'pessoa',
-      'vendedor',
-      'especialista',
-    ])('should handoff when user message contains "%s"', (keyword) => {
-      const result = policy.evaluate({
-        userMessage: `Quero falar com um ${keyword}`,
-        response: makeResponse(),
-        confidenceThreshold: 0.7,
-      });
+    it.each(['humano', 'atendente', 'pessoa', 'vendedor', 'especialista'])(
+      'should handoff when user message contains "%s"',
+      (keyword) => {
+        const result = policy.evaluate({
+          userMessage: `Quero falar com um ${keyword}`,
+          response: makeResponse(),
+          confidenceThreshold: 0.7,
+        });
 
-      expect(result).toEqual({
-        shouldHandoff: true,
-        reason: 'USER_REQUESTED_HUMAN',
-      });
-    });
+        expect(result).toEqual({
+          shouldHandoff: true,
+          reason: 'USER_REQUESTED_HUMAN',
+        });
+      },
+    );
 
     it('should detect keyword case-insensitively', () => {
       const result = policy.evaluate({
@@ -156,7 +153,11 @@ describe('HumanHandoffPolicy', () => {
     it('should return USER_REQUESTED_HUMAN even if confidence is high', () => {
       const result = policy.evaluate({
         userMessage: 'Quero falar com um humano por favor',
-        response: makeResponse({ confidence: 0.99, intent: 'GREETING', sentiment: 'POSITIVE' }),
+        response: makeResponse({
+          confidence: 0.99,
+          intent: 'GREETING',
+          sentiment: 'POSITIVE',
+        }),
         confidenceThreshold: 0.7,
       });
 

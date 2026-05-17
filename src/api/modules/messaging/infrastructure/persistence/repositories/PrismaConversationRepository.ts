@@ -8,7 +8,7 @@ import { MessagingMapper } from '../mappers/MessagingMapper';
 
 @Injectable()
 export class PrismaConversationRepository implements IConversationRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async save(
     conversation: Conversation,
@@ -196,7 +196,9 @@ export class PrismaConversationRepository implements IConversationRepository {
         LIMIT ${limit}
       `);
 
-    const totalRows = await this.prisma.$queryRaw<Array<{ total: bigint | number }>>(Prisma.sql`
+    const totalRows = await this.prisma.$queryRaw<
+      Array<{ total: bigint | number }>
+    >(Prisma.sql`
         SELECT COUNT(*) AS total
         FROM messaging_schema.conversations c
         WHERE c.tenant_id = ${tenantId}::uuid
@@ -215,19 +217,23 @@ export class PrismaConversationRepository implements IConversationRepository {
     const results =
       orderedIds.length > 0
         ? await this.prisma.conversation.findMany({
-          where: { id: { in: orderedIds } },
-          include: {
-            messages: {
-              orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+            where: { id: { in: orderedIds } },
+            include: {
+              messages: {
+                orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+              },
             },
-          },
-        })
+          })
         : [];
 
-    const resultsById = new Map(results.map((conversation) => [conversation.id, conversation]));
+    const resultsById = new Map(
+      results.map((conversation) => [conversation.id, conversation]),
+    );
     const orderedResults = orderedIds
       .map((id) => resultsById.get(id))
-      .filter((conversation): conversation is (typeof results)[number] => Boolean(conversation));
+      .filter((conversation): conversation is (typeof results)[number] =>
+        Boolean(conversation),
+      );
 
     return {
       data: orderedResults.map(MessagingMapper.toDomain),
@@ -285,17 +291,16 @@ export class PrismaConversationRepository implements IConversationRepository {
           AND c.id IN (${Prisma.join(conversationIds.map((id) => Prisma.sql`${id}::uuid`))})
       `);
 
-    return rows.reduce<Record<string, { id: string; name: string; assignedAt?: Date }>>(
-      (acc, row) => {
-        acc[row.conversationId] = {
-          id: row.userId,
-          name: row.userName,
-          assignedAt: row.assignedAt ?? undefined,
-        };
-        return acc;
-      },
-      {},
-    );
+    return rows.reduce<
+      Record<string, { id: string; name: string; assignedAt?: Date }>
+    >((acc, row) => {
+      acc[row.conversationId] = {
+        id: row.userId,
+        name: row.userName,
+        assignedAt: row.assignedAt ?? undefined,
+      };
+      return acc;
+    }, {});
   }
 
   async findQueueState(
@@ -431,7 +436,8 @@ export class PrismaConversationRepository implements IConversationRepository {
         lastOutboundAt: row.lastOutboundAt ?? undefined,
         lastMessageAt: row.lastMessageAt ?? undefined,
         lastMessageSequence:
-          row.lastMessageSequence !== null && row.lastMessageSequence !== undefined
+          row.lastMessageSequence !== null &&
+          row.lastMessageSequence !== undefined
             ? Number(row.lastMessageSequence)
             : undefined,
         lastMessageDirection: row.lastMessageDirection ?? undefined,

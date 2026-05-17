@@ -28,7 +28,11 @@ describe('AddItemToShoppingSessionUseCase', () => {
       publish: jest.fn(),
     } as any;
 
-    useCase = new AddItemToShoppingSessionUseCase(commerceRepo, salesRepo, eventBus);
+    useCase = new AddItemToShoppingSessionUseCase(
+      commerceRepo,
+      salesRepo,
+      eventBus,
+    );
   });
 
   it('should recalculate percentage discount when a new item is added', async () => {
@@ -46,8 +50,10 @@ describe('AddItemToShoppingSessionUseCase', () => {
       items: [{ lineTotal: 100 }],
     };
 
-    commerceRepo.findSessionById.mockResolvedValueOnce(sessionWithCoupon as any);
-    
+    commerceRepo.findSessionById.mockResolvedValueOnce(
+      sessionWithCoupon as any,
+    );
+
     // Mock item finding
     commerceRepo.findCatalogItemById.mockResolvedValue({
       id: 'item-2',
@@ -96,10 +102,12 @@ describe('AddItemToShoppingSessionUseCase', () => {
     // Subtotal: 100 + 50 = 150
     // Discount (10%): 15
     // Total: 150 - 15 = 135
-    expect(commerceRepo.updateSessionState).toHaveBeenCalledWith(expect.objectContaining({
-      subtotalAmount: 150,
-      discountAmount: 15,
-      totalAmount: 135,
-    }));
+    expect(commerceRepo.updateSessionState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subtotalAmount: 150,
+        discountAmount: 15,
+        totalAmount: 135,
+      }),
+    );
   });
 });

@@ -16,4 +16,3 @@ export class SocialAutoReplyTriggeredIntegrationEvent extends IntegrationEvent {
     super();
   }
 }
-

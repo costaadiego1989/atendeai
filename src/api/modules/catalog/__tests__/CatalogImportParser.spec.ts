@@ -27,10 +27,7 @@ describe('CatalogImportParser', () => {
   });
 
   it('handles missing columns gracefully', () => {
-    const csv = [
-      'nome;preço',
-      'Produto A;15.00',
-    ].join('\n');
+    const csv = ['nome;preço', 'Produto A;15.00'].join('\n');
 
     const result = parser.parseRows(csv);
 
@@ -42,11 +39,7 @@ describe('CatalogImportParser', () => {
   });
 
   it('handles invalid price values', () => {
-    const csv = [
-      'nome;preço',
-      'Produto A;abc',
-      'Produto B;19.90',
-    ].join('\n');
+    const csv = ['nome;preço', 'Produto A;abc', 'Produto B;19.90'].join('\n');
 
     const result = parser.parseRows(csv);
 
@@ -91,10 +84,7 @@ describe('CatalogImportParser', () => {
   });
 
   it('applies defaults when provided', () => {
-    const csv = [
-      'nome;preço',
-      'Produto A;10.00',
-    ].join('\n');
+    const csv = ['nome;preço', 'Produto A;10.00'].join('\n');
 
     const result = parser.parseRows(csv, {
       defaultType: 'PRODUCT',

@@ -45,7 +45,9 @@ export class AdvanceCommerceConversationUseCase {
   ) {}
 
   async execute(input: AdvanceCommerceConversationInput) {
-    if (!this.conversationFlowRules.isTransactionalBusiness(input.businessType)) {
+    if (
+      !this.conversationFlowRules.isTransactionalBusiness(input.businessType)
+    ) {
       return null;
     }
 

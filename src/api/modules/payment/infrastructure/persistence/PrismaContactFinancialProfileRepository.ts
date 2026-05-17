@@ -8,9 +8,7 @@ import {
 } from '../../domain/repositories/IContactFinancialProfileRepository';
 
 @Injectable()
-export class PrismaContactFinancialProfileRepository
-  implements IContactFinancialProfileRepository
-{
+export class PrismaContactFinancialProfileRepository implements IContactFinancialProfileRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByTenantAndContact(

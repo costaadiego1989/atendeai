@@ -22,9 +22,7 @@ export class PrismaTransactionalEventPublisher {
   ) {}
 
   async execute<T>(
-    work: (
-      tx: Prisma.TransactionClient,
-    ) => Promise<TransactionalWorkResult<T>>,
+    work: (tx: Prisma.TransactionClient) => Promise<TransactionalWorkResult<T>>,
   ): Promise<T> {
     const useOutbox = this.getMode() === 'outbox';
     let pendingEvents: IntegrationEvent[] = [];

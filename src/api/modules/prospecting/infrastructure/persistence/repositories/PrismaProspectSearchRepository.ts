@@ -6,9 +6,8 @@ import { IProspectSearchRepository } from '../../../domain/repositories/IProspec
 import { ProspectSearchMapper } from '../mappers/ProspectSearchMapper';
 
 @Injectable()
-export class PrismaProspectSearchRepository
-  implements IProspectSearchRepository {
-  constructor(private readonly prisma: PrismaService) { }
+export class PrismaProspectSearchRepository implements IProspectSearchRepository {
+  constructor(private readonly prisma: PrismaService) {}
 
   async save(search: ProspectSearch): Promise<void> {
     const data = ProspectSearchMapper.toPersistence(search);

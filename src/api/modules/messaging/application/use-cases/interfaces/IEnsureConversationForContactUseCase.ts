@@ -14,11 +14,10 @@ export interface EnsureConversationForContactOutput {
   created: boolean;
 }
 
-export interface IEnsureConversationForContactUseCase
-  extends IUseCase<
-    EnsureConversationForContactInput,
-    EnsureConversationForContactOutput
-  > {}
+export interface IEnsureConversationForContactUseCase extends IUseCase<
+  EnsureConversationForContactInput,
+  EnsureConversationForContactOutput
+> {}
 
 export const IEnsureConversationForContactUseCase = Symbol(
   'IEnsureConversationForContactUseCase',

@@ -1,7 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { IMessagingFacade, MESSAGING_FACADE } from '@modules/messaging/application/facades/MessagingFacade';
+import {
+  IMessagingFacade,
+  MESSAGING_FACADE,
+} from '@modules/messaging/application/facades/MessagingFacade';
 import { IProposalRepository } from '@modules/proposal/domain/ports/IProposalRepository';
 import { buildProposalDeliveryMessage } from '@modules/proposal/application/support/proposal-message';
 import { normalizeProposalMetadata } from '@modules/proposal/application/support/proposal-public-access';
@@ -39,9 +42,12 @@ export class ProposalAsyncJobProcessor extends WorkerHost {
     }
 
     try {
-      const { publicUrl } = await this.proposalPublicLinkService.ensurePublicLink(proposal);
+      const { publicUrl } =
+        await this.proposalPublicLinkService.ensurePublicLink(proposal);
 
-      this.logger.log(`Delivering proposal ${proposalId} to contact ${proposal.contactId}`);
+      this.logger.log(
+        `Delivering proposal ${proposalId} to contact ${proposal.contactId}`,
+      );
 
       const result = await this.messagingFacade.queueSystemMessage({
         tenantId: proposal.tenantId,
@@ -61,7 +67,9 @@ export class ProposalAsyncJobProcessor extends WorkerHost {
       proposal.updateStatus('SENT');
       await this.proposalRepository.update(proposal);
     } catch (error) {
-      this.logger.error(`Failed to deliver proposal ${proposalId}: ${error.message}`);
+      this.logger.error(
+        `Failed to deliver proposal ${proposalId}: ${error.message}`,
+      );
       throw error;
     }
   }

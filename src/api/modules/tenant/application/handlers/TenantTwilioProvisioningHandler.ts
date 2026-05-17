@@ -27,7 +27,12 @@ export class TenantTwilioProvisioningHandler implements OnModuleInit {
   }
 
   private async handle(event: TenantCreatedIntegrationEvent): Promise<void> {
-    if (this.configService.get<string>('TWILIO_AUTO_PROVISION_TENANTS', 'true') === 'false') {
+    if (
+      this.configService.get<string>(
+        'TWILIO_AUTO_PROVISION_TENANTS',
+        'true',
+      ) === 'false'
+    ) {
       return;
     }
 

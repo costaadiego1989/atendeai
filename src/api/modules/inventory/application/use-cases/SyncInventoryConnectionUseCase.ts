@@ -25,7 +25,7 @@ export class SyncInventoryConnectionUseCase {
     @Inject(INVENTORY_PROVIDER_FACTORY)
     private readonly providerFactory: IInventoryProviderFactory,
     private readonly syncInventoryItemUseCase: SyncInventoryItemUseCase,
-  ) { }
+  ) {}
 
   async execute(command: SyncInventoryConnectionCommand): Promise<void> {
     const connections = await this.inventoryRepository.listConnections(
@@ -37,7 +37,9 @@ export class SyncInventoryConnectionUseCase {
       throw new InventoryConnectionNotFoundError(command.connectionId);
     }
 
-    this.logger.log(`Starting sync for connection ${connection.id} (${connection.providerName})`);
+    this.logger.log(
+      `Starting sync for connection ${connection.id} (${connection.providerName})`,
+    );
 
     try {
       const provider = this.providerFactory.getProvider(connection.sourceType);
@@ -71,11 +73,18 @@ export class SyncInventoryConnectionUseCase {
         }
       }
 
-      await this.inventoryRepository.markConnectionSyncedAt(connection.id, new Date());
+      await this.inventoryRepository.markConnectionSyncedAt(
+        connection.id,
+        new Date(),
+      );
 
-      this.logger.log(`Finished sync for connection ${connection.id}. Total items synced: ${totalSynced}`);
+      this.logger.log(
+        `Finished sync for connection ${connection.id}. Total items synced: ${totalSynced}`,
+      );
     } catch (error: any) {
-      this.logger.error(`Error syncing connection ${connection.id}: ${error.message}`);
+      this.logger.error(
+        `Error syncing connection ${connection.id}: ${error.message}`,
+      );
       throw error;
     }
   }

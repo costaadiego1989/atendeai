@@ -39,4 +39,6 @@ export interface IContactTimelineRepository {
   ): Promise<ContactTimelineResult | null>;
 }
 
-export const CONTACT_TIMELINE_REPOSITORY = Symbol('CONTACT_TIMELINE_REPOSITORY');
+export const CONTACT_TIMELINE_REPOSITORY = Symbol(
+  'CONTACT_TIMELINE_REPOSITORY',
+);

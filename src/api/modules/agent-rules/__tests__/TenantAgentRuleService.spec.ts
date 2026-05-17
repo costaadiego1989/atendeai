@@ -30,7 +30,13 @@ describe('TenantAgentRuleService (facade)', () => {
   });
 
   it('AGENT-U-060: getRule delega para GetTenantAgentRuleUseCase com params corretos', async () => {
-    await service.getRule('tenant-1', AgentModule.MESSAGING, 'user-1', 'tenant-1', 'branch-1');
+    await service.getRule(
+      'tenant-1',
+      AgentModule.MESSAGING,
+      'user-1',
+      'tenant-1',
+      'branch-1',
+    );
 
     expect(getRuleUseCase.execute).toHaveBeenCalledWith({
       tenantId: 'tenant-1',

@@ -30,12 +30,16 @@ describe('GetAbandonmentConfigUseCase', () => {
   });
 
   it('should return config for tenant when it exists', async () => {
-    commerceRepo.findAbandonmentConfigByTenantId.mockResolvedValue(mockConfig as any);
+    commerceRepo.findAbandonmentConfigByTenantId.mockResolvedValue(
+      mockConfig as any,
+    );
 
     const result = await useCase.execute(tenantId);
 
     expect(result).toEqual(mockConfig);
-    expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(tenantId);
+    expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(
+      tenantId,
+    );
   });
 
   it('should return default config when none is set for tenant', async () => {
@@ -60,6 +64,8 @@ describe('GetAbandonmentConfigUseCase', () => {
 
     await useCase.execute(otherTenantId);
 
-    expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(otherTenantId);
+    expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(
+      otherTenantId,
+    );
   });
 });

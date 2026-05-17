@@ -1,7 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { FILE_STORAGE_SERVICE, FileStorageService } from '@shared/domain/services/FileStorageService';
+import {
+  FILE_STORAGE_SERVICE,
+  FileStorageService,
+} from '@shared/domain/services/FileStorageService';
 import { SchedulingAsyncJobsService } from '../../application/services/SchedulingAsyncJobsService';
 import { SchedulingReportCsvBuilder } from '../../application/services/SchedulingReportCsvBuilder';
 import { GenerateSchedulingReportUseCase } from '../../application/use-cases/GenerateSchedulingReportUseCase';
@@ -15,7 +18,14 @@ type SchedulingAsyncJobPayload = {
   endDate: string;
   professionalIds?: string[] | null;
   categoryIds?: string[] | null;
-  statuses?: Array<'AVAILABLE' | 'PRE_RESERVED' | 'RESERVED' | 'COMPLETED' | 'NO_SHOW' | 'BLOCKED'> | null;
+  statuses?: Array<
+    | 'AVAILABLE'
+    | 'PRE_RESERVED'
+    | 'RESERVED'
+    | 'COMPLETED'
+    | 'NO_SHOW'
+    | 'BLOCKED'
+  > | null;
   totalItems?: number;
 };
 
@@ -41,7 +51,9 @@ export class SchedulingAsyncJobProcessor extends WorkerHost {
     await this.handleExportJob(job);
   }
 
-  private async handleExportJob(job: Job<SchedulingAsyncJobPayload>): Promise<void> {
+  private async handleExportJob(
+    job: Job<SchedulingAsyncJobPayload>,
+  ): Promise<void> {
     const data = job.data;
 
     await this.schedulingAsyncJobsService.markProcessing(data.asyncJobId, {
@@ -102,7 +114,9 @@ export class SchedulingAsyncJobProcessor extends WorkerHost {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao gerar relatorio da agenda.';
+        error instanceof Error
+          ? error.message
+          : 'Falha ao gerar relatorio da agenda.';
       await this.schedulingAsyncJobsService.failJob(data.asyncJobId, message);
       throw error;
     }

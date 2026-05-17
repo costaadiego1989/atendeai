@@ -18,10 +18,7 @@ import { ListSocialCommentsUseCase } from './application/use-cases/ListSocialCom
 import { ConfigureAutoReplyRulesUseCase } from './application/use-cases/ConfigureAutoReplyRulesUseCase';
 
 @Module({
-  imports: [
-    AuthModule,
-    BullModule.registerQueue({ name: 'social-delayed' }),
-  ],
+  imports: [AuthModule, BullModule.registerQueue({ name: 'social-delayed' })],
   controllers: [SocialController, SocialWebhookController],
   providers: [
     {
@@ -52,4 +49,4 @@ import { ConfigureAutoReplyRulesUseCase } from './application/use-cases/Configur
     AutoReplyEngine,
   ],
 })
-export class SocialModule { }
+export class SocialModule {}

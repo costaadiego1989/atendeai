@@ -225,33 +225,67 @@ describe('Active branch scope (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await prisma.$executeRaw(Prisma.sql`
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM recovery_schema.recovery_cases WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.orders WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.shopping_session_items WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.shopping_sessions WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.shipping_policies WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM messaging_schema.messages WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM messaging_schema.conversations WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.inventoryItem.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.catalogItem.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.catalogCategory.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+      `,
+        )
+        .catch(() => {});
+      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.inventoryItem
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.catalogItem
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.catalogCategory
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
 
     if (app) {

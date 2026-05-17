@@ -31,7 +31,7 @@ export class FollowUpWorker implements OnModuleInit, OnModuleDestroy {
     @Inject(CONVERSATION_INTELLIGENCE_REPOSITORY)
     private readonly conversationIntelligenceRepository: IConversationIntelligenceRepository,
     private readonly structuredLog: StructuredLogEmitter,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.worker = new Worker(
@@ -127,14 +127,16 @@ export class FollowUpWorker implements OnModuleInit, OnModuleDestroy {
       tenantId: data.tenantId,
       contactId: data.contactId,
       interval: data.interval,
-      intelligence: intelligence ? {
-        summary: intelligence.summary,
-        sentiment: intelligence.sentiment,
-        tags: intelligence.tags,
-        interests: intelligence.interests,
-        nextStep: intelligence.nextStep,
-        lossReason: intelligence.lossReason,
-      } : undefined,
+      intelligence: intelligence
+        ? {
+            summary: intelligence.summary,
+            sentiment: intelligence.sentiment,
+            tags: intelligence.tags,
+            interests: intelligence.interests,
+            nextStep: intelligence.nextStep,
+            lossReason: intelligence.lossReason,
+          }
+        : undefined,
     });
 
     await this.eventBus.publish(event);

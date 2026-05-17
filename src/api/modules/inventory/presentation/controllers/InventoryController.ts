@@ -97,7 +97,10 @@ export class InventoryController {
       },
     );
 
-    await this.inventoryAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.inventoryAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
 
     return this.inventoryAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
@@ -189,7 +192,10 @@ export class InventoryController {
       },
     );
 
-    await this.inventoryAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.inventoryAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.inventoryAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -201,7 +207,10 @@ export class InventoryController {
 
   @Get('jobs/:jobId')
   @Roles('OWNER', 'ADMIN')
-  async getJob(@Param('tenantId') tenantId: string, @Param('jobId') jobId: string) {
+  async getJob(
+    @Param('tenantId') tenantId: string,
+    @Param('jobId') jobId: string,
+  ) {
     return this.inventoryAsyncJobsService.getJob(tenantId, jobId);
   }
 
@@ -212,11 +221,17 @@ export class InventoryController {
     @Param('jobId') jobId: string,
     @Res() res: Response,
   ) {
-    const file = await this.inventoryAsyncJobsService.getDownloadPayload(tenantId, jobId);
+    const file = await this.inventoryAsyncJobsService.getDownloadPayload(
+      tenantId,
+      jobId,
+    );
 
     if (file.fileContent) {
       res.setHeader('Content-Type', file.fileMimeType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file.fileName}"`,
+      );
       return res.send(file.fileContent);
     }
 

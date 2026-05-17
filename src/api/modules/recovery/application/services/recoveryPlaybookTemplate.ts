@@ -24,10 +24,16 @@ export function applyRecoveryPlaybookTemplate(
     phone: recoveryCase.phone ?? '',
   };
 
-  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key: string) => map[key] ?? '');
+  return template.replace(
+    /\{\{\s*(\w+)\s*\}\}/g,
+    (_, key: string) => map[key] ?? '',
+  );
 }
 
-export function daysPastDue(dueDate: Date | null | undefined, now: Date): number {
+export function daysPastDue(
+  dueDate: Date | null | undefined,
+  now: Date,
+): number {
   if (!dueDate) {
     return 0;
   }

@@ -5,9 +5,7 @@ import { IProspectCampaignRepository } from '../../../domain/repositories/IProsp
 import { ProspectCampaignMapper } from '../mappers/ProspectCampaignMapper';
 
 @Injectable()
-export class PrismaProspectCampaignRepository
-  implements IProspectCampaignRepository
-{
+export class PrismaProspectCampaignRepository implements IProspectCampaignRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(campaign: ProspectCampaign): Promise<void> {

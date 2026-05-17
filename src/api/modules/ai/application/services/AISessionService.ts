@@ -1,9 +1,16 @@
-import { AISessionDto, IAISessionRepository } from '../ports/IAISessionRepository';
+import {
+  AISessionDto,
+  IAISessionRepository,
+} from '../ports/IAISessionRepository';
 
 export class AISessionService {
   constructor(private readonly repository: IAISessionRepository) {}
 
-  async getOrCreateSession(tenantId: string, contactId: string, conversationId: string): Promise<AISessionDto> {
+  async getOrCreateSession(
+    tenantId: string,
+    contactId: string,
+    conversationId: string,
+  ): Promise<AISessionDto> {
     return (
       (await this.repository.findActive(tenantId, contactId, conversationId)) ??
       this.repository.createActive(tenantId, contactId, conversationId)
@@ -26,7 +33,10 @@ export class AISessionService {
     });
   }
 
-  async closeSession(sessionId: string, status: 'CLOSED' | 'EXPIRED' | 'HANDOFF' = 'CLOSED'): Promise<void> {
+  async closeSession(
+    sessionId: string,
+    status: 'CLOSED' | 'EXPIRED' | 'HANDOFF' = 'CLOSED',
+  ): Promise<void> {
     await this.repository.close(sessionId, status);
   }
 }

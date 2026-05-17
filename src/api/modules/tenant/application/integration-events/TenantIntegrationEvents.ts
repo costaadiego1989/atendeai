@@ -79,10 +79,7 @@ export class TenantInstagramConfiguredIntegrationEvent extends IntegrationEvent 
     return this.payload.aggregateId as string;
   }
 
-  constructor(data: {
-    aggregateId: string;
-    instagramAccountId: string;
-  }) {
+  constructor(data: { aggregateId: string; instagramAccountId: string }) {
     super();
     this.payload = data;
   }
@@ -116,11 +113,7 @@ export class TenantPlanChangedIntegrationEvent extends IntegrationEvent {
     return this.payload.aggregateId as string;
   }
 
-  constructor(data: {
-    aggregateId: string;
-    oldPlan: string;
-    newPlan: string;
-  }) {
+  constructor(data: { aggregateId: string; oldPlan: string; newPlan: string }) {
     super();
     this.payload = data;
   }

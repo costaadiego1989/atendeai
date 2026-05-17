@@ -60,7 +60,9 @@ export class CreateRecoveryCaseUseCase {
       );
 
       if (!contact) {
-        throw new ValidationErrorException('Contato informado não foi encontrado');
+        throw new ValidationErrorException(
+          'Contato informado não foi encontrado',
+        );
       }
 
       debtorName = debtorName || contact.name;
@@ -84,7 +86,9 @@ export class CreateRecoveryCaseUseCase {
       this.configService.get<string>('RECOVERY_PLAYBOOKS_ENABLED') === 'true';
 
     if (playbooksEnabled) {
-      await this.playbookRepository.ensureSystemDefaultPlaybook(command.tenantId);
+      await this.playbookRepository.ensureSystemDefaultPlaybook(
+        command.tenantId,
+      );
       const active = await this.playbookRepository.findActivePlaybookWithPhases(
         command.tenantId,
         branchId ?? null,

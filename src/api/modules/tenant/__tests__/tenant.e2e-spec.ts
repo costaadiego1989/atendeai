@@ -42,15 +42,31 @@ describe('TenantModule (e2e)', () => {
       where: { cnpj: testCnpj },
     });
     if (existingTenant) {
-      await prisma.salesMetric.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.subscription.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.usageRecord.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.whatsAppConfig.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.aIConfig.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: existingTenant.id } }).catch(() => { });
+      await prisma.salesMetric
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.usageRecord
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.user
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.whatsAppConfig
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.aIConfig
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.tenant
+        .delete({ where: { id: existingTenant.id } })
+        .catch(() => {});
     }
-    await prisma.user.deleteMany({ where: { email: testEmail } }).catch(() => { });
+    await prisma.user
+      .deleteMany({ where: { email: testEmail } })
+      .catch(() => {});
   });
 
   afterAll(async () => {
@@ -58,13 +74,27 @@ describe('TenantModule (e2e)', () => {
       where: { cnpj: testCnpj },
     });
     if (existingTenant) {
-      await prisma.salesMetric.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.subscription.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.usageRecord.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.whatsAppConfig.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.aIConfig.deleteMany({ where: { tenantId: existingTenant.id } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: existingTenant.id } }).catch(() => { });
+      await prisma.salesMetric
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.usageRecord
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.user
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.whatsAppConfig
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.aIConfig
+        .deleteMany({ where: { tenantId: existingTenant.id } })
+        .catch(() => {});
+      await prisma.tenant
+        .delete({ where: { id: existingTenant.id } })
+        .catch(() => {});
     }
     await app.close();
   });
@@ -281,7 +311,9 @@ describe('TenantModule (e2e)', () => {
       })) as any;
 
       expect(updatedTenant?.aiConfig).toBeDefined();
-      expect(updatedTenant?.aiConfig?.systemPrompt).toBe(aiSettings.systemPrompt);
+      expect(updatedTenant?.aiConfig?.systemPrompt).toBe(
+        aiSettings.systemPrompt,
+      );
     });
 
     it('should configure WhatsApp settings successfully', async () => {

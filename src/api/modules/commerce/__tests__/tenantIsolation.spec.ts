@@ -87,7 +87,9 @@ describe('Commerce — Tenant Isolation', () => {
 
       await useCase.execute(TENANT_A);
 
-      expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(TENANT_A);
+      expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(
+        TENANT_A,
+      );
     });
 
     it('should return tenant-specific default when no config exists', async () => {
@@ -96,7 +98,9 @@ describe('Commerce — Tenant Isolation', () => {
       const result = await useCase.execute(TENANT_B);
 
       expect(result.tenantId).toBe(TENANT_B);
-      expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(TENANT_B);
+      expect(commerceRepo.findAbandonmentConfigByTenantId).toHaveBeenCalledWith(
+        TENANT_B,
+      );
     });
 
     it('should never return config from another tenant', async () => {
@@ -147,17 +151,23 @@ describe('Commerce — Tenant Isolation', () => {
 
       await useCase.execute(TENANT_A, 'order-1');
 
-      expect(commerceRepo.findOrderById).toHaveBeenCalledWith(TENANT_A, 'order-1');
+      expect(commerceRepo.findOrderById).toHaveBeenCalledWith(
+        TENANT_A,
+        'order-1',
+      );
     });
 
     it('should throw when order belongs to another tenant', async () => {
       commerceRepo.findOrderById.mockResolvedValue(null);
 
-      await expect(
-        useCase.execute(TENANT_B, 'order-1'),
-      ).rejects.toBeInstanceOf(NotFoundException);
+      await expect(useCase.execute(TENANT_B, 'order-1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
 
-      expect(commerceRepo.findOrderById).toHaveBeenCalledWith(TENANT_B, 'order-1');
+      expect(commerceRepo.findOrderById).toHaveBeenCalledWith(
+        TENANT_B,
+        'order-1',
+      );
     });
   });
 });

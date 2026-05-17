@@ -7,9 +7,7 @@ import {
 } from '../../../domain/repositories/IConversationIntelligenceRepository';
 
 @Injectable()
-export class PrismaConversationIntelligenceRepository
-  implements IConversationIntelligenceRepository
-{
+export class PrismaConversationIntelligenceRepository implements IConversationIntelligenceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(

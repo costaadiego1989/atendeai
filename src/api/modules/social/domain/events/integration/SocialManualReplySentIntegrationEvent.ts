@@ -16,4 +16,3 @@ export class SocialManualReplySentIntegrationEvent extends IntegrationEvent {
     super();
   }
 }
-

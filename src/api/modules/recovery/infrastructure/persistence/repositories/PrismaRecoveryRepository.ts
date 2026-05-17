@@ -12,7 +12,9 @@ import {
 export class PrismaRecoveryRepository implements IRecoveryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createCase(input: CreateRecoveryCaseInput): Promise<RecoveryCaseRecord> {
+  async createCase(
+    input: CreateRecoveryCaseInput,
+  ): Promise<RecoveryCaseRecord> {
     const [recoveryCase] = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         INSERT INTO recovery_schema.recovery_cases (
           tenant_id,
@@ -66,7 +68,9 @@ export class PrismaRecoveryRepository implements IRecoveryRepository {
     return this.mapCase(recoveryCase);
   }
 
-  async listCases(filters: ListRecoveryCasesFilters): Promise<RecoveryCaseRecord[]> {
+  async listCases(
+    filters: ListRecoveryCasesFilters,
+  ): Promise<RecoveryCaseRecord[]> {
     const whereClauses: Prisma.Sql[] = [
       Prisma.sql`tenant_id = ${filters.tenantId}::uuid`,
     ];
@@ -289,37 +293,45 @@ export class PrismaRecoveryRepository implements IRecoveryRepository {
       contactId: recoveryCase.contactId ?? recoveryCase.contact_id ?? null,
       debtorName: recoveryCase.debtorName ?? recoveryCase.debtor_name,
       debtorCompanyName:
-        recoveryCase.debtorCompanyName ?? recoveryCase.debtor_company_name ?? null,
+        recoveryCase.debtorCompanyName ??
+        recoveryCase.debtor_company_name ??
+        null,
       debtorDocument:
         recoveryCase.debtorDocument ?? recoveryCase.debtor_document ?? null,
       phone: recoveryCase.phone,
       externalReference:
-        recoveryCase.externalReference ?? recoveryCase.external_reference ?? null,
+        recoveryCase.externalReference ??
+        recoveryCase.external_reference ??
+        null,
       paymentReference:
         recoveryCase.paymentReference ?? recoveryCase.payment_reference ?? null,
       source: recoveryCase.source,
       chargeType: recoveryCase.chargeType ?? recoveryCase.charge_type ?? null,
-      chargeTitle: recoveryCase.chargeTitle ?? recoveryCase.charge_title ?? null,
+      chargeTitle:
+        recoveryCase.chargeTitle ?? recoveryCase.charge_title ?? null,
       chargeDescription:
-        recoveryCase.chargeDescription ?? recoveryCase.charge_description ?? null,
+        recoveryCase.chargeDescription ??
+        recoveryCase.charge_description ??
+        null,
       referencePeriod:
         recoveryCase.referencePeriod ?? recoveryCase.reference_period ?? null,
       relatedEntityType:
-        recoveryCase.relatedEntityType ?? recoveryCase.related_entity_type ?? null,
+        recoveryCase.relatedEntityType ??
+        recoveryCase.related_entity_type ??
+        null,
       relatedEntityId:
         recoveryCase.relatedEntityId ?? recoveryCase.related_entity_id ?? null,
       relatedEntityLabel:
-        recoveryCase.relatedEntityLabel ?? recoveryCase.related_entity_label ?? null,
+        recoveryCase.relatedEntityLabel ??
+        recoveryCase.related_entity_label ??
+        null,
       amountDue:
         recoveryCase.amountDue == null
           ? recoveryCase.amount_due == null
             ? null
             : Number(recoveryCase.amount_due.toString()).toFixed(2)
           : Number(recoveryCase.amountDue.toString()).toFixed(2),
-      dueDate:
-        recoveryCase.dueDate ??
-        recoveryCase.due_date ??
-        null,
+      dueDate: recoveryCase.dueDate ?? recoveryCase.due_date ?? null,
       status: recoveryCase.status,
       assignedTags: Array.isArray(recoveryCase.assignedTags)
         ? (recoveryCase.assignedTags as string[])
@@ -328,7 +340,8 @@ export class PrismaRecoveryRepository implements IRecoveryRepository {
           : [],
       lastContactedAt:
         recoveryCase.lastContactedAt ?? recoveryCase.last_contacted_at ?? null,
-      nextActionAt: recoveryCase.nextActionAt ?? recoveryCase.next_action_at ?? null,
+      nextActionAt:
+        recoveryCase.nextActionAt ?? recoveryCase.next_action_at ?? null,
       paidAt: recoveryCase.paidAt ?? recoveryCase.paid_at ?? null,
       suggestedReply:
         recoveryCase.suggestedReply ?? recoveryCase.suggested_reply ?? null,
@@ -340,8 +353,7 @@ export class PrismaRecoveryRepository implements IRecoveryRepository {
         recoveryCase.guidanceGeneratedAt ??
         recoveryCase.guidance_generated_at ??
         null,
-      playbookId:
-        recoveryCase.playbookId ?? recoveryCase.playbook_id ?? null,
+      playbookId: recoveryCase.playbookId ?? recoveryCase.playbook_id ?? null,
       playbookPhaseIndex:
         recoveryCase.playbookPhaseIndex ??
         recoveryCase.playbook_phase_index ??

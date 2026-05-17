@@ -41,7 +41,10 @@ describe('CommerceConversationFlowRules', () => {
     });
 
     it('should return null when message does not contain a valid number', () => {
-      const result = flowRules.resolveSelectedOption(options as any, 'quero pizza');
+      const result = flowRules.resolveSelectedOption(
+        options as any,
+        'quero pizza',
+      );
       expect(result).toBeNull();
     });
 
@@ -69,15 +72,27 @@ describe('CommerceConversationFlowRules', () => {
   describe('isNegativeOrCheckout', () => {
     it('should detect negative/checkout intents (normalized input)', () => {
       // The method expects pre-normalized input (as used in AdvanceConversation)
-      expect(flowRules.isNegativeOrCheckout(flowRules.normalize('só isso'))).toBe(true);
-      expect(flowRules.isNegativeOrCheckout(flowRules.normalize('fechar pedido'))).toBe(true);
-      expect(flowRules.isNegativeOrCheckout(flowRules.normalize('finalizar'))).toBe(true);
-      expect(flowRules.isNegativeOrCheckout(flowRules.normalize('não'))).toBe(true);
+      expect(
+        flowRules.isNegativeOrCheckout(flowRules.normalize('só isso')),
+      ).toBe(true);
+      expect(
+        flowRules.isNegativeOrCheckout(flowRules.normalize('fechar pedido')),
+      ).toBe(true);
+      expect(
+        flowRules.isNegativeOrCheckout(flowRules.normalize('finalizar')),
+      ).toBe(true);
+      expect(flowRules.isNegativeOrCheckout(flowRules.normalize('não'))).toBe(
+        true,
+      );
     });
 
     it('should return false for unrelated messages', () => {
-      expect(flowRules.isNegativeOrCheckout(flowRules.normalize('quero mais'))).toBe(false);
-      expect(flowRules.isNegativeOrCheckout(flowRules.normalize('adicionar item'))).toBe(false);
+      expect(
+        flowRules.isNegativeOrCheckout(flowRules.normalize('quero mais')),
+      ).toBe(false);
+      expect(
+        flowRules.isNegativeOrCheckout(flowRules.normalize('adicionar item')),
+      ).toBe(false);
     });
   });
 
@@ -89,7 +104,9 @@ describe('CommerceConversationFlowRules', () => {
 
     it('should detect delivery intent', () => {
       expect(flowRules.isDelivery(flowRules.normalize('entrega'))).toBe(true);
-      expect(flowRules.isDelivery(flowRules.normalize('quero entregar'))).toBe(true);
+      expect(flowRules.isDelivery(flowRules.normalize('quero entregar'))).toBe(
+        true,
+      );
     });
 
     it('should not confuse pickup with delivery', () => {

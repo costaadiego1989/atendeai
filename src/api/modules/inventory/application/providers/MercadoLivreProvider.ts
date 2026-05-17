@@ -12,12 +12,15 @@ export class MercadoLivreProvider implements IInventoryProvider {
       );
     }
 
-    const response = await fetch(`https://api.mercadolibre.com/users/${userId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await fetch(
+      `https://api.mercadolibre.com/users/${userId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Falha Mercado Livre: Status HTTP ${response.status}`);

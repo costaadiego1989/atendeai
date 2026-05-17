@@ -7,15 +7,15 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job, Worker } from 'bullmq';
-import {
-  IDispatchNextProspectCampaignExecutionUseCase,
-} from '../../application/use-cases/interfaces/IDispatchNextProspectCampaignExecutionUseCase';
+import { IDispatchNextProspectCampaignExecutionUseCase } from '../../application/use-cases/interfaces/IDispatchNextProspectCampaignExecutionUseCase';
 import { ProspectDispatchJob } from '../../domain/ports/IProspectDispatchQueue';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
 import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
 @Injectable()
-export class ProspectDispatchProcessor implements OnModuleInit, OnModuleDestroy {
+export class ProspectDispatchProcessor
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(ProspectDispatchProcessor.name);
   private worker: Worker;
 

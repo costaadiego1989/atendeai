@@ -57,7 +57,10 @@ export interface CreateInventoryConnectionInput {
 export interface IInventoryRepository {
   syncItem(input: SyncInventoryItemInput): Promise<InventoryItemRecord>;
   listItems(filters: ListInventoryItemsFilters): Promise<InventoryItemRecord[]>;
-  findItemBySku(tenantId: string, sku: string): Promise<InventoryItemRecord | null>;
+  findItemBySku(
+    tenantId: string,
+    sku: string,
+  ): Promise<InventoryItemRecord | null>;
   createConnection(
     input: CreateInventoryConnectionInput,
   ): Promise<InventoryConnectionRecord>;

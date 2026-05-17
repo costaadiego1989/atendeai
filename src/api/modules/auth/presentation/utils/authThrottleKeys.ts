@@ -1,9 +1,7 @@
 import { Request } from 'express';
 import { createHash } from 'crypto';
 
-import {
-  DEVICE_ID_COOKIE_NAME,
-} from '@shared/infrastructure/http/interceptors/DeviceIdInterceptor';
+import { DEVICE_ID_COOKIE_NAME } from '@shared/infrastructure/http/interceptors/DeviceIdInterceptor';
 
 const SAFE_DEVICE_HEADER = /^[a-zA-Z0-9_-]{8,128}$/;
 const FALLBACK_FALLBACK_BUCKET = '_';
@@ -34,7 +32,10 @@ export function resolveAuthThrottleDeviceId(
   request: Request & { deviceId?: string },
 ): string {
   const fromCookie = request.cookies?.[DEVICE_ID_COOKIE_NAME];
-  if (typeof fromCookie === 'string' && SAFE_DEVICE_HEADER.test(fromCookie.trim())) {
+  if (
+    typeof fromCookie === 'string' &&
+    SAFE_DEVICE_HEADER.test(fromCookie.trim())
+  ) {
     return fromCookie.trim();
   }
 

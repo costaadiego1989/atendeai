@@ -25,9 +25,15 @@ describe('AIContextAggregator', () => {
 
   beforeEach(() => {
     promptBuilder = { build: jest.fn().mockReturnValue('Base prompt') } as any;
-    commercialProvider = { findRelevantOffer: jest.fn().mockResolvedValue(null) };
-    commerceProvider = { findConversationContext: jest.fn().mockResolvedValue(null) };
-    schedulingProvider = { findRelevantAvailability: jest.fn().mockResolvedValue(null) };
+    commercialProvider = {
+      findRelevantOffer: jest.fn().mockResolvedValue(null),
+    };
+    commerceProvider = {
+      findConversationContext: jest.fn().mockResolvedValue(null),
+    };
+    schedulingProvider = {
+      findRelevantAvailability: jest.fn().mockResolvedValue(null),
+    };
     pdfProvider = { findRelevantPDFContext: jest.fn().mockResolvedValue(null) };
   });
 
@@ -50,15 +56,24 @@ describe('AIContextAggregator', () => {
       const result = await aggregator.aggregate(tenant, 'conv-1', 'Olá', false);
 
       expect(promptBuilder.build).toHaveBeenCalledWith(tenant);
-      expect(commercialProvider.findRelevantOffer).toHaveBeenCalledWith('tenant-1', 'Olá');
+      expect(commercialProvider.findRelevantOffer).toHaveBeenCalledWith(
+        'tenant-1',
+        'Olá',
+      );
       expect(commerceProvider.findConversationContext).toHaveBeenCalledWith({
         tenantId: 'tenant-1',
         conversationId: 'conv-1',
         userMessage: 'Olá',
         businessType: 'MARKET',
       });
-      expect(schedulingProvider.findRelevantAvailability).toHaveBeenCalledWith('tenant-1', 'Olá');
-      expect(pdfProvider.findRelevantPDFContext).toHaveBeenCalledWith('tenant-1', 'Olá');
+      expect(schedulingProvider.findRelevantAvailability).toHaveBeenCalledWith(
+        'tenant-1',
+        'Olá',
+      );
+      expect(pdfProvider.findRelevantPDFContext).toHaveBeenCalledWith(
+        'tenant-1',
+        'Olá',
+      );
       expect(result.systemPrompt).toBe('Base prompt');
       expect(result.diagnostics.basePromptUsage).toBe(true);
     });
@@ -66,7 +81,12 @@ describe('AIContextAggregator', () => {
     it('should not include cache diagnostics when ttl is 0', async () => {
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        false,
+      );
 
       expect(result.diagnostics.aiContextAggregatorCacheHit).toBeUndefined();
       expect(result.diagnostics.aiContextAggregatorCacheTtlMs).toBeUndefined();
@@ -120,7 +140,12 @@ describe('AIContextAggregator', () => {
       // The first entry should have been evicted; calling it again should rebuild
       promptBuilder.build.mockClear();
       const tenant0 = makeTenantStub('tenant-0');
-      const result = await aggregator.aggregate(tenant0, 'conv-0', 'msg-0', false);
+      const result = await aggregator.aggregate(
+        tenant0,
+        'conv-0',
+        'msg-0',
+        false,
+      );
 
       expect(promptBuilder.build).toHaveBeenCalled();
       expect(result.diagnostics.aiContextAggregatorCacheHit).toBe(false);
@@ -131,7 +156,12 @@ describe('AIContextAggregator', () => {
     it('should append first interaction guardrail when isFirstInteraction=true', async () => {
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', true);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        true,
+      );
 
       expect(result.systemPrompt).toContain('[PRIMEIRA INTERAção]');
       expect(result.diagnostics.firstInteractionGuardrail).toBe(true);
@@ -140,7 +170,12 @@ describe('AIContextAggregator', () => {
     it('should NOT append first interaction guardrail when isFirstInteraction=false', async () => {
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        false,
+      );
 
       expect(result.systemPrompt).not.toContain('[PRIMEIRA INTERAção]');
       expect(result.diagnostics.firstInteractionGuardrail).toBe(false);
@@ -149,10 +184,17 @@ describe('AIContextAggregator', () => {
 
   describe('context providers found', () => {
     it('should append commercial context when provider returns data', async () => {
-      commercialProvider.findRelevantOffer.mockResolvedValue('Oferta: 20% desconto');
+      commercialProvider.findRelevantOffer.mockResolvedValue(
+        'Oferta: 20% desconto',
+      );
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'promoção', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'promoção',
+        false,
+      );
 
       expect(result.systemPrompt).toContain('[CONTEXTO COMERCIAL]');
       expect(result.systemPrompt).toContain('Oferta: 20% desconto');
@@ -160,10 +202,17 @@ describe('AIContextAggregator', () => {
     });
 
     it('should append commerce context when provider returns data', async () => {
-      commerceProvider.findConversationContext.mockResolvedValue('Carrinho: 2 itens');
+      commerceProvider.findConversationContext.mockResolvedValue(
+        'Carrinho: 2 itens',
+      );
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'meu pedido', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'meu pedido',
+        false,
+      );
 
       expect(result.systemPrompt).toContain('[CONTEXTO DE NEGOCIO]');
       expect(result.systemPrompt).toContain('Carrinho: 2 itens');
@@ -171,10 +220,17 @@ describe('AIContextAggregator', () => {
     });
 
     it('should append scheduling context when provider returns data', async () => {
-      schedulingProvider.findRelevantAvailability.mockResolvedValue('Horários: 14h, 15h');
+      schedulingProvider.findRelevantAvailability.mockResolvedValue(
+        'Horários: 14h, 15h',
+      );
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'agendar', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'agendar',
+        false,
+      );
 
       expect(result.systemPrompt).toContain('[CONTEXTO DE AGENDA]');
       expect(result.systemPrompt).toContain('Horários: 14h, 15h');
@@ -182,12 +238,21 @@ describe('AIContextAggregator', () => {
     });
 
     it('should append PDF context when provider returns data', async () => {
-      pdfProvider.findRelevantPDFContext.mockResolvedValue('Documento: política de troca');
+      pdfProvider.findRelevantPDFContext.mockResolvedValue(
+        'Documento: política de troca',
+      );
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'troca', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'troca',
+        false,
+      );
 
-      expect(result.systemPrompt).toContain('[CONTEXTO DE DOCUMENTOS DA EMPRESA]');
+      expect(result.systemPrompt).toContain(
+        '[CONTEXTO DE DOCUMENTOS DA EMPRESA]',
+      );
       expect(result.systemPrompt).toContain('Documento: política de troca');
       expect(result.diagnostics.tenantPDFContextFound).toBe(true);
     });
@@ -197,7 +262,12 @@ describe('AIContextAggregator', () => {
     it('should not append commercial context when provider returns null', async () => {
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        false,
+      );
 
       expect(result.systemPrompt).not.toContain('[CONTEXTO COMERCIAL]');
       expect(result.diagnostics.commercialContextFound).toBeUndefined();
@@ -206,9 +276,16 @@ describe('AIContextAggregator', () => {
     it('should not append PDF context when provider is undefined', async () => {
       const aggregator = createAggregator(0, false);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        false,
+      );
 
-      expect(result.systemPrompt).not.toContain('[CONTEXTO DE DOCUMENTOS DA EMPRESA]');
+      expect(result.systemPrompt).not.toContain(
+        '[CONTEXTO DE DOCUMENTOS DA EMPRESA]',
+      );
       expect(result.diagnostics.tenantPDFContextFound).toBeUndefined();
     });
   });
@@ -217,7 +294,12 @@ describe('AIContextAggregator', () => {
     it('should return only base prompt with no extra context sections', async () => {
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        false,
+      );
 
       expect(result.systemPrompt).toBe('Base prompt');
       expect(result.diagnostics.commercialContextFound).toBeUndefined();
@@ -231,20 +313,34 @@ describe('AIContextAggregator', () => {
     it('should include version and basePromptUsage in diagnostics', async () => {
       const aggregator = createAggregator(0);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        false,
+      );
 
-      expect(result.diagnostics.aiContextAggregatorVersion).toBe('2026-05-context-v1');
+      expect(result.diagnostics.aiContextAggregatorVersion).toBe(
+        '2026-05-context-v1',
+      );
       expect(result.diagnostics.basePromptUsage).toBe(true);
     });
 
     it('should include cache TTL in diagnostics when cache is enabled', async () => {
       const aggregator = createAggregator(5000);
 
-      const result = await aggregator.aggregate(makeTenantStub(), 'conv-1', 'Oi', false);
+      const result = await aggregator.aggregate(
+        makeTenantStub(),
+        'conv-1',
+        'Oi',
+        false,
+      );
 
       expect(result.diagnostics.aiContextAggregatorCacheHit).toBe(false);
       expect(result.diagnostics.aiContextAggregatorCacheTtlMs).toBe(5000);
-      expect(result.diagnostics.aiContextAggregatorCacheExpiresAtMs).toBeGreaterThan(Date.now() - 1000);
+      expect(
+        result.diagnostics.aiContextAggregatorCacheExpiresAtMs,
+      ).toBeGreaterThan(Date.now() - 1000);
     });
   });
 });

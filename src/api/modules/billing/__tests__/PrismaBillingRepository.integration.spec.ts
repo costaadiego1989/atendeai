@@ -42,10 +42,16 @@ describe('PrismaBillingRepository (integration)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await prisma.usageRecord.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.usageRecord
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
       await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {

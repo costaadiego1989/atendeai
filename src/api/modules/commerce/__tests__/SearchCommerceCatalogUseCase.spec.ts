@@ -18,7 +18,10 @@ describe('SearchCommerceCatalogUseCase', () => {
       searchItems: jest.fn(),
     } as any;
 
-    useCase = new SearchCommerceCatalogUseCase(inventoryQueryPort, catalogQueryPort);
+    useCase = new SearchCommerceCatalogUseCase(
+      inventoryQueryPort,
+      catalogQueryPort,
+    );
   });
 
   it('should search by keyword and return combined results', async () => {

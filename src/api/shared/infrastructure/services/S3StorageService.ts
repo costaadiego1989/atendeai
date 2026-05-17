@@ -30,7 +30,10 @@ export class S3StorageService implements FileStorageService {
       forcePathStyle: !!endpoint, // Useful for S3-compatible providers like MinIO or R2
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID', ''),
-        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY', ''),
+        secretAccessKey: this.configService.get<string>(
+          'AWS_SECRET_ACCESS_KEY',
+          '',
+        ),
       },
     });
   }

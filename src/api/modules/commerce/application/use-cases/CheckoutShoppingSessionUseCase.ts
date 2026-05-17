@@ -49,15 +49,26 @@ export class CheckoutShoppingSessionUseCase {
     }
 
     if (!session.fulfillmentType) {
-      throw new BadRequestException('Select pickup or delivery before checkout');
+      throw new BadRequestException(
+        'Select pickup or delivery before checkout',
+      );
     }
 
-    if (session.fulfillmentType === 'DELIVERY' && !session.deliveryAddress?.trim()) {
-      throw new BadRequestException('Delivery address is required before checkout');
+    if (
+      session.fulfillmentType === 'DELIVERY' &&
+      !session.deliveryAddress?.trim()
+    ) {
+      throw new BadRequestException(
+        'Delivery address is required before checkout',
+      );
     }
 
     if (session.status === 'PAID') {
-      throw new InvalidSessionStateError(session.id, session.status, 'CHECKOUT');
+      throw new InvalidSessionStateError(
+        session.id,
+        session.status,
+        'CHECKOUT',
+      );
     }
 
     const subtotalAmount = session.items.reduce(

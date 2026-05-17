@@ -26,16 +26,18 @@ export class CreateProposalService {
   constructor(
     @Inject('IProposalRepository')
     private readonly proposalRepository: IProposalRepository,
-  ) { }
+  ) {}
 
   async execute(data: CreateProposalData): Promise<Proposal> {
     const title = ProposalTitle.create(data.title);
-    const items = data.items.map(item => ProposalItem.create({
-      name: item.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      description: item.description,
-    }));
+    const items = data.items.map((item) =>
+      ProposalItem.create({
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        description: item.description,
+      }),
+    );
 
     const proposal = Proposal.create({
       tenantId: data.tenantId,

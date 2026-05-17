@@ -21,7 +21,8 @@
  */
 
 jest.mock('@shared/infrastructure/observability/DomainTrace', () => ({
-  traceAsync: (_name: string, _attrs: unknown, fn: () => Promise<unknown>) => fn(),
+  traceAsync: (_name: string, _attrs: unknown, fn: () => Promise<unknown>) =>
+    fn(),
 }));
 
 import { AIContextAggregator } from '../application/services/AIContextAggregator';
@@ -72,7 +73,9 @@ function makeTenant(_id = 'tenant-abc') {
   return tenant;
 }
 
-function makeAddress(override: Partial<Parameters<typeof Address.create>[0]> = {}) {
+function makeAddress(
+  override: Partial<Parameters<typeof Address.create>[0]> = {},
+) {
   return Address.create({
     zipcode: '01310-100',
     street: 'Avenida Paulista',
@@ -225,7 +228,9 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
 
     it('PDF context e buscado com tenantId correto para isolamento', async () => {
       const providers = makeNullProviders();
-      providers.pdf.findRelevantPDFContext.mockResolvedValue('Conteudo PDF empresa A');
+      providers.pdf.findRelevantPDFContext.mockResolvedValue(
+        'Conteudo PDF empresa A',
+      );
       const aggregator = makeAggregator(providers);
       const tenantA = makeTenant();
 
@@ -252,8 +257,18 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
       const aggA = makeAggregator(provA);
       const aggB = makeAggregator(provB);
 
-      const resultA = await aggA.aggregate(tenantA, 'conv-1', 'cardapio?', false);
-      const resultB = await aggB.aggregate(tenantB, 'conv-2', 'cardapio?', false);
+      const resultA = await aggA.aggregate(
+        tenantA,
+        'conv-1',
+        'cardapio?',
+        false,
+      );
+      const resultB = await aggB.aggregate(
+        tenantB,
+        'conv-2',
+        'cardapio?',
+        false,
+      );
 
       expect(resultA.systemPrompt).toContain('PDF exclusivo tenant A');
       expect(resultB.systemPrompt).not.toContain('PDF exclusivo tenant A');
@@ -330,7 +345,8 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
     it('systemPrompt contem Description quando usuario pergunta sobre a empresa', async () => {
       const tenant = makeTenant();
       tenant.updateBusinessData({
-        description: 'Clínica odontológica especializada em implantes e estética dental.',
+        description:
+          'Clínica odontológica especializada em implantes e estética dental.',
       });
       const providers = makeNullProviders();
       const aggregator = makeAggregator(providers);
@@ -349,7 +365,8 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
     it('systemPrompt contem Services/Products quando usuario pergunta sobre servicos', async () => {
       const tenant = makeTenant();
       tenant.updateBusinessData({
-        services: 'Clareamento dental, implante osseointegrado, ortodontia, limpeza profissional',
+        services:
+          'Clareamento dental, implante osseointegrado, ortodontia, limpeza profissional',
       });
       const providers = makeNullProviders();
       const aggregator = makeAggregator(providers);
@@ -371,7 +388,9 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
     it('adiciona instrução de boas-vindas sem despejar todos os dados', async () => {
       const tenant = makeTenant();
       tenant.updateBusinessData({
-        operatingHours: { monday: { open: '08:00', close: '18:00', closed: false } },
+        operatingHours: {
+          monday: { open: '08:00', close: '18:00', closed: false },
+        },
         address: makeAddress(),
         services: 'Corte, barba, pigmentação',
       });
@@ -439,7 +458,8 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
       const tenant = makeTenant();
       tenant.updateBusinessData({
         businessType: 'Restaurante',
-        description: 'Restaurante especializado em culinária italiana artesanal.',
+        description:
+          'Restaurante especializado em culinária italiana artesanal.',
         services: 'Almoço, jantar, delivery, eventos',
         catalogUrl: 'https://restaurante.test/cardapio',
         catalogFiles: ['https://storage.test/cardapio-full.pdf'],

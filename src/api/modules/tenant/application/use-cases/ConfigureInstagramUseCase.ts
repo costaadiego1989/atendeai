@@ -46,7 +46,9 @@ export class ConfigureInstagramUseCase implements IConfigureInstagramUseCase {
 
     if (input.branchId) {
       const branches = await this.tenantRepo.listBranches(input.tenantId);
-      const branch = branches.find((item) => item.id.toValue() === input.branchId);
+      const branch = branches.find(
+        (item) => item.id.toValue() === input.branchId,
+      );
       if (!branch) {
         throw new EntityNotFoundException('TenantBranch', input.branchId);
       }

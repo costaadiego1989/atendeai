@@ -68,11 +68,17 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
       });
 
       // Detect inquiry
-      if (req.userMessage.toLowerCase().includes('preço') || req.userMessage.toLowerCase().includes('camisa')) {
+      if (
+        req.userMessage.toLowerCase().includes('preço') ||
+        req.userMessage.toLowerCase().includes('camisa')
+      ) {
         return {
           text: 'Temos a Camisa Dry Fit Uni por R$ 99,90. Digite 1 para selecionar.',
-          tokensUsed: 40, confidence: 0.97, finishReason: 'stop',
-          intent: 'PURCHASE', sentiment: 'POSITIVE',
+          tokensUsed: 40,
+          confidence: 0.97,
+          finishReason: 'stop',
+          intent: 'PURCHASE',
+          sentiment: 'POSITIVE',
         };
       }
 
@@ -80,8 +86,11 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
       if (req.userMessage.trim() === '1') {
         return {
           text: 'Ótimo! Camisa Dry Fit Uni selecionada. Qual o tamanho e cor que você deseja?',
-          tokensUsed: 30, confidence: 0.95, finishReason: 'stop',
-          intent: 'PURCHASE', sentiment: 'POSITIVE',
+          tokensUsed: 30,
+          confidence: 0.95,
+          finishReason: 'stop',
+          intent: 'PURCHASE',
+          sentiment: 'POSITIVE',
         };
       }
 
@@ -89,8 +98,11 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
       if (req.userMessage.toLowerCase().includes('preta')) {
         return {
           text: 'Anotado, tamanho P na cor preta. Qual a quantidade?',
-          tokensUsed: 30, confidence: 0.95, finishReason: 'stop',
-          intent: 'PURCHASE', sentiment: 'POSITIVE',
+          tokensUsed: 30,
+          confidence: 0.95,
+          finishReason: 'stop',
+          intent: 'PURCHASE',
+          sentiment: 'POSITIVE',
         };
       }
 
@@ -98,8 +110,11 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
       if (req.userMessage.trim() === '2') {
         return {
           text: '2x Camisa Dry Fit. Quer entrega ou retirada?',
-          tokensUsed: 35, confidence: 0.96, finishReason: 'stop',
-          intent: 'PURCHASE', sentiment: 'POSITIVE',
+          tokensUsed: 35,
+          confidence: 0.96,
+          finishReason: 'stop',
+          intent: 'PURCHASE',
+          sentiment: 'POSITIVE',
         };
       }
 
@@ -107,8 +122,11 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
       if (req.userMessage.toLowerCase().includes('entrega')) {
         return {
           text: 'Qual o seu endereço completo para entrega?',
-          tokensUsed: 35, confidence: 0.96, finishReason: 'stop',
-          intent: 'PURCHASE', sentiment: 'POSITIVE',
+          tokensUsed: 35,
+          confidence: 0.96,
+          finishReason: 'stop',
+          intent: 'PURCHASE',
+          sentiment: 'POSITIVE',
         };
       }
 
@@ -116,17 +134,26 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
       if (req.userMessage.toLowerCase().includes('rua abc')) {
         return {
           text: 'O frete fica R$ 10. Total R$ 209,80. Posso gerar o link de pagamento?',
-          tokensUsed: 35, confidence: 0.96, finishReason: 'stop',
-          intent: 'PURCHASE', sentiment: 'POSITIVE',
+          tokensUsed: 35,
+          confidence: 0.96,
+          finishReason: 'stop',
+          intent: 'PURCHASE',
+          sentiment: 'POSITIVE',
         };
       }
 
       // Checkout "pode gerar"
-      if (req.userMessage.toLowerCase().includes('gerar') || req.userMessage.toLowerCase().includes('sim')) {
+      if (
+        req.userMessage.toLowerCase().includes('gerar') ||
+        req.userMessage.toLowerCase().includes('sim')
+      ) {
         return {
           text: 'Aqui está seu link: [PAYMENT_LINK: Pedido Dry Fit, 209.80]',
-          tokensUsed: 45, confidence: 0.99, finishReason: 'stop',
-          intent: 'PURCHASE', sentiment: 'POSITIVE',
+          tokensUsed: 45,
+          confidence: 0.99,
+          finishReason: 'stop',
+          intent: 'PURCHASE',
+          sentiment: 'POSITIVE',
         };
       }
 
@@ -175,8 +202,8 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
 
   // ── Mock: Follow-up Service ─────────────────────────────────────────
   const mockFollowUpService = {
-    cancelFollowUps: jest.fn(async () => { }),
-    scheduleFollowUps: jest.fn(async () => { }),
+    cancelFollowUps: jest.fn(async () => {}),
+    scheduleFollowUps: jest.fn(async () => {}),
   };
 
   // ── Mock: Payment Gateway (prevents Asaas calls) ───────────────────
@@ -241,10 +268,7 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
     const calcDigit = (digits: string, weights: number[]) => {
       const sum = digits
         .split('')
-        .reduce(
-          (acc, digit, index) => acc + Number(digit) * weights[index],
-          0,
-        );
+        .reduce((acc, digit, index) => acc + Number(digit) * weights[index], 0);
       const rest = sum % 11;
       return rest < 2 ? 0 : 11 - rest;
     };
@@ -263,7 +287,9 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
   }
 
   async function sendInbound(text: string, externalId?: string) {
-    const id = externalId || `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const id =
+      externalId ||
+      `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     return request(app.getHttpServer())
       .post('/api/v1/webhooks/whatsapp')
       .send({
@@ -304,7 +330,8 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
     conversationId: string,
     predicate: (messages: any[]) => boolean,
   ) {
-    for (let i = 0; i < 150; i++) { // Poll for up to 45 seconds (300ms * 150)
+    for (let i = 0; i < 150; i++) {
+      // Poll for up to 45 seconds (300ms * 150)
       const messages = await (prisma.message as any).findMany({
         where: { conversationId },
         orderBy: { createdAt: 'asc' },
@@ -360,7 +387,7 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
     // Activate subscription
     await prisma.subscription
       .updateMany({ where: { tenantId }, data: { status: 'ACTIVE' } })
-      .catch(() => { });
+      .catch(() => {});
 
     // Configure WhatsApp
     const tenantEntity = await tenantRepository.findById(tenantId);
@@ -403,13 +430,18 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
       optionGroups: [
         {
           name: 'Tamanho',
-          options: [{ name: 'P' }, { name: 'M' }, { name: 'G' }, { name: 'GG' }]
+          options: [
+            { name: 'P' },
+            { name: 'M' },
+            { name: 'G' },
+            { name: 'GG' },
+          ],
         },
         {
           name: 'Cor',
-          options: [{ name: 'Preta' }, { name: 'Branca' }, { name: 'Azul' }]
-        }
-      ]
+          options: [{ name: 'Preta' }, { name: 'Branca' }, { name: 'Azul' }],
+        },
+      ],
     });
   });
 
@@ -427,54 +459,50 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
           .$executeRaw(
             Prisma.sql`DELETE FROM commerce_schema.shopping_session_items WHERE tenant_id = ${tenantId}::uuid`,
           )
-          .catch(() => { });
+          .catch(() => {});
         await prisma
           .$executeRaw(
             Prisma.sql`DELETE FROM commerce_schema.shopping_sessions WHERE tenant_id = ${tenantId}::uuid`,
           )
-          .catch(() => { });
+          .catch(() => {});
         await prisma
           .$executeRaw(
             Prisma.sql`DELETE FROM inventory_schema.inventory_items WHERE tenant_id = ${tenantId}::uuid`,
           )
-          .catch(() => { });
+          .catch(() => {});
         await prisma
           .$executeRaw(
             Prisma.sql`DELETE FROM catalog_schema.catalog_items WHERE tenant_id = ${tenantId}::uuid`,
           )
-          .catch(() => { });
+          .catch(() => {});
         await prisma
           .$executeRaw(
             Prisma.sql`DELETE FROM catalog_schema.catalog_categories WHERE tenant_id = ${tenantId}::uuid`,
           )
-          .catch(() => { });
+          .catch(() => {});
         await (prisma.message as any)
           .deleteMany({ where: { conversation: { tenantId } } })
-          .catch(() => { });
+          .catch(() => {});
         await (prisma.conversation as any)
           .deleteMany({ where: { tenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await (prisma.contact as any)
           .deleteMany({ where: { tenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await (prisma.salesMetric as any)
           .deleteMany({ where: { tenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await prisma.whatsAppConfig
           .deleteMany({ where: { tenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await prisma.aIConfig
           .deleteMany({ where: { tenantId } })
-          .catch(() => { });
+          .catch(() => {});
         await prisma.subscription
           .deleteMany({ where: { tenantId } })
-          .catch(() => { });
-        await prisma.user
-          .deleteMany({ where: { tenantId } })
-          .catch(() => { });
-        await prisma.tenant
-          .delete({ where: { id: tenantId } })
-          .catch(() => { });
+          .catch(() => {});
+        await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+        await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
       } catch (e) {
         console.error('Cleanup error:', e);
       }
@@ -495,42 +523,80 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
     console.log(`✅ Conversation created: ${conversation.id}`);
 
     // Wait for AI response
-    let messages = await waitForMessages(conversation.id, (msgs) => msgs.length >= 2);
+    let messages = await waitForMessages(
+      conversation.id,
+      (msgs) => msgs.length >= 2,
+    );
     expect(messages).not.toBeNull();
-    console.log(`✅ AI: ${JSON.stringify(messages![messages!.length - 1].content)}`);
+    console.log(
+      `✅ AI: ${JSON.stringify(messages![messages!.length - 1].content)}`,
+    );
 
     // Step 2: Select '1'
     await sendInbound('Quero a opção 1 por favor');
-    messages = await waitForMessages(conversation.id, (msgs) => msgs.length >= 4);
+    messages = await waitForMessages(
+      conversation.id,
+      (msgs) => msgs.length >= 4,
+    );
     expect(messages).not.toBeNull();
-    console.log(`✅ AI (size/color): ${JSON.stringify(messages![messages!.length - 1].content)}`);
+    console.log(
+      `✅ AI (size/color): ${JSON.stringify(messages![messages!.length - 1].content)}`,
+    );
 
     // Step 3: Sizes/colors 'P e Preta'
     await sendInbound('P e Preta');
-    messages = await waitForMessages(conversation.id, (msgs) => msgs.length >= 6);
-    console.log(`✅ AI (quantity): ${JSON.stringify(messages![messages!.length - 1].content)}`);
+    messages = await waitForMessages(
+      conversation.id,
+      (msgs) => msgs.length >= 6,
+    );
+    console.log(
+      `✅ AI (quantity): ${JSON.stringify(messages![messages!.length - 1].content)}`,
+    );
 
     // Step 4: Qty '2'
     await sendInbound('2');
-    messages = await waitForMessages(conversation.id, (msgs) => msgs.length >= 8);
-    console.log(`✅ AI (fulfillment): ${JSON.stringify(messages![messages!.length - 1].content)}`);
-    
+    messages = await waitForMessages(
+      conversation.id,
+      (msgs) => msgs.length >= 8,
+    );
+    console.log(
+      `✅ AI (fulfillment): ${JSON.stringify(messages![messages!.length - 1].content)}`,
+    );
+
     // Step 5: Mode 'Entrega'
     await sendInbound('Entrega');
-    messages = await waitForMessages(conversation.id, (msgs) => msgs.length >= 10);
-    console.log(`✅ AI (address): ${JSON.stringify(messages![messages!.length - 1].content)}`);
-    
+    messages = await waitForMessages(
+      conversation.id,
+      (msgs) => msgs.length >= 10,
+    );
+    console.log(
+      `✅ AI (address): ${JSON.stringify(messages![messages!.length - 1].content)}`,
+    );
+
     // Step 6: Address 'Rua ABC, 123'
     await sendInbound('Rua ABC, 123');
-    messages = await waitForMessages(conversation.id, (msgs) => msgs.length >= 12);
-    console.log(`✅ AI (checkout confirm): ${JSON.stringify(messages![messages!.length - 1].content)}`);
-    
+    messages = await waitForMessages(
+      conversation.id,
+      (msgs) => msgs.length >= 12,
+    );
+    console.log(
+      `✅ AI (checkout confirm): ${JSON.stringify(messages![messages!.length - 1].content)}`,
+    );
+
     // Step 7: Yes, generate link
     await sendInbound('Sim pode gerar o link');
     messages = await waitForMessages(conversation.id, (msgs) => {
       if (msgs.length < 14) return false;
-      const cnt = JSON.stringify(msgs[msgs.length - 1].content || '').toLowerCase();
-      return cnt.includes('http') || cnt.includes('pay') || cnt.includes('asaas') || cnt.includes('link') || cnt.includes('pix');
+      const cnt = JSON.stringify(
+        msgs[msgs.length - 1].content || '',
+      ).toLowerCase();
+      return (
+        cnt.includes('http') ||
+        cnt.includes('pay') ||
+        cnt.includes('asaas') ||
+        cnt.includes('link') ||
+        cnt.includes('pix')
+      );
     });
     expect(messages).not.toBeNull();
     const lastMsg = JSON.stringify(messages![messages!.length - 1].content);
@@ -539,20 +605,24 @@ describe('WhatsApp Dry Fit Buying Flow (e2e)', () => {
     // Verify commerce session was created and payment link injected
     let sessions: any[] = [];
     for (let i = 0; i < 10; i++) {
-        sessions = await prisma.$queryRaw<any[]>(
-        Prisma.sql`SELECT * FROM commerce_schema.shopping_sessions WHERE tenant_id = ${tenantId}::uuid`
-        );
-        if (sessions.length > 0) break;
-        await new Promise(r => setTimeout(r, 500));
+      sessions = await prisma.$queryRaw<any[]>(
+        Prisma.sql`SELECT * FROM commerce_schema.shopping_sessions WHERE tenant_id = ${tenantId}::uuid`,
+      );
+      if (sessions.length > 0) break;
+      await new Promise((r) => setTimeout(r, 500));
     }
 
     if (sessions.length > 0) {
-      console.log(`✅ Commerce session created: ${sessions[0].id}, total: ${sessions[0].total_amount}`);
+      console.log(
+        `✅ Commerce session created: ${sessions[0].id}, total: ${sessions[0].total_amount}`,
+      );
       console.log(`✅ Payment Link URL in DB: ${sessions[0].payment_link_url}`);
       // Usually payment links take a few seconds after the intent to be injected by the background process
       // So expect could fail if queried too fast. We are just checking we got past checkout.
     } else {
-      console.log('⚠️ Could not verify session in DB - it might not have been created or is queued.');
+      console.log(
+        '⚠️ Could not verify session in DB - it might not have been created or is queued.',
+      );
     }
   });
 });

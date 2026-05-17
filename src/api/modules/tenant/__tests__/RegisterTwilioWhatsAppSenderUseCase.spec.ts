@@ -134,9 +134,9 @@ describe('RegisterTwilioWhatsAppSenderUseCase', () => {
       'whatsappNumbers',
     );
     expect(tenantRepository.save).toHaveBeenCalledWith(tenant);
-    expect(tenantDomainEventPublisher.publishFromAggregate).toHaveBeenCalledWith(
-      tenant,
-    );
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).toHaveBeenCalledWith(tenant);
   });
 
   it('should save Twilio sender in a branch scope when branchId is provided', async () => {

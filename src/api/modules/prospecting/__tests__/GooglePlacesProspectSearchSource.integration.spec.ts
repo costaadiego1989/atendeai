@@ -149,13 +149,15 @@ describe('GooglePlacesProspectSearchSource', () => {
   });
 
   it('should throw when the Google Places API key is not configured', async () => {
-    configService.get.mockImplementation((key: string, defaultValue?: unknown) => {
-      if (key === 'GOOGLE_PLACES_API_KEY') return '';
-      if (key === 'GOOGLE_PLACES_BASE_URL') {
-        return 'https://places.googleapis.com/v1';
-      }
-      return defaultValue as any;
-    });
+    configService.get.mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'GOOGLE_PLACES_API_KEY') return '';
+        if (key === 'GOOGLE_PLACES_BASE_URL') {
+          return 'https://places.googleapis.com/v1';
+        }
+        return defaultValue as any;
+      },
+    );
 
     source = new GooglePlacesProspectSearchSource(configService);
 

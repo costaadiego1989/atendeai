@@ -63,9 +63,7 @@ import { InstagramGraphAdapter } from './infrastructure/acl/InstagramGraphAdapte
 import { MessagingGatewayRegistry } from './infrastructure/acl/MessagingGatewayRegistry';
 import { PrismaMessagingWebhookReceiptStore } from './infrastructure/persistence/repositories/PrismaMessagingWebhookReceiptStore';
 import { PrismaConversationIntelligenceRepository } from './infrastructure/persistence/repositories/PrismaConversationIntelligenceRepository';
-import {
-  CONVERSATION_INTELLIGENCE_REPOSITORY,
-} from './domain/repositories/IConversationIntelligenceRepository';
+import { CONVERSATION_INTELLIGENCE_REPOSITORY } from './domain/repositories/IConversationIntelligenceRepository';
 import { ConversationIntelligenceService } from './application/services/ConversationIntelligenceService';
 import {
   MESSAGING_FACADE,
@@ -215,4 +213,4 @@ import { OutboundMessageRetryService } from './application/services/OutboundMess
     MESSAGING_FACADE,
   ],
 })
-export class MessagingModule { }
+export class MessagingModule {}

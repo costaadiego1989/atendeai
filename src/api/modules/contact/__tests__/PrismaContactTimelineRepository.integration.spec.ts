@@ -6,9 +6,7 @@ import {
   CONTACT_TIMELINE_REPOSITORY,
   IContactTimelineRepository,
 } from '../application/ports/IContactTimelineRepository';
-import {
-  REDIS_CLIENT,
-} from '@shared/infrastructure/redis/RedisModule';
+import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
 
@@ -35,7 +33,9 @@ describe('PrismaContactTimelineRepository (integration)', () => {
 
     prisma = app.get(PrismaService);
     redis = app.get(REDIS_CLIENT);
-    repository = app.get<IContactTimelineRepository>(CONTACT_TIMELINE_REPOSITORY);
+    repository = app.get<IContactTimelineRepository>(
+      CONTACT_TIMELINE_REPOSITORY,
+    );
 
     const tenant = await prisma.tenant.create({
       data: {
@@ -179,7 +179,9 @@ describe('PrismaContactTimelineRepository (integration)', () => {
 
   afterAll(async () => {
     if (redis && conversationId) {
-      await redis.del(`messaging:follow-up:audit:${conversationId}`).catch(() => {});
+      await redis
+        .del(`messaging:follow-up:audit:${conversationId}`)
+        .catch(() => {});
       if (tenantId && professionalId) {
         await redis
           .del(
@@ -246,10 +248,14 @@ describe('PrismaContactTimelineRepository (integration)', () => {
       ]),
     );
 
-    const timestamps = result!.entries.map((entry) => entry.timestamp.getTime());
+    const timestamps = result!.entries.map((entry) =>
+      entry.timestamp.getTime(),
+    );
     expect(timestamps).toEqual([...timestamps].sort((a, b) => a - b));
 
-    const handoffEntry = result!.entries.find((entry) => entry.type === 'HANDOFF_HUMAN');
+    const handoffEntry = result!.entries.find(
+      (entry) => entry.type === 'HANDOFF_HUMAN',
+    );
     expect(handoffEntry?.details).toEqual(
       expect.objectContaining({
         conversationId,

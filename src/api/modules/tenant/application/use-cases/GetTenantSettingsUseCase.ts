@@ -24,12 +24,13 @@ export class GetTenantSettingsUseCase implements IGetTenantSettingsUseCase {
   ) {}
 
   async execute(tenantId: string): Promise<GetTenantSettingsOutput> {
-    const [tenant, recentAuditLogs, branches, billingAccess] = await Promise.all([
-      this.tenantRepository.findById(tenantId),
-      this.tenantAuditLogRepository.listRecent(tenantId, 8),
-      this.tenantRepository.listBranches(tenantId),
-      this.tenantModuleAccessService.getSummary(tenantId),
-    ]);
+    const [tenant, recentAuditLogs, branches, billingAccess] =
+      await Promise.all([
+        this.tenantRepository.findById(tenantId),
+        this.tenantAuditLogRepository.listRecent(tenantId, 8),
+        this.tenantRepository.listBranches(tenantId),
+        this.tenantModuleAccessService.getSummary(tenantId),
+      ]);
 
     if (!tenant) {
       throw new NotFoundException(`Tenant with ID ${tenantId} not found`);
@@ -65,7 +66,8 @@ export class GetTenantSettingsUseCase implements IGetTenantSettingsUseCase {
           configured: tenant.instagramConfig !== null,
           connected: tenant.instagramConfig?.status === 'ACTIVE',
           status: tenant.instagramConfig?.status ?? null,
-          instagramAccountId: tenant.instagramConfig?.instagramAccountId ?? null,
+          instagramAccountId:
+            tenant.instagramConfig?.instagramAccountId ?? null,
         },
       },
       company: {

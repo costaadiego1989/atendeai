@@ -72,7 +72,9 @@ describeLiveGoogleMeet('Scheduling Google Meet live integration (e2e)', () => {
     prisma = app.get(PrismaService);
     redis = app.get(REDIS_CLIENT);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => {});
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const tenant = await prisma.tenant.create({
       data: {
@@ -123,7 +125,9 @@ describeLiveGoogleMeet('Scheduling Google Meet live integration (e2e)', () => {
   afterAll(async () => {
     if (tenantId) {
       if (professionalId && date && slotId) {
-        const rows = await prisma.$queryRaw<Array<{ event_id: string }>>(Prisma.sql`
+        const rows = await prisma.$queryRaw<
+          Array<{ event_id: string }>
+        >(Prisma.sql`
           SELECT event_id
           FROM scheduling_schema.google_calendar_event_links
           WHERE tenant_id = ${tenantId}::uuid
@@ -147,16 +151,26 @@ describeLiveGoogleMeet('Scheduling Google Meet live integration (e2e)', () => {
       }
 
       await clearSchedulingKeys(tenantId).catch(() => {});
-      await prisma.$executeRaw(Prisma.sql`
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM scheduling_schema.google_calendar_event_links
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => {});
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM scheduling_schema.google_calendar_connection_scopes
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => {});
+      `,
+        )
+        .catch(() => {});
       await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     await app?.close();

@@ -70,7 +70,9 @@ describe('InventoryController (e2e)', () => {
 
     prisma = app.get(PrismaService);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => { });
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -99,25 +101,45 @@ describe('InventoryController (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await prisma.$executeRaw(Prisma.sql`
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM inventory_schema.inventory_async_jobs
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM inventory_schema.inventory_items
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM catalog_schema.catalog_items
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM catalog_schema.catalog_categories
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => { });
+      `,
+        )
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {
@@ -369,7 +391,9 @@ describe('InventoryController (e2e)', () => {
     expect(reportJob.fileName).toContain('relatorio-estoque-');
 
     const downloadResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/inventory/jobs/${reportJob.id}/download`)
+      .get(
+        `/api/v1/tenants/${tenantId}/inventory/jobs/${reportJob.id}/download`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 

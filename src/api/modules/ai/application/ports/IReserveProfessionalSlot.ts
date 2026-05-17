@@ -4,7 +4,9 @@
  * without depending on the concrete Scheduling use case.
  */
 export interface IReserveProfessionalSlot {
-  execute(input: ReserveProfessionalSlotInput): Promise<ReserveProfessionalSlotOutput>;
+  execute(
+    input: ReserveProfessionalSlotInput,
+  ): Promise<ReserveProfessionalSlotOutput>;
 }
 
 export interface ReserveProfessionalSlotInput {

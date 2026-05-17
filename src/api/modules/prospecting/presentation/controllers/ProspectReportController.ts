@@ -73,7 +73,10 @@ export class ProspectReportController {
       },
     );
 
-    await this.prospectingAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.prospectingAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.prospectingAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -121,7 +124,10 @@ export class ProspectReportController {
       },
     );
 
-    await this.prospectingAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.prospectingAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.prospectingAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -151,7 +157,10 @@ export class ProspectReportController {
 
     if (file.fileContent) {
       res.setHeader('Content-Type', file.fileMimeType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file.fileName}"`,
+      );
       return res.send(file.fileContent);
     }
 

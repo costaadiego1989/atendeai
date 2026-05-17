@@ -65,10 +65,14 @@ export class GenerateProspectCampaignReportUseCase {
   async execute(
     input: GenerateProspectCampaignReportInput,
   ): Promise<GenerateProspectCampaignReportOutput> {
-    const campaigns = await this.prospectCampaignRepository.findAllByTenant(input.tenantId);
+    const campaigns = await this.prospectCampaignRepository.findAllByTenant(
+      input.tenantId,
+    );
     const statusFilters = new Set((input.statuses ?? []).filter(Boolean));
     const channelFilters = new Set((input.channels ?? []).filter(Boolean));
-    const audienceFilters = new Set((input.audienceTypes ?? []).filter(Boolean));
+    const audienceFilters = new Set(
+      (input.audienceTypes ?? []).filter(Boolean),
+    );
     const normalizedQuery = input.query?.trim().toLowerCase() ?? '';
     const startAt = this.toStartDate(input.dateFrom);
     const endAt = this.toEndDate(input.dateTo);
@@ -86,17 +90,28 @@ export class GenerateProspectCampaignReportUseCase {
         [campaign.name, campaign.objective]
           .filter(Boolean)
           .some((value) => value.toLowerCase().includes(normalizedQuery));
-      const matchesDate = this.isWithinRange(campaign.createdAt, startAt, endAt);
+      const matchesDate = this.isWithinRange(
+        campaign.createdAt,
+        startAt,
+        endAt,
+      );
 
-      return matchesStatus && matchesChannel && matchesAudience && matchesQuery && matchesDate;
+      return (
+        matchesStatus &&
+        matchesChannel &&
+        matchesAudience &&
+        matchesQuery &&
+        matchesDate
+      );
     });
 
     const rows = await Promise.all(
       filteredCampaigns.map(async (campaign) => {
-        const executions = await this.prospectExecutionRepository.findAllByCampaign(
-          input.tenantId,
-          campaign.id.toString(),
-        );
+        const executions =
+          await this.prospectExecutionRepository.findAllByCampaign(
+            input.tenantId,
+            campaign.id.toString(),
+          );
 
         return {
           campaignId: campaign.id.toString(),
@@ -108,11 +123,21 @@ export class GenerateProspectCampaignReportUseCase {
           dailyLimit: campaign.dailyLimit,
           targetContactsCount: campaign.targetContactIds.length,
           executionsCount: executions.length,
-          pendingExecutions: executions.filter((item) => item.status.value === 'PENDING').length,
-          contactedExecutions: executions.filter((item) => item.status.value === 'CONTACTED').length,
-          respondedExecutions: executions.filter((item) => item.status.value === 'RESPONDED').length,
-          stoppedExecutions: executions.filter((item) => item.status.value === 'STOPPED').length,
-          failedExecutions: executions.filter((item) => item.status.value === 'FAILED').length,
+          pendingExecutions: executions.filter(
+            (item) => item.status.value === 'PENDING',
+          ).length,
+          contactedExecutions: executions.filter(
+            (item) => item.status.value === 'CONTACTED',
+          ).length,
+          respondedExecutions: executions.filter(
+            (item) => item.status.value === 'RESPONDED',
+          ).length,
+          stoppedExecutions: executions.filter(
+            (item) => item.status.value === 'STOPPED',
+          ).length,
+          failedExecutions: executions.filter(
+            (item) => item.status.value === 'FAILED',
+          ).length,
           createdAt: campaign.createdAt.toISOString(),
           updatedAt: campaign.updatedAt.toISOString(),
         } satisfies ProspectCampaignReportRow;
@@ -126,11 +151,26 @@ export class GenerateProspectCampaignReportUseCase {
         activeCampaigns: rows.filter((row) => row.status === 'ACTIVE').length,
         draftCampaigns: rows.filter((row) => row.status === 'DRAFT').length,
         pausedCampaigns: rows.filter((row) => row.status === 'PAUSED').length,
-        totalAudience: rows.reduce((total, row) => total + row.targetContactsCount, 0),
-        totalExecutions: rows.reduce((total, row) => total + row.executionsCount, 0),
-        contactedExecutions: rows.reduce((total, row) => total + row.contactedExecutions, 0),
-        respondedExecutions: rows.reduce((total, row) => total + row.respondedExecutions, 0),
-        failedExecutions: rows.reduce((total, row) => total + row.failedExecutions, 0),
+        totalAudience: rows.reduce(
+          (total, row) => total + row.targetContactsCount,
+          0,
+        ),
+        totalExecutions: rows.reduce(
+          (total, row) => total + row.executionsCount,
+          0,
+        ),
+        contactedExecutions: rows.reduce(
+          (total, row) => total + row.contactedExecutions,
+          0,
+        ),
+        respondedExecutions: rows.reduce(
+          (total, row) => total + row.respondedExecutions,
+          0,
+        ),
+        failedExecutions: rows.reduce(
+          (total, row) => total + row.failedExecutions,
+          0,
+        ),
       },
       rows,
     };

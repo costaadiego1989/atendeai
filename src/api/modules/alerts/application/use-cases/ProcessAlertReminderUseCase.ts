@@ -7,8 +7,14 @@ import {
   MESSAGING_FACADE,
   IMessagingFacade,
 } from '@modules/messaging/application/facades/MessagingFacade';
-import { ALERT_REMINDER_QUEUE, IAlertReminderQueue } from '../../domain/ports/IAlertReminderQueue';
-import { ALERT_REMINDER_REPOSITORY, IAlertReminderRepository } from '../../domain/repositories/IAlertReminderRepository';
+import {
+  ALERT_REMINDER_QUEUE,
+  IAlertReminderQueue,
+} from '../../domain/ports/IAlertReminderQueue';
+import {
+  ALERT_REMINDER_REPOSITORY,
+  IAlertReminderRepository,
+} from '../../domain/repositories/IAlertReminderRepository';
 import type { AlertReminder } from '../../domain/types/AlertReminder';
 import {
   assertValidReminderTimezone,
@@ -48,7 +54,10 @@ export class ProcessAlertReminderUseCase {
 
     const now = new Date();
     const nextTriggerAt = new Date(reminder.nextTriggerAt);
-    if (Number.isNaN(nextTriggerAt.getTime()) || nextTriggerAt.getTime() > now.getTime() + 30_000) {
+    if (
+      Number.isNaN(nextTriggerAt.getTime()) ||
+      nextTriggerAt.getTime() > now.getTime() + 30_000
+    ) {
       return;
     }
 
@@ -146,7 +155,9 @@ export class ProcessAlertReminderUseCase {
     }
   }
 
-  private resolveReminderTimezone(reminder: { timezone?: string | null }): string {
+  private resolveReminderTimezone(reminder: {
+    timezone?: string | null;
+  }): string {
     const raw = reminder.timezone?.trim();
     if (raw) {
       try {

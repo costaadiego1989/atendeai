@@ -169,7 +169,9 @@ describe('UsageController (e2e)', () => {
         .deleteMany({
           where: {
             tenantId: {
-              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(Boolean),
+              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(
+                Boolean,
+              ),
             },
           },
         })
@@ -178,7 +180,9 @@ describe('UsageController (e2e)', () => {
         .deleteMany({
           where: {
             tenantId: {
-              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(Boolean),
+              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(
+                Boolean,
+              ),
             },
           },
         })
@@ -187,7 +191,9 @@ describe('UsageController (e2e)', () => {
         .deleteMany({
           where: {
             tenantId: {
-              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(Boolean),
+              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(
+                Boolean,
+              ),
             },
           },
         })
@@ -196,7 +202,9 @@ describe('UsageController (e2e)', () => {
         .deleteMany({
           where: {
             id: {
-              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(Boolean),
+              in: [tenantId, otherTenantId, noSubscriptionTenantId].filter(
+                Boolean,
+              ),
             },
           },
         })

@@ -1,20 +1,38 @@
-import { IsString, IsOptional, IsInt, IsObject, Min, Max, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsObject,
+  Min,
+  Max,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ListCommentsQueryDTO {
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   status?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   postId?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   platform?: string;
 
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1)
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   page?: number;
 
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100)
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
   limit?: number;
 }
 
@@ -30,36 +48,50 @@ export class CreateAutoReplyRuleDTO {
   @IsString()
   platform!: string;
 
-  @IsOptional() @IsInt() @Min(0) @Max(100)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
   priority?: number;
 
-  @IsOptional() @IsObject()
+  @IsOptional()
+  @IsObject()
   conditions?: Record<string, unknown>;
 
-  @IsOptional() @IsObject()
+  @IsOptional()
+  @IsObject()
   actions?: Record<string, unknown>;
 
-  @IsOptional() @IsObject()
+  @IsOptional()
+  @IsObject()
   limits?: Record<string, unknown>;
 }
 
 export class UpdateAutoReplyRuleDTO {
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   name?: string;
 
-  @IsOptional() @IsInt() @Min(0) @Max(100)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
   priority?: number;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   platform?: string;
 
-  @IsOptional() @IsObject()
+  @IsOptional()
+  @IsObject()
   conditions?: Record<string, unknown>;
 
-  @IsOptional() @IsObject()
+  @IsOptional()
+  @IsObject()
   actions?: Record<string, unknown>;
 
-  @IsOptional() @IsObject()
+  @IsOptional()
+  @IsObject()
   limits?: Record<string, unknown>;
 }
 
@@ -70,25 +102,32 @@ export class SendInboxMessageDTO {
   @IsString()
   recipientExternalId!: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   recipientUsername?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   text?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   imageUrl?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   videoUrl?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   linkUrl?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   linkTitle?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   originCommentId?: string;
 }
 
@@ -99,15 +138,19 @@ export class ConnectInstagramDTO {
   @IsString()
   instagramAccountId!: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   username?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   displayName?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   profilePictureUrl?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   pageId?: string;
 }

@@ -32,7 +32,7 @@ export function buildSchedulingConfirmationMessage(input: {
   const timeLine =
     input.startsAt && input.endsAt
       ? `${input.startsAt} as ${input.endsAt}`
-      : input.startsAt ?? 'horário combinado';
+      : (input.startsAt ?? 'horário combinado');
 
   return `Ola, ${firstName}! Seu agendamento foi confirmado${categoryLine}${professionalLine} para ${formattedDate}, as ${timeLine}. Se precisar ajustar o horário, e so responder por aqui.`;
 }
@@ -57,7 +57,7 @@ export function buildSchedulingPaymentPendingMessage(input: {
   const timeLine =
     input.startsAt && input.endsAt
       ? `${input.startsAt} as ${input.endsAt}`
-      : input.startsAt ?? 'horário combinado';
+      : (input.startsAt ?? 'horário combinado');
 
   return `Ola, ${firstName}! Seu horário${categoryLine}${professionalLine} ficou pre-agendado para ${formattedDate}, as ${timeLine}. Para confirmar, conclua o pagamento por aqui: ${input.paymentUrl}. Esse pré-agendamento fica reservado ate ${formattedExpiry}.`;
 }
@@ -82,7 +82,7 @@ export function buildSchedulingRescheduledMessage(input: {
   const timeLine =
     input.startsAt && input.endsAt
       ? `${input.startsAt} as ${input.endsAt}`
-      : input.startsAt ?? 'horário combinado';
+      : (input.startsAt ?? 'horário combinado');
 
   if (input.pendingPayment && input.paymentUrl) {
     const expiryLine = input.paymentExpiresAt

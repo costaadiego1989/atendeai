@@ -56,7 +56,7 @@ export class CreateSplitPaymentChargeUseCase {
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
     private readonly paymentLinkLifecycleService: SalesPaymentLinkLifecycleService,
-  ) { }
+  ) {}
 
   async execute(input: CreateSplitPaymentChargeInput) {
     if (input.value <= 0) {
@@ -64,7 +64,9 @@ export class CreateSplitPaymentChargeUseCase {
     }
 
     const tenantFinancialAccount =
-      await this.tenantFinancialAccountRepository.findByTenantId(input.tenantId);
+      await this.tenantFinancialAccountRepository.findByTenantId(
+        input.tenantId,
+      );
     if (!tenantFinancialAccount?.walletId) {
       throw new ConflictException(
         'Conta financeira da empresa ainda não foi configurada',
@@ -91,7 +93,9 @@ export class CreateSplitPaymentChargeUseCase {
 
     const paymentRecordId = randomUUID();
     const externalReference = `sales-charge|${input.tenantId}|${paymentRecordId}`;
-    const dueDate = (input.dueDate ?? this.defaultDueDate()).toISOString().slice(0, 10);
+    const dueDate = (input.dueDate ?? this.defaultDueDate())
+      .toISOString()
+      .slice(0, 10);
     const tenantPercentualValue = input.value < 100 ? 98 : 98.5;
 
     const payment = await this.paymentService.createPayment({
@@ -110,15 +114,17 @@ export class CreateSplitPaymentChargeUseCase {
     });
 
     if (input.sendViaWhatsApp) {
-      await this.eventBus.publish(new SalesPaymentChargeCreatedIntegrationEvent({
-        tenantId: input.tenantId,
-        contactId: input.contactId,
-        contactName: contact.name,
-        invoiceUrl: payment.invoiceUrl,
-        value: input.value,
-        branchId: resolvedBranchId,
-        conversationId: input.conversationId ?? null,
-      }));
+      await this.eventBus.publish(
+        new SalesPaymentChargeCreatedIntegrationEvent({
+          tenantId: input.tenantId,
+          contactId: input.contactId,
+          contactName: contact.name,
+          invoiceUrl: payment.invoiceUrl,
+          value: input.value,
+          branchId: resolvedBranchId,
+          conversationId: input.conversationId ?? null,
+        }),
+      );
     }
 
     const savedLink = await this.paymentLinkLifecycleService.recordCreated({
@@ -170,21 +176,20 @@ export class CreateSplitPaymentChargeUseCase {
     };
   }
 
-  private resolveRecurrence(input: CreateSplitPaymentChargeInput):
-    | {
-        frequency: 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
-        startDate: Date;
-        endDate: Date;
-        totalValue: number;
-        nextRunAt: Date | null;
-      }
-    | null {
+  private resolveRecurrence(input: CreateSplitPaymentChargeInput): {
+    frequency: 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+    startDate: Date;
+    endDate: Date;
+    totalValue: number;
+    nextRunAt: Date | null;
+  } | null {
     if (!input.recurrence) {
       return null;
     }
 
     const frequency = input.recurrence.frequency ?? 'MONTHLY';
-    const startDate = input.recurrence.startDate ?? input.dueDate ?? this.defaultDueDate();
+    const startDate =
+      input.recurrence.startDate ?? input.dueDate ?? this.defaultDueDate();
     const endDate = input.recurrence.endDate;
 
     if (!endDate) {
@@ -192,7 +197,9 @@ export class CreateSplitPaymentChargeUseCase {
     }
 
     if (endDate < startDate) {
-      throw new BadRequestException('Data final da recorrência deve ser posterior ao inicio');
+      throw new BadRequestException(
+        'Data final da recorrência deve ser posterior ao inicio',
+      );
     }
 
     const occurrences = this.countOccurrences(startDate, endDate, frequency);

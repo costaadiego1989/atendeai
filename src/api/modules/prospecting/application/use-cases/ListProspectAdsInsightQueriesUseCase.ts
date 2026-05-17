@@ -10,9 +10,7 @@ import {
 } from '../../domain/repositories/IProspectAdsInsightQueryRepository';
 
 @Injectable()
-export class ListProspectAdsInsightQueriesUseCase
-  implements IListProspectAdsInsightQueriesUseCase
-{
+export class ListProspectAdsInsightQueriesUseCase implements IListProspectAdsInsightQueriesUseCase {
   constructor(
     @Inject(PROSPECT_ADS_INSIGHT_QUERY_REPOSITORY)
     private readonly queryRepository: IProspectAdsInsightQueryRepository,

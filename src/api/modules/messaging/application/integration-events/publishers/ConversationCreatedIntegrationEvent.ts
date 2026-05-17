@@ -5,12 +5,12 @@ export type ConversationCreatedIntegrationEventPayload = {
   conversationId: string;
   contactId: string;
   channel: string;
-}
+};
 
 export class ConversationCreatedIntegrationEvent extends IntegrationEvent {
   readonly queue = 'messaging.conversation-created';
   readonly sourceModule = 'messaging';
-  
+
   get eventName(): string {
     return 'messaging.conversation.created.v1';
   }
@@ -19,7 +19,10 @@ export class ConversationCreatedIntegrationEvent extends IntegrationEvent {
     return this.payload.conversationId;
   }
 
-  constructor(public readonly payload: ConversationCreatedIntegrationEventPayload, eventId?: string) {
+  constructor(
+    public readonly payload: ConversationCreatedIntegrationEventPayload,
+    eventId?: string,
+  ) {
     super(eventId);
   }
 }

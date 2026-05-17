@@ -20,9 +20,7 @@ export class PlatformAdminApiKeyGuard implements CanActivate {
     const req = context
       .switchToHttp()
       .getRequest<{ headers: Record<string, string | undefined> }>();
-    const provided =
-      req.headers[HEADER] ??
-      req.headers[HEADER.toUpperCase()];
+    const provided = req.headers[HEADER] ?? req.headers[HEADER.toUpperCase()];
     if (!provided || provided !== expected) {
       throw new UnauthorizedException('Invalid platform admin credentials');
     }

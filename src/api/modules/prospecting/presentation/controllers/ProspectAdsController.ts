@@ -23,27 +23,13 @@ import {
   SelectGoogleAdsAccountDTO,
   SyncProspectAdsLeadsDTO,
 } from '../dtos/ProspectSearchDTOs';
-import {
-  ICreateProspectAdsInsightQueryUseCase,
-} from '../../application/use-cases/interfaces/ICreateProspectAdsInsightQueryUseCase';
-import {
-  IListProspectAdsInsightQueriesUseCase,
-} from '../../application/use-cases/interfaces/IListProspectAdsInsightQueriesUseCase';
-import {
-  IListProspectAdsInsightResultsUseCase,
-} from '../../application/use-cases/interfaces/IListProspectAdsInsightResultsUseCase';
-import {
-  ISyncProspectAdsLeadsUseCase,
-} from '../../application/use-cases/interfaces/ISyncProspectAdsLeadsUseCase';
-import {
-  IListProspectLeadCapturesUseCase,
-} from '../../application/use-cases/interfaces/IListProspectLeadCapturesUseCase';
-import {
-  IImportProspectLeadCapturesUseCase,
-} from '../../application/use-cases/interfaces/IImportProspectLeadCapturesUseCase';
-import {
-  IProspectLeadCapturesUseCase,
-} from '../../application/use-cases/interfaces/IProspectLeadCapturesUseCase';
+import { ICreateProspectAdsInsightQueryUseCase } from '../../application/use-cases/interfaces/ICreateProspectAdsInsightQueryUseCase';
+import { IListProspectAdsInsightQueriesUseCase } from '../../application/use-cases/interfaces/IListProspectAdsInsightQueriesUseCase';
+import { IListProspectAdsInsightResultsUseCase } from '../../application/use-cases/interfaces/IListProspectAdsInsightResultsUseCase';
+import { ISyncProspectAdsLeadsUseCase } from '../../application/use-cases/interfaces/ISyncProspectAdsLeadsUseCase';
+import { IListProspectLeadCapturesUseCase } from '../../application/use-cases/interfaces/IListProspectLeadCapturesUseCase';
+import { IImportProspectLeadCapturesUseCase } from '../../application/use-cases/interfaces/IImportProspectLeadCapturesUseCase';
+import { IProspectLeadCapturesUseCase } from '../../application/use-cases/interfaces/IProspectLeadCapturesUseCase';
 import { StartGoogleAdsConnectionUseCase } from '../../application/use-cases/StartGoogleAdsConnectionUseCase';
 import { GetGoogleAdsConnectionStatusUseCase } from '../../application/use-cases/GetGoogleAdsConnectionStatusUseCase';
 import { ListGoogleAdsAccessibleAccountsUseCase } from '../../application/use-cases/ListGoogleAdsAccessibleAccountsUseCase';
@@ -137,7 +123,10 @@ export class ProspectAdsController {
   @Post('connection/select-account')
   @UseGuards(JwtCookieGuard, RolesGuard)
   @Roles('OWNER', 'ADMIN')
-  async selectAccount(@Req() req: any, @Body() body: SelectGoogleAdsAccountDTO) {
+  async selectAccount(
+    @Req() req: any,
+    @Body() body: SelectGoogleAdsAccountDTO,
+  ) {
     return this.selectGoogleAdsAccountUseCase.execute({
       tenantId: req.user.tenantId,
       customerId: body.customerId,
@@ -157,7 +146,10 @@ export class ProspectAdsController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtCookieGuard, RolesGuard)
   @Roles('OWNER', 'ADMIN')
-  async createInsightQuery(@Req() req: any, @Body() body: CreateProspectAdsInsightQueryDTO) {
+  async createInsightQuery(
+    @Req() req: any,
+    @Body() body: CreateProspectAdsInsightQueryDTO,
+  ) {
     return this.createInsightQueryUseCase.execute({
       tenantId: req.user.tenantId,
       ...body,
@@ -271,7 +263,7 @@ export class ProspectAdsController {
               window.close();
             })();
           </script>
-          <p>${success ? 'Google Ads conectado. Pode voltar ao AtendeAi.' : (message || 'Falha ao conectar Google Ads.')}</p>
+          <p>${success ? 'Google Ads conectado. Pode voltar ao AtendeAi.' : message || 'Falha ao conectar Google Ads.'}</p>
         </body>
       </html>
     `;

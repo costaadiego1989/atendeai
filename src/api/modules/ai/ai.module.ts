@@ -51,9 +51,15 @@ import {
   ITenantPDFContextProvider,
   TENANT_PDF_CONTEXT_PROVIDER,
 } from './application/ports/ITenantPDFContextProvider';
-import { EMBEDDING_PROVIDER, IEmbeddingProvider } from './application/ports/IEmbeddingProvider';
+import {
+  EMBEDDING_PROVIDER,
+  IEmbeddingProvider,
+} from './application/ports/IEmbeddingProvider';
 import { DOCUMENT_CHUNK_REPOSITORY } from './application/ports/IDocumentChunkRepository';
-import { IRAGResponseCache, RAG_RESPONSE_CACHE } from './application/ports/IRAGResponseCache';
+import {
+  IRAGResponseCache,
+  RAG_RESPONSE_CACHE,
+} from './application/ports/IRAGResponseCache';
 import { CommerceContextProvider } from './infrastructure/adapters/CommerceContextProvider';
 import { TenantPDFContextProvider } from './infrastructure/adapters/TenantPDFContextProvider';
 import { OpenAIEmbeddingAdapter } from './infrastructure/adapters/OpenAIEmbeddingAdapter';
@@ -358,4 +364,4 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
     DocumentChunkingService,
   ],
 })
-export class AIModule { }
+export class AIModule {}

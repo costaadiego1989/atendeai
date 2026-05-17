@@ -22,9 +22,7 @@ import {
 import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
 
 @Injectable()
-export class CreateProspectSearchUseCase
-  implements ICreateProspectSearchUseCase
-{
+export class CreateProspectSearchUseCase implements ICreateProspectSearchUseCase {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,

@@ -1,4 +1,7 @@
-import { EntityNotFoundException, ValidationErrorException } from '@shared/domain/exceptions/DomainExceptions';
+import {
+  EntityNotFoundException,
+  ValidationErrorException,
+} from '@shared/domain/exceptions/DomainExceptions';
 import { ActivateProspectCampaignUseCase } from '../application/use-cases/ActivateProspectCampaignUseCase';
 import { IProspectCampaignRepository } from '../domain/repositories/IProspectCampaignRepository';
 import { ProspectCampaign } from '../domain/entities/ProspectCampaign';

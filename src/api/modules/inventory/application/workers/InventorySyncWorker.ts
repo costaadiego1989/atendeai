@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { SyncInventoryConnectionUseCase } from '../use-cases/SyncInventoryConnectionUseCase';
 
@@ -10,7 +15,7 @@ export class InventorySyncWorker implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly syncInventoryConnectionUseCase: SyncInventoryConnectionUseCase,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.syncInterval = setInterval(() => {
@@ -39,7 +44,9 @@ export class InventorySyncWorker implements OnModuleInit, OnModuleDestroy {
             connectionId: conn.id,
           });
         } catch (error: any) {
-          this.logger.error(`Failed to execute sync for connection ${conn.id}: ${error.message}`);
+          this.logger.error(
+            `Failed to execute sync for connection ${conn.id}: ${error.message}`,
+          );
         }
       }
 
@@ -49,4 +56,3 @@ export class InventorySyncWorker implements OnModuleInit, OnModuleDestroy {
     }
   }
 }
-

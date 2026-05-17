@@ -40,7 +40,7 @@ describe('TinyProvider', () => {
     const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        retorno: { status: 'OK', 'número_paginas': 1, produtos: [] },
+        retorno: { status: 'OK', número_paginas: 1, produtos: [] },
       }),
     }) as unknown as typeof fetch;
     global.fetch = fetchMock;
@@ -61,14 +61,24 @@ describe('TinyProvider', () => {
   });
 
   it('INV-T-062e: fetchStock pagina usando número_paginas da resposta', async () => {
-    const fetchMock = jest.fn()
+    const fetchMock = jest
+      .fn()
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           retorno: {
             status: 'OK',
-            'número_paginas': 2,
-            produtos: [{ produto: { codigo: 'P1', nome: 'Prod 1', saldo_estoque: '5', preço: '10.00' } }],
+            número_paginas: 2,
+            produtos: [
+              {
+                produto: {
+                  codigo: 'P1',
+                  nome: 'Prod 1',
+                  saldo_estoque: '5',
+                  preço: '10.00',
+                },
+              },
+            ],
           },
         }),
       })
@@ -77,8 +87,17 @@ describe('TinyProvider', () => {
         json: async () => ({
           retorno: {
             status: 'OK',
-            'número_paginas': 2,
-            produtos: [{ produto: { codigo: 'P2', nome: 'Prod 2', saldo_estoque: '3', preço: '20.00' } }],
+            número_paginas: 2,
+            produtos: [
+              {
+                produto: {
+                  codigo: 'P2',
+                  nome: 'Prod 2',
+                  saldo_estoque: '3',
+                  preço: '20.00',
+                },
+              },
+            ],
           },
         }),
       }) as unknown as typeof fetch;
@@ -99,7 +118,7 @@ describe('TinyProvider', () => {
       json: async () => ({
         retorno: {
           status: 'OK',
-          'número_paginas': 1,
+          número_paginas: 1,
           produtos: [
             {
               produto: {
@@ -133,7 +152,7 @@ describe('TinyProvider', () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        retorno: { status: 'OK', 'número_paginas': 1, produtos: [] },
+        retorno: { status: 'OK', número_paginas: 1, produtos: [] },
       }),
     }) as unknown as typeof fetch;
 

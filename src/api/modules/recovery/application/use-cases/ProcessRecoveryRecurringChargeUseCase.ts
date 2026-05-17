@@ -13,7 +13,9 @@ import { GenerateRecoveryPaymentLinkUseCase } from './GenerateRecoveryPaymentLin
 
 @Injectable()
 export class ProcessRecoveryRecurringChargeUseCase {
-  private readonly logger = new Logger(ProcessRecoveryRecurringChargeUseCase.name);
+  private readonly logger = new Logger(
+    ProcessRecoveryRecurringChargeUseCase.name,
+  );
 
   constructor(
     @Inject(RECOVERY_RECURRING_CHARGE_REPOSITORY)
@@ -23,13 +25,20 @@ export class ProcessRecoveryRecurringChargeUseCase {
     private readonly generateRecoveryPaymentLinkUseCase: GenerateRecoveryPaymentLinkUseCase,
   ) {}
 
-  async execute(input: { tenantId: string; recurrenceId: string }): Promise<void> {
+  async execute(input: {
+    tenantId: string;
+    recurrenceId: string;
+  }): Promise<void> {
     const recurrence = await this.recurringChargeRepository.findById(
       input.tenantId,
       input.recurrenceId,
     );
 
-    if (!recurrence || recurrence.status !== 'ACTIVE' || !recurrence.nextRunAt) {
+    if (
+      !recurrence ||
+      recurrence.status !== 'ACTIVE' ||
+      !recurrence.nextRunAt
+    ) {
       return;
     }
 
@@ -67,12 +76,16 @@ export class ProcessRecoveryRecurringChargeUseCase {
     if (!recoveryCase || this.isTerminalCase(recoveryCase)) {
       await this.recurringChargeRepository.markRunSkipped({
         runId: run.id,
-        reason: recoveryCase ? `terminal_case_${recoveryCase.status}` : 'case_not_found',
+        reason: recoveryCase
+          ? `terminal_case_${recoveryCase.status}`
+          : 'case_not_found',
       });
       await this.recurringChargeRepository.cancel({
         tenantId: recurrence.tenantId,
         recurrenceId: recurrence.id,
-        reason: recoveryCase ? `terminal_case_${recoveryCase.status}` : 'case_not_found',
+        reason: recoveryCase
+          ? `terminal_case_${recoveryCase.status}`
+          : 'case_not_found',
       });
       return;
     }
@@ -101,7 +114,9 @@ export class ProcessRecoveryRecurringChargeUseCase {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao processar recorrência';
+        error instanceof Error
+          ? error.message
+          : 'Falha ao processar recorrência';
       this.logger.error(
         `Recovery recurring charge ${recurrence.id} failed: ${message}`,
       );
@@ -150,7 +165,10 @@ export class ProcessRecoveryRecurringChargeUseCase {
 
     return template
       .replace(/\{\{\s*nome\s*\}\}/gi, recoveryCase.debtorName)
-      .replace(/\{\{\s*titulo\s*\}\}/gi, recoveryCase.chargeTitle ?? 'pendencia')
+      .replace(
+        /\{\{\s*titulo\s*\}\}/gi,
+        recoveryCase.chargeTitle ?? 'pendencia',
+      )
       .replace(/\{\{\s*valor\s*\}\}/gi, recoveryCase.amountDue ?? '')
       .replace(/\{\{\s*link\s*\}\}/gi, '{{link}}');
   }

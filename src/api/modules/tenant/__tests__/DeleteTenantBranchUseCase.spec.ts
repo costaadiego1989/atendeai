@@ -26,7 +26,10 @@ describe('DeleteTenantBranchUseCase', () => {
       record: jest.fn(),
     } as any;
 
-    useCase = new DeleteTenantBranchUseCase(tenantRepository, tenantAuditService);
+    useCase = new DeleteTenantBranchUseCase(
+      tenantRepository,
+      tenantAuditService,
+    );
   });
 
   it('should delete a branch and record audit log', async () => {
@@ -39,14 +42,19 @@ describe('DeleteTenantBranchUseCase', () => {
 
     await useCase.execute(input);
 
-    expect(tenantRepository.deleteBranch).toHaveBeenCalledWith(input.tenantId, input.branchId);
+    expect(tenantRepository.deleteBranch).toHaveBeenCalledWith(
+      input.tenantId,
+      input.branchId,
+    );
 
-    expect(tenantAuditService.record).toHaveBeenCalledWith(expect.objectContaining({
-      tenantId: 'tenant-1',
-      eventType: 'BRANCH_DELETED',
-      metadata: expect.objectContaining({
-        branchId: 'branch-1',
+    expect(tenantAuditService.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        eventType: 'BRANCH_DELETED',
+        metadata: expect.objectContaining({
+          branchId: 'branch-1',
+        }),
       }),
-    }));
+    );
   });
 });

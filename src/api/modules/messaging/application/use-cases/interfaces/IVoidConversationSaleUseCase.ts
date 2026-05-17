@@ -15,5 +15,7 @@ export interface VoidConversationSaleOutput {
 }
 
 export interface IVoidConversationSaleUseCase {
-  execute(input: VoidConversationSaleInput): Promise<VoidConversationSaleOutput>;
+  execute(
+    input: VoidConversationSaleInput,
+  ): Promise<VoidConversationSaleOutput>;
 }

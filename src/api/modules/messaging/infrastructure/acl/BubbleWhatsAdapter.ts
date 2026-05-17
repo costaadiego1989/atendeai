@@ -184,9 +184,7 @@ export class BubbleWhatsAdapter implements IMessagingGateway {
     }
 
     return {
-      messageId:
-        candidate.key?.id ||
-        `bw-native-${Date.now()}`,
+      messageId: candidate.key?.id || `bw-native-${Date.now()}`,
       from,
       to: this.readString(body.toNumber),
       deviceId: this.readString(body.deviceID) || this.readString(body.id),
@@ -205,7 +203,11 @@ export class BubbleWhatsAdapter implements IMessagingGateway {
       ? (body.messages as Array<Record<string, any>>)
       : null;
 
-    if (!messages?.length || !('from' in messages[0]) || !('body' in messages[0])) {
+    if (
+      !messages?.length ||
+      !('from' in messages[0]) ||
+      !('body' in messages[0])
+    ) {
       return null;
     }
 
@@ -244,12 +246,12 @@ export class BubbleWhatsAdapter implements IMessagingGateway {
       return null;
     }
 
-    const from =
-      this.readString(body.from) ||
-      this.readString(body.fromNumber);
+    const from = this.readString(body.from) || this.readString(body.fromNumber);
     const text =
       this.readString(body.body) ||
-      this.readString((body.messageContext as any)?.message?.extendedTextMessage?.text) ||
+      this.readString(
+        (body.messageContext as any)?.message?.extendedTextMessage?.text,
+      ) ||
       this.readString((body.messageContext as any)?.message?.conversation);
 
     if (!from || !text) {
@@ -257,9 +259,7 @@ export class BubbleWhatsAdapter implements IMessagingGateway {
     }
 
     return {
-      messageId:
-        this.readString(body.id) ||
-        `bw-context-${Date.now()}`,
+      messageId: this.readString(body.id) || `bw-context-${Date.now()}`,
       from,
       to: this.readString(body.toNumber),
       deviceId: this.readString(body.deviceID),

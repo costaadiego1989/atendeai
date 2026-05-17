@@ -9,7 +9,7 @@ export class MessagingBusinessRulesHandler implements OnModuleInit {
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
     private readonly followUpService: FollowUpService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.eventBus.subscribe(

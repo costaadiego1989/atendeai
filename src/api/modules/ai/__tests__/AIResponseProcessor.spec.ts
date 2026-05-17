@@ -43,7 +43,9 @@ describe('AIResponseProcessor', () => {
       name: 'Corte Premium',
       value: 59.9,
     });
-    expect(result).toBe('Segue o pagamento: Clique aqui para pagar: https://pay.test/link-1');
+    expect(result).toBe(
+      'Segue o pagamento: Clique aqui para pagar: https://pay.test/link-1',
+    );
   });
 
   it('should replace the tag with a fallback message when payment link generation fails', async () => {

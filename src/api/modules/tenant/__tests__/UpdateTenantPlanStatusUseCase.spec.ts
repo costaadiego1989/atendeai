@@ -50,9 +50,11 @@ describe('UpdateTenantPlanStatusUseCase', () => {
   it('should throw EntityNotFoundException if tenant does not exist', async () => {
     tenantRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({
-      tenantId: 'missing',
-      status: 'ACTIVE',
-    })).rejects.toThrow(EntityNotFoundException);
+    await expect(
+      useCase.execute({
+        tenantId: 'missing',
+        status: 'ACTIVE',
+      }),
+    ).rejects.toThrow(EntityNotFoundException);
   });
 });

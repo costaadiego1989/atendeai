@@ -39,7 +39,11 @@ describe('ContactFacade', () => {
       stage: 'LEAD',
     });
 
-    const result = await facade.identifyContact(tenantId, '5511999999999', 'John Doe');
+    const result = await facade.identifyContact(
+      tenantId,
+      '5511999999999',
+      'John Doe',
+    );
 
     expect(mockIdentifyUseCase.execute).toHaveBeenCalledWith({
       tenantId,
@@ -93,7 +97,11 @@ describe('ContactFacade', () => {
       stage: 'CUSTOMER',
     });
 
-    const result = await facade.identifyContact(tenantId, '5511888888888', 'Jane Smith');
+    const result = await facade.identifyContact(
+      tenantId,
+      '5511888888888',
+      'Jane Smith',
+    );
 
     expect(mockIdentifyUseCase.execute).toHaveBeenCalledTimes(1);
     expect(result.contactId).toBe('contact-2');

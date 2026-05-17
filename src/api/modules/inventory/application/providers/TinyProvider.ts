@@ -10,18 +10,17 @@ export class TinyProvider implements IInventoryProvider {
       throw new Error('A conexão com o Tiny requer um Token de API.');
     }
 
-    const response = await fetch(
-      'https://api.tiny.com.br/api2/info.php',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ token: String(token), formato: 'JSON' }),
-      },
-    );
+    const response = await fetch('https://api.tiny.com.br/api2/info.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token: String(token), formato: 'JSON' }),
+    });
 
     const data = await response.json();
     if (data.retorno?.status === 'Erro') {
-      throw new Error(`Falha na autenticação do Tiny: ${data.retorno.codigo_erro}`);
+      throw new Error(
+        `Falha na autenticação do Tiny: ${data.retorno.codigo_erro}`,
+      );
     }
 
     return true;

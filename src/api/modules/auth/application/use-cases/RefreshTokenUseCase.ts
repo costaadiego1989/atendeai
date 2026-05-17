@@ -156,7 +156,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       sid: nextSessionId,
       type: 'refresh' as const,
     });
-    
+
     await this.refreshSessionStore.save(
       user.id.toString(),
       nextSessionId,

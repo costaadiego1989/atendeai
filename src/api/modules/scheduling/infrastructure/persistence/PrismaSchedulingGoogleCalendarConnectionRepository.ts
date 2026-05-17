@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
-import {
-  ISchedulingGoogleCalendarConnectionRepository,
-} from '../../domain/ports/ISchedulingGoogleCalendarConnectionRepository';
+import { ISchedulingGoogleCalendarConnectionRepository } from '../../domain/ports/ISchedulingGoogleCalendarConnectionRepository';
 import { SchedulingGoogleCalendarConnection } from '../../domain/types/SchedulingGoogleCalendarConnection';
 
 @Injectable()
-export class PrismaSchedulingGoogleCalendarConnectionRepository
-  implements ISchedulingGoogleCalendarConnectionRepository
-{
+export class PrismaSchedulingGoogleCalendarConnectionRepository implements ISchedulingGoogleCalendarConnectionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(connection: SchedulingGoogleCalendarConnection): Promise<void> {
-    const existing = await this.findByScope(connection.tenantId, connection.branchId);
+    const existing = await this.findByScope(
+      connection.tenantId,
+      connection.branchId,
+    );
 
     if (existing) {
       await this.prisma.$executeRaw(Prisma.sql`
@@ -90,7 +89,10 @@ export class PrismaSchedulingGoogleCalendarConnectionRepository
     return this.findByScope(tenantId, null);
   }
 
-  async deleteByScope(tenantId: string, branchId?: string | null): Promise<void> {
+  async deleteByScope(
+    tenantId: string,
+    branchId?: string | null,
+  ): Promise<void> {
     const branchCondition = branchId
       ? Prisma.sql`branch_id = ${branchId}::uuid`
       : Prisma.sql`branch_id IS NULL`;

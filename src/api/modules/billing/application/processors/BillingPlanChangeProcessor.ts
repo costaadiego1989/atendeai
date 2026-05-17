@@ -33,7 +33,9 @@ export class BillingPlanChangeProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<ApplyScheduledPlanChangeJob, any, string>): Promise<void> {
+  async process(
+    job: Job<ApplyScheduledPlanChangeJob, any, string>,
+  ): Promise<void> {
     return traceAsync(
       'billing.processor.plan_change.process',
       { 'tenant.id': job.data.tenantId },

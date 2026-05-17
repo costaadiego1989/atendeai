@@ -43,7 +43,9 @@ describe('UpdateProposalUseCase', () => {
     mockRepository.findById.mockResolvedValue(null);
 
     await expect(
-      updateProposalUseCase.execute('missing-proposal', { title: 'Updated Proposal' }),
+      updateProposalUseCase.execute('missing-proposal', {
+        title: 'Updated Proposal',
+      }),
     ).rejects.toBeInstanceOf(ProposalNotFoundError);
 
     expect(mockRepository.update).not.toHaveBeenCalled();

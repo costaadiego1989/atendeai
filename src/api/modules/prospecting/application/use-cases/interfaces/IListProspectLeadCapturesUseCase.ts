@@ -42,11 +42,10 @@ export interface ListProspectLeadCapturesOutput {
   };
 }
 
-export interface IListProspectLeadCapturesUseCase
-  extends IUseCase<
-    ListProspectLeadCapturesInput,
-    ListProspectLeadCapturesOutput
-  > {}
+export interface IListProspectLeadCapturesUseCase extends IUseCase<
+  ListProspectLeadCapturesInput,
+  ListProspectLeadCapturesOutput
+> {}
 
 export const IListProspectLeadCapturesUseCase = Symbol(
   'IListProspectLeadCapturesUseCase',

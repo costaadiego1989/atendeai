@@ -20,7 +20,12 @@ import { ListProposalsUseCase } from '../../application/use-cases/ListProposalsU
 import { GenerateProposalPdfUseCase } from '../../application/use-cases/GenerateProposalPdfUseCase';
 import { ScheduleProposalDeliveryUseCase } from '../../application/use-cases/ScheduleProposalDeliveryUseCase';
 import { ProposalPublicLinkService } from '../../application/services/implementations/ProposalPublicLinkService';
-import { InMemoryProposalRepository, createFileStorageMock, createMessagingFacadeMock, createQueueMock } from '../proposal-test-utils';
+import {
+  InMemoryProposalRepository,
+  createFileStorageMock,
+  createMessagingFacadeMock,
+  createQueueMock,
+} from '../proposal-test-utils';
 
 describe('ProposalController (e2e)', () => {
   let app: INestApplication;
@@ -45,64 +50,78 @@ describe('ProposalController (e2e)', () => {
         { provide: MESSAGING_FACADE, useValue: messagingFacadeMock },
         {
           provide: CreateProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new CreateProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new CreateProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: UpdateProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new UpdateProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new UpdateProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: DeleteProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new DeleteProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new DeleteProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: GetProposalService,
-          useFactory: (repo: InMemoryProposalRepository) => new GetProposalService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new GetProposalService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: ListProposalsService,
-          useFactory: (repo: InMemoryProposalRepository) => new ListProposalsService(repo),
+          useFactory: (repo: InMemoryProposalRepository) =>
+            new ListProposalsService(repo),
           inject: ['IProposalRepository'],
         },
         {
           provide: ScheduleProposalDeliveryService,
-          useFactory: (repo: InMemoryProposalRepository, queue: ReturnType<typeof createQueueMock>) =>
-            new ScheduleProposalDeliveryService(repo, queue as any),
+          useFactory: (
+            repo: InMemoryProposalRepository,
+            queue: ReturnType<typeof createQueueMock>,
+          ) => new ScheduleProposalDeliveryService(repo, queue as any),
           inject: ['IProposalRepository', 'BullQueue_proposal-delivery'],
         },
         {
           provide: CreateProposalUseCase,
-          useFactory: (service: CreateProposalService) => new CreateProposalUseCase(service),
+          useFactory: (service: CreateProposalService) =>
+            new CreateProposalUseCase(service),
           inject: [CreateProposalService],
         },
         {
           provide: UpdateProposalUseCase,
-          useFactory: (service: UpdateProposalService) => new UpdateProposalUseCase(service),
+          useFactory: (service: UpdateProposalService) =>
+            new UpdateProposalUseCase(service),
           inject: [UpdateProposalService],
         },
         {
           provide: DeleteProposalUseCase,
-          useFactory: (service: DeleteProposalService) => new DeleteProposalUseCase(service),
+          useFactory: (service: DeleteProposalService) =>
+            new DeleteProposalUseCase(service),
           inject: [DeleteProposalService],
         },
         {
           provide: GetProposalUseCase,
-          useFactory: (service: GetProposalService) => new GetProposalUseCase(service),
+          useFactory: (service: GetProposalService) =>
+            new GetProposalUseCase(service),
           inject: [GetProposalService],
         },
         {
           provide: ListProposalsUseCase,
-          useFactory: (service: ListProposalsService) => new ListProposalsUseCase(service),
+          useFactory: (service: ListProposalsService) =>
+            new ListProposalsUseCase(service),
           inject: [ListProposalsService],
         },
         {
           provide: GenerateProposalPdfUseCase,
-          useFactory: (repo: InMemoryProposalRepository, storage: ReturnType<typeof createFileStorageMock>) =>
-            new GenerateProposalPdfUseCase(repo, storage),
+          useFactory: (
+            repo: InMemoryProposalRepository,
+            storage: ReturnType<typeof createFileStorageMock>,
+          ) => new GenerateProposalPdfUseCase(repo, storage),
           inject: ['IProposalRepository', FILE_STORAGE_SERVICE],
         },
         {
@@ -129,8 +148,17 @@ describe('ProposalController (e2e)', () => {
             repo: InMemoryProposalRepository,
             messagingFacade: ReturnType<typeof createMessagingFacadeMock>,
             proposalPublicLinkService: ProposalPublicLinkService,
-          ) => new ProposalAsyncJobProcessor(repo, messagingFacade as any, proposalPublicLinkService),
-          inject: ['IProposalRepository', MESSAGING_FACADE, ProposalPublicLinkService],
+          ) =>
+            new ProposalAsyncJobProcessor(
+              repo,
+              messagingFacade as any,
+              proposalPublicLinkService,
+            ),
+          inject: [
+            'IProposalRepository',
+            MESSAGING_FACADE,
+            ProposalPublicLinkService,
+          ],
         },
       ],
     }).compile();

@@ -2,7 +2,10 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
-import { USER_REPOSITORY, IUserRepository } from '../domain/repositories/IUserRepository';
+import {
+  USER_REPOSITORY,
+  IUserRepository,
+} from '../domain/repositories/IUserRepository';
 import { User } from '../domain/entities/User';
 import { Email } from '../domain/value-objects/Email';
 import { Phone } from '../domain/value-objects/Phone';
@@ -30,7 +33,9 @@ describe('PrismaUserRepository (integration)', () => {
     repository = app.get<IUserRepository>(USER_REPOSITORY);
 
     // Initial Cleanup
-    await prisma.tenant.deleteMany({ where: { cnpj: testCnpj } }).catch(() => {});
+    await prisma.tenant
+      .deleteMany({ where: { cnpj: testCnpj } })
+      .catch(() => {});
 
     const tenant = await prisma.tenant.create({
       data: {
@@ -45,10 +50,16 @@ describe('PrismaUserRepository (integration)', () => {
   afterAll(async () => {
     if (tenantId) {
       if (emails.length > 0) {
-        await prisma.user.deleteMany({ where: { email: { in: emails } } }).catch(() => {});
+        await prisma.user
+          .deleteMany({ where: { email: { in: emails } } })
+          .catch(() => {});
       }
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {
@@ -74,7 +85,10 @@ describe('PrismaUserRepository (integration)', () => {
     await repository.saveWithTenant(user, tenantId);
 
     const byId = await repository.findById(user.id.toValue());
-    const byTenant = await repository.findByIdAndTenant(user.id.toValue(), tenantId);
+    const byTenant = await repository.findByIdAndTenant(
+      user.id.toValue(),
+      tenantId,
+    );
     const byEmail = await repository.findByEmail(user.email.value);
 
     expect(byId?.email.value).toBe(user.email.value);
@@ -94,9 +108,9 @@ describe('PrismaUserRepository (integration)', () => {
     const allUsers = await repository.findAllByTenant(tenantId);
     const updated = await repository.findById(user.id.toValue());
 
-    expect(allUsers.some((item) => item.id.toValue() === user.id.toValue())).toBe(
-      true,
-    );
+    expect(
+      allUsers.some((item) => item.id.toValue() === user.id.toValue()),
+    ).toBe(true);
     expect(updated?.name).toBe('Updated User');
     expect(updated?.phone.value).toBe('+5511977776666');
     expect(updated?.role.value).toBe('ADMIN');

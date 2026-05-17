@@ -77,7 +77,9 @@ describe('SalesController (e2e)', () => {
 
     prisma = app.get(PrismaService);
 
-    await prisma.$executeRaw(Prisma.sql`CREATE SCHEMA IF NOT EXISTS tenant_schema`);
+    await prisma.$executeRaw(
+      Prisma.sql`CREATE SCHEMA IF NOT EXISTS tenant_schema`,
+    );
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -174,11 +176,15 @@ describe('SalesController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
-    await prisma.$executeRaw(Prisma.sql`
+      .catch(() => {});
+    await prisma
+      .$executeRaw(
+        Prisma.sql`
       DELETE FROM sales_schema.payment_links
       WHERE tenant_id IN (${Prisma.join([tenantId, otherTenantId].filter(Boolean))})
-    `).catch(() => { });
+    `,
+      )
+      .catch(() => {});
     await prisma.subscription
       .deleteMany({
         where: {
@@ -187,7 +193,7 @@ describe('SalesController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.user
       .deleteMany({
         where: {
@@ -196,7 +202,7 @@ describe('SalesController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.tenant
       .deleteMany({
         where: {
@@ -205,7 +211,7 @@ describe('SalesController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     if (app) {
       await app.close();

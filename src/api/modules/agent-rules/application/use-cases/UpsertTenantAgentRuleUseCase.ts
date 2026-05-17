@@ -17,12 +17,15 @@ export interface UpsertTenantAgentRuleInput {
 
 export type UpsertTenantAgentRuleOutput = TenantAgentRule;
 
-export class UpsertTenantAgentRuleUseCase
-  implements IAgentRuleUseCase<UpsertTenantAgentRuleInput, UpsertTenantAgentRuleOutput>
-{
+export class UpsertTenantAgentRuleUseCase implements IAgentRuleUseCase<
+  UpsertTenantAgentRuleInput,
+  UpsertTenantAgentRuleOutput
+> {
   constructor(private readonly ruleService: UpsertTenantAgentRuleService) {}
 
-  async execute(input: UpsertTenantAgentRuleInput): Promise<UpsertTenantAgentRuleOutput> {
+  async execute(
+    input: UpsertTenantAgentRuleInput,
+  ): Promise<UpsertTenantAgentRuleOutput> {
     return this.ruleService.upsert(input);
   }
 }

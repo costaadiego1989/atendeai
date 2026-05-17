@@ -85,7 +85,9 @@ describe('MessagingFacade', () => {
       new UniqueEntityID('conversation-existing'),
     );
 
-    conversationRepository.findLatestByContact.mockResolvedValue(existingConversation);
+    conversationRepository.findLatestByContact.mockResolvedValue(
+      existingConversation,
+    );
 
     const result = await sut.queueSystemMessage({
       tenantId: 'tenant-1',
@@ -94,7 +96,9 @@ describe('MessagingFacade', () => {
       text: 'Follow-up message',
     });
 
-    expect(conversationRepository.save).toHaveBeenCalledWith(existingConversation);
+    expect(conversationRepository.save).toHaveBeenCalledWith(
+      existingConversation,
+    );
     expect(existingConversation.messages).toHaveLength(1);
     expect(result.conversationId).toBe('conversation-existing');
   });
@@ -110,7 +114,9 @@ describe('MessagingFacade', () => {
     );
     archivedConversation.archive();
 
-    conversationRepository.findLatestByContact.mockResolvedValue(archivedConversation);
+    conversationRepository.findLatestByContact.mockResolvedValue(
+      archivedConversation,
+    );
 
     await sut.queueSystemMessage({
       tenantId: 'tenant-1',
@@ -147,7 +153,9 @@ describe('MessagingFacade', () => {
       conversationId: 'conversation-specific',
     });
 
-    expect(conversationRepository.findById).toHaveBeenCalledWith('conversation-specific');
+    expect(conversationRepository.findById).toHaveBeenCalledWith(
+      'conversation-specific',
+    );
     expect(conversationRepository.findLatestByContact).not.toHaveBeenCalled();
     expect(result.conversationId).toBe('conversation-specific');
   });

@@ -101,21 +101,33 @@ export class TriggerRecoveryOutreachDTO {
 
   @IsOptional()
   @Transform(({ value }) =>
-    value === true || value === 'true' ? true : value === false || value === 'false' ? false : value,
+    value === true || value === 'true'
+      ? true
+      : value === false || value === 'false'
+        ? false
+        : value,
   )
   @IsBoolean()
   previewOnly?: boolean;
 
   @IsOptional()
   @Transform(({ value }) =>
-    value === true || value === 'true' ? true : value === false || value === 'false' ? false : value,
+    value === true || value === 'true'
+      ? true
+      : value === false || value === 'false'
+        ? false
+        : value,
   )
   @IsBoolean()
   generateWithAI?: boolean;
 
   @IsOptional()
   @Transform(({ value }) =>
-    value === true || value === 'true' ? true : value === false || value === 'false' ? false : value,
+    value === true || value === 'true'
+      ? true
+      : value === false || value === 'false'
+        ? false
+        : value,
   )
   @IsBoolean()
   followPlaybook?: boolean;
@@ -140,7 +152,9 @@ export class ScheduleRecoveryRecurringChargeDTO {
 
   @IsOptional()
   @Transform(({ value }) =>
-    value === undefined || value === null || value === '' ? undefined : Number(value),
+    value === undefined || value === null || value === ''
+      ? undefined
+      : Number(value),
   )
   @IsInt()
   @Min(1)
@@ -184,17 +198,16 @@ export class GenerateRecoveryReportDTO {
     },
     { each: true },
   )
-  statuses?:
-    | Array<
-        | 'READY_TO_CONTACT'
-        | 'CONTACTED'
-        | 'NEGOTIATING'
-        | 'PROMISE_TO_PAY'
-        | 'PAID'
-        | 'NO_RESPONSE'
-        | 'INVALID_CONTACT'
-        | 'STOPPED'
-      >;
+  statuses?: Array<
+    | 'READY_TO_CONTACT'
+    | 'CONTACTED'
+    | 'NEGOTIATING'
+    | 'PROMISE_TO_PAY'
+    | 'PAID'
+    | 'NO_RESPONSE'
+    | 'INVALID_CONTACT'
+    | 'STOPPED'
+  >;
 
   @IsOptional()
   @IsArray()
@@ -233,7 +246,9 @@ export class CreateRecoveryPlaybookPhaseDTO {
 
   @IsOptional()
   @Transform(({ value }) =>
-    value === undefined || value === null || value === '' ? undefined : Number(value),
+    value === undefined || value === null || value === ''
+      ? undefined
+      : Number(value),
   )
   @IsInt()
   @Min(0)
@@ -241,7 +256,9 @@ export class CreateRecoveryPlaybookPhaseDTO {
 
   @IsOptional()
   @Transform(({ value }) =>
-    value === undefined || value === null || value === '' ? undefined : Number(value),
+    value === undefined || value === null || value === ''
+      ? undefined
+      : Number(value),
   )
   @IsInt()
   @Min(0)

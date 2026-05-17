@@ -25,7 +25,10 @@ export class RecoveryCaseMessagingService {
   ) {}
 
   async queueMessage(input: QueueRecoveryCaseMessageInput) {
-    const contact = await this.resolveContact(input.tenantId, input.recoveryCase);
+    const contact = await this.resolveContact(
+      input.tenantId,
+      input.recoveryCase,
+    );
 
     const queuedMessage = await this.messagingFacade.queueSystemMessage({
       tenantId: input.tenantId,

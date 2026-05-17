@@ -12,12 +12,15 @@ export interface GetTenantAgentRuleInput {
 
 export type GetTenantAgentRuleOutput = TenantAgentRule | null;
 
-export class GetTenantAgentRuleUseCase
-  implements IAgentRuleUseCase<GetTenantAgentRuleInput, GetTenantAgentRuleOutput>
-{
+export class GetTenantAgentRuleUseCase implements IAgentRuleUseCase<
+  GetTenantAgentRuleInput,
+  GetTenantAgentRuleOutput
+> {
   constructor(private readonly ruleService: GetTenantAgentRuleService) {}
 
-  async execute(input: GetTenantAgentRuleInput): Promise<GetTenantAgentRuleOutput> {
+  async execute(
+    input: GetTenantAgentRuleInput,
+  ): Promise<GetTenantAgentRuleOutput> {
     return this.ruleService.get(input);
   }
 }

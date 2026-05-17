@@ -43,13 +43,20 @@ type AuthenticatedSocket = {
 
 @Injectable()
 export class WebSocketMessagingRealtimePublisher
-  implements IMessagingRealtimePublisher, OnApplicationBootstrap, OnModuleDestroy
+  implements
+    IMessagingRealtimePublisher,
+    OnApplicationBootstrap,
+    OnModuleDestroy
 {
-  private readonly logger = new Logger(WebSocketMessagingRealtimePublisher.name);
-  private readonly clientsByTenant = new Map<string, Set<AuthenticatedSocket>>();
-  private server:
-    | InstanceType<typeof WebSocketPackage.WebSocketServer>
-    | null = null;
+  private readonly logger = new Logger(
+    WebSocketMessagingRealtimePublisher.name,
+  );
+  private readonly clientsByTenant = new Map<
+    string,
+    Set<AuthenticatedSocket>
+  >();
+  private server: InstanceType<typeof WebSocketPackage.WebSocketServer> | null =
+    null;
   private rawHttpServer: {
     on(event: 'upgrade', listener: (...args: any[]) => void): void;
     off(event: 'upgrade', listener: (...args: any[]) => void): void;
@@ -104,7 +111,9 @@ export class WebSocketMessagingRealtimePublisher
     this.server = new WebSocketPackage.WebSocketServer({ noServer: true });
     this.server.on('connection', (client) => this.handleConnection(client));
     this.rawHttpServer.on('upgrade', this.handleUpgrade);
-    this.logger.log('Messaging websocket server attached at /api/v1/ws/messaging');
+    this.logger.log(
+      'Messaging websocket server attached at /api/v1/ws/messaging',
+    );
   }
 
   onModuleDestroy() {

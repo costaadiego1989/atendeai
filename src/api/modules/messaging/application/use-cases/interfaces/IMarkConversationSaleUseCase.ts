@@ -34,5 +34,7 @@ export interface MarkConversationSaleOutput {
 }
 
 export interface IMarkConversationSaleUseCase {
-  execute(input: MarkConversationSaleInput): Promise<MarkConversationSaleOutput>;
+  execute(
+    input: MarkConversationSaleInput,
+  ): Promise<MarkConversationSaleOutput>;
 }

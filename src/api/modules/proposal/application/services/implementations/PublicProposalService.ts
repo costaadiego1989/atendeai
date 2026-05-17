@@ -4,7 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CONTACT_FACADE, IContactFacade } from '@modules/contact/application/facades/ContactFacade';
+import {
+  CONTACT_FACADE,
+  IContactFacade,
+} from '@modules/contact/application/facades/ContactFacade';
 import { CreateSplitPaymentChargeUseCase } from '@modules/sales/application/use-cases/CreateSplitPaymentChargeUseCase';
 import { IProposalRepository } from '@modules/proposal/domain/ports/IProposalRepository';
 import { Proposal } from '@modules/proposal/domain/entities/Proposal';
@@ -84,11 +87,16 @@ export class PublicProposalService {
     const metadata = normalizeProposalMetadata(proposal.metadata);
 
     if (metadata.commercial.approval.status === 'REJECTED') {
-      throw new BadRequestException('Esta proposta já foi recusada pelo cliente.');
+      throw new BadRequestException(
+        'Esta proposta já foi recusada pelo cliente.',
+      );
     }
 
     if (!metadata.commercial.payment?.url) {
-      const contact = await this.contacts.getContactById(proposal.tenantId, proposal.contactId);
+      const contact = await this.contacts.getContactById(
+        proposal.tenantId,
+        proposal.contactId,
+      );
       if (!contact) {
         throw new NotFoundException('Contato da proposta não foi encontrado.');
       }
@@ -108,7 +116,9 @@ export class PublicProposalService {
         customerDocument: contact.document,
         name: proposal.title,
         value: amount,
-        description: proposal.description || `Pagamento referente à proposta "${proposal.title}"`,
+        description:
+          proposal.description ||
+          `Pagamento referente à proposta "${proposal.title}"`,
         label: 'Proposta aceita',
         billingType: 'PIX',
         dueDate: proposal.validUntil ?? undefined,
@@ -161,7 +171,9 @@ export class PublicProposalService {
     const metadata = normalizeProposalMetadata(proposal.metadata);
 
     if (metadata.commercial.approval.status === 'ACCEPTED') {
-      throw new BadRequestException('Esta proposta já foi aceite e não pode mais ser recusada.');
+      throw new BadRequestException(
+        'Esta proposta já foi aceite e não pode mais ser recusada.',
+      );
     }
 
     metadata.commercial.approval.status = 'REJECTED';
@@ -176,13 +188,17 @@ export class PublicProposalService {
   private async resolveProposalOrThrow(token: string): Promise<Proposal> {
     const proposal = await this.publicLinks.resolveProposalByToken(token);
     if (!proposal) {
-      throw new NotFoundException('Proposta pública não encontrada ou expirada.');
+      throw new NotFoundException(
+        'Proposta pública não encontrada ou expirada.',
+      );
     }
 
     return proposal;
   }
 
-  private async toPublicResponse(proposal: Proposal): Promise<PublicProposalResponse> {
+  private async toPublicResponse(
+    proposal: Proposal,
+  ): Promise<PublicProposalResponse> {
     const metadata = normalizeProposalMetadata(proposal.metadata);
     const tenant = await this.tenantRepository.findById(proposal.tenantId);
     const brandingSource =
@@ -190,7 +206,8 @@ export class PublicProposalService {
         ? (metadata.branding as Record<string, unknown>)
         : null;
     const logoUrl =
-      typeof brandingSource?.logoUrl === 'string' && brandingSource.logoUrl.trim()
+      typeof brandingSource?.logoUrl === 'string' &&
+      brandingSource.logoUrl.trim()
         ? brandingSource.logoUrl.trim()
         : null;
 
@@ -212,7 +229,9 @@ export class PublicProposalService {
       })),
       totalAmount: proposal.totalAmount,
       finalAmount: resolveProposalFinalAmount(proposal),
-      validUntil: proposal.validUntil ? proposal.validUntil.toISOString() : null,
+      validUntil: proposal.validUntil
+        ? proposal.validUntil.toISOString()
+        : null,
       status: proposal.status,
       approvalStatus: metadata.commercial.approval.status,
       signature: {

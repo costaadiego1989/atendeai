@@ -27,6 +27,7 @@ export class ContactMapper {
         tags: raw.tags as string[],
         notes: raw.notes || undefined,
         lastInteraction: raw.lastInteraction || undefined,
+        prospectingOptOut: raw.prospectingOptOut ?? false,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
@@ -47,6 +48,7 @@ export class ContactMapper {
       tags: contact.tags,
       notes: contact.notes || null,
       lastInteraction: contact.lastInteraction || null,
+      prospectingOptOut: contact.prospectingOptOut,
       createdAt: contact.createdAt,
       updatedAt: contact.updatedAt,
     };

@@ -23,7 +23,9 @@ describe('GenerateProposalPdfUseCase', () => {
   it('generates a PDF and stores the URL on the proposal', async () => {
     const proposal = buildProposal({ pdfUrl: null });
     mockRepository.findById.mockResolvedValue(proposal);
-    mockStorage.upload.mockResolvedValue('https://cdn.test/proposals/proposal-1.pdf');
+    mockStorage.upload.mockResolvedValue(
+      'https://cdn.test/proposals/proposal-1.pdf',
+    );
 
     const pdfUrl = await generateProposalPdfUseCase.execute(proposal.id);
 

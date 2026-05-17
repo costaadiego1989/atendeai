@@ -1,7 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  EntityNotFoundException,
-} from '@shared/domain/exceptions/DomainExceptions';
+import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
   BILLING_REPOSITORY,
   IBillingRepository,
@@ -45,17 +43,20 @@ export class GetAddonPackageInfoUseCase implements IGetAddonPackageInfoUseCase {
       };
     }
 
-    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
-      input.tenantId,
-      ADDON_PACKAGE_MODULE_CODE,
-    );
+    const activeModule =
+      await this.billingRepository.findActiveSubscriptionModule(
+        input.tenantId,
+        ADDON_PACKAGE_MODULE_CODE,
+      );
 
     const planCatalog = await this.billingRepository.findPlanByCode(
       subscription.plan,
     );
 
     const packagePrice = planCatalog
-      ? Math.round(Number(planCatalog.monthlyPrice) * packageDef.priceMultiplier)
+      ? Math.round(
+          Number(planCatalog.monthlyPrice) * packageDef.priceMultiplier,
+        )
       : 0;
 
     return {

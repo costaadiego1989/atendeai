@@ -1,5 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
+import {
+  ISocialRepository,
+  SOCIAL_REPOSITORY,
+} from '../../domain/ports/ISocialRepository';
 import { SocialAutoReplyRule } from '../../domain/entities/SocialAutoReplyRule';
 
 @Injectable()
@@ -72,7 +75,10 @@ export class ConfigureAutoReplyRulesUseCase {
     return { success: true };
   }
 
-  async toggle(tenantId: string, ruleId: string): Promise<{ isActive: boolean; error?: string }> {
+  async toggle(
+    tenantId: string,
+    ruleId: string,
+  ): Promise<{ isActive: boolean; error?: string }> {
     const rule = await this.repo.findRuleById(tenantId, ruleId);
     if (!rule) return { isActive: false, error: 'Regra não encontrada' };
 
@@ -87,7 +93,10 @@ export class ConfigureAutoReplyRulesUseCase {
     return { isActive: rule.isActive };
   }
 
-  async delete(tenantId: string, ruleId: string): Promise<{ success: boolean }> {
+  async delete(
+    tenantId: string,
+    ruleId: string,
+  ): Promise<{ success: boolean }> {
     await this.repo.deleteRule(tenantId, ruleId);
     await this.repo.logAudit(tenantId, {
       event: 'RULE_DELETED',

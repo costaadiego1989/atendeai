@@ -130,7 +130,9 @@ describe('RabbitMQEventBus', () => {
   });
 
   it('should ignore duplicated events already claimed in the inbox', async () => {
-    let onMessage: ((message: { content: Buffer }) => Promise<void>) | undefined;
+    let onMessage:
+      | ((message: { content: Buffer }) => Promise<void>)
+      | undefined;
     channel.consume.mockImplementation(
       async (
         _queue: string,
@@ -169,7 +171,9 @@ describe('RabbitMQEventBus', () => {
   });
 
   it('should mark claimed events as processed after the handler succeeds', async () => {
-    let onMessage: ((message: { content: Buffer }) => Promise<void>) | undefined;
+    let onMessage:
+      | ((message: { content: Buffer }) => Promise<void>)
+      | undefined;
     channel.consume.mockImplementation(
       async (
         _queue: string,
@@ -205,7 +209,9 @@ describe('RabbitMQEventBus', () => {
   });
 
   it('should mark claimed events as failed and send them to DLQ when the handler fails', async () => {
-    let onMessage: ((message: { content: Buffer }) => Promise<void>) | undefined;
+    let onMessage:
+      | ((message: { content: Buffer }) => Promise<void>)
+      | undefined;
     channel.consume.mockImplementation(
       async (
         _queue: string,

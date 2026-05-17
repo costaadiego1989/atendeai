@@ -11,7 +11,7 @@ export class ScheduleProposalDeliveryService {
     @Inject('IProposalRepository')
     private readonly proposalRepository: IProposalRepository,
     @InjectQueue('proposal-delivery') private readonly deliveryQueue: Queue,
-  ) { }
+  ) {}
 
   async execute(id: string, scheduledAt: Date): Promise<void> {
     const proposal = await this.proposalRepository.findById(id);
@@ -28,7 +28,7 @@ export class ScheduleProposalDeliveryService {
     await this.deliveryQueue.add(
       'send-proposal',
       { proposalId: id },
-      { delay: delay > 0 ? delay : 0, jobId: `send-proposal-${id}` }
+      { delay: delay > 0 ? delay : 0, jobId: `send-proposal-${id}` },
     );
   }
 }

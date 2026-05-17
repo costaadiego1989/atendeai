@@ -60,7 +60,8 @@ export class GetTenantProfileSectionsUseCase implements IGetTenantProfileSection
             configured: tenant.instagramConfig !== null,
             connected: tenant.instagramConfig?.status === 'ACTIVE',
             status: tenant.instagramConfig?.status ?? null,
-            instagramAccountId: tenant.instagramConfig?.instagramAccountId ?? null,
+            instagramAccountId:
+              tenant.instagramConfig?.instagramAccountId ?? null,
           },
         },
         aiConfig: tenant.aiConfig

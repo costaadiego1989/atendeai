@@ -40,7 +40,7 @@ describe('Coupon Entity', () => {
 
     coupon.redeem(); // 2
     coupon.redeem(); // 3
-    
+
     expect(coupon.usedCount).toBe(3);
     expect(coupon.canRedeem()).toBe(false);
 
@@ -76,9 +76,15 @@ describe('Coupon Entity', () => {
       ],
     });
 
-    expect(coupon.appliesTo({ targetType: 'ITEM', targetId: 'item-1' })).toBe(true);
-    expect(coupon.appliesTo({ targetType: 'CATEGORY', targetId: 'category-1' })).toBe(true);
-    expect(coupon.appliesTo({ targetType: 'CATEGORY', targetId: 'category-2' })).toBe(false);
+    expect(coupon.appliesTo({ targetType: 'ITEM', targetId: 'item-1' })).toBe(
+      true,
+    );
+    expect(
+      coupon.appliesTo({ targetType: 'CATEGORY', targetId: 'category-1' }),
+    ).toBe(true);
+    expect(
+      coupon.appliesTo({ targetType: 'CATEGORY', targetId: 'category-2' }),
+    ).toBe(false);
   });
 
   it('should treat legacy catalogItemId as an item target', () => {
@@ -92,7 +98,11 @@ describe('Coupon Entity', () => {
       catalogItemId: 'legacy-item',
     });
 
-    expect(coupon.appliesTo({ targetType: 'ITEM', targetId: 'legacy-item' })).toBe(true);
-    expect(coupon.appliesTo({ targetType: 'ITEM', targetId: 'other-item' })).toBe(false);
+    expect(
+      coupon.appliesTo({ targetType: 'ITEM', targetId: 'legacy-item' }),
+    ).toBe(true);
+    expect(
+      coupon.appliesTo({ targetType: 'ITEM', targetId: 'other-item' }),
+    ).toBe(false);
   });
 });

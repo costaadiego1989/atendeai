@@ -107,26 +107,26 @@ export class SchedulingPaymentEventHandler implements OnModuleInit {
           await this.schedulingStore.listProfessionals(payload.tenantId)
         ).find((entry) => entry.id === parsedReference.professionalId);
 
-        const calendarSync = await this.googleCalendarSyncService.syncReservation({
-          tenantId: payload.tenantId,
-          branchId: professional?.branchId ?? null,
-          professionalId: parsedReference.professionalId,
-          professionalName: professional?.name,
-          date: parsedReference.date,
-          slot: confirmedSlot,
-        });
+        const calendarSync =
+          await this.googleCalendarSyncService.syncReservation({
+            tenantId: payload.tenantId,
+            branchId: professional?.branchId ?? null,
+            professionalId: parsedReference.professionalId,
+            professionalName: professional?.name,
+            date: parsedReference.date,
+            slot: confirmedSlot,
+          });
 
-        const slotWithMeeting =
-          calendarSync?.meetingUrl
-            ? await this.schedulingStore.attachMeetingLinkToReservedSlot({
-                tenantId: payload.tenantId,
-                professionalId: parsedReference.professionalId,
-                date: parsedReference.date,
-                slotId: confirmedSlot.id,
-                meetingProvider: 'GOOGLE_MEET',
-                meetingUrl: calendarSync.meetingUrl,
-              })
-            : null;
+        const slotWithMeeting = calendarSync?.meetingUrl
+          ? await this.schedulingStore.attachMeetingLinkToReservedSlot({
+              tenantId: payload.tenantId,
+              professionalId: parsedReference.professionalId,
+              date: parsedReference.date,
+              slotId: confirmedSlot.id,
+              meetingProvider: 'GOOGLE_MEET',
+              meetingUrl: calendarSync.meetingUrl,
+            })
+          : null;
         const meetingUrl =
           slotWithMeeting?.reservedFor?.meetingUrl ??
           calendarSync?.meetingUrl ??
@@ -154,7 +154,9 @@ export class SchedulingPaymentEventHandler implements OnModuleInit {
         });
 
         await this.eventBus.publish(
-          new ProfessionalSlotPaymentConfirmedIntegrationEvent(notificationPayload),
+          new ProfessionalSlotPaymentConfirmedIntegrationEvent(
+            notificationPayload,
+          ),
         );
 
         await this.scheduleReservationReminders({
@@ -187,7 +189,8 @@ export class SchedulingPaymentEventHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'payment.overdue',
       async (event) => {
-        const payload = event.payload as PaymentOverdueIntegrationEvent['payload'];
+        const payload =
+          event.payload as PaymentOverdueIntegrationEvent['payload'];
         await this.handlePaymentAttentionRequired({
           tenantId: payload.tenantId,
           rawReference: payload.rawReference,
@@ -200,7 +203,8 @@ export class SchedulingPaymentEventHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'payment.refunded',
       async (event) => {
-        const payload = event.payload as PaymentRefundedIntegrationEvent['payload'];
+        const payload =
+          event.payload as PaymentRefundedIntegrationEvent['payload'];
         await this.handlePaymentAttentionRequired({
           tenantId: payload.tenantId,
           rawReference: payload.rawReference,
@@ -293,10 +297,13 @@ export class SchedulingPaymentEventHandler implements OnModuleInit {
     endsAt: string;
     meetingUrl?: string;
   }) {
-    const formattedDate = new Date(`${input.date}T12:00:00`).toLocaleDateString('pt-BR');
-    const timeLine = input.startsAt && input.endsAt
-      ? `${input.startsAt} às ${input.endsAt}`
-      : input.startsAt;
+    const formattedDate = new Date(`${input.date}T12:00:00`).toLocaleDateString(
+      'pt-BR',
+    );
+    const timeLine =
+      input.startsAt && input.endsAt
+        ? `${input.startsAt} às ${input.endsAt}`
+        : input.startsAt;
     const meetLine = input.meetingUrl
       ? `\n\nLink do Google Meet: ${input.meetingUrl}`
       : '';

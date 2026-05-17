@@ -13,19 +13,27 @@ describe('CompanyName Value Object', () => {
   });
 
   it('should throw an error if company name is too short', () => {
-    expect(() => CompanyName.create('A')).toThrow('Company name must have at least 2 characters');
+    expect(() => CompanyName.create('A')).toThrow(
+      'Company name must have at least 2 characters',
+    );
   });
 
   it('should throw an error if company name is empty', () => {
-    expect(() => CompanyName.create('')).toThrow('Company name must have at least 2 characters');
+    expect(() => CompanyName.create('')).toThrow(
+      'Company name must have at least 2 characters',
+    );
   });
 
   it('should throw an error if company name is just whitespace', () => {
-    expect(() => CompanyName.create('   ')).toThrow('Company name must have at least 2 characters');
+    expect(() => CompanyName.create('   ')).toThrow(
+      'Company name must have at least 2 characters',
+    );
   });
 
   it('should throw an error if company name is too long', () => {
     const longName = 'a'.repeat(256);
-    expect(() => CompanyName.create(longName)).toThrow('Company name must have at most 255 characters');
+    expect(() => CompanyName.create(longName)).toThrow(
+      'Company name must have at most 255 characters',
+    );
   });
 });

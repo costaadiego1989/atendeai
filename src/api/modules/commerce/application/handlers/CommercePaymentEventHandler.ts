@@ -48,11 +48,12 @@ export class CommercePaymentEventHandler implements OnModuleInit {
           return;
         }
 
-        const order = await this.commerceRepository.markOrderPaidByPaymentReference({
-          tenantId: payload.tenantId,
-          paymentReference: payload.rawReference!,
-          paidAt: new Date(payload.confirmedAt),
-        });
+        const order =
+          await this.commerceRepository.markOrderPaidByPaymentReference({
+            tenantId: payload.tenantId,
+            paymentReference: payload.rawReference!,
+            paidAt: new Date(payload.confirmedAt),
+          });
 
         if (order) {
           await this.commerceRepository.saveAuditLog({

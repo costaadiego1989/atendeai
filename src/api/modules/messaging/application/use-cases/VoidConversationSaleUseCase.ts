@@ -16,7 +16,11 @@ import {
   VoidConversationSaleOutput,
 } from './interfaces/IVoidConversationSaleUseCase';
 
-function canVoidSale(actorRole: string, actorUserId: string, markedByUserId: string): boolean {
+function canVoidSale(
+  actorRole: string,
+  actorUserId: string,
+  markedByUserId: string,
+): boolean {
   if (actorRole === 'OWNER' || actorRole === 'ADMIN') {
     return true;
   }

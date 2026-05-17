@@ -8,9 +8,19 @@ import {
   TENANT_REPOSITORY,
 } from '@modules/tenant/domain/repositories/ITenantRepository';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
-import { ALERT_REMINDER_QUEUE, IAlertReminderQueue } from '../../domain/ports/IAlertReminderQueue';
-import { ALERT_REMINDER_REPOSITORY, IAlertReminderRepository } from '../../domain/repositories/IAlertReminderRepository';
-import { AlertReminder, AlertReminderFrequency, AlertReminderStatus } from '../../domain/types/AlertReminder';
+import {
+  ALERT_REMINDER_QUEUE,
+  IAlertReminderQueue,
+} from '../../domain/ports/IAlertReminderQueue';
+import {
+  ALERT_REMINDER_REPOSITORY,
+  IAlertReminderRepository,
+} from '../../domain/repositories/IAlertReminderRepository';
+import {
+  AlertReminder,
+  AlertReminderFrequency,
+  AlertReminderStatus,
+} from '../../domain/types/AlertReminder';
 import {
   assertValidReminderTimezone,
   computeNextTriggerAt,
@@ -47,7 +57,10 @@ export class UpdateAlertReminderUseCase {
   ) {}
 
   async execute(input: UpdateAlertReminderInput): Promise<AlertReminder> {
-    const reminder = await this.reminderRepository.findById(input.tenantId, input.reminderId);
+    const reminder = await this.reminderRepository.findById(
+      input.tenantId,
+      input.reminderId,
+    );
     if (!reminder || reminder.userId !== input.userId) {
       throw new EntityNotFoundException('Alert reminder', input.reminderId);
     }
@@ -89,8 +102,14 @@ export class UpdateAlertReminderUseCase {
       title: input.title?.trim() ?? reminder.title,
       message: input.message?.trim() ?? reminder.message,
       frequency,
-      scheduledAt: frequency === 'ONCE' ? input.scheduledAt ?? reminder.scheduledAt : undefined,
-      timeOfDay: frequency === 'DAILY' ? input.timeOfDay ?? reminder.timeOfDay : undefined,
+      scheduledAt:
+        frequency === 'ONCE'
+          ? (input.scheduledAt ?? reminder.scheduledAt)
+          : undefined,
+      timeOfDay:
+        frequency === 'DAILY'
+          ? (input.timeOfDay ?? reminder.timeOfDay)
+          : undefined,
       status,
       updatedAt: new Date().toISOString(),
       nextTriggerAt:
@@ -99,11 +118,11 @@ export class UpdateAlertReminderUseCase {
               frequency,
               scheduledAt:
                 frequency === 'ONCE'
-                  ? input.scheduledAt ?? reminder.scheduledAt
+                  ? (input.scheduledAt ?? reminder.scheduledAt)
                   : undefined,
               timeOfDay:
                 frequency === 'DAILY'
-                  ? input.timeOfDay ?? reminder.timeOfDay
+                  ? (input.timeOfDay ?? reminder.timeOfDay)
                   : undefined,
               timezone: resolvedTimezone,
             })

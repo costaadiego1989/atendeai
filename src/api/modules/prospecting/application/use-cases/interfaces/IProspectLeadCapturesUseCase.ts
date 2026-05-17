@@ -18,8 +18,10 @@ export interface ProspectLeadCapturesOutput {
   targetContactIds: string[];
 }
 
-export interface IProspectLeadCapturesUseCase
-  extends IUseCase<ProspectLeadCapturesInput, ProspectLeadCapturesOutput> {}
+export interface IProspectLeadCapturesUseCase extends IUseCase<
+  ProspectLeadCapturesInput,
+  ProspectLeadCapturesOutput
+> {}
 
 export const IProspectLeadCapturesUseCase = Symbol(
   'IProspectLeadCapturesUseCase',

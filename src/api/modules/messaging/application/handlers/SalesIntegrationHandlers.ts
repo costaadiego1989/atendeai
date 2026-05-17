@@ -3,7 +3,10 @@ import {
   SalesPaymentConfirmedConversationIntegrationEvent,
   SalesPaymentLinkOverdueRemarketingIntegrationEvent,
 } from '@modules/sales/application/integration-events/SalesIntegrationEvents';
-import { EVENT_BUS, IEventBus } from '../../../../shared/application/ports/IEventBus';
+import {
+  EVENT_BUS,
+  IEventBus,
+} from '../../../../shared/application/ports/IEventBus';
 import { IMessagingFacade, MESSAGING_FACADE } from '../facades/MessagingFacade';
 
 type SalesPaymentChargeCreatedEnvelope = {

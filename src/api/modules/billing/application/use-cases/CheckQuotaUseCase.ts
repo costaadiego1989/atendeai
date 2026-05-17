@@ -24,7 +24,7 @@ export class CheckQuotaUseCase implements ICheckQuotaUseCase {
     private readonly billingRepo: IBillingRepository,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
-  ) { }
+  ) {}
 
   async execute(input: CheckQuotaInput): Promise<CheckQuotaOutput> {
     return traceAsync(
@@ -37,9 +37,7 @@ export class CheckQuotaUseCase implements ICheckQuotaUseCase {
     );
   }
 
-  private async doExecute(
-    input: CheckQuotaInput,
-  ): Promise<CheckQuotaOutput> {
+  private async doExecute(input: CheckQuotaInput): Promise<CheckQuotaOutput> {
     const subscription = await this.billingRepo.findSubscription(
       input.tenantId,
     );
@@ -114,11 +112,7 @@ export class CheckQuotaUseCase implements ICheckQuotaUseCase {
       }
     }
 
-    this.setQuotaSpanAttributes(
-      canProceed,
-      subscription.status,
-      percentUsed,
-    );
+    this.setQuotaSpanAttributes(canProceed, subscription.status, percentUsed);
 
     return {
       canProceed,

@@ -59,7 +59,7 @@ export class AddItemToShoppingSessionUseCase {
     let currency = 'BRL';
     let source: 'INVENTORY' | 'CATALOG' = 'CATALOG';
     let catalogItemId = input.catalogItemId ?? null;
-    let inventoryItemId = input.inventoryItemId ?? null;
+    const inventoryItemId = input.inventoryItemId ?? null;
 
     if (input.inventoryItemId) {
       const inventoryItem = await this.commerceRepository.findInventoryItemById(
@@ -145,7 +145,9 @@ export class AddItemToShoppingSessionUseCase {
     }
 
     const totalAmount =
-      subtotalAmount + Number(refreshedSession.freightAmount ?? 0) - discountAmount;
+      subtotalAmount +
+      Number(refreshedSession.freightAmount ?? 0) -
+      discountAmount;
 
     const updatedSession = await this.commerceRepository.updateSessionState({
       tenantId: input.tenantId,

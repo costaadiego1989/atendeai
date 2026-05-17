@@ -228,7 +228,9 @@ describe('Contact timeline endpoint (e2e)', () => {
 
   afterAll(async () => {
     if (redis && conversationId) {
-      await redis.del(`messaging:follow-up:audit:${conversationId}`).catch(() => {});
+      await redis
+        .del(`messaging:follow-up:audit:${conversationId}`)
+        .catch(() => {});
       if (tenantId && professionalId) {
         await redis
           .del(
@@ -356,7 +358,9 @@ describe('Contact timeline endpoint (e2e)', () => {
 
   it('should reject cross-tenant access to timeline', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${otherTenantId}/contacts/${otherContactId}/timeline`)
+      .get(
+        `/api/v1/tenants/${otherTenantId}/contacts/${otherContactId}/timeline`,
+      )
       .set('Cookie', [authCookie])
       .expect(401);
   });

@@ -26,7 +26,9 @@ describe('CommercePaymentReference', () => {
 
   describe('parseCommercePaymentReference', () => {
     it('should extract tenantId and orderId from a valid reference', () => {
-      const result = parseCommercePaymentReference('commerce|tenant-123|order-456');
+      const result = parseCommercePaymentReference(
+        'commerce|tenant-123|order-456',
+      );
 
       expect(result).toEqual({ tenantId: 'tenant-123', orderId: 'order-456' });
     });

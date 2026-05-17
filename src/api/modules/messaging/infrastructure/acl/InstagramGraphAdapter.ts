@@ -41,8 +41,7 @@ export class InstagramGraphAdapter implements IMessagingGateway {
     if (!accessToken?.trim()) {
       return {
         success: false,
-        error:
-          'Instagram Graph API not configured for this tenant yet',
+        error: 'Instagram Graph API not configured for this tenant yet',
       };
     }
 

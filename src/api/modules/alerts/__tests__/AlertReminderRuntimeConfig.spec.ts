@@ -1,6 +1,8 @@
 import { AlertReminderRuntimeConfig } from '../application/services/AlertReminderRuntimeConfig';
 
-function createConfigService(env: Record<string, string | undefined> = {}): any {
+function createConfigService(
+  env: Record<string, string | undefined> = {},
+): any {
   return {
     get: (key: string) => env[key],
   };
@@ -16,7 +18,9 @@ describe('AlertReminderRuntimeConfig', () => {
 
   it('returns configured timezone when valid IANA zone is set', () => {
     const sut = new AlertReminderRuntimeConfig(
-      createConfigService({ ALERT_REMINDER_DEFAULT_TIMEZONE: 'America/Sao_Paulo' }),
+      createConfigService({
+        ALERT_REMINDER_DEFAULT_TIMEZONE: 'America/Sao_Paulo',
+      }),
     );
     expect(sut.effectiveDefaultTimezone()).toBe('America/Sao_Paulo');
   });

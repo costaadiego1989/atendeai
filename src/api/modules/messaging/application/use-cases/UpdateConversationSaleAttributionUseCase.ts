@@ -18,9 +18,7 @@ import {
 } from './interfaces/IUpdateConversationSaleAttributionUseCase';
 
 @Injectable()
-export class UpdateConversationSaleAttributionUseCase
-  implements IUpdateConversationSaleAttributionUseCase
-{
+export class UpdateConversationSaleAttributionUseCase implements IUpdateConversationSaleAttributionUseCase {
   constructor(
     @Inject(CONVERSATION_REPOSITORY)
     private readonly conversationRepository: IConversationRepository,

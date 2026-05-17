@@ -2,9 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { IPasswordResetEmailSender } from '@modules/auth/application/ports/IPasswordResetEmailSender';
 
 @Injectable()
-export class ConsolePasswordResetEmailSender
-  implements IPasswordResetEmailSender
-{
+export class ConsolePasswordResetEmailSender implements IPasswordResetEmailSender {
   private readonly logger = new Logger(ConsolePasswordResetEmailSender.name);
 
   async send(input: {

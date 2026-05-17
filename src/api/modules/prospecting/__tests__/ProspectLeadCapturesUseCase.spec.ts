@@ -78,7 +78,11 @@ describe('ProspectLeadCapturesUseCase', () => {
       submissionAt: new Date('2026-04-02T12:00:00.000Z'),
     });
 
-    leadCaptureRepository.findManyByIds.mockResolvedValue([leadA, leadB, leadSkipped]);
+    leadCaptureRepository.findManyByIds.mockResolvedValue([
+      leadA,
+      leadB,
+      leadSkipped,
+    ]);
     contactFacade.upsertProspectContact
       .mockResolvedValueOnce({ contactId: 'contact-a', created: true })
       .mockResolvedValueOnce({ contactId: 'contact-b', created: false });

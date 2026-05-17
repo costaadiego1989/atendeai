@@ -23,10 +23,11 @@ export class StartShoppingSessionUseCase {
   ) {}
 
   async execute(input: StartShoppingSessionInput) {
-    const existing = await this.commerceRepository.findActiveSessionByConversation(
-      input.tenantId,
-      input.conversationId,
-    );
+    const existing =
+      await this.commerceRepository.findActiveSessionByConversation(
+        input.tenantId,
+        input.conversationId,
+      );
 
     if (existing) {
       return existing;

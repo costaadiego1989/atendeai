@@ -25,7 +25,9 @@ describe('CompleteMetaInstagramConnectionUseCase', () => {
     } as any;
 
     oauthService = {
-      exchangeCodeForAccessToken: jest.fn().mockResolvedValue('meta-access-token'),
+      exchangeCodeForAccessToken: jest
+        .fn()
+        .mockResolvedValue('meta-access-token'),
       listInstagramAccounts: jest.fn().mockResolvedValue([
         {
           instagramAccountId: '17841400000000000',
@@ -78,7 +80,10 @@ describe('CompleteMetaInstagramConnectionUseCase', () => {
     });
 
     expect(stateService.verify).toHaveBeenCalledWith('signed-state');
-    expect(oauthService.exchangeCodeForAccessToken).toHaveBeenCalledWith('oauth-code', 'tenant-1');
+    expect(oauthService.exchangeCodeForAccessToken).toHaveBeenCalledWith(
+      'oauth-code',
+      'tenant-1',
+    );
     expect(oauthService.listInstagramAccounts).toHaveBeenCalledWith(
       'meta-access-token',
       'tenant-1',

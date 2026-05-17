@@ -31,9 +31,7 @@ describe('alert-reminder-schedule', () => {
   });
 
   it('reject timezone invalido', () => {
-    expect(() =>
-      assertValidReminderTimezone('NaoEhZona/Realy'),
-    ).toThrow();
+    expect(() => assertValidReminderTimezone('NaoEhZona/Realy')).toThrow();
   });
 
   it('computeNextTriggerAt DAILY delega zona', () => {
@@ -122,14 +120,22 @@ describe('alert-reminder-schedule', () => {
 
   it('computeNextDailyTriggerAfterLastRunUtc schedules next day same time', () => {
     const lastRun = new Date('2026-05-03T12:00:00.000Z');
-    const result = computeNextDailyTriggerAfterLastRunUtc('09:00', lastRun, 'America/Sao_Paulo');
+    const result = computeNextDailyTriggerAfterLastRunUtc(
+      '09:00',
+      lastRun,
+      'America/Sao_Paulo',
+    );
     // lastRun in SP = 09:00. Next day 09:00 SP = 2026-05-04T12:00:00Z
     expect(result).toBe('2026-05-04T12:00:00.000Z');
   });
 
   it('computeNextDailyTriggerAfterLastRunUtc at midnight boundary', () => {
     const lastRun = new Date('2026-05-03T03:00:00.000Z'); // SP = 00:00
-    const result = computeNextDailyTriggerAfterLastRunUtc('00:00', lastRun, 'America/Sao_Paulo');
+    const result = computeNextDailyTriggerAfterLastRunUtc(
+      '00:00',
+      lastRun,
+      'America/Sao_Paulo',
+    );
     // Next day 00:00 SP = 2026-05-04T03:00:00Z
     expect(result).toBe('2026-05-04T03:00:00.000Z');
   });
@@ -151,7 +157,9 @@ describe('alert-reminder-schedule', () => {
   });
 
   it('assertValidReminderTimezone accepts valid IANA zone', () => {
-    expect(assertValidReminderTimezone('America/Sao_Paulo')).toBe('America/Sao_Paulo');
+    expect(assertValidReminderTimezone('America/Sao_Paulo')).toBe(
+      'America/Sao_Paulo',
+    );
   });
 
   // ─── NEW: Past time today → next day ─────────────────────────────────────────
@@ -170,9 +178,9 @@ describe('alert-reminder-schedule', () => {
   // ─── NEW: computeNextTriggerAt ONCE validations ───────────────────────────────
 
   it('computeNextTriggerAt ONCE throws when scheduledAt is missing', () => {
-    expect(() =>
-      computeNextTriggerAt({ frequency: 'ONCE', now: ref }),
-    ).toThrow('Scheduled date is required');
+    expect(() => computeNextTriggerAt({ frequency: 'ONCE', now: ref })).toThrow(
+      'Scheduled date is required',
+    );
   });
 
   it('computeNextTriggerAt ONCE throws when scheduledAt is in the past', () => {

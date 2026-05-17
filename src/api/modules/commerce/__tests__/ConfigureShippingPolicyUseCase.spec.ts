@@ -52,7 +52,12 @@ describe('ConfigureShippingPolicyUseCase', () => {
   });
 
   it('should create a shipping policy with PER_KM mode', async () => {
-    const perKmPolicy = { ...mockPolicy, mode: 'PER_KM' as const, fixedAmount: null, pricePerKm: 2.5 };
+    const perKmPolicy = {
+      ...mockPolicy,
+      mode: 'PER_KM' as const,
+      fixedAmount: null,
+      pricePerKm: 2.5,
+    };
     commerceRepo.upsertShippingPolicy.mockResolvedValue(perKmPolicy as any);
 
     const result = await useCase.execute({
@@ -90,7 +95,11 @@ describe('ConfigureShippingPolicyUseCase', () => {
       tenantId: otherTenantId,
     } as any);
 
-    await useCase.execute({ tenantId: otherTenantId, mode: 'FIXED', fixedAmount: 5 });
+    await useCase.execute({
+      tenantId: otherTenantId,
+      mode: 'FIXED',
+      fixedAmount: 5,
+    });
 
     expect(commerceRepo.upsertShippingPolicy).toHaveBeenCalledWith(
       expect.objectContaining({ tenantId: otherTenantId }),
@@ -105,16 +114,36 @@ describe('ConfigureShippingPolicyUseCase', () => {
       mode: 'FIXED',
       fixedAmount: 10,
       deliverySchedule: [
-        { weekday: 'MONDAY', enabled: true, startTime: ' 08:00 ', endTime: ' 18:00 ' },
-        { weekday: 'TUESDAY', enabled: false, startTime: '09:00', endTime: '17:00' },
+        {
+          weekday: 'MONDAY',
+          enabled: true,
+          startTime: ' 08:00 ',
+          endTime: ' 18:00 ',
+        },
+        {
+          weekday: 'TUESDAY',
+          enabled: false,
+          startTime: '09:00',
+          endTime: '17:00',
+        },
       ],
     });
 
     expect(commerceRepo.upsertShippingPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
         deliverySchedule: [
-          { weekday: 'MONDAY', enabled: true, startTime: '08:00', endTime: '18:00' },
-          { weekday: 'TUESDAY', enabled: false, startTime: null, endTime: null },
+          {
+            weekday: 'MONDAY',
+            enabled: true,
+            startTime: '08:00',
+            endTime: '18:00',
+          },
+          {
+            weekday: 'TUESDAY',
+            enabled: false,
+            startTime: null,
+            endTime: null,
+          },
         ],
       }),
     );

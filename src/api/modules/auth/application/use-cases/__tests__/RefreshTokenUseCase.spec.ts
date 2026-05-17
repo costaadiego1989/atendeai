@@ -12,7 +12,14 @@ describe('RefreshTokenUseCase', () => {
   let refreshSessionStore: any;
   let authAuditLogRepository: any;
 
-  function createMockUser(overrides: Partial<{ id: string; tenantId: string; email: string; role: string }> = {}) {
+  function createMockUser(
+    overrides: Partial<{
+      id: string;
+      tenantId: string;
+      email: string;
+      role: string;
+    }> = {},
+  ) {
     return AuthUser.create(
       {
         tenantId: overrides.tenantId ?? 'tenant-1',
@@ -66,7 +73,9 @@ describe('RefreshTokenUseCase', () => {
   });
 
   it('should throw UnauthorizedException when token is expired/invalid', async () => {
-    tokenService.verifyRefreshToken.mockRejectedValue(new Error('Token expired'));
+    tokenService.verifyRefreshToken.mockRejectedValue(
+      new Error('Token expired'),
+    );
 
     await expect(
       useCase.execute({ refreshToken: 'expired_token' }),

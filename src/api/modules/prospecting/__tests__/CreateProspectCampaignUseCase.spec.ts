@@ -89,7 +89,8 @@ describe('CreateProspectCampaignUseCase', () => {
       audienceType: 'CONTACT_LIST',
       channel: 'WHATSAPP',
       targetContactIds: ['contact-1', 'contact-1', 'contact-2'],
-      messageTemplate: 'Oi {{first_name}}, temos uma condição especial para voce.',
+      messageTemplate:
+        'Oi {{first_name}}, temos uma condição especial para voce.',
       dailyLimit: 30,
     });
 

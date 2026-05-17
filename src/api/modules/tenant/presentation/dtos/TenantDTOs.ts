@@ -385,7 +385,10 @@ export class CreateTenantBranchDTO {
 
   @IsOptional()
   @IsObject()
-  operatingHours?: Record<string, { open: string; close: string; closed?: boolean }>;
+  operatingHours?: Record<
+    string,
+    { open: string; close: string; closed?: boolean }
+  >;
 
   @IsOptional()
   isHeadquarters?: boolean;

@@ -3,8 +3,14 @@ import { Prisma } from '@prisma/client';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 
-export type InventoryAsyncJobType = 'EXPORT_INVENTORY_REPORT_CSV' | 'SYNC_INVENTORY_CONNECTION';
-export type InventoryAsyncJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type InventoryAsyncJobType =
+  | 'EXPORT_INVENTORY_REPORT_CSV'
+  | 'SYNC_INVENTORY_CONNECTION';
+export type InventoryAsyncJobStatus =
+  | 'QUEUED'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED';
 
 interface InventoryAsyncJobRow {
   id: string;
@@ -103,7 +109,10 @@ export class InventoryAsyncJobsService {
     `);
   }
 
-  async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }): Promise<void> {
+  async markProcessing(
+    jobId: string,
+    input?: { progress?: number; totalItems?: number },
+  ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE inventory_schema.inventory_async_jobs
       SET status = 'PROCESSING',
@@ -158,7 +167,10 @@ export class InventoryAsyncJobsService {
     `);
   }
 
-  async listJobs(tenantId: string, limit = 15): Promise<InventoryAsyncJobView[]> {
+  async listJobs(
+    tenantId: string,
+    limit = 15,
+  ): Promise<InventoryAsyncJobView[]> {
     const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM inventory_schema.inventory_async_jobs
@@ -170,7 +182,10 @@ export class InventoryAsyncJobsService {
     return rows.map((row) => this.toView(row));
   }
 
-  async getJob(tenantId: string, jobId: string): Promise<InventoryAsyncJobView> {
+  async getJob(
+    tenantId: string,
+    jobId: string,
+  ): Promise<InventoryAsyncJobView> {
     const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM inventory_schema.inventory_async_jobs
@@ -186,7 +201,10 @@ export class InventoryAsyncJobsService {
     return this.toView(rows[0]);
   }
 
-  async getDownloadPayload(tenantId: string, jobId: string): Promise<{
+  async getDownloadPayload(
+    tenantId: string,
+    jobId: string,
+  ): Promise<{
     fileName: string;
     fileMimeType: string;
     fileContent?: string | null;
@@ -239,5 +257,4 @@ export class InventoryAsyncJobsService {
       failedAt: row.failed_at,
     };
   }
-
 }

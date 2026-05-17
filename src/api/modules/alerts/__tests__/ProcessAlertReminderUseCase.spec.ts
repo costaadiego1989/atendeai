@@ -9,7 +9,9 @@ describe('ProcessAlertReminderUseCase', () => {
   let messagingFacade: any;
   let sut: ProcessAlertReminderUseCase;
 
-  const makeReminder = (overrides: Partial<AlertReminder> = {}): AlertReminder => ({
+  const makeReminder = (
+    overrides: Partial<AlertReminder> = {},
+  ): AlertReminder => ({
     id: 'reminder-1',
     tenantId: 'tenant-1',
     branchId: 'branch-1',
@@ -38,7 +40,9 @@ describe('ProcessAlertReminderUseCase', () => {
       addJob: jest.fn(),
     };
     contactFacade = {
-      ensureContact: jest.fn().mockResolvedValue({ contactId: 'contact-1', created: true }),
+      ensureContact: jest
+        .fn()
+        .mockResolvedValue({ contactId: 'contact-1', created: true }),
     };
     messagingFacade = {
       queueSystemMessage: jest.fn().mockResolvedValue({ messageId: 'msg-1' }),
@@ -93,7 +97,9 @@ describe('ProcessAlertReminderUseCase', () => {
     );
 
     reminderRepository.countRecipientDispatchesSince.mockResolvedValue(3);
-    reminderRepository.findById.mockResolvedValue(makeReminder({ branchId: null }));
+    reminderRepository.findById.mockResolvedValue(
+      makeReminder({ branchId: null }),
+    );
 
     await localSut.execute({ tenantId: 'tenant-1', reminderId: 'reminder-1' });
 
@@ -206,7 +212,11 @@ describe('ProcessAlertReminderUseCase', () => {
 
   it('falls back to runtime default timezone when reminder has invalid timezone', async () => {
     reminderRepository.findById.mockResolvedValue(
-      makeReminder({ frequency: 'DAILY', timeOfDay: '09:00', timezone: 'Invalid/Zone' }),
+      makeReminder({
+        frequency: 'DAILY',
+        timeOfDay: '09:00',
+        timezone: 'Invalid/Zone',
+      }),
     );
 
     await sut.execute({ tenantId: 'tenant-1', reminderId: 'reminder-1' });
@@ -241,7 +251,9 @@ describe('ProcessAlertReminderUseCase', () => {
 
   it('propagates error when messagingFacade.queueSystemMessage throws', async () => {
     reminderRepository.findById.mockResolvedValue(makeReminder());
-    messagingFacade.queueSystemMessage.mockRejectedValue(new Error('Messaging service unavailable'));
+    messagingFacade.queueSystemMessage.mockRejectedValue(
+      new Error('Messaging service unavailable'),
+    );
 
     await expect(
       sut.execute({ tenantId: 'tenant-1', reminderId: 'reminder-1' }),

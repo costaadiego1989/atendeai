@@ -10,16 +10,21 @@ export class BlingProvider implements IInventoryProvider {
       throw new Error('A conexão com o Bling requer um accessToken (OAuth2).');
     }
 
-    const response = await fetch('https://api.bling.com.br/Api/v3/usuarios/me', {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      'https://api.bling.com.br/Api/v3/usuarios/me',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
 
     if (!response.ok) {
-      throw new Error(`Falha de autenticação no Bling: Erro HTTP ${response.status}`);
+      throw new Error(
+        `Falha de autenticação no Bling: Erro HTTP ${response.status}`,
+      );
     }
 
     return true;

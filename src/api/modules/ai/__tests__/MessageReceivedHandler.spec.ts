@@ -17,10 +17,7 @@ describe('MessageReceivedHandler', () => {
       execute: jest.fn(),
     } as unknown as jest.Mocked<IProcessAIResponseUseCase>;
 
-    handler = new MessageReceivedHandler(
-      eventBus,
-      processAIResponseUseCase,
-    );
+    handler = new MessageReceivedHandler(eventBus, processAIResponseUseCase);
   });
 
   it('should subscribe to messaging.message-received and process payload', async () => {

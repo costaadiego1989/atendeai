@@ -9,7 +9,7 @@ import {
 
 @Injectable()
 export class PrismaTenantAuditLogRepository implements ITenantAuditLogRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async record(input: TenantAuditLogInput): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`

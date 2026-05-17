@@ -44,19 +44,72 @@ type CanonicalColumn =
 
 const COLUMN_SYNONYMS: Record<CanonicalColumn, string[]> = {
   type: ['type', 'tipo'],
-  name: ['name', 'nome', 'produto', 'item', 'product name', 'nome produto', 'nome item'],
+  name: [
+    'name',
+    'nome',
+    'produto',
+    'item',
+    'product name',
+    'nome produto',
+    'nome item',
+  ],
   description: ['description', 'descrição', 'descrição', 'detalhes', 'details'],
-  basePrice: ['base price', 'preço', 'preço', 'valor', 'price', 'valor base', 'preço base', 'preço base'],
+  basePrice: [
+    'base price',
+    'preço',
+    'preço',
+    'valor',
+    'price',
+    'valor base',
+    'preço base',
+    'preço base',
+  ],
   currency: ['currency', 'moeda'],
-  categoryName: ['category', 'categoria', 'grupo', 'department', 'departamento'],
+  categoryName: [
+    'category',
+    'categoria',
+    'grupo',
+    'department',
+    'departamento',
+  ],
   tags: ['tags', 'tag', 'labels', 'etiquetas'],
   source: ['source', 'origem'],
-  externalReference: ['external reference', 'referência', 'referência', 'codigo', 'código', 'code', 'id externo', 'ref'],
+  externalReference: [
+    'external reference',
+    'referência',
+    'referência',
+    'codigo',
+    'código',
+    'code',
+    'id externo',
+    'ref',
+  ],
   imageUrl: ['image', 'image url', 'imagem', 'foto', 'url imagem', 'url image'],
   sku: ['sku', 'codigo sku', 'codigo interno', 'código interno', 'ref sku'],
-  availableQuantity: ['quantity', 'qty', 'estoque', 'stock', 'saldo', 'quantidade', 'qtd', 'available quantity'],
-  availabilityStatus: ['status', 'availability', 'disponibilidade', 'status estoque', 'status do estoque'],
-  currentPrice: ['current price', 'preço atual', 'preço atual', 'sale price', 'valor atual'],
+  availableQuantity: [
+    'quantity',
+    'qty',
+    'estoque',
+    'stock',
+    'saldo',
+    'quantidade',
+    'qtd',
+    'available quantity',
+  ],
+  availabilityStatus: [
+    'status',
+    'availability',
+    'disponibilidade',
+    'status estoque',
+    'status do estoque',
+  ],
+  currentPrice: [
+    'current price',
+    'preço atual',
+    'preço atual',
+    'sale price',
+    'valor atual',
+  ],
 };
 
 const POSITIONAL_COLUMNS: CanonicalColumn[] = [
@@ -78,7 +131,10 @@ const POSITIONAL_COLUMNS: CanonicalColumn[] = [
 
 @Injectable()
 export class CatalogImportParser {
-  parseRows(rawText: string, defaults: CatalogImportDefaults = {}): ParsedCatalogImportRow[] {
+  parseRows(
+    rawText: string,
+    defaults: CatalogImportDefaults = {},
+  ): ParsedCatalogImportRow[] {
     const lines = rawText
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -119,7 +175,9 @@ export class CatalogImportParser {
   ): ParsedCatalogImportRow {
     const getValue = (column: CanonicalColumn): string | undefined => {
       if (headerMap) {
-        const entry = Object.entries(headerMap).find(([, mapped]) => mapped === column);
+        const entry = Object.entries(headerMap).find(
+          ([, mapped]) => mapped === column,
+        );
         if (!entry) {
           return undefined;
         }
@@ -138,11 +196,21 @@ export class CatalogImportParser {
     const type = this.normalizeType(getValue('type') ?? defaults.defaultType);
     const basePrice = this.normalizeMoney(getValue('basePrice'));
     const currentPrice = this.normalizeMoney(getValue('currentPrice'));
-    const availableQuantity = this.normalizeQuantity(getValue('availableQuantity'));
-    const availabilityStatus = this.normalizeAvailabilityStatus(getValue('availabilityStatus'));
-    const categoryName = this.normalizeEmpty(getValue('categoryName') ?? defaults.defaultCategoryName);
-    const source = this.normalizeSource(getValue('source') ?? defaults.defaultSource);
-    const externalReference = this.normalizeEmpty(getValue('externalReference'));
+    const availableQuantity = this.normalizeQuantity(
+      getValue('availableQuantity'),
+    );
+    const availabilityStatus = this.normalizeAvailabilityStatus(
+      getValue('availabilityStatus'),
+    );
+    const categoryName = this.normalizeEmpty(
+      getValue('categoryName') ?? defaults.defaultCategoryName,
+    );
+    const source = this.normalizeSource(
+      getValue('source') ?? defaults.defaultSource,
+    );
+    const externalReference = this.normalizeEmpty(
+      getValue('externalReference'),
+    );
     const sku = this.normalizeEmpty(getValue('sku'));
     const name =
       this.normalizeEmpty(getValue('name')) ??
@@ -174,13 +242,19 @@ export class CatalogImportParser {
     };
   }
 
-  private mapHeader(columns: string[]): Partial<Record<number, CanonicalColumn>> {
+  private mapHeader(
+    columns: string[],
+  ): Partial<Record<number, CanonicalColumn>> {
     const mapping: Partial<Record<number, CanonicalColumn>> = {};
 
     columns.forEach((column, index) => {
       const normalized = this.normalizeHeader(column);
-      const canonical = (Object.entries(COLUMN_SYNONYMS) as Array<[CanonicalColumn, string[]]>).find(
-        ([, synonyms]) => synonyms.some((synonym) => normalized.includes(this.normalizeHeader(synonym))),
+      const canonical = (
+        Object.entries(COLUMN_SYNONYMS) as Array<[CanonicalColumn, string[]]>
+      ).find(([, synonyms]) =>
+        synonyms.some((synonym) =>
+          normalized.includes(this.normalizeHeader(synonym)),
+        ),
       )?.[0];
 
       if (canonical) {
@@ -195,10 +269,16 @@ export class CatalogImportParser {
     const delimiters = [';', ',', '\t', '|'];
     const scored = delimiters.map((delimiter) => ({
       delimiter,
-      score: lines.reduce((total, line) => total + this.countDelimiter(line, delimiter), 0),
+      score: lines.reduce(
+        (total, line) => total + this.countDelimiter(line, delimiter),
+        0,
+      ),
     }));
 
-    return scored.sort((left, right) => right.score - left.score)[0]?.delimiter ?? ';';
+    return (
+      scored.sort((left, right) => right.score - left.score)[0]?.delimiter ??
+      ';'
+    );
   }
 
   private countDelimiter(line: string, delimiter: string): number {
@@ -255,7 +335,9 @@ export class CatalogImportParser {
       .trim();
   }
 
-  private normalizeType(value?: string): 'SERVICE' | 'PRODUCT' | 'RENTAL' | undefined {
+  private normalizeType(
+    value?: string,
+  ): 'SERVICE' | 'PRODUCT' | 'RENTAL' | undefined {
     const normalized = this.normalizeHeader(value ?? '');
     if (!normalized) {
       return undefined;
@@ -272,7 +354,9 @@ export class CatalogImportParser {
     return 'PRODUCT';
   }
 
-  private normalizeSource(value?: string): 'MANUAL' | 'IMPORT' | 'ERP_SNAPSHOT' | undefined {
+  private normalizeSource(
+    value?: string,
+  ): 'MANUAL' | 'IMPORT' | 'ERP_SNAPSHOT' | undefined {
     const normalized = this.normalizeHeader(value ?? '');
     if (!normalized) {
       return undefined;
@@ -305,7 +389,11 @@ export class CatalogImportParser {
       return 'RESERVED';
     }
 
-    if (normalized.includes('indispon') || normalized.includes('unavailable') || normalized.includes('sem estoque')) {
+    if (
+      normalized.includes('indispon') ||
+      normalized.includes('unavailable') ||
+      normalized.includes('sem estoque')
+    ) {
       return 'UNAVAILABLE';
     }
 

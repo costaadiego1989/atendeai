@@ -49,7 +49,8 @@ export class RegenerateRecoveryGuidanceUseCase {
       );
     }
 
-    const guidanceStatus = recoveryCase.status as RecoveryGuidanceInput['status'];
+    const guidanceStatus =
+      recoveryCase.status as RecoveryGuidanceInput['status'];
 
     const guidance = await this.recoveryGuidanceGenerator.generate({
       tenantId: command.tenantId,

@@ -14,9 +14,7 @@ import {
 import { resolveBillingNicheCode } from '../support/BillingNicheResolver';
 
 @Injectable()
-export class GetSubscriptionCatalogUseCase
-  implements IGetSubscriptionCatalogUseCase
-{
+export class GetSubscriptionCatalogUseCase implements IGetSubscriptionCatalogUseCase {
   constructor(
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepository: IBillingRepository,
@@ -110,7 +108,9 @@ export class GetSubscriptionCatalogUseCase
       .map((module) => {
         const recommendation = recommendations.get(module.code);
         const subscribed = billingAccess.addonModules.includes(module.code);
-        const includedInPlan = billingAccess.includedModules.includes(module.code);
+        const includedInPlan = billingAccess.includedModules.includes(
+          module.code,
+        );
         const enabled = billingAccess.enabledModules.includes(module.code);
 
         return {

@@ -22,13 +22,22 @@ import { RescheduleSchedulingReservationUseCase } from './application/use-cases/
 import { SchedulingPaymentEventHandler } from './application/handlers/SchedulingPaymentEventHandler';
 import { ExpirePendingSchedulingReservationUseCase } from './application/use-cases/ExpirePendingSchedulingReservationUseCase';
 import { RedisSchedulingStore } from './infrastructure/persistence/RedisSchedulingStore';
-import { ISchedulingStore, SCHEDULING_STORE } from './domain/ports/ISchedulingStore';
+import {
+  ISchedulingStore,
+  SCHEDULING_STORE,
+} from './domain/ports/ISchedulingStore';
 import { BullMQSchedulingReservationExpirationQueue } from './infrastructure/queue/BullMQSchedulingReservationExpirationQueue';
-import { ISchedulingReservationExpirationQueue, SCHEDULING_RESERVATION_EXPIRATION_QUEUE } from './domain/ports/ISchedulingReservationExpirationQueue';
+import {
+  ISchedulingReservationExpirationQueue,
+  SCHEDULING_RESERVATION_EXPIRATION_QUEUE,
+} from './domain/ports/ISchedulingReservationExpirationQueue';
 import { AuthModule } from '../auth/auth.module';
 import { ContactModule } from '../contact/contact.module';
 import { PaymentModule } from '../payment/payment.module';
-import { MessagingFacade, MESSAGING_FACADE } from '../messaging/application/facades/MessagingFacade';
+import {
+  MessagingFacade,
+  MESSAGING_FACADE,
+} from '../messaging/application/facades/MessagingFacade';
 import { CONVERSATION_REPOSITORY } from '../messaging/domain/repositories/IConversationRepository';
 import { PrismaConversationRepository } from '../messaging/infrastructure/persistence/repositories/PrismaConversationRepository';
 import { MESSAGE_QUEUE } from '../messaging/domain/ports/IMessageQueue';
@@ -186,5 +195,5 @@ import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedu
 export class SchedulingModule {
   constructor(
     private readonly _schedulingPaymentEventHandler: SchedulingPaymentEventHandler,
-  ) { }
+  ) {}
 }

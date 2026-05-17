@@ -151,7 +151,9 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
         },
       });
 
-      expect(subscription.billingCycleStart.toISOString()).toBe(originalCycleStart);
+      expect(subscription.billingCycleStart.toISOString()).toBe(
+        originalCycleStart,
+      );
       expect(eventBus.publish).not.toHaveBeenCalledWith(
         expect.any(BillingCycleRenewedIntegrationEvent),
       );
@@ -163,7 +165,10 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
   describe('Scenario 3: Plan Change — upgrade confirmed via webhook', () => {
     it('should upgrade plan from ESSENCIAL to PROFISSIONAL on billing-upgrade reference', async () => {
       const handler = getHandler('payment.confirmed');
-      const subscription = createActiveSubscription('tenant-upgrade-1', 'ESSENCIAL');
+      const subscription = createActiveSubscription(
+        'tenant-upgrade-1',
+        'ESSENCIAL',
+      );
       subscription.updateAsaasCustomer('cus-upgrade-1');
       billingRepo.findSubscription.mockResolvedValue(subscription);
       billingRepo.findPlanByCode.mockResolvedValue({
@@ -213,7 +218,10 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
 
     it('should apply scheduled downgrade on next cycle renewal', async () => {
       const handler = getHandler('payment.confirmed');
-      const subscription = createActiveSubscription('tenant-downgrade-1', 'ESCALA');
+      const subscription = createActiveSubscription(
+        'tenant-downgrade-1',
+        'ESCALA',
+      );
       subscription.schedulePlanChange('PROFISSIONAL');
       billingRepo.findSubscription.mockResolvedValue(subscription);
       billingRepo.findPlanByCode.mockResolvedValue({
@@ -246,9 +254,16 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
 
     it('should expire addon package on cycle renewal during upgrade', async () => {
       const handler = getHandler('payment.confirmed');
-      const subscription = createActiveSubscription('tenant-upgrade-expire', 'ESSENCIAL');
+      const subscription = createActiveSubscription(
+        'tenant-upgrade-expire',
+        'ESSENCIAL',
+      );
       subscription.updateAsaasCustomer('cus-expire-1');
-      subscription.adjustQuotas({ messages: 5000, aiTokens: 1000000, contacts: 0 });
+      subscription.adjustQuotas({
+        messages: 5000,
+        aiTokens: 1000000,
+        contacts: 0,
+      });
       subscription.updatePricing({
         baseMonthlyPrice: 99,
         addonsMonthlyPrice: 49,
@@ -380,7 +395,11 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
     it('should revert addon quotas and mark module as REFUNDED', async () => {
       const handler = getHandler('payment.refunded');
       const subscription = createActiveSubscription('tenant-refund-1');
-      subscription.adjustQuotas({ messages: 5000, aiTokens: 1000000, contacts: 0 });
+      subscription.adjustQuotas({
+        messages: 5000,
+        aiTokens: 1000000,
+        contacts: 0,
+      });
       subscription.updatePricing({
         baseMonthlyPrice: 297,
         addonsMonthlyPrice: 49,

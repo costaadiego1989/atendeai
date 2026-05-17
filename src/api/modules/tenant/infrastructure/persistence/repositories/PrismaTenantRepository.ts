@@ -14,11 +14,12 @@ import { UniqueEntityID } from '../../../../../shared/domain/UniqueEntityID.js';
 
 @Injectable()
 export class PrismaTenantRepository implements ITenantRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async save(tenant: Tenant): Promise<void> {
     const data = TenantMapper.toPersistence(tenant);
-    const { ownerBirthDate, streetNumber, ownerUserId, ...tenantRecord } = data.tenant;
+    const { ownerBirthDate, streetNumber, ownerUserId, ...tenantRecord } =
+      data.tenant;
 
     await this.prisma.$transaction(async (tx) => {
       await tx.tenant.upsert({
@@ -162,7 +163,16 @@ export class PrismaTenantRepository implements ITenantRepository {
       return null;
     }
 
-    const [instagramConfig, whatsappConfig, users, ownerBirthDates, streetNumbers, ownerUserIds, businessTypes, catalogFiles] = await Promise.all([
+    const [
+      instagramConfig,
+      whatsappConfig,
+      users,
+      ownerBirthDates,
+      streetNumbers,
+      ownerUserIds,
+      businessTypes,
+      catalogFiles,
+    ] = await Promise.all([
       this.findInstagramConfigByTenantId(id),
       this.findWhatsAppConfigByTenantId(id),
       this.findUsersByTenantId(id),
@@ -175,11 +185,19 @@ export class PrismaTenantRepository implements ITenantRepository {
     return TenantMapper.toDomain({
       ...(raw as any),
       users,
-      ownerBirthDate: ownerBirthDates.get(id) ?? (raw as any).ownerBirthDate ?? null,
+      ownerBirthDate:
+        ownerBirthDates.get(id) ?? (raw as any).ownerBirthDate ?? null,
       streetNumber: streetNumbers.get(id) ?? (raw as any).streetNumber ?? null,
       ownerUserId: ownerUserIds.get(id) ?? (raw as any).ownerUserId ?? null,
-      businessType: businessTypes.get(id) || (raw as any).businessType || (raw as any).business_type || null,
-      catalogFiles: (catalogFiles.get(id) ?? []).length > 0 ? catalogFiles.get(id)! : ((raw as any).catalogFiles || (raw as any).catalog_files || []),
+      businessType:
+        businessTypes.get(id) ||
+        (raw as any).businessType ||
+        (raw as any).business_type ||
+        null,
+      catalogFiles:
+        (catalogFiles.get(id) ?? []).length > 0
+          ? catalogFiles.get(id)!
+          : (raw as any).catalogFiles || (raw as any).catalog_files || [],
       instagramConfig,
       whatsappConfig,
     });
@@ -204,7 +222,16 @@ export class PrismaTenantRepository implements ITenantRepository {
     });
 
     if (raw) {
-      const [instagramConfig, whatsappConfig, users, ownerBirthDates, streetNumbers, ownerUserIds, businessTypes, catalogFiles] = await Promise.all([
+      const [
+        instagramConfig,
+        whatsappConfig,
+        users,
+        ownerBirthDates,
+        streetNumbers,
+        ownerUserIds,
+        businessTypes,
+        catalogFiles,
+      ] = await Promise.all([
         this.findInstagramConfigByTenantId(raw.id),
         this.findWhatsAppConfigByTenantId(raw.id),
         this.findUsersByTenantId(raw.id),
@@ -217,11 +244,27 @@ export class PrismaTenantRepository implements ITenantRepository {
       return TenantMapper.toDomain({
         ...(raw as any),
         users,
-        ownerBirthDate: ownerBirthDates.get(String(raw.id).toLowerCase()) ?? (raw as any).ownerBirthDate ?? null,
-        streetNumber: streetNumbers.get(String(raw.id).toLowerCase()) ?? (raw as any).streetNumber ?? null,
-        ownerUserId: ownerUserIds.get(String(raw.id).toLowerCase()) ?? (raw as any).ownerUserId ?? null,
-        businessType: businessTypes.get(String(raw.id).toLowerCase()) || (raw as any).businessType || (raw as any).business_type || null,
-        catalogFiles: (catalogFiles.get(String(raw.id).toLowerCase()) ?? []).length > 0 ? catalogFiles.get(String(raw.id).toLowerCase())! : ((raw as any).catalogFiles || (raw as any).catalog_files || []),
+        ownerBirthDate:
+          ownerBirthDates.get(String(raw.id).toLowerCase()) ??
+          (raw as any).ownerBirthDate ??
+          null,
+        streetNumber:
+          streetNumbers.get(String(raw.id).toLowerCase()) ??
+          (raw as any).streetNumber ??
+          null,
+        ownerUserId:
+          ownerUserIds.get(String(raw.id).toLowerCase()) ??
+          (raw as any).ownerUserId ??
+          null,
+        businessType:
+          businessTypes.get(String(raw.id).toLowerCase()) ||
+          (raw as any).businessType ||
+          (raw as any).business_type ||
+          null,
+        catalogFiles:
+          (catalogFiles.get(String(raw.id).toLowerCase()) ?? []).length > 0
+            ? catalogFiles.get(String(raw.id).toLowerCase())!
+            : (raw as any).catalogFiles || (raw as any).catalog_files || [],
         instagramConfig,
         whatsappConfig,
       });
@@ -242,7 +285,16 @@ export class PrismaTenantRepository implements ITenantRepository {
       return null;
     }
 
-    const [instagramConfig, whatsappConfig, users, ownerBirthDates, streetNumbers, ownerUserIds, businessTypes, catalogFiles] = await Promise.all([
+    const [
+      instagramConfig,
+      whatsappConfig,
+      users,
+      ownerBirthDates,
+      streetNumbers,
+      ownerUserIds,
+      businessTypes,
+      catalogFiles,
+    ] = await Promise.all([
       this.findInstagramConfigByTenantId(fallback.id),
       this.findWhatsAppConfigByTenantId(fallback.id),
       this.findUsersByTenantId(fallback.id),
@@ -255,11 +307,29 @@ export class PrismaTenantRepository implements ITenantRepository {
     return TenantMapper.toDomain({
       ...(fallback as any),
       users,
-      ownerBirthDate: ownerBirthDates.get(String(fallback.id).toLowerCase()) ?? (fallback as any).ownerBirthDate ?? null,
-      streetNumber: streetNumbers.get(String(fallback.id).toLowerCase()) ?? (fallback as any).streetNumber ?? null,
-      ownerUserId: ownerUserIds.get(String(fallback.id).toLowerCase()) ?? (fallback as any).ownerUserId ?? null,
-      businessType: businessTypes.get(String(fallback.id).toLowerCase()) || (fallback as any).businessType || (fallback as any).business_type || null,
-      catalogFiles: (catalogFiles.get(String(fallback.id).toLowerCase()) ?? []).length > 0 ? catalogFiles.get(String(fallback.id).toLowerCase())! : ((fallback as any).catalogFiles || (fallback as any).catalog_files || []),
+      ownerBirthDate:
+        ownerBirthDates.get(String(fallback.id).toLowerCase()) ??
+        (fallback as any).ownerBirthDate ??
+        null,
+      streetNumber:
+        streetNumbers.get(String(fallback.id).toLowerCase()) ??
+        (fallback as any).streetNumber ??
+        null,
+      ownerUserId:
+        ownerUserIds.get(String(fallback.id).toLowerCase()) ??
+        (fallback as any).ownerUserId ??
+        null,
+      businessType:
+        businessTypes.get(String(fallback.id).toLowerCase()) ||
+        (fallback as any).businessType ||
+        (fallback as any).business_type ||
+        null,
+      catalogFiles:
+        (catalogFiles.get(String(fallback.id).toLowerCase()) ?? []).length > 0
+          ? catalogFiles.get(String(fallback.id).toLowerCase())!
+          : (fallback as any).catalogFiles ||
+            (fallback as any).catalog_files ||
+            [],
       instagramConfig,
       whatsappConfig,
     });
@@ -282,7 +352,16 @@ export class PrismaTenantRepository implements ITenantRepository {
       return null;
     }
 
-    const [instagramConfig, whatsappConfig, users, ownerBirthDates, streetNumbers, ownerUserIds, businessTypes, catalogFiles] = await Promise.all([
+    const [
+      instagramConfig,
+      whatsappConfig,
+      users,
+      ownerBirthDates,
+      streetNumbers,
+      ownerUserIds,
+      businessTypes,
+      catalogFiles,
+    ] = await Promise.all([
       this.findInstagramConfigByTenantId(raw.id),
       this.findWhatsAppConfigByTenantId(raw.id),
       this.findUsersByTenantId(raw.id),
@@ -295,11 +374,27 @@ export class PrismaTenantRepository implements ITenantRepository {
     return TenantMapper.toDomain({
       ...(raw as any),
       users,
-      ownerBirthDate: ownerBirthDates.get(String(raw.id).toLowerCase()) ?? (raw as any).ownerBirthDate ?? null,
-      streetNumber: streetNumbers.get(String(raw.id).toLowerCase()) ?? (raw as any).streetNumber ?? null,
-      ownerUserId: ownerUserIds.get(String(raw.id).toLowerCase()) ?? (raw as any).ownerUserId ?? null,
-      businessType: businessTypes.get(String(raw.id).toLowerCase()) || (raw as any).businessType || (raw as any).business_type || null,
-      catalogFiles: (catalogFiles.get(String(raw.id).toLowerCase()) ?? []).length > 0 ? catalogFiles.get(String(raw.id).toLowerCase())! : ((raw as any).catalogFiles || (raw as any).catalog_files || []),
+      ownerBirthDate:
+        ownerBirthDates.get(String(raw.id).toLowerCase()) ??
+        (raw as any).ownerBirthDate ??
+        null,
+      streetNumber:
+        streetNumbers.get(String(raw.id).toLowerCase()) ??
+        (raw as any).streetNumber ??
+        null,
+      ownerUserId:
+        ownerUserIds.get(String(raw.id).toLowerCase()) ??
+        (raw as any).ownerUserId ??
+        null,
+      businessType:
+        businessTypes.get(String(raw.id).toLowerCase()) ||
+        (raw as any).businessType ||
+        (raw as any).business_type ||
+        null,
+      catalogFiles:
+        (catalogFiles.get(String(raw.id).toLowerCase()) ?? []).length > 0
+          ? catalogFiles.get(String(raw.id).toLowerCase())!
+          : (raw as any).catalogFiles || (raw as any).catalog_files || [],
       instagramConfig,
       whatsappConfig,
     });
@@ -351,7 +446,16 @@ export class PrismaTenantRepository implements ITenantRepository {
     ]);
 
     const tenantIds = results.map((r) => r.id);
-    const [instagramConfigs, whatsappConfigs, usersByTenantId, ownerBirthDates, streetNumbers, ownerUserIds, businessTypes, catalogFiles] = await Promise.all([
+    const [
+      instagramConfigs,
+      whatsappConfigs,
+      usersByTenantId,
+      ownerBirthDates,
+      streetNumbers,
+      ownerUserIds,
+      businessTypes,
+      catalogFiles,
+    ] = await Promise.all([
       this.findInstagramConfigsByTenantIds(tenantIds),
       this.findWhatsAppConfigsByTenantIds(tenantIds),
       this.findUsersByTenantIds(tenantIds),
@@ -367,13 +471,31 @@ export class PrismaTenantRepository implements ITenantRepository {
         TenantMapper.toDomain({
           ...(r as any),
           users: usersByTenantId.get(String(r.id).toLowerCase()) ?? [],
-          ownerBirthDate: ownerBirthDates.get(String(r.id).toLowerCase()) ?? (r as any).ownerBirthDate ?? null,
-          streetNumber: streetNumbers.get(String(r.id).toLowerCase()) ?? (r as any).streetNumber ?? null,
-          ownerUserId: ownerUserIds.get(String(r.id).toLowerCase()) ?? (r as any).ownerUserId ?? null,
-          businessType: businessTypes.get(String(r.id).toLowerCase()) || (r as any).businessType || (r as any).business_type || null,
-          catalogFiles: (catalogFiles.get(String(r.id).toLowerCase()) ?? []).length > 0 ? catalogFiles.get(String(r.id).toLowerCase())! : ((r as any).catalogFiles || (r as any).catalog_files || []),
-          instagramConfig: instagramConfigs.get(String(r.id).toLowerCase()) ?? null,
-          whatsappConfig: whatsappConfigs.get(String(r.id).toLowerCase()) ?? null,
+          ownerBirthDate:
+            ownerBirthDates.get(String(r.id).toLowerCase()) ??
+            (r as any).ownerBirthDate ??
+            null,
+          streetNumber:
+            streetNumbers.get(String(r.id).toLowerCase()) ??
+            (r as any).streetNumber ??
+            null,
+          ownerUserId:
+            ownerUserIds.get(String(r.id).toLowerCase()) ??
+            (r as any).ownerUserId ??
+            null,
+          businessType:
+            businessTypes.get(String(r.id).toLowerCase()) ||
+            (r as any).businessType ||
+            (r as any).business_type ||
+            null,
+          catalogFiles:
+            (catalogFiles.get(String(r.id).toLowerCase()) ?? []).length > 0
+              ? catalogFiles.get(String(r.id).toLowerCase())!
+              : (r as any).catalogFiles || (r as any).catalog_files || [],
+          instagramConfig:
+            instagramConfigs.get(String(r.id).toLowerCase()) ?? null,
+          whatsappConfig:
+            whatsappConfigs.get(String(r.id).toLowerCase()) ?? null,
         }),
       ),
       total,
@@ -492,7 +614,10 @@ export class PrismaTenantRepository implements ITenantRepository {
     return branch;
   }
 
-  async updateBranch(branchId: string, input: SaveTenantBranchInput): Promise<TenantBranch> {
+  async updateBranch(
+    branchId: string,
+    input: SaveTenantBranchInput,
+  ): Promise<TenantBranch> {
     if (input.isHeadquarters) {
       await this.prisma.$executeRaw(Prisma.sql`
           UPDATE tenant_schema.tenant_branches
@@ -557,7 +682,16 @@ export class PrismaTenantRepository implements ITenantRepository {
       return null;
     }
 
-    const [instagramConfig, whatsappConfig, users, ownerBirthDates, streetNumbers, ownerUserIds, businessTypes, catalogFiles] = await Promise.all([
+    const [
+      instagramConfig,
+      whatsappConfig,
+      users,
+      ownerBirthDates,
+      streetNumbers,
+      ownerUserIds,
+      businessTypes,
+      catalogFiles,
+    ] = await Promise.all([
       this.findInstagramConfigByTenantId(raw.id),
       this.findWhatsAppConfigByTenantId(raw.id),
       this.findUsersByTenantId(raw.id),
@@ -570,11 +704,27 @@ export class PrismaTenantRepository implements ITenantRepository {
     return TenantMapper.toDomain({
       ...(raw as any),
       users,
-      ownerBirthDate: ownerBirthDates.get(String(raw.id).toLowerCase()) ?? (raw as any).ownerBirthDate ?? null,
-      streetNumber: streetNumbers.get(String(raw.id).toLowerCase()) ?? (raw as any).streetNumber ?? null,
-      ownerUserId: ownerUserIds.get(String(raw.id).toLowerCase()) ?? (raw as any).ownerUserId ?? null,
-      businessType: businessTypes.get(String(raw.id).toLowerCase()) || (raw as any).businessType || (raw as any).business_type || null,
-      catalogFiles: (catalogFiles.get(String(raw.id).toLowerCase()) ?? []).length > 0 ? catalogFiles.get(String(raw.id).toLowerCase())! : ((raw as any).catalogFiles || (raw as any).catalog_files || []),
+      ownerBirthDate:
+        ownerBirthDates.get(String(raw.id).toLowerCase()) ??
+        (raw as any).ownerBirthDate ??
+        null,
+      streetNumber:
+        streetNumbers.get(String(raw.id).toLowerCase()) ??
+        (raw as any).streetNumber ??
+        null,
+      ownerUserId:
+        ownerUserIds.get(String(raw.id).toLowerCase()) ??
+        (raw as any).ownerUserId ??
+        null,
+      businessType:
+        businessTypes.get(String(raw.id).toLowerCase()) ||
+        (raw as any).businessType ||
+        (raw as any).business_type ||
+        null,
+      catalogFiles:
+        (catalogFiles.get(String(raw.id).toLowerCase()) ?? []).length > 0
+          ? catalogFiles.get(String(raw.id).toLowerCase())!
+          : (raw as any).catalogFiles || (raw as any).catalog_files || [],
       instagramConfig,
       whatsappConfig,
     });
@@ -708,7 +858,12 @@ export class PrismaTenantRepository implements ITenantRepository {
         WHERE id = ANY(${tenantIds}::uuid[])
       `);
 
-    return new Map(results.map((row) => [String(row.id).toLowerCase(), row.street_number ?? null]));
+    return new Map(
+      results.map((row) => [
+        String(row.id).toLowerCase(),
+        row.street_number ?? null,
+      ]),
+    );
   }
 
   private async findOwnerUserIdsByTenantIds(
@@ -726,7 +881,12 @@ export class PrismaTenantRepository implements ITenantRepository {
         WHERE id = ANY(${tenantIds}::uuid[])
       `);
 
-    return new Map(results.map((row) => [String(row.id).toLowerCase(), row.owner_user_id ?? null]));
+    return new Map(
+      results.map((row) => [
+        String(row.id).toLowerCase(),
+        row.owner_user_id ?? null,
+      ]),
+    );
   }
 
   private async findBusinessTypesByTenantIds(
@@ -744,7 +904,12 @@ export class PrismaTenantRepository implements ITenantRepository {
         WHERE id = ANY(${tenantIds}::uuid[])
       `);
 
-    return new Map(results.map((row) => [String(row.id).toLowerCase(), row.business_type ?? null]));
+    return new Map(
+      results.map((row) => [
+        String(row.id).toLowerCase(),
+        row.business_type ?? null,
+      ]),
+    );
   }
 
   private async findCatalogFilesByTenantIds(
@@ -770,9 +935,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     );
   }
 
-  private async findUsersByTenantId(
-    tenantId: string,
-  ): Promise<
+  private async findUsersByTenantId(tenantId: string): Promise<
     Array<{
       id: string;
       tenantId: string;
@@ -789,9 +952,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     return results.get(tenantId) ?? [];
   }
 
-  private async findUsersByTenantIds(
-    tenantIds: string[],
-  ): Promise<
+  private async findUsersByTenantIds(tenantIds: string[]): Promise<
     Map<
       string,
       Array<{
@@ -942,9 +1103,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     };
   }
 
-  private async findWhatsAppConfigsByTenantIds(
-    tenantIds: string[],
-  ): Promise<
+  private async findWhatsAppConfigsByTenantIds(tenantIds: string[]): Promise<
     Map<
       string,
       {
@@ -1054,9 +1213,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     };
   }
 
-  private async findInstagramConfigsByTenantIds(
-    tenantIds: string[],
-  ): Promise<
+  private async findInstagramConfigsByTenantIds(tenantIds: string[]): Promise<
     Map<
       string,
       {
@@ -1113,7 +1270,10 @@ export class PrismaTenantRepository implements ITenantRepository {
     );
   }
 
-  private getCnpjVariants(cnpj: string): { original: string; formatted: string } {
+  private getCnpjVariants(cnpj: string): {
+    original: string;
+    formatted: string;
+  } {
     try {
       const formatted = CNPJ.create(cnpj).value;
       return {
@@ -1177,13 +1337,13 @@ export class PrismaTenantRepository implements ITenantRepository {
         instagramAccountId: row.instagram_account_id ?? null,
         whatsAppConfigOverride:
           row.whatsapp_provider &&
-            row.whatsapp_credentials &&
-            Object.keys(row.whatsapp_credentials).length > 0
+          row.whatsapp_credentials &&
+          Object.keys(row.whatsapp_credentials).length > 0
             ? {
-              provider: row.whatsapp_provider,
-              credentials: row.whatsapp_credentials,
-              webhookSecret: row.whatsapp_webhook_secret ?? null,
-            }
+                provider: row.whatsapp_provider,
+                credentials: row.whatsapp_credentials,
+                webhookSecret: row.whatsapp_webhook_secret ?? null,
+              }
             : null,
         address: Address.create({
           zipcode: row.zipcode ?? '',

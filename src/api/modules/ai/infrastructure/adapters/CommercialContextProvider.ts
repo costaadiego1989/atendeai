@@ -23,13 +23,15 @@ export class CommercialContextProvider implements ICommercialContextProvider {
     private readonly inventoryQueryPort: IInventoryQueryPort,
     @Inject(CATALOG_QUERY_PORT)
     private readonly catalogQueryPort: ICatalogQueryPort,
-  ) { }
+  ) {}
 
   async findRelevantOffer(
     tenantId: string,
     userMessage: string,
   ): Promise<string | null> {
-    const inventoryItems = await this.inventoryQueryPort.listItems({ tenantId });
+    const inventoryItems = await this.inventoryQueryPort.listItems({
+      tenantId,
+    });
     const matchingInventory = this.findBestInventoryMatch(
       inventoryItems,
       userMessage,
@@ -43,7 +45,10 @@ export class CommercialContextProvider implements ICommercialContextProvider {
       tenantId,
       includeInactive: false,
     });
-    const matchingCatalog = this.findBestCatalogMatch(catalogItems, userMessage);
+    const matchingCatalog = this.findBestCatalogMatch(
+      catalogItems,
+      userMessage,
+    );
 
     if (matchingCatalog) {
       return this.buildCatalogContext(matchingCatalog);

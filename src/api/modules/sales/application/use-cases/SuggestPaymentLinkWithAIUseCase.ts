@@ -1,4 +1,8 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { AI_ENGINE, IAIEngine } from '../../../ai/application/ports/IAIEngine';
 import {
   ITenantRepository,
@@ -20,7 +24,7 @@ export class SuggestPaymentLinkWithAIUseCase {
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
     private readonly tenantAgentRuleService: TenantAgentRuleService,
-  ) { }
+  ) {}
 
   async execute(input: SuggestPaymentLinkWithAIInput) {
     const tenant = await this.tenantRepository.findById(input.tenantId);
@@ -45,12 +49,14 @@ export class SuggestPaymentLinkWithAIUseCase {
 
     if (!useFallback) {
       // If no fallback, these specific sales instructions are the ONLY rules
-      basePrompt.unshift('[ATENção: IGNORE INSTRUCOES GERAIS DA EMPRESA. SIGA APENAS AS REGRAS ABAIXO]');
+      basePrompt.unshift(
+        '[ATENção: IGNORE INSTRUCOES GERAIS DA EMPRESA. SIGA APENAS AS REGRAS ABAIXO]',
+      );
     }
 
     if (customPrompt) {
       basePrompt.push(
-        '\n[DIRETRIZES PERSONALIZADAS DO AGENTE DE VENDAS]:\n' + customPrompt
+        '\n[DIRETRIZES PERSONALIZADAS DO AGENTE DE VENDAS]:\n' + customPrompt,
       );
     }
 
@@ -116,7 +122,9 @@ export class SuggestPaymentLinkWithAIUseCase {
   private normalizeBillingType(
     value: unknown,
   ): 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED' {
-    const normalized = String(value ?? 'PIX').trim().toUpperCase();
+    const normalized = String(value ?? 'PIX')
+      .trim()
+      .toUpperCase();
     if (
       normalized === 'PIX' ||
       normalized === 'CREDIT_CARD' ||

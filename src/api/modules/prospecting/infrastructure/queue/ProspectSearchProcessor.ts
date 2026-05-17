@@ -7,9 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job, Worker } from 'bullmq';
-import {
-  IExecuteProspectSearchUseCase,
-} from '../../application/use-cases/interfaces/IExecuteProspectSearchUseCase';
+import { IExecuteProspectSearchUseCase } from '../../application/use-cases/interfaces/IExecuteProspectSearchUseCase';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
 import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
@@ -23,7 +21,7 @@ export class ProspectSearchProcessor implements OnModuleInit, OnModuleDestroy {
     @Inject(IExecuteProspectSearchUseCase)
     private readonly executeProspectSearchUseCase: IExecuteProspectSearchUseCase,
     private readonly structuredLog: StructuredLogEmitter,
-  ) { }
+  ) {}
 
   onModuleInit() {
     const connection = parseRedisConnection(this.configService);
@@ -62,13 +60,14 @@ export class ProspectSearchProcessor implements OnModuleInit, OnModuleDestroy {
               bull_job_id: bullJobId,
             },
           });
-
         } catch (err) {
           this.structuredLog.emit({
             level: 'error',
             event: 'prospecting.search.job_failed',
             message:
-              err instanceof Error ? err.message : 'Falha ao executar prospect search',
+              err instanceof Error
+                ? err.message
+                : 'Falha ao executar prospect search',
             attributes: {
               search_id: job.data.searchId,
               bull_job_id: bullJobId,

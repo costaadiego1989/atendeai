@@ -5,10 +5,14 @@ import {
 } from '../domain/ports/ICatalogRepository';
 
 describe('CreateCatalogCategoryUseCase', () => {
-  let repository: jest.Mocked<Pick<ICatalogRepository, 'createCategory' | 'saveAuditLog'>>;
+  let repository: jest.Mocked<
+    Pick<ICatalogRepository, 'createCategory' | 'saveAuditLog'>
+  >;
   let sut: CreateCatalogCategoryUseCase;
 
-  const categoryRecord = (over?: Partial<CatalogCategoryRecord>): CatalogCategoryRecord => ({
+  const categoryRecord = (
+    over?: Partial<CatalogCategoryRecord>,
+  ): CatalogCategoryRecord => ({
     id: 'category-1',
     tenantId: 'tenant-1',
     parentCategoryId: null,

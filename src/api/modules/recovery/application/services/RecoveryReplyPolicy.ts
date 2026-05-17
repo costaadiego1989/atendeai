@@ -35,7 +35,11 @@ export class RecoveryReplyPolicy {
       return 'NEGOTIATING';
     }
 
-    if (this.stopKeywords.some((keyword) => normalizedText.includes(this.normalize(keyword)))) {
+    if (
+      this.stopKeywords.some((keyword) =>
+        normalizedText.includes(this.normalize(keyword)),
+      )
+    ) {
       return 'STOPPED';
     }
 

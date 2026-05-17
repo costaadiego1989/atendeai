@@ -8,7 +8,9 @@ export interface RedisConnectionOptions {
   enableReadyCheck: boolean;
 }
 
-export function parseRedisConnection(config: ConfigService): RedisConnectionOptions {
+export function parseRedisConnection(
+  config: ConfigService,
+): RedisConnectionOptions {
   const redisUrl = config.get<string>('REDIS_URL');
   const redisHost = config.get<string>('REDIS_HOST');
 
@@ -21,7 +23,9 @@ export function parseRedisConnection(config: ConfigService): RedisConnectionOpti
       return {
         host: parsed.hostname,
         port: Number(parsed.port) || 6379,
-        password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
+        password: parsed.password
+          ? decodeURIComponent(parsed.password)
+          : undefined,
         maxRetriesPerRequest: null,
         enableReadyCheck: false,
       };
@@ -55,7 +59,9 @@ export function parseRedisConnectionFromEnv(): RedisConnectionOptions {
       return {
         host: parsed.hostname,
         port: Number(parsed.port) || 6379,
-        password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
+        password: parsed.password
+          ? decodeURIComponent(parsed.password)
+          : undefined,
         maxRetriesPerRequest: null,
         enableReadyCheck: false,
       };

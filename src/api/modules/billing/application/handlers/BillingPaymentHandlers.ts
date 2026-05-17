@@ -36,82 +36,160 @@ export class BillingPaymentHandlers implements OnModuleInit {
     private readonly paymentService: PaymentService,
     @InjectQueue('billing-provisioning')
     private readonly provisioningQueue: Queue,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.eventBus.subscribe('payment.confirmed', async (event) => {
-      const payload =
-        event.payload as PaymentConfirmedIntegrationEvent['payload'];
-      const tenantId = payload.tenantId;
-      const confirmedAt = new Date(payload.confirmedAt);
+    this.eventBus.subscribe(
+      'payment.confirmed',
+      async (event) => {
+        const payload =
+          event.payload as PaymentConfirmedIntegrationEvent['payload'];
+        const tenantId = payload.tenantId;
+        const confirmedAt = new Date(payload.confirmedAt);
 
-      this.logger.log(`Handling cycle renewal for tenant ${tenantId}`);
+        this.logger.log(`Handling cycle renewal for tenant ${tenantId}`);
 
-      const subscription =
-        await this.billingRepository.findSubscription(tenantId);
-      if (subscription) {
-        const planUpgradeRequest = this.parseBillingUpgradeReference(
-          payload.rawReference,
-        );
-
-        const addonPackageRequest = this.parseBillingAddonReference(
-          payload.rawReference,
-        );
-
-        // Handle addon package payment confirmation
-        if (addonPackageRequest) {
-          await this.handleAddonPackagePaymentConfirmed(
-            addonPackageRequest.tenantId,
-            subscription,
+        const subscription =
+          await this.billingRepository.findSubscription(tenantId);
+        if (subscription) {
+          const planUpgradeRequest = this.parseBillingUpgradeReference(
+            payload.rawReference,
           );
-          return;
-        }
 
-        if (planUpgradeRequest) {
-          const oldPlan = subscription.plan;
-          const targetPlanDefinition = await this.billingRepository.findPlanByCode(
-            planUpgradeRequest.targetPlan,
+          const addonPackageRequest = this.parseBillingAddonReference(
+            payload.rawReference,
           );
-          const subscriptionModules =
-            await this.billingRepository.listSubscriptionModules(
-              subscription.id.toString(),
+
+          // Handle addon package payment confirmation
+          if (addonPackageRequest) {
+            await this.handleAddonPackagePaymentConfirmed(
+              addonPackageRequest.tenantId,
+              subscription,
             );
-          subscription.changePlan(
-            planUpgradeRequest.targetPlan,
-            targetPlanDefinition
-              ? buildSubscriptionCommercialState(
-                  targetPlanDefinition,
-                  subscriptionModules,
-                  subscription.config,
-                )
-              : undefined,
-          );
-          subscription.clearScheduledPlan();
+            return;
+          }
+
+          if (planUpgradeRequest) {
+            const oldPlan = subscription.plan;
+            const targetPlanDefinition =
+              await this.billingRepository.findPlanByCode(
+                planUpgradeRequest.targetPlan,
+              );
+            const subscriptionModules =
+              await this.billingRepository.listSubscriptionModules(
+                subscription.id.toString(),
+              );
+            subscription.changePlan(
+              planUpgradeRequest.targetPlan,
+              targetPlanDefinition
+                ? buildSubscriptionCommercialState(
+                    targetPlanDefinition,
+                    subscriptionModules,
+                    subscription.config,
+                  )
+                : undefined,
+            );
+            subscription.clearScheduledPlan();
+            subscription.renewCycleFrom(confirmedAt);
+
+            // Expire addon package from previous cycle
+            await this.expireAddonPackageOnRenewal(tenantId, subscription);
+
+            await this.syncRecurringBillingAfterUpgrade(
+              tenantId,
+              subscription.plan,
+              subscription.asaasCustomerId,
+              subscription.asaasSubscriptionId,
+              confirmedAt,
+            ).then((result) => {
+              if (result.customerId && result.subscriptionId) {
+                subscription.updateAsaasInfo(
+                  result.customerId,
+                  result.subscriptionId,
+                );
+              }
+            });
+
+            await this.billingRepository.saveSubscription(subscription);
+
+            await this.billingRepository.saveAuditLog({
+              tenantId,
+              event: 'CYCLE_RENEWED_UPGRADE',
+              oldPlan,
+              newPlan: subscription.plan,
+              metadata: { confirmedAt, rawReference: payload.rawReference },
+            });
+
+            const usage = UsageRecord.create(
+              TenantId.create(tenantId),
+              subscription.billingCycleStart,
+              subscription.billingCycleEnd,
+            );
+            await this.billingRepository.saveUsage(usage);
+
+            await this.eventBus.publish(
+              new BillingSubscriptionActivatedIntegrationEvent({
+                tenantId,
+                plan: subscription.plan,
+                billingCycleStart: subscription.billingCycleStart.toISOString(),
+                billingCycleEnd: subscription.billingCycleEnd.toISOString(),
+              }),
+            );
+            await this.eventBus.publish(
+              new BillingCycleRenewedIntegrationEvent({
+                tenantId,
+                plan: subscription.plan,
+                billingCycleStart: subscription.billingCycleStart.toISOString(),
+                billingCycleEnd: subscription.billingCycleEnd.toISOString(),
+                confirmedAt: confirmedAt.toISOString(),
+              }),
+            );
+            return;
+          }
+
+          if (
+            subscription.status === 'ACTIVE' &&
+            subscription.isInCurrentCycle(confirmedAt)
+          ) {
+            return;
+          }
+
+          const oldPlan = subscription.plan;
+          if (subscription.scheduledPlan) {
+            const scheduledPlanDefinition =
+              await this.billingRepository.findPlanByCode(
+                subscription.scheduledPlan,
+              );
+            const subscriptionModules =
+              await this.billingRepository.listSubscriptionModules(
+                subscription.id.toString(),
+              );
+            subscription.changePlan(
+              subscription.scheduledPlan,
+              scheduledPlanDefinition
+                ? buildSubscriptionCommercialState(
+                    scheduledPlanDefinition,
+                    subscriptionModules,
+                    subscription.config,
+                  )
+                : undefined,
+            );
+            subscription.clearScheduledPlan();
+          }
+
           subscription.renewCycleFrom(confirmedAt);
 
           // Expire addon package from previous cycle
           await this.expireAddonPackageOnRenewal(tenantId, subscription);
 
-          await this.syncRecurringBillingAfterUpgrade(
-            tenantId,
-            subscription.plan,
-            subscription.asaasCustomerId,
-            subscription.asaasSubscriptionId,
-            confirmedAt,
-          ).then((result) => {
-            if (result.customerId && result.subscriptionId) {
-              subscription.updateAsaasInfo(result.customerId, result.subscriptionId);
-            }
-          });
-
           await this.billingRepository.saveSubscription(subscription);
 
           await this.billingRepository.saveAuditLog({
             tenantId,
-            event: 'CYCLE_RENEWED_UPGRADE',
+            event: 'CYCLE_RENEWED',
             oldPlan,
             newPlan: subscription.plan,
-            metadata: { confirmedAt, rawReference: payload.rawReference },
+            metadata: { confirmedAt },
           });
 
           const usage = UsageRecord.create(
@@ -120,6 +198,10 @@ export class BillingPaymentHandlers implements OnModuleInit {
             subscription.billingCycleEnd,
           );
           await this.billingRepository.saveUsage(usage);
+
+          this.logger.log(
+            `Usage reset and cycle renewed for tenant ${tenantId}`,
+          );
 
           await this.eventBus.publish(
             new BillingSubscriptionActivatedIntegrationEvent({
@@ -138,143 +220,83 @@ export class BillingPaymentHandlers implements OnModuleInit {
               confirmedAt: confirmedAt.toISOString(),
             }),
           );
-          return;
         }
+      },
+      { consumerName: 'billing-payment-confirmed' },
+    );
 
-        if (
-          subscription.status === 'ACTIVE' &&
-          subscription.isInCurrentCycle(confirmedAt)
-        ) {
-          return;
-        }
+    this.eventBus.subscribe(
+      'payment.overdue',
+      async (event) => {
+        const payload =
+          event.payload as PaymentOverdueIntegrationEvent['payload'];
+        const tenantId = payload.tenantId;
+        const subscription =
+          await this.billingRepository.findSubscription(tenantId);
 
-        const oldPlan = subscription.plan;
-        if (subscription.scheduledPlan) {
-          const scheduledPlanDefinition =
-            await this.billingRepository.findPlanByCode(
-              subscription.scheduledPlan,
-            );
-          const subscriptionModules =
-            await this.billingRepository.listSubscriptionModules(
-              subscription.id.toString(),
-            );
-          subscription.changePlan(
-            subscription.scheduledPlan,
-            scheduledPlanDefinition
-              ? buildSubscriptionCommercialState(
-                  scheduledPlanDefinition,
-                  subscriptionModules,
-                  subscription.config,
-                )
-              : undefined,
+        if (subscription && subscription.status !== 'OVERDUE') {
+          subscription.markAsOverdue();
+          await this.billingRepository.saveSubscription(subscription);
+
+          await this.billingRepository.saveAuditLog({
+            tenantId,
+            event: 'SUBSCRIPTION_OVERDUE',
+            metadata: { reason: 'payment.overdue' },
+          });
+
+          await this.eventBus.publish(
+            new BillingSubscriptionOverdueIntegrationEvent({
+              tenantId,
+              plan: subscription.plan,
+              overdueReason: 'PAYMENT_OVERDUE',
+              status: subscription.status,
+            }),
           );
-          subscription.clearScheduledPlan();
+        }
+      },
+      { consumerName: 'billing-payment-overdue' },
+    );
+
+    this.eventBus.subscribe(
+      'payment.refunded',
+      async (event) => {
+        const payload =
+          event.payload as PaymentRefundedIntegrationEvent['payload'];
+        const tenantId = payload.tenantId;
+        const subscription =
+          await this.billingRepository.findSubscription(tenantId);
+
+        if (!subscription) return;
+
+        // Check if this refund is for an addon package
+        const addonRef = this.parseBillingAddonReference(payload.rawReference);
+        if (addonRef) {
+          await this.rollbackAddonPackage(tenantId, subscription);
+          return;
         }
 
-        subscription.renewCycleFrom(confirmedAt);
+        if (subscription.status !== 'OVERDUE') {
+          subscription.markAsOverdue();
+          await this.billingRepository.saveSubscription(subscription);
 
-        // Expire addon package from previous cycle
-        await this.expireAddonPackageOnRenewal(tenantId, subscription);
-
-        await this.billingRepository.saveSubscription(subscription);
-
-        await this.billingRepository.saveAuditLog({
-          tenantId,
-          event: 'CYCLE_RENEWED',
-          oldPlan,
-          newPlan: subscription.plan,
-          metadata: { confirmedAt },
-        });
-
-        const usage = UsageRecord.create(
-          TenantId.create(tenantId),
-          subscription.billingCycleStart,
-          subscription.billingCycleEnd,
-        );
-        await this.billingRepository.saveUsage(usage);
-
-        this.logger.log(`Usage reset and cycle renewed for tenant ${tenantId}`);
-
-        await this.eventBus.publish(
-          new BillingSubscriptionActivatedIntegrationEvent({
+          await this.billingRepository.saveAuditLog({
             tenantId,
-            plan: subscription.plan,
-            billingCycleStart: subscription.billingCycleStart.toISOString(),
-            billingCycleEnd: subscription.billingCycleEnd.toISOString(),
-          }),
-        );
-        await this.eventBus.publish(
-          new BillingCycleRenewedIntegrationEvent({
-            tenantId,
-            plan: subscription.plan,
-            billingCycleStart: subscription.billingCycleStart.toISOString(),
-            billingCycleEnd: subscription.billingCycleEnd.toISOString(),
-            confirmedAt: confirmedAt.toISOString(),
-          }),
-        );
-      }
-    }, { consumerName: 'billing-payment-confirmed' });
+            event: 'SUBSCRIPTION_OVERDUE',
+            metadata: { reason: 'payment.refunded' },
+          });
 
-    this.eventBus.subscribe('payment.overdue', async (event) => {
-      const payload = event.payload as PaymentOverdueIntegrationEvent['payload'];
-      const tenantId = payload.tenantId;
-      const subscription = await this.billingRepository.findSubscription(tenantId);
-
-      if (subscription && subscription.status !== 'OVERDUE') {
-        subscription.markAsOverdue();
-        await this.billingRepository.saveSubscription(subscription);
-
-        await this.billingRepository.saveAuditLog({
-          tenantId,
-          event: 'SUBSCRIPTION_OVERDUE',
-          metadata: { reason: 'payment.overdue' },
-        });
-
-        await this.eventBus.publish(
-          new BillingSubscriptionOverdueIntegrationEvent({
-            tenantId,
-            plan: subscription.plan,
-            overdueReason: 'PAYMENT_OVERDUE',
-            status: subscription.status,
-          }),
-        );
-      }
-    }, { consumerName: 'billing-payment-overdue' });
-
-    this.eventBus.subscribe('payment.refunded', async (event) => {
-      const payload = event.payload as PaymentRefundedIntegrationEvent['payload'];
-      const tenantId = payload.tenantId;
-      const subscription = await this.billingRepository.findSubscription(tenantId);
-
-      if (!subscription) return;
-
-      // Check if this refund is for an addon package
-      const addonRef = this.parseBillingAddonReference(payload.rawReference);
-      if (addonRef) {
-        await this.rollbackAddonPackage(tenantId, subscription);
-        return;
-      }
-
-      if (subscription.status !== 'OVERDUE') {
-        subscription.markAsOverdue();
-        await this.billingRepository.saveSubscription(subscription);
-
-        await this.billingRepository.saveAuditLog({
-          tenantId,
-          event: 'SUBSCRIPTION_OVERDUE',
-          metadata: { reason: 'payment.refunded' },
-        });
-
-        await this.eventBus.publish(
-          new BillingSubscriptionOverdueIntegrationEvent({
-            tenantId,
-            plan: subscription.plan,
-            overdueReason: 'PAYMENT_REFUNDED',
-            status: subscription.status,
-          }),
-        );
-      }
-    }, { consumerName: 'billing-payment-refunded' });
+          await this.eventBus.publish(
+            new BillingSubscriptionOverdueIntegrationEvent({
+              tenantId,
+              plan: subscription.plan,
+              overdueReason: 'PAYMENT_REFUNDED',
+              status: subscription.status,
+            }),
+          );
+        }
+      },
+      { consumerName: 'billing-payment-refunded' },
+    );
   }
 
   private parseBillingUpgradeReference(rawReference?: unknown): {
@@ -285,9 +307,10 @@ export class BillingPaymentHandlers implements OnModuleInit {
       return null;
     }
 
-    const match = /^billing-upgrade\|([^|]+)\|(ESSENCIAL|PROFISSIONAL|ESCALA)$/.exec(
-      rawReference,
-    );
+    const match =
+      /^billing-upgrade\|([^|]+)\|(ESSENCIAL|PROFISSIONAL|ESCALA)$/.exec(
+        rawReference,
+      );
 
     if (!match) {
       return null;
@@ -327,10 +350,11 @@ export class BillingPaymentHandlers implements OnModuleInit {
     tenantId: string,
     subscription: Subscription,
   ): Promise<void> {
-    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
-      tenantId,
-      ADDON_PACKAGE_MODULE_CODE,
-    );
+    const activeModule =
+      await this.billingRepository.findActiveSubscriptionModule(
+        tenantId,
+        ADDON_PACKAGE_MODULE_CODE,
+      );
 
     if (!activeModule) {
       this.logger.warn(
@@ -360,10 +384,11 @@ export class BillingPaymentHandlers implements OnModuleInit {
     tenantId: string,
     subscription: Subscription,
   ): Promise<void> {
-    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
-      tenantId,
-      ADDON_PACKAGE_MODULE_CODE,
-    );
+    const activeModule =
+      await this.billingRepository.findActiveSubscriptionModule(
+        tenantId,
+        ADDON_PACKAGE_MODULE_CODE,
+      );
 
     if (!activeModule) {
       this.logger.warn(
@@ -410,7 +435,9 @@ export class BillingPaymentHandlers implements OnModuleInit {
       },
     });
 
-    this.logger.log(`Addon package refunded and rolled back for tenant ${tenantId}`);
+    this.logger.log(
+      `Addon package refunded and rolled back for tenant ${tenantId}`,
+    );
   }
 
   private async syncRecurringBillingAfterUpgrade(
@@ -420,12 +447,14 @@ export class BillingPaymentHandlers implements OnModuleInit {
     asaasSubscriptionId: string | undefined,
     confirmedAt: Date,
   ): Promise<{ customerId?: string; subscriptionId?: string }> {
-    const targetPlanDefinition = await this.billingRepository.findPlanByCode(
-      targetPlan,
-    );
-    const subscription = await this.billingRepository.findSubscription(tenantId);
+    const targetPlanDefinition =
+      await this.billingRepository.findPlanByCode(targetPlan);
+    const subscription =
+      await this.billingRepository.findSubscription(tenantId);
     const subscriptionModules = subscription
-      ? await this.billingRepository.listSubscriptionModules(subscription.id.toString())
+      ? await this.billingRepository.listSubscriptionModules(
+          subscription.id.toString(),
+        )
       : [];
 
     if (!targetPlanDefinition) {
@@ -498,10 +527,11 @@ export class BillingPaymentHandlers implements OnModuleInit {
     tenantId: string,
     subscription: Subscription,
   ): Promise<void> {
-    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
-      tenantId,
-      ADDON_PACKAGE_MODULE_CODE,
-    );
+    const activeModule =
+      await this.billingRepository.findActiveSubscriptionModule(
+        tenantId,
+        ADDON_PACKAGE_MODULE_CODE,
+      );
 
     if (!activeModule) return;
 

@@ -19,9 +19,7 @@ import { ProspectChannelVO } from '../../domain/value-objects/ProspectChannel';
 import { ProspectDispatchPolicy } from '../services/ProspectDispatchPolicy';
 
 @Injectable()
-export class CreateProspectCampaignUseCase
-  implements ICreateProspectCampaignUseCase
-{
+export class CreateProspectCampaignUseCase implements ICreateProspectCampaignUseCase {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,

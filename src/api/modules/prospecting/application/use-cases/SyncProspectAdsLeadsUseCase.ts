@@ -30,7 +30,9 @@ export class SyncProspectAdsLeadsUseCase implements ISyncProspectAdsLeadsUseCase
     private readonly leadCaptureRepository: IProspectLeadCaptureRepository,
   ) {}
 
-  async execute(input: SyncProspectAdsLeadsInput): Promise<SyncProspectAdsLeadsOutput> {
+  async execute(
+    input: SyncProspectAdsLeadsInput,
+  ): Promise<SyncProspectAdsLeadsOutput> {
     const tenant = await this.tenantRepository.findById(input.tenantId);
     if (!tenant) {
       throw new NotFoundException(`Tenant ${input.tenantId} not found`);

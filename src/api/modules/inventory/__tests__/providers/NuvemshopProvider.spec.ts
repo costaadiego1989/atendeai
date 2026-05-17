@@ -9,13 +9,21 @@ describe('NuvemshopProvider', () => {
     jest.restoreAllMocks();
   });
 
-  const config = { storeId: '12345', accessToken: 'ns-token', userAgent: 'Test/1.0' };
+  const config = {
+    storeId: '12345',
+    accessToken: 'ns-token',
+    userAgent: 'Test/1.0',
+  };
 
   // ─── testConnection ────────────────────────────────────────────────────────
 
   it('INV-T-063a: testConnection lança erro quando storeId ou accessToken ausente', async () => {
-    await expect(provider.testConnection({ accessToken: 'tok' })).rejects.toThrow(/storeId/);
-    await expect(provider.testConnection({ storeId: '1' })).rejects.toThrow(/accessToken/);
+    await expect(
+      provider.testConnection({ accessToken: 'tok' }),
+    ).rejects.toThrow(/storeId/);
+    await expect(provider.testConnection({ storeId: '1' })).rejects.toThrow(
+      /accessToken/,
+    );
   });
 
   it('INV-T-063b: testConnection usa header "Authentication: bearer {token}" (não Authorization)', async () => {
@@ -38,7 +46,9 @@ describe('NuvemshopProvider', () => {
       statusText: 'Unauthorized',
     }) as unknown as typeof fetch;
 
-    await expect(provider.testConnection(config)).rejects.toThrow(/Autenticação falhou/i);
+    await expect(provider.testConnection(config)).rejects.toThrow(
+      /Autenticação falhou/i,
+    );
   });
 
   // ─── fetchStock ────────────────────────────────────────────────────────────
@@ -67,7 +77,13 @@ describe('NuvemshopProvider', () => {
           id: 1,
           name: { pt: 'Produto NS Teste' },
           variants: [
-            { id: 11, sku: 'NS-SKU-001', stock: 20, price: '49.90', values: ['Padrão'] },
+            {
+              id: 11,
+              sku: 'NS-SKU-001',
+              stock: 20,
+              price: '49.90',
+              values: ['Padrão'],
+            },
           ],
         },
       ],

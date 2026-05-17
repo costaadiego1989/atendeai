@@ -164,11 +164,23 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.paymentLink.deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } }).catch(() => {});
-    await prisma.recoveryCase.deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } }).catch(() => {});
-    await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
+    await prisma.paymentLink
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
+      .catch(() => {});
+    await prisma.recoveryCase
+      .deleteMany({
+        where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } },
+      })
+      .catch(() => {});
+    await prisma.subscription
+      .deleteMany({ where: { tenantId } })
+      .catch(() => {});
     await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
-    await prisma.tenant.deleteMany({ where: { id: otherTenantId } }).catch(() => {});
+    await prisma.tenant
+      .deleteMany({ where: { id: otherTenantId } })
+      .catch(() => {});
     await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
     await app.close();
   });
@@ -189,7 +201,10 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
     const paidRevenue = Number(linksData.summary.paidRevenue);
     const recoveredRevenue = recoveryItems
       .filter((item: any) => item.status === 'PAID')
-      .reduce((total: number, item: any) => total + Number(item.amountDue ?? 0), 0);
+      .reduce(
+        (total: number, item: any) => total + Number(item.amountDue ?? 0),
+        0,
+      );
     const newSaleRevenue = paidRevenue - recoveredRevenue;
 
     expect(paidRevenue).toBe(620);

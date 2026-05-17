@@ -13,11 +13,10 @@ export interface DispatchProspectExecutionOutput {
   renderedMessage: string;
 }
 
-export interface IDispatchProspectExecutionUseCase
-  extends IUseCase<
-    DispatchProspectExecutionInput,
-    DispatchProspectExecutionOutput
-  > {}
+export interface IDispatchProspectExecutionUseCase extends IUseCase<
+  DispatchProspectExecutionInput,
+  DispatchProspectExecutionOutput
+> {}
 
 export const IDispatchProspectExecutionUseCase = Symbol(
   'IDispatchProspectExecutionUseCase',

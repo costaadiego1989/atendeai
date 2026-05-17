@@ -26,21 +26,28 @@ describe('GetCurrentUserUseCase', () => {
     moduleAccess: { messaging: true },
   };
 
-  function createMockUser(overrides: Partial<{
-    id: string;
-    tenantId: string;
-    tenantName: string;
-    tenantCnpj: string;
-    tenantBusinessType: string;
-    tenantBranches: Array<{ id: string; name: string; isHeadquarters: boolean; active: boolean }>;
-    email: string;
-    name: string;
-    phone: string;
-    cpf: string;
-    role: string;
-    mustChangePassword: boolean;
-    planStatus: string;
-  }> = {}) {
+  function createMockUser(
+    overrides: Partial<{
+      id: string;
+      tenantId: string;
+      tenantName: string;
+      tenantCnpj: string;
+      tenantBusinessType: string;
+      tenantBranches: Array<{
+        id: string;
+        name: string;
+        isHeadquarters: boolean;
+        active: boolean;
+      }>;
+      email: string;
+      name: string;
+      phone: string;
+      cpf: string;
+      role: string;
+      mustChangePassword: boolean;
+      planStatus: string;
+    }> = {},
+  ) {
     return AuthUser.create(
       {
         tenantId: overrides.tenantId ?? 'tenant-123',
@@ -48,8 +55,18 @@ describe('GetCurrentUserUseCase', () => {
         tenantCnpj: overrides.tenantCnpj ?? '12345678000100',
         tenantBusinessType: overrides.tenantBusinessType ?? 'SCHEDULING',
         tenantBranches: overrides.tenantBranches ?? [
-          { id: 'branch-1', name: 'Matriz', isHeadquarters: true, active: true },
-          { id: 'branch-2', name: 'Filial', isHeadquarters: false, active: false },
+          {
+            id: 'branch-1',
+            name: 'Matriz',
+            isHeadquarters: true,
+            active: true,
+          },
+          {
+            id: 'branch-2',
+            name: 'Filial',
+            isHeadquarters: false,
+            active: false,
+          },
         ],
         email: AuthUserEmail.create(overrides.email ?? 'test@test.com'),
         name: overrides.name ?? 'Test User',
@@ -70,7 +87,10 @@ describe('GetCurrentUserUseCase', () => {
     tenantModuleAccessService = {
       getSummary: jest.fn().mockResolvedValue(mockBillingAccess),
     };
-    useCase = new GetCurrentUserUseCase(authUserRepo, tenantModuleAccessService);
+    useCase = new GetCurrentUserUseCase(
+      authUserRepo,
+      tenantModuleAccessService,
+    );
   });
 
   it('should return user and tenant when user exists', async () => {
@@ -104,7 +124,9 @@ describe('GetCurrentUserUseCase', () => {
     const result = await useCase.execute('user-123');
 
     expect(result.tenant.billingAccess).toEqual(mockBillingAccess);
-    expect(tenantModuleAccessService.getSummary).toHaveBeenCalledWith('tenant-123');
+    expect(tenantModuleAccessService.getSummary).toHaveBeenCalledWith(
+      'tenant-123',
+    );
   });
 
   it('should include tenant branches in response', async () => {

@@ -62,8 +62,12 @@ describe('AuthController edge cases (e2e)', () => {
     if (prisma) {
       await prisma.user.deleteMany({ where: { email } }).catch(() => {});
       if (tenantId) {
-        await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
-        await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
+        await prisma.subscription
+          .deleteMany({ where: { tenantId } })
+          .catch(() => {});
+        await prisma.tenant
+          .deleteMany({ where: { id: tenantId } })
+          .catch(() => {});
       }
     }
   });
@@ -82,9 +86,9 @@ describe('AuthController edge cases (e2e)', () => {
     expect(cookies.some((cookie) => cookie.includes('atendeai_access=;'))).toBe(
       true,
     );
-    expect(cookies.some((cookie) => cookie.includes('atendeai_refresh=;'))).toBe(
-      true,
-    );
+    expect(
+      cookies.some((cookie) => cookie.includes('atendeai_refresh=;')),
+    ).toBe(true);
   });
 
   it('should clear cookies with the root path on logout', async () => {

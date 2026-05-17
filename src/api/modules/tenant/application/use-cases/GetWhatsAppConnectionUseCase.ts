@@ -78,8 +78,9 @@ export class GetWhatsAppConnectionUseCase {
             'TWILIO_EMBEDDED_SIGNUP_CONFIGURATION_ID',
           ) || null,
         solutionId:
-          this.configService.get<string>('TWILIO_EMBEDDED_SIGNUP_SOLUTION_ID') ||
-          null,
+          this.configService.get<string>(
+            'TWILIO_EMBEDDED_SIGNUP_SOLUTION_ID',
+          ) || null,
       },
       connection: config,
     };

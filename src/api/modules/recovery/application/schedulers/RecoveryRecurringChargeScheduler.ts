@@ -14,7 +14,9 @@ import {
 } from '../../domain/ports/IRecoveryRecurringChargeRepository';
 
 @Injectable()
-export class RecoveryRecurringChargeScheduler implements OnModuleInit, OnModuleDestroy {
+export class RecoveryRecurringChargeScheduler
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(RecoveryRecurringChargeScheduler.name);
   private timer: NodeJS.Timeout | null = null;
   private isTicking = false;
@@ -29,7 +31,12 @@ export class RecoveryRecurringChargeScheduler implements OnModuleInit, OnModuleD
   ) {}
 
   onModuleInit(): void {
-    if (this.configService.get<string>('RECOVERY_RECURRING_CHARGES_ENABLED', 'true') === 'false') {
+    if (
+      this.configService.get<string>(
+        'RECOVERY_RECURRING_CHARGES_ENABLED',
+        'true',
+      ) === 'false'
+    ) {
       return;
     }
 
@@ -74,7 +81,9 @@ export class RecoveryRecurringChargeScheduler implements OnModuleInit, OnModuleD
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown error';
       const isTableMissing =
-        message.includes('42P01') || message.includes('não existe') || message.includes('does not exist');
+        message.includes('42P01') ||
+        message.includes('não existe') ||
+        message.includes('does not exist');
 
       if (isTableMissing) {
         this.logger.warn(
@@ -86,7 +95,9 @@ export class RecoveryRecurringChargeScheduler implements OnModuleInit, OnModuleD
           this.timer = null;
         }
       } else {
-        this.logger.error(`Recovery recurring charge scheduler failed: ${message}`);
+        this.logger.error(
+          `Recovery recurring charge scheduler failed: ${message}`,
+        );
       }
     } finally {
       this.isTicking = false;

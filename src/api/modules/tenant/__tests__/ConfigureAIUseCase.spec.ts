@@ -92,9 +92,9 @@ describe('ConfigureAIUseCase', () => {
     expect(tenant.aiConfig?.maxTokensPerResponse).toBe(500);
     expect(tenant.aiConfig?.confidenceThreshold).toBe(0.7);
     expect(tenantRepo.save).toHaveBeenCalledWith(tenant);
-    expect(tenantDomainEventPublisher.publishFromAggregate).toHaveBeenCalledWith(
-      tenant,
-    );
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).toHaveBeenCalledWith(tenant);
     expect(result).toEqual(
       expect.objectContaining({
         systemPrompt: 'Prompt grande o suficiente',

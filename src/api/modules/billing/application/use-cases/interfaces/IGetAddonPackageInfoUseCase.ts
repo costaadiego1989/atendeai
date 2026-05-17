@@ -16,7 +16,11 @@ export interface GetAddonPackageInfoOutput {
   } | null;
 }
 
-export interface IGetAddonPackageInfoUseCase
-  extends IUseCase<GetAddonPackageInfoInput, GetAddonPackageInfoOutput> {}
+export interface IGetAddonPackageInfoUseCase extends IUseCase<
+  GetAddonPackageInfoInput,
+  GetAddonPackageInfoOutput
+> {}
 
-export const IGetAddonPackageInfoUseCase = Symbol('IGetAddonPackageInfoUseCase');
+export const IGetAddonPackageInfoUseCase = Symbol(
+  'IGetAddonPackageInfoUseCase',
+);

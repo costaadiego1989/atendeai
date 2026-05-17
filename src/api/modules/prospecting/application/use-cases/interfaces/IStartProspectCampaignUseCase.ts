@@ -18,8 +18,10 @@ export interface StartProspectCampaignOutput {
   executions: StartProspectCampaignExecutionItem[];
 }
 
-export interface IStartProspectCampaignUseCase
-  extends IUseCase<StartProspectCampaignInput, StartProspectCampaignOutput> {}
+export interface IStartProspectCampaignUseCase extends IUseCase<
+  StartProspectCampaignInput,
+  StartProspectCampaignOutput
+> {}
 
 export const IStartProspectCampaignUseCase = Symbol(
   'IStartProspectCampaignUseCase',

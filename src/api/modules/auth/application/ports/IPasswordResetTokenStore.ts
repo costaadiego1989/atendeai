@@ -20,6 +20,4 @@ export interface IPasswordResetTokenStore {
   invalidateForUser(userId: string): Promise<void>;
 }
 
-export const PASSWORD_RESET_TOKEN_STORE = Symbol(
-  'PASSWORD_RESET_TOKEN_STORE',
-);
+export const PASSWORD_RESET_TOKEN_STORE = Symbol('PASSWORD_RESET_TOKEN_STORE');

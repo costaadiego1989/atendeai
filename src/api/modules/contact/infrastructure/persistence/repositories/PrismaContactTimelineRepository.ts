@@ -31,7 +31,10 @@ type PaymentTimelineRow = {
   created_at: Date | string;
 };
 
-type SchedulingProfessionalLookup = Record<string, { name: string; role?: string | null }>;
+type SchedulingProfessionalLookup = Record<
+  string,
+  { name: string; role?: string | null }
+>;
 
 interface FollowUpAuditEntry {
   type: 'SCHEDULED' | 'CANCELLED' | 'TRIGGERED' | 'SKIPPED';
@@ -47,7 +50,7 @@ export class PrismaContactTimelineRepository implements IContactTimelineReposito
     private readonly prisma: PrismaService,
     @Inject(REDIS_CLIENT)
     private readonly redis: Redis,
-  ) { }
+  ) {}
 
   async getTimeline(
     tenantId: string,
@@ -308,7 +311,9 @@ export class PrismaContactTimelineRepository implements IContactTimelineReposito
       }
 
       entries.push({
-        timestamp: new Date(paymentEvent.processed_at ?? paymentEvent.created_at),
+        timestamp: new Date(
+          paymentEvent.processed_at ?? paymentEvent.created_at,
+        ),
         type: normalizedType,
         title: this.getPaymentTitle(normalizedType),
         details: {
@@ -373,8 +378,7 @@ export class PrismaContactTimelineRepository implements IContactTimelineReposito
             professionalId,
             professionalName:
               professionals[professionalId]?.name ?? 'Profissional',
-            professionalRole:
-              professionals[professionalId]?.role ?? null,
+            professionalRole: professionals[professionalId]?.role ?? null,
             date,
             startsAt: slot.startsAt,
             endsAt: slot.endsAt,

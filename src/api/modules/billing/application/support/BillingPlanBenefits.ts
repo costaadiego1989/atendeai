@@ -29,7 +29,9 @@ export function applyEnterprisePlanBenefits(
 ): BillingPlanCatalogRecord {
   const configuredFeatures = Array.isArray(plan.features) ? plan.features : [];
   const standardFeatures = ENTERPRISE_PLAN_BENEFITS[plan.code] ?? [];
-  const features = Array.from(new Set([...standardFeatures, ...configuredFeatures]));
+  const features = Array.from(
+    new Set([...standardFeatures, ...configuredFeatures]),
+  );
 
   return {
     ...plan,

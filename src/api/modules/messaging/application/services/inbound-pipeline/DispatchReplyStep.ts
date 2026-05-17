@@ -38,8 +38,12 @@ export class DispatchReplyStep {
             type: contentType,
             ...(ctx.input.content.text ? { text: ctx.input.content.text } : {}),
             ...(ctx.input.content.url ? { url: ctx.input.content.url } : {}),
-            ...(ctx.input.content.mimeType ? { mimeType: ctx.input.content.mimeType } : {}),
-            ...(ctx.input.content.fileName ? { fileName: ctx.input.content.fileName } : {}),
+            ...(ctx.input.content.mimeType
+              ? { mimeType: ctx.input.content.mimeType }
+              : {}),
+            ...(ctx.input.content.fileName
+              ? { fileName: ctx.input.content.fileName }
+              : {}),
           },
           channel: ctx.input.channel,
         },

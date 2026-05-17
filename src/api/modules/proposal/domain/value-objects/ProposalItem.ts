@@ -32,9 +32,19 @@ export class ProposalItem extends ValueObject<ProposalItemProps> {
     });
   }
 
-  get name(): string { return this.props.name; }
-  get quantity(): number { return this.props.quantity; }
-  get unitPrice(): number { return this.props.unitPrice; }
-  get description(): string | undefined { return this.props.description; }
-  get subtotal(): number { return this.props.unitPrice * this.props.quantity; }
+  get name(): string {
+    return this.props.name;
+  }
+  get quantity(): number {
+    return this.props.quantity;
+  }
+  get unitPrice(): number {
+    return this.props.unitPrice;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get subtotal(): number {
+    return this.props.unitPrice * this.props.quantity;
+  }
 }

@@ -1,4 +1,8 @@
-import { ConflictException, INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  ConflictException,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
@@ -17,21 +21,11 @@ import { Email } from '@modules/tenant/domain/value-objects/Email';
 import { Phone } from '@modules/tenant/domain/value-objects/Phone';
 import { Role } from '@modules/tenant/domain/value-objects/Role';
 import { UnauthorizedException } from '@shared/domain/exceptions/DomainExceptions';
-import {
-  ICreateProspectSearchUseCase,
-} from '../application/use-cases/interfaces/ICreateProspectSearchUseCase';
-import {
-  IListProspectSearchesUseCase,
-} from '../application/use-cases/interfaces/IListProspectSearchesUseCase';
-import {
-  IListProspectSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
-import {
-  IImportProspectSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
-import {
-  IProspectSelectedSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
+import { ICreateProspectSearchUseCase } from '../application/use-cases/interfaces/ICreateProspectSearchUseCase';
+import { IListProspectSearchesUseCase } from '../application/use-cases/interfaces/IListProspectSearchesUseCase';
+import { IListProspectSearchResultsUseCase } from '../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
+import { IImportProspectSearchResultsUseCase } from '../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
+import { IProspectSelectedSearchResultsUseCase } from '../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
 import { CreateProspectSearchUseCase } from '../application/use-cases/CreateProspectSearchUseCase';
 import { ListProspectSearchesUseCase } from '../application/use-cases/ListProspectSearchesUseCase';
 import { ProspectSearchController } from '../presentation/controllers/ProspectSearchController';
@@ -118,15 +112,19 @@ describe('ProspectSearchController', () => {
   const searchQueue: jest.Mocked<IProspectSearchQueue> = {
     addJob: jest.fn(),
   };
-  const prospectingQuotaService: jest.Mocked<Pick<BillingProspectingQuotaService, 'assertCanConsume'>> = {
+  const prospectingQuotaService: jest.Mocked<
+    Pick<BillingProspectingQuotaService, 'assertCanConsume'>
+  > = {
     assertCanConsume: jest.fn(),
   };
-  const listSearchResultsUseCase: jest.Mocked<IListProspectSearchResultsUseCase> = {
-    execute: jest.fn(),
-  };
-  const importSearchResultsUseCase: jest.Mocked<IImportProspectSearchResultsUseCase> = {
-    execute: jest.fn(),
-  };
+  const listSearchResultsUseCase: jest.Mocked<IListProspectSearchResultsUseCase> =
+    {
+      execute: jest.fn(),
+    };
+  const importSearchResultsUseCase: jest.Mocked<IImportProspectSearchResultsUseCase> =
+    {
+      execute: jest.fn(),
+    };
   const prospectSelectedResultsUseCase: jest.Mocked<IProspectSelectedSearchResultsUseCase> =
     {
       execute: jest.fn(),
@@ -273,7 +271,9 @@ describe('ProspectSearchController', () => {
 
   it('should return a frontend-friendly conflict when prospecting daily quota is exceeded', async () => {
     prospectingQuotaService.assertCanConsume.mockRejectedValue(
-      new ConflictException('Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.'),
+      new ConflictException(
+        'Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.',
+      ),
     );
 
     const response = await request(app.getHttpServer())
@@ -286,7 +286,9 @@ describe('ProspectSearchController', () => {
       })
       .expect(409);
 
-    expect(response.body.error.message).toContain('Limite diario de prospeccao');
+    expect(response.body.error.message).toContain(
+      'Limite diario de prospeccao',
+    );
     expect(savedSearches).toHaveLength(0);
     expect(searchQueue.addJob).not.toHaveBeenCalled();
   });

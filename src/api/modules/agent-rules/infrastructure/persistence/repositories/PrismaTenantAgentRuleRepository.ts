@@ -43,9 +43,12 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     moduleId: AgentModule,
     branchId?: string | null,
   ): Promise<TenantAgentRule | null> {
-
     if (branchId) {
-      const branchRule = await this.findExactByScope(tenantId, moduleId, branchId);
+      const branchRule = await this.findExactByScope(
+        tenantId,
+        moduleId,
+        branchId,
+      );
       if (branchRule) {
         return {
           ...branchRule,
@@ -70,7 +73,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     moduleId: AgentModule,
     branchId?: string | null,
   ): Promise<TenantAgentRule | null> {
-
     const rows = branchId
       ? await this.prisma.$queryRaw<AgentRuleRow[]>(Prisma.sql`
             SELECT
@@ -122,7 +124,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
   }
 
   async save(rule: TenantAgentRule): Promise<void> {
-
     if (rule.branchId) {
       const updatedRows = await this.prisma.$executeRaw(Prisma.sql`
           UPDATE tenant_schema.tenant_agent_rules
@@ -227,7 +228,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
   }
 
   async saveHistory(history: TenantAgentRuleHistory): Promise<void> {
-
     await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO tenant_schema.tenant_agent_rule_history (
           id,
@@ -260,7 +260,6 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     branchId?: string | null;
     limit: number;
   }): Promise<TenantAgentRuleHistory[]> {
-
     const lim = Math.min(100, Math.max(1, params.limit));
 
     const rows = params.branchId

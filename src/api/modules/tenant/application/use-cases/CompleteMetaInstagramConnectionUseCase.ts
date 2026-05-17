@@ -36,9 +36,9 @@ export class CompleteMetaInstagramConnectionUseCase {
     }
 
     if (payload.branchId) {
-      const branch = (await this.tenantRepository.listBranches(payload.tenantId)).find(
-        (item) => item.id.toValue() === payload.branchId,
-      );
+      const branch = (
+        await this.tenantRepository.listBranches(payload.tenantId)
+      ).find((item) => item.id.toValue() === payload.branchId);
       if (!branch) {
         throw new EntityNotFoundException('TenantBranch', payload.branchId);
       }

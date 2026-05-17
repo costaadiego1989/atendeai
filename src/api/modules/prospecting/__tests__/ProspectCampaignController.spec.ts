@@ -70,9 +70,9 @@ describe('ProspectCampaignController', () => {
   let app: INestApplication;
   let currentUser:
     | {
-      tenantId: string;
-      role: 'OWNER' | 'ADMIN' | 'AGENT';
-    }
+        tenantId: string;
+        role: 'OWNER' | 'ADMIN' | 'AGENT';
+      }
     | undefined;
   let savedCampaigns: ProspectCampaign[] = [];
 
@@ -235,7 +235,8 @@ describe('ProspectCampaignController', () => {
         audienceType: 'CONTACT_LIST',
         channel: 'WHATSAPP',
         targetContactIds: ['contact-1', 'contact-1', 'contact-2'],
-        messageTemplate: 'Oi {{first_name}}, temos uma oferta especial para voce.',
+        messageTemplate:
+          'Oi {{first_name}}, temos uma oferta especial para voce.',
         dailyLimit: 25,
       })
       .expect(201);
@@ -324,16 +325,19 @@ describe('ProspectCampaignController', () => {
     });
     createdCampaign.clearEvents();
     savedCampaigns = [createdCampaign];
-    campaignRepository.findById.mockImplementation(async (tenantId, campaignId) =>
-      savedCampaigns.find(
-        (campaign) =>
-          campaign.tenantId.toString() === tenantId &&
-          campaign.id.toString() === campaignId,
-      ) ?? null,
+    campaignRepository.findById.mockImplementation(
+      async (tenantId, campaignId) =>
+        savedCampaigns.find(
+          (campaign) =>
+            campaign.tenantId.toString() === tenantId &&
+            campaign.id.toString() === campaignId,
+        ) ?? null,
     );
 
     const activateResponse = await request(app.getHttpServer())
-      .patch(`/api/v1/prospecting/campaigns/${createdCampaign.id.toString()}/activate`)
+      .patch(
+        `/api/v1/prospecting/campaigns/${createdCampaign.id.toString()}/activate`,
+      )
       .expect(200);
 
     expect(activateResponse.body).toEqual(
@@ -344,7 +348,9 @@ describe('ProspectCampaignController', () => {
     );
 
     const pauseResponse = await request(app.getHttpServer())
-      .patch(`/api/v1/prospecting/campaigns/${createdCampaign.id.toString()}/pause`)
+      .patch(
+        `/api/v1/prospecting/campaigns/${createdCampaign.id.toString()}/pause`,
+      )
       .expect(200);
 
     expect(pauseResponse.body).toEqual(
@@ -368,16 +374,19 @@ describe('ProspectCampaignController', () => {
     });
     createdCampaign.activate();
     savedCampaigns = [createdCampaign];
-    campaignRepository.findById.mockImplementation(async (tenantId, campaignId) =>
-      savedCampaigns.find(
-        (campaign) =>
-          campaign.tenantId.toString() === tenantId &&
-          campaign.id.toString() === campaignId,
-      ) ?? null,
+    campaignRepository.findById.mockImplementation(
+      async (tenantId, campaignId) =>
+        savedCampaigns.find(
+          (campaign) =>
+            campaign.tenantId.toString() === tenantId &&
+            campaign.id.toString() === campaignId,
+        ) ?? null,
     );
 
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/prospecting/campaigns/${createdCampaign.id.toString()}/start`)
+      .post(
+        `/api/v1/prospecting/campaigns/${createdCampaign.id.toString()}/start`,
+      )
       .expect(201);
 
     expect(response.body).toEqual(

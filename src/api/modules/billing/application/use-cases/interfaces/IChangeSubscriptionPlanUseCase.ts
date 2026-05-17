@@ -17,8 +17,10 @@ export interface ChangeSubscriptionPlanOutput {
   effectiveAt?: Date;
 }
 
-export interface IChangeSubscriptionPlanUseCase
-  extends IUseCase<ChangeSubscriptionPlanInput, ChangeSubscriptionPlanOutput> {}
+export interface IChangeSubscriptionPlanUseCase extends IUseCase<
+  ChangeSubscriptionPlanInput,
+  ChangeSubscriptionPlanOutput
+> {}
 
 export const IChangeSubscriptionPlanUseCase = Symbol(
   'IChangeSubscriptionPlanUseCase',

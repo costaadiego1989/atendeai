@@ -4,7 +4,11 @@ import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExcepti
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 
 export type RecoveryAsyncJobType = 'EXPORT_RECOVERY_REPORT_CSV';
-export type RecoveryAsyncJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type RecoveryAsyncJobStatus =
+  | 'QUEUED'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED';
 
 interface RecoveryAsyncJobRow {
   id: string;
@@ -55,7 +59,7 @@ export interface RecoveryAsyncJobView {
 
 @Injectable()
 export class RecoveryAsyncJobsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createJob(input: {
     tenantId: string;
@@ -108,7 +112,10 @@ export class RecoveryAsyncJobsService {
     `);
   }
 
-  async markProcessing(jobId: string, input?: { progress?: number; totalItems?: number }): Promise<void> {
+  async markProcessing(
+    jobId: string,
+    input?: { progress?: number; totalItems?: number },
+  ): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE recovery_schema.recovery_async_jobs
       SET status = 'PROCESSING',
@@ -163,7 +170,10 @@ export class RecoveryAsyncJobsService {
     `);
   }
 
-  async listJobs(tenantId: string, limit = 15): Promise<RecoveryAsyncJobView[]> {
+  async listJobs(
+    tenantId: string,
+    limit = 15,
+  ): Promise<RecoveryAsyncJobView[]> {
     const rows = await this.prisma.$queryRaw<RecoveryAsyncJobRow[]>(Prisma.sql`
       SELECT *
       FROM recovery_schema.recovery_async_jobs
@@ -248,5 +258,4 @@ export class RecoveryAsyncJobsService {
       failedAt: row.failed_at,
     };
   }
-
 }

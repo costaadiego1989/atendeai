@@ -21,6 +21,7 @@ interface ContactProps {
   tags: string[];
   notes?: string;
   lastInteraction?: Date;
+  prospectingOptOut: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,12 +62,19 @@ export class Contact extends AggregateRoot<ContactProps> {
     return this.props.lastInteraction;
   }
 
+  get prospectingOptOut(): boolean {
+    return this.props.prospectingOptOut;
+  }
+
   public static reconstitute(props: ContactProps, id: UniqueEntityID): Contact {
     return new Contact(props, id);
   }
 
   public static create(
-    props: Omit<ContactProps, 'stage' | 'tags' | 'createdAt' | 'updatedAt'> & {
+    props: Omit<
+      ContactProps,
+      'stage' | 'tags' | 'createdAt' | 'updatedAt' | 'prospectingOptOut'
+    > & {
       stage?: ContactStageVO;
       tags?: string[];
     },
@@ -77,6 +85,7 @@ export class Contact extends AggregateRoot<ContactProps> {
         ...props,
         stage: props.stage ?? ContactStageVO.create('LEAD'),
         tags: props.tags || [],
+        prospectingOptOut: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -129,6 +138,11 @@ export class Contact extends AggregateRoot<ContactProps> {
       this.props.tags.splice(index, 1);
       this.props.updatedAt = new Date();
     }
+  }
+
+  public markProspectingOptOut(): void {
+    this.props.prospectingOptOut = true;
+    this.props.updatedAt = new Date();
   }
 
   public recordInteraction(): void {

@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IMessagingFacade, MESSAGING_FACADE } from '@modules/messaging/application/facades/MessagingFacade';
+import {
+  IMessagingFacade,
+  MESSAGING_FACADE,
+} from '@modules/messaging/application/facades/MessagingFacade';
 import { ProposalNotFoundError } from '../../../domain/errors/ProposalNotFoundError';
 import { IProposalRepository } from '../../../domain/ports/IProposalRepository';
 import { buildProposalDeliveryMessage } from '../../support/proposal-message';
@@ -24,7 +27,8 @@ export class SendProposalToConversationService {
       throw new ProposalNotFoundError(proposalId);
     }
 
-    const { publicUrl } = await this.proposalPublicLinkService.ensurePublicLink(proposal);
+    const { publicUrl } =
+      await this.proposalPublicLinkService.ensurePublicLink(proposal);
 
     const result = await this.messagingFacade.queueSystemMessage({
       tenantId: proposal.tenantId,

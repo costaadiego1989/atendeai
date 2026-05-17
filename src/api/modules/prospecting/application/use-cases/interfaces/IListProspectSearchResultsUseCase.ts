@@ -21,11 +21,10 @@ export interface ProspectSearchResultListItem {
   createdAt: Date;
 }
 
-export interface IListProspectSearchResultsUseCase
-  extends IUseCase<
-    ListProspectSearchResultsInput,
-    ProspectSearchResultListItem[]
-  > {}
+export interface IListProspectSearchResultsUseCase extends IUseCase<
+  ListProspectSearchResultsInput,
+  ProspectSearchResultListItem[]
+> {}
 
 export const IListProspectSearchResultsUseCase = Symbol(
   'IListProspectSearchResultsUseCase',

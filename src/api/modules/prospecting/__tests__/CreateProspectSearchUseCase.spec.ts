@@ -37,7 +37,9 @@ describe('CreateProspectSearchUseCase', () => {
   let tenantRepository: jest.Mocked<ITenantRepository>;
   let searchRepository: jest.Mocked<IProspectSearchRepository>;
   let searchQueue: jest.Mocked<IProspectSearchQueue>;
-  let prospectingQuotaService: jest.Mocked<Pick<BillingProspectingQuotaService, 'assertCanConsume'>>;
+  let prospectingQuotaService: jest.Mocked<
+    Pick<BillingProspectingQuotaService, 'assertCanConsume'>
+  >;
 
   beforeEach(() => {
     tenantRepository = {
@@ -153,7 +155,9 @@ describe('CreateProspectSearchUseCase', () => {
     const tenant = makeTenant();
     tenantRepository.findById.mockResolvedValue(tenant);
     prospectingQuotaService.assertCanConsume.mockRejectedValue(
-      new Error('Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.'),
+      new Error(
+        'Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.',
+      ),
     );
 
     await expect(

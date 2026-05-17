@@ -22,11 +22,10 @@ export interface ProspectAdsInsightQueryListItem {
   updatedAt: Date;
 }
 
-export interface IListProspectAdsInsightQueriesUseCase
-  extends IUseCase<
-    ListProspectAdsInsightQueriesInput,
-    ProspectAdsInsightQueryListItem[]
-  > {}
+export interface IListProspectAdsInsightQueriesUseCase extends IUseCase<
+  ListProspectAdsInsightQueriesInput,
+  ProspectAdsInsightQueryListItem[]
+> {}
 
 export const IListProspectAdsInsightQueriesUseCase = Symbol(
   'IListProspectAdsInsightQueriesUseCase',

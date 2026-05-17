@@ -14,7 +14,9 @@ import { randomUUID } from 'crypto';
 export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async ensureSystemDefaultPlaybook(tenantId: string): Promise<RecoveryPlaybookWithPhases | null> {
+  async ensureSystemDefaultPlaybook(
+    tenantId: string,
+  ): Promise<RecoveryPlaybookWithPhases | null> {
     const rows = await this.prisma.$queryRaw<{ n: bigint }[]>(Prisma.sql`
       SELECT COUNT(*)::bigint AS n FROM recovery_schema.recovery_playbooks
       WHERE tenant_id = ${tenantId}::uuid
@@ -79,7 +81,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
   }
 
   async listPlaybooks(tenantId: string): Promise<RecoveryPlaybookRecord[]> {
-    const list = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const list = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT * FROM recovery_schema.recovery_playbooks
       WHERE tenant_id = ${tenantId}::uuid
       ORDER BY created_at ASC
@@ -88,7 +92,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
   }
 
   async listPhases(playbookId: string): Promise<RecoveryPlaybookPhaseRecord[]> {
-    const list = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const list = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT * FROM recovery_schema.recovery_playbook_phases
       WHERE playbook_id = ${playbookId}::uuid
       ORDER BY sort_order ASC
@@ -100,7 +106,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
     tenantId: string,
     playbookId: string,
   ): Promise<RecoveryPlaybookWithPhases | null> {
-    const [row] = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const [row] = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT * FROM recovery_schema.recovery_playbooks
       WHERE tenant_id = ${tenantId}::uuid AND id = ${playbookId}::uuid
       LIMIT 1
@@ -118,7 +126,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
     branchId?: string | null,
   ): Promise<RecoveryPlaybookWithPhases | null> {
     if (branchId) {
-      const [scoped] = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+      const [scoped] = await this.prisma.$queryRaw<
+        Record<string, unknown>[]
+      >(Prisma.sql`
         SELECT * FROM recovery_schema.recovery_playbooks
         WHERE tenant_id = ${tenantId}::uuid AND active = true AND branch_id = ${branchId}::uuid
         LIMIT 1
@@ -130,7 +140,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
       }
     }
 
-    const [fallback] = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const [fallback] = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT * FROM recovery_schema.recovery_playbooks
       WHERE tenant_id = ${tenantId}::uuid AND active = true AND branch_id IS NULL
       LIMIT 1
@@ -143,7 +155,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
     return { playbook, phases };
   }
 
-  async createPlaybook(input: CreateRecoveryPlaybookInput): Promise<RecoveryPlaybookWithPhases> {
+  async createPlaybook(
+    input: CreateRecoveryPlaybookInput,
+  ): Promise<RecoveryPlaybookWithPhases> {
     const playbookId = randomUUID();
 
     await this.prisma.$executeRaw(Prisma.sql`
@@ -183,14 +197,20 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
       `);
     }
 
-    const created = await this.findPlaybookWithPhases(input.tenantId, playbookId);
+    const created = await this.findPlaybookWithPhases(
+      input.tenantId,
+      playbookId,
+    );
     if (!created) {
       throw new Error('Failed to load playbook after create');
     }
     return created;
   }
 
-  async activatePlaybook(tenantId: string, playbookId: string): Promise<RecoveryPlaybookRecord> {
+  async activatePlaybook(
+    tenantId: string,
+    playbookId: string,
+  ): Promise<RecoveryPlaybookRecord> {
     const target = await this.findPlaybookWithPhases(tenantId, playbookId);
     if (!target) {
       throw new Error('Playbook not found');
@@ -212,7 +232,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
       `);
     }
 
-    const [updated] = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const [updated] = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       UPDATE recovery_schema.recovery_playbooks
       SET active = true, updated_at = now()
       WHERE tenant_id = ${tenantId}::uuid AND id = ${playbookId}::uuid
@@ -271,7 +293,9 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
       sortOrder: Number(row.sort_order ?? row.sortOrder),
       channel: String(row.channel ?? 'WHATSAPP'),
       minDelayHoursSincePrevious: Number(
-        row.min_delay_hours_since_previous ?? row.minDelayHoursSincePrevious ?? 0,
+        row.min_delay_hours_since_previous ??
+          row.minDelayHoursSincePrevious ??
+          0,
       ),
       minDaysOverdue: Number(row.min_days_overdue ?? row.minDaysOverdue ?? 0),
       mode: String(row.mode) as RecoveryPlaybookPhaseRecord['mode'],

@@ -26,14 +26,21 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
   async execute(
     input: GenerateContactsReportInput,
   ): Promise<GenerateContactsReportOutput> {
-    const tagFilters = (input.tags ?? []).map((tag) => tag.trim()).filter(Boolean);
-    const contactsResult = await this.contactRepository.findAllByTenant(input.tenantId, {
-      page: 1,
-      limit: 5000,
-      branchId: input.branchId,
-    });
+    const tagFilters = (input.tags ?? [])
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const contactsResult = await this.contactRepository.findAllByTenant(
+      input.tenantId,
+      {
+        page: 1,
+        limit: 5000,
+        branchId: input.branchId,
+      },
+    );
 
-    const stageFilters = new Set((input.stages ?? []).map((stage) => stage.trim()).filter(Boolean));
+    const stageFilters = new Set(
+      (input.stages ?? []).map((stage) => stage.trim()).filter(Boolean),
+    );
     const contacts = contactsResult.data.filter((contact) => {
       if (stageFilters.size > 0 && !stageFilters.has(contact.stage.value)) {
         return false;
@@ -91,8 +98,18 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
       const lastTimelineEventAt = matchingEntries.length
         ? matchingEntries[matchingEntries.length - 1].timestamp
         : undefined;
-      const channels = [...new Set(matchingEntries.map((entry) => this.resolveChannel(entry)).filter(Boolean))] as string[];
-      const timelineTypes = [...new Set(matchingEntries.map((entry) => this.resolveTimelineGroup(entry)))];
+      const channels = [
+        ...new Set(
+          matchingEntries
+            .map((entry) => this.resolveChannel(entry))
+            .filter(Boolean),
+        ),
+      ] as string[];
+      const timelineTypes = [
+        ...new Set(
+          matchingEntries.map((entry) => this.resolveTimelineGroup(entry)),
+        ),
+      ];
 
       rows.push({
         id: contact.id.toString(),
@@ -107,8 +124,12 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
         lastInteraction: contact.lastInteraction,
         lastTimelineEventAt,
         timelineEventCount: matchingEntries.length,
-        inboundMessages: matchingEntries.filter((entry) => entry.type === 'MESSAGE_INBOUND').length,
-        outboundMessages: matchingEntries.filter((entry) => entry.type === 'MESSAGE_OUTBOUND').length,
+        inboundMessages: matchingEntries.filter(
+          (entry) => entry.type === 'MESSAGE_INBOUND',
+        ).length,
+        outboundMessages: matchingEntries.filter(
+          (entry) => entry.type === 'MESSAGE_OUTBOUND',
+        ).length,
         channels,
         timelineTypes,
       });
@@ -124,7 +145,9 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
       return rightTime - leftTime;
     });
 
-    const contactsWithTimelineMatch = rows.filter((row) => row.timelineEventCount > 0).length;
+    const contactsWithTimelineMatch = rows.filter(
+      (row) => row.timelineEventCount > 0,
+    ).length;
 
     return {
       generatedAt: new Date(),
@@ -149,9 +172,9 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
   private requiresTimelineFilter(input: GenerateContactsReportInput): boolean {
     return Boolean(
       (input.timelineTypes && input.timelineTypes.length > 0) ||
-        (input.channels && input.channels.length > 0) ||
-        input.dateFrom ||
-        input.dateTo,
+      (input.channels && input.channels.length > 0) ||
+      input.dateFrom ||
+      input.dateTo,
     );
   }
 
@@ -160,11 +183,17 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
     input: GenerateContactsReportInput,
   ): boolean {
     const timelineGroup = this.resolveTimelineGroup(entry);
-    if (input.timelineTypes?.length && (timelineGroup === 'CRM' || !input.timelineTypes.includes(timelineGroup))) {
+    if (
+      input.timelineTypes?.length &&
+      (timelineGroup === 'CRM' || !input.timelineTypes.includes(timelineGroup))
+    ) {
       return false;
     }
 
-    if (input.channels?.length && !input.channels.includes(this.resolveChannel(entry))) {
+    if (
+      input.channels?.length &&
+      !input.channels.includes(this.resolveChannel(entry))
+    ) {
       return false;
     }
 
@@ -208,7 +237,9 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
     }
 
     if (
-      ['PAYMENT_CONFIRMED', 'PAYMENT_OVERDUE', 'PAYMENT_REFUNDED'].includes(entry.type)
+      ['PAYMENT_CONFIRMED', 'PAYMENT_OVERDUE', 'PAYMENT_REFUNDED'].includes(
+        entry.type,
+      )
     ) {
       return 'PAYMENT';
     }
@@ -220,7 +251,9 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
     return 'CRM';
   }
 
-  private resolveChannel(entry: ContactTimelineEntry): 'WHATSAPP' | 'INSTAGRAM' | 'CRM' {
+  private resolveChannel(
+    entry: ContactTimelineEntry,
+  ): 'WHATSAPP' | 'INSTAGRAM' | 'CRM' {
     const detailsChannel = entry.details['channel'];
     if (detailsChannel === 'WHATSAPP' || detailsChannel === 'INSTAGRAM') {
       return detailsChannel;
@@ -234,7 +267,12 @@ export class GenerateContactsReportUseCase implements IGenerateContactsReportUse
     labelKey: T,
   ): Array<Record<T, string> & { total: number }> {
     return [...source.entries()]
-      .map(([label, total]) => ({ [labelKey]: label, total }) as Record<T, string> & { total: number })
+      .map(
+        ([label, total]) =>
+          ({ [labelKey]: label, total }) as Record<T, string> & {
+            total: number;
+          },
+      )
       .sort((left, right) => right.total - left.total)
       .slice(0, 5);
   }

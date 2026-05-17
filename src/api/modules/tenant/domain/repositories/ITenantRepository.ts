@@ -10,13 +10,11 @@ export interface SaveTenantBranchInput {
   email?: string | null;
   whatsappNumber?: string | null;
   instagramAccountId?: string | null;
-  whatsAppConfigOverride?:
-  | {
+  whatsAppConfigOverride?: {
     provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
     credentials: Record<string, string>;
     webhookSecret?: string | null;
-  }
-  | null;
+  } | null;
   zipcode?: string | null;
   street?: string | null;
   streetNumber?: string | null;
@@ -42,7 +40,10 @@ export interface ITenantRepository {
   exists(cnpj: string): Promise<boolean>;
   listBranches(tenantId: string): Promise<TenantBranch[]>;
   createBranch(input: SaveTenantBranchInput): Promise<TenantBranch>;
-  updateBranch(branchId: string, input: SaveTenantBranchInput): Promise<TenantBranch>;
+  updateBranch(
+    branchId: string,
+    input: SaveTenantBranchInput,
+  ): Promise<TenantBranch>;
   deleteBranch(tenantId: string, branchId: string): Promise<void>;
   findBranchByWhatsAppNumber?(
     whatsappNumber: string,

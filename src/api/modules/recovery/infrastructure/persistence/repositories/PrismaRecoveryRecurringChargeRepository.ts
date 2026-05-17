@@ -9,9 +9,7 @@ import {
 } from '../../../domain/ports/IRecoveryRecurringChargeRepository';
 
 @Injectable()
-export class PrismaRecoveryRecurringChargeRepository
-  implements IRecoveryRecurringChargeRepository
-{
+export class PrismaRecoveryRecurringChargeRepository implements IRecoveryRecurringChargeRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
@@ -184,7 +182,10 @@ export class PrismaRecoveryRecurringChargeRepository
     `);
   }
 
-  async markRunSkipped(input: { runId: string; reason: string }): Promise<void> {
+  async markRunSkipped(input: {
+    runId: string;
+    reason: string;
+  }): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE recovery_schema.recovery_recurring_charge_runs
       SET status = 'SKIPPED',
@@ -244,7 +245,9 @@ export class PrismaRecoveryRecurringChargeRepository
     caseId: string;
     reason?: string;
   }): Promise<number> {
-    const rows = await this.prisma.$queryRaw<Array<{ count: number }>>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Array<{ count: number }>
+    >(Prisma.sql`
       WITH updated AS (
         UPDATE recovery_schema.recovery_recurring_charges
         SET status = 'CANCELLED',
@@ -311,5 +314,4 @@ export class PrismaRecoveryRecurringChargeRepository
       completedAt: row.completedAt ?? row.completed_at ?? null,
     };
   }
-
 }

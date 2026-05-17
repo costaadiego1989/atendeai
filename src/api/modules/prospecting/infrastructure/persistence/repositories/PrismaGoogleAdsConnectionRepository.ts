@@ -5,9 +5,8 @@ import { IGoogleAdsConnectionRepository } from '../../../domain/repositories/IGo
 import { GoogleAdsConnection } from '../../../domain/types/GoogleAdsConnection';
 
 @Injectable()
-export class PrismaGoogleAdsConnectionRepository
-  implements IGoogleAdsConnectionRepository {
-  constructor(private readonly prisma: PrismaService) { }
+export class PrismaGoogleAdsConnectionRepository implements IGoogleAdsConnectionRepository {
+  constructor(private readonly prisma: PrismaService) {}
 
   async save(connection: GoogleAdsConnection): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`

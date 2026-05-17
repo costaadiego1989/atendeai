@@ -15,8 +15,7 @@ describe('SchedulingPaymentEventHandler', () => {
       isOnline: true,
     },
     payment: {
-      reference:
-        'scheduling|tenant-1|professional-1|2030-07-20|slot-1',
+      reference: 'scheduling|tenant-1|professional-1|2030-07-20|slot-1',
       linkId: 'link-1',
       linkUrl: 'https://pay.example/x',
       amount: 230,
@@ -93,7 +92,9 @@ describe('SchedulingPaymentEventHandler', () => {
       }),
     );
 
-    expect(schedulingStore.attachMeetingLinkToReservedSlot).toHaveBeenCalledWith({
+    expect(
+      schedulingStore.attachMeetingLinkToReservedSlot,
+    ).toHaveBeenCalledWith({
       tenantId: 'tenant-1',
       professionalId: 'professional-1',
       date: '2030-07-20',

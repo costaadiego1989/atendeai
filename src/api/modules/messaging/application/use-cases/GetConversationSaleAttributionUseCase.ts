@@ -15,9 +15,7 @@ import {
 } from './interfaces/IGetConversationSaleAttributionUseCase';
 
 @Injectable()
-export class GetConversationSaleAttributionUseCase
-  implements IGetConversationSaleAttributionUseCase
-{
+export class GetConversationSaleAttributionUseCase implements IGetConversationSaleAttributionUseCase {
   constructor(
     @Inject(CONVERSATION_REPOSITORY)
     private readonly conversationRepository: IConversationRepository,
@@ -56,8 +54,7 @@ export class GetConversationSaleAttributionUseCase
       id: sale.id,
       conversationId: sale.conversationId,
       attributedUserId: sale.attributedUserId,
-      saleAmount:
-        sale.saleAmount != null ? sale.saleAmount.toString() : null,
+      saleAmount: sale.saleAmount != null ? sale.saleAmount.toString() : null,
       currency: sale.currency,
       lifecycleStatus: sale.lifecycleStatus,
       aiValidationStatus: sale.aiValidationStatus,
@@ -68,11 +65,13 @@ export class GetConversationSaleAttributionUseCase
         : null,
       notes: sale.notes,
       commercialKind:
-        typeof (sale.metadata as any)?.objectiveEvidence?.commercialKind === 'string'
+        typeof (sale.metadata as any)?.objectiveEvidence?.commercialKind ===
+        'string'
           ? (sale.metadata as any).objectiveEvidence.commercialKind
           : null,
       commercialStatus:
-        typeof (sale.metadata as any)?.objectiveEvidence?.commercialStatus === 'string'
+        typeof (sale.metadata as any)?.objectiveEvidence?.commercialStatus ===
+        'string'
           ? (sale.metadata as any).objectiveEvidence.commercialStatus
           : null,
       evidenceSource:

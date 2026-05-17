@@ -48,21 +48,26 @@ export class RegisterTwilioWhatsAppSenderUseCase {
 
     const normalizedPhone = this.normalizeBrazilPhone(input.phoneNumber);
     const currentWhatsappNumber = branch
-      ? branch.whatsappNumber ?? ''
-      : tenant.whatsAppConfig?.whatsappNumber ?? '';
+      ? (branch.whatsappNumber ?? '')
+      : (tenant.whatsAppConfig?.whatsappNumber ?? '');
 
     if (
       normalizedPhone &&
       normalizedPhone !== currentWhatsappNumber.replace(/\D/g, '')
     ) {
-      await this.billingCapacityService.assertCanAdd(input.tenantId, 'whatsappNumbers');
+      await this.billingCapacityService.assertCanAdd(
+        input.tenantId,
+        'whatsappNumbers',
+      );
     }
 
-    const twilioAccount = await this.tenantTwilioAccountService.ensureTenantAccount({
-      tenantId: input.tenantId,
-      companyName: tenant.companyName.value,
-    });
-    const twilioCredentials = this.tenantTwilioAccountService.toCredentials(twilioAccount);
+    const twilioAccount =
+      await this.tenantTwilioAccountService.ensureTenantAccount({
+        tenantId: input.tenantId,
+        companyName: tenant.companyName.value,
+      });
+    const twilioCredentials =
+      this.tenantTwilioAccountService.toCredentials(twilioAccount);
     const sender = await this.twilioManagementAcl.createSender(
       {
         senderId: `whatsapp:+${normalizedPhone}`,
@@ -159,12 +164,16 @@ export class RegisterTwilioWhatsAppSenderUseCase {
   }
 
   private resolveWebhookUrl(): string | undefined {
-    const direct = this.configService.get<string>('TWILIO_WHATSAPP_WEBHOOK_URL');
+    const direct = this.configService.get<string>(
+      'TWILIO_WHATSAPP_WEBHOOK_URL',
+    );
     if (direct?.trim()) {
       return direct.trim();
     }
 
-    const appPublicBaseUrl = this.configService.get<string>('APP_PUBLIC_BASE_URL');
+    const appPublicBaseUrl = this.configService.get<string>(
+      'APP_PUBLIC_BASE_URL',
+    );
     if (!appPublicBaseUrl?.trim()) {
       return undefined;
     }

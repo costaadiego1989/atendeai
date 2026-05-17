@@ -5,7 +5,9 @@ import { InventoryItemRecord } from '../domain/ports/IInventoryRepository';
 describe('InventoryReportCsvBuilder', () => {
   let builder: InventoryReportCsvBuilder;
 
-  const makeItem = (overrides: Partial<InventoryItemRecord> = {}): InventoryItemRecord => ({
+  const makeItem = (
+    overrides: Partial<InventoryItemRecord> = {},
+  ): InventoryItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     catalogItemId: 'cat-1',
@@ -23,15 +25,22 @@ describe('InventoryReportCsvBuilder', () => {
     ...overrides,
   });
 
-  const makeReport = (items: InventoryItemRecord[]): GenerateInventoryReportOutput => ({
+  const makeReport = (
+    items: InventoryItemRecord[],
+  ): GenerateInventoryReportOutput => ({
     generatedAt: new Date('2024-06-15T12:00:00.000Z'),
     summary: {
       totalItems: items.length,
       totalQuantity: items.reduce((sum, i) => sum + i.availableQuantity, 0),
-      availableItems: items.filter((i) => i.availabilityStatus === 'AVAILABLE').length,
-      lowStockItems: items.filter((i) => i.availabilityStatus === 'LOW_STOCK').length,
-      unavailableItems: items.filter((i) => i.availabilityStatus === 'UNAVAILABLE').length,
-      reservedItems: items.filter((i) => i.availabilityStatus === 'RESERVED').length,
+      availableItems: items.filter((i) => i.availabilityStatus === 'AVAILABLE')
+        .length,
+      lowStockItems: items.filter((i) => i.availabilityStatus === 'LOW_STOCK')
+        .length,
+      unavailableItems: items.filter(
+        (i) => i.availabilityStatus === 'UNAVAILABLE',
+      ).length,
+      reservedItems: items.filter((i) => i.availabilityStatus === 'RESERVED')
+        .length,
       estimatedInventoryValue: 0,
     },
     items,
@@ -54,7 +63,9 @@ describe('InventoryReportCsvBuilder', () => {
     expect(headerLine).toContain('"Status"');
     expect(headerLine).toContain('"Ultimo sync"');
     expect(result.mimeType).toBe('text/csv;charset=utf-8');
-    expect(result.fileName).toMatch(/^relatorio-estoque-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(result.fileName).toMatch(
+      /^relatorio-estoque-\d{4}-\d{2}-\d{2}\.csv$/,
+    );
   });
 
   it('should format item data correctly in CSV rows', () => {
@@ -74,7 +85,10 @@ describe('InventoryReportCsvBuilder', () => {
   });
 
   it('should handle zero quantity items', () => {
-    const item = makeItem({ availableQuantity: 0, availabilityStatus: 'UNAVAILABLE' });
+    const item = makeItem({
+      availableQuantity: 0,
+      availabilityStatus: 'UNAVAILABLE',
+    });
     const report = makeReport([item]);
     const result = builder.build(report);
 

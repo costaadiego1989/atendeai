@@ -16,7 +16,9 @@ export class SeedDefaultRecoveryPlaybookUseCase {
     seeded: boolean;
     playbook: RecoveryPlaybookWithPhases | null;
   }> {
-    const created = await this.playbookRepository.ensureSystemDefaultPlaybook(input.tenantId);
+    const created = await this.playbookRepository.ensureSystemDefaultPlaybook(
+      input.tenantId,
+    );
     if (created) {
       return { seeded: true, playbook: created };
     }

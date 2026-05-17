@@ -118,7 +118,11 @@ export class TenantController {
   @Put(':id/ai-config')
   @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
   @Roles('OWNER', 'ADMIN')
-  async updateAIConfig(@Param('id') id: string, @Body() body: ConfigureAIDTO, @Req() req: Request) {
+  async updateAIConfig(
+    @Param('id') id: string,
+    @Body() body: ConfigureAIDTO,
+    @Req() req: Request,
+  ) {
     const user = (req as any).user;
     return this.configureAIUseCase.execute({
       ...body,
@@ -167,7 +171,11 @@ export class TenantController {
   @Post(':id/promotions')
   @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
   @Roles('OWNER', 'ADMIN')
-  async addPromotion(@Param('id') id: string, @Body() body: AddPromotionDTO, @Req() req: Request) {
+  async addPromotion(
+    @Param('id') id: string,
+    @Body() body: AddPromotionDTO,
+    @Req() req: Request,
+  ) {
     const user = (req as any).user;
     return this.addPromotionUseCase.execute({
       ...body,

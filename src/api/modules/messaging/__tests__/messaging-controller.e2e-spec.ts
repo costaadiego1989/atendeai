@@ -271,7 +271,9 @@ describe('MessagingController (e2e)', () => {
 
   it('should list conversations with pagination and status filter', async () => {
     const response = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/conversations?page=1&limit=1&status=ACTIVE`)
+      .get(
+        `/api/v1/tenants/${tenantId}/conversations?page=1&limit=1&status=ACTIVE`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 
@@ -299,7 +301,9 @@ describe('MessagingController (e2e)', () => {
 
   it('should return conversation history with pagination metadata', async () => {
     const response = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/conversations/${conversationId}/messages?page=1&limit=1`)
+      .get(
+        `/api/v1/tenants/${tenantId}/conversations/${conversationId}/messages?page=1&limit=1`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 
@@ -316,7 +320,9 @@ describe('MessagingController (e2e)', () => {
 
   it('should persist a human reply and queue it for delivery', async () => {
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${conversationId}/messages`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversationId}/messages`,
+      )
       .set('Cookie', [authCookie])
       .send({
         content: {
@@ -348,7 +354,9 @@ describe('MessagingController (e2e)', () => {
 
   it('should update the conversation status for human handoff and archive flows', async () => {
     const handoffResponse = await request(app.getHttpServer())
-      .patch(`/api/v1/tenants/${tenantId}/conversations/${conversationId}/status`)
+      .patch(
+        `/api/v1/tenants/${tenantId}/conversations/${conversationId}/status`,
+      )
       .set('Cookie', [authCookie])
       .send({ status: 'PENDING_HUMAN' })
       .expect(200);
@@ -361,7 +369,9 @@ describe('MessagingController (e2e)', () => {
     );
 
     const archivedResponse = await request(app.getHttpServer())
-      .patch(`/api/v1/tenants/${tenantId}/conversations/${conversationId}/status`)
+      .patch(
+        `/api/v1/tenants/${tenantId}/conversations/${conversationId}/status`,
+      )
       .set('Cookie', [authCookie])
       .send({ status: 'ARCHIVED' })
       .expect(200);
@@ -418,7 +428,9 @@ describe('MessagingController (e2e)', () => {
       .expect(401);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${otherTenantId}/conversations/${otherConversationId}/messages`)
+      .get(
+        `/api/v1/tenants/${otherTenantId}/conversations/${otherConversationId}/messages`,
+      )
       .set('Cookie', [authCookie])
       .expect(401);
   });
@@ -443,7 +455,9 @@ describe('MessagingController (e2e)', () => {
     });
 
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${conversationId}/sale-attribution`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversationId}/sale-attribution`,
+      )
       .set('Cookie', [authCookie])
       .send({})
       .expect(201);
@@ -505,14 +519,17 @@ describe('MessagingController (e2e)', () => {
     });
 
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${recoveryConversation.id}/sale-attribution`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${recoveryConversation.id}/sale-attribution`,
+      )
       .set('Cookie', [authCookie])
       .send({})
       .expect(201);
 
     expect(response.body).toEqual({
       approved: false,
-      reason: 'Pagamento confirmado em recovery conta como receita recuperada, não como nova venda.',
+      reason:
+        'Pagamento confirmado em recovery conta como receita recuperada, não como nova venda.',
       confidence: 1,
       conversationId: recoveryConversation.id,
       commercialKind: 'RECOVERY',

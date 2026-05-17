@@ -1,5 +1,8 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { EVENT_BUS, IEventBus } from '../../../../shared/application/ports/IEventBus';
+import {
+  EVENT_BUS,
+  IEventBus,
+} from '../../../../shared/application/ports/IEventBus';
 import { IMessagingFacade, MESSAGING_FACADE } from '../facades/MessagingFacade';
 import { ProfessionalSlotReservedIntegrationEvent } from '../../../scheduling/domain/events/integration/ProfessionalSlotReservedIntegrationEvent';
 import { ProfessionalSlotPaymentPendingIntegrationEvent } from '../../../scheduling/domain/events/integration/ProfessionalSlotPaymentPendingIntegrationEvent';
@@ -16,7 +19,7 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
     private readonly eventBus: IEventBus,
     @Inject(MESSAGING_FACADE)
     private readonly messagingFacade: IMessagingFacade,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.eventBus.subscribe(
@@ -28,13 +31,17 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
     this.eventBus.subscribe(
       'scheduling.professional_slot.payment_pending',
       async (event) =>
-        this.handlePaymentPending(event as ProfessionalSlotPaymentPendingIntegrationEvent),
+        this.handlePaymentPending(
+          event as ProfessionalSlotPaymentPendingIntegrationEvent,
+        ),
       { consumerName: 'messaging-scheduling-payment-pending' },
     );
     this.eventBus.subscribe(
       'scheduling.professional_slot.rescheduled',
       async (event) =>
-        this.handleRescheduled(event as ProfessionalSlotRescheduledIntegrationEvent),
+        this.handleRescheduled(
+          event as ProfessionalSlotRescheduledIntegrationEvent,
+        ),
       { consumerName: 'messaging-scheduling-rescheduled' },
     );
     this.eventBus.subscribe(
@@ -47,12 +54,15 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
     );
   }
 
-  private async handleReserved(event: ProfessionalSlotReservedIntegrationEvent) {
+  private async handleReserved(
+    event: ProfessionalSlotReservedIntegrationEvent,
+  ) {
     const { payload } = event;
     const formattedDate = this.formatDate(payload.date);
-    const timeLine = payload.startsAt && payload.endsAt
-      ? `${payload.startsAt} as ${payload.endsAt}`
-      : payload.startsAt;
+    const timeLine =
+      payload.startsAt && payload.endsAt
+        ? `${payload.startsAt} as ${payload.endsAt}`
+        : payload.startsAt;
     const meetLine = payload.meetingUrl
       ? `\n\nLink do Google Meet: ${payload.meetingUrl}`
       : '';
@@ -72,18 +82,24 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
     });
   }
 
-  private async handlePaymentPending(event: ProfessionalSlotPaymentPendingIntegrationEvent) {
+  private async handlePaymentPending(
+    event: ProfessionalSlotPaymentPendingIntegrationEvent,
+  ) {
     const { payload } = event;
     const formattedDate = this.formatDate(payload.date);
-    const formattedExpiry = new Date(payload.expiresAt).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    const timeLine = payload.startsAt && payload.endsAt
-      ? `${payload.startsAt} as ${payload.endsAt}`
-      : payload.startsAt;
+    const formattedExpiry = new Date(payload.expiresAt).toLocaleString(
+      'pt-BR',
+      {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      },
+    );
+    const timeLine =
+      payload.startsAt && payload.endsAt
+        ? `${payload.startsAt} as ${payload.endsAt}`
+        : payload.startsAt;
 
     const text = `Olá! Seu horário para ${payload.categoryName} com ${payload.professionalName} ficou pré-agendado para ${formattedDate}, as ${timeLine}. Para confirmar, conclua o pagamento por aqui: ${payload.paymentUrl}. Esse pré-agendamento fica reservado ate ${formattedExpiry}.`;
 
@@ -96,12 +112,15 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
     });
   }
 
-  private async handleRescheduled(event: ProfessionalSlotRescheduledIntegrationEvent) {
+  private async handleRescheduled(
+    event: ProfessionalSlotRescheduledIntegrationEvent,
+  ) {
     const { payload } = event;
     const formattedDate = this.formatDate(payload.date);
-    const timeLine = payload.startsAt && payload.endsAt
-      ? `${payload.startsAt} as ${payload.endsAt}`
-      : payload.startsAt;
+    const timeLine =
+      payload.startsAt && payload.endsAt
+        ? `${payload.startsAt} as ${payload.endsAt}`
+        : payload.startsAt;
     const meetLine = payload.meetingUrl
       ? `\n\nLink do Google Meet: ${payload.meetingUrl}`
       : '';
@@ -111,14 +130,16 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
     if (payload.pendingPayment && payload.paymentUrl) {
       const formattedExpiry = payload.paymentExpiresAt
         ? new Date(payload.paymentExpiresAt).toLocaleString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
         : '';
 
-      const expiryLine = formattedExpiry ? ` Ele segue reservado ate ${formattedExpiry}.` : '';
+      const expiryLine = formattedExpiry
+        ? ` Ele segue reservado ate ${formattedExpiry}.`
+        : '';
 
       text = `Olá! Seu pré-agendamento para ${payload.categoryName} com ${payload.professionalName} foi remarcado para ${formattedDate}, as ${timeLine}. O mesmo link de pagamento continua valido: ${payload.paymentUrl}.${expiryLine}`;
     } else {
@@ -138,12 +159,15 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
     });
   }
 
-  private async handlePaymentConfirmed(event: ProfessionalSlotPaymentConfirmedIntegrationEvent) {
+  private async handlePaymentConfirmed(
+    event: ProfessionalSlotPaymentConfirmedIntegrationEvent,
+  ) {
     const { payload } = event;
     const formattedDate = this.formatDate(payload.date);
-    const timeLine = payload.startsAt && payload.endsAt
-      ? `${payload.startsAt} as ${payload.endsAt}`
-      : payload.startsAt;
+    const timeLine =
+      payload.startsAt && payload.endsAt
+        ? `${payload.startsAt} as ${payload.endsAt}`
+        : payload.startsAt;
 
     const meetLine = payload.meetingUrl
       ? `\n\nLink do Google Meet: ${payload.meetingUrl}`
@@ -164,9 +188,10 @@ export class SchedulingIntegrationHandlers implements OnModuleInit {
   ) {
     const { payload } = event;
     const formattedDate = this.formatDate(payload.date);
-    const timeLine = payload.startsAt && payload.endsAt
-      ? `${payload.startsAt} as ${payload.endsAt}`
-      : payload.startsAt;
+    const timeLine =
+      payload.startsAt && payload.endsAt
+        ? `${payload.startsAt} as ${payload.endsAt}`
+        : payload.startsAt;
     const reasonText =
       payload.reason === 'REFUNDED'
         ? 'o pagamento foi estornado'

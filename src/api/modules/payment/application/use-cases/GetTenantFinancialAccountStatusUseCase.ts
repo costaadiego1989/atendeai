@@ -12,7 +12,8 @@ export class GetTenantFinancialAccountStatusUseCase {
   ) {}
 
   async execute(tenantId: string) {
-    const account = await this.tenantFinancialAccountRepository.findByTenantId(tenantId);
+    const account =
+      await this.tenantFinancialAccountRepository.findByTenantId(tenantId);
 
     if (!account) {
       return {

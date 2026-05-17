@@ -1,4 +1,11 @@
-import { IsIn, IsOptional, IsString, Matches, MaxLength, ValidateIf } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator';
 import { SupportFeedbackType } from '../../domain/types/SupportFeedback';
 
 export class CreateSupportFeedbackDTO {
@@ -24,12 +31,14 @@ export class CreateSupportFeedbackDTO {
 
   @IsOptional()
   @ValidateIf(
-    (_o: object, value: unknown) => typeof value === 'string' && value.trim().length > 0,
+    (_o: object, value: unknown) =>
+      typeof value === 'string' && value.trim().length > 0,
   )
   @IsString()
   @MaxLength(80)
   @Matches(/^[a-z0-9_]+$/, {
-    message: 'appModule deve ser snake_case minúsculo (ex.: messaging, catalog).',
+    message:
+      'appModule deve ser snake_case minúsculo (ex.: messaging, catalog).',
   })
   appModule?: string;
 }

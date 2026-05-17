@@ -22,7 +22,15 @@ export interface IContactFacade {
   getContactById(
     tenantId: string,
     contactId: string,
-  ): Promise<{ contactId: string; name: string; phone: string; document?: string; email?: string; branchId?: string | null } | null>;
+  ): Promise<{
+    contactId: string;
+    name: string;
+    phone: string;
+    document?: string;
+    email?: string;
+    branchId?: string | null;
+    prospectingOptOut: boolean;
+  } | null>;
 
   ensureContact(input: {
     tenantId: string;
@@ -51,6 +59,8 @@ export interface IContactFacade {
     tenantId: string,
     limit: number,
   ): Promise<string[]>;
+
+  markProspectingOptOut(tenantId: string, contactId: string): Promise<void>;
 }
 
 export const CONTACT_FACADE = 'CONTACT_FACADE';
@@ -83,7 +93,15 @@ export class ContactFacade implements IContactFacade {
   async getContactById(
     tenantId: string,
     contactId: string,
-  ): Promise<{ contactId: string; name: string; phone: string; document?: string; email?: string; branchId?: string | null } | null> {
+  ): Promise<{
+    contactId: string;
+    name: string;
+    phone: string;
+    document?: string;
+    email?: string;
+    branchId?: string | null;
+    prospectingOptOut: boolean;
+  } | null> {
     const contact = await this.contactRepository.findById(tenantId, contactId);
     if (!contact) {
       return null;
@@ -96,6 +114,7 @@ export class ContactFacade implements IContactFacade {
       document: contact.document,
       email: contact.email,
       branchId: contact.branchId ?? null,
+      prospectingOptOut: contact.prospectingOptOut,
     };
   }
 
@@ -157,6 +176,16 @@ export class ContactFacade implements IContactFacade {
       contactId: contact.id.toString(),
       created: true,
     };
+  }
+
+  async markProspectingOptOut(
+    tenantId: string,
+    contactId: string,
+  ): Promise<void> {
+    const contact = await this.contactRepository.findById(tenantId, contactId);
+    if (!contact) return;
+    contact.markProspectingOptOut();
+    await this.contactRepository.save(contact);
   }
 
   async findContactIdsForReengagementAudience(

@@ -32,21 +32,51 @@ export class Coupon extends Entity<CouponProps> {
     super(props, id);
   }
 
-  get tenantId(): string { return this.props.tenantId; }
-  get promotionId(): string | null | undefined { return this.props.promotionId; }
-  get code(): string { return this.props.code; }
-  get description(): string | null | undefined { return this.props.description; }
-  get discountType(): CouponDiscountType { return this.props.discountType; }
-  get discountValue(): number { return this.props.discountValue; }
-  get maxUses(): number { return this.props.maxUses; }
-  get usedCount(): number { return this.props.usedCount; }
-  get startsAt(): Date { return this.props.startsAt; }
-  get expiresAt(): Date | null | undefined { return this.props.expiresAt; }
-  get active(): boolean { return this.props.active; }
-  get catalogItemId(): string | null | undefined { return this.props.catalogItemId; }
-  get targets(): CouponTarget[] { return this.props.targets ?? []; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get tenantId(): string {
+    return this.props.tenantId;
+  }
+  get promotionId(): string | null | undefined {
+    return this.props.promotionId;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get description(): string | null | undefined {
+    return this.props.description;
+  }
+  get discountType(): CouponDiscountType {
+    return this.props.discountType;
+  }
+  get discountValue(): number {
+    return this.props.discountValue;
+  }
+  get maxUses(): number {
+    return this.props.maxUses;
+  }
+  get usedCount(): number {
+    return this.props.usedCount;
+  }
+  get startsAt(): Date {
+    return this.props.startsAt;
+  }
+  get expiresAt(): Date | null | undefined {
+    return this.props.expiresAt;
+  }
+  get active(): boolean {
+    return this.props.active;
+  }
+  get catalogItemId(): string | null | undefined {
+    return this.props.catalogItemId;
+  }
+  get targets(): CouponTarget[] {
+    return this.props.targets ?? [];
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   get isUnlimited(): boolean {
     return this.props.maxUses === 0;
@@ -57,15 +87,18 @@ export class Coupon extends Entity<CouponProps> {
     const now = new Date();
     if (now < this.props.startsAt) return false;
     if (this.props.expiresAt && now > this.props.expiresAt) return false;
-    if (!this.isUnlimited && this.props.usedCount >= this.props.maxUses) return false;
+    if (!this.isUnlimited && this.props.usedCount >= this.props.maxUses)
+      return false;
     return true;
   }
 
   public appliesTo(target: CouponTarget): boolean {
     const targets = this.effectiveTargets();
     if (targets.length === 0) return true;
-    return targets.some((candidate) =>
-      candidate.targetType === target.targetType && candidate.targetId === target.targetId,
+    return targets.some(
+      (candidate) =>
+        candidate.targetType === target.targetType &&
+        candidate.targetId === target.targetId,
     );
   }
 
@@ -89,7 +122,10 @@ export class Coupon extends Entity<CouponProps> {
   }
 
   public static create(
-    props: Omit<CouponProps, 'createdAt' | 'updatedAt' | 'usedCount' | 'active'> & { active?: boolean },
+    props: Omit<
+      CouponProps,
+      'createdAt' | 'updatedAt' | 'usedCount' | 'active'
+    > & { active?: boolean },
     id?: UniqueEntityID,
   ): Coupon {
     return new Coupon(

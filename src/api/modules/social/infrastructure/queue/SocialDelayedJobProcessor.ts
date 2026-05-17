@@ -1,8 +1,14 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
-import { ISocialPlatformAdapter, SOCIAL_PLATFORM_ADAPTER } from '../../domain/ports/ISocialPlatformAdapter';
+import {
+  ISocialRepository,
+  SOCIAL_REPOSITORY,
+} from '../../domain/ports/ISocialRepository';
+import {
+  ISocialPlatformAdapter,
+  SOCIAL_PLATFORM_ADAPTER,
+} from '../../domain/ports/ISocialPlatformAdapter';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { SocialAutoReplyTriggeredIntegrationEvent } from '../../domain/events/integration/SocialAutoReplyTriggeredIntegrationEvent';
 import { Optional } from '@nestjs/common';
@@ -31,7 +37,8 @@ export class SocialDelayedJobProcessor extends WorkerHost {
 
   constructor(
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
-    @Inject(SOCIAL_PLATFORM_ADAPTER) private readonly adapter: ISocialPlatformAdapter,
+    @Inject(SOCIAL_PLATFORM_ADAPTER)
+    private readonly adapter: ISocialPlatformAdapter,
     @Optional() @Inject(EVENT_BUS) private readonly eventBus?: IEventBus,
   ) {
     super();
@@ -63,7 +70,11 @@ export class SocialDelayedJobProcessor extends WorkerHost {
             if (media.caption) content.linkTitle = media.caption;
           }
 
-          await this.adapter.sendInboxMessage(data.accessToken, data.recipientId, content);
+          await this.adapter.sendInboxMessage(
+            data.accessToken,
+            data.recipientId,
+            content,
+          );
         }
       }
 

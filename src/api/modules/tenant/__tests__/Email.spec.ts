@@ -19,7 +19,9 @@ describe('Email Value Object', () => {
   });
 
   it('should throw an error for invalid email without @', () => {
-    expect(() => Email.create('invalidemail.com')).toThrow(ValidationErrorException);
+    expect(() => Email.create('invalidemail.com')).toThrow(
+      ValidationErrorException,
+    );
   });
 
   it('should throw an error for email without domain', () => {

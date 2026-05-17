@@ -77,7 +77,11 @@ export class UpsertTenantPDFResumeUseCase {
 
     const normalized = text.replace(/\s+/g, ' ');
     const chunks: string[] = [];
-    for (let index = 0; index < normalized.length && chunks.length < 8; index += 900) {
+    for (
+      let index = 0;
+      index < normalized.length && chunks.length < 8;
+      index += 900
+    ) {
       chunks.push(normalized.slice(index, index + 900).trim());
     }
 

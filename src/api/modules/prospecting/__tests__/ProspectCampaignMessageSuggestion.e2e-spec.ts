@@ -5,7 +5,12 @@ import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuar
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { UnauthorizedException } from '@shared/domain/exceptions/DomainExceptions';
-import { AI_ENGINE, IAIEngine, AIRequest, AIResponse } from '@modules/ai/application/ports/IAIEngine';
+import {
+  AI_ENGINE,
+  IAIEngine,
+  AIRequest,
+  AIResponse,
+} from '@modules/ai/application/ports/IAIEngine';
 import {
   TENANT_REPOSITORY,
   ITenantRepository,
@@ -16,9 +21,7 @@ import { IListProspectCampaignsUseCase } from '../application/use-cases/interfac
 import { IActivateProspectCampaignUseCase } from '../application/use-cases/interfaces/IActivateProspectCampaignUseCase';
 import { IPauseProspectCampaignUseCase } from '../application/use-cases/interfaces/IPauseProspectCampaignUseCase';
 import { IStartProspectCampaignUseCase } from '../application/use-cases/interfaces/IStartProspectCampaignUseCase';
-import {
-  ISuggestProspectCampaignMessageUseCase,
-} from '../application/use-cases/interfaces/ISuggestProspectCampaignMessageUseCase';
+import { ISuggestProspectCampaignMessageUseCase } from '../application/use-cases/interfaces/ISuggestProspectCampaignMessageUseCase';
 import { SuggestProspectCampaignMessageUseCase } from '../application/use-cases/SuggestProspectCampaignMessageUseCase';
 import { Tenant } from '@modules/tenant/domain/entities/Tenant';
 import { User } from '@modules/tenant/domain/entities/User';
@@ -78,9 +81,9 @@ describe('ProspectCampaign message suggestion e2e', () => {
   let app: INestApplication;
   let currentUser:
     | {
-      tenantId: string;
-      role: 'OWNER' | 'ADMIN' | 'AGENT';
-    }
+        tenantId: string;
+        role: 'OWNER' | 'ADMIN' | 'AGENT';
+      }
     | undefined;
   let aiRequests: AIRequest[] = [];
 
@@ -99,23 +102,25 @@ describe('ProspectCampaign message suggestion e2e', () => {
   };
 
   const aiEngine: jest.Mocked<IAIEngine> = {
-    generateResponse: jest.fn(async (request: AIRequest): Promise<AIResponse> => {
-      aiRequests.push(request);
-      const payload = JSON.parse(request.userMessage) as {
-        objective: string;
-        searchTerm?: string | null;
-      };
+    generateResponse: jest.fn(
+      async (request: AIRequest): Promise<AIResponse> => {
+        aiRequests.push(request);
+        const payload = JSON.parse(request.userMessage) as {
+          objective: string;
+          searchTerm?: string | null;
+        };
 
-      return {
-        text: buildContextualMessage(
-          payload.searchTerm ?? 'negocio local',
-          payload.objective,
-        ),
-        tokensUsed: 96,
-        confidence: 0.93,
-        finishReason: 'stop',
-      };
-    }),
+        return {
+          text: buildContextualMessage(
+            payload.searchTerm ?? 'negocio local',
+            payload.objective,
+          ),
+          tokensUsed: 96,
+          confidence: 0.93,
+          finishReason: 'stop',
+        };
+      },
+    ),
   };
 
   beforeAll(async () => {
@@ -228,7 +233,12 @@ describe('ProspectCampaign message suggestion e2e', () => {
     {
       label: 'pet shop',
       searchTerm: 'pet shop em Botafogo / Rio de Janeiro / RJ',
-      expectedTerms: ['pet shops', 'agendamentos', 'recompra', 'relacionamento'],
+      expectedTerms: [
+        'pet shops',
+        'agendamentos',
+        'recompra',
+        'relacionamento',
+      ],
     },
   ])(
     'should generate a contextual message for %s',

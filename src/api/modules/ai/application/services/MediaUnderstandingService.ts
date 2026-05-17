@@ -37,12 +37,15 @@ export class MediaUnderstandingService {
         }
 
         if (extraction?.extractedText?.trim()) {
-          const prefix = input.type === 'AUDIO' || input.type === 'VIDEO'
-            ? 'Transcricao'
-            : 'Conteudo extraido';
+          const prefix =
+            input.type === 'AUDIO' || input.type === 'VIDEO'
+              ? 'Transcricao'
+              : 'Conteudo extraido';
           parts.push(`${prefix}: ${extraction.extractedText.trim()}`);
         } else {
-          parts.push('Nao foi possível extrair o conteudo da midia automaticamente.');
+          parts.push(
+            'Nao foi possível extrair o conteudo da midia automaticamente.',
+          );
         }
 
         parts.push(`Arquivo: ${input.url}`);

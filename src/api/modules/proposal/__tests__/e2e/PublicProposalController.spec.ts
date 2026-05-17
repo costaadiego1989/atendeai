@@ -25,13 +25,16 @@ describe('PublicProposalController', () => {
 
   beforeAll(async () => {
     repository = new InMemoryProposalRepository();
-    publicLinks = new ProposalPublicLinkService(repository as any, {
-      get: (key: string) => {
-        if (key === 'APP_PUBLIC_BASE_URL') return 'https://app.test';
-        if (key === 'JWT_ACCESS_SECRET') return 'test-secret';
-        return undefined;
-      },
-    } as any);
+    publicLinks = new ProposalPublicLinkService(
+      repository as any,
+      {
+        get: (key: string) => {
+          if (key === 'APP_PUBLIC_BASE_URL') return 'https://app.test';
+          if (key === 'JWT_ACCESS_SECRET') return 'test-secret';
+          return undefined;
+        },
+      } as any,
+    );
 
     const moduleRef = await Test.createTestingModule({
       controllers: [PublicProposalController],

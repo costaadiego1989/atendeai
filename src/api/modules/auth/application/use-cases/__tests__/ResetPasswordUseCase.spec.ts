@@ -109,7 +109,9 @@ describe('ResetPasswordUseCase', () => {
 
     await useCase.execute({ token: 'raw-token', password: 'NewPass123!' });
 
-    expect(passwordResetTokenStore.markUsed).toHaveBeenCalledWith('token-record-1');
+    expect(passwordResetTokenStore.markUsed).toHaveBeenCalledWith(
+      'token-record-1',
+    );
   });
 
   it('should register audit PASSWORD_RESET_COMPLETED on success', async () => {
@@ -118,7 +120,11 @@ describe('ResetPasswordUseCase', () => {
     await useCase.execute({
       token: 'raw-token',
       password: 'NewPass123!',
-      context: { ipAddress: '10.0.0.1', userAgent: 'Chrome', deviceId: 'dev-1' },
+      context: {
+        ipAddress: '10.0.0.1',
+        userAgent: 'Chrome',
+        deviceId: 'dev-1',
+      },
     });
 
     expect(authAuditLogRepository.record).toHaveBeenCalledWith(

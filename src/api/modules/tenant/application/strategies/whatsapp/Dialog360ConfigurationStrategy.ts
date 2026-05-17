@@ -6,9 +6,7 @@ import { IWhatsAppConfigurationStrategy } from './IWhatsAppConfigurationStrategy
 import { Dialog360ManagementAcl } from '../../../infrastructure/acl/Dialog360ManagementAcl';
 
 @Injectable()
-export class Dialog360ConfigurationStrategy
-  implements IWhatsAppConfigurationStrategy
-{
+export class Dialog360ConfigurationStrategy implements IWhatsAppConfigurationStrategy {
   readonly provider = 'D360' as const;
 
   constructor(
@@ -59,7 +57,9 @@ export class Dialog360ConfigurationStrategy
       return directWebhookUrl.trim();
     }
 
-    const appPublicBaseUrl = this.configService.get<string>('APP_PUBLIC_BASE_URL');
+    const appPublicBaseUrl = this.configService.get<string>(
+      'APP_PUBLIC_BASE_URL',
+    );
     if (!appPublicBaseUrl?.trim()) {
       return null;
     }

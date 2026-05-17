@@ -26,11 +26,17 @@ export class ConfigureShippingPolicyUseCase {
   ) {}
 
   async execute(input: ConfigureShippingPolicyInput) {
-    if (input.mode === 'FIXED' && (input.fixedAmount == null || input.fixedAmount < 0)) {
+    if (
+      input.mode === 'FIXED' &&
+      (input.fixedAmount == null || input.fixedAmount < 0)
+    ) {
       throw new BadRequestException('Fixed shipping amount must be informed');
     }
 
-    if (input.mode === 'PER_KM' && (input.pricePerKm == null || input.pricePerKm < 0)) {
+    if (
+      input.mode === 'PER_KM' &&
+      (input.pricePerKm == null || input.pricePerKm < 0)
+    ) {
       throw new BadRequestException('Price per km must be informed');
     }
 

@@ -63,19 +63,41 @@ describe('AI Token Quota Enforcement (e2e)', () => {
 
     for (const t of tenantsToDelete) {
       const tId = t.id;
-      await (prisma.message as any).deleteMany({ where: { conversation: { tenantId: tId } } }).catch(() => { });
-      await (prisma.conversation as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.contact as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.aISession as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.usageRecord as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.subscription as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.aIConfig as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.whatsAppConfig as any).deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma as any).user.deleteMany({ where: { tenantId: tId } }).catch(() => { });
-      await (prisma.tenant as any).delete({ where: { id: tId } }).catch(() => { });
+      await (prisma.message as any)
+        .deleteMany({ where: { conversation: { tenantId: tId } } })
+        .catch(() => {});
+      await (prisma.conversation as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.contact as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.aISession as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.usageRecord as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.subscription as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.aIConfig as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.whatsAppConfig as any)
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma as any).user
+        .deleteMany({ where: { tenantId: tId } })
+        .catch(() => {});
+      await (prisma.tenant as any)
+        .delete({ where: { id: tId } })
+        .catch(() => {});
     }
 
-    await (prisma as any).user.deleteMany({ where: { email: ownerEmail } }).catch(() => { });
+    await (prisma as any).user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const createTenant = app.get<ICreateTenantUseCase>(ICreateTenantUseCase);
     const tenantResult = await createTenant.execute({
@@ -125,15 +147,33 @@ describe('AI Token Quota Enforcement (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await (prisma.message as any).deleteMany({ where: { conversation: { tenantId } } }).catch(() => { });
-      await (prisma.conversation as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.contact as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.usageRecord as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.subscription as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.aIConfig as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.whatsAppConfig as any).deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma as any).user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await (prisma.tenant as any).delete({ where: { id: tenantId } }).catch(() => { });
+      await (prisma.message as any)
+        .deleteMany({ where: { conversation: { tenantId } } })
+        .catch(() => {});
+      await (prisma.conversation as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.contact as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.usageRecord as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.subscription as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.aIConfig as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.whatsAppConfig as any)
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma as any).user
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await (prisma.tenant as any)
+        .delete({ where: { id: tenantId } })
+        .catch(() => {});
     }
     if (app) {
       await app.close();
@@ -368,4 +408,3 @@ describe('AI Token Quota Enforcement (e2e)', () => {
     });
   });
 });
-

@@ -20,7 +20,7 @@ export class PaymentService {
   constructor(
     @Inject(IPAYMENT_GATEWAY)
     private readonly provider: IPaymentGateway,
-  ) { }
+  ) {}
 
   async createCustomer(data: CreateCustomerData): Promise<CustomerResult> {
     return this.provider.createCustomer(data);

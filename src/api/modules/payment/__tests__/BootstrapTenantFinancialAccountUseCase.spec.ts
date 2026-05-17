@@ -30,7 +30,10 @@ describe('BootstrapTenantFinancialAccountUseCase', () => {
 
   it('should return the existing financial account when already provisioned', async () => {
     tenantRepository.findById.mockResolvedValue({
-      owner: { email: { value: 'owner@test.com' }, phone: { value: '11999999999' } },
+      owner: {
+        email: { value: 'owner@test.com' },
+        phone: { value: '11999999999' },
+      },
       ownerBirthDate: null,
       updateBusinessData: jest.fn(),
     });
@@ -74,11 +77,13 @@ describe('BootstrapTenantFinancialAccountUseCase', () => {
       walletId: 'wallet_123',
       status: 'PENDING_APPROVAL',
     });
-    tenantFinancialAccountRepository.save.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    tenantFinancialAccountRepository.save.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',
@@ -156,11 +161,13 @@ describe('BootstrapTenantFinancialAccountUseCase', () => {
         status: 'PENDING_APPROVAL',
       },
     ]);
-    tenantFinancialAccountRepository.save.mockImplementation(async (record: any) => ({
-      ...record,
-      createdAt: new Date('2026-03-31T00:00:00.000Z'),
-      updatedAt: new Date('2026-03-31T00:00:00.000Z'),
-    }));
+    tenantFinancialAccountRepository.save.mockImplementation(
+      async (record: any) => ({
+        ...record,
+        createdAt: new Date('2026-03-31T00:00:00.000Z'),
+        updatedAt: new Date('2026-03-31T00:00:00.000Z'),
+      }),
+    );
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',

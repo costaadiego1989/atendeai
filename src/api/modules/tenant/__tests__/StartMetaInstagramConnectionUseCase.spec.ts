@@ -27,7 +27,9 @@ describe('StartMetaInstagramConnectionUseCase', () => {
     } as any;
 
     oauthService = {
-      buildAuthorizationUrl: jest.fn().mockReturnValue('https://meta.example.com/oauth'),
+      buildAuthorizationUrl: jest
+        .fn()
+        .mockReturnValue('https://meta.example.com/oauth'),
     } as any;
 
     stateService = {
@@ -66,8 +68,13 @@ describe('StartMetaInstagramConnectionUseCase', () => {
       tenantId: tenant.id.toValue(),
     });
 
-    expect(stateService.sign).toHaveBeenCalledWith(tenant.id.toValue(), undefined);
-    expect(oauthService.buildAuthorizationUrl).toHaveBeenCalledWith('signed-state');
+    expect(stateService.sign).toHaveBeenCalledWith(
+      tenant.id.toValue(),
+      undefined,
+    );
+    expect(oauthService.buildAuthorizationUrl).toHaveBeenCalledWith(
+      'signed-state',
+    );
     expect(result.authorizationUrl).toBe('https://meta.example.com/oauth');
   });
 

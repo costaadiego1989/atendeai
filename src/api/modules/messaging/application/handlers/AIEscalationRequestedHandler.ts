@@ -1,6 +1,9 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { EVENT_BUS, IEventBus } from '@shared/infrastructure/event-bus';
-import { CONVERSATION_REPOSITORY, IConversationRepository } from '../../domain/repositories/IConversationRepository';
+import {
+  CONVERSATION_REPOSITORY,
+  IConversationRepository,
+} from '../../domain/repositories/IConversationRepository';
 import { AIEscalationRequestedIntegrationEvent } from '@modules/ai/application/integration-events/publishers/AIIntegrationEvents';
 import { SendAIMessageUseCase } from '../use-cases/SendAIMessageUseCase';
 import { FollowUpService } from '../services/FollowUpService';

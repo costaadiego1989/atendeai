@@ -17,4 +17,6 @@ export interface IRecoveryOutreachGenerator {
   generate(input: RecoveryOutreachInput): Promise<string>;
 }
 
-export const RECOVERY_OUTREACH_GENERATOR = Symbol('RECOVERY_OUTREACH_GENERATOR');
+export const RECOVERY_OUTREACH_GENERATOR = Symbol(
+  'RECOVERY_OUTREACH_GENERATOR',
+);

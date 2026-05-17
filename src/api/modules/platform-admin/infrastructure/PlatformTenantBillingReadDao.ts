@@ -71,10 +71,7 @@ export class PlatformTenantBillingReadDao {
     ]);
 
     const subByTenant = new Map(subscriptions.map((s) => [s.tenantId, s]));
-    const usageByTenant = new Map<
-      string,
-      (typeof usages)[number]
-    >();
+    const usageByTenant = new Map<string, (typeof usages)[number]>();
     for (const u of usages) {
       if (!usageByTenant.has(u.tenantId)) {
         usageByTenant.set(u.tenantId, u);

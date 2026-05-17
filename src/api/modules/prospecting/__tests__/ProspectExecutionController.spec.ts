@@ -6,9 +6,7 @@ import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
 import { UnauthorizedException } from '@shared/domain/exceptions/DomainExceptions';
 import { ProspectExecutionController } from '../presentation/controllers/ProspectExecutionController';
-import {
-  IDispatchProspectExecutionUseCase,
-} from '../application/use-cases/interfaces/IDispatchProspectExecutionUseCase';
+import { IDispatchProspectExecutionUseCase } from '../application/use-cases/interfaces/IDispatchProspectExecutionUseCase';
 
 describe('ProspectExecutionController', () => {
   let app: INestApplication;

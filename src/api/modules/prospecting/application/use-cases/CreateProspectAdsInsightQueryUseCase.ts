@@ -25,9 +25,7 @@ import {
 import { ProspectAdsInsightResult } from '../../domain/entities/ProspectAdsInsightResult';
 
 @Injectable()
-export class CreateProspectAdsInsightQueryUseCase
-  implements ICreateProspectAdsInsightQueryUseCase
-{
+export class CreateProspectAdsInsightQueryUseCase implements ICreateProspectAdsInsightQueryUseCase {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
@@ -95,7 +93,9 @@ export class CreateProspectAdsInsightQueryUseCase
       query.markAsCompleted(results.length);
       await this.queryRepository.save(query);
     } catch (error: any) {
-      query.markAsFailed(error?.message || 'Failed to fetch Google Ads insights');
+      query.markAsFailed(
+        error?.message || 'Failed to fetch Google Ads insights',
+      );
       await this.queryRepository.save(query);
       throw error;
     }

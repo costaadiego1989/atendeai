@@ -74,7 +74,7 @@ export class SalesController {
     private readonly redeemCouponUseCase: RedeemCouponUseCase,
     @Inject(ICreatePaymentLinkUseCase)
     private readonly createPaymentLinkUseCase: ICreatePaymentLinkUseCase,
-  ) { }
+  ) {}
 
   @Get('metrics')
   @Roles('OWNER', 'ADMIN')
@@ -119,7 +119,9 @@ export class SalesController {
       description: body.description,
       label: body.label,
       billingType: body.billingType ?? 'PIX',
-      dueDate: body.dueDate ? new Date(`${body.dueDate}T23:59:59.000Z`) : undefined,
+      dueDate: body.dueDate
+        ? new Date(`${body.dueDate}T23:59:59.000Z`)
+        : undefined,
       sendViaWhatsApp: Boolean(body.sendViaWhatsApp),
       recurrence: body.recurring
         ? {
@@ -152,7 +154,9 @@ export class SalesController {
       description: body.description,
       label: body.label,
       billingType: body.billingType || 'PIX',
-      expiresAt: body.expiresAt ? new Date(`${body.expiresAt}T23:59:59.000Z`) : undefined,
+      expiresAt: body.expiresAt
+        ? new Date(`${body.expiresAt}T23:59:59.000Z`)
+        : undefined,
       source: body.source ?? 'MANUAL',
       catalogItemId: body.catalogItemId ?? null,
       catalogItemSku: body.catalogItemSku ?? null,
@@ -192,7 +196,8 @@ export class SalesController {
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
     @Query('search') search?: string,
-    @Query('status') status?:
+    @Query('status')
+    status?:
       | 'ALL'
       | 'ACTIVE'
       | 'PAUSED'
@@ -225,7 +230,8 @@ export class SalesController {
     @Req() req: any,
     @Res() res: Response,
     @Query('search') search?: string,
-    @Query('status') status?:
+    @Query('status')
+    status?:
       | 'ALL'
       | 'ACTIVE'
       | 'PAUSED'
@@ -257,7 +263,10 @@ export class SalesController {
     const fileStamp = new Date().toISOString().slice(0, 10);
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="sales-Cobranças-${fileStamp}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="sales-Cobranças-${fileStamp}.csv"`,
+    );
     return res.send(csv);
   }
 
@@ -299,7 +308,10 @@ export class SalesController {
 
   @Get('promotions')
   @Roles('OWNER', 'ADMIN', 'AGENT')
-  async listPromotions(@Req() req: any, @Query('onlyActive') onlyActive?: string) {
+  async listPromotions(
+    @Req() req: any,
+    @Query('onlyActive') onlyActive?: string,
+  ) {
     return this.listPromotionsUseCase.execute({
       tenantId: req.user.tenantId,
       onlyActive: onlyActive === 'true',
@@ -308,7 +320,11 @@ export class SalesController {
 
   @Put('promotions/:id')
   @Roles('OWNER', 'ADMIN', 'AGENT')
-  async updatePromotion(@Req() req: any, @Param('id') id: string, @Body() body: UpdatePromotionDTO) {
+  async updatePromotion(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: UpdatePromotionDTO,
+  ) {
     return this.updatePromotionUseCase.execute({
       ...body,
       tenantId: req.user.tenantId,
@@ -345,7 +361,11 @@ export class SalesController {
 
   @Put('coupons/:id')
   @Roles('OWNER', 'ADMIN', 'AGENT')
-  async updateCoupon(@Req() req: any, @Param('id') id: string, @Body() body: UpdateCouponDTO) {
+  async updateCoupon(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: UpdateCouponDTO,
+  ) {
     return this.updateCouponUseCase.execute({
       ...body,
       tenantId: req.user.tenantId,

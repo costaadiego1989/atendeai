@@ -6,9 +6,14 @@ export interface ScheduleProposalRequest {
 }
 
 export class ScheduleProposalDeliveryUseCase {
-  constructor(private readonly scheduleProposalDeliveryService: ScheduleProposalDeliveryService) {}
+  constructor(
+    private readonly scheduleProposalDeliveryService: ScheduleProposalDeliveryService,
+  ) {}
 
   async execute(request: ScheduleProposalRequest): Promise<void> {
-    await this.scheduleProposalDeliveryService.execute(request.proposalId, request.scheduledAt);
+    await this.scheduleProposalDeliveryService.execute(
+      request.proposalId,
+      request.scheduledAt,
+    );
   }
 }

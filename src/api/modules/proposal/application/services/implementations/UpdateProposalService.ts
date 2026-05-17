@@ -24,7 +24,7 @@ export class UpdateProposalService {
   constructor(
     @Inject('IProposalRepository')
     private readonly proposalRepository: IProposalRepository,
-  ) { }
+  ) {}
 
   async execute(id: string, data: UpdateProposalData): Promise<Proposal> {
     const proposal = await this.proposalRepository.findById(id);
@@ -35,19 +35,25 @@ export class UpdateProposalService {
     }
 
     if (data.items) {
-      const items = data.items.map((item: any) => ProposalItem.create({
-        name: item.name,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        description: item.description,
-      }));
+      const items = data.items.map((item: any) =>
+        ProposalItem.create({
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          description: item.description,
+        }),
+      );
       proposal.updateItems(items);
     }
 
-    if (data.description !== undefined) (proposal as any)._props.description = data.description;
-    if (data.benefits !== undefined) (proposal as any)._props.benefits = data.benefits;
-    if (data.validUntil !== undefined) (proposal as any)._props.validUntil = data.validUntil;
-    if (data.metadata !== undefined) (proposal as any)._props.metadata = data.metadata;
+    if (data.description !== undefined)
+      (proposal as any)._props.description = data.description;
+    if (data.benefits !== undefined)
+      (proposal as any)._props.benefits = data.benefits;
+    if (data.validUntil !== undefined)
+      (proposal as any)._props.validUntil = data.validUntil;
+    if (data.metadata !== undefined)
+      (proposal as any)._props.metadata = data.metadata;
 
     await this.proposalRepository.update(proposal);
     return proposal;

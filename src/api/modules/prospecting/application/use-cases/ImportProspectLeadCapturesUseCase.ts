@@ -15,9 +15,7 @@ import {
 } from '../../domain/repositories/IProspectLeadCaptureRepository';
 
 @Injectable()
-export class ImportProspectLeadCapturesUseCase
-  implements IImportProspectLeadCapturesUseCase
-{
+export class ImportProspectLeadCapturesUseCase implements IImportProspectLeadCapturesUseCase {
   constructor(
     @Inject(PROSPECT_LEAD_CAPTURE_REPOSITORY)
     private readonly leadCaptureRepository: IProspectLeadCaptureRepository,
@@ -34,13 +32,16 @@ export class ImportProspectLeadCapturesUseCase
     );
 
     if (!leads.length) {
-      throw new ValidationErrorException('No selected Google Ads leads were found');
+      throw new ValidationErrorException(
+        'No selected Google Ads leads were found',
+      );
     }
 
     let importedCount = 0;
     let reusedExistingContacts = 0;
     let skippedMissingPhone = 0;
-    const importedContacts: ImportProspectLeadCapturesOutput['importedContacts'] = [];
+    const importedContacts: ImportProspectLeadCapturesOutput['importedContacts'] =
+      [];
 
     for (const lead of leads) {
       if (!lead.phone) {
@@ -100,8 +101,12 @@ export class ImportProspectLeadCapturesUseCase
       'Lead captado via Google Ads',
       lead.campaignName ? `Campanha: ${lead.campaignName}` : undefined,
       lead.formName ? `Formulario: ${lead.formName}` : undefined,
-      lead.city ? `Cidade: ${lead.city}${lead.state ? `/${lead.state}` : ''}` : undefined,
-      lead.interests ? `Interesses: ${JSON.stringify(lead.interests)}` : undefined,
+      lead.city
+        ? `Cidade: ${lead.city}${lead.state ? `/${lead.state}` : ''}`
+        : undefined,
+      lead.interests
+        ? `Interesses: ${JSON.stringify(lead.interests)}`
+        : undefined,
     ]
       .filter(Boolean)
       .join(' | ');

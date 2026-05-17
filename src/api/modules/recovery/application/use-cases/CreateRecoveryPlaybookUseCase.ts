@@ -15,10 +15,12 @@ export class CreateRecoveryPlaybookUseCase {
 
   async execute(input: CreateRecoveryPlaybookInput) {
     if (!input.phases?.length) {
-      throw new ValidationErrorException('Indique pelo menos uma fase no playbook');
+      throw new ValidationErrorException(
+        'Indique pelo menos uma fase no playbook',
+      );
     }
     for (const p of input.phases) {
-      if (p.mode === 'TEMPLATE' && !(p.templateBody?.trim())) {
+      if (p.mode === 'TEMPLATE' && !p.templateBody?.trim()) {
         throw new ValidationErrorException('Fase TEMPLATE requer templateBody');
       }
     }

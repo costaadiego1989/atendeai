@@ -13,7 +13,7 @@ export class FollowUpTriggeredHandler implements OnModuleInit {
     private readonly eventBus: IEventBus,
     @Inject(IProcessAIResponseUseCase)
     private readonly processAIResponseUseCase: IProcessAIResponseUseCase,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.eventBus.subscribe<FollowUpTriggeredEvent>(
@@ -43,12 +43,18 @@ export class FollowUpTriggeredHandler implements OnModuleInit {
       `Follow-up de ${payload.interval}`,
       intelligence?.summary ? `Resumo: ${intelligence.summary}` : null,
       intelligence?.sentiment ? `Sentimento: ${intelligence.sentiment}` : null,
-      intelligence?.tags?.length ? `Tags: ${intelligence.tags.join(', ')}` : null,
+      intelligence?.tags?.length
+        ? `Tags: ${intelligence.tags.join(', ')}`
+        : null,
       intelligence?.interests?.length
         ? `Interesses: ${intelligence.interests.join(', ')}`
         : null,
-      intelligence?.lossReason ? `possível motivo de perda: ${intelligence.lossReason}` : null,
-      intelligence?.nextStep ? `Proximo passo sugerido: ${intelligence.nextStep}` : null,
+      intelligence?.lossReason
+        ? `possível motivo de perda: ${intelligence.lossReason}`
+        : null,
+      intelligence?.nextStep
+        ? `Proximo passo sugerido: ${intelligence.nextStep}`
+        : null,
     ].filter(Boolean);
 
     return [

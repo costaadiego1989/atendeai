@@ -7,7 +7,12 @@ export interface ProcessInboundMessageInput {
   fromPhone: string;
   toPhone: string;
   contentType: 'text' | 'image' | 'audio' | 'video' | 'document';
-  content: { text?: string; url?: string; mimeType?: string; fileName?: string };
+  content: {
+    text?: string;
+    url?: string;
+    mimeType?: string;
+    fileName?: string;
+  };
   channel: 'WHATSAPP' | 'INSTAGRAM';
 }
 

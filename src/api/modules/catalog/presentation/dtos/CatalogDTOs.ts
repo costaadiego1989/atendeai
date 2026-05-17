@@ -82,7 +82,9 @@ export class CreateCatalogItemDTO {
   imageUrl?: string;
 
   @IsOptional()
-  @Transform(({ value }) => (value === '' || value == null ? undefined : Number(value)))
+  @Transform(({ value }) =>
+    value === '' || value == null ? undefined : Number(value),
+  )
   @IsInt()
   @Min(0)
   initialStock?: number;

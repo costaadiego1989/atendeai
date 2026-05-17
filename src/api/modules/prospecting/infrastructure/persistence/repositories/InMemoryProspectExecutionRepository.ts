@@ -77,8 +77,24 @@ export class InMemoryProspectExecutionRepository implements IProspectExecutionRe
   async findLatestByContactIds(
     tenantId: string,
     contactIds: string[],
-  ): Promise<Array<{ contactId: string; status: string; updatedAt: Date; stopReason?: string | null; campaignName?: string }>> {
-    const seen = new Map<string, { contactId: string; status: string; updatedAt: Date; stopReason?: string | null }>();
+  ): Promise<
+    Array<{
+      contactId: string;
+      status: string;
+      updatedAt: Date;
+      stopReason?: string | null;
+      campaignName?: string;
+    }>
+  > {
+    const seen = new Map<
+      string,
+      {
+        contactId: string;
+        status: string;
+        updatedAt: Date;
+        stopReason?: string | null;
+      }
+    >();
 
     for (const execution of this.executions.values()) {
       if (
@@ -105,7 +121,9 @@ export class InMemoryProspectExecutionRepository implements IProspectExecutionRe
   async findActiveByContact(
     tenantId: string,
     contactId: string,
-  ): Promise<import('../../../domain/entities/ProspectExecution').ProspectExecution[]> {
+  ): Promise<
+    import('../../../domain/entities/ProspectExecution').ProspectExecution[]
+  > {
     return [...this.executions.values()].filter(
       (e) =>
         e.tenantId.toString() === tenantId &&

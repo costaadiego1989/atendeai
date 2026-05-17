@@ -17,10 +17,9 @@ export class DeduplicateMessageStep {
       return { ...ctx, isDuplicate: false };
     }
 
-    const existing =
-      await this.conversationRepository.findByExternalMessageId(
-        ctx.input.externalMessageId,
-      );
+    const existing = await this.conversationRepository.findByExternalMessageId(
+      ctx.input.externalMessageId,
+    );
 
     return { ...ctx, isDuplicate: !!existing };
   }

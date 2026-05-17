@@ -43,10 +43,18 @@ describe('BillingUsageHandlers', () => {
       const handler = getHandler('messaging.message-sent');
 
       await handler({
-        payload: { tenantId: 'tenant-1', conversationId: 'conv-1', contactId: 'c-1' },
+        payload: {
+          tenantId: 'tenant-1',
+          conversationId: 'conv-1',
+          contactId: 'c-1',
+        },
       });
       await handler({
-        payload: { tenantId: 'tenant-1', conversationId: 'conv-2', contactId: 'c-2' },
+        payload: {
+          tenantId: 'tenant-1',
+          conversationId: 'conv-2',
+          contactId: 'c-2',
+        },
       });
 
       expect(recordUsageUseCase.execute).toHaveBeenCalledTimes(2);
@@ -115,7 +123,11 @@ describe('BillingUsageHandlers', () => {
 
       await expect(
         handler({
-          payload: { tenantId: 'tenant-5', conversationId: 'conv-1', contactId: 'c-1' },
+          payload: {
+            tenantId: 'tenant-5',
+            conversationId: 'conv-1',
+            contactId: 'c-1',
+          },
         }),
       ).rejects.toThrow('DB failure');
     });
@@ -127,7 +139,11 @@ describe('BillingUsageHandlers', () => {
       const aiHandler = getHandler('ai.response-generated');
 
       await messageHandler({
-        payload: { tenantId: 'tenant-6', conversationId: 'conv-1', contactId: 'c-1' },
+        payload: {
+          tenantId: 'tenant-6',
+          conversationId: 'conv-1',
+          contactId: 'c-1',
+        },
       });
       await aiHandler({
         payload: { tenantId: 'tenant-6', tokensUsed: 200 },

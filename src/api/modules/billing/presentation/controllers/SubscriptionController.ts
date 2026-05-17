@@ -1,13 +1,22 @@
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
 import {
   ChangeSubscriptionPlanDTO,
   ReplaceSubscriptionModulesDTO,
 } from '../dtos/SubscriptionDTOs';
-import {
-  IChangeSubscriptionPlanUseCase,
-} from '../../application/use-cases/interfaces/IChangeSubscriptionPlanUseCase';
+import { IChangeSubscriptionPlanUseCase } from '../../application/use-cases/interfaces/IChangeSubscriptionPlanUseCase';
 import { ICancelSubscriptionUseCase } from '../../application/use-cases/interfaces/ICancelSubscriptionUseCase';
 import { IListBillingPlansUseCase } from '../../application/use-cases/interfaces/IListBillingPlansUseCase';
 import { IGetSubscriptionCatalogUseCase } from '../../application/use-cases/interfaces/IGetSubscriptionCatalogUseCase';

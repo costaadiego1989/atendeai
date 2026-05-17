@@ -18,7 +18,7 @@ export class DeleteTenantBranchUseCase {
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
     private readonly tenantAuditService: TenantAuditService,
-  ) { }
+  ) {}
 
   async execute(input: DeleteTenantBranchInput) {
     await this.tenantRepository.deleteBranch(input.tenantId, input.branchId);

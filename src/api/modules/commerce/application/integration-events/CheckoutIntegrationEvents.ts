@@ -103,14 +103,12 @@ export class CommerceOrderPaidIntegrationEvent extends IntegrationEvent {
     return this.payload.orderId as string;
   }
 
-  constructor(
-    data: {
-      orderId: string;
-      tenantId: string;
-      paidAt: Date;
-      totalAmount: number;
-    },
-  ) {
+  constructor(data: {
+    orderId: string;
+    tenantId: string;
+    paidAt: Date;
+    totalAmount: number;
+  }) {
     super();
     this.payload = data;
   }
@@ -129,12 +127,7 @@ export class CommerceOrderPreparingIntegrationEvent extends IntegrationEvent {
     return this.payload.orderId as string;
   }
 
-  constructor(
-    data: {
-      orderId: string;
-      tenantId: string;
-    },
-  ) {
+  constructor(data: { orderId: string; tenantId: string }) {
     super();
     this.payload = data;
   }
@@ -153,12 +146,7 @@ export class CommerceOrderShippedIntegrationEvent extends IntegrationEvent {
     return this.payload.orderId as string;
   }
 
-  constructor(
-    data: {
-      orderId: string;
-      tenantId: string;
-    },
-  ) {
+  constructor(data: { orderId: string; tenantId: string }) {
     super();
     this.payload = data;
   }
@@ -177,12 +165,7 @@ export class CommerceOrderReadyForPickupIntegrationEvent extends IntegrationEven
     return this.payload.orderId as string;
   }
 
-  constructor(
-    data: {
-      orderId: string;
-      tenantId: string;
-    },
-  ) {
+  constructor(data: { orderId: string; tenantId: string }) {
     super();
     this.payload = data;
   }
@@ -201,12 +184,7 @@ export class CommerceOrderDeliveredIntegrationEvent extends IntegrationEvent {
     return this.payload.orderId as string;
   }
 
-  constructor(
-    data: {
-      orderId: string;
-      tenantId: string;
-    },
-  ) {
+  constructor(data: { orderId: string; tenantId: string }) {
     super();
     this.payload = data;
   }
@@ -225,12 +203,7 @@ export class CommerceOrderCancelledIntegrationEvent extends IntegrationEvent {
     return this.payload.orderId as string;
   }
 
-  constructor(
-    data: {
-      orderId: string;
-      tenantId: string;
-    },
-  ) {
+  constructor(data: { orderId: string; tenantId: string }) {
     super();
     this.payload = data;
   }
@@ -249,18 +222,16 @@ export class CommerceSessionAbandonedIntegrationEvent extends IntegrationEvent {
     return this.payload.sessionId as string;
   }
 
-  constructor(
-    data: {
-      sessionId: string;
-      tenantId: string;
-      conversationId?: string;
-      contactId?: string | null;
-      interval?: string;
-      subtotalAmount?: number;
-      totalAmount?: number;
-      currentStep?: string;
-    },
-  ) {
+  constructor(data: {
+    sessionId: string;
+    tenantId: string;
+    conversationId?: string;
+    contactId?: string | null;
+    interval?: string;
+    subtotalAmount?: number;
+    totalAmount?: number;
+    currentStep?: string;
+  }) {
     super();
     this.payload = data;
   }

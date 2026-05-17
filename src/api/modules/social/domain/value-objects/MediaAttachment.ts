@@ -22,10 +22,18 @@ export class MediaAttachment {
     });
   }
 
-  get type(): MediaType { return this.props.type; }
-  get url(): string { return this.props.url; }
-  get caption(): string | undefined { return this.props.caption; }
-  get mimeType(): string | undefined { return this.props.mimeType; }
+  get type(): MediaType {
+    return this.props.type;
+  }
+  get url(): string {
+    return this.props.url;
+  }
+  get caption(): string | undefined {
+    return this.props.caption;
+  }
+  get mimeType(): string | undefined {
+    return this.props.mimeType;
+  }
 
   toJSON(): MediaAttachmentProps {
     return { ...this.props };

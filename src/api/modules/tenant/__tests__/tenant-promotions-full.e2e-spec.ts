@@ -17,10 +17,14 @@ describe('Tenant Promotions Full CRUD (e2e)', () => {
   let tenantId: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     app.useGlobalFilters(new GlobalExceptionFilter());
     app.useGlobalInterceptors(new SuccessResponseInterceptor());
     app.setGlobalPrefix('api/v1');
@@ -29,29 +33,39 @@ describe('Tenant Promotions Full CRUD (e2e)', () => {
 
     await cleanup(prisma, testCnpj, testEmail);
 
-    const createRes = await request(app.getHttpServer()).post('/api/v1/tenants').send({
-      companyName: 'Promotions Test Corp',
-      cnpj: testCnpj,
-      ownerName: 'Test Owner',
-      ownerEmail: testEmail,
-      ownerPhone: '11999998888',
-      ownerPassword: 'password123',
-      plan: 'PROFISSIONAL',
-    });
+    const createRes = await request(app.getHttpServer())
+      .post('/api/v1/tenants')
+      .send({
+        companyName: 'Promotions Test Corp',
+        cnpj: testCnpj,
+        ownerName: 'Test Owner',
+        ownerEmail: testEmail,
+        ownerPhone: '11999998888',
+        ownerPassword: 'password123',
+        plan: 'PROFISSIONAL',
+      });
 
     if (createRes.status !== 201) {
-      console.error('Tenant setup failed:', createRes.status, JSON.stringify(createRes.body));
+      console.error(
+        'Tenant setup failed:',
+        createRes.status,
+        JSON.stringify(createRes.body),
+      );
       throw new Error(`Tenant creation failed`);
     }
 
-    const loginRes = await request(app.getHttpServer()).post('/api/v1/auth/login').send({ email: testEmail, password: 'password123' });
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({ email: testEmail, password: 'password123' });
 
     if (loginRes.status !== 200) {
       throw new Error(`Login failed: ${JSON.stringify(loginRes.body)}`);
     }
 
     authCookie = loginRes.get('Set-Cookie') || [];
-    const tenant = await prisma.tenant.findUnique({ where: { cnpj: testCnpj } });
+    const tenant = await prisma.tenant.findUnique({
+      where: { cnpj: testCnpj },
+    });
     tenantId = tenant!.id;
   });
 
@@ -59,8 +73,12 @@ describe('Tenant Promotions Full CRUD (e2e)', () => {
     const tenant = await prisma.tenant.findUnique({ where: { cnpj } });
     if (tenant) {
       const tid = tenant.id;
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${tid}::uuid`);
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM tenant_schema.tenant_branches WHERE tenant_id = ${tid}::uuid`);
+      await prisma.$executeRaw(
+        Prisma.sql`DELETE FROM tenant_schema.tenant_audit_logs WHERE tenant_id = ${tid}::uuid`,
+      );
+      await prisma.$executeRaw(
+        Prisma.sql`DELETE FROM tenant_schema.tenant_branches WHERE tenant_id = ${tid}::uuid`,
+      );
       await prisma.whatsAppConfig.deleteMany({ where: { tenantId: tid } });
       await prisma.aIConfig.deleteMany({ where: { tenantId: tid } });
       await prisma.tenantAgentRule.deleteMany({ where: { tenantId: tid } });
@@ -86,7 +104,7 @@ describe('Tenant Promotions Full CRUD (e2e)', () => {
         title: 'Promotion 1',
         description: 'Description 1',
         value: '10%',
-        expiresAt: new Date(Date.now() + 86400000).toISOString()
+        expiresAt: new Date(Date.now() + 86400000).toISOString(),
       });
 
     expect(createRes.status).toBe(201);
@@ -109,7 +127,7 @@ describe('Tenant Promotions Full CRUD (e2e)', () => {
       .send({
         title: 'Promotion 1 Updated',
         description: 'Description 1 Updated',
-        value: '20%'
+        value: '20%',
       });
 
     expect(updateRes.status).toBe(200);

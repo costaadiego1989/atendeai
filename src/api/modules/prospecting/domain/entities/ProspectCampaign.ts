@@ -14,8 +14,17 @@ interface ProspectCampaignProps {
   channel: ProspectChannelVO;
   targetContactIds: string[];
   messageTemplate?: string;
+  templateName?: string;
+  languageCode: string;
+  templateVariableMapping?: Record<string, string>;
+  aiVariableGeneration: boolean;
+  cooldownDays: number;
+  minDelaySeconds: number;
+  maxDelaySeconds: number;
+  blockRateThreshold: number;
   dailyLimit: number;
   status: ProspectCampaignStatusVO;
+  pauseReason?: string;
 }
 
 export class ProspectCampaign extends AggregateRoot<ProspectCampaignProps> {
@@ -56,6 +65,38 @@ export class ProspectCampaign extends AggregateRoot<ProspectCampaignProps> {
     return this.props.messageTemplate;
   }
 
+  get templateName(): string | undefined {
+    return this.props.templateName;
+  }
+
+  get languageCode(): string {
+    return this.props.languageCode;
+  }
+
+  get templateVariableMapping(): Record<string, string> | undefined {
+    return this.props.templateVariableMapping;
+  }
+
+  get aiVariableGeneration(): boolean {
+    return this.props.aiVariableGeneration;
+  }
+
+  get cooldownDays(): number {
+    return this.props.cooldownDays;
+  }
+
+  get minDelaySeconds(): number {
+    return this.props.minDelaySeconds;
+  }
+
+  get maxDelaySeconds(): number {
+    return this.props.maxDelaySeconds;
+  }
+
+  get blockRateThreshold(): number {
+    return this.props.blockRateThreshold;
+  }
+
   get dailyLimit(): number {
     return this.props.dailyLimit;
   }
@@ -64,13 +105,32 @@ export class ProspectCampaign extends AggregateRoot<ProspectCampaignProps> {
     return this.props.status;
   }
 
+  get pauseReason(): string | undefined {
+    return this.props.pauseReason;
+  }
+
   public static create(
     props: Omit<
       ProspectCampaignProps,
-      'status' | 'dailyLimit' | 'targetContactIds'
+      | 'status'
+      | 'dailyLimit'
+      | 'targetContactIds'
+      | 'languageCode'
+      | 'aiVariableGeneration'
+      | 'cooldownDays'
+      | 'minDelaySeconds'
+      | 'maxDelaySeconds'
+      | 'blockRateThreshold'
+      | 'pauseReason'
     > & {
       dailyLimit?: number;
       targetContactIds?: string[];
+      languageCode?: string;
+      aiVariableGeneration?: boolean;
+      cooldownDays?: number;
+      minDelaySeconds?: number;
+      maxDelaySeconds?: number;
+      blockRateThreshold?: number;
     },
     id?: UniqueEntityID,
   ): ProspectCampaign {
@@ -99,6 +159,12 @@ export class ProspectCampaign extends AggregateRoot<ProspectCampaignProps> {
         ...props,
         targetContactIds: normalizedTargetContactIds,
         dailyLimit,
+        languageCode: props.languageCode ?? 'pt_BR',
+        aiVariableGeneration: props.aiVariableGeneration ?? false,
+        cooldownDays: props.cooldownDays ?? 30,
+        minDelaySeconds: props.minDelaySeconds ?? 30,
+        maxDelaySeconds: props.maxDelaySeconds ?? 120,
+        blockRateThreshold: props.blockRateThreshold ?? 0.05,
         status: ProspectCampaignStatusVO.create('DRAFT'),
       },
       id,
@@ -121,7 +187,14 @@ export class ProspectCampaign extends AggregateRoot<ProspectCampaignProps> {
       );
     }
 
+    if (this.props.channel.value === 'WHATSAPP' && !this.props.templateName) {
+      throw new ValidationErrorException(
+        'Template obrigatório para campanhas WhatsApp. Defina templateName antes de ativar.',
+      );
+    }
+
     this.props.status = ProspectCampaignStatusVO.create('ACTIVE');
+    this.props.pauseReason = undefined;
     this.updatedAt = new Date();
   }
 
@@ -133,6 +206,16 @@ export class ProspectCampaign extends AggregateRoot<ProspectCampaignProps> {
     }
 
     this.props.status = ProspectCampaignStatusVO.create('PAUSED');
+    this.updatedAt = new Date();
+  }
+
+  public pauseWithReason(reason: string): void {
+    if (this.props.status.value !== 'ACTIVE') {
+      return;
+    }
+
+    this.props.status = ProspectCampaignStatusVO.create('PAUSED');
+    this.props.pauseReason = reason;
     this.updatedAt = new Date();
   }
 }

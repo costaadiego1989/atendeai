@@ -90,7 +90,10 @@ describe('GetShoppingSessionUseCase', () => {
     const result = await useCase.execute(tenantId, sessionId);
 
     expect(result).toEqual(mockSession);
-    expect(commerceRepo.findSessionById).toHaveBeenCalledWith(tenantId, sessionId);
+    expect(commerceRepo.findSessionById).toHaveBeenCalledWith(
+      tenantId,
+      sessionId,
+    );
   });
 
   it('should throw NotFoundException when session is not found', async () => {
@@ -108,7 +111,10 @@ describe('GetShoppingSessionUseCase', () => {
     await expect(useCase.execute(otherTenantId, sessionId)).rejects.toThrow(
       NotFoundException,
     );
-    expect(commerceRepo.findSessionById).toHaveBeenCalledWith(otherTenantId, sessionId);
+    expect(commerceRepo.findSessionById).toHaveBeenCalledWith(
+      otherTenantId,
+      sessionId,
+    );
   });
 
   it('should return session including items and totals', async () => {

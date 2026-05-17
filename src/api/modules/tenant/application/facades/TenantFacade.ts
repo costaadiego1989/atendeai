@@ -50,7 +50,11 @@ export class TenantFacade implements ITenantFacade {
   async getWhatsAppConfigByNumber(
     phoneNumber?: string | null,
     bubbleWhatsId?: string | null,
-  ): Promise<{ tenantId: string; branchId?: string | null; config: WhatsAppConfig } | null> {
+  ): Promise<{
+    tenantId: string;
+    branchId?: string | null;
+    config: WhatsAppConfig;
+  } | null> {
     let tenant = null;
     let branch = null;
     let branchId: string | null = null;
@@ -91,7 +95,8 @@ export class TenantFacade implements ITenantFacade {
     const branchOverride = branch?.whatsAppConfigOverride ?? null;
     const provider = branchOverride?.provider ?? tenant.whatsAppConfig.provider;
     const credentials =
-      branchOverride?.credentials && Object.keys(branchOverride.credentials).length > 0
+      branchOverride?.credentials &&
+      Object.keys(branchOverride.credentials).length > 0
         ? branchOverride.credentials
         : tenant.whatsAppConfig.credentials;
     const webhookSecret =
@@ -110,7 +115,8 @@ export class TenantFacade implements ITenantFacade {
               }
             : credentials,
         webhookSecret,
-        whatsappNumber: branch?.whatsappNumber || tenant.whatsAppConfig.whatsappNumber,
+        whatsappNumber:
+          branch?.whatsappNumber || tenant.whatsAppConfig.whatsappNumber,
         status: tenant.whatsAppConfig.status,
         branchId,
       },
@@ -122,12 +128,11 @@ export class TenantFacade implements ITenantFacade {
     channel: MessagingChannel,
     branchId?: string | null,
   ): Promise<MessagingChannelConfig | null> {
-    const branch =
-      branchId
-        ? (await this.tenantRepository.listBranches(tenantId)).find(
-            (entry) => entry.id.toValue() === branchId,
-          ) ?? null
-        : null;
+    const branch = branchId
+      ? ((await this.tenantRepository.listBranches(tenantId)).find(
+          (entry) => entry.id.toValue() === branchId,
+        ) ?? null)
+      : null;
 
     if (channel === 'WHATSAPP') {
       const config = await this.getWhatsAppConfig(tenantId);
@@ -138,10 +143,12 @@ export class TenantFacade implements ITenantFacade {
       const branchOverride = branch?.whatsAppConfigOverride ?? null;
       const provider = branchOverride?.provider ?? config.provider;
       const credentials =
-        branchOverride?.credentials && Object.keys(branchOverride.credentials).length > 0
+        branchOverride?.credentials &&
+        Object.keys(branchOverride.credentials).length > 0
           ? branchOverride.credentials
           : config.credentials;
-      const webhookSecret = branchOverride?.webhookSecret ?? config.webhookSecret;
+      const webhookSecret =
+        branchOverride?.webhookSecret ?? config.webhookSecret;
 
       return {
         channel: 'WHATSAPP',
@@ -170,7 +177,8 @@ export class TenantFacade implements ITenantFacade {
       provider: config.provider,
       credentials: config.credentials,
       webhookSecret: config.webhookSecret,
-      externalAccountId: branch?.instagramAccountId || config.instagramAccountId,
+      externalAccountId:
+        branch?.instagramAccountId || config.instagramAccountId,
       status: config.status,
       branchId: branch?.id.toValue() ?? null,
     };

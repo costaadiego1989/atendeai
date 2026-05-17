@@ -23,7 +23,15 @@ export interface IProspectExecutionRepository {
   findLatestByContactIds(
     tenantId: string,
     contactIds: string[],
-  ): Promise<Array<{ contactId: string; status: string; updatedAt: Date; stopReason?: string | null; campaignName?: string }>>;
+  ): Promise<
+    Array<{
+      contactId: string;
+      status: string;
+      updatedAt: Date;
+      stopReason?: string | null;
+      campaignName?: string;
+    }>
+  >;
 
   findActiveByContact(
     tenantId: string,

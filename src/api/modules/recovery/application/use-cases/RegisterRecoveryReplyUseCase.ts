@@ -26,10 +26,11 @@ export class RegisterRecoveryReplyUseCase {
   ) {}
 
   async execute(command: RegisterRecoveryReplyCommand) {
-    const recoveryCase = await this.recoveryRepository.findLatestActiveCaseByContact(
-      command.tenantId,
-      command.contactId,
-    );
+    const recoveryCase =
+      await this.recoveryRepository.findLatestActiveCaseByContact(
+        command.tenantId,
+        command.contactId,
+      );
 
     if (!recoveryCase) {
       return null;

@@ -16,7 +16,11 @@ export interface PurchaseAddonPackageOutput {
   checkoutUrl: string;
 }
 
-export interface IPurchaseAddonPackageUseCase
-  extends IUseCase<PurchaseAddonPackageInput, PurchaseAddonPackageOutput> {}
+export interface IPurchaseAddonPackageUseCase extends IUseCase<
+  PurchaseAddonPackageInput,
+  PurchaseAddonPackageOutput
+> {}
 
-export const IPurchaseAddonPackageUseCase = Symbol('IPurchaseAddonPackageUseCase');
+export const IPurchaseAddonPackageUseCase = Symbol(
+  'IPurchaseAddonPackageUseCase',
+);

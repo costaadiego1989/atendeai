@@ -16,7 +16,11 @@ export class AwaitingQuantityStepHandler {
     private readonly conversationFlowRules: CommerceConversationFlowRules,
   ) {}
 
-  async handle({ input, session, normalizedMessage }: CommerceConversationHandlerContext) {
+  async handle({
+    input,
+    session,
+    normalizedMessage,
+  }: CommerceConversationHandlerContext) {
     const quantity =
       this.conversationFlowRules.extractPositiveInteger(normalizedMessage);
     if (quantity == null) {
@@ -28,11 +32,11 @@ export class AwaitingQuantityStepHandler {
       sessionId: session.id,
       inventoryItemId:
         session.selectedSource === 'INVENTORY'
-          ? session.selectedInventoryItemId ?? undefined
+          ? (session.selectedInventoryItemId ?? undefined)
           : undefined,
       catalogItemId:
         session.selectedSource === 'CATALOG'
-          ? session.selectedCatalogItemId ?? undefined
+          ? (session.selectedCatalogItemId ?? undefined)
           : undefined,
       quantity,
     });

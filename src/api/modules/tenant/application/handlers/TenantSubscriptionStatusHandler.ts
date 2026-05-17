@@ -10,7 +10,7 @@ export class TenantSubscriptionStatusHandler implements OnModuleInit {
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
     private readonly updateTenantPlanStatusUseCase: UpdateTenantPlanStatusUseCase,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.subscribeToEvents();
@@ -28,9 +28,14 @@ export class TenantSubscriptionStatusHandler implements OnModuleInit {
             tenantId,
             status: 'ACTIVE',
           });
-          this.logger.log(`Tenant ${tenantId} plan status updated to ACTIVE due to payment confirmation.`);
+          this.logger.log(
+            `Tenant ${tenantId} plan status updated to ACTIVE due to payment confirmation.`,
+          );
         } catch (error) {
-          this.logger.error(`Failed to update tenant ${tenantId} status on payment confirmation`, error);
+          this.logger.error(
+            `Failed to update tenant ${tenantId} status on payment confirmation`,
+            error,
+          );
         }
       },
       { consumerName: 'tenant-plan-status-payment-confirmed' },
@@ -47,9 +52,14 @@ export class TenantSubscriptionStatusHandler implements OnModuleInit {
             tenantId,
             status: 'EXPIRED',
           });
-          this.logger.log(`Tenant ${tenantId} plan status updated to EXPIRED due to overdue payment.`);
+          this.logger.log(
+            `Tenant ${tenantId} plan status updated to EXPIRED due to overdue payment.`,
+          );
         } catch (error) {
-          this.logger.error(`Failed to update tenant ${tenantId} status on payment overdue`, error);
+          this.logger.error(
+            `Failed to update tenant ${tenantId} status on payment overdue`,
+            error,
+          );
         }
       },
       { consumerName: 'tenant-plan-status-payment-overdue' },
@@ -66,9 +76,14 @@ export class TenantSubscriptionStatusHandler implements OnModuleInit {
             tenantId,
             status: 'TRIAL_EXPIRED',
           });
-          this.logger.log(`Tenant ${tenantId} plan status updated to TRIAL_EXPIRED.`);
+          this.logger.log(
+            `Tenant ${tenantId} plan status updated to TRIAL_EXPIRED.`,
+          );
         } catch (error) {
-          this.logger.error(`Failed to update tenant ${tenantId} status on trial expiration`, error);
+          this.logger.error(
+            `Failed to update tenant ${tenantId} status on trial expiration`,
+            error,
+          );
         }
       },
       { consumerName: 'tenant-plan-status-trial-expired' },

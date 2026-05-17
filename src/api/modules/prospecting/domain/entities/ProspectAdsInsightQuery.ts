@@ -95,7 +95,8 @@ export class ProspectAdsInsightQuery extends AggregateRoot<ProspectAdsInsightQue
     return new ProspectAdsInsightQuery(
       {
         tenantId: props.tenantId,
-        source: props.source ?? ProspectSearchSourceVO.create('GOOGLE_ADS_AUDIENCE'),
+        source:
+          props.source ?? ProspectSearchSourceVO.create('GOOGLE_ADS_AUDIENCE'),
         segment,
         city: props.city?.trim() || undefined,
         state: props.state?.trim() || undefined,
@@ -135,7 +136,8 @@ export class ProspectAdsInsightQuery extends AggregateRoot<ProspectAdsInsightQue
 
   public markAsFailed(reason: string): void {
     this.props.status = ProspectSearchStatusVO.create('FAILED');
-    this.props.failureReason = reason?.trim() || 'Unknown Google Ads insight failure';
+    this.props.failureReason =
+      reason?.trim() || 'Unknown Google Ads insight failure';
     this.updatedAt = new Date();
   }
 }

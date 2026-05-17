@@ -18,9 +18,7 @@ import { UniqueEntityID } from '@shared/domain/UniqueEntityID';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 
 @Injectable()
-export class EnsureConversationForContactUseCase
-  implements IEnsureConversationForContactUseCase
-{
+export class EnsureConversationForContactUseCase implements IEnsureConversationForContactUseCase {
   constructor(
     @Inject(CONVERSATION_REPOSITORY)
     private readonly conversationRepository: IConversationRepository,

@@ -5,7 +5,13 @@ export interface ImportContactsListInput {
   tenantId: string;
   branchId?: string;
   rawText: string;
-  defaultStage?: ContactStage | 'LEAD' | 'PROSPECT' | 'OPPORTUNITY' | 'CUSTOMER' | 'INACTIVE';
+  defaultStage?:
+    | ContactStage
+    | 'LEAD'
+    | 'PROSPECT'
+    | 'OPPORTUNITY'
+    | 'CUSTOMER'
+    | 'INACTIVE';
   defaultTags?: string[];
 }
 
@@ -26,5 +32,7 @@ export interface ImportContactsListOutput {
 }
 
 export const IImportContactsListUseCase = Symbol('IImportContactsListUseCase');
-export interface IImportContactsListUseCase
-  extends IUseCase<ImportContactsListInput, ImportContactsListOutput> {}
+export interface IImportContactsListUseCase extends IUseCase<
+  ImportContactsListInput,
+  ImportContactsListOutput
+> {}

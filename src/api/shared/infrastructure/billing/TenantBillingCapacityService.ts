@@ -88,7 +88,10 @@ export class TenantBillingCapacityService {
     const configLimits = config?.limits ?? {};
 
     return {
-      branches: this.positiveNumber(configLimits.branches, DEFAULT_LIMITS.branches),
+      branches: this.positiveNumber(
+        configLimits.branches,
+        DEFAULT_LIMITS.branches,
+      ),
       whatsappNumbers: this.positiveNumber(
         configLimits.whatsappNumbers,
         DEFAULT_LIMITS.whatsappNumbers,

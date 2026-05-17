@@ -31,7 +31,9 @@ export class JoinSchedulingMeetingUseCase {
     private readonly messaging: IMessagingFacade,
   ) {}
 
-  async execute(input: JoinSchedulingMeetingInput): Promise<JoinSchedulingMeetingOutput> {
+  async execute(
+    input: JoinSchedulingMeetingInput,
+  ): Promise<JoinSchedulingMeetingOutput> {
     const slot = await this.store.getAvailabilitySlot(
       input.tenantId,
       input.professionalId,

@@ -30,7 +30,9 @@ describe('UpdateAbandonmentConfigUseCase', () => {
   });
 
   it('should update abandonment config', async () => {
-    commerceRepo.upsertAbandonmentConfig.mockResolvedValue(mockUpdatedConfig as any);
+    commerceRepo.upsertAbandonmentConfig.mockResolvedValue(
+      mockUpdatedConfig as any,
+    );
 
     const input = {
       active: true,
@@ -51,7 +53,9 @@ describe('UpdateAbandonmentConfigUseCase', () => {
   });
 
   it('should pass intervalMinutes to repository', async () => {
-    commerceRepo.upsertAbandonmentConfig.mockResolvedValue(mockUpdatedConfig as any);
+    commerceRepo.upsertAbandonmentConfig.mockResolvedValue(
+      mockUpdatedConfig as any,
+    );
 
     const input = {
       active: true,

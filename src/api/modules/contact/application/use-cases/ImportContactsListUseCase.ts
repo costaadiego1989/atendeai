@@ -24,9 +24,14 @@ export class ImportContactsListUseCase implements IImportContactsListUseCase {
     private readonly contactImportParser: ContactImportParser,
   ) {}
 
-  async execute(input: ImportContactsListInput): Promise<ImportContactsListOutput> {
+  async execute(
+    input: ImportContactsListInput,
+  ): Promise<ImportContactsListOutput> {
     const tenantId = TenantId.create(input.tenantId);
-    const rows = this.contactImportParser.parseRows(input.rawText, input.defaultTags ?? []);
+    const rows = this.contactImportParser.parseRows(
+      input.rawText,
+      input.defaultTags ?? [],
+    );
     const items: ImportContactsListOutput['items'] = [];
     let created = 0;
     let updated = 0;
@@ -65,7 +70,10 @@ export class ImportContactsListUseCase implements IImportContactsListUseCase {
             existing.assignBranch(input.branchId);
           }
 
-          if (input.defaultStage && existing.stage.value !== input.defaultStage) {
+          if (
+            input.defaultStage &&
+            existing.stage.value !== input.defaultStage
+          ) {
             existing.updateStage(ContactStageVO.create(input.defaultStage));
           }
 
@@ -113,7 +121,10 @@ export class ImportContactsListUseCase implements IImportContactsListUseCase {
           status: 'FAILED',
           name: row.name,
           phone: row.phone,
-          reason: error instanceof Error ? error.message : 'Falha ao importar a linha.',
+          reason:
+            error instanceof Error
+              ? error.message
+              : 'Falha ao importar a linha.',
         });
       }
     }

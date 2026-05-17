@@ -41,9 +41,7 @@ describe('SchedulingController (e2e)', () => {
 
     const cookies = response.get('Set-Cookie');
     expect(cookies).toBeDefined();
-    return cookies!
-      .map((cookie) => cookie.split(';')[0])
-      .join('; ');
+    return cookies!.map((cookie) => cookie.split(';')[0]).join('; ');
   }
 
   async function clearSchedulingKeys(currentTenantId: string) {
@@ -151,7 +149,9 @@ describe('SchedulingController (e2e)', () => {
       ON payment_schema.payment_webhook_receipts (receipt_key)
     `);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => { });
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -181,18 +181,22 @@ describe('SchedulingController (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await clearSchedulingKeys(tenantId).catch(() => { });
-      await prisma.$executeRaw(
-        Prisma.sql`
+      await clearSchedulingKeys(tenantId).catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
           DELETE FROM scheduling_schema.scheduling_async_jobs
           WHERE tenant_id = ${tenantId}::uuid
         `,
-      ).catch(() => { });
+        )
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {
@@ -977,31 +981,35 @@ describe('SchedulingController (e2e)', () => {
       );
     });
 
-    await waitFor(async () => {
-      const messages = await prisma.message.findMany({
-        where: {
-          conversation: {
-            tenantId,
-            contactId: contactResponse.body.id,
+    await waitFor(
+      async () => {
+        const messages = await prisma.message.findMany({
+          where: {
+            conversation: {
+              tenantId,
+              contactId: contactResponse.body.id,
+            },
+            sentBy: 'SYSTEM',
+            direction: 'OUTBOUND',
           },
-          sentBy: 'SYSTEM',
-          direction: 'OUTBOUND',
-        },
-        orderBy: { createdAt: 'asc' },
-      });
+          orderBy: { createdAt: 'asc' },
+        });
 
-      expect(messages).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            content: expect.objectContaining({
-              text: expect.stringContaining(
-                'Link do Google Meet: https://meet.google.com/abc-defg-hij',
-              ),
+        expect(messages).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              content: expect.objectContaining({
+                text: expect.stringContaining(
+                  'Link do Google Meet: https://meet.google.com/abc-defg-hij',
+                ),
+              }),
             }),
-          }),
-        ]),
-      );
-    }, 60, 500);
+          ]),
+        );
+      },
+      60,
+      500,
+    );
   });
 
   it('should enqueue a scheduling report job and download the csv', async () => {
@@ -1101,7 +1109,9 @@ describe('SchedulingController (e2e)', () => {
     expect(reportJob.fileName).toContain('relatorio-agenda-');
 
     const downloadResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/scheduling/jobs/${reportJob.id}/download`)
+      .get(
+        `/api/v1/tenants/${tenantId}/scheduling/jobs/${reportJob.id}/download`,
+      )
       .set('Cookie', [authCookie])
       .expect(200);
 

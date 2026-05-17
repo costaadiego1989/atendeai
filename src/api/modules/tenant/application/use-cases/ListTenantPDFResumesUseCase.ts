@@ -1,5 +1,8 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { TenantPDFResumeRepository, TenantPDFResumeRecord } from '../../infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import {
+  TenantPDFResumeRepository,
+  TenantPDFResumeRecord,
+} from '../../infrastructure/persistence/repositories/TenantPDFResumeRepository';
 import {
   IDocumentChunkRepository,
   DOCUMENT_CHUNK_REPOSITORY,

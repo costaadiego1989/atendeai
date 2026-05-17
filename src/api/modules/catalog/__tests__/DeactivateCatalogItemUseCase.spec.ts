@@ -1,7 +1,10 @@
 import { DeactivateCatalogItemUseCase } from '../application/use-cases/DeactivateCatalogItemUseCase';
 import { CatalogItemNotFoundError } from '../domain/errors/CatalogItemNotFoundError';
 import { CatalogItemDeactivatedIntegrationEvent } from '../application/integration-events/CatalogIntegrationEvents';
-import { CatalogItemRecord, ICatalogRepository } from '../domain/ports/ICatalogRepository';
+import {
+  CatalogItemRecord,
+  ICatalogRepository,
+} from '../domain/ports/ICatalogRepository';
 import { IEventBus } from '@shared/application/ports/IEventBus';
 
 describe('DeactivateCatalogItemUseCase', () => {
@@ -11,7 +14,9 @@ describe('DeactivateCatalogItemUseCase', () => {
   let eventBus: jest.Mocked<IEventBus>;
   let sut: DeactivateCatalogItemUseCase;
 
-  const itemRecord = (over?: Partial<CatalogItemRecord>): CatalogItemRecord => ({
+  const itemRecord = (
+    over?: Partial<CatalogItemRecord>,
+  ): CatalogItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     categoryId: null,
@@ -62,7 +67,10 @@ describe('DeactivateCatalogItemUseCase', () => {
     });
 
     expect(result).toBe(deactivated);
-    expect(repository.deactivateItem).toHaveBeenCalledWith('tenant-1', 'item-1');
+    expect(repository.deactivateItem).toHaveBeenCalledWith(
+      'tenant-1',
+      'item-1',
+    );
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(CatalogItemDeactivatedIntegrationEvent),
     );
@@ -92,6 +100,9 @@ describe('DeactivateCatalogItemUseCase', () => {
       sut.execute({ tenantId: 'tenant-other', itemId: 'item-1' }),
     ).rejects.toBeInstanceOf(CatalogItemNotFoundError);
 
-    expect(repository.findItemById).toHaveBeenCalledWith('tenant-other', 'item-1');
+    expect(repository.findItemById).toHaveBeenCalledWith(
+      'tenant-other',
+      'item-1',
+    );
   });
 });

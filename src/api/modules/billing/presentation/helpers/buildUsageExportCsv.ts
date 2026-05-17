@@ -2,8 +2,7 @@ import type { GetUsageOutput } from '../../application/use-cases/interfaces/IGet
 
 function csvCell(value: unknown): string {
   if (value === null || value === undefined) return '';
-  const s =
-    typeof value === 'number' ? String(value) : String(value ?? '');
+  const s = typeof value === 'number' ? String(value) : String(value ?? '');
   const needsQuote = /[",\r\n]/.test(s);
   const escaped = s.replace(/"/g, '""');
   return needsQuote ? `"${escaped}"` : escaped;

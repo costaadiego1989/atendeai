@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
-import {
-  IAlertReminderRepository,
-} from '../../../domain/repositories/IAlertReminderRepository';
+import { IAlertReminderRepository } from '../../../domain/repositories/IAlertReminderRepository';
 import { AlertReminder } from '../../../domain/types/AlertReminder';
 
 @Injectable()
@@ -59,7 +57,10 @@ export class PrismaAlertReminderRepository implements IAlertReminderRepository {
       `);
   }
 
-  async findById(tenantId: string, reminderId: string): Promise<AlertReminder | null> {
+  async findById(
+    tenantId: string,
+    reminderId: string,
+  ): Promise<AlertReminder | null> {
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
         SELECT *
         FROM alerts_schema.alert_reminders
@@ -140,10 +141,16 @@ export class PrismaAlertReminderRepository implements IAlertReminderRepository {
       title: row.title,
       message: row.message,
       frequency: row.frequency,
-      scheduledAt: row.scheduled_at ? new Date(row.scheduled_at).toISOString() : undefined,
+      scheduledAt: row.scheduled_at
+        ? new Date(row.scheduled_at).toISOString()
+        : undefined,
       timeOfDay: row.time_of_day ?? undefined,
-      nextTriggerAt: row.next_trigger_at ? new Date(row.next_trigger_at).toISOString() : undefined,
-      lastTriggeredAt: row.last_triggered_at ? new Date(row.last_triggered_at).toISOString() : undefined,
+      nextTriggerAt: row.next_trigger_at
+        ? new Date(row.next_trigger_at).toISOString()
+        : undefined,
+      lastTriggeredAt: row.last_triggered_at
+        ? new Date(row.last_triggered_at).toISOString()
+        : undefined,
       status: row.status,
       createdAt: new Date(row.created_at).toISOString(),
       updatedAt: new Date(row.updated_at).toISOString(),

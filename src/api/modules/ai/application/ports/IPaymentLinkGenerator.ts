@@ -10,9 +10,7 @@ export interface GeneratePaymentLinkOutput {
 }
 
 export interface IPaymentLinkGenerator {
-  generate(
-    input: GeneratePaymentLinkInput,
-  ): Promise<GeneratePaymentLinkOutput>;
+  generate(input: GeneratePaymentLinkInput): Promise<GeneratePaymentLinkOutput>;
 }
 
 export const PAYMENT_LINK_GENERATOR = Symbol('PAYMENT_LINK_GENERATOR');

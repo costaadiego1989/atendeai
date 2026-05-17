@@ -2,7 +2,12 @@ import { ListSchedulingCategoriesUseCase } from '../application/use-cases/ListSc
 import { ISchedulingStore } from '../domain/ports/ISchedulingStore';
 
 describe('Scheduling — Tenant Isolation', () => {
-  let schedulingStore: jest.Mocked<Pick<ISchedulingStore, 'listCategories' | 'listProfessionals' | 'listAvailability'>>;
+  let schedulingStore: jest.Mocked<
+    Pick<
+      ISchedulingStore,
+      'listCategories' | 'listProfessionals' | 'listAvailability'
+    >
+  >;
 
   const TENANT_A = 'tenant-aaa';
   const TENANT_B = 'tenant-bbb';
@@ -27,7 +32,10 @@ describe('Scheduling — Tenant Isolation', () => {
 
       await useCase.execute(TENANT_A);
 
-      expect(schedulingStore.listCategories).toHaveBeenCalledWith(TENANT_A, undefined);
+      expect(schedulingStore.listCategories).toHaveBeenCalledWith(
+        TENANT_A,
+        undefined,
+      );
     });
 
     it('should pass tenantId and branchId to store', async () => {
@@ -35,23 +43,39 @@ describe('Scheduling — Tenant Isolation', () => {
 
       await useCase.execute(TENANT_A, 'branch-1');
 
-      expect(schedulingStore.listCategories).toHaveBeenCalledWith(TENANT_A, 'branch-1');
+      expect(schedulingStore.listCategories).toHaveBeenCalledWith(
+        TENANT_A,
+        'branch-1',
+      );
     });
 
     it('should not leak categories across tenants', async () => {
       const tenantACategories = [
-        { id: 'cat-1', tenantId: TENANT_A, name: 'Corte', unit: 'PER_SESSION' as const, active: true, createdAt: '2026-01-01' },
+        {
+          id: 'cat-1',
+          tenantId: TENANT_A,
+          name: 'Corte',
+          unit: 'PER_SESSION' as const,
+          active: true,
+          createdAt: '2026-01-01',
+        },
       ];
       const tenantBCategories = [
-        { id: 'cat-2', tenantId: TENANT_B, name: 'Manicure', unit: 'PER_SESSION' as const, active: true, createdAt: '2026-01-01' },
+        {
+          id: 'cat-2',
+          tenantId: TENANT_B,
+          name: 'Manicure',
+          unit: 'PER_SESSION' as const,
+          active: true,
+          createdAt: '2026-01-01',
+        },
       ];
 
-      schedulingStore.listCategories
-        .mockImplementation(async (tenantId) => {
-          if (tenantId === TENANT_A) return tenantACategories;
-          if (tenantId === TENANT_B) return tenantBCategories;
-          return [];
-        });
+      schedulingStore.listCategories.mockImplementation(async (tenantId) => {
+        if (tenantId === TENANT_A) return tenantACategories;
+        if (tenantId === TENANT_B) return tenantBCategories;
+        return [];
+      });
 
       const resultA = await useCase.execute(TENANT_A);
       const resultB = await useCase.execute(TENANT_B);

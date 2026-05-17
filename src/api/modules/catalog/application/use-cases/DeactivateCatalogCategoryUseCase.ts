@@ -32,10 +32,11 @@ export class DeactivateCatalogCategoryUseCase {
       throw new CatalogCategoryNotFoundError(command.categoryId);
     }
 
-    const hasActiveItems = await this.catalogRepository.hasActiveItemsInCategory(
-      command.tenantId,
-      command.categoryId,
-    );
+    const hasActiveItems =
+      await this.catalogRepository.hasActiveItemsInCategory(
+        command.tenantId,
+        command.categoryId,
+      );
 
     if (hasActiveItems) {
       throw new CatalogCategoryInUseError(command.categoryId);

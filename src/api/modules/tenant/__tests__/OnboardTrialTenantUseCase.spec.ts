@@ -24,15 +24,17 @@ describe('OnboardTrialTenantUseCase', () => {
 
     await useCase.execute(input);
 
-    expect(createTenantUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({
-      companyName: input.companyName,
-      cnpj: '00000000000000',
-      ownerName: input.ownerName,
-      ownerEmail: input.ownerEmail,
-      ownerPhone: input.ownerPhone,
-      plan: input.plan,
-      isTrial: true,
-      ownerPassword: expect.stringMatching(/^[a-z0-9]{8}$/),
-    }));
+    expect(createTenantUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        companyName: input.companyName,
+        cnpj: '00000000000000',
+        ownerName: input.ownerName,
+        ownerEmail: input.ownerEmail,
+        ownerPhone: input.ownerPhone,
+        plan: input.plan,
+        isTrial: true,
+        ownerPassword: expect.stringMatching(/^[a-z0-9]{8}$/),
+      }),
+    );
   });
 });

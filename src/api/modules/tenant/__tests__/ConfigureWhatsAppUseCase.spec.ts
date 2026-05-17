@@ -113,7 +113,9 @@ describe('ConfigureWhatsAppUseCase', () => {
     ).rejects.toThrow(EntityNotFoundException);
 
     expect(tenantRepo.save).not.toHaveBeenCalled();
-    expect(tenantDomainEventPublisher.publishFromAggregate).not.toHaveBeenCalled();
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).not.toHaveBeenCalled();
   });
 
   it('should persist the whatsapp config and publish domain events', async () => {
@@ -130,9 +132,9 @@ describe('ConfigureWhatsAppUseCase', () => {
     });
 
     expect(tenantRepo.save).toHaveBeenCalledWith(tenant);
-    expect(tenantDomainEventPublisher.publishFromAggregate).toHaveBeenCalledWith(
-      tenant,
-    );
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).toHaveBeenCalledWith(tenant);
     expect(result).toEqual(
       expect.objectContaining({
         provider: 'BUBBLEWHATS',

@@ -34,7 +34,7 @@ export class CreateCatalogItemUseCase {
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
     private readonly syncInventoryItemUseCase: SyncInventoryItemUseCase,
-  ) { }
+  ) {}
 
   async execute(command: CreateCatalogItemCommand) {
     if (command.categoryId) {
@@ -97,16 +97,19 @@ export class CreateCatalogItemUseCase {
     return item;
   }
 
-  private async syncInventoryForManualCatalogItem(item: {
-    id: string;
-    tenantId: string;
-    type: string;
-    name: string;
-    externalReference?: string | null;
-    basePrice?: string | null;
-    currency: string;
-    variants?: Array<Record<string, unknown>>;
-  }, initialStock?: number) {
+  private async syncInventoryForManualCatalogItem(
+    item: {
+      id: string;
+      tenantId: string;
+      type: string;
+      name: string;
+      externalReference?: string | null;
+      basePrice?: string | null;
+      currency: string;
+      variants?: Array<Record<string, unknown>>;
+    },
+    initialStock?: number,
+  ) {
     if (item.type === 'SERVICE') {
       return;
     }
@@ -114,7 +117,10 @@ export class CreateCatalogItemUseCase {
     const variants = item.variants ?? [];
 
     if (variants.length === 0) {
-      const sku = this.resolveSku(item.externalReference ?? undefined, item.name);
+      const sku = this.resolveSku(
+        item.externalReference ?? undefined,
+        item.name,
+      );
       if (!sku) return;
 
       await this.syncInventoryItemUseCase.execute({
@@ -124,7 +130,8 @@ export class CreateCatalogItemUseCase {
         externalReference: item.externalReference ?? undefined,
         name: item.name,
         availableQuantity: this.parseQuantity(initialStock),
-        availabilityStatus: this.parseQuantity(initialStock) > 0 ? 'AVAILABLE' : 'UNAVAILABLE',
+        availabilityStatus:
+          this.parseQuantity(initialStock) > 0 ? 'AVAILABLE' : 'UNAVAILABLE',
         currentPrice: item.basePrice ?? undefined,
         currency: item.currency,
         source: 'MANUAL_SNAPSHOT',
@@ -134,10 +141,13 @@ export class CreateCatalogItemUseCase {
 
     for (const [index, variant] of variants.entries()) {
       const variantName =
-        this.stringifyValue(variant.name) || `${item.name} - Variação ${index + 1}`;
+        this.stringifyValue(variant.name) ||
+        `${item.name} - Variação ${index + 1}`;
       const reference =
-        this.stringifyValue(variant.reference) || this.stringifyValue(variant.sku);
-      const externalReference = reference || item.externalReference || undefined;
+        this.stringifyValue(variant.reference) ||
+        this.stringifyValue(variant.sku);
+      const externalReference =
+        reference || item.externalReference || undefined;
       const sku = this.resolveSku(externalReference, variantName);
 
       if (!sku) continue;
@@ -151,14 +161,18 @@ export class CreateCatalogItemUseCase {
         name: `${item.name} - ${variantName}`,
         availableQuantity,
         availabilityStatus: availableQuantity > 0 ? 'AVAILABLE' : 'UNAVAILABLE',
-        currentPrice: this.stringifyValue(variant.price) || item.basePrice || undefined,
+        currentPrice:
+          this.stringifyValue(variant.price) || item.basePrice || undefined,
         currency: item.currency,
         source: 'MANUAL_SNAPSHOT',
       });
     }
   }
 
-  private resolveSku(reference: string | undefined, name: string): string | undefined {
+  private resolveSku(
+    reference: string | undefined,
+    name: string,
+  ): string | undefined {
     const candidate = reference?.trim();
     if (candidate) {
       return candidate.toUpperCase();

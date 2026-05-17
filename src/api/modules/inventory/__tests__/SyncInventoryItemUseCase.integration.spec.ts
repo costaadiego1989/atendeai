@@ -43,16 +43,24 @@ describe('SyncInventoryItemUseCase (integration)', () => {
   });
 
   it('INV-T-070b: item UNAVAILABLE publica inventory.item.unavailable.v1 além de synced', async () => {
-    await useCase.execute({ ...base, availableQuantity: 0, availabilityStatus: 'UNAVAILABLE' });
+    await useCase.execute({
+      ...base,
+      availableQuantity: 0,
+      availabilityStatus: 'UNAVAILABLE',
+    });
 
     expect(eventBus.getByEventName('inventory.item.synced.v1')).toHaveLength(1);
-    expect(eventBus.getByEventName('inventory.item.unavailable.v1')).toHaveLength(1);
+    expect(
+      eventBus.getByEventName('inventory.item.unavailable.v1'),
+    ).toHaveLength(1);
   });
 
   it('INV-T-070c: item AVAILABLE não publica inventory.item.unavailable.v1', async () => {
     await useCase.execute(base);
 
-    expect(eventBus.getByEventName('inventory.item.unavailable.v1')).toHaveLength(0);
+    expect(
+      eventBus.getByEventName('inventory.item.unavailable.v1'),
+    ).toHaveLength(0);
   });
 
   it('INV-T-070d: mudança de preço publica inventory.price.changed.v1 com previousPrice e newPrice', async () => {
@@ -76,14 +84,20 @@ describe('SyncInventoryItemUseCase (integration)', () => {
 
     await useCase.execute({ ...base, currentPrice: '50.00' });
 
-    expect(eventBus.getByEventName('inventory.price.changed.v1')).toHaveLength(0);
+    expect(eventBus.getByEventName('inventory.price.changed.v1')).toHaveLength(
+      0,
+    );
   });
 
   // ─── SKU validation ───────────────────────────────────────────────────────
 
   it('INV-T-070f: SKU vazio ou só espaços lança InventoryInvalidSkuError', async () => {
-    await expect(useCase.execute({ ...base, sku: '' })).rejects.toThrow(InventoryInvalidSkuError);
-    await expect(useCase.execute({ ...base, sku: '   ' })).rejects.toThrow(InventoryInvalidSkuError);
+    await expect(useCase.execute({ ...base, sku: '' })).rejects.toThrow(
+      InventoryInvalidSkuError,
+    );
+    await expect(useCase.execute({ ...base, sku: '   ' })).rejects.toThrow(
+      InventoryInvalidSkuError,
+    );
   });
 
   // ─── quantity clamping ────────────────────────────────────────────────────
@@ -101,7 +115,11 @@ describe('SyncInventoryItemUseCase (integration)', () => {
 
   it('INV-T-070h: segundo sync do mesmo SKU atualiza o registro existente (upsert)', async () => {
     const first = await useCase.execute({ ...base, availableQuantity: 5 });
-    const second = await useCase.execute({ ...base, availableQuantity: 3, name: 'Nome Atualizado' });
+    const second = await useCase.execute({
+      ...base,
+      availableQuantity: 3,
+      name: 'Nome Atualizado',
+    });
 
     expect(second.id).toBe(first.id);
     expect(second.availableQuantity).toBe(3);

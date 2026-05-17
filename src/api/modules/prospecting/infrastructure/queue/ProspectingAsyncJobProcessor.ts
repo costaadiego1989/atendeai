@@ -83,8 +83,12 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
         const report = await this.generateProspectSearchReportUseCase.execute({
           tenantId: job.data.tenantId,
           query: job.data.query,
-          statuses: job.data.statuses as Array<'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED'>,
-          sources: job.data.sources as Array<'GOOGLE_PLACES' | 'GOOGLE_ADS_AUDIENCE'>,
+          statuses: job.data.statuses as Array<
+            'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED'
+          >,
+          sources: job.data.sources as Array<
+            'GOOGLE_PLACES' | 'GOOGLE_ADS_AUDIENCE'
+          >,
           dateFrom: job.data.dateFrom,
           dateTo: job.data.dateTo,
         });
@@ -96,15 +100,18 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
           job.data.asyncJobId,
         );
 
-        await this.prospectingAsyncJobsService.completeJob(job.data.asyncJobId, {
-          processedItems: report.rows.length,
-          totalItems: report.rows.length,
-          resultSummary: report.summary,
-          fileName: csv.fileName,
-          fileMimeType: csv.mimeType,
-          fileUrl: fileUpload.fileUrl,
-          fileContent: fileUpload.fileContent,
-        });
+        await this.prospectingAsyncJobsService.completeJob(
+          job.data.asyncJobId,
+          {
+            processedItems: report.rows.length,
+            totalItems: report.rows.length,
+            resultSummary: report.summary,
+            fileName: csv.fileName,
+            fileMimeType: csv.mimeType,
+            fileUrl: fileUpload.fileUrl,
+            fileContent: fileUpload.fileContent,
+          },
+        );
         this.structuredLog.emit({
           level: 'info',
           event: 'prospecting.async_export.completed',
@@ -124,15 +131,21 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
         job.name === 'export-prospect-campaigns-csv' &&
         job.data.type === 'EXPORT_PROSPECT_CAMPAIGNS_CSV'
       ) {
-        const report = await this.generateProspectCampaignReportUseCase.execute({
-          tenantId: job.data.tenantId,
-          query: job.data.query,
-          statuses: job.data.statuses as Array<'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED'>,
-          channels: job.data.channels as Array<'WHATSAPP' | 'INSTAGRAM'>,
-          audienceTypes: job.data.audienceTypes as Array<'REENGAGEMENT' | 'CONTACT_LIST'>,
-          dateFrom: job.data.dateFrom,
-          dateTo: job.data.dateTo,
-        });
+        const report = await this.generateProspectCampaignReportUseCase.execute(
+          {
+            tenantId: job.data.tenantId,
+            query: job.data.query,
+            statuses: job.data.statuses as Array<
+              'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED'
+            >,
+            channels: job.data.channels as Array<'WHATSAPP' | 'INSTAGRAM'>,
+            audienceTypes: job.data.audienceTypes as Array<
+              'REENGAGEMENT' | 'CONTACT_LIST'
+            >,
+            dateFrom: job.data.dateFrom,
+            dateTo: job.data.dateTo,
+          },
+        );
         const csv = this.prospectReportCsvBuilder.buildCampaigns(report);
         const fileUpload = await this.tryUpload(
           csv,
@@ -141,15 +154,18 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
           job.data.asyncJobId,
         );
 
-        await this.prospectingAsyncJobsService.completeJob(job.data.asyncJobId, {
-          processedItems: report.rows.length,
-          totalItems: report.rows.length,
-          resultSummary: report.summary,
-          fileName: csv.fileName,
-          fileMimeType: csv.mimeType,
-          fileUrl: fileUpload.fileUrl,
-          fileContent: fileUpload.fileContent,
-        });
+        await this.prospectingAsyncJobsService.completeJob(
+          job.data.asyncJobId,
+          {
+            processedItems: report.rows.length,
+            totalItems: report.rows.length,
+            resultSummary: report.summary,
+            fileName: csv.fileName,
+            fileMimeType: csv.mimeType,
+            fileUrl: fileUpload.fileUrl,
+            fileContent: fileUpload.fileContent,
+          },
+        );
         this.structuredLog.emit({
           level: 'info',
           event: 'prospecting.async_export.completed',
@@ -165,7 +181,9 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to generate prospecting report.';
+        error instanceof Error
+          ? error.message
+          : 'Failed to generate prospecting report.';
       this.structuredLog.emit({
         level: 'error',
         event: 'prospecting.async_export.failed',
@@ -177,7 +195,10 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
           export_type: job.data.type,
         },
       });
-      await this.prospectingAsyncJobsService.failJob(job.data.asyncJobId, message);
+      await this.prospectingAsyncJobsService.failJob(
+        job.data.asyncJobId,
+        message,
+      );
       throw error;
     }
   }

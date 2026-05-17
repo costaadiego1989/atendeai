@@ -9,7 +9,10 @@ import {
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { SalesPaymentLinkCreatedIntegrationEvent } from '../integration-events/SalesIntegrationEvents';
 
-type PaymentLinkRecordInput = Omit<SalesPaymentLinkRecord, 'createdAt' | 'updatedAt'>;
+type PaymentLinkRecordInput = Omit<
+  SalesPaymentLinkRecord,
+  'createdAt' | 'updatedAt'
+>;
 
 @Injectable()
 export class SalesPaymentLinkLifecycleService {
@@ -22,8 +25,11 @@ export class SalesPaymentLinkLifecycleService {
     private readonly eventBus: IEventBus,
   ) {}
 
-  async recordCreated(input: PaymentLinkRecordInput): Promise<SalesPaymentLinkRecord> {
-    const savedLink = await this.paymentLinksRepository.createPaymentLink(input);
+  async recordCreated(
+    input: PaymentLinkRecordInput,
+  ): Promise<SalesPaymentLinkRecord> {
+    const savedLink =
+      await this.paymentLinksRepository.createPaymentLink(input);
 
     await this.metricsRepository.incrementMetric(
       input.tenantId,

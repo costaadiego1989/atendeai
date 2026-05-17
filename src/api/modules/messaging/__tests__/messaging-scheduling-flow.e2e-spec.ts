@@ -33,16 +33,24 @@ describe('Messaging Scheduling Flow (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [SchedulingController],
       providers: [
-        { provide: CreateSchedulingProfessionalUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: CreateSchedulingProfessionalUseCase,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: ListSchedulingProfessionalsUseCase,
           useValue: {
-            execute: jest.fn().mockResolvedValue([
-              { id: 'prof-1', name: 'Dra Ana', role: 'Dentista' },
-            ]),
+            execute: jest
+              .fn()
+              .mockResolvedValue([
+                { id: 'prof-1', name: 'Dra Ana', role: 'Dentista' },
+              ]),
           },
         },
-        { provide: SetProfessionalAvailabilityUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: SetProfessionalAvailabilityUseCase,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: GetProfessionalAvailabilityUseCase,
           useValue: {
@@ -70,22 +78,28 @@ describe('Messaging Scheduling Flow (e2e)', () => {
             }),
           },
         },
-        { provide: CreateSchedulingCategoryUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: CreateSchedulingCategoryUseCase,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: ListSchedulingCategoriesUseCase,
           useValue: {
-            execute: jest.fn().mockResolvedValue([
-              { id: 'cat-1', name: 'Avaliacao' },
-            ]),
+            execute: jest
+              .fn()
+              .mockResolvedValue([{ id: 'cat-1', name: 'Avaliacao' }]),
           },
         },
-        { provide: AssignProfessionalCategoriesUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: AssignProfessionalCategoriesUseCase,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: ListCategoryProfessionalsUseCase,
           useValue: {
-            execute: jest.fn().mockResolvedValue([
-              { id: 'prof-1', name: 'Dra Ana' },
-            ]),
+            execute: jest
+              .fn()
+              .mockResolvedValue([{ id: 'prof-1', name: 'Dra Ana' }]),
           },
         },
         {
@@ -107,7 +121,10 @@ describe('Messaging Scheduling Flow (e2e)', () => {
             ]),
           },
         },
-        { provide: UpdateAvailabilitySlotUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: UpdateAvailabilitySlotUseCase,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: GenerateSchedulingPaymentLinkUseCase,
           useValue: {
@@ -117,15 +134,48 @@ describe('Messaging Scheduling Flow (e2e)', () => {
             }),
           },
         },
-        { provide: RescheduleSchedulingReservationUseCase, useValue: { execute: jest.fn() } },
-        { provide: CreateSchedulingRecurrenceUseCase, useValue: { execute: jest.fn() } },
-        { provide: ListSchedulingRecurrencesUseCase, useValue: { execute: jest.fn() } },
-        { provide: CancelSchedulingRecurrenceUseCase, useValue: { execute: jest.fn() } },
-        { provide: DeleteSchedulingRecurrenceUseCase, useValue: { execute: jest.fn() } },
-        { provide: ProcessSchedulingRecurringReservationUseCase, useValue: { execute: jest.fn() } },
-        { provide: SchedulingAsyncJobsService, useValue: { createJob: jest.fn(), attachQueueJobId: jest.fn(), getJob: jest.fn(), listJobs: jest.fn(), getDownloadPayload: jest.fn() } },
-        { provide: GenerateSchedulingReportUseCase, useValue: { execute: jest.fn() } },
-        { provide: 'BullQueue_scheduling-async-jobs', useValue: { add: jest.fn() } },
+        {
+          provide: RescheduleSchedulingReservationUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: CreateSchedulingRecurrenceUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ListSchedulingRecurrencesUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: CancelSchedulingRecurrenceUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: DeleteSchedulingRecurrenceUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ProcessSchedulingRecurringReservationUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: SchedulingAsyncJobsService,
+          useValue: {
+            createJob: jest.fn(),
+            attachQueueJobId: jest.fn(),
+            getJob: jest.fn(),
+            listJobs: jest.fn(),
+            getDownloadPayload: jest.fn(),
+          },
+        },
+        {
+          provide: GenerateSchedulingReportUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: 'BullQueue_scheduling-async-jobs',
+          useValue: { add: jest.fn() },
+        },
       ],
     })
       .overrideGuard(JwtCookieGuard)
@@ -164,7 +214,9 @@ describe('Messaging Scheduling Flow (e2e)', () => {
     );
 
     const availability = await request(app.getHttpServer())
-      .get('/api/v1/tenants/tenant-1/scheduling/professionals/prof-1/availability?date=2026-05-10')
+      .get(
+        '/api/v1/tenants/tenant-1/scheduling/professionals/prof-1/availability?date=2026-05-10',
+      )
       .expect(200);
 
     expect(availability.body.slots).toEqual(
@@ -172,7 +224,9 @@ describe('Messaging Scheduling Flow (e2e)', () => {
     );
 
     const reservation = await request(app.getHttpServer())
-      .post('/api/v1/tenants/tenant-1/scheduling/professionals/prof-1/availability/reservations')
+      .post(
+        '/api/v1/tenants/tenant-1/scheduling/professionals/prof-1/availability/reservations',
+      )
       .send({
         date: '2026-05-10',
         slotId: 'slot-1',

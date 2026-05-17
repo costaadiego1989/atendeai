@@ -3,43 +3,19 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
-import {
-  FILE_STORAGE_SERVICE,
-} from '@shared/domain/services/FileStorageService';
+import { FILE_STORAGE_SERVICE } from '@shared/domain/services/FileStorageService';
 import { MessagingController } from '../presentation/controllers/MessagingController';
-import {
-  IListConversationsUseCase,
-} from '../application/use-cases/interfaces/IListConversationsUseCase';
-import {
-  IGetMessageHistoryUseCase,
-} from '../application/use-cases/interfaces/IGetMessageHistoryUseCase';
-import {
-  IMarkConversationReadUseCase,
-} from '../application/use-cases/interfaces/IMarkConversationReadUseCase';
-import {
-  ISendHumanMessageUseCase,
-} from '../application/use-cases/interfaces/ISendHumanMessageUseCase';
-import {
-  IEnsureConversationForContactUseCase,
-} from '../application/use-cases/interfaces/IEnsureConversationForContactUseCase';
-import {
-  IUpdateConversationStatusUseCase,
-} from '../application/use-cases/interfaces/IUpdateConversationStatusUseCase';
-import {
-  SUGGEST_AGENT_REPLY_USE_CASE,
-} from '../application/use-cases/interfaces/ISuggestAgentReplyUseCase';
-import {
-  MARK_CONVERSATION_SALE_USE_CASE,
-} from '../application/use-cases/interfaces/IMarkConversationSaleUseCase';
-import {
-  VOID_CONVERSATION_SALE_USE_CASE,
-} from '../application/use-cases/interfaces/IVoidConversationSaleUseCase';
-import {
-  GET_CONVERSATION_SALE_ATTRIBUTION_USE_CASE,
-} from '../application/use-cases/interfaces/IGetConversationSaleAttributionUseCase';
-import {
-  UPDATE_CONVERSATION_SALE_ATTRIBUTION_USE_CASE,
-} from '../application/use-cases/interfaces/IUpdateConversationSaleAttributionUseCase';
+import { IListConversationsUseCase } from '../application/use-cases/interfaces/IListConversationsUseCase';
+import { IGetMessageHistoryUseCase } from '../application/use-cases/interfaces/IGetMessageHistoryUseCase';
+import { IMarkConversationReadUseCase } from '../application/use-cases/interfaces/IMarkConversationReadUseCase';
+import { ISendHumanMessageUseCase } from '../application/use-cases/interfaces/ISendHumanMessageUseCase';
+import { IEnsureConversationForContactUseCase } from '../application/use-cases/interfaces/IEnsureConversationForContactUseCase';
+import { IUpdateConversationStatusUseCase } from '../application/use-cases/interfaces/IUpdateConversationStatusUseCase';
+import { SUGGEST_AGENT_REPLY_USE_CASE } from '../application/use-cases/interfaces/ISuggestAgentReplyUseCase';
+import { MARK_CONVERSATION_SALE_USE_CASE } from '../application/use-cases/interfaces/IMarkConversationSaleUseCase';
+import { VOID_CONVERSATION_SALE_USE_CASE } from '../application/use-cases/interfaces/IVoidConversationSaleUseCase';
+import { GET_CONVERSATION_SALE_ATTRIBUTION_USE_CASE } from '../application/use-cases/interfaces/IGetConversationSaleAttributionUseCase';
+import { UPDATE_CONVERSATION_SALE_ATTRIBUTION_USE_CASE } from '../application/use-cases/interfaces/IUpdateConversationSaleAttributionUseCase';
 
 describe('Messaging Greeting Flow (e2e)', () => {
   let app: INestApplication;
@@ -98,20 +74,51 @@ describe('Messaging Greeting Flow (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [MessagingController],
       providers: [
-        { provide: IListConversationsUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: IListConversationsUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: IGetMessageHistoryUseCase, useValue: getHistoryUseCase },
-        { provide: IMarkConversationReadUseCase, useValue: { execute: jest.fn() } },
+        {
+          provide: IMarkConversationReadUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: ISendHumanMessageUseCase, useValue: { execute: jest.fn() } },
-        { provide: IEnsureConversationForContactUseCase, useValue: ensureConversationUseCase },
-        { provide: IUpdateConversationStatusUseCase, useValue: { execute: jest.fn() } },
-        { provide: SUGGEST_AGENT_REPLY_USE_CASE, useValue: { execute: jest.fn() } },
-        { provide: MARK_CONVERSATION_SALE_USE_CASE, useValue: { execute: jest.fn() } },
-        { provide: VOID_CONVERSATION_SALE_USE_CASE, useValue: { execute: jest.fn() } },
-        { provide: GET_CONVERSATION_SALE_ATTRIBUTION_USE_CASE, useValue: { execute: jest.fn() } },
-        { provide: UPDATE_CONVERSATION_SALE_ATTRIBUTION_USE_CASE, useValue: { execute: jest.fn() } },
+        {
+          provide: IEnsureConversationForContactUseCase,
+          useValue: ensureConversationUseCase,
+        },
+        {
+          provide: IUpdateConversationStatusUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: SUGGEST_AGENT_REPLY_USE_CASE,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: MARK_CONVERSATION_SALE_USE_CASE,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: VOID_CONVERSATION_SALE_USE_CASE,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GET_CONVERSATION_SALE_ATTRIBUTION_USE_CASE,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: UPDATE_CONVERSATION_SALE_ATTRIBUTION_USE_CASE,
+          useValue: { execute: jest.fn() },
+        },
         {
           provide: FILE_STORAGE_SERVICE,
-          useValue: { upload: jest.fn(), delete: jest.fn(), getPresignedUrl: jest.fn() },
+          useValue: {
+            upload: jest.fn(),
+            delete: jest.fn(),
+            getPresignedUrl: jest.fn(),
+          },
         },
       ],
     })
@@ -167,7 +174,9 @@ describe('Messaging Greeting Flow (e2e)', () => {
     expect(reusedResponse.body.created).toBe(false);
 
     const historyResponse = await request(app.getHttpServer())
-      .get('/api/v1/tenants/tenant-1/conversations/conversation-1/messages?page=1&limit=20')
+      .get(
+        '/api/v1/tenants/tenant-1/conversations/conversation-1/messages?page=1&limit=20',
+      )
       .expect(200);
 
     expect(historyResponse.body.data).toEqual(

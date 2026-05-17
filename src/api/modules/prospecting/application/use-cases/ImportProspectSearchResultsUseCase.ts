@@ -23,8 +23,7 @@ import {
 import { ProspectSearchResult } from '../../domain/entities/ProspectSearchResult';
 
 @Injectable()
-export class ImportProspectSearchResultsUseCase
-  implements IImportProspectSearchResultsUseCase {
+export class ImportProspectSearchResultsUseCase implements IImportProspectSearchResultsUseCase {
   constructor(
     @Inject(PROSPECT_SEARCH_REPOSITORY)
     private readonly searchRepository: IProspectSearchRepository,
@@ -32,7 +31,7 @@ export class ImportProspectSearchResultsUseCase
     private readonly searchResultRepository: IProspectSearchResultRepository,
     @Inject(CONTACT_FACADE)
     private readonly contactFacade: IContactFacade,
-  ) { }
+  ) {}
 
   async execute(
     input: ImportProspectSearchResultsInput,

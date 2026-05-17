@@ -1,4 +1,10 @@
-import { IsArray, IsDateString, IsIn, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsIn,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class GenerateProspectSearchReportDTO {
   @IsString()

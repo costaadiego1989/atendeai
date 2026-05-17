@@ -48,29 +48,17 @@ import { CreateProspectSearchUseCase } from '../application/use-cases/CreatePros
 import { ExecuteProspectSearchUseCase } from '../application/use-cases/ExecuteProspectSearchUseCase';
 import { ListProspectSearchResultsUseCase } from '../application/use-cases/ListProspectSearchResultsUseCase';
 import { ListProspectSearchesUseCase } from '../application/use-cases/ListProspectSearchesUseCase';
-import {
-  ICreateProspectSearchUseCase,
-} from '../application/use-cases/interfaces/ICreateProspectSearchUseCase';
-import {
-  IExecuteProspectSearchUseCase,
-} from '../application/use-cases/interfaces/IExecuteProspectSearchUseCase';
-import {
-  IListProspectSearchesUseCase,
-} from '../application/use-cases/interfaces/IListProspectSearchesUseCase';
-import {
-  IListProspectSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
+import { ICreateProspectSearchUseCase } from '../application/use-cases/interfaces/ICreateProspectSearchUseCase';
+import { IExecuteProspectSearchUseCase } from '../application/use-cases/interfaces/IExecuteProspectSearchUseCase';
+import { IListProspectSearchesUseCase } from '../application/use-cases/interfaces/IListProspectSearchesUseCase';
+import { IListProspectSearchResultsUseCase } from '../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
 import { ICheckQuotaUseCase } from '@modules/billing/application/use-cases/interfaces/ICheckQuotaUseCase';
 import {
   IRecordUsageUseCase,
   UsageType,
 } from '@modules/billing/application/use-cases/interfaces/IRecordUsageUseCase';
-import {
-  IImportProspectSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
-import {
-  IProspectSelectedSearchResultsUseCase,
-} from '../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
+import { IImportProspectSearchResultsUseCase } from '../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
+import { IProspectSelectedSearchResultsUseCase } from '../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
 import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
 import { ConflictException } from '@nestjs/common';
 
@@ -109,7 +97,9 @@ describe('Prospecting search flow (e2e)', () => {
 
   const tenantRepository: jest.Mocked<ITenantRepository> = {
     save: jest.fn(),
-    findById: jest.fn(async (id: string) => (id === tenant.id.toString() ? tenant : null)),
+    findById: jest.fn(async (id: string) =>
+      id === tenant.id.toString() ? tenant : null,
+    ),
     findByCnpj: jest.fn(),
     findByWhatsAppNumber: jest.fn(),
     findByApiKey: jest.fn(),
@@ -123,7 +113,9 @@ describe('Prospecting search flow (e2e)', () => {
 
   const searchRepository: jest.Mocked<IProspectSearchRepository> = {
     save: jest.fn(async (search: ProspectSearch) => {
-      const index = savedSearches.findIndex((item) => item.id.toString() === search.id.toString());
+      const index = savedSearches.findIndex(
+        (item) => item.id.toString() === search.id.toString(),
+      );
       if (index >= 0) {
         savedSearches[index] = search;
       } else {
@@ -134,7 +126,10 @@ describe('Prospecting search flow (e2e)', () => {
       const search = savedSearches.find((item) => item.id.toString() === id);
       return search && search.tenantId.toString() === tenantId ? search : null;
     }),
-    findBySearchId: jest.fn(async (id: string) => savedSearches.find((item) => item.id.toString() === id) ?? null),
+    findBySearchId: jest.fn(
+      async (id: string) =>
+        savedSearches.find((item) => item.id.toString() === id) ?? null,
+    ),
     findAllByTenant: jest.fn(async (tenantId: string) =>
       savedSearches.filter((search) => search.tenantId.toString() === tenantId),
     ),
@@ -158,41 +153,45 @@ describe('Prospecting search flow (e2e)', () => {
     findAllBySearch: jest.fn(async (tenantId: string, searchId: string) =>
       savedResults.filter(
         (result) =>
-          result.tenantId.toString() === tenantId && result.searchId.toString() === searchId,
+          result.tenantId.toString() === tenantId &&
+          result.searchId.toString() === searchId,
       ),
     ),
   };
 
   const sourceRegistry: jest.Mocked<IProspectSearchSourceRegistry> = {
     resolve: jest.fn(
-      (_source: 'GOOGLE_PLACES'): IProspectSearchSource => ({
-      source: 'GOOGLE_PLACES',
-      search: jest.fn().mockResolvedValue([
-        {
-          externalId: 'place-odontocentro',
-          businessName: 'Odonto Centro Copacabana',
-          city: 'Rio de Janeiro',
-          state: 'RJ',
-          phone: '2133345566',
-          website: 'https://odontocentro.example.com',
-          email: 'contato@odontocentro.example.com',
-        },
-        {
-          externalId: 'place-sorrisorio',
-          businessName: 'Clinica Sorriso Rio',
-          city: 'Rio de Janeiro',
-          state: 'RJ',
-          phone: '2122223344',
-          website: 'https://sorrisorio.example.com',
-        },
-      ]),
-      }) as IProspectSearchSource,
+      (_source: 'GOOGLE_PLACES'): IProspectSearchSource =>
+        ({
+          source: 'GOOGLE_PLACES',
+          search: jest.fn().mockResolvedValue([
+            {
+              externalId: 'place-odontocentro',
+              businessName: 'Odonto Centro Copacabana',
+              city: 'Rio de Janeiro',
+              state: 'RJ',
+              phone: '2133345566',
+              website: 'https://odontocentro.example.com',
+              email: 'contato@odontocentro.example.com',
+            },
+            {
+              externalId: 'place-sorrisorio',
+              businessName: 'Clinica Sorriso Rio',
+              city: 'Rio de Janeiro',
+              state: 'RJ',
+              phone: '2122223344',
+              website: 'https://sorrisorio.example.com',
+            },
+          ]),
+        }) as IProspectSearchSource,
     ),
   };
 
   const websiteEnricher: jest.Mocked<IProspectWebsiteEnricher> = {
     enrich: jest.fn(
-      async (_input: { website?: string }): Promise<ProspectWebsiteEnrichment> => ({}),
+      async (_input: {
+        website?: string;
+      }): Promise<ProspectWebsiteEnrichment> => ({}),
     ),
   };
 
@@ -216,36 +215,40 @@ describe('Prospecting search flow (e2e)', () => {
   };
 
   const prospectingQuotaService = {
-    assertCanConsume: jest.fn(async (input: { tenantId: string; requested: number }) => {
-      const used = savedSearches
-        .filter(
-          (search) =>
-            search.tenantId.toString() === input.tenantId &&
-            ['RUNNING', 'COMPLETED'].includes(search.status.value),
-        )
-        .reduce((total, search) => total + search.maxResults, 0);
+    assertCanConsume: jest.fn(
+      async (input: { tenantId: string; requested: number }) => {
+        const used = savedSearches
+          .filter(
+            (search) =>
+              search.tenantId.toString() === input.tenantId &&
+              ['RUNNING', 'COMPLETED'].includes(search.status.value),
+          )
+          .reduce((total, search) => total + search.maxResults, 0);
 
-      if (used + input.requested > 150) {
-        throw new ConflictException(
-          `Limite diario de prospeccao atingido. Usado hoje: ${used}. Limite: 150.`,
-        );
-      }
+        if (used + input.requested > 150) {
+          throw new ConflictException(
+            `Limite diario de prospeccao atingido. Usado hoje: ${used}. Limite: 150.`,
+          );
+        }
 
-      return {
-        used,
-        quota: 150,
-        remaining: 150 - used - input.requested,
-      };
-    }),
+        return {
+          used,
+          quota: 150,
+          remaining: 150 - used - input.requested,
+        };
+      },
+    ),
   };
 
-  const importResultsUseCase: jest.Mocked<IImportProspectSearchResultsUseCase> = {
-    execute: jest.fn(),
-  };
+  const importResultsUseCase: jest.Mocked<IImportProspectSearchResultsUseCase> =
+    {
+      execute: jest.fn(),
+    };
 
-  const prospectSelectedUseCase: jest.Mocked<IProspectSelectedSearchResultsUseCase> = {
-    execute: jest.fn(),
-  };
+  const prospectSelectedUseCase: jest.Mocked<IProspectSelectedSearchResultsUseCase> =
+    {
+      execute: jest.fn(),
+    };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -318,7 +321,10 @@ describe('Prospecting search flow (e2e)', () => {
       .useValue({
         canActivate: (context: any) => {
           if (!currentUser) {
-            throw new UnauthorizedException('Access token not provided', 'MISSING_TOKEN');
+            throw new UnauthorizedException(
+              'Access token not provided',
+              'MISSING_TOKEN',
+            );
           }
           context.switchToHttp().getRequest().user = currentUser;
           return true;
@@ -437,7 +443,9 @@ describe('Prospecting search flow (e2e)', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: expect.stringContaining('Limite diario de prospeccao atingido'),
+          message: expect.stringContaining(
+            'Limite diario de prospeccao atingido',
+          ),
         }),
       }),
     );

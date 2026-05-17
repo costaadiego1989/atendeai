@@ -14,7 +14,15 @@ describe('GenerateContactsReportUseCase', () => {
 
   const tenantId = '123e4567-e89b-12d3-a456-426614174000';
 
-  const makeContact = (overrides: Partial<{ name: string; phone: string; stage: string; id: string; tags: string[] }> = {}) => {
+  const makeContact = (
+    overrides: Partial<{
+      name: string;
+      phone: string;
+      stage: string;
+      id: string;
+      tags: string[];
+    }> = {},
+  ) => {
     return Contact.reconstitute(
       {
         tenantId: TenantId.create(tenantId),
@@ -48,10 +56,23 @@ describe('GenerateContactsReportUseCase', () => {
   it('should generate report successfully with contacts', async () => {
     const contacts = [
       makeContact({ id: 'c1', name: 'Alice', phone: '5511111111111' }),
-      makeContact({ id: 'c2', name: 'Bob', phone: '5511222222222', stage: 'CUSTOMER' }),
+      makeContact({
+        id: 'c2',
+        name: 'Bob',
+        phone: '5511222222222',
+        stage: 'CUSTOMER',
+      }),
     ];
     mockRepo.findAllByTenant.mockResolvedValue({ data: contacts, total: 2 });
-    mockTimelineRepo.getTimeline.mockResolvedValue({ contact: { id: 'c1', name: 'Alice', phone: '5511111111111', stage: 'LEAD' }, entries: [] });
+    mockTimelineRepo.getTimeline.mockResolvedValue({
+      contact: {
+        id: 'c1',
+        name: 'Alice',
+        phone: '5511111111111',
+        stage: 'LEAD',
+      },
+      entries: [],
+    });
 
     const result = await useCase.execute({ tenantId });
 

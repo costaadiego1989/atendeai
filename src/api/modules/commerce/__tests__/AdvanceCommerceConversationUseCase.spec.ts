@@ -137,9 +137,17 @@ describe('AdvanceCommerceConversationUseCase', () => {
 
   it('should delegate to the correct step handler based on currentStep', async () => {
     conversationFlowRules.isTransactionalBusiness.mockReturnValue(true);
-    const sessionAtQuantity = { ...mockSession, currentStep: 'AWAITING_QUANTITY' as const };
-    commerceRepo.findActiveSessionByConversation.mockResolvedValue(sessionAtQuantity as any);
-    awaitingQuantityStepHandler.handle.mockResolvedValue({ ...sessionAtQuantity, currentStep: 'ASKING_MORE_ITEMS' });
+    const sessionAtQuantity = {
+      ...mockSession,
+      currentStep: 'AWAITING_QUANTITY' as const,
+    };
+    commerceRepo.findActiveSessionByConversation.mockResolvedValue(
+      sessionAtQuantity as any,
+    );
+    awaitingQuantityStepHandler.handle.mockResolvedValue({
+      ...sessionAtQuantity,
+      currentStep: 'ASKING_MORE_ITEMS',
+    });
 
     await useCase.execute({
       tenantId,
@@ -157,7 +165,9 @@ describe('AdvanceCommerceConversationUseCase', () => {
   it('should return session as-is for terminal steps (AWAITING_PAYMENT, PAID, CANCELLED)', async () => {
     conversationFlowRules.isTransactionalBusiness.mockReturnValue(true);
     const paidSession = { ...mockSession, currentStep: 'PAID' as const };
-    commerceRepo.findActiveSessionByConversation.mockResolvedValue(paidSession as any);
+    commerceRepo.findActiveSessionByConversation.mockResolvedValue(
+      paidSession as any,
+    );
 
     const result = await useCase.execute({
       tenantId,

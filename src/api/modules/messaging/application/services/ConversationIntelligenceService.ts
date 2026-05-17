@@ -20,7 +20,7 @@ export class ConversationIntelligenceService {
   constructor(
     @Inject(CONVERSATION_INTELLIGENCE_REPOSITORY)
     private readonly intelligenceRepository: IConversationIntelligenceRepository,
-  ) { }
+  ) {}
 
   async captureMessageSignal(input: AnalyzeMessageInput): Promise<void> {
     const text = input.text.trim();
@@ -48,11 +48,15 @@ export class ConversationIntelligenceService {
     const tags = new Set<string>();
     const interests = new Set<string>();
 
-    if (/(preço|valor|quanto|orcamento|pagar|pix|boleto|cartao)/i.test(normalized)) {
+    if (
+      /(preço|valor|quanto|orcamento|pagar|pix|boleto|cartao)/i.test(normalized)
+    ) {
       tags.add('financeiro');
       interests.add('preço');
     }
-    if (/(agenda|horário|marcar|remarcar|consulta|disponivel)/i.test(normalized)) {
+    if (
+      /(agenda|horário|marcar|remarcar|consulta|disponivel)/i.test(normalized)
+    ) {
       tags.add('agenda');
       interests.add('agendamento');
     }
@@ -64,7 +68,9 @@ export class ConversationIntelligenceService {
       tags.add('venda');
       interests.add('produto');
     }
-    if (/(problema|reclama|ruim|erro|atras|cancelar|devolver)/i.test(normalized)) {
+    if (
+      /(problema|reclama|ruim|erro|atras|cancelar|devolver)/i.test(normalized)
+    ) {
       tags.add('risco');
     }
 
@@ -93,11 +99,7 @@ export class ConversationIntelligenceService {
     sentBy: 'CONTACT' | 'AI' | 'HUMAN' | 'SYSTEM',
   ) {
     const author =
-      direction === 'INBOUND'
-        ? 'Cliente'
-        : sentBy === 'AI'
-          ? 'IA'
-          : 'Operador';
+      direction === 'INBOUND' ? 'Cliente' : sentBy === 'AI' ? 'IA' : 'Operador';
     const compact = text.replace(/\s+/g, ' ').slice(0, 180);
     return `${author}: ${compact}`;
   }
@@ -110,11 +112,17 @@ export class ConversationIntelligenceService {
   }
 
   private resolveSentiment(normalized: string): ConversationSentiment {
-    if (/(obrigad|perfeito|gostei|bom|otimo|fechado|quero|sim)/i.test(normalized)) {
+    if (
+      /(obrigad|perfeito|gostei|bom|otimo|fechado|quero|sim)/i.test(normalized)
+    ) {
       return 'POSITIVE';
     }
 
-    if (/(ruim|problema|cancelar|caro|demora|reclama|insatisfeito|não quero)/i.test(normalized)) {
+    if (
+      /(ruim|problema|cancelar|caro|demora|reclama|insatisfeito|não quero)/i.test(
+        normalized,
+      )
+    ) {
       return 'NEGATIVE';
     }
 

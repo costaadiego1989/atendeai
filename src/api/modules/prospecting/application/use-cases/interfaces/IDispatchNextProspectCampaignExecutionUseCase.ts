@@ -15,11 +15,10 @@ export interface DispatchNextProspectCampaignExecutionOutput {
   remainingPendingExecutions: number;
 }
 
-export interface IDispatchNextProspectCampaignExecutionUseCase
-  extends IUseCase<
-    DispatchNextProspectCampaignExecutionInput,
-    DispatchNextProspectCampaignExecutionOutput
-  > {}
+export interface IDispatchNextProspectCampaignExecutionUseCase extends IUseCase<
+  DispatchNextProspectCampaignExecutionInput,
+  DispatchNextProspectCampaignExecutionOutput
+> {}
 
 export const IDispatchNextProspectCampaignExecutionUseCase = Symbol(
   'IDispatchNextProspectCampaignExecutionUseCase',

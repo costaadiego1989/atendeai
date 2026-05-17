@@ -12,8 +12,14 @@ export class GetGoogleCalendarConnectionStatusUseCase {
   ) {}
 
   async execute(input: { tenantId: string; branchId?: string | null }) {
-    const exactConnection = await this.repository.findByScope(input.tenantId, input.branchId);
-    const connection = await this.repository.findBestForScope(input.tenantId, input.branchId);
+    const exactConnection = await this.repository.findByScope(
+      input.tenantId,
+      input.branchId,
+    );
+    const connection = await this.repository.findBestForScope(
+      input.tenantId,
+      input.branchId,
+    );
 
     return {
       connected: Boolean(connection),

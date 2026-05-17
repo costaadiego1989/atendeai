@@ -83,7 +83,7 @@ describe('ContactController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -172,7 +172,7 @@ describe('ContactController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.conversation
       .deleteMany({
         where: {
@@ -181,7 +181,7 @@ describe('ContactController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.contact
       .deleteMany({
         where: {
@@ -190,7 +190,7 @@ describe('ContactController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.subscription
       .deleteMany({
         where: {
@@ -199,17 +199,19 @@ describe('ContactController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
-    await prisma.$executeRaw(
-      Prisma.sql`
+      .catch(() => {});
+    await prisma
+      .$executeRaw(
+        Prisma.sql`
         DELETE FROM contact_schema.contact_async_jobs
         WHERE tenant_id IN (${Prisma.join(
-        [tenantId, otherTenantId]
-          .filter(Boolean)
-          .map((id) => Prisma.sql`${id}::uuid`),
-      )})
+          [tenantId, otherTenantId]
+            .filter(Boolean)
+            .map((id) => Prisma.sql`${id}::uuid`),
+        )})
       `,
-    ).catch(() => { });
+      )
+      .catch(() => {});
     await prisma.user
       .deleteMany({
         where: {
@@ -218,7 +220,7 @@ describe('ContactController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
     await prisma.tenant
       .deleteMany({
         where: {
@@ -227,7 +229,7 @@ describe('ContactController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
   });
 
   it('should create and list contacts with filters', async () => {

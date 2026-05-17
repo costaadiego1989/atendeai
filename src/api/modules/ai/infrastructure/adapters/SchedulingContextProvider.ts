@@ -15,7 +15,7 @@ export class SchedulingContextProvider implements ISchedulingContextProvider {
   constructor(
     @Inject(SCHEDULING_FACADE)
     private readonly schedulingFacade: ISchedulingFacade,
-  ) { }
+  ) {}
 
   async findRelevantAvailability(
     tenantId: string,
@@ -29,7 +29,8 @@ export class SchedulingContextProvider implements ISchedulingContextProvider {
         return null;
       }
 
-      const professionals = await this.schedulingFacade.listProfessionals(tenantId);
+      const professionals =
+        await this.schedulingFacade.listProfessionals(tenantId);
       return this.buildGeneralSchedulingOverview(categories, professionals);
     }
 
@@ -56,7 +57,11 @@ export class SchedulingContextProvider implements ISchedulingContextProvider {
 
       hasAnySchedulingRecords = true;
 
-      const summary = this.buildDaySummary(date, matchingCategory, availability);
+      const summary = this.buildDaySummary(
+        date,
+        matchingCategory,
+        availability,
+      );
       daySummaries.push(summary.text);
       hasOpenSlots = hasOpenSlots || summary.hasOpenSlots;
     }
@@ -122,13 +127,20 @@ export class SchedulingContextProvider implements ISchedulingContextProvider {
   ): string {
     const categoryLines = categories.slice(0, 8).map((category) => {
       const price =
-        category.basePrice != null ? ` | base price BRL ${category.basePrice.toFixed(2)}` : '';
-      const duration = category.durationMinutes ? ` | duration ${category.durationMinutes} min` : '';
+        category.basePrice != null
+          ? ` | base price BRL ${category.basePrice.toFixed(2)}`
+          : '';
+      const duration = category.durationMinutes
+        ? ` | duration ${category.durationMinutes} min`
+        : '';
       return `- Service: ${category.name} | categoryId=${category.id}${duration}${price}`;
     });
-    const professionalLines = professionals.slice(0, 8).map((professional) => (
-      `- Professional: ${professional.name} | professionalId=${professional.id}${professional.role ? ` | role=${professional.role}` : ''}`
-    ));
+    const professionalLines = professionals
+      .slice(0, 8)
+      .map(
+        (professional) =>
+          `- Professional: ${professional.name} | professionalId=${professional.id}${professional.role ? ` | role=${professional.role}` : ''}`,
+      );
 
     return [
       'Scheduling context:',
@@ -136,7 +148,9 @@ export class SchedulingContextProvider implements ISchedulingContextProvider {
       '- First ask which service/category the customer wants if it is not clear.',
       '- Services available:',
       ...categoryLines,
-      professionals.length > 0 ? '- Professionals available:' : '- Professionals available: none configured',
+      professionals.length > 0
+        ? '- Professionals available:'
+        : '- Professionals available: none configured',
       ...professionalLines,
       ...this.buildConversationRules(false),
     ].join('\n');
@@ -146,11 +160,7 @@ export class SchedulingContextProvider implements ISchedulingContextProvider {
     const normalizedMessage = this.normalize(userMessage);
     const today = new Date();
     const utcReference = new Date(
-      Date.UTC(
-        today.getUTCFullYear(),
-        today.getUTCMonth(),
-        today.getUTCDate(),
-      ),
+      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
     );
 
     if (

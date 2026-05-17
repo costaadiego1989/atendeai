@@ -12,7 +12,10 @@ export class GetShoppingSessionUseCase {
   ) {}
 
   async execute(tenantId: string, sessionId: string) {
-    const session = await this.commerceRepository.findSessionById(tenantId, sessionId);
+    const session = await this.commerceRepository.findSessionById(
+      tenantId,
+      sessionId,
+    );
 
     if (!session) {
       throw new NotFoundException('Shopping session not found');

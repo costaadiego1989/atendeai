@@ -1,4 +1,14 @@
-import { BadRequestException, Controller, Post, Body, Get, Param, Query, Patch, Delete } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Query,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { CreateProposalUseCase } from '@modules/proposal/application/use-cases/CreateProposalUseCase';
 import { UpdateProposalUseCase } from '@modules/proposal/application/use-cases/UpdateProposalUseCase';
 import { DeleteProposalUseCase } from '@modules/proposal/application/use-cases/DeleteProposalUseCase';
@@ -83,7 +93,9 @@ function toProposalItems(value: unknown): ProposalItemInput[] {
   return items;
 }
 
-function toCreateProposalInput(body: Record<string, unknown>): CreateProposalInput {
+function toCreateProposalInput(
+  body: Record<string, unknown>,
+): CreateProposalInput {
   return {
     tenantId: asString(body.tenantId).trim(),
     contactId: asString(body.contactId).trim(),
@@ -99,15 +111,35 @@ function toCreateProposalInput(body: Record<string, unknown>): CreateProposalInp
 
 function toUpdateProposalInput(body: Record<string, unknown>) {
   return {
-    tenantId: body.tenantId === undefined ? undefined : asString(body.tenantId).trim() || undefined,
-    contactId: body.contactId === undefined ? undefined : asString(body.contactId).trim() || undefined,
-    userId: body.userId === undefined ? undefined : asString(body.userId).trim() || undefined,
-    title: body.title === undefined ? undefined : asString(body.title).trim() || undefined,
-    description: body.description === undefined ? undefined : toOptionalString(body.description),
-    benefits: body.benefits === undefined ? undefined : toOptionalString(body.benefits),
+    tenantId:
+      body.tenantId === undefined
+        ? undefined
+        : asString(body.tenantId).trim() || undefined,
+    contactId:
+      body.contactId === undefined
+        ? undefined
+        : asString(body.contactId).trim() || undefined,
+    userId:
+      body.userId === undefined
+        ? undefined
+        : asString(body.userId).trim() || undefined,
+    title:
+      body.title === undefined
+        ? undefined
+        : asString(body.title).trim() || undefined,
+    description:
+      body.description === undefined
+        ? undefined
+        : toOptionalString(body.description),
+    benefits:
+      body.benefits === undefined ? undefined : toOptionalString(body.benefits),
     items: body.items === undefined ? undefined : toProposalItems(body.items),
-    metadata: body.metadata === undefined ? undefined : toMetadata(body.metadata),
-    validUntil: body.validUntil === undefined ? undefined : toOptionalDateString(body.validUntil),
+    metadata:
+      body.metadata === undefined ? undefined : toMetadata(body.metadata),
+    validUntil:
+      body.validUntil === undefined
+        ? undefined
+        : toOptionalDateString(body.validUntil),
   };
 }
 
@@ -122,7 +154,7 @@ export class ProposalController {
     private readonly generateProposalPdfUseCase: GenerateProposalPdfUseCase,
     private readonly scheduleProposalDeliveryUseCase: ScheduleProposalDeliveryUseCase,
     private readonly sendProposalToConversationUseCase: SendProposalToConversationUseCase,
-  ) { }
+  ) {}
 
   @Post()
   async create(@Body() body: Record<string, unknown>) {
@@ -170,7 +202,10 @@ export class ProposalController {
   }
 
   @Post(':id/schedule')
-  async schedule(@Param('id') id: string, @Body('scheduledAt') scheduledAt: string) {
+  async schedule(
+    @Param('id') id: string,
+    @Body('scheduledAt') scheduledAt: string,
+  ) {
     const date = new Date(scheduledAt);
     await this.scheduleProposalDeliveryUseCase.execute({
       proposalId: id,

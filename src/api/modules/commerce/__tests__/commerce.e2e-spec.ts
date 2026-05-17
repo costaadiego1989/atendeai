@@ -20,8 +20,14 @@ import { UpdateCommerceOrderStatusUseCase } from '../application/use-cases/Updat
 import { DetectAbandonedShoppingSessionsUseCase } from '../application/use-cases/DetectAbandonedShoppingSessionsUseCase';
 import { UpdateCommerceAbandonmentStateUseCase } from '../application/use-cases/UpdateCommerceAbandonmentStateUseCase';
 import { TriggerCommerceAbandonmentTouchUseCase } from '../application/use-cases/TriggerCommerceAbandonmentTouchUseCase';
-import { COMMERCE_REPOSITORY, ICommerceRepository } from '../domain/ports/ICommerceRepository';
-import { IPAYMENT_GATEWAY, IPaymentGateway } from '@modules/payment/domain/ports/IPaymentGateway';
+import {
+  COMMERCE_REPOSITORY,
+  ICommerceRepository,
+} from '../domain/ports/ICommerceRepository';
+import {
+  IPAYMENT_GATEWAY,
+  IPaymentGateway,
+} from '@modules/payment/domain/ports/IPaymentGateway';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { PaymentConfirmedIntegrationEvent } from '@modules/payment/application/integration-events/PaymentIntegrationEvents';
 import {
@@ -90,24 +96,46 @@ describe('CommerceModule (e2e)', () => {
 
   afterAll(async () => {
     if (tenantId) {
-      await prisma.$executeRaw(Prisma.sql`
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.orders WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.shopping_session_items WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.shopping_sessions WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+      `,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM commerce_schema.shipping_policies WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
-      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.inventoryItem.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.catalogItem.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.catalogCategory.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+      `,
+        )
+        .catch(() => {});
+      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.inventoryItem
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.catalogItem
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.catalogCategory
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
 
     if (app) {
@@ -235,7 +263,10 @@ describe('CommerceModule (e2e)', () => {
         tenantId,
         checkout.order.paymentReference!,
       );
-      const paidSession = await commerceRepository.findSessionById(tenantId, session.id);
+      const paidSession = await commerceRepository.findSessionById(
+        tenantId,
+        session.id,
+      );
 
       expect(paidOrder?.status).toBe('PAID');
       expect(paidOrder?.paymentStatus).toBe('PAID');
@@ -338,7 +369,8 @@ describe('CommerceModule (e2e)', () => {
     ]);
     expect(policy.notes).toBe('Validar manualmente bairros fora da zona sul.');
 
-    const persisted = await commerceRepository.findShippingPolicyByTenantId(tenantId);
+    const persisted =
+      await commerceRepository.findShippingPolicyByTenantId(tenantId);
 
     expect(persisted?.mode).toBe('PER_KM');
     expect(persisted?.pricePerKm).toBe(4.2);
@@ -566,14 +598,21 @@ describe('CommerceModule (e2e)', () => {
     expect(listedOrder?.totalAmount).toBe(42);
     expect(listedOrder?.paymentStatus).toBe('PENDING');
 
-    const details = await getCommerceOrderDetails.execute(tenantId, checkout.order.id);
+    const details = await getCommerceOrderDetails.execute(
+      tenantId,
+      checkout.order.id,
+    );
 
     expect(details.order.id).toBe(checkout.order.id);
-    expect(details.order.paymentLinkUrl).toBe('https://pay.test/plink-commerce-3');
+    expect(details.order.paymentLinkUrl).toBe(
+      'https://pay.test/plink-commerce-3',
+    );
     expect(details.session?.id).toBe(session.id);
     expect(details.session?.items).toHaveLength(1);
     expect(details.session?.items[0]?.name).toBe('Bolo de cenoura');
-    expect(details.session?.deliveryAddress).toBe('Rua da Padaria, 12 - Centro');
+    expect(details.session?.deliveryAddress).toBe(
+      'Rua da Padaria, 12 - Centro',
+    );
   });
 
   it('should update an operational commerce order status after payment', async () => {
@@ -688,7 +727,10 @@ describe('CommerceModule (e2e)', () => {
 
     expect(delivered.status).toBe('OUT_FOR_DELIVERY');
 
-    const persisted = await commerceRepository.findOrderById(tenantId, checkout.order.id);
+    const persisted = await commerceRepository.findOrderById(
+      tenantId,
+      checkout.order.id,
+    );
     expect(persisted?.status).toBe('OUT_FOR_DELIVERY');
   });
 
@@ -698,10 +740,16 @@ describe('CommerceModule (e2e)', () => {
     const syncInventory = app.get(SyncInventoryItemUseCase);
     const startShoppingSession = app.get(StartShoppingSessionUseCase);
     const addItemToShoppingSession = app.get(AddItemToShoppingSessionUseCase);
-    const detectAbandonedSessions = app.get(DetectAbandonedShoppingSessionsUseCase);
+    const detectAbandonedSessions = app.get(
+      DetectAbandonedShoppingSessionsUseCase,
+    );
     const checkoutShoppingSession = app.get(CheckoutShoppingSessionUseCase);
-    const updateAbandonmentState = app.get(UpdateCommerceAbandonmentStateUseCase);
-    const triggerAbandonmentTouch = app.get(TriggerCommerceAbandonmentTouchUseCase);
+    const updateAbandonmentState = app.get(
+      UpdateCommerceAbandonmentStateUseCase,
+    );
+    const triggerAbandonmentTouch = app.get(
+      TriggerCommerceAbandonmentTouchUseCase,
+    );
     const paymentGateway = app.get<IPaymentGateway>(IPAYMENT_GATEWAY);
     const eventBus = app.get<IEventBus>(EVENT_BUS);
 
@@ -844,10 +892,11 @@ describe('CommerceModule (e2e)', () => {
         userName: 'Operação',
       });
 
-      const manualTouchRecorded = await commerceRepository.listSessionAbandonmentTouches(
-        tenantId,
-        session.id,
-      );
+      const manualTouchRecorded =
+        await commerceRepository.listSessionAbandonmentTouches(
+          tenantId,
+          session.id,
+        );
       expect(
         manualTouchRecorded.some((touch) => touch.interval === 'manual'),
       ).toBe(true);
@@ -861,7 +910,9 @@ describe('CommerceModule (e2e)', () => {
     const createItem = app.get(CreateCatalogItemUseCase);
     const syncInventory = app.get(SyncInventoryItemUseCase);
     const configureShippingPolicy = app.get(ConfigureShippingPolicyUseCase);
-    const advanceCommerceConversation = app.get(AdvanceCommerceConversationUseCase);
+    const advanceCommerceConversation = app.get(
+      AdvanceCommerceConversationUseCase,
+    );
     const paymentGateway = app.get<IPaymentGateway>(IPAYMENT_GATEWAY);
 
     const contact = await prisma.contact.create({
@@ -1025,6 +1076,8 @@ describe('CommerceModule (e2e)', () => {
     );
 
     expect(order?.status).toBe('AWAITING_PAYMENT');
-    expect(order?.paymentLinkUrl).toBe('https://pay.test/plink-commerce-conversation');
+    expect(order?.paymentLinkUrl).toBe(
+      'https://pay.test/plink-commerce-conversation',
+    );
   });
 });

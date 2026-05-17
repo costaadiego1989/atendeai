@@ -31,7 +31,8 @@ export class TwilioAdapter implements IMessagingGateway {
   private readonly statusCallbackUrl?: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID') || '';
+    this.accountSid =
+      this.configService.get<string>('TWILIO_ACCOUNT_SID') || '';
     this.authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN') || '';
     this.apiBaseUrl =
       this.configService.get<string>('TWILIO_API_BASE_URL') ||
@@ -62,7 +63,10 @@ export class TwilioAdapter implements IMessagingGateway {
 
     const payload = Object.keys(body)
       .sort()
-      .reduce((acc, key) => `${acc}${key}${String(body[key] ?? '')}`, requestUrl);
+      .reduce(
+        (acc, key) => `${acc}${key}${String(body[key] ?? '')}`,
+        requestUrl,
+      );
 
     const expected = crypto
       .createHmac('sha1', authToken)

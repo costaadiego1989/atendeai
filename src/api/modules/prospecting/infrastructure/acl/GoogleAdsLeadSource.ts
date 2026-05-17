@@ -23,9 +23,14 @@ export class GoogleAdsLeadSource implements IGoogleAdsLeadSource {
     private readonly oauthService: GoogleAdsOAuthService,
   ) {}
 
-  async pullLeads(input: { tenantId: string; limit?: number }): Promise<GoogleAdsLeadItem[]> {
+  async pullLeads(input: {
+    tenantId: string;
+    limit?: number;
+  }): Promise<GoogleAdsLeadItem[]> {
     const connection = await this.getTenantConnection(input.tenantId);
-    const accessToken = await this.oauthService.getAccessToken(connection.refreshToken);
+    const accessToken = await this.oauthService.getAccessToken(
+      connection.refreshToken,
+    );
     const limit = Math.min(Math.max(input.limit ?? 50, 1), 200);
     const response = await axios.post(
       `${this.apiBaseUrl}/customers/${connection.customerId}/googleAds:searchStream`,
@@ -47,7 +52,8 @@ export class GoogleAdsLeadSource implements IGoogleAdsLeadSource {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'developer-token': this.configService.get<string>('GOOGLE_ADS_DEVELOPER_TOKEN') || '',
+          'developer-token':
+            this.configService.get<string>('GOOGLE_ADS_DEVELOPER_TOKEN') || '',
           ...(connection.loginCustomerId
             ? { 'login-customer-id': connection.loginCustomerId }
             : {}),
@@ -80,7 +86,10 @@ export class GoogleAdsLeadSource implements IGoogleAdsLeadSource {
         ),
         googleAdsCustomerId: connection.customerId,
         campaignName: row.campaign?.name ?? undefined,
-        formName: String(leadData.asset ?? '').split('/').pop() || undefined,
+        formName:
+          String(leadData.asset ?? '')
+            .split('/')
+            .pop() || undefined,
         fullName: getField('full_name', 'name', 'nome'),
         phone: getField('phone_number', 'phone', 'telefone', 'whatsapp'),
         email: getField('email'),
@@ -88,7 +97,9 @@ export class GoogleAdsLeadSource implements IGoogleAdsLeadSource {
         state: getField('province', 'state', 'estado'),
         instagramHandle: getField('instagram'),
         document: getField('cpf', 'cnpj', 'documento'),
-        submissionAt: new Date(leadData.submissionDateTime ?? new Date().toISOString()),
+        submissionAt: new Date(
+          leadData.submissionDateTime ?? new Date().toISOString(),
+        ),
         fields,
         rawPayload: row,
       } satisfies GoogleAdsLeadItem;

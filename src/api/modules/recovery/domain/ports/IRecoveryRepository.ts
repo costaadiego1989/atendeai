@@ -72,7 +72,10 @@ export interface ListRecoveryCasesFilters {
 export interface IRecoveryRepository {
   createCase(input: CreateRecoveryCaseInput): Promise<RecoveryCaseRecord>;
   listCases(filters: ListRecoveryCasesFilters): Promise<RecoveryCaseRecord[]>;
-  findCaseById(tenantId: string, caseId: string): Promise<RecoveryCaseRecord | null>;
+  findCaseById(
+    tenantId: string,
+    caseId: string,
+  ): Promise<RecoveryCaseRecord | null>;
   findLatestActiveCaseByContact(
     tenantId: string,
     contactId: string,

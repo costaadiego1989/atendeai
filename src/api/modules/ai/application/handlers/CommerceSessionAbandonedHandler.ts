@@ -10,7 +10,7 @@ export class CommerceSessionAbandonedHandler implements OnModuleInit {
     private readonly eventBus: IEventBus,
     @Inject(IProcessAIResponseUseCase)
     private readonly processAIResponseUseCase: IProcessAIResponseUseCase,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.eventBus.subscribe<CommerceSessionAbandonedIntegrationEvent>(

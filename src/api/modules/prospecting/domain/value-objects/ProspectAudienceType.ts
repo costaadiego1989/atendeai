@@ -17,10 +17,7 @@ export class ProspectAudienceTypeVO extends ValueObject<ProspectAudienceTypeProp
   }
 
   public static create(value: string): ProspectAudienceTypeVO {
-    const validTypes: ProspectAudienceType[] = [
-      'REENGAGEMENT',
-      'CONTACT_LIST',
-    ];
+    const validTypes: ProspectAudienceType[] = ['REENGAGEMENT', 'CONTACT_LIST'];
 
     if (!validTypes.includes(value as ProspectAudienceType)) {
       throw new ValidationErrorException(

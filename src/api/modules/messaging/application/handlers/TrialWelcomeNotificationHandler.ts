@@ -14,7 +14,7 @@ export class TrialWelcomeNotificationHandler implements OnModuleInit {
     @Inject(MESSAGING_FACADE)
     private readonly messagingFacade: IMessagingFacade,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.eventBus.subscribe(
@@ -28,15 +28,25 @@ export class TrialWelcomeNotificationHandler implements OnModuleInit {
 
   private async handle(event: TenantCreatedIntegrationEvent) {
     const payload = (event as any).payload || event;
-    const { isTrial, ownerPassword, ownerName, ownerEmail, ownerPhone, aggregateId: tenantId } = payload;
+    const {
+      isTrial,
+      ownerPassword,
+      ownerName,
+      ownerEmail,
+      ownerPhone,
+      aggregateId: tenantId,
+    } = payload;
 
     if (!isTrial) {
       return;
     }
 
-    this.logger.log(`Handling trial welcome notification for tenant ${tenantId} (${ownerEmail})`);
+    this.logger.log(
+      `Handling trial welcome notification for tenant ${tenantId} (${ownerEmail})`,
+    );
 
-    const welcomeMessage = `Olá ${ownerName}! 🚀\n\nBem-vindo ao AtendeAí! Sua conta de teste de 7 dias foi criada com sucesso.\n\n` +
+    const welcomeMessage =
+      `Olá ${ownerName}! 🚀\n\nBem-vindo ao AtendeAí! Sua conta de teste de 7 dias foi criada com sucesso.\n\n` +
       `Acesse agora: https://app.atendeai.pro\n` +
       `Usuário: ${ownerEmail}\n` +
       `Senha temporária: ${ownerPassword}\n\n` +
@@ -51,13 +61,13 @@ export class TrialWelcomeNotificationHandler implements OnModuleInit {
           },
         },
         update: {
-          tags: ["owner"]
+          tags: ['owner'],
         },
         create: {
           tenantId: tenantId as string,
           name: ownerName as string,
           phone: ownerPhone as string,
-          tags: ["owner"],
+          tags: ['owner'],
         },
       });
 
@@ -70,7 +80,10 @@ export class TrialWelcomeNotificationHandler implements OnModuleInit {
 
       this.logger.log(`Trial welcome message queued for ${ownerPhone}`);
     } catch (error) {
-      this.logger.error(`Failed to send trial welcome WhatsApp to ${ownerPhone}`, error);
+      this.logger.error(
+        `Failed to send trial welcome WhatsApp to ${ownerPhone}`,
+        error,
+      );
     }
   }
 }

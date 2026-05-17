@@ -4,18 +4,25 @@ import { Role } from '@shared/domain/Role';
 import { UniqueEntityID } from '@shared/domain/UniqueEntityID';
 
 describe('AuthUser', () => {
-  function createUser(overrides: Partial<{
-    id: string;
-    tenantId: string;
-    tenantName: string;
-    tenantBranches: Array<{ id: string; name: string; isHeadquarters: boolean; active: boolean }>;
-    email: string;
-    name: string;
-    passwordHash: string;
-    mustChangePassword: boolean;
-    role: string;
-    planStatus: string;
-  }> = {}) {
+  function createUser(
+    overrides: Partial<{
+      id: string;
+      tenantId: string;
+      tenantName: string;
+      tenantBranches: Array<{
+        id: string;
+        name: string;
+        isHeadquarters: boolean;
+        active: boolean;
+      }>;
+      email: string;
+      name: string;
+      passwordHash: string;
+      mustChangePassword: boolean;
+      role: string;
+      planStatus: string;
+    }> = {},
+  ) {
     return AuthUser.create(
       {
         tenantId: overrides.tenantId ?? 'tenant-1',
@@ -77,7 +84,12 @@ describe('AuthUser', () => {
     const user = createUser({
       tenantBranches: [
         { id: 'b1', name: 'Matriz', isHeadquarters: true, active: true },
-        { id: 'b2', name: 'Filial Inativa', isHeadquarters: false, active: false },
+        {
+          id: 'b2',
+          name: 'Filial Inativa',
+          isHeadquarters: false,
+          active: false,
+        },
         { id: 'b3', name: 'Filial Ativa', isHeadquarters: false, active: true },
       ],
     });
@@ -90,7 +102,11 @@ describe('AuthUser', () => {
   it('should determine equality by id', () => {
     const user1 = createUser({ id: 'same-id', email: 'a@test.com', name: 'A' });
     const user2 = createUser({ id: 'same-id', email: 'b@test.com', name: 'B' });
-    const user3 = createUser({ id: 'different-id', email: 'a@test.com', name: 'A' });
+    const user3 = createUser({
+      id: 'different-id',
+      email: 'a@test.com',
+      name: 'A',
+    });
 
     expect(user1.equals(user2)).toBe(true);
     expect(user1.equals(user3)).toBe(false);

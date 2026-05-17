@@ -22,7 +22,7 @@ const traceUrl =
   process.env['OTEL_EXPORTER_OTLP_TRACES_ENDPOINT'] ?? `${base}/v1/traces`;
 const metricsUrl =
   process.env['OTEL_EXPORTER_OTLP_METRICS_ENDPOINT'] ?? `${base}/v1/metrics`;
-  
+
 const logsUrl =
   process.env['OTEL_EXPORTER_OTLP_LOGS_ENDPOINT'] ?? `${base}/v1/logs`;
 

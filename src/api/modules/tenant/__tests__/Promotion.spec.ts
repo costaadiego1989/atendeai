@@ -21,7 +21,9 @@ describe('Promotion Value Object', () => {
       description: 'A very long description for the promotion',
       value: 'Free',
     });
-    expect(promotion.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(promotion.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
   });
 
   it('should keep the provided id', () => {
@@ -36,27 +38,33 @@ describe('Promotion Value Object', () => {
   });
 
   it('should throw an error if title is too short', () => {
-    expect(() => Promotion.create({
-      title: 'ab',
-      description: 'Valid description that is long enough',
-      value: '5',
-    })).toThrow('Promotion title must be at least 3 characters long');
+    expect(() =>
+      Promotion.create({
+        title: 'ab',
+        description: 'Valid description that is long enough',
+        value: '5',
+      }),
+    ).toThrow('Promotion title must be at least 3 characters long');
   });
 
   it('should throw an error if description is too short', () => {
-    expect(() => Promotion.create({
-      title: 'Valid Title',
-      description: 'Short',
-      value: '5',
-    })).toThrow('Promotion description must be at least 10 characters long');
+    expect(() =>
+      Promotion.create({
+        title: 'Valid Title',
+        description: 'Short',
+        value: '5',
+      }),
+    ).toThrow('Promotion description must be at least 10 characters long');
   });
 
   it('should throw an error if expiresAt is invalid', () => {
-    expect(() => Promotion.create({
-      title: 'Valid Title',
-      description: 'Valid description that is long enough',
-      value: '5',
-      expiresAt: 'invalid-date',
-    })).toThrow('Promotion expiresAt must be a valid date');
+    expect(() =>
+      Promotion.create({
+        title: 'Valid Title',
+        description: 'Valid description that is long enough',
+        value: '5',
+        expiresAt: 'invalid-date',
+      }),
+    ).toThrow('Promotion expiresAt must be a valid date');
   });
 });

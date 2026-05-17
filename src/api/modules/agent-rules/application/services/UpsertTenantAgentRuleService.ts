@@ -14,10 +14,7 @@ export class UpsertTenantAgentRuleService {
   constructor(private readonly repository: ITenantAgentRuleRepository) {}
 
   async upsert(input: UpsertTenantAgentRuleInput): Promise<TenantAgentRule> {
-    ensureAgentRuleTenantAccess(
-      input.tenantId,
-      input.requestingUserTenantId,
-    );
+    ensureAgentRuleTenantAccess(input.tenantId, input.requestingUserTenantId);
 
     const moduleId = parseAgentModule(input.moduleId);
     const customPrompt = normalizeAgentPrompt(input.customPrompt);

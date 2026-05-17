@@ -162,7 +162,7 @@ describe('AIModule (e2e)', () => {
     jest.restoreAllMocks();
 
     for (const conversationId of createdConversationIds) {
-      await chatHistory.clearHistory(conversationId).catch(() => { });
+      await chatHistory.clearHistory(conversationId).catch(() => {});
     }
   });
 
@@ -176,15 +176,23 @@ describe('AIModule (e2e)', () => {
             },
           },
         })
-        .catch(() => { });
-      await prisma.conversation.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.salesMetric.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.usageRecord.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.aIConfig.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.conversation
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.salesMetric
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.usageRecord
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
+      await prisma.aIConfig.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
 
     if (app) {
@@ -376,7 +384,9 @@ describe('AIModule (e2e)', () => {
       content: { type: 'TEXT', text: 'Quero entender melhor o serviço' },
     });
 
-    const afterUsage = await waitForUsageIncrease(beforeUsage?.aiTokensUsed || 0);
+    const afterUsage = await waitForUsageIncrease(
+      beforeUsage?.aiTokensUsed || 0,
+    );
 
     expect(afterUsage).toBeDefined();
     expect(afterUsage?.aiTokensUsed || 0).toBeGreaterThan(

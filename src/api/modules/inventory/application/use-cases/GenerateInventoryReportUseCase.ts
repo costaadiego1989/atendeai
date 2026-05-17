@@ -43,15 +43,23 @@ export class GenerateInventoryReportUseCase {
       availableOnly: input.availableOnly,
     });
 
-    const statuses = new Set<'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'RESERVED'>(
-      (input.statuses ?? []).filter(Boolean) as Array<'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'RESERVED'>,
+    const statuses = new Set<
+      'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'RESERVED'
+    >(
+      (input.statuses ?? []).filter(Boolean) as Array<
+        'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'RESERVED'
+      >,
     );
     const filteredItems =
       statuses.size === 0
         ? items
         : items.filter((item) =>
             statuses.has(
-              item.availabilityStatus as 'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'RESERVED',
+              item.availabilityStatus as
+                | 'AVAILABLE'
+                | 'LOW_STOCK'
+                | 'UNAVAILABLE'
+                | 'RESERVED',
             ),
           );
 
@@ -59,13 +67,25 @@ export class GenerateInventoryReportUseCase {
       generatedAt: new Date(),
       summary: {
         totalItems: filteredItems.length,
-        totalQuantity: filteredItems.reduce((total, item) => total + item.availableQuantity, 0),
-        availableItems: filteredItems.filter((item) => item.availabilityStatus === 'AVAILABLE').length,
-        lowStockItems: filteredItems.filter((item) => item.availabilityStatus === 'LOW_STOCK').length,
-        unavailableItems: filteredItems.filter((item) => item.availabilityStatus === 'UNAVAILABLE').length,
-        reservedItems: filteredItems.filter((item) => item.availabilityStatus === 'RESERVED').length,
+        totalQuantity: filteredItems.reduce(
+          (total, item) => total + item.availableQuantity,
+          0,
+        ),
+        availableItems: filteredItems.filter(
+          (item) => item.availabilityStatus === 'AVAILABLE',
+        ).length,
+        lowStockItems: filteredItems.filter(
+          (item) => item.availabilityStatus === 'LOW_STOCK',
+        ).length,
+        unavailableItems: filteredItems.filter(
+          (item) => item.availabilityStatus === 'UNAVAILABLE',
+        ).length,
+        reservedItems: filteredItems.filter(
+          (item) => item.availabilityStatus === 'RESERVED',
+        ).length,
         estimatedInventoryValue: filteredItems.reduce((total, item) => {
-          const currentPrice = item.currentPrice == null ? 0 : Number(item.currentPrice);
+          const currentPrice =
+            item.currentPrice == null ? 0 : Number(item.currentPrice);
           return total + currentPrice * item.availableQuantity;
         }, 0),
       },

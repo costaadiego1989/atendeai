@@ -34,7 +34,11 @@ export class TenantBranchController {
   @Post(':id/branches')
   @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
   @Roles('OWNER', 'ADMIN')
-  async createBranch(@Param('id') id: string, @Body() body: CreateTenantBranchDTO, @Req() req: Request) {
+  async createBranch(
+    @Param('id') id: string,
+    @Body() body: CreateTenantBranchDTO,
+    @Req() req: Request,
+  ) {
     const user = (req as any).user;
     return this.createTenantBranchUseCase.execute({
       ...body,

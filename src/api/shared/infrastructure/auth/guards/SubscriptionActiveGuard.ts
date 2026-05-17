@@ -12,8 +12,8 @@ import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 export class SubscriptionActiveGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private prisma: PrismaService
-  ) { }
+    private prisma: PrismaService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiresActivePlan = this.reflector.getAllAndOverride<boolean>(
@@ -34,7 +34,7 @@ export class SubscriptionActiveGuard implements CanActivate {
 
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: user.tenantId },
-      select: { planStatus: true }
+      select: { planStatus: true },
     });
 
     if (!tenant) {

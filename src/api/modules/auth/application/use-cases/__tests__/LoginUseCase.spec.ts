@@ -33,23 +33,30 @@ describe('LoginUseCase', () => {
     moduleAccess: { messaging: true, scheduling: true },
   };
 
-  function createMockUser(overrides: Partial<{
-    id: string;
-    tenantId: string;
-    tenantName: string;
-    tenantCnpj: string;
-    tenantBusinessType: string;
-    tenantBranches: Array<{ id: string; name: string; isHeadquarters: boolean; active: boolean }>;
-    email: string;
-    name: string;
-    phone: string;
-    cpf: string;
-    passwordHash: string;
-    mustChangePassword: boolean;
-    role: string;
-    planStatus: string;
-    tenantCreatedAt: Date;
-  }> = {}) {
+  function createMockUser(
+    overrides: Partial<{
+      id: string;
+      tenantId: string;
+      tenantName: string;
+      tenantCnpj: string;
+      tenantBusinessType: string;
+      tenantBranches: Array<{
+        id: string;
+        name: string;
+        isHeadquarters: boolean;
+        active: boolean;
+      }>;
+      email: string;
+      name: string;
+      phone: string;
+      cpf: string;
+      passwordHash: string;
+      mustChangePassword: boolean;
+      role: string;
+      planStatus: string;
+      tenantCreatedAt: Date;
+    }> = {},
+  ) {
     return AuthUser.create(
       {
         tenantId: overrides.tenantId ?? 'tenant-123',
@@ -57,8 +64,18 @@ describe('LoginUseCase', () => {
         tenantCnpj: overrides.tenantCnpj ?? '12345678000100',
         tenantBusinessType: overrides.tenantBusinessType ?? 'SCHEDULING',
         tenantBranches: overrides.tenantBranches ?? [
-          { id: 'branch-1', name: 'Matriz', isHeadquarters: true, active: true },
-          { id: 'branch-2', name: 'Filial', isHeadquarters: false, active: false },
+          {
+            id: 'branch-1',
+            name: 'Matriz',
+            isHeadquarters: true,
+            active: true,
+          },
+          {
+            id: 'branch-2',
+            name: 'Filial',
+            isHeadquarters: false,
+            active: false,
+          },
         ],
         email: AuthUserEmail.create(overrides.email ?? 'test@test.com'),
         name: overrides.name ?? 'Test User',
@@ -230,14 +247,21 @@ describe('LoginUseCase', () => {
 
     expect(result.tenant.billingAccess).toBeDefined();
     expect(result.tenant.billingAccess).toEqual(mockBillingAccess);
-    expect(tenantModuleAccessService.getSummary).toHaveBeenCalledWith('tenant-123');
+    expect(tenantModuleAccessService.getSummary).toHaveBeenCalledWith(
+      'tenant-123',
+    );
   });
 
   it('should include active branches in response', async () => {
     const mockUser = createMockUser({
       tenantBranches: [
         { id: 'b1', name: 'Matriz', isHeadquarters: true, active: true },
-        { id: 'b2', name: 'Filial Inativa', isHeadquarters: false, active: false },
+        {
+          id: 'b2',
+          name: 'Filial Inativa',
+          isHeadquarters: false,
+          active: false,
+        },
         { id: 'b3', name: 'Filial Ativa', isHeadquarters: false, active: true },
       ],
     });

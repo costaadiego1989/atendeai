@@ -22,8 +22,6 @@ export class TrialPaymentProjectionService {
 
     const tenantId = parts[1];
 
-    this.logger.log(
-      `Trial payment confirmed for tenantId=${tenantId}`,
-    );
+    this.logger.log(`Trial payment confirmed for tenantId=${tenantId}`);
   }
 }

@@ -1,4 +1,7 @@
-import { WhatsAppConfig, WhatsAppProvider } from '../../../domain/entities/WhatsAppConfig';
+import {
+  WhatsAppConfig,
+  WhatsAppProvider,
+} from '../../../domain/entities/WhatsAppConfig';
 import { ConfigureWhatsAppInput } from '../../use-cases/interfaces/IConfigureWhatsAppUseCase';
 
 export interface IWhatsAppConfigurationStrategy {

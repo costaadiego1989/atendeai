@@ -17,7 +17,9 @@ export class CompleteGoogleCalendarConnectionUseCase {
 
   async execute(input: { code: string; state: string }) {
     const payload = this.stateService.verify(input.state);
-    const oauth = await this.oauthService.exchangeCodeForRefreshToken(input.code);
+    const oauth = await this.oauthService.exchangeCodeForRefreshToken(
+      input.code,
+    );
     const now = new Date().toISOString();
 
     await this.repository.save({

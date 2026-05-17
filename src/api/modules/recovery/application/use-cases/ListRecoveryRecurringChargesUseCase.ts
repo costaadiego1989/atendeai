@@ -12,6 +12,9 @@ export class ListRecoveryRecurringChargesUseCase {
   ) {}
 
   async execute(input: { tenantId: string; caseId: string }) {
-    return this.recurringChargeRepository.listByCase(input.tenantId, input.caseId);
+    return this.recurringChargeRepository.listByCase(
+      input.tenantId,
+      input.caseId,
+    );
   }
 }

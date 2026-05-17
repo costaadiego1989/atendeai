@@ -17,7 +17,9 @@ import {
 export class SchedulingRecurringReservationScheduler
   implements OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger(SchedulingRecurringReservationScheduler.name);
+  private readonly logger = new Logger(
+    SchedulingRecurringReservationScheduler.name,
+  );
   private timer: NodeJS.Timeout | null = null;
   private isTicking = false;
 

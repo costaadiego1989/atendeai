@@ -28,8 +28,12 @@ export class PersistMessageStep {
             metadata: {
               source: ctx.input.channel,
               originalType: ctx.input.contentType,
-              ...(ctx.input.content.mimeType ? { mimeType: ctx.input.content.mimeType } : {}),
-              ...(ctx.input.content.fileName ? { fileName: ctx.input.content.fileName } : {}),
+              ...(ctx.input.content.mimeType
+                ? { mimeType: ctx.input.content.mimeType }
+                : {}),
+              ...(ctx.input.content.fileName
+                ? { fileName: ctx.input.content.fileName }
+                : {}),
             },
           }
         : {}),
@@ -61,8 +65,15 @@ export class PersistMessageStep {
     return { ...ctx, message, signalText };
   }
 
-  private normalizeContentType(contentType: ProcessInboundMessageInput['contentType']) {
-    return contentType.toUpperCase() as 'TEXT' | 'IMAGE' | 'AUDIO' | 'VIDEO' | 'DOCUMENT';
+  private normalizeContentType(
+    contentType: ProcessInboundMessageInput['contentType'],
+  ) {
+    return contentType.toUpperCase() as
+      | 'TEXT'
+      | 'IMAGE'
+      | 'AUDIO'
+      | 'VIDEO'
+      | 'DOCUMENT';
   }
 
   private toSignalText(content: { type: string; text?: string; url?: string }) {

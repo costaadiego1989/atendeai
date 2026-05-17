@@ -28,19 +28,23 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     @Inject(SALES_REPOSITORY)
     private readonly salesRepository: ISalesRepository,
     private readonly searchCommerceCatalogUseCase: SearchCommerceCatalogUseCase,
-  ) { }
+  ) {}
 
   async findConversationContext(
     input: FindCommerceConversationContextInput,
   ): Promise<string | null> {
-    const transactionalBusiness = this.isTransactionalBusiness(input.businessType);
+    const transactionalBusiness = this.isTransactionalBusiness(
+      input.businessType,
+    );
     const activeSession =
       await this.commerceRepository.findActiveSessionByConversation(
         input.tenantId,
         input.conversationId,
       );
     const shippingPolicy = transactionalBusiness
-      ? await this.commerceRepository.findShippingPolicyByTenantId(input.tenantId)
+      ? await this.commerceRepository.findShippingPolicyByTenantId(
+          input.tenantId,
+        )
       : null;
 
     const shouldSearchCatalog =
@@ -50,13 +54,17 @@ export class CommerceContextProvider implements ICommerceContextProvider {
 
     const catalogMatches = shouldSearchCatalog
       ? await this.searchCommerceCatalogUseCase.execute({
-        tenantId: input.tenantId,
-        query: input.userMessage,
-        limit: 5,
-      })
+          tenantId: input.tenantId,
+          query: input.userMessage,
+          limit: 5,
+        })
       : [];
 
-    if (!transactionalBusiness && !activeSession && catalogMatches.length === 0) {
+    if (
+      !transactionalBusiness &&
+      !activeSession &&
+      catalogMatches.length === 0
+    ) {
       return null;
     }
 
@@ -86,14 +94,18 @@ export class CommerceContextProvider implements ICommerceContextProvider {
             (slot) => slot.enabled && slot.startTime && slot.endTime,
           )
             ? `- Delivery schedule: ${shippingPolicy.deliverySchedule
-              .filter((slot) => slot.enabled && slot.startTime && slot.endTime)
-              .map(
-                (slot) =>
-                  `${this.formatWeekday(slot.weekday)} ${slot.startTime}-${slot.endTime}`,
-              )
-              .join(', ')}`
+                .filter(
+                  (slot) => slot.enabled && slot.startTime && slot.endTime,
+                )
+                .map(
+                  (slot) =>
+                    `${this.formatWeekday(slot.weekday)} ${slot.startTime}-${slot.endTime}`,
+                )
+                .join(', ')}`
             : null,
-          shippingPolicy.notes ? `- Operational notes: ${shippingPolicy.notes}` : null,
+          shippingPolicy.notes
+            ? `- Operational notes: ${shippingPolicy.notes}`
+            : null,
         ]
           .filter(Boolean)
           .join('\n'),
@@ -112,7 +124,8 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     }
 
     const optionsFromSession =
-      activeSession?.pendingOptions?.length && this.looksLikeOptionSelection(input.userMessage)
+      activeSession?.pendingOptions?.length &&
+      this.looksLikeOptionSelection(input.userMessage)
         ? activeSession.pendingOptions
         : [];
 
@@ -144,32 +157,44 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     const itemLines =
       session.items.length > 0
         ? session.items.map((item, index) => {
-          const unitPrice =
-            item.unitPrice != null ? this.formatMoney(item.unitPrice) : 'n/a';
-          return `  ${index + 1}. ${item.name} x${item.quantity} - ${unitPrice} cada - linha ${this.formatMoney(item.lineTotal)}`;
-        })
+            const unitPrice =
+              item.unitPrice != null ? this.formatMoney(item.unitPrice) : 'n/a';
+            return `  ${index + 1}. ${item.name} x${item.quantity} - ${unitPrice} cada - linha ${this.formatMoney(item.lineTotal)}`;
+          })
         : ['  - Cart is empty'];
 
     return [
       'Shopping session context:',
       `- Session status: ${session.status}`,
       `- Current step: ${session.currentStep}`,
-      session.fulfillmentType ? `- Fulfillment type: ${session.fulfillmentType}` : null,
+      session.fulfillmentType
+        ? `- Fulfillment type: ${session.fulfillmentType}`
+        : null,
       session.shippingMode ? `- Shipping mode: ${session.shippingMode}` : null,
-      session.deliveryAddress ? `- Delivery address: ${session.deliveryAddress}` : null,
+      session.deliveryAddress
+        ? `- Delivery address: ${session.deliveryAddress}`
+        : null,
       session.notes ? `- Customer note: ${session.notes}` : null,
       session.selectedItemName
         ? `- Selected item awaiting confirmation: ${session.selectedItemName}`
         : null,
-      session.distanceKm != null ? `- Distance km: ${session.distanceKm}` : null,
+      session.distanceKm != null
+        ? `- Distance km: ${session.distanceKm}`
+        : null,
       '- Current cart items:',
       ...itemLines,
       `- Subtotal: ${this.formatMoney(session.subtotalAmount)}`,
       session.couponCode ? `- Applied coupon: ${session.couponCode}` : null,
-      session.discountAmount ? `- Saved discount: ${this.formatMoney(session.discountAmount)}` : null,
-      session.freightAmount != null ? `- Freight: ${this.formatMoney(session.freightAmount)}` : null,
+      session.discountAmount
+        ? `- Saved discount: ${this.formatMoney(session.discountAmount)}`
+        : null,
+      session.freightAmount != null
+        ? `- Freight: ${this.formatMoney(session.freightAmount)}`
+        : null,
       `- Total: ${this.formatMoney(session.totalAmount)}`,
-      session.paymentLinkUrl ? `- Payment link already generated: ${session.paymentLinkUrl}` : null,
+      session.paymentLinkUrl
+        ? `- Payment link already generated: ${session.paymentLinkUrl}`
+        : null,
       `- Next step: ${this.resolveNextStep(session)}`,
     ]
       .filter(Boolean)
@@ -182,7 +207,10 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     return [
       'Commerce catalog matches:',
       ...matches.map((option: CatalogOption | CommercePendingOptionRecord) => {
-        const price = option.price != null ? this.formatMoney(option.price) : 'preço sob consulta';
+        const price =
+          option.price != null
+            ? this.formatMoney(option.price)
+            : 'preço sob consulta';
         const availability =
           option.availableQuantity != null
             ? `${option.availableQuantity} unidades`
@@ -191,18 +219,28 @@ export class CommerceContextProvider implements ICommerceContextProvider {
         let descriptionStr = `- ${option.optionNumber}. ${option.name} | ${price} | ${availability}`;
 
         const variations: string[] = [];
-        
+
         if (option.attributes && Object.keys(option.attributes).length > 0) {
           variations.push(`Atributos: ${JSON.stringify(option.attributes)}`);
         }
-        
+
         if (option.variants && option.variants.length > 0) {
-          const variantsDesc = option.variants.map((v: Record<string, unknown>) => v.name || Object.values(v).join(', ')).join(' | ');
+          const variantsDesc = option.variants
+            .map(
+              (v: Record<string, unknown>) =>
+                v.name || Object.values(v).join(', '),
+            )
+            .join(' | ');
           variations.push(`Variantes: ${variantsDesc}`);
         }
 
         if (option.optionGroups && option.optionGroups.length > 0) {
-          const groupsDesc = option.optionGroups.map((g: Record<string, unknown>) => `${g.name} (${Array.isArray(g.options) ? g.options.map((o: Record<string, unknown>) => o.name).join(', ') : ''})`).join(' | ');
+          const groupsDesc = option.optionGroups
+            .map(
+              (g: Record<string, unknown>) =>
+                `${g.name} (${Array.isArray(g.options) ? g.options.map((o: Record<string, unknown>) => o.name).join(', ') : ''})`,
+            )
+            .join(' | ');
           variations.push(`Opções: ${groupsDesc}`);
         }
 
@@ -302,27 +340,42 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     }
   }
 
-  private async buildPromotionContext(tenantId: string): Promise<string | null> {
+  private async buildPromotionContext(
+    tenantId: string,
+  ): Promise<string | null> {
     const coupons = await this.salesRepository.listCoupons(tenantId, true);
-    const promotions = await this.salesRepository.listPromotions(tenantId, true);
+    const promotions = await this.salesRepository.listPromotions(
+      tenantId,
+      true,
+    );
 
     if (coupons.length === 0 && promotions.length === 0) return null;
 
     const lines = ['Active promotions and coupons:'];
-    
+
     if (coupons.length > 0) {
-      lines.push('- Available coupons (Customer must type "CUPOM [CODE]" to apply):');
-      coupons.forEach(c => {
-        const disc = c.discountType === 'PERCENTAGE' ? `${c.discountValue}%` : this.formatMoney(c.discountValue);
-        const min = c.minimumOrder ? ` (min. order ${this.formatMoney(c.minimumOrder)})` : '';
+      lines.push(
+        '- Available coupons (Customer must type "CUPOM [CODE]" to apply):',
+      );
+      coupons.forEach((c) => {
+        const disc =
+          c.discountType === 'PERCENTAGE'
+            ? `${c.discountValue}%`
+            : this.formatMoney(c.discountValue);
+        const min = c.minimumOrder
+          ? ` (min. order ${this.formatMoney(c.minimumOrder)})`
+          : '';
         lines.push(`  - ${c.code}: ${disc} discount${min}`);
       });
     }
 
     if (promotions.length > 0) {
       lines.push('- Store promotions:');
-      promotions.forEach(p => {
-        const disc = p.discountType === 'PERCENTAGE' ? `${p.discountValue}%` : this.formatMoney(p.discountValue);
+      promotions.forEach((p) => {
+        const disc =
+          p.discountType === 'PERCENTAGE'
+            ? `${p.discountValue}%`
+            : this.formatMoney(p.discountValue);
         lines.push(`  - ${p.title}: ${disc} off - ${p.description}`);
       });
     }

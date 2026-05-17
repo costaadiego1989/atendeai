@@ -69,4 +69,4 @@ import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connect
     FollowUpWorker,
   ],
 })
-export class MessagingWorkerModule { }
+export class MessagingWorkerModule {}

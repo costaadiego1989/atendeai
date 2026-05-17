@@ -71,22 +71,26 @@ describe('CreateTenantBranchUseCase', () => {
       requestingUserEmail: 'user@example.com',
     });
 
-    expect(tenantRepository.createBranch).toHaveBeenCalledWith(expect.objectContaining({
-      tenantId: 'tenant-1',
-      name: 'Loja Centro',
-    }));
+    expect(tenantRepository.createBranch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        name: 'Loja Centro',
+      }),
+    );
     expect(billingCapacityService.assertCanAdd).toHaveBeenCalledWith(
       'tenant-1',
       'branches',
     );
-    expect(tenantAuditService.record).toHaveBeenCalledWith(expect.objectContaining({
-      tenantId: 'tenant-1',
-      eventType: 'BRANCH_ADDED',
-      metadata: expect.objectContaining({
-        branchId: 'branch-1',
-        branchName: 'Loja Centro',
+    expect(tenantAuditService.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        eventType: 'BRANCH_ADDED',
+        metadata: expect.objectContaining({
+          branchId: 'branch-1',
+          branchName: 'Loja Centro',
+        }),
       }),
-    }));
+    );
     expect(result.success).toBe(true);
     expect(result.data.id).toBe('branch-1');
   });

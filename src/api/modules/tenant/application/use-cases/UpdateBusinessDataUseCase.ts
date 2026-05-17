@@ -55,8 +55,11 @@ export class UpdateBusinessDataUseCase implements IUpdateBusinessDataUseCase {
       email: input.requestingUserEmail,
       eventType: 'BUSINESS_DATA_UPDATED',
       metadata: {
-        updatedFields: Object.keys(input).filter((key) =>
-          !['tenantId', 'requestingUserId', 'requestingUserEmail'].includes(key),
+        updatedFields: Object.keys(input).filter(
+          (key) =>
+            !['tenantId', 'requestingUserId', 'requestingUserEmail'].includes(
+              key,
+            ),
         ),
       },
     });

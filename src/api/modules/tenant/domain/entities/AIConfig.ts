@@ -65,13 +65,19 @@ export class AIConfig extends Entity<AIConfigProps> {
     id?: UniqueEntityID,
   ): AIConfig {
     if (!props.systemPrompt || props.systemPrompt.trim().length < 10) {
-      throw new ValidationErrorException('System prompt must have at least 10 characters');
+      throw new ValidationErrorException(
+        'System prompt must have at least 10 characters',
+      );
     }
     if (props.confidenceThreshold < 0 || props.confidenceThreshold > 1) {
-      throw new ValidationErrorException('Confidence threshold must be between 0 and 1');
+      throw new ValidationErrorException(
+        'Confidence threshold must be between 0 and 1',
+      );
     }
     if (props.maxTokensPerResponse < 50 || props.maxTokensPerResponse > 4000) {
-      throw new ValidationErrorException('Max tokens must be between 50 and 4000');
+      throw new ValidationErrorException(
+        'Max tokens must be between 50 and 4000',
+      );
     }
     return new AIConfig(
       {

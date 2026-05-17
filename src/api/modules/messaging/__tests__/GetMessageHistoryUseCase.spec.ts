@@ -49,17 +49,20 @@ describe('GetMessageHistoryUseCase', () => {
       limit: 2,
     });
 
-    expect(conversationRepository.findMessagesByConversation).toHaveBeenCalledWith(
-      'conversation-1',
-      2,
-      2,
-    );
+    expect(
+      conversationRepository.findMessagesByConversation,
+    ).toHaveBeenCalledWith('conversation-1', 2, 2);
     expect(result.data).toEqual([
       expect.objectContaining({
         id: 'message-1',
         direction: 'INBOUND',
         contentType: 'TEXT',
-        content: { type: 'TEXT', text: 'Oi', url: undefined, metadata: undefined },
+        content: {
+          type: 'TEXT',
+          text: 'Oi',
+          url: undefined,
+          metadata: undefined,
+        },
         sentBy: 'CONTACT',
       }),
     ]);
@@ -81,11 +84,9 @@ describe('GetMessageHistoryUseCase', () => {
       conversationId: 'conversation-1',
     });
 
-    expect(conversationRepository.findMessagesByConversation).toHaveBeenCalledWith(
-      'conversation-1',
-      1,
-      50,
-    );
+    expect(
+      conversationRepository.findMessagesByConversation,
+    ).toHaveBeenCalledWith('conversation-1', 1, 50);
     expect(result.meta).toEqual({
       total: 0,
       page: 1,

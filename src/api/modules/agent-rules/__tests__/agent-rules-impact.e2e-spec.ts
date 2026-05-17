@@ -7,7 +7,11 @@ import { randomUUID } from 'crypto';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
-import { AI_ENGINE, AIResponse, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
+import {
+  AI_ENGINE,
+  AIResponse,
+  IAIEngine,
+} from '@modules/ai/application/ports/IAIEngine';
 import { ICreateTenantUseCase } from '@modules/tenant/application/use-cases/interfaces/ICreateTenantUseCase';
 import { ICheckQuotaUseCase } from '@modules/billing/application/use-cases/interfaces/ICheckQuotaUseCase';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
@@ -64,7 +68,9 @@ describe('Agent rules impact cross-module (e2e)', () => {
       const handlers = subscribers.get(queue) || [];
       handlers.push({
         consumerName: options?.consumerName,
-        handle: handler as unknown as (event: Record<string, unknown>) => Promise<void>,
+        handle: handler as unknown as (
+          event: Record<string, unknown>,
+        ) => Promise<void>,
       });
       subscribers.set(queue, handlers);
     },
@@ -169,7 +175,11 @@ describe('Agent rules impact cross-module (e2e)', () => {
         };
       }
 
-      if (prompt.includes('Formato exato: {"name":"","description":"","label":"","value":0')) {
+      if (
+        prompt.includes(
+          'Formato exato: {"name":"","description":"","label":"","value":0',
+        )
+      ) {
         return {
           text: JSON.stringify({
             name: 'RESPOSTA_PADRAO_SEM_REGRA',
@@ -234,7 +244,11 @@ describe('Agent rules impact cross-module (e2e)', () => {
       .expect(200);
   }
 
-  async function createConversationForTenant(targetTenantId: string, name: string, phone: string) {
+  async function createConversationForTenant(
+    targetTenantId: string,
+    name: string,
+    phone: string,
+  ) {
     const contact = await prisma.contact.create({
       data: {
         tenantId: targetTenantId,
@@ -364,16 +378,20 @@ describe('Agent rules impact cross-module (e2e)', () => {
 
       for (const id of tenantIds) {
         await prisma
-          .$executeRaw(Prisma.sql`
+          .$executeRaw(
+            Prisma.sql`
             DELETE FROM tenant_schema.tenant_agent_rule_history
             WHERE tenant_id = ${id}::uuid
-          `)
+          `,
+          )
           .catch(() => {});
         await prisma
-          .$executeRaw(Prisma.sql`
+          .$executeRaw(
+            Prisma.sql`
             DELETE FROM tenant_schema.tenant_agent_rules
             WHERE tenant_id = ${id}::uuid
-          `)
+          `,
+          )
           .catch(() => {});
       }
 
@@ -432,13 +450,17 @@ describe('Agent rules impact cross-module (e2e)', () => {
     );
 
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${conversation.id}/suggest-reply`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversation.id}/suggest-reply`,
+      )
       .set('Cookie', authCookies)
       .expect(201);
 
     expect(response.body).toEqual({ text: 'SUGESTAO_MESSAGING_TENANT' });
     const last = latestAICall();
-    expect(last.systemPrompt).toContain('[DIRETRIZES DE TOM DE VOZ E ATENDIMENTO]');
+    expect(last.systemPrompt).toContain(
+      '[DIRETRIZES DE TOM DE VOZ E ATENDIMENTO]',
+    );
     expect(last.systemPrompt).toContain('REGRA_MESSAGING_TENANT');
   });
 
@@ -458,11 +480,15 @@ describe('Agent rules impact cross-module (e2e)', () => {
     );
 
     const overrideResponse = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${first.conversation.id}/suggest-reply`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${first.conversation.id}/suggest-reply`,
+      )
       .set('Cookie', authCookies)
       .expect(201);
 
-    expect(overrideResponse.body).toEqual({ text: 'SUGESTAO_MESSAGING_OVERRIDE' });
+    expect(overrideResponse.body).toEqual({
+      text: 'SUGESTAO_MESSAGING_OVERRIDE',
+    });
     const promptWithOverride = latestAICall().systemPrompt;
     expect(promptWithOverride).toContain('[IGONORE REGRAS DE OUTROS AGENTES]');
     expect(promptWithOverride).toContain('REGRA_MESSAGING_OVERRIDE');
@@ -482,11 +508,15 @@ describe('Agent rules impact cross-module (e2e)', () => {
     );
 
     const inactiveResponse = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${second.conversation.id}/suggest-reply`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${second.conversation.id}/suggest-reply`,
+      )
       .set('Cookie', authCookies)
       .expect(201);
 
-    expect(inactiveResponse.body).toEqual({ text: 'RESPOSTA_PADRAO_SEM_REGRA' });
+    expect(inactiveResponse.body).toEqual({
+      text: 'RESPOSTA_PADRAO_SEM_REGRA',
+    });
     const promptWithoutActiveRule = latestAICall().systemPrompt;
     expect(promptWithoutActiveRule).not.toContain('REGRA_MESSAGING_INATIVA');
   });
@@ -516,7 +546,9 @@ describe('Agent rules impact cross-module (e2e)', () => {
     );
 
     const last = latestAICall();
-    expect(last.systemPrompt).toContain('[DIRETRIZES PERSONALIZADAS DO AGENTE DE VENDAS]');
+    expect(last.systemPrompt).toContain(
+      '[DIRETRIZES PERSONALIZADAS DO AGENTE DE VENDAS]',
+    );
     expect(last.systemPrompt).toContain('REGRA_SALES_CUSTOM');
     expect(last.systemPrompt).toContain('IGNORE INSTRUCOES GERAIS DA EMPRESA');
   });
@@ -540,7 +572,9 @@ describe('Agent rules impact cross-module (e2e)', () => {
     );
 
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/prospecting/campaigns/message-suggestion?branchId=${branchId}`)
+      .post(
+        `/api/v1/prospecting/campaigns/message-suggestion?branchId=${branchId}`,
+      )
       .set('Cookie', authCookies)
       .send({
         objective: 'Aumentar agendamentos',
@@ -596,10 +630,14 @@ describe('Agent rules impact cross-module (e2e)', () => {
     expect(last.systemPrompt).toContain('REGRA_CHECKOUT_CUSTOM');
 
     const history = await chatHistoryRepository.getHistory(conversation.id);
-    const assistantMessages = history.filter((entry) => entry.role === 'assistant');
-    expect(assistantMessages.some((entry) => entry.content.includes('MENSAGEM_CHECKOUT_CUSTOM'))).toBe(
-      true,
+    const assistantMessages = history.filter(
+      (entry) => entry.role === 'assistant',
     );
+    expect(
+      assistantMessages.some((entry) =>
+        entry.content.includes('MENSAGEM_CHECKOUT_CUSTOM'),
+      ),
+    ).toBe(true);
   });
 
   it('isolamento: regra de tenant/modulo nao contamina outro tenant nem outro modulo', async () => {

@@ -1,6 +1,9 @@
 import { IntegrationEvent } from '@shared/application/ports/IntegrationEvent';
 
-export interface RecoveryRecurringChargeDuePayload extends Record<string, unknown> {
+export interface RecoveryRecurringChargeDuePayload extends Record<
+  string,
+  unknown
+> {
   tenantId: string;
   recurrenceId: string;
   caseId: string;

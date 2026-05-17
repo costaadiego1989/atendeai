@@ -87,9 +87,15 @@ describe('Promotion Entity', () => {
       ],
     });
 
-    expect(promo.appliesTo({ targetType: 'ITEM', targetId: 'item-1' })).toBe(true);
-    expect(promo.appliesTo({ targetType: 'CATEGORY', targetId: 'category-1' })).toBe(true);
-    expect(promo.appliesTo({ targetType: 'ITEM', targetId: 'item-2' })).toBe(false);
+    expect(promo.appliesTo({ targetType: 'ITEM', targetId: 'item-1' })).toBe(
+      true,
+    );
+    expect(
+      promo.appliesTo({ targetType: 'CATEGORY', targetId: 'category-1' }),
+    ).toBe(true);
+    expect(promo.appliesTo({ targetType: 'ITEM', targetId: 'item-2' })).toBe(
+      false,
+    );
   });
 
   it('should treat legacy catalogItemId as an item target', () => {
@@ -103,7 +109,11 @@ describe('Promotion Entity', () => {
       catalogItemId: 'legacy-item',
     });
 
-    expect(promo.appliesTo({ targetType: 'ITEM', targetId: 'legacy-item' })).toBe(true);
-    expect(promo.appliesTo({ targetType: 'ITEM', targetId: 'other-item' })).toBe(false);
+    expect(
+      promo.appliesTo({ targetType: 'ITEM', targetId: 'legacy-item' }),
+    ).toBe(true);
+    expect(
+      promo.appliesTo({ targetType: 'ITEM', targetId: 'other-item' }),
+    ).toBe(false);
   });
 });

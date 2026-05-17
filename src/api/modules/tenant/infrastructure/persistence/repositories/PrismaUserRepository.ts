@@ -7,7 +7,7 @@ import { UserMapper } from '../mappers/UserMapper';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async saveWithTenant(user: User, tenantId: string): Promise<void> {
     const data = UserMapper.toPersistence(user, tenantId);
@@ -48,7 +48,9 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async save(user: User): Promise<void> {
-    const existing = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>(Prisma.sql`
+    const existing = await this.prisma.$queryRaw<
+      Array<{ tenant_id: string }>
+    >(Prisma.sql`
         SELECT tenant_id
         FROM tenant_schema.users
         WHERE id = ${user.id.toValue()}::uuid
@@ -127,9 +129,7 @@ export class PrismaUserRepository implements IUserRepository {
     return raw ? UserMapper.toDomain(raw) : null;
   }
 
-  async findOwnerPrincipalByTenantId(
-    tenantId: string,
-  ): Promise<{
+  async findOwnerPrincipalByTenantId(tenantId: string): Promise<{
     id: string;
     name: string;
     email: string;

@@ -11,7 +11,11 @@ import {
   TENANT_REPOSITORY,
 } from '@modules/tenant/domain/repositories/ITenantRepository';
 import { WhatsAppConfig } from '@modules/tenant/domain/entities/WhatsAppConfig';
-import { AI_ENGINE, AIResponse, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
+import {
+  AI_ENGINE,
+  AIResponse,
+  IAIEngine,
+} from '@modules/ai/application/ports/IAIEngine';
 import { ICheckQuotaUseCase } from '@modules/billing/application/use-cases/interfaces/ICheckQuotaUseCase';
 import { MESSAGE_QUEUE } from '../domain/ports/IMessageQueue';
 import { FollowUpService } from '../application/services/FollowUpService';
@@ -39,14 +43,16 @@ describe('BubbleWhats AI response flow (e2e)', () => {
   const testCnpj = generateValidCnpj(seed);
 
   const mockAiEngine: IAIEngine = {
-    generateResponse: jest.fn(async (request): Promise<AIResponse> => ({
-      text: `Resposta IA para: ${request.userMessage}`,
-      tokensUsed: 42,
-      confidence: 0.96,
-      finishReason: 'stop',
-      intent: 'GENERAL',
-      sentiment: 'NEUTRAL',
-    })),
+    generateResponse: jest.fn(
+      async (request): Promise<AIResponse> => ({
+        text: `Resposta IA para: ${request.userMessage}`,
+        tokensUsed: 42,
+        confidence: 0.96,
+        finishReason: 'stop',
+        intent: 'GENERAL',
+        sentiment: 'NEUTRAL',
+      }),
+    ),
   };
 
   const mockQuotaUseCase = {
@@ -59,16 +65,18 @@ describe('BubbleWhats AI response flow (e2e)', () => {
   };
 
   const mockMessageQueue = {
-    addJob: jest.fn(async () => { }),
+    addJob: jest.fn(async () => {}),
   };
 
   const mockFollowUpService = {
-    cancelFollowUps: jest.fn(async () => { }),
-    scheduleFollowUps: jest.fn(async () => { }),
+    cancelFollowUps: jest.fn(async () => {}),
+    scheduleFollowUps: jest.fn(async () => {}),
   };
   const mockStorageService: FileStorageService = {
-    upload: jest.fn(async (_file, fileName) => `https://media.test/uploads/${fileName}`),
-    delete: jest.fn(async () => { }),
+    upload: jest.fn(
+      async (_file, fileName) => `https://media.test/uploads/${fileName}`,
+    ),
+    delete: jest.fn(async () => {}),
   };
 
   const subscribedHandlers = new Map<
@@ -100,7 +108,9 @@ describe('BubbleWhats AI response flow (e2e)', () => {
       const handlers = subscribedHandlers.get(queue) || [];
       handlers.push({
         consumerName: options?.consumerName,
-        handle: handler as unknown as (event: Record<string, unknown>) => Promise<void>,
+        handle: handler as unknown as (
+          event: Record<string, unknown>,
+        ) => Promise<void>,
       });
       subscribedHandlers.set(queue, handlers);
     },
@@ -303,28 +313,28 @@ describe('BubbleWhats AI response flow (e2e)', () => {
     if (tenantId) {
       await (prisma.message as any)
         .deleteMany({ where: { conversation: { tenantId } } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.conversation as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.contact as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.aIConfig as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.subscription as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.whatsAppConfig as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.user as any)
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
+        .catch(() => {});
       await (prisma.tenant as any)
         .delete({ where: { id: tenantId } })
-        .catch(() => { });
+        .catch(() => {});
     }
 
     if (app) {
@@ -356,7 +366,8 @@ describe('BubbleWhats AI response flow (e2e)', () => {
       persisted!.conversation.id,
       (currentMessages) =>
         currentMessages.length >= 4 &&
-        currentMessages.filter((message) => message.sentBy === 'AI').length >= 2,
+        currentMessages.filter((message) => message.sentBy === 'AI').length >=
+          2,
     );
 
     expect(messages).not.toBeNull();
@@ -497,7 +508,13 @@ describe('BubbleWhats AI response flow (e2e)', () => {
     for (const item of cases) {
       const externalId = `media-${item.type}-${Date.now()}`;
 
-      await sendInboundMedia(item.phone, externalId, item.type, item.url, item.text);
+      await sendInboundMedia(
+        item.phone,
+        externalId,
+        item.type,
+        item.url,
+        item.text,
+      );
       const persisted = await waitForConversation(item.phone);
 
       expect(persisted).not.toBeNull();
@@ -522,14 +539,18 @@ describe('BubbleWhats AI response flow (e2e)', () => {
         }),
       );
 
-      const aiCall = (mockAiEngine.generateResponse as jest.Mock).mock.calls.find(
+      const aiCall = (
+        mockAiEngine.generateResponse as jest.Mock
+      ).mock.calls.find(
         ([request]) =>
           typeof request.userMessage === 'string' &&
           request.userMessage.includes(item.url),
       );
 
       expect(aiCall).toBeDefined();
-      expect(aiCall![0].userMessage.toLowerCase()).toContain(item.expectedLabel);
+      expect(aiCall![0].userMessage.toLowerCase()).toContain(
+        item.expectedLabel,
+      );
       if (item.text) {
         expect(aiCall![0].userMessage).toContain(item.text);
       }

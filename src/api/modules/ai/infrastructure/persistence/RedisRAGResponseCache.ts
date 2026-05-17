@@ -48,7 +48,10 @@ export class RedisRAGResponseCache implements IRAGResponseCache {
           continue;
         }
 
-        const similarity = this.cosineSimilarity(queryEmbedding, entry.embedding);
+        const similarity = this.cosineSimilarity(
+          queryEmbedding,
+          entry.embedding,
+        );
         if (similarity >= threshold && similarity > bestSimilarity) {
           bestSimilarity = similarity;
           bestResponse = entry.responseText;

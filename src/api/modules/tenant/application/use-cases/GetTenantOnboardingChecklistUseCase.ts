@@ -11,9 +11,7 @@ import {
 } from './interfaces/IGetTenantOnboardingChecklistUseCase';
 
 @Injectable()
-export class GetTenantOnboardingChecklistUseCase
-  implements IGetTenantOnboardingChecklistUseCase
-{
+export class GetTenantOnboardingChecklistUseCase implements IGetTenantOnboardingChecklistUseCase {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
@@ -41,8 +39,7 @@ export class GetTenantOnboardingChecklistUseCase
       {
         key: 'business_profile',
         label: 'Perfil comercial (tipo + descrição ou serviços)',
-        completed:
-          !!tenant.businessType?.trim() && hasBusinessStory,
+        completed: !!tenant.businessType?.trim() && hasBusinessStory,
       },
       {
         key: 'catalog_or_documents',
@@ -68,7 +65,9 @@ export class GetTenantOnboardingChecklistUseCase
 
     const completedCount = items.filter((i) => i.completed).length;
     const completionRatio =
-      items.length === 0 ? 1 : Math.round((completedCount / items.length) * 1000) / 1000;
+      items.length === 0
+        ? 1
+        : Math.round((completedCount / items.length) * 1000) / 1000;
 
     return {
       id: tenant.id.toValue(),

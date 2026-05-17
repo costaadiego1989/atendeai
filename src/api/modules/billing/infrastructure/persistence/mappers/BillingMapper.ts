@@ -44,11 +44,9 @@ export class BillingMapper {
         ),
         billingCycleStart: raw.billingCycleStart ?? raw.billing_cycle_start!,
         billingCycleEnd: raw.billingCycleEnd ?? raw.billing_cycle_end!,
-        scheduledPlan: (
-          raw.scheduledPlan ??
+        scheduledPlan: (raw.scheduledPlan ??
           raw.scheduled_plan ??
-          undefined
-        ) as PlanType | undefined,
+          undefined) as PlanType | undefined,
         asaasCustomerId:
           raw.asaasCustomerId ?? raw.asaas_customer_id ?? undefined,
         asaasSubscriptionId:

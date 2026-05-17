@@ -57,9 +57,9 @@ describe('CreateTenantUseCase', () => {
 
     expect(passwordHasher.hash).toHaveBeenCalledWith('Password123!');
     expect(tenantRepo.save).toHaveBeenCalledTimes(1);
-    expect(tenantDomainEventPublisher.publishFromAggregate).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).toHaveBeenCalledTimes(1);
 
     const savedTenant = tenantRepo.save.mock.calls[0][0];
     expect(savedTenant.plan.value).toBe('TRIAL');
@@ -110,6 +110,8 @@ describe('CreateTenantUseCase', () => {
 
     expect(passwordHasher.hash).not.toHaveBeenCalled();
     expect(tenantRepo.save).not.toHaveBeenCalled();
-    expect(tenantDomainEventPublisher.publishFromAggregate).not.toHaveBeenCalled();
+    expect(
+      tenantDomainEventPublisher.publishFromAggregate,
+    ).not.toHaveBeenCalled();
   });
 });

@@ -56,7 +56,10 @@ export class SendRecoveryGuidanceUseCase {
     });
 
     const nextAssignedTags = Array.from(
-      new Set([...(recoveryCase.assignedTags ?? []), RECOVERY_GUIDANCE_SENT_TAG]),
+      new Set([
+        ...(recoveryCase.assignedTags ?? []),
+        RECOVERY_GUIDANCE_SENT_TAG,
+      ]),
     );
 
     const updatedCase = await this.recoveryRepository.updateCaseStatus({

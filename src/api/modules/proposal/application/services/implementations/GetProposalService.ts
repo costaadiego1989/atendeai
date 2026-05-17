@@ -8,7 +8,7 @@ export class GetProposalService {
   constructor(
     @Inject('IProposalRepository')
     private readonly proposalRepository: IProposalRepository,
-  ) { }
+  ) {}
 
   async execute(id: string): Promise<Proposal> {
     const proposal = await this.proposalRepository.findById(id);

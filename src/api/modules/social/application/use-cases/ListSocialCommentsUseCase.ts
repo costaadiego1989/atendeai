@@ -1,5 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ISocialRepository, SOCIAL_REPOSITORY } from '../../domain/ports/ISocialRepository';
+import {
+  ISocialRepository,
+  SOCIAL_REPOSITORY,
+} from '../../domain/ports/ISocialRepository';
 
 @Injectable()
 export class ListSocialCommentsUseCase {

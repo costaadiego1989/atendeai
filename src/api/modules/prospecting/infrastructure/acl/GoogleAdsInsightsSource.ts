@@ -34,7 +34,9 @@ export class GoogleAdsInsightsSource implements IGoogleAdsInsightsSource {
     interest?: string;
   }): Promise<GoogleAdsInsightItem[]> {
     const connection = await this.getTenantConnection(input.tenantId);
-    const accessToken = await this.oauthService.getAccessToken(connection.refreshToken);
+    const accessToken = await this.oauthService.getAccessToken(
+      connection.refreshToken,
+    );
     const endpoint = `${this.apiBaseUrl}/customers/${connection.customerId}:generateKeywordIdeas`;
     const response = await axios.post(
       endpoint,
@@ -43,12 +45,7 @@ export class GoogleAdsInsightsSource implements IGoogleAdsInsightsSource {
         geoTargetConstants: [],
         keywordSeed: {
           keywords: [
-            [
-              input.segment,
-              input.interest,
-              input.city,
-              input.state,
-            ]
+            [input.segment, input.interest, input.city, input.state]
               .filter(Boolean)
               .join(' '),
           ],
@@ -57,7 +54,8 @@ export class GoogleAdsInsightsSource implements IGoogleAdsInsightsSource {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'developer-token': this.configService.get<string>('GOOGLE_ADS_DEVELOPER_TOKEN') || '',
+          'developer-token':
+            this.configService.get<string>('GOOGLE_ADS_DEVELOPER_TOKEN') || '',
           ...(connection.loginCustomerId
             ? { 'login-customer-id': connection.loginCustomerId }
             : {}),
@@ -89,10 +87,7 @@ export class GoogleAdsInsightsSource implements IGoogleAdsInsightsSource {
             ? `Tema observado em ${[input.city, input.state].filter(Boolean).join(' / ')}`
             : 'Tema relacionado ao segmento',
         metricValue: monthlySearches,
-        score:
-          typeof competition === 'number'
-            ? competition
-            : undefined,
+        score: typeof competition === 'number' ? competition : undefined,
         metadata: {
           segment: input.segment,
           interest: input.interest,

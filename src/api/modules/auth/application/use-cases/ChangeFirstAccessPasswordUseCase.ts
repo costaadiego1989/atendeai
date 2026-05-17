@@ -19,9 +19,7 @@ import {
 } from '../ports/IAuthAuditLogRepository';
 
 @Injectable()
-export class ChangeFirstAccessPasswordUseCase
-  implements IChangeFirstAccessPasswordUseCase
-{
+export class ChangeFirstAccessPasswordUseCase implements IChangeFirstAccessPasswordUseCase {
   constructor(
     @Inject(AUTH_USER_REPOSITORY)
     private readonly authUserRepository: IAuthUserRepository,

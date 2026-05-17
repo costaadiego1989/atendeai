@@ -33,12 +33,14 @@ export class ProposalService {
 
   async create(data: CreateProposalData): Promise<Proposal> {
     const title = ProposalTitle.create(data.title);
-    const items = data.items.map(item => ProposalItem.create({
-      name: item.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      description: item.description,
-    }));
+    const items = data.items.map((item) =>
+      ProposalItem.create({
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        description: item.description,
+      }),
+    );
 
     const proposal = Proposal.create({
       tenantId: data.tenantId,
@@ -55,7 +57,10 @@ export class ProposalService {
     return proposal;
   }
 
-  async update(id: string, data: Partial<CreateProposalData>): Promise<Proposal> {
+  async update(
+    id: string,
+    data: Partial<CreateProposalData>,
+  ): Promise<Proposal> {
     const proposal = await this.getById(id);
 
     if (data.title) {
@@ -63,18 +68,23 @@ export class ProposalService {
     }
 
     if (data.items) {
-      const items = data.items.map(item => ProposalItem.create({
-        name: item.name,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        description: item.description,
-      }));
+      const items = data.items.map((item) =>
+        ProposalItem.create({
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          description: item.description,
+        }),
+      );
       proposal.updateItems(items);
     }
 
-    if (data.description !== undefined) (proposal as any)._props.description = data.description;
-    if (data.benefits !== undefined) (proposal as any)._props.benefits = data.benefits;
-    if (data.validUntil !== undefined) (proposal as any)._props.validUntil = data.validUntil;
+    if (data.description !== undefined)
+      (proposal as any)._props.description = data.description;
+    if (data.benefits !== undefined)
+      (proposal as any)._props.benefits = data.benefits;
+    if (data.validUntil !== undefined)
+      (proposal as any)._props.validUntil = data.validUntil;
 
     await this.proposalRepository.update(proposal);
     return proposal;
@@ -96,7 +106,7 @@ export class ProposalService {
 
   async scheduleDelivery(id: string, scheduledAt: Date): Promise<void> {
     const proposal = await this.getById(id);
-    
+
     if (scheduledAt <= new Date()) {
       throw new ProposalInvalidScheduleDateError();
     }
@@ -108,7 +118,7 @@ export class ProposalService {
     await this.deliveryQueue.add(
       'send-proposal',
       { proposalId: id },
-      { delay: delay > 0 ? delay : 0, jobId: `send-proposal-${id}` }
+      { delay: delay > 0 ? delay : 0, jobId: `send-proposal-${id}` },
     );
   }
 }

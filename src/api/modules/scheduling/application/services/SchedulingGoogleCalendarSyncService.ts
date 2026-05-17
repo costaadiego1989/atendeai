@@ -12,7 +12,9 @@ import { AvailabilitySlotRecord } from '../../domain/ports/ISchedulingStore';
 
 @Injectable()
 export class SchedulingGoogleCalendarSyncService {
-  private readonly logger = new Logger(SchedulingGoogleCalendarSyncService.name);
+  private readonly logger = new Logger(
+    SchedulingGoogleCalendarSyncService.name,
+  );
   private readonly timeZone = 'America/Sao_Paulo';
 
   constructor(
@@ -21,7 +23,7 @@ export class SchedulingGoogleCalendarSyncService {
     @Inject(SCHEDULING_GOOGLE_CALENDAR_EVENT_LINK_REPOSITORY)
     private readonly eventLinkRepository: ISchedulingGoogleCalendarEventLinkRepository,
     private readonly googleCalendarOAuthService: GoogleCalendarOAuthService,
-  ) { }
+  ) {}
 
   async syncReservation(input: {
     tenantId: string;
@@ -64,7 +66,8 @@ export class SchedulingGoogleCalendarSyncService {
         slotId: input.slot.id,
       });
       const shouldCreateGoogleMeet =
-        Boolean(input.createGoogleMeet) || Boolean(input.slot.reservedFor?.isOnline);
+        Boolean(input.createGoogleMeet) ||
+        Boolean(input.slot.reservedFor?.isOnline);
       const payload = this.buildEventPayload({
         ...input,
         createGoogleMeet: shouldCreateGoogleMeet,
@@ -212,7 +215,8 @@ export class SchedulingGoogleCalendarSyncService {
       });
 
       return {
-        meetingUrl: updatedEvent?.meetingUrl ?? input.targetSlot.reservedFor?.meetingUrl,
+        meetingUrl:
+          updatedEvent?.meetingUrl ?? input.targetSlot.reservedFor?.meetingUrl,
       };
     } catch (error: any) {
       this.logger.warn(
@@ -228,8 +232,10 @@ export class SchedulingGoogleCalendarSyncService {
     slot: AvailabilitySlotRecord;
     createGoogleMeet?: boolean;
   }) {
-    const contactName = input.slot.reservedFor?.contactName || 'horário interno';
-    const categoryName = input.slot.reservedFor?.categoryName || input.slot.label || 'Agendamento';
+    const contactName =
+      input.slot.reservedFor?.contactName || 'horário interno';
+    const categoryName =
+      input.slot.reservedFor?.categoryName || input.slot.label || 'Agendamento';
     const summaryPrefix =
       input.slot.status === 'PRE_RESERVED'
         ? '[Pendente] '
@@ -268,7 +274,9 @@ export class SchedulingGoogleCalendarSyncService {
       input.slot.payment?.expiresAt
         ? `Pagamento expira em: ${new Date(input.slot.payment.expiresAt).toISOString()}`
         : null,
-      input.slot.reservedFor?.notes ? `Observações: ${input.slot.reservedFor.notes}` : null,
+      input.slot.reservedFor?.notes
+        ? `Observações: ${input.slot.reservedFor.notes}`
+        : null,
     ].filter(Boolean);
 
     return {

@@ -96,7 +96,9 @@ describe('Payment ProcessWebhookUseCase', () => {
     expect(transactionalEventPublisher.execute).toHaveBeenCalledTimes(1);
     const publishedEvent = executionOutcomes[0].events[0];
     expect(publishedEvent).toBeInstanceOf(PaymentConfirmedIntegrationEvent);
-    expect(publishedEvent.eventId).toBe('payment:ASAAS:PAYMENT_CONFIRMED:pay-123');
+    expect(publishedEvent.eventId).toBe(
+      'payment:ASAAS:PAYMENT_CONFIRMED:pay-123',
+    );
     expect(publishedEvent.payload).toEqual({
       tenantId: 'tenant-1',
       paymentId: 'pay-123',
@@ -185,8 +187,8 @@ describe('Payment ProcessWebhookUseCase', () => {
         amount: 199,
         occurredAt: deletedAt,
         rawReference: 'tenant-1',
-      rawPayload: {},
-    });
+        rawPayload: {},
+      });
     webhookReceiptStore.registerReceived
       .mockResolvedValueOnce({
         id: 'receipt-3',
@@ -263,7 +265,9 @@ describe('Payment ProcessWebhookUseCase', () => {
 
     const publishedEvent = executionOutcomes[0].events[0];
     expect(publishedEvent).toBeInstanceOf(PaymentRefundedIntegrationEvent);
-    expect(publishedEvent.eventId).toBe('payment:ASAAS:PAYMENT_REFUNDED:pay-ref-1');
+    expect(publishedEvent.eventId).toBe(
+      'payment:ASAAS:PAYMENT_REFUNDED:pay-ref-1',
+    );
     expect(publishedEvent.payload).toEqual({
       tenantId: 'tenant-1',
       paymentId: 'pay-ref-1',
@@ -337,7 +341,10 @@ describe('Payment ProcessWebhookUseCase', () => {
     const eventBus = {
       publish: jest.fn().mockResolvedValue(undefined),
     };
-    const projection = new PaymentWebhookSalesProjectionService(prisma as any, eventBus as any);
+    const projection = new PaymentWebhookSalesProjectionService(
+      prisma as any,
+      eventBus as any,
+    );
 
     await projection.project({
       eventType: 'PAYMENT_CONFIRMED',

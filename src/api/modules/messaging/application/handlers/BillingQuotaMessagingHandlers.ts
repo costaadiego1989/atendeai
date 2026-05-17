@@ -1,15 +1,15 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CONTACT_FACADE, IContactFacade } from '@modules/contact/application/facades/ContactFacade';
+import {
+  CONTACT_FACADE,
+  IContactFacade,
+} from '@modules/contact/application/facades/ContactFacade';
 import {
   IUserRepository,
   USER_REPOSITORY,
 } from '@modules/tenant/domain/repositories/IUserRepository';
 import { IntegrationEvent } from '@shared/application/ports/IntegrationEvent';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
-import {
-  IMessagingFacade,
-  MESSAGING_FACADE,
-} from '../facades/MessagingFacade';
+import { IMessagingFacade, MESSAGING_FACADE } from '../facades/MessagingFacade';
 
 @Injectable()
 export class BillingQuotaMessagingHandlers implements OnModuleInit {

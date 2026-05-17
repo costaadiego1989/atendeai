@@ -1,7 +1,9 @@
 import { IntegrationEvent } from '@shared/application/ports/IntegrationEvent';
 
-export interface SchedulingRecurringReservationDuePayload
-  extends Record<string, unknown> {
+export interface SchedulingRecurringReservationDuePayload extends Record<
+  string,
+  unknown
+> {
   tenantId: string;
   recurrenceId: string;
   professionalId: string;

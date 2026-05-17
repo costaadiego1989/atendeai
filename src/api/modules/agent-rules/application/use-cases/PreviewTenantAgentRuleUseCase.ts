@@ -1,6 +1,4 @@
-import type {
-  ITenantAgentRuleRepository,
-} from '../../domain/repositories/ITenantAgentRuleRepository';
+import type { ITenantAgentRuleRepository } from '../../domain/repositories/ITenantAgentRuleRepository';
 import { ensureAgentRuleTenantAccess } from '../support/agentRuleTenantAccess';
 import {
   normalizeAgentPrompt,
@@ -36,10 +34,7 @@ export class PreviewTenantAgentRuleUseCase {
   async execute(
     input: PreviewTenantAgentRuleInput,
   ): Promise<PreviewTenantAgentRuleOutput> {
-    ensureAgentRuleTenantAccess(
-      input.tenantId,
-      input.requestingUserTenantId,
-    );
+    ensureAgentRuleTenantAccess(input.tenantId, input.requestingUserTenantId);
 
     const moduleParsed = parseAgentModule(input.moduleId);
     const normalizedCustomPrompt = normalizeAgentPrompt(input.customPrompt);

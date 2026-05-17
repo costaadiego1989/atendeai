@@ -18,7 +18,8 @@ export class SchedulingRecurringReservationDueHandler implements OnModuleInit {
     this.eventBus.subscribe<SchedulingRecurringReservationDueIntegrationEvent>(
       'scheduling.recurring-reservation.due',
       async (event) => {
-        const payload = event.payload as SchedulingRecurringReservationDuePayload;
+        const payload =
+          event.payload as SchedulingRecurringReservationDuePayload;
         await this.processSchedulingRecurringReservationUseCase.execute({
           tenantId: payload.tenantId,
           recurrenceId: payload.recurrenceId,

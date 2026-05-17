@@ -28,7 +28,7 @@ import {
 
 @Injectable()
 export class PrismaCommerceRepository implements ICommerceRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async saveAuditLog(input: CommerceAuditLogInput): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
@@ -75,10 +75,14 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   }
 
   private toSqlNullableJson(value?: unknown): string {
-    return value == null ? 'NULL' : `${this.toSqlString(JSON.stringify(value))}::jsonb`;
+    return value == null
+      ? 'NULL'
+      : `${this.toSqlString(JSON.stringify(value))}::jsonb`;
   }
 
-  private mapShippingPolicy(row: Record<string, unknown>): CommerceShippingPolicyRecord {
+  private mapShippingPolicy(
+    row: Record<string, unknown>,
+  ): CommerceShippingPolicyRecord {
     return {
       tenantId: String(row.tenant_id),
       mode: String(row.mode) as CommerceShippingPolicyRecord['mode'],
@@ -86,8 +90,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       pricePerKm: row.price_per_km == null ? null : Number(row.price_per_km),
       minimumAmount:
         row.minimum_amount == null ? null : Number(row.minimum_amount),
-      maxRadiusKm:
-        row.max_radius_km == null ? null : Number(row.max_radius_km),
+      maxRadiusKm: row.max_radius_km == null ? null : Number(row.max_radius_km),
       servicedNeighborhoods:
         row.serviced_neighborhoods == null
           ? []
@@ -100,8 +103,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
           : Array.isArray(row.delivery_schedule)
             ? (row.delivery_schedule as CommerceShippingPolicyRecord['deliverySchedule'])
             : (JSON.parse(
-              String(row.delivery_schedule),
-            ) as CommerceShippingPolicyRecord['deliverySchedule']),
+                String(row.delivery_schedule),
+              ) as CommerceShippingPolicyRecord['deliverySchedule']),
       notes: (row.notes as string | null | undefined) ?? null,
       active: Boolean(row.active),
       createdAt: new Date(String(row.created_at)),
@@ -109,7 +112,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     };
   }
 
-  private mapAbandonmentConfig(row: Record<string, unknown>): CommerceAbandonmentConfigRecord {
+  private mapAbandonmentConfig(
+    row: Record<string, unknown>,
+  ): CommerceAbandonmentConfigRecord {
     return {
       id: String(row.id),
       tenantId: String(row.tenant_id),
@@ -125,13 +130,16 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     };
   }
 
-  private mapSessionItem(row: Record<string, unknown>): CommerceSessionItemRecord {
+  private mapSessionItem(
+    row: Record<string, unknown>,
+  ): CommerceSessionItemRecord {
     return {
       id: String(row.id),
       sessionId: String(row.session_id),
       tenantId: String(row.tenant_id),
       source: String(row.source) as CommerceSessionItemRecord['source'],
-      inventoryItemId: (row.inventory_item_id as string | null | undefined) ?? null,
+      inventoryItemId:
+        (row.inventory_item_id as string | null | undefined) ?? null,
       catalogItemId: (row.catalog_item_id as string | null | undefined) ?? null,
       name: String(row.name),
       quantity: Number(row.quantity),
@@ -143,8 +151,12 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     };
   }
 
-  private async loadSessionItems(sessionId: string): Promise<CommerceSessionItemRecord[]> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+  private async loadSessionItems(
+    sessionId: string,
+  ): Promise<CommerceSessionItemRecord[]> {
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT *
       FROM commerce_schema.shopping_session_items
       WHERE session_id = ${sessionId}::uuid
@@ -154,11 +166,18 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     return rows.map((row) => this.mapSessionItem(row));
   }
 
-  private async mapSession(row: Record<string, unknown>): Promise<CommerceSessionRecord> {
+  private async mapSession(
+    row: Record<string, unknown>,
+  ): Promise<CommerceSessionRecord> {
     const pendingOptions =
       Array.isArray(row.pending_options) || row.pending_options == null
-        ? ((row.pending_options as CommercePendingOptionRecord[] | null | undefined) ?? [])
-        : (JSON.parse(String(row.pending_options)) as CommercePendingOptionRecord[]);
+        ? ((row.pending_options as
+            | CommercePendingOptionRecord[]
+            | null
+            | undefined) ?? [])
+        : (JSON.parse(
+            String(row.pending_options),
+          ) as CommercePendingOptionRecord[]);
 
     return {
       id: String(row.id),
@@ -167,13 +186,17 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       conversationId: String(row.conversation_id),
       contactId: (row.contact_id as string | null | undefined) ?? null,
       status: String(row.status) as CommerceSessionRecord['status'],
-      currentStep: String(row.current_step ?? 'IDENTIFYING_NEED') as CommerceSessionRecord['currentStep'],
+      currentStep: String(
+        row.current_step ?? 'IDENTIFYING_NEED',
+      ) as CommerceSessionRecord['currentStep'],
       fulfillmentType:
-        (row.fulfillment_type as CommerceSessionRecord['fulfillmentType']) ?? null,
+        (row.fulfillment_type as CommerceSessionRecord['fulfillmentType']) ??
+        null,
       shippingMode:
         (row.shipping_mode as CommerceSessionRecord['shippingMode']) ?? null,
       distanceKm: row.distance_km == null ? null : Number(row.distance_km),
-      freightAmount: row.freight_amount == null ? null : Number(row.freight_amount),
+      freightAmount:
+        row.freight_amount == null ? null : Number(row.freight_amount),
       subtotalAmount: Number(row.subtotal_amount ?? 0),
       totalAmount: Number(row.total_amount ?? 0),
       deliveryAddress:
@@ -187,7 +210,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       paymentStatus:
         (row.payment_status as 'PENDING' | 'PAID' | null | undefined) ?? null,
       couponCode: (row.coupon_code as string | null | undefined) ?? null,
-      discountAmount: row.discount_amount == null ? null : Number(row.discount_amount),
+      discountAmount:
+        row.discount_amount == null ? null : Number(row.discount_amount),
       abandonmentPaused: Boolean(row.abandonment_paused ?? false),
       abandonmentPausedAt: row.abandonment_paused_at
         ? new Date(String(row.abandonment_paused_at))
@@ -195,14 +219,17 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       pendingQuery: (row.pending_query as string | null | undefined) ?? null,
       pendingOptions,
       selectedSource:
-        (row.selected_source as 'INVENTORY' | 'CATALOG' | null | undefined) ?? null,
+        (row.selected_source as 'INVENTORY' | 'CATALOG' | null | undefined) ??
+        null,
       selectedInventoryItemId:
         (row.selected_inventory_item_id as string | null | undefined) ?? null,
       selectedCatalogItemId:
         (row.selected_catalog_item_id as string | null | undefined) ?? null,
       selectedItemName:
         (row.selected_item_name as string | null | undefined) ?? null,
-      checkedOutAt: row.checked_out_at ? new Date(String(row.checked_out_at)) : null,
+      checkedOutAt: row.checked_out_at
+        ? new Date(String(row.checked_out_at))
+        : null,
       createdAt: new Date(String(row.created_at)),
       updatedAt: new Date(String(row.updated_at)),
       items: await this.loadSessionItems(String(row.id)),
@@ -219,7 +246,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       contactId: (row.contact_id as string | null | undefined) ?? null,
       status: String(row.status) as CommerceOrderRecord['status'],
       fulfillmentType:
-        (row.fulfillment_type as CommerceOrderRecord['fulfillmentType']) ?? null,
+        (row.fulfillment_type as CommerceOrderRecord['fulfillmentType']) ??
+        null,
       shippingMode:
         (row.shipping_mode as CommerceOrderRecord['shippingMode']) ?? null,
       subtotalAmount: Number(row.subtotal_amount ?? 0),
@@ -235,7 +263,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       paymentStatus:
         (row.payment_status as 'PENDING' | 'PAID' | null | undefined) ?? null,
       couponCode: (row.coupon_code as string | null | undefined) ?? null,
-      discountAmount: row.discount_amount == null ? null : Number(row.discount_amount),
+      discountAmount:
+        row.discount_amount == null ? null : Number(row.discount_amount),
       paidAt: row.paid_at ? new Date(String(row.paid_at)) : null,
       createdAt: new Date(String(row.created_at)),
       updatedAt: new Date(String(row.updated_at)),
@@ -274,7 +303,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async upsertShippingPolicy(
     input: UpsertCommerceShippingPolicyInput,
   ): Promise<CommerceShippingPolicyRecord> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       INSERT INTO commerce_schema.shipping_policies (
         tenant_id,
         mode,
@@ -322,7 +353,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async upsertAbandonmentConfig(
     input: UpsertCommerceAbandonmentConfigInput,
   ): Promise<CommerceAbandonmentConfigRecord> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       INSERT INTO commerce_schema.commerce_abandonment_configs (
         tenant_id,
         active,
@@ -363,7 +396,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async findAbandonmentConfigByTenantId(
     tenantId: string,
   ): Promise<CommerceAbandonmentConfigRecord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT *
       FROM commerce_schema.commerce_abandonment_configs
       WHERE tenant_id = ${tenantId}::uuid
@@ -379,7 +414,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async findShippingPolicyByTenantId(
     tenantId: string,
   ): Promise<CommerceShippingPolicyRecord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT *
       FROM commerce_schema.shipping_policies
       WHERE tenant_id = ${tenantId}::uuid
@@ -389,8 +426,12 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     return rows[0] ? this.mapShippingPolicy(rows[0]) : null;
   }
 
-  async createSession(input: CreateCommerceSessionInput): Promise<CommerceSessionRecord> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+  async createSession(
+    input: CreateCommerceSessionInput,
+  ): Promise<CommerceSessionRecord> {
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       INSERT INTO commerce_schema.shopping_sessions (
         tenant_id,
         branch_id,
@@ -424,7 +465,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     conversationId: string,
   ): Promise<CommerceSessionRecord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT *
       FROM commerce_schema.shopping_sessions
       WHERE tenant_id = ${tenantId}::uuid
@@ -442,7 +485,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     sessionId: string,
   ): Promise<CommerceSessionRecord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT *
       FROM commerce_schema.shopping_sessions
       WHERE tenant_id = ${tenantId}::uuid
@@ -456,7 +501,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async addSessionItem(
     input: AddCommerceSessionItemInput,
   ): Promise<CommerceSessionItemRecord> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       INSERT INTO commerce_schema.shopping_session_items (
         session_id,
         tenant_id,
@@ -502,78 +549,118 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       assignments.push(Prisma.sql`current_step = ${input.currentStep ?? null}`);
     }
     if ('fulfillmentType' in input) {
-      assignments.push(Prisma.sql`fulfillment_type = ${input.fulfillmentType ?? null}`);
+      assignments.push(
+        Prisma.sql`fulfillment_type = ${input.fulfillmentType ?? null}`,
+      );
     }
     if ('shippingMode' in input) {
-      assignments.push(Prisma.sql`shipping_mode = ${input.shippingMode ?? null}`);
+      assignments.push(
+        Prisma.sql`shipping_mode = ${input.shippingMode ?? null}`,
+      );
     }
     if ('distanceKm' in input) {
       assignments.push(Prisma.sql`distance_km = ${input.distanceKm ?? null}`);
     }
     if ('freightAmount' in input) {
-      assignments.push(Prisma.sql`freight_amount = ${input.freightAmount ?? null}`);
+      assignments.push(
+        Prisma.sql`freight_amount = ${input.freightAmount ?? null}`,
+      );
     }
     if ('subtotalAmount' in input) {
-      assignments.push(Prisma.sql`subtotal_amount = ${input.subtotalAmount ?? null}`);
+      assignments.push(
+        Prisma.sql`subtotal_amount = ${input.subtotalAmount ?? null}`,
+      );
     }
     if ('totalAmount' in input) {
       assignments.push(Prisma.sql`total_amount = ${input.totalAmount ?? null}`);
     }
     if ('deliveryAddress' in input) {
-      assignments.push(Prisma.sql`delivery_address = ${input.deliveryAddress ?? null}`);
+      assignments.push(
+        Prisma.sql`delivery_address = ${input.deliveryAddress ?? null}`,
+      );
     }
     if ('notes' in input) {
       assignments.push(Prisma.sql`notes = ${input.notes ?? null}`);
     }
     if ('paymentReference' in input) {
-      assignments.push(Prisma.sql`payment_reference = ${input.paymentReference ?? null}`);
+      assignments.push(
+        Prisma.sql`payment_reference = ${input.paymentReference ?? null}`,
+      );
     }
     if ('paymentLinkId' in input) {
-      assignments.push(Prisma.sql`payment_link_id = ${input.paymentLinkId ?? null}`);
+      assignments.push(
+        Prisma.sql`payment_link_id = ${input.paymentLinkId ?? null}`,
+      );
     }
     if ('paymentLinkUrl' in input) {
-      assignments.push(Prisma.sql`payment_link_url = ${input.paymentLinkUrl ?? null}`);
+      assignments.push(
+        Prisma.sql`payment_link_url = ${input.paymentLinkUrl ?? null}`,
+      );
     }
     if ('paymentStatus' in input) {
-      assignments.push(Prisma.sql`payment_status = ${input.paymentStatus ?? null}`);
+      assignments.push(
+        Prisma.sql`payment_status = ${input.paymentStatus ?? null}`,
+      );
     }
     if ('abandonmentPaused' in input) {
-      assignments.push(Prisma.sql`abandonment_paused = ${Boolean(input.abandonmentPaused)}`);
+      assignments.push(
+        Prisma.sql`abandonment_paused = ${Boolean(input.abandonmentPaused)}`,
+      );
     }
     if ('abandonmentPausedAt' in input) {
-      assignments.push(Prisma.sql`abandonment_paused_at = ${input.abandonmentPausedAt ?? null}`);
+      assignments.push(
+        Prisma.sql`abandonment_paused_at = ${input.abandonmentPausedAt ?? null}`,
+      );
     }
     if ('pendingQuery' in input) {
-      assignments.push(Prisma.sql`pending_query = ${input.pendingQuery ?? null}`);
+      assignments.push(
+        Prisma.sql`pending_query = ${input.pendingQuery ?? null}`,
+      );
     }
     if ('pendingOptions' in input) {
-      assignments.push(Prisma.sql`pending_options = ${JSON.stringify(input.pendingOptions ?? null)}::jsonb`);
+      assignments.push(
+        Prisma.sql`pending_options = ${JSON.stringify(input.pendingOptions ?? null)}::jsonb`,
+      );
     }
     if ('selectedSource' in input) {
-      assignments.push(Prisma.sql`selected_source = ${input.selectedSource ?? null}`);
+      assignments.push(
+        Prisma.sql`selected_source = ${input.selectedSource ?? null}`,
+      );
     }
     if ('selectedInventoryItemId' in input) {
-      assignments.push(Prisma.sql`selected_inventory_item_id = ${input.selectedInventoryItemId || null}::uuid`);
+      assignments.push(
+        Prisma.sql`selected_inventory_item_id = ${input.selectedInventoryItemId || null}::uuid`,
+      );
     }
     if ('selectedCatalogItemId' in input) {
-      assignments.push(Prisma.sql`selected_catalog_item_id = ${input.selectedCatalogItemId || null}::uuid`);
+      assignments.push(
+        Prisma.sql`selected_catalog_item_id = ${input.selectedCatalogItemId || null}::uuid`,
+      );
     }
     if ('selectedItemName' in input) {
-      assignments.push(Prisma.sql`selected_item_name = ${input.selectedItemName ?? null}`);
+      assignments.push(
+        Prisma.sql`selected_item_name = ${input.selectedItemName ?? null}`,
+      );
     }
     if ('checkedOutAt' in input) {
-      assignments.push(Prisma.sql`checked_out_at = ${input.checkedOutAt ?? null}`);
+      assignments.push(
+        Prisma.sql`checked_out_at = ${input.checkedOutAt ?? null}`,
+      );
     }
     if ('couponCode' in input) {
       assignments.push(Prisma.sql`coupon_code = ${input.couponCode ?? null}`);
     }
     if ('discountAmount' in input) {
-      assignments.push(Prisma.sql`discount_amount = ${input.discountAmount ?? null}`);
+      assignments.push(
+        Prisma.sql`discount_amount = ${input.discountAmount ?? null}`,
+      );
     }
 
     assignments.push(Prisma.sql`updated_at = now()`);
 
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       UPDATE commerce_schema.shopping_sessions
       SET ${Prisma.join(assignments, ', ')}
       WHERE tenant_id = ${input.tenantId}::uuid
@@ -584,8 +671,12 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     return this.mapSession(rows[0]);
   }
 
-  async createOrder(input: CreateCommerceOrderInput): Promise<CommerceOrderRecord> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+  async createOrder(
+    input: CreateCommerceOrderInput,
+  ): Promise<CommerceOrderRecord> {
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       INSERT INTO commerce_schema.orders (
         id,
         tenant_id,
@@ -637,7 +728,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     orderId: string,
   ): Promise<CommerceOrderRecord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT *
       FROM commerce_schema.orders
       WHERE tenant_id = ${tenantId}::uuid
@@ -652,7 +745,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     paymentReference: string,
   ): Promise<CommerceOrderRecord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT *
       FROM commerce_schema.orders
       WHERE tenant_id = ${tenantId}::uuid
@@ -671,7 +766,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     dateFrom?: Date | null;
     dateTo?: Date | null;
   }): Promise<CommerceOrderListItemRecord[]> {
-    const whereClauses: Prisma.Sql[] = [Prisma.sql`orders.tenant_id = ${input.tenantId}::uuid`];
+    const whereClauses: Prisma.Sql[] = [
+      Prisma.sql`orders.tenant_id = ${input.tenantId}::uuid`,
+    ];
 
     if (input.branchId) {
       whereClauses.push(Prisma.sql`orders.branch_id = ${input.branchId}::uuid`);
@@ -680,7 +777,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       whereClauses.push(Prisma.sql`orders.status = ${input.status}`);
     }
     if (input.paymentStatus) {
-      whereClauses.push(Prisma.sql`orders.payment_status = ${input.paymentStatus}`);
+      whereClauses.push(
+        Prisma.sql`orders.payment_status = ${input.paymentStatus}`,
+      );
     }
     if (input.dateFrom) {
       whereClauses.push(Prisma.sql`orders.updated_at >= ${input.dateFrom}`);
@@ -689,7 +788,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       whereClauses.push(Prisma.sql`orders.updated_at <= ${input.dateTo}`);
     }
 
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT
         orders.*,
         contacts.name AS contact_name,
@@ -727,7 +828,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     orderId: string;
     status: CommerceOrderStatus;
   }): Promise<CommerceOrderRecord> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       UPDATE commerce_schema.orders
       SET
         status = ${input.status},
@@ -755,7 +858,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async markOrderPaidByPaymentReference(
     input: MarkCommerceOrderPaidInput,
   ): Promise<CommerceOrderRecord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       UPDATE commerce_schema.orders
       SET
         status = 'PAID',
@@ -788,8 +893,12 @@ export class PrismaCommerceRepository implements ICommerceRepository {
   async listAbandonedSessions(
     input: ListAbandonedCommerceSessionsInput,
   ): Promise<CommerceSessionRecord[]> {
-    const limitExpr = input.limit ? Prisma.sql`LIMIT ${Number(input.limit)}` : Prisma.empty;
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const limitExpr = input.limit
+      ? Prisma.sql`LIMIT ${Number(input.limit)}`
+      : Prisma.empty;
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT sessions.*
       FROM commerce_schema.shopping_sessions AS sessions
       WHERE sessions.status IN ('BUILDING_CART', 'READY_FOR_CHECKOUT')
@@ -824,7 +933,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     sessionId: string,
   ): Promise<CommerceAbandonmentTouchRecord[]> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT
         COALESCE(audit.metadata->>'interval', '') AS interval,
         audit.created_at AS triggered_at,
@@ -846,7 +957,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     itemId: string,
   ): Promise<CommerceCatalogLookupreçord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT
         items.id,
         items.tenant_id,
@@ -873,7 +986,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       name: String(rows[0].name),
       basePrice: rows[0].base_price == null ? null : Number(rows[0].base_price),
       currency: String(rows[0].currency ?? 'BRL'),
-      categoryName: (rows[0].category_name as string | null | undefined) ?? null,
+      categoryName:
+        (rows[0].category_name as string | null | undefined) ?? null,
     };
   }
 
@@ -881,7 +995,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     tenantId: string,
     itemId: string,
   ): Promise<CommerceInventoryLookupreçord | null> {
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       SELECT
         id,
         tenant_id,
@@ -904,7 +1020,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     return {
       id: String(rows[0].id),
       tenantId: String(rows[0].tenant_id),
-      catalogItemId: (rows[0].catalog_item_id as string | null | undefined) ?? null,
+      catalogItemId:
+        (rows[0].catalog_item_id as string | null | undefined) ?? null,
       name: String(rows[0].name),
       currentPrice:
         rows[0].current_price == null ? null : Number(rows[0].current_price),

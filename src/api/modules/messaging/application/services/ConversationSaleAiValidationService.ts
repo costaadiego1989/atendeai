@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import {
-  AI_ENGINE,
-  IAIEngine,
-} from '@modules/ai/application/ports/IAIEngine';
+import { AI_ENGINE, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { ValidationErrorException } from '@shared/domain/exceptions/DomainExceptions';
 
@@ -36,7 +33,8 @@ export class ConversationSaleAiValidationService {
   ): Promise<ConversationSaleAiValidationResult> {
     const transcript = await this.buildTranscript(input.conversationId);
     const amountLine =
-      input.claimedSaleAmount != null && Number.isFinite(input.claimedSaleAmount)
+      input.claimedSaleAmount != null &&
+      Number.isFinite(input.claimedSaleAmount)
         ? `Valor declarado pelo atendente: ${input.claimedSaleAmount}`
         : 'Valor declarado: não informado.';
     const notesLine = input.notes?.trim()
@@ -93,7 +91,10 @@ export class ConversationSaleAiValidationService {
     reason: string;
     confidence: number;
   } {
-    const trimmed = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    const trimmed = raw
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '');
     try {
       const obj = JSON.parse(trimmed) as Record<string, unknown>;
       const approved = Boolean(obj.approved);
@@ -138,12 +139,8 @@ export class ConversationSaleAiValidationService {
         continue;
       }
       const who =
-        row.direction === 'INBOUND'
-          ? 'Cliente'
-          : `Atendimento (${row.sentBy})`;
-      lines.push(
-        `[${row.createdAt.toISOString()}] ${who}: ${preview}`,
-      );
+        row.direction === 'INBOUND' ? 'Cliente' : `Atendimento (${row.sentBy})`;
+      lines.push(`[${row.createdAt.toISOString()}] ${who}: ${preview}`);
     }
     return lines.join('\n');
   }

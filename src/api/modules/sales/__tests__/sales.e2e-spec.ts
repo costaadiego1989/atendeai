@@ -10,7 +10,10 @@ import {
 } from '../../ai/application/integration-events/publishers/AIIntegrationEvents';
 import { ICreatePaymentLinkUseCase } from '../application/use-cases/interfaces/ICreatePaymentLinkUseCase';
 import { randomUUID } from 'crypto';
-import { IPAYMENT_GATEWAY, IPaymentGateway } from '@modules/payment/domain/ports/IPaymentGateway';
+import {
+  IPAYMENT_GATEWAY,
+  IPaymentGateway,
+} from '@modules/payment/domain/ports/IPaymentGateway';
 
 describe('SalesModule (e2e)', () => {
   let app: INestApplication;
@@ -31,7 +34,9 @@ describe('SalesModule (e2e)', () => {
     prisma = app.get(PrismaService);
     eventBus = app.get(EVENT_BUS);
 
-    await prisma.$executeRaw(Prisma.sql`CREATE SCHEMA IF NOT EXISTS tenant_schema`);
+    await prisma.$executeRaw(
+      Prisma.sql`CREATE SCHEMA IF NOT EXISTS tenant_schema`,
+    );
 
     const testEmail = `sales-owner-${Date.now()}@test.com`;
     const existingTenant = await prisma.tenant.findUnique({
@@ -40,20 +45,20 @@ describe('SalesModule (e2e)', () => {
     if (existingTenant) {
       await prisma.salesMetric
         .deleteMany({ where: { tenantId: existingTenant.id } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId: existingTenant.id } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.user
         .deleteMany({ where: { tenantId: existingTenant.id } })
-        .catch(() => { });
+        .catch(() => {});
       await prisma.tenant
         .delete({ where: { id: existingTenant.id } })
-        .catch(() => { });
+        .catch(() => {});
     }
     await prisma.user
       .deleteMany({ where: { email: { contains: 'sales-owner' } } })
-      .catch(() => { });
+      .catch(() => {});
 
     const tenant = await prisma.tenant.create({
       data: {
@@ -90,15 +95,19 @@ describe('SalesModule (e2e)', () => {
     if (tenantId) {
       await prisma.salesMetric
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`
         DELETE FROM sales_schema.payment_links
         WHERE tenant_id = ${tenantId}::uuid
-      `).catch(() => { });
+      `,
+        )
+        .catch(() => {});
       await prisma.subscription
         .deleteMany({ where: { tenantId } })
-        .catch(() => { });
-      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => { });
+        .catch(() => {});
+      await prisma.tenant.delete({ where: { id: tenantId } }).catch(() => {});
     }
     await app.close();
   });

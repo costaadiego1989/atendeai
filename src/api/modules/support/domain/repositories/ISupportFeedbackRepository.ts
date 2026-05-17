@@ -1,4 +1,7 @@
-import { SupportFeedback, SupportFeedbackStatus } from '../types/SupportFeedback';
+import {
+  SupportFeedback,
+  SupportFeedbackStatus,
+} from '../types/SupportFeedback';
 
 export interface SupportFeedbackReply {
   id: string;
@@ -33,10 +36,16 @@ export interface CreateReplyInput {
 
 export interface ISupportFeedbackRepository {
   save(feedback: SupportFeedback): Promise<void>;
-  findAllByTenant(tenantId: string, branchId?: string): Promise<SupportFeedback[]>;
+  findAllByTenant(
+    tenantId: string,
+    branchId?: string,
+  ): Promise<SupportFeedback[]>;
   findAll(filters: ListAllFeedbacksFilters): Promise<ListAllFeedbacksResult>;
   findById(feedbackId: string): Promise<SupportFeedback | null>;
-  updateStatus(feedbackId: string, status: SupportFeedbackStatus): Promise<void>;
+  updateStatus(
+    feedbackId: string,
+    status: SupportFeedbackStatus,
+  ): Promise<void>;
   createReply(input: CreateReplyInput): Promise<SupportFeedbackReply>;
   listReplies(feedbackId: string): Promise<SupportFeedbackReply[]>;
 }

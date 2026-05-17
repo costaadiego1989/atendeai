@@ -1,7 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { FILE_STORAGE_SERVICE, FileStorageService } from '@shared/domain/services/FileStorageService';
+import {
+  FILE_STORAGE_SERVICE,
+  FileStorageService,
+} from '@shared/domain/services/FileStorageService';
 import { InventoryAsyncJobsService } from '../../application/services/InventoryAsyncJobsService';
 import { InventoryReportCsvBuilder } from '../../application/services/InventoryReportCsvBuilder';
 import { GenerateInventoryReportUseCase } from '../../application/use-cases/GenerateInventoryReportUseCase';
@@ -105,19 +108,31 @@ export class InventoryAsyncJobProcessor extends WorkerHost {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao exportar relatorio de estoque.';
-      await this.inventoryAsyncJobsService.failJob(exportData.asyncJobId, message);
+        error instanceof Error
+          ? error.message
+          : 'Falha ao exportar relatorio de estoque.';
+      await this.inventoryAsyncJobsService.failJob(
+        exportData.asyncJobId,
+        message,
+      );
       throw error;
     }
   }
 
-  private async processSyncConnection(job: Job<SyncConnectionPayload>): Promise<void> {
+  private async processSyncConnection(
+    job: Job<SyncConnectionPayload>,
+  ): Promise<void> {
     const { asyncJobId, tenantId, connectionId } = job.data;
 
-    await this.inventoryAsyncJobsService.markProcessing(asyncJobId, { progress: 20 });
+    await this.inventoryAsyncJobsService.markProcessing(asyncJobId, {
+      progress: 20,
+    });
 
     try {
-      await this.syncInventoryConnectionUseCase.execute({ tenantId, connectionId });
+      await this.syncInventoryConnectionUseCase.execute({
+        tenantId,
+        connectionId,
+      });
 
       await this.inventoryAsyncJobsService.completeJob(asyncJobId, {
         processedItems: 0,
@@ -126,7 +141,9 @@ export class InventoryAsyncJobProcessor extends WorkerHost {
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao sincronizar conexão de inventário.';
+        error instanceof Error
+          ? error.message
+          : 'Falha ao sincronizar conexão de inventário.';
       this.logger.error(
         `Sync connection job ${asyncJobId} failed for connection ${connectionId}: ${message}`,
       );

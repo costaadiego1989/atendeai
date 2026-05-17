@@ -42,25 +42,55 @@ describe('InventoryTenantIsolation (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     app.useGlobalFilters(new GlobalExceptionFilter());
     app.setGlobalPrefix('api/v1');
     await app.init();
 
     prisma = app.get(PrismaService);
 
-    await prisma.user.deleteMany({ where: { email: { in: [ownerA, ownerB] } } }).catch(() => { });
+    await prisma.user
+      .deleteMany({ where: { email: { in: [ownerA, ownerB] } } })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const tenantA = await prisma.tenant.create({ data: { companyName: 'Tenant A Store', cnpj: cnpjA, plan: 'ESSENCIAL' } });
+    const tenantA = await prisma.tenant.create({
+      data: { companyName: 'Tenant A Store', cnpj: cnpjA, plan: 'ESSENCIAL' },
+    });
     tenantAId = tenantA.id;
 
-    const tenantB = await prisma.tenant.create({ data: { companyName: 'Tenant B Store', cnpj: cnpjB, plan: 'ESSENCIAL' } });
+    const tenantB = await prisma.tenant.create({
+      data: { companyName: 'Tenant B Store', cnpj: cnpjB, plan: 'ESSENCIAL' },
+    });
     tenantBId = tenantB.id;
 
-    await prisma.user.create({ data: { tenantId: tenantAId, name: 'Owner A', email: ownerA, phone: '11970000070', passwordHash, role: 'OWNER' } });
-    await prisma.user.create({ data: { tenantId: tenantBId, name: 'Owner B', email: ownerB, phone: '11970000071', passwordHash, role: 'OWNER' } });
+    await prisma.user.create({
+      data: {
+        tenantId: tenantAId,
+        name: 'Owner A',
+        email: ownerA,
+        phone: '11970000070',
+        passwordHash,
+        role: 'OWNER',
+      },
+    });
+    await prisma.user.create({
+      data: {
+        tenantId: tenantBId,
+        name: 'Owner B',
+        email: ownerB,
+        phone: '11970000071',
+        passwordHash,
+        role: 'OWNER',
+      },
+    });
 
     cookieA = await login(ownerA);
     cookieB = await login(ownerB);
@@ -69,12 +99,28 @@ describe('InventoryTenantIsolation (e2e)', () => {
   afterAll(async () => {
     for (const tid of [tenantAId, tenantBId]) {
       if (!tid) continue;
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM inventory_schema.inventory_async_jobs WHERE tenant_id = ${tid}::uuid`).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM inventory_schema.inventory_items WHERE tenant_id = ${tid}::uuid`).catch(() => { });
-      await prisma.$executeRaw(Prisma.sql`DELETE FROM inventory_schema.inventory_connections WHERE tenant_id = ${tid}::uuid`).catch(() => { });
-      await prisma.subscription.deleteMany({ where: { tenantId: tid } }).catch(() => { });
-      await prisma.user.deleteMany({ where: { tenantId: tid } }).catch(() => { });
-      await prisma.tenant.deleteMany({ where: { id: tid } }).catch(() => { });
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM inventory_schema.inventory_async_jobs WHERE tenant_id = ${tid}::uuid`,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM inventory_schema.inventory_items WHERE tenant_id = ${tid}::uuid`,
+        )
+        .catch(() => {});
+      await prisma
+        .$executeRaw(
+          Prisma.sql`DELETE FROM inventory_schema.inventory_connections WHERE tenant_id = ${tid}::uuid`,
+        )
+        .catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId: tid } })
+        .catch(() => {});
+      await prisma.user
+        .deleteMany({ where: { tenantId: tid } })
+        .catch(() => {});
+      await prisma.tenant.deleteMany({ where: { id: tid } }).catch(() => {});
     }
     if (app) await app.close();
   });
@@ -85,7 +131,13 @@ describe('InventoryTenantIsolation (e2e)', () => {
     await request(app.getHttpServer())
       .post(`/api/v1/tenants/${tenantAId}/inventory/items/sync`)
       .set('Cookie', [cookieA])
-      .send({ sku: 'ISO-SKU-A001', name: 'Item do Tenant A', availableQuantity: 10, availabilityStatus: 'AVAILABLE', source: 'MANUAL_SNAPSHOT' })
+      .send({
+        sku: 'ISO-SKU-A001',
+        name: 'Item do Tenant A',
+        availableQuantity: 10,
+        availabilityStatus: 'AVAILABLE',
+        source: 'MANUAL_SNAPSHOT',
+      })
       .expect(201);
 
     const resB = await request(app.getHttpServer())
@@ -109,7 +161,11 @@ describe('InventoryTenantIsolation (e2e)', () => {
     await request(app.getHttpServer())
       .post(`/api/v1/tenants/${tenantAId}/inventory/connections`)
       .set('Cookie', [cookieA])
-      .send({ sourceType: 'MANUAL_SNAPSHOT', providerName: 'Conn Isolada A', config: {} })
+      .send({
+        sourceType: 'MANUAL_SNAPSHOT',
+        providerName: 'Conn Isolada A',
+        config: {},
+      })
       .expect(201);
 
     const resB = await request(app.getHttpServer())
@@ -127,13 +183,19 @@ describe('InventoryTenantIsolation (e2e)', () => {
     const connRes = await request(app.getHttpServer())
       .post(`/api/v1/tenants/${tenantAId}/inventory/connections`)
       .set('Cookie', [cookieA])
-      .send({ sourceType: 'MANUAL_SNAPSHOT', providerName: 'Conn A para sync attack', config: {} })
+      .send({
+        sourceType: 'MANUAL_SNAPSHOT',
+        providerName: 'Conn A para sync attack',
+        config: {},
+      })
       .expect(201);
 
     const connAId = connRes.body.id;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantAId}/inventory/connections/${connAId}/sync`)
+      .post(
+        `/api/v1/tenants/${tenantAId}/inventory/connections/${connAId}/sync`,
+      )
       .set('Cookie', [cookieB])
       .expect(403);
   });

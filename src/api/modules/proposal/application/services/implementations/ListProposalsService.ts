@@ -7,7 +7,7 @@ export class ListProposalsService {
   constructor(
     @Inject('IProposalRepository')
     private readonly proposalRepository: IProposalRepository,
-  ) { }
+  ) {}
 
   async execute(tenantId: string): Promise<Proposal[]> {
     return this.proposalRepository.findByTenantId(tenantId);

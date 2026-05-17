@@ -1,7 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  EntityNotFoundException,
-} from '@shared/domain/exceptions/DomainExceptions';
+import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
   IProspectCampaignRepository,
   PROSPECT_CAMPAIGN_REPOSITORY,

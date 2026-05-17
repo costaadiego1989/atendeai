@@ -13,21 +13,11 @@ import {
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
-import {
-  ICreateProspectSearchUseCase,
-} from '../../application/use-cases/interfaces/ICreateProspectSearchUseCase';
-import {
-  IListProspectSearchesUseCase,
-} from '../../application/use-cases/interfaces/IListProspectSearchesUseCase';
-import {
-  IListProspectSearchResultsUseCase,
-} from '../../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
-import {
-  IImportProspectSearchResultsUseCase,
-} from '../../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
-import {
-  IProspectSelectedSearchResultsUseCase,
-} from '../../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
+import { ICreateProspectSearchUseCase } from '../../application/use-cases/interfaces/ICreateProspectSearchUseCase';
+import { IListProspectSearchesUseCase } from '../../application/use-cases/interfaces/IListProspectSearchesUseCase';
+import { IListProspectSearchResultsUseCase } from '../../application/use-cases/interfaces/IListProspectSearchResultsUseCase';
+import { IImportProspectSearchResultsUseCase } from '../../application/use-cases/interfaces/IImportProspectSearchResultsUseCase';
+import { IProspectSelectedSearchResultsUseCase } from '../../application/use-cases/interfaces/IProspectSelectedSearchResultsUseCase';
 import {
   CreateProspectSearchDTO,
   ImportProspectSearchResultsDTO,

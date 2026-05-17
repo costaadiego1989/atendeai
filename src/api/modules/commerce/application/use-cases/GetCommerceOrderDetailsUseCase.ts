@@ -12,7 +12,10 @@ export class GetCommerceOrderDetailsUseCase {
   ) {}
 
   async execute(tenantId: string, orderId: string) {
-    const order = await this.commerceRepository.findOrderById(tenantId, orderId);
+    const order = await this.commerceRepository.findOrderById(
+      tenantId,
+      orderId,
+    );
 
     if (!order) {
       throw new NotFoundException('Commerce order not found');
@@ -22,10 +25,11 @@ export class GetCommerceOrderDetailsUseCase {
       tenantId,
       order.sessionId,
     );
-    const abandonmentTouches = await this.commerceRepository.listSessionAbandonmentTouches(
-      tenantId,
-      order.sessionId,
-    );
+    const abandonmentTouches =
+      await this.commerceRepository.listSessionAbandonmentTouches(
+        tenantId,
+        order.sessionId,
+      );
 
     return {
       order,

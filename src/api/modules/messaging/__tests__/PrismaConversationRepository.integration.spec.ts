@@ -69,11 +69,17 @@ describe('PrismaConversationRepository (integration)', () => {
       await prisma.message
         .deleteMany({ where: { conversation: { tenantId } } })
         .catch(() => {});
-      await prisma.conversation.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.conversation
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
       await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
+      await prisma.subscription
+        .deleteMany({ where: { tenantId } })
+        .catch(() => {});
       await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
-      await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
+      await prisma.tenant
+        .deleteMany({ where: { id: tenantId } })
+        .catch(() => {});
     }
 
     if (app) {
@@ -229,8 +235,12 @@ describe('PrismaConversationRepository (integration)', () => {
         lastMessagePreview: 'Cliente respondeu',
       }),
     );
-    expect(queueState[conversation.id.toString()].lastInboundAt).toBeInstanceOf(Date);
-    expect(queueState[conversation.id.toString()].lastOutboundAt).toBeInstanceOf(Date);
+    expect(queueState[conversation.id.toString()].lastInboundAt).toBeInstanceOf(
+      Date,
+    );
+    expect(
+      queueState[conversation.id.toString()].lastOutboundAt,
+    ).toBeInstanceOf(Date);
   });
 
   it('should clear unread count after marking a conversation as read', async () => {

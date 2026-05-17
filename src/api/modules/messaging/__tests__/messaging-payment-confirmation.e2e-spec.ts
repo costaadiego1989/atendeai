@@ -50,7 +50,9 @@ describe('Messaging Payment Confirmation Flow (e2e)', () => {
 
     prisma = app.get(PrismaService);
 
-    await prisma.user.deleteMany({ where: { email: ownerEmail } }).catch(() => {});
+    await prisma.user
+      .deleteMany({ where: { email: ownerEmail } })
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -98,11 +100,19 @@ describe('Messaging Payment Confirmation Flow (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.paymentLink.deleteMany({ where: { tenantId } }).catch(() => {});
-    await prisma.conversationSaleEvent.deleteMany({ where: { tenantId } }).catch(() => {});
-    await prisma.conversation.deleteMany({ where: { tenantId } }).catch(() => {});
+    await prisma.paymentLink
+      .deleteMany({ where: { tenantId } })
+      .catch(() => {});
+    await prisma.conversationSaleEvent
+      .deleteMany({ where: { tenantId } })
+      .catch(() => {});
+    await prisma.conversation
+      .deleteMany({ where: { tenantId } })
+      .catch(() => {});
     await prisma.contact.deleteMany({ where: { tenantId } }).catch(() => {});
-    await prisma.subscription.deleteMany({ where: { tenantId } }).catch(() => {});
+    await prisma.subscription
+      .deleteMany({ where: { tenantId } })
+      .catch(() => {});
     await prisma.user.deleteMany({ where: { tenantId } }).catch(() => {});
     await prisma.tenant.deleteMany({ where: { id: tenantId } }).catch(() => {});
     await app.close();
@@ -128,7 +138,9 @@ describe('Messaging Payment Confirmation Flow (e2e)', () => {
     });
 
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/tenants/${tenantId}/conversations/${conversationId}/sale-attribution`)
+      .post(
+        `/api/v1/tenants/${tenantId}/conversations/${conversationId}/sale-attribution`,
+      )
       .set('Cookie', [authCookie])
       .send({})
       .expect(201);

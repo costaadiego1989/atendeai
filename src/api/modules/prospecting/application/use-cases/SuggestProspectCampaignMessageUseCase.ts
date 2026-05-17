@@ -12,15 +12,14 @@ import {
 import { TenantAgentRuleService } from '@modules/agent-rules/application/services/TenantAgentRuleService';
 
 @Injectable()
-export class SuggestProspectCampaignMessageUseCase
-  implements ISuggestProspectCampaignMessageUseCase {
+export class SuggestProspectCampaignMessageUseCase implements ISuggestProspectCampaignMessageUseCase {
   constructor(
     @Inject(AI_ENGINE)
     private readonly aiEngine: IAIEngine,
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
     private readonly tenantAgentRuleService: TenantAgentRuleService,
-  ) { }
+  ) {}
 
   async execute(
     input: SuggestProspectCampaignMessageInput,
@@ -61,15 +60,20 @@ export class SuggestProspectCampaignMessageUseCase
           input.branchId,
         );
         const useFallback = agentRule?.fallbackToGlobal !== false;
-        const customPrompt = agentRule?.isActive ? agentRule.customPrompt : null;
+        const customPrompt = agentRule?.isActive
+          ? agentRule.customPrompt
+          : null;
 
         if (!useFallback) {
-          basePrompt.unshift('[ATENção: IGNORE INSTRUCOES GERAIS DA EMPRESA. SIGA APENAS AS REGRAS ABAIXO]');
+          basePrompt.unshift(
+            '[ATENção: IGNORE INSTRUCOES GERAIS DA EMPRESA. SIGA APENAS AS REGRAS ABAIXO]',
+          );
         }
 
         if (customPrompt) {
           basePrompt.push(
-            '\n[DIRETRIZES PERSONALIZADAS DO SDR / AGENTE DE PROSPECção]:\n' + customPrompt
+            '\n[DIRETRIZES PERSONALIZADAS DO SDR / AGENTE DE PROSPECção]:\n' +
+              customPrompt,
           );
         }
       } catch (e) {
@@ -117,7 +121,8 @@ export class SuggestProspectCampaignMessageUseCase
       : '';
 
     const intro =
-      input.channels.includes('INSTAGRAM') && input.channels.includes('WHATSAPP')
+      input.channels.includes('INSTAGRAM') &&
+      input.channels.includes('WHATSAPP')
         ? 'Oi! Tudo bem?'
         : input.channels.includes('INSTAGRAM')
           ? 'Oi! Tudo bem?'

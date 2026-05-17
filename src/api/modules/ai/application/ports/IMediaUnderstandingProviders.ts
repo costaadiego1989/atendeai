@@ -18,7 +18,9 @@ export interface MediaUnderstandingOutput {
 }
 
 export interface ImageOcrProvider {
-  extractTextFromImage(input: MediaUnderstandingInput): Promise<MediaUnderstandingOutput>;
+  extractTextFromImage(
+    input: MediaUnderstandingInput,
+  ): Promise<MediaUnderstandingOutput>;
 }
 
 export interface AudioTranscriptionProvider {
@@ -26,9 +28,13 @@ export interface AudioTranscriptionProvider {
 }
 
 export interface DocumentTextExtractor {
-  extractText(input: MediaUnderstandingInput): Promise<MediaUnderstandingOutput>;
+  extractText(
+    input: MediaUnderstandingInput,
+  ): Promise<MediaUnderstandingOutput>;
 }
 
 export const IMAGE_OCR_PROVIDER = Symbol('IMAGE_OCR_PROVIDER');
-export const AUDIO_TRANSCRIPTION_PROVIDER = Symbol('AUDIO_TRANSCRIPTION_PROVIDER');
+export const AUDIO_TRANSCRIPTION_PROVIDER = Symbol(
+  'AUDIO_TRANSCRIPTION_PROVIDER',
+);
 export const DOCUMENT_TEXT_EXTRACTOR = Symbol('DOCUMENT_TEXT_EXTRACTOR');

@@ -13,11 +13,10 @@ export interface RegisterProspectResponseOutput {
   status: 'PENDING' | 'CONTACTED' | 'RESPONDED' | 'STOPPED' | 'FAILED';
 }
 
-export interface IRegisterProspectResponseUseCase
-  extends IUseCase<
-    RegisterProspectResponseInput,
-    RegisterProspectResponseOutput | null
-  > {}
+export interface IRegisterProspectResponseUseCase extends IUseCase<
+  RegisterProspectResponseInput,
+  RegisterProspectResponseOutput | null
+> {}
 
 export const IRegisterProspectResponseUseCase = Symbol(
   'IRegisterProspectResponseUseCase',

@@ -16,7 +16,6 @@ import {
 import { TenantPDFResumeRepository } from '@modules/tenant/infrastructure/persistence/repositories/TenantPDFResumeRepository';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const pdfParse = require('pdf-parse');
 
 export interface ProcessDocumentForRAGInput {
@@ -102,7 +101,8 @@ export class ProcessDocumentForRAGUseCase {
       for (let i = 0; i < chunks.length; i += EMBEDDING_BATCH_SIZE) {
         const batch = chunks.slice(i, i + EMBEDDING_BATCH_SIZE);
         const texts = batch.map((c) => c.content);
-        const embeddings = await this.embeddingProvider.generateEmbeddings(texts);
+        const embeddings =
+          await this.embeddingProvider.generateEmbeddings(texts);
 
         const chunkInputs = batch.map((chunk, batchIdx) => ({
           tenantId,
@@ -110,7 +110,10 @@ export class ProcessDocumentForRAGUseCase {
           chunkIndex: chunk.index,
           content: chunk.content,
           tokenCount: chunk.tokenCount,
-          metadata: { fileName, chunkIndex: chunk.index } as Record<string, unknown>,
+          metadata: { fileName, chunkIndex: chunk.index } as Record<
+            string,
+            unknown
+          >,
           embedding: embeddings[batchIdx],
         }));
 
@@ -129,8 +132,7 @@ export class ProcessDocumentForRAGUseCase {
         `[ProcessDocumentForRAG] completed doc=${documentId} fileName=${fileName} chunks=${chunks.length}`,
       );
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Unknown error';
+      const message = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
         `[ProcessDocumentForRAG] failed doc=${documentId}: ${message}`,
       );
@@ -156,6 +158,10 @@ export class ProcessDocumentForRAGUseCase {
     status: string,
     error?: string,
   ): Promise<void> {
-    await this.pdfResumeRepository.updateStatus(documentId, status, error ?? null);
+    await this.pdfResumeRepository.updateStatus(
+      documentId,
+      status,
+      error ?? null,
+    );
   }
 }

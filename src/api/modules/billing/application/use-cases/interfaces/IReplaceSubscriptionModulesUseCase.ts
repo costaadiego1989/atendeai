@@ -24,11 +24,10 @@ export interface ReplaceSubscriptionModulesOutput {
   };
 }
 
-export interface IReplaceSubscriptionModulesUseCase
-  extends IUseCase<
-    ReplaceSubscriptionModulesInput,
-    ReplaceSubscriptionModulesOutput
-  > {}
+export interface IReplaceSubscriptionModulesUseCase extends IUseCase<
+  ReplaceSubscriptionModulesInput,
+  ReplaceSubscriptionModulesOutput
+> {}
 
 export const IReplaceSubscriptionModulesUseCase = Symbol(
   'IReplaceSubscriptionModulesUseCase',

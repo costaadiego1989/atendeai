@@ -13,7 +13,7 @@ import { Request } from 'express';
 
 @Controller('webhooks/whatsapp')
 export class WebhookController {
-  constructor(private readonly processWebhookUseCase: ProcessWebhookUseCase) { }
+  constructor(private readonly processWebhookUseCase: ProcessWebhookUseCase) {}
 
   @Post()
   @HttpCode(HttpStatus.OK)
@@ -27,7 +27,9 @@ export class WebhookController {
         (headers['x-hub-signature'] as string | undefined) ||
         (headers['x-twilio-signature'] as string | undefined) ||
         '';
-      const forwardedProto = (headers['x-forwarded-proto'] as string | undefined)
+      const forwardedProto = (
+        headers['x-forwarded-proto'] as string | undefined
+      )
         ?.split(',')[0]
         ?.trim();
       const forwardedHost = (headers['x-forwarded-host'] as string | undefined)
@@ -44,7 +46,10 @@ export class WebhookController {
         headers,
       });
     } catch (error: any) {
-      if (error.message === 'Invalid signature' || error.name === 'UnauthorizedException') {
+      if (
+        error.message === 'Invalid signature' ||
+        error.name === 'UnauthorizedException'
+      ) {
         throw new import_common.UnauthorizedException(error.message);
       }
       throw error;

@@ -102,24 +102,34 @@ describe('Tenant agent rules (e2e)', () => {
     if (prisma) {
       for (const id of [tenantId, otherTenantId].filter(Boolean)) {
         await prisma
-          .$executeRaw(Prisma.sql`
+          .$executeRaw(
+            Prisma.sql`
             DELETE FROM tenant_schema.tenant_agent_rule_history
             WHERE tenant_id = ${id}::uuid
-          `)
-          .catch(() => { });
+          `,
+          )
+          .catch(() => {});
         await prisma
-          .$executeRaw(Prisma.sql`
+          .$executeRaw(
+            Prisma.sql`
             DELETE FROM tenant_schema.tenant_agent_rules
             WHERE tenant_id = ${id}::uuid
-          `)
-          .catch(() => { });
+          `,
+          )
+          .catch(() => {});
       }
       await prisma.user
-        .deleteMany({ where: { tenantId: { in: [tenantId, otherTenantId].filter(Boolean) } } })
-        .catch(() => { });
+        .deleteMany({
+          where: {
+            tenantId: { in: [tenantId, otherTenantId].filter(Boolean) },
+          },
+        })
+        .catch(() => {});
       await prisma.tenant
-        .deleteMany({ where: { id: { in: [tenantId, otherTenantId].filter(Boolean) } } })
-        .catch(() => { });
+        .deleteMany({
+          where: { id: { in: [tenantId, otherTenantId].filter(Boolean) } },
+        })
+        .catch(() => {});
     }
 
     if (app) {
@@ -151,7 +161,9 @@ describe('Tenant agent rules (e2e)', () => {
     );
 
     const inheritedResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/agent-rules/messaging?branchId=${branchId}`)
+      .get(
+        `/api/v1/tenants/${tenantId}/agent-rules/messaging?branchId=${branchId}`,
+      )
       .set('Cookie', authCookies)
       .expect(200);
 
@@ -165,7 +177,9 @@ describe('Tenant agent rules (e2e)', () => {
     );
 
     const branchRuleResponse = await request(app.getHttpServer())
-      .put(`/api/v1/tenants/${tenantId}/agent-rules/messaging?branchId=${branchId}`)
+      .put(
+        `/api/v1/tenants/${tenantId}/agent-rules/messaging?branchId=${branchId}`,
+      )
       .set('Cookie', authCookies)
       .send({
         customPrompt:
@@ -188,7 +202,9 @@ describe('Tenant agent rules (e2e)', () => {
     );
 
     const exactBranchResponse = await request(app.getHttpServer())
-      .get(`/api/v1/tenants/${tenantId}/agent-rules/messaging?branchId=${branchId}`)
+      .get(
+        `/api/v1/tenants/${tenantId}/agent-rules/messaging?branchId=${branchId}`,
+      )
       .set('Cookie', authCookies)
       .expect(200);
 
@@ -201,7 +217,9 @@ describe('Tenant agent rules (e2e)', () => {
       }),
     );
 
-    const historyRows = await prisma.$queryRaw<Array<{ total: bigint }>>(Prisma.sql`
+    const historyRows = await prisma.$queryRaw<
+      Array<{ total: bigint }>
+    >(Prisma.sql`
       SELECT COUNT(*)::bigint AS total
       FROM tenant_schema.tenant_agent_rule_history
       WHERE tenant_id = ${tenantId}::uuid
@@ -221,7 +239,8 @@ describe('Tenant agent rules (e2e)', () => {
       .put(`/api/v1/tenants/${otherTenantId}/agent-rules/messaging`)
       .set('Cookie', authCookies)
       .send({
-        customPrompt: 'Tentativa cross tenant com prompt suficientemente longo.',
+        customPrompt:
+          'Tentativa cross tenant com prompt suficientemente longo.',
       })
       .expect(403);
   });

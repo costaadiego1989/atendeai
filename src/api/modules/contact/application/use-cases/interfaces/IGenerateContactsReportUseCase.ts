@@ -45,6 +45,10 @@ export interface GenerateContactsReportOutput {
   }>;
 }
 
-export const IGenerateContactsReportUseCase = Symbol('IGenerateContactsReportUseCase');
-export interface IGenerateContactsReportUseCase
-  extends IUseCase<GenerateContactsReportInput, GenerateContactsReportOutput> {}
+export const IGenerateContactsReportUseCase = Symbol(
+  'IGenerateContactsReportUseCase',
+);
+export interface IGenerateContactsReportUseCase extends IUseCase<
+  GenerateContactsReportInput,
+  GenerateContactsReportOutput
+> {}

@@ -141,7 +141,9 @@ describe('CreateProspectAdsInsightQueryUseCase', () => {
   it('should mark query as failed when source throws', async () => {
     const tenant = makeTenant();
     tenantRepository.findById.mockResolvedValue(tenant);
-    insightsSource.generateInsights.mockRejectedValue(new Error('OAuth failed'));
+    insightsSource.generateInsights.mockRejectedValue(
+      new Error('OAuth failed'),
+    );
 
     await expect(
       useCase.execute({

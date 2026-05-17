@@ -125,7 +125,11 @@ export class SchedulingController {
       notes: body.notes,
     });
 
-    for (let occurrence = 0; occurrence < recurrence.maxOccurrences; occurrence += 1) {
+    for (
+      let occurrence = 0;
+      occurrence < recurrence.maxOccurrences;
+      occurrence += 1
+    ) {
       await this.processSchedulingRecurringReservationUseCase.execute({
         tenantId,
         recurrenceId: recurrence.id,
@@ -455,7 +459,10 @@ export class SchedulingController {
       },
     );
 
-    await this.schedulingAsyncJobsService.attachQueueJobId(asyncJob.id, String(queueJob.id));
+    await this.schedulingAsyncJobsService.attachQueueJobId(
+      asyncJob.id,
+      String(queueJob.id),
+    );
     return this.schedulingAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
@@ -467,7 +474,10 @@ export class SchedulingController {
 
   @Get('jobs/:jobId')
   @Roles('OWNER', 'ADMIN')
-  async getJob(@Param('tenantId') tenantId: string, @Param('jobId') jobId: string) {
+  async getJob(
+    @Param('tenantId') tenantId: string,
+    @Param('jobId') jobId: string,
+  ) {
     return this.schedulingAsyncJobsService.getJob(tenantId, jobId);
   }
 
@@ -478,11 +488,17 @@ export class SchedulingController {
     @Param('jobId') jobId: string,
     @Res() res: Response,
   ) {
-    const file = await this.schedulingAsyncJobsService.getDownloadPayload(tenantId, jobId);
+    const file = await this.schedulingAsyncJobsService.getDownloadPayload(
+      tenantId,
+      jobId,
+    );
 
     if (file.fileContent) {
       res.setHeader('Content-Type', file.fileMimeType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file.fileName}"`,
+      );
       return res.send(file.fileContent);
     }
 

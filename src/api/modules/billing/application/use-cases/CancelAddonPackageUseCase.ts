@@ -1,7 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  EntityNotFoundException,
-} from '@shared/domain/exceptions/DomainExceptions';
+import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
   BILLING_REPOSITORY,
   IBillingRepository,
@@ -31,10 +29,11 @@ export class CancelAddonPackageUseCase implements ICancelAddonPackageUseCase {
       throw new EntityNotFoundException('Subscription', input.tenantId);
     }
 
-    const activeModule = await this.billingRepository.findActiveSubscriptionModule(
-      input.tenantId,
-      ADDON_PACKAGE_MODULE_CODE,
-    );
+    const activeModule =
+      await this.billingRepository.findActiveSubscriptionModule(
+        input.tenantId,
+        ADDON_PACKAGE_MODULE_CODE,
+      );
 
     if (!activeModule) {
       throw new EntityNotFoundException(

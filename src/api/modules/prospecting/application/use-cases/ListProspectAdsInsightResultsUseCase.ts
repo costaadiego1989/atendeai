@@ -15,9 +15,7 @@ import {
 } from '../../domain/repositories/IProspectAdsInsightResultRepository';
 
 @Injectable()
-export class ListProspectAdsInsightResultsUseCase
-  implements IListProspectAdsInsightResultsUseCase
-{
+export class ListProspectAdsInsightResultsUseCase implements IListProspectAdsInsightResultsUseCase {
   constructor(
     @Inject(PROSPECT_ADS_INSIGHT_QUERY_REPOSITORY)
     private readonly queryRepository: IProspectAdsInsightQueryRepository,
@@ -28,9 +26,15 @@ export class ListProspectAdsInsightResultsUseCase
   async execute(
     input: ListProspectAdsInsightResultsInput,
   ): Promise<ProspectAdsInsightResultListItem[]> {
-    const query = await this.queryRepository.findById(input.tenantId, input.queryId);
+    const query = await this.queryRepository.findById(
+      input.tenantId,
+      input.queryId,
+    );
     if (!query) {
-      throw new EntityNotFoundException('ProspectAdsInsightQuery', input.queryId);
+      throw new EntityNotFoundException(
+        'ProspectAdsInsightQuery',
+        input.queryId,
+      );
     }
 
     const results = await this.resultRepository.findAllByQuery(

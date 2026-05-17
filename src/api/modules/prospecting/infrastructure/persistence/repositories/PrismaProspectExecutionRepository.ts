@@ -184,11 +184,25 @@ export class PrismaProspectExecutionRepository implements IProspectExecutionRepo
   async findLatestByContactIds(
     tenantId: string,
     contactIds: string[],
-  ): Promise<Array<{ contactId: string; status: string; updatedAt: Date; stopReason?: string | null; campaignName?: string }>> {
+  ): Promise<
+    Array<{
+      contactId: string;
+      status: string;
+      updatedAt: Date;
+      stopReason?: string | null;
+      campaignName?: string;
+    }>
+  > {
     if (contactIds.length === 0) return [];
 
     const results = await this.prisma.$queryRaw<
-      Array<{ contact_id: string; status: string; stop_reason: string | null; updated_at: Date; campaign_name: string | null }>
+      Array<{
+        contact_id: string;
+        status: string;
+        stop_reason: string | null;
+        updated_at: Date;
+        campaign_name: string | null;
+      }>
     >(
       Prisma.sql`
         SELECT DISTINCT ON (e.contact_id)

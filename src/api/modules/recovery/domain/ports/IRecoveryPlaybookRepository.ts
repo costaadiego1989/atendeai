@@ -6,7 +6,9 @@ import {
 } from '../types/recovery-playbook.types';
 
 export interface IRecoveryPlaybookRepository {
-  ensureSystemDefaultPlaybook(tenantId: string): Promise<RecoveryPlaybookWithPhases | null>;
+  ensureSystemDefaultPlaybook(
+    tenantId: string,
+  ): Promise<RecoveryPlaybookWithPhases | null>;
 
   listPlaybooks(tenantId: string): Promise<RecoveryPlaybookRecord[]>;
 
@@ -22,9 +24,14 @@ export interface IRecoveryPlaybookRepository {
     branchId?: string | null,
   ): Promise<RecoveryPlaybookWithPhases | null>;
 
-  createPlaybook(input: CreateRecoveryPlaybookInput): Promise<RecoveryPlaybookWithPhases>;
+  createPlaybook(
+    input: CreateRecoveryPlaybookInput,
+  ): Promise<RecoveryPlaybookWithPhases>;
 
-  activatePlaybook(tenantId: string, playbookId: string): Promise<RecoveryPlaybookRecord>;
+  activatePlaybook(
+    tenantId: string,
+    playbookId: string,
+  ): Promise<RecoveryPlaybookRecord>;
 
   hasDispatchedPhase(caseId: string, phaseId: string): Promise<boolean>;
 
@@ -35,4 +42,6 @@ export interface IRecoveryPlaybookRepository {
   }): Promise<void>;
 }
 
-export const RECOVERY_PLAYBOOK_REPOSITORY = Symbol('RECOVERY_PLAYBOOK_REPOSITORY');
+export const RECOVERY_PLAYBOOK_REPOSITORY = Symbol(
+  'RECOVERY_PLAYBOOK_REPOSITORY',
+);

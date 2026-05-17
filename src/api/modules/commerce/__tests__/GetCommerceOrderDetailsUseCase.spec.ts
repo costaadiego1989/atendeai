@@ -44,7 +44,13 @@ describe('GetCommerceOrderDetailsUseCase', () => {
   };
 
   const mockAbandonmentTouches = [
-    { interval: '60min', triggeredAt: new Date(), subtotalAmount: 200, totalAmount: 215, currentStep: 'READY_FOR_CHECKOUT' },
+    {
+      interval: '60min',
+      triggeredAt: new Date(),
+      subtotalAmount: 200,
+      totalAmount: 215,
+      currentStep: 'READY_FOR_CHECKOUT',
+    },
   ];
 
   beforeEach(() => {
@@ -60,7 +66,9 @@ describe('GetCommerceOrderDetailsUseCase', () => {
   it('should return order with session and abandonment touches', async () => {
     commerceRepo.findOrderById.mockResolvedValue(mockOrder as any);
     commerceRepo.findSessionById.mockResolvedValue(mockSession as any);
-    commerceRepo.listSessionAbandonmentTouches.mockResolvedValue(mockAbandonmentTouches as any);
+    commerceRepo.listSessionAbandonmentTouches.mockResolvedValue(
+      mockAbandonmentTouches as any,
+    );
 
     const result = await useCase.execute(tenantId, orderId);
 
@@ -84,7 +92,10 @@ describe('GetCommerceOrderDetailsUseCase', () => {
     await expect(useCase.execute(otherTenantId, orderId)).rejects.toThrow(
       NotFoundException,
     );
-    expect(commerceRepo.findOrderById).toHaveBeenCalledWith(otherTenantId, orderId);
+    expect(commerceRepo.findOrderById).toHaveBeenCalledWith(
+      otherTenantId,
+      orderId,
+    );
   });
 
   it('should include payment status in the returned order', async () => {

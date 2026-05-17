@@ -1,6 +1,17 @@
-import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { COMMERCE_REPOSITORY, ICommerceRepository } from '../../domain/ports/ICommerceRepository';
-import { SALES_REPOSITORY, ISalesCouponRepository } from '@modules/sales/domain/repositories/ISalesRepository';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import {
+  COMMERCE_REPOSITORY,
+  ICommerceRepository,
+} from '../../domain/ports/ICommerceRepository';
+import {
+  SALES_REPOSITORY,
+  ISalesCouponRepository,
+} from '@modules/sales/domain/repositories/ISalesRepository';
 
 export interface ApplyCouponToShoppingSessionInput {
   tenantId: string;
@@ -15,15 +26,21 @@ export class ApplyCouponToShoppingSessionUseCase {
     private readonly commerceRepository: ICommerceRepository,
     @Inject(SALES_REPOSITORY)
     private readonly salesRepository: ISalesCouponRepository,
-  ) { }
+  ) {}
 
   async execute(input: ApplyCouponToShoppingSessionInput) {
-    const session = await this.commerceRepository.findSessionById(input.tenantId, input.sessionId);
+    const session = await this.commerceRepository.findSessionById(
+      input.tenantId,
+      input.sessionId,
+    );
     if (!session) {
       throw new NotFoundException('Shopping session not found');
     }
 
-    const coupon = await this.salesRepository.findCouponByCode(input.tenantId, input.code);
+    const coupon = await this.salesRepository.findCouponByCode(
+      input.tenantId,
+      input.code,
+    );
     if (!coupon) {
       throw new NotFoundException('Coupon not found');
     }
@@ -45,7 +62,9 @@ export class ApplyCouponToShoppingSessionUseCase {
     }
 
     if (coupon.minimumOrder && session.subtotalAmount < coupon.minimumOrder) {
-      throw new BadRequestException(`Minimum order amount of BRL ${coupon.minimumOrder} not met`);
+      throw new BadRequestException(
+        `Minimum order amount of BRL ${coupon.minimumOrder} not met`,
+      );
     }
 
     let discountAmount = 0;
@@ -55,7 +74,8 @@ export class ApplyCouponToShoppingSessionUseCase {
       discountAmount = (session.subtotalAmount * coupon.discountValue) / 100;
     }
 
-    const totalAmount = session.subtotalAmount + (session.freightAmount ?? 0) - discountAmount;
+    const totalAmount =
+      session.subtotalAmount + (session.freightAmount ?? 0) - discountAmount;
 
     return await this.commerceRepository.updateSessionState({
       tenantId: input.tenantId,

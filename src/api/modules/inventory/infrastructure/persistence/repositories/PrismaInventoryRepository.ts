@@ -51,7 +51,9 @@ export class PrismaInventoryRepository implements IInventoryRepository {
     return this.mapItem(item);
   }
 
-  async listItems(filters: ListInventoryItemsFilters): Promise<InventoryItemRecord[]> {
+  async listItems(
+    filters: ListInventoryItemsFilters,
+  ): Promise<InventoryItemRecord[]> {
     const items = await this.prisma.inventoryItem.findMany({
       where: {
         tenantId: filters.tenantId,
@@ -125,7 +127,9 @@ export class PrismaInventoryRepository implements IInventoryRepository {
     return this.mapConnection(connection);
   }
 
-  async listConnections(tenantId: string): Promise<InventoryConnectionRecord[]> {
+  async listConnections(
+    tenantId: string,
+  ): Promise<InventoryConnectionRecord[]> {
     const connections = await this.prisma.inventoryConnection.findMany({
       where: {
         tenantId,
@@ -159,7 +163,10 @@ export class PrismaInventoryRepository implements IInventoryRepository {
     return connection ? this.mapConnection(connection) : null;
   }
 
-  async markConnectionSyncedAt(connectionId: string, syncedAt: Date): Promise<void> {
+  async markConnectionSyncedAt(
+    connectionId: string,
+    syncedAt: Date,
+  ): Promise<void> {
     await this.prisma.inventoryConnection.update({
       where: { id: connectionId },
       data: { lastSyncedAt: syncedAt },

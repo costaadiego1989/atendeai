@@ -36,7 +36,9 @@ export class GenerateRecoveryReportUseCase {
     private readonly recoveryRepository: IRecoveryRepository,
   ) {}
 
-  async execute(query: GenerateRecoveryReportQuery): Promise<GenerateRecoveryReportOutput> {
+  async execute(
+    query: GenerateRecoveryReportQuery,
+  ): Promise<GenerateRecoveryReportOutput> {
     const cases = await this.recoveryRepository.listCases({
       tenantId: query.tenantId,
       branchId: query.branchId,
@@ -47,10 +49,16 @@ export class GenerateRecoveryReportUseCase {
       cases.filter((item) => this.matchesFilters(item, query)),
       query.search,
     );
-    const openCases = filteredCases.filter((item) => item.status !== 'PAID' && item.status !== 'STOPPED');
+    const openCases = filteredCases.filter(
+      (item) => item.status !== 'PAID' && item.status !== 'STOPPED',
+    );
     const paidCases = filteredCases.filter((item) => item.status === 'PAID');
-    const promiseCases = filteredCases.filter((item) => item.status === 'PROMISE_TO_PAY');
-    const guidanceCases = filteredCases.filter((item) => Boolean(item.suggestedReply));
+    const promiseCases = filteredCases.filter(
+      (item) => item.status === 'PROMISE_TO_PAY',
+    );
+    const guidanceCases = filteredCases.filter((item) =>
+      Boolean(item.suggestedReply),
+    );
 
     return {
       generatedAt: new Date(),
@@ -60,14 +68,23 @@ export class GenerateRecoveryReportUseCase {
         promiseCases: promiseCases.length,
         paidCases: paidCases.length,
         guidanceCases: guidanceCases.length,
-        openAmount: openCases.reduce((total, item) => total + Number(item.amountDue ?? 0), 0),
-        paidAmount: paidCases.reduce((total, item) => total + Number(item.amountDue ?? 0), 0),
+        openAmount: openCases.reduce(
+          (total, item) => total + Number(item.amountDue ?? 0),
+          0,
+        ),
+        paidAmount: paidCases.reduce(
+          (total, item) => total + Number(item.amountDue ?? 0),
+          0,
+        ),
       },
       items: filteredCases,
     };
   }
 
-  private applySearch(cases: RecoveryCaseRecord[], search?: string): RecoveryCaseRecord[] {
+  private applySearch(
+    cases: RecoveryCaseRecord[],
+    search?: string,
+  ): RecoveryCaseRecord[] {
     const normalizedSearch = search?.trim().toLowerCase();
     if (!normalizedSearch) {
       return cases;
@@ -90,7 +107,10 @@ export class GenerateRecoveryReportUseCase {
     );
   }
 
-  private matchesFilters(item: RecoveryCaseRecord, query: GenerateRecoveryReportQuery) {
+  private matchesFilters(
+    item: RecoveryCaseRecord,
+    query: GenerateRecoveryReportQuery,
+  ) {
     const statuses = new Set((query.statuses ?? []).filter(Boolean));
     const sources = new Set((query.sources ?? []).filter(Boolean));
 

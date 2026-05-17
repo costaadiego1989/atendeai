@@ -101,7 +101,10 @@ describe('CheckoutShoppingSessionUseCase', () => {
       paymentLinkUrl: mockPaymentLink.url,
       paymentStatus: 'PENDING',
     } as any);
-    commerceRepo.updateSessionState.mockResolvedValue({ ...mockSession, status: 'AWAITING_PAYMENT' } as any);
+    commerceRepo.updateSessionState.mockResolvedValue({
+      ...mockSession,
+      status: 'AWAITING_PAYMENT',
+    } as any);
     commerceRepo.saveAuditLog.mockResolvedValue(undefined);
 
     const result = await useCase.execute({ tenantId, sessionId });
@@ -149,9 +152,13 @@ describe('CheckoutShoppingSessionUseCase', () => {
       freightAmount: 15,
       discountAmount: 20,
     };
-    commerceRepo.findSessionById.mockResolvedValue(sessionWithFreightAndDiscount as any);
+    commerceRepo.findSessionById.mockResolvedValue(
+      sessionWithFreightAndDiscount as any,
+    );
     commerceRepo.createOrder.mockResolvedValue({ id: 'order-1' } as any);
-    commerceRepo.updateSessionState.mockResolvedValue(sessionWithFreightAndDiscount as any);
+    commerceRepo.updateSessionState.mockResolvedValue(
+      sessionWithFreightAndDiscount as any,
+    );
     commerceRepo.saveAuditLog.mockResolvedValue(undefined);
 
     await useCase.execute({ tenantId, sessionId });

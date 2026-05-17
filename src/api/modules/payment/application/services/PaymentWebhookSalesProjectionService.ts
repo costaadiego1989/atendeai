@@ -32,7 +32,9 @@ export class PaymentWebhookSalesProjectionService {
       return;
     }
 
-    const rows = await this.prisma.$queryRaw<Record<string, unknown>[]>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
       UPDATE sales_schema.payment_links
       SET status = ${status}, updated_at = now()
       WHERE tenant_id = ${input.tenantId}::uuid
@@ -51,7 +53,9 @@ export class PaymentWebhookSalesProjectionService {
     }
 
     let contactName = 'Cliente';
-    const contactRows = await this.prisma.$queryRaw<{ name: string }[]>(Prisma.sql`
+    const contactRows = await this.prisma.$queryRaw<
+      { name: string }[]
+    >(Prisma.sql`
       SELECT name FROM contact_schema.contacts
       WHERE tenant_id = ${input.tenantId}::uuid AND id = ${contactId}::uuid
       LIMIT 1
@@ -61,15 +65,16 @@ export class PaymentWebhookSalesProjectionService {
     }
 
     const payload = {
-        tenantId: input.tenantId,
-        contactId,
-        contactName,
-        branchId: (updated.branch_id as string | null | undefined) ?? null,
-        conversationId: (updated.conversation_id as string | null | undefined) ?? null,
-        paymentLinkUrl: String(updated.url ?? ''),
-        linkTitle: String(updated.name ?? ''),
-        value: Number(updated.value ?? 0),
-      };
+      tenantId: input.tenantId,
+      contactId,
+      contactName,
+      branchId: (updated.branch_id as string | null | undefined) ?? null,
+      conversationId:
+        (updated.conversation_id as string | null | undefined) ?? null,
+      paymentLinkUrl: String(updated.url ?? ''),
+      linkTitle: String(updated.name ?? ''),
+      value: Number(updated.value ?? 0),
+    };
 
     if (status === 'PAID') {
       await this.eventBus.publish(

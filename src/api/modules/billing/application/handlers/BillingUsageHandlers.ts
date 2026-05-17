@@ -24,24 +24,32 @@ export class BillingUsageHandlers implements OnModuleInit {
     private readonly eventBus: IEventBus,
     @Inject(IRecordUsageUseCase)
     private readonly recordUsageUseCase: IRecordUsageUseCase,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.eventBus.subscribe('messaging.message-sent', async (event) => {
-      const payload = event.payload as unknown as MessageSentPayload;
-      await this.recordUsageUseCase.execute({
-        tenantId: payload.tenantId,
-        type: UsageType.MESSAGE,
-      });
-    }, { consumerName: 'billing-message-sent' });
+    this.eventBus.subscribe(
+      'messaging.message-sent',
+      async (event) => {
+        const payload = event.payload as unknown as MessageSentPayload;
+        await this.recordUsageUseCase.execute({
+          tenantId: payload.tenantId,
+          type: UsageType.MESSAGE,
+        });
+      },
+      { consumerName: 'billing-message-sent' },
+    );
 
-    this.eventBus.subscribe('ai.response-generated', async (event) => {
-      const payload = event.payload as unknown as AIResponsePayload;
-      await this.recordUsageUseCase.execute({
-        tenantId: payload.tenantId,
-        type: UsageType.AI_TOKEN,
-        amount: toBillableAiTokens(payload.tokensUsed),
-      });
-    }, { consumerName: 'billing-ai-response-generated' });
+    this.eventBus.subscribe(
+      'ai.response-generated',
+      async (event) => {
+        const payload = event.payload as unknown as AIResponsePayload;
+        await this.recordUsageUseCase.execute({
+          tenantId: payload.tenantId,
+          type: UsageType.AI_TOKEN,
+          amount: toBillableAiTokens(payload.tokensUsed),
+        });
+      },
+      { consumerName: 'billing-ai-response-generated' },
+    );
   }
 }

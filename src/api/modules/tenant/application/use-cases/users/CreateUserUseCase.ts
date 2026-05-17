@@ -98,9 +98,13 @@ export class CreateUserUseCase {
     user.requirePasswordChange();
 
     await this.userRepo.saveWithTenant(user, input.tenantId);
-    await this.userDomainEventPublisher.publishFromAggregate(user, input.tenantId);
+    await this.userDomainEventPublisher.publishFromAggregate(
+      user,
+      input.tenantId,
+    );
 
-    const loginUrl = process.env['APP_LOGIN_URL_BASE'] || 'http://localhost:8080/login';
+    const loginUrl =
+      process.env['APP_LOGIN_URL_BASE'] || 'http://localhost:8080/login';
 
     try {
       await this.teamMemberCredentialsEmailSender.send({
@@ -116,7 +120,11 @@ export class CreateUserUseCase {
       );
     }
 
-    await this.sendWhatsAppCredentials(input, temporaryPassword, tenantCompanyName);
+    await this.sendWhatsAppCredentials(
+      input,
+      temporaryPassword,
+      tenantCompanyName,
+    );
 
     return { id: user.id.toValue() };
   }
@@ -139,7 +147,8 @@ export class CreateUserUseCase {
         tags: ['equipe-interna'],
       });
 
-      const loginUrl = process.env['APP_LOGIN_URL_BASE'] || 'http://localhost:8080/login';
+      const loginUrl =
+        process.env['APP_LOGIN_URL_BASE'] || 'http://localhost:8080/login';
       const message = [
         `Olá ${input.name}! Você foi adicionado(a) à equipe *${tenantName}* no AtendeAi.`,
         '',

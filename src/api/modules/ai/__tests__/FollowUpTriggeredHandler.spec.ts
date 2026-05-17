@@ -17,10 +17,7 @@ describe('FollowUpTriggeredHandler', () => {
       execute: jest.fn(),
     } as unknown as jest.Mocked<IProcessAIResponseUseCase>;
 
-    handler = new FollowUpTriggeredHandler(
-      eventBus,
-      processAIResponseUseCase,
-    );
+    handler = new FollowUpTriggeredHandler(eventBus, processAIResponseUseCase);
   });
 
   it('should subscribe to messaging.follow-up-triggered and forward a system follow-up prompt', async () => {

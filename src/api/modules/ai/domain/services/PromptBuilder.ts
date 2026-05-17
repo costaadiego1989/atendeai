@@ -3,7 +3,8 @@ import { Tenant } from '../../../tenant/domain/entities/Tenant';
 export class PromptBuilder {
   public build(tenant: Tenant): string {
     const aiConfig = tenant.aiConfig;
-    const basePrompt = aiConfig?.systemPrompt || 'You are a helpful virtual assistant.';
+    const basePrompt =
+      aiConfig?.systemPrompt || 'You are a helpful virtual assistant.';
     const businessContext = this.getBusinessContext(tenant);
     const address = this.getAddress(tenant);
 
@@ -112,8 +113,8 @@ Seja resiliente, mas nunca invasivo. Use contexto da empresa, promocoes e objeco
       'CURSO',
     ];
 
-    const supportsRecurringPackages = recurringBusinessKeywords.some((keyword) =>
-      searchableContext.includes(keyword),
+    const supportsRecurringPackages = recurringBusinessKeywords.some(
+      (keyword) => searchableContext.includes(keyword),
     );
 
     if (!supportsRecurringPackages) {

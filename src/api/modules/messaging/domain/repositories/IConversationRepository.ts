@@ -9,7 +9,9 @@ export interface IConversationRepository {
   ): Promise<void>;
   findById(id: string): Promise<Conversation | null>;
   findByMessageId(messageId: string): Promise<Conversation | null>;
-  findByExternalMessageId(externalMessageId: string): Promise<Conversation | null>;
+  findByExternalMessageId(
+    externalMessageId: string,
+  ): Promise<Conversation | null>;
   findActiveByContact(
     tenantId: string,
     contactId: string,

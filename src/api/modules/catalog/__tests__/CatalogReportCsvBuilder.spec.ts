@@ -5,7 +5,9 @@ import { CatalogItemRecord } from '../domain/ports/ICatalogRepository';
 describe('CatalogReportCsvBuilder', () => {
   let builder: CatalogReportCsvBuilder;
 
-  const itemRecord = (over?: Partial<CatalogItemRecord>): CatalogItemRecord => ({
+  const itemRecord = (
+    over?: Partial<CatalogItemRecord>,
+  ): CatalogItemRecord => ({
     id: 'item-1',
     tenantId: 'tenant-1',
     categoryId: 'cat-1',
@@ -28,7 +30,9 @@ describe('CatalogReportCsvBuilder', () => {
     ...over,
   });
 
-  const buildReport = (items: CatalogItemRecord[]): GenerateCatalogReportOutput => ({
+  const buildReport = (
+    items: CatalogItemRecord[],
+  ): GenerateCatalogReportOutput => ({
     generatedAt: new Date('2024-01-20T10:00:00Z'),
     summary: {
       totalItems: items.length,
@@ -51,7 +55,9 @@ describe('CatalogReportCsvBuilder', () => {
     const result = builder.build(report);
 
     expect(result.mimeType).toBe('text/csv;charset=utf-8');
-    expect(result.fileName).toMatch(/^relatorio-catalogo-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(result.fileName).toMatch(
+      /^relatorio-catalogo-\d{4}-\d{2}-\d{2}\.csv$/,
+    );
 
     const lines = result.content.split('\n');
     expect(lines[0]).toContain('"Nome"');
@@ -88,7 +94,10 @@ describe('CatalogReportCsvBuilder', () => {
 
   it('escapes double quotes in fields', () => {
     const report = buildReport([
-      itemRecord({ name: 'Produto "Premium"', description: 'Desc com "aspas"' }),
+      itemRecord({
+        name: 'Produto "Premium"',
+        description: 'Desc com "aspas"',
+      }),
     ]);
     const result = builder.build(report);
 

@@ -32,17 +32,20 @@ export class UpdateAvailabilitySlotUseCase {
     private readonly googleCalendarSyncService: SchedulingGoogleCalendarSyncService,
   ) {}
 
-  async execute(input: UpdateAvailabilitySlotInput & { branchId?: string | null }): Promise<AvailabilitySlotRecord> {
-    const contact =
-      input.contactId
-        ? await this.contactFacade.getContactById(input.tenantId, input.contactId)
-        : null;
-    const category =
-      input.categoryId
-        ? (await this.schedulingFacade.listCategories(input.tenantId, input.branchId)).find(
-            (entry) => entry.id === input.categoryId,
-          ) ?? null
-        : null;
+  async execute(
+    input: UpdateAvailabilitySlotInput & { branchId?: string | null },
+  ): Promise<AvailabilitySlotRecord> {
+    const contact = input.contactId
+      ? await this.contactFacade.getContactById(input.tenantId, input.contactId)
+      : null;
+    const category = input.categoryId
+      ? ((
+          await this.schedulingFacade.listCategories(
+            input.tenantId,
+            input.branchId,
+          )
+        ).find((entry) => entry.id === input.categoryId) ?? null)
+      : null;
 
     const updatedSlot = await this.schedulingStore.updateSlot({
       ...input,
@@ -69,7 +72,10 @@ export class UpdateAvailabilitySlotUseCase {
     }
 
     const professional = (
-      await this.schedulingStore.listProfessionals(input.tenantId, input.branchId)
+      await this.schedulingStore.listProfessionals(
+        input.tenantId,
+        input.branchId,
+      )
     ).find((entry) => entry.id === input.professionalId);
 
     if (

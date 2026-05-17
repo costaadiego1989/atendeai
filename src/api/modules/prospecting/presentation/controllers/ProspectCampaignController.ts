@@ -15,27 +15,13 @@ import {
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
-import {
-  ICreateProspectCampaignUseCase,
-} from '../../application/use-cases/interfaces/ICreateProspectCampaignUseCase';
-import {
-  IListProspectCampaignsUseCase,
-} from '../../application/use-cases/interfaces/IListProspectCampaignsUseCase';
-import {
-  IActivateProspectCampaignUseCase,
-} from '../../application/use-cases/interfaces/IActivateProspectCampaignUseCase';
-import {
-  IPauseProspectCampaignUseCase,
-} from '../../application/use-cases/interfaces/IPauseProspectCampaignUseCase';
-import {
-  IStartProspectCampaignUseCase,
-} from '../../application/use-cases/interfaces/IStartProspectCampaignUseCase';
-import {
-  IDispatchNextProspectCampaignExecutionUseCase,
-} from '../../application/use-cases/interfaces/IDispatchNextProspectCampaignExecutionUseCase';
-import {
-  ISuggestProspectCampaignMessageUseCase,
-} from '../../application/use-cases/interfaces/ISuggestProspectCampaignMessageUseCase';
+import { ICreateProspectCampaignUseCase } from '../../application/use-cases/interfaces/ICreateProspectCampaignUseCase';
+import { IListProspectCampaignsUseCase } from '../../application/use-cases/interfaces/IListProspectCampaignsUseCase';
+import { IActivateProspectCampaignUseCase } from '../../application/use-cases/interfaces/IActivateProspectCampaignUseCase';
+import { IPauseProspectCampaignUseCase } from '../../application/use-cases/interfaces/IPauseProspectCampaignUseCase';
+import { IStartProspectCampaignUseCase } from '../../application/use-cases/interfaces/IStartProspectCampaignUseCase';
+import { IDispatchNextProspectCampaignExecutionUseCase } from '../../application/use-cases/interfaces/IDispatchNextProspectCampaignExecutionUseCase';
+import { ISuggestProspectCampaignMessageUseCase } from '../../application/use-cases/interfaces/ISuggestProspectCampaignMessageUseCase';
 import {
   CreateProspectCampaignDTO,
   SuggestProspectCampaignMessageDTO,

@@ -49,7 +49,14 @@ const commerceScenarios: ConversationFlowScenario[] = [
       'Tenho cupom {{couponCode}}',
       'pode mandar o link',
     ],
-    expectedSignals: ['carrinho', 'entrega', 'cupom', 'pagamento', 'pix', 'link'],
+    expectedSignals: [
+      'carrinho',
+      'entrega',
+      'cupom',
+      'pagamento',
+      'pix',
+      'link',
+    ],
     expectation: 'COMMERCE_CHECKOUT',
   },
   {
@@ -65,7 +72,9 @@ const schedulingScenarios: ConversationFlowScenario[] = [
   {
     key: 'service-discovery',
     title: 'descoberta de servico antes de agendar',
-    turns: ['Tenho uma necessidade e quero saber qual servico voces recomendam'],
+    turns: [
+      'Tenho uma necessidade e quero saber qual servico voces recomendam',
+    ],
     expectedSignals: ['servico', 'recomendo', 'horario', 'agenda', 'avaliacao'],
     expectation: 'SCHEDULING_RESPONSE',
   },
@@ -83,7 +92,9 @@ const schedulingScenarios: ConversationFlowScenario[] = [
   {
     key: 'reschedule-question',
     title: 'duvida de remarcacao e disponibilidade',
-    turns: ['Ja tenho um horario, mas preciso remarcar para outro dia. Como fazemos?'],
+    turns: [
+      'Ja tenho um horario, mas preciso remarcar para outro dia. Como fazemos?',
+    ],
     expectedSignals: ['remarcar', 'horario', 'disponibilidade', 'agenda'],
     expectation: 'SCHEDULING_RESPONSE',
   },
@@ -93,8 +104,16 @@ const consultativeScenarios: ConversationFlowScenario[] = [
   {
     key: 'lead-qualification',
     title: 'qualificacao do lead',
-    turns: ['Preciso de ajuda, mas ainda nao sei exatamente qual servico contratar'],
-    expectedSignals: ['entender', 'necessidade', 'servico', 'ajudar', 'recomendar'],
+    turns: [
+      'Preciso de ajuda, mas ainda nao sei exatamente qual servico contratar',
+    ],
+    expectedSignals: [
+      'entender',
+      'necessidade',
+      'servico',
+      'ajudar',
+      'recomendar',
+    ],
     expectation: 'AI_RESPONSE',
   },
   {
@@ -110,8 +129,16 @@ const consultativeScenarios: ConversationFlowScenario[] = [
   {
     key: 'handoff-sensitive',
     title: 'pedido sensivel que pode exigir humano',
-    turns: ['Meu caso e urgente e preciso falar com uma pessoa responsavel agora'],
-    expectedSignals: ['humano', 'responsavel', 'atendente', 'urgente', 'ajudar'],
+    turns: [
+      'Meu caso e urgente e preciso falar com uma pessoa responsavel agora',
+    ],
+    expectedSignals: [
+      'humano',
+      'responsavel',
+      'atendente',
+      'urgente',
+      'ajudar',
+    ],
     expectation: 'AI_RESPONSE',
   },
 ];

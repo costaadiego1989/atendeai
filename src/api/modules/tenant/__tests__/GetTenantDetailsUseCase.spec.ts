@@ -52,7 +52,10 @@ describe('GetTenantDetailsUseCase', () => {
       }),
     } as unknown as jest.Mocked<TenantModuleAccessService>;
 
-    useCase = new GetTenantDetailsUseCase(tenantRepository, tenantModuleAccessService);
+    useCase = new GetTenantDetailsUseCase(
+      tenantRepository,
+      tenantModuleAccessService,
+    );
   });
 
   it('should throw when the tenant does not exist', async () => {

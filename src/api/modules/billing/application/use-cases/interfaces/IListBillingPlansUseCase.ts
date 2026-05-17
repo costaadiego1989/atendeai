@@ -26,7 +26,9 @@ export interface ListBillingPlansOutput {
   plans: BillingPlanOutput[];
 }
 
-export interface IListBillingPlansUseCase
-  extends IUseCase<ListBillingPlansInput, ListBillingPlansOutput> {}
+export interface IListBillingPlansUseCase extends IUseCase<
+  ListBillingPlansInput,
+  ListBillingPlansOutput
+> {}
 
 export const IListBillingPlansUseCase = Symbol('IListBillingPlansUseCase');

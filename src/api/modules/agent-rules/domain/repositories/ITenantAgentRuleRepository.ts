@@ -48,4 +48,6 @@ export interface ITenantAgentRuleRepository {
   }): Promise<TenantAgentRuleHistory[]>;
 }
 
-export const TENANT_AGENT_RULE_REPOSITORY = Symbol('TENANT_AGENT_RULE_REPOSITORY');
+export const TENANT_AGENT_RULE_REPOSITORY = Symbol(
+  'TENANT_AGENT_RULE_REPOSITORY',
+);

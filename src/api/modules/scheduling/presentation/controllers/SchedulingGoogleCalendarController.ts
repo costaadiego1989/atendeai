@@ -64,7 +64,10 @@ export class SchedulingGoogleCalendarController {
     }
 
     try {
-      await this.completeGoogleCalendarConnectionUseCase.execute({ code, state });
+      await this.completeGoogleCalendarConnectionUseCase.execute({
+        code,
+        state,
+      });
       res.type('html').send(this.buildPopupHtml(true));
     } catch (callbackError: any) {
       res
@@ -101,10 +104,7 @@ export class SchedulingGoogleCalendarController {
   @Post('connection/select-calendar')
   @UseGuards(JwtCookieGuard, RolesGuard)
   @Roles('OWNER', 'ADMIN')
-  async selectCalendar(
-    @Req() req: any,
-    @Body() body: { calendarId: string },
-  ) {
+  async selectCalendar(@Req() req: any, @Body() body: { calendarId: string }) {
     return this.selectGoogleCalendarUseCase.execute({
       tenantId: req.user.tenantId,
       branchId: req.query.branchId,

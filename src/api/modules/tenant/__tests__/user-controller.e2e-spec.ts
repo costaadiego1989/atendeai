@@ -70,7 +70,7 @@ describe('UserController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     await prisma.tenant
       .deleteMany({
@@ -80,7 +80,7 @@ describe('UserController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -155,7 +155,7 @@ describe('UserController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     await prisma.user
       .deleteMany({
@@ -165,7 +165,7 @@ describe('UserController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     await prisma.tenant
       .deleteMany({
@@ -175,7 +175,7 @@ describe('UserController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
 
     if (app) {
       await app.close();
@@ -195,7 +195,7 @@ describe('UserController (e2e)', () => {
           },
         },
       })
-      .catch(() => { });
+      .catch(() => {});
   });
 
   it('should list tenant users for OWNER', async () => {
