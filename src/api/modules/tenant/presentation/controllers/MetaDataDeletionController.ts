@@ -6,10 +6,8 @@ import {
   HttpStatus,
   Post,
   Query,
-  Res,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
 import * as crypto from 'crypto';
 
 interface DataDeletionRequestBody {
@@ -24,6 +22,19 @@ interface DataDeletionStatusResponse {
 @Controller('channels/instagram/meta')
 export class MetaDataDeletionController {
   constructor(private readonly configService: ConfigService) {}
+
+  /**
+   * GET handler for Meta URL validation.
+   * Meta checks the URL is reachable before accepting it.
+   */
+  @Get('data-deletion')
+  @HttpCode(HttpStatus.OK)
+  validateDataDeletionUrl() {
+    return {
+      status: 'active',
+      message: 'AtendeAI data deletion endpoint is active.',
+    };
+  }
 
   /**
    * Meta Data Deletion Request Callback
