@@ -11,22 +11,20 @@ import {
   IProspectExecutionRepository,
   PROSPECT_EXECUTION_REPOSITORY,
 } from '../../domain/repositories/IProspectExecutionRepository';
-import {
-  IDispatchProspectExecutionUseCase,
-} from './interfaces/IDispatchProspectExecutionUseCase';
+import { IDispatchProspectExecutionUseCase } from './interfaces/IDispatchProspectExecutionUseCase';
 import {
   DispatchNextProspectCampaignExecutionInput,
   DispatchNextProspectCampaignExecutionOutput,
   IDispatchNextProspectCampaignExecutionUseCase,
 } from './interfaces/IDispatchNextProspectCampaignExecutionUseCase';
+import { IStartProspectCampaignUseCase } from './interfaces/IStartProspectCampaignUseCase';
 import {
-  IStartProspectCampaignUseCase,
-} from './interfaces/IStartProspectCampaignUseCase';
+  IProspectDispatchQueue,
+  PROSPECT_DISPATCH_QUEUE,
+} from '../../domain/ports/IProspectDispatchQueue';
 
 @Injectable()
-export class DispatchNextProspectCampaignExecutionUseCase
-  implements IDispatchNextProspectCampaignExecutionUseCase
-{
+export class DispatchNextProspectCampaignExecutionUseCase implements IDispatchNextProspectCampaignExecutionUseCase {
   constructor(
     @Inject(PROSPECT_CAMPAIGN_REPOSITORY)
     private readonly campaignRepository: IProspectCampaignRepository,
@@ -36,6 +34,8 @@ export class DispatchNextProspectCampaignExecutionUseCase
     private readonly dispatchProspectExecutionUseCase: IDispatchProspectExecutionUseCase,
     @Inject(IStartProspectCampaignUseCase)
     private readonly startProspectCampaignUseCase: IStartProspectCampaignUseCase,
+    @Inject(PROSPECT_DISPATCH_QUEUE)
+    private readonly dispatchQueue: IProspectDispatchQueue,
   ) {}
 
   async execute(
@@ -56,10 +56,11 @@ export class DispatchNextProspectCampaignExecutionUseCase
       );
     }
 
-    let nextExecution = await this.executionRepository.findNextPendingByCampaign(
-      input.tenantId,
-      input.campaignId,
-    );
+    let nextExecution =
+      await this.executionRepository.findNextPendingByCampaign(
+        input.tenantId,
+        input.campaignId,
+      );
 
     if (!nextExecution) {
       await this.startProspectCampaignUseCase.execute({
@@ -89,6 +90,33 @@ export class DispatchNextProspectCampaignExecutionUseCase
       input.campaignId,
     );
 
+    const remainingPendingExecutions = allExecutions.filter(
+      (execution) => execution.status.value === 'PENDING',
+    ).length;
+
+    if (remainingPendingExecutions > 0) {
+      const contactedToday =
+        await this.executionRepository.countContactedTodayByCampaign(
+          input.tenantId,
+          input.campaignId,
+        );
+
+      if (contactedToday < campaign.dailyLimit) {
+        const delayMs =
+          (Math.floor(
+            Math.random() *
+              (campaign.maxDelaySeconds - campaign.minDelaySeconds + 1),
+          ) +
+            campaign.minDelaySeconds) *
+          1000;
+
+        await this.dispatchQueue.scheduleNextDispatch(
+          { tenantId: input.tenantId, campaignId: input.campaignId },
+          delayMs,
+        );
+      }
+    }
+
     return {
       campaignId: input.campaignId,
       executionId: dispatchResult.executionId,
@@ -96,9 +124,7 @@ export class DispatchNextProspectCampaignExecutionUseCase
       messageId: dispatchResult.messageId,
       status: dispatchResult.status,
       renderedMessage: dispatchResult.renderedMessage,
-      remainingPendingExecutions: allExecutions.filter(
-        (execution) => execution.status.value === 'PENDING',
-      ).length,
+      remainingPendingExecutions,
     };
   }
 }

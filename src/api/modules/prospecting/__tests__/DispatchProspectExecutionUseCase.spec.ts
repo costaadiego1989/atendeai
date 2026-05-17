@@ -16,6 +16,7 @@ import {
   ASSISTED_LOCAL_PROSPECTING_OBJECTIVE_PREFIX,
   ProspectDispatchPolicy,
 } from '../application/services/ProspectDispatchPolicy';
+import { ProspectTemplateUnavailableError } from '../domain/errors/ProspectingErrors';
 
 function makeCampaign(messageTemplate = 'Oi {{first_name}}, tudo bem?') {
   const campaign = ProspectCampaign.create({
@@ -24,6 +25,21 @@ function makeCampaign(messageTemplate = 'Oi {{first_name}}, tudo bem?') {
     objective: 'Enviar primeiro toque',
     audienceType: ProspectAudienceTypeVO.create('CONTACT_LIST'),
     channel: ProspectChannelVO.create('WHATSAPP'),
+    targetContactIds: ['contact-1'],
+    messageTemplate,
+    templateName: 'atendeai_outbound_v1',
+  });
+  campaign.activate();
+  return campaign;
+}
+
+function makeInstagramCampaign(messageTemplate = 'Oi {{first_name}}, tudo bem?') {
+  const campaign = ProspectCampaign.create({
+    tenantId: TenantId.create('123e4567-e89b-12d3-a456-426614174000'),
+    name: 'Campanha Instagram',
+    objective: 'Enviar primeiro toque',
+    audienceType: ProspectAudienceTypeVO.create('CONTACT_LIST'),
+    channel: ProspectChannelVO.create('INSTAGRAM'),
     targetContactIds: ['contact-1'],
     messageTemplate,
   });
@@ -40,6 +56,7 @@ function makeAssistedLocalQueue() {
     channel: ProspectChannelVO.create('WHATSAPP'),
     targetContactIds: ['contact-1'],
     messageTemplate: 'Oi {{first_name}}, tudo bem?',
+    templateName: 'atendeai_outbound_v1',
   });
   campaign.activate();
   return campaign;
@@ -74,6 +91,10 @@ describe('DispatchProspectExecutionUseCase', () => {
       findLatestContactedByContact: jest.fn(),
       findAllByCampaign: jest.fn(),
       findNextPendingByCampaign: jest.fn(),
+      findLastContactedAt: jest.fn().mockResolvedValue(null),
+      findLatestByContactIds: jest.fn().mockResolvedValue([]),
+      findActiveByContact: jest.fn().mockResolvedValue([]),
+      countContactedTodayByCampaign: jest.fn().mockResolvedValue(0),
     };
     contactFacade = {
       identifyContact: jest.fn(),
@@ -81,9 +102,11 @@ describe('DispatchProspectExecutionUseCase', () => {
       ensureContact: jest.fn(),
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
+      markProspectingOptOut: jest.fn(),
     };
     messagingFacade = {
       queueSystemMessage: jest.fn(),
+      queueTemplateMessage: jest.fn(),
     };
 
     useCase = new DispatchProspectExecutionUseCase(
@@ -91,11 +114,11 @@ describe('DispatchProspectExecutionUseCase', () => {
       executionRepository,
       contactFacade,
       messagingFacade,
-      new ProspectDispatchPolicy(),
+      new ProspectDispatchPolicy(executionRepository),
     );
   });
 
-  it('should queue the outbound system message and mark execution as contacted', async () => {
+  it('should dispatch via template and mark execution as contacted', async () => {
     const campaign = makeCampaign();
     const execution = makeExecution(campaign);
 
@@ -106,10 +129,11 @@ describe('DispatchProspectExecutionUseCase', () => {
       name: 'Maria Silva',
       phone: '11999998888',
       email: 'maria@test.com',
+      prospectingOptOut: false,
     });
-    messagingFacade.queueSystemMessage.mockResolvedValue({
+    messagingFacade.queueTemplateMessage.mockResolvedValue({
       conversationId: 'conversation-1',
-      messageId: 'message-1',
+      messageId: 'wamid.abc123',
     });
 
     const result = await useCase.execute({
@@ -117,18 +141,21 @@ describe('DispatchProspectExecutionUseCase', () => {
       executionId: execution.id.toString(),
     });
 
-    expect(messagingFacade.queueSystemMessage).toHaveBeenCalledWith({
-      tenantId: campaign.tenantId.toString(),
-      contactId: 'contact-1',
-      channel: 'WHATSAPP',
-      text: 'Oi Maria, tudo bem?',
-    });
+    expect(messagingFacade.queueTemplateMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: campaign.tenantId.toString(),
+        contactId: 'contact-1',
+        phone: '11999998888',
+        channel: 'WHATSAPP',
+        templateName: 'atendeai_outbound_v1',
+      }),
+    );
     expect(executionRepository.save).toHaveBeenCalledWith(execution);
     expect(result.status).toBe('CONTACTED');
     expect(result.renderedMessage).toBe('Oi Maria, tudo bem?');
   });
 
-  it('should use the messaging facade result when dispatching the message', async () => {
+  it('should return conversationId and messageId from facade result', async () => {
     const campaign = makeCampaign('Oi {{name}}, temos novidades');
     const execution = makeExecution(campaign);
 
@@ -139,10 +166,11 @@ describe('DispatchProspectExecutionUseCase', () => {
       name: 'Maria Silva',
       phone: '11999998888',
       email: 'maria@test.com',
+      prospectingOptOut: false,
     });
-    messagingFacade.queueSystemMessage.mockResolvedValue({
+    messagingFacade.queueTemplateMessage.mockResolvedValue({
       conversationId: 'conversation-99',
-      messageId: 'message-99',
+      messageId: 'wamid.xyz99',
     });
 
     const result = await useCase.execute({
@@ -180,8 +208,8 @@ describe('DispatchProspectExecutionUseCase', () => {
     ).rejects.toThrow(ValidationErrorException);
   });
 
-  it('should reject campaigns without a message template', async () => {
-    const campaign = makeCampaign('');
+  it('should reject campaigns without a message template (legacy free-text path)', async () => {
+    const campaign = makeInstagramCampaign('');
     const execution = makeExecution(campaign);
 
     executionRepository.findById.mockResolvedValue(execution);
@@ -195,8 +223,10 @@ describe('DispatchProspectExecutionUseCase', () => {
     ).rejects.toThrow(ValidationErrorException);
   });
 
-  it('should reject dispatch when the template has no personalization token', async () => {
-    const campaign = makeCampaign('Olá, temos uma condição especial para você.');
+  it('should reject dispatch when the template has no personalization token (legacy free-text path)', async () => {
+    const campaign = makeInstagramCampaign(
+      'Olá, temos uma condição especial para você.',
+    );
     const execution = makeExecution(campaign);
 
     executionRepository.findById.mockResolvedValue(execution);
@@ -225,5 +255,103 @@ describe('DispatchProspectExecutionUseCase', () => {
       }),
     ).rejects.toThrow(ValidationErrorException);
     expect(messagingFacade.queueSystemMessage).not.toHaveBeenCalled();
+  });
+
+  it('should call queueTemplateMessage when campaign has a templateName', async () => {
+    const campaign = makeCampaign();
+    const execution = makeExecution(campaign);
+
+    executionRepository.findById.mockResolvedValue(execution);
+    campaignRepository.findById.mockResolvedValue(campaign);
+    contactFacade.getContactById.mockResolvedValue({
+      contactId: 'contact-1',
+      name: 'Maria Silva',
+      phone: '11999998888',
+      email: 'maria@test.com',
+      prospectingOptOut: false,
+    });
+    messagingFacade.queueTemplateMessage.mockResolvedValue({
+      conversationId: 'conversation-1',
+      messageId: 'wamid.abc123',
+    });
+
+    const result = await useCase.execute({
+      tenantId: campaign.tenantId.toString(),
+      executionId: execution.id.toString(),
+    });
+
+    expect(messagingFacade.queueTemplateMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: campaign.tenantId.toString(),
+        contactId: 'contact-1',
+        phone: '11999998888',
+        channel: 'WHATSAPP',
+        templateName: 'atendeai_outbound_v1',
+      }),
+    );
+    expect(messagingFacade.queueSystemMessage).not.toHaveBeenCalled();
+    expect(result.status).toBe('CONTACTED');
+    expect(result.messageId).toBe('wamid.abc123');
+  });
+
+  it('should mark execution as STOPPED and pause campaign on ProspectTemplateUnavailableError', async () => {
+    const campaign = makeCampaign();
+    const execution = makeExecution(campaign);
+
+    executionRepository.findById.mockResolvedValue(execution);
+    campaignRepository.findById.mockResolvedValue(campaign);
+    contactFacade.getContactById.mockResolvedValue({
+      contactId: 'contact-1',
+      name: 'Maria Silva',
+      phone: '11999998888',
+      email: 'maria@test.com',
+      prospectingOptOut: false,
+    });
+    messagingFacade.queueTemplateMessage.mockRejectedValue(
+      new ProspectTemplateUnavailableError('atendeai_outbound_v1'),
+    );
+
+    await expect(
+      useCase.execute({
+        tenantId: campaign.tenantId.toString(),
+        executionId: execution.id.toString(),
+      }),
+    ).rejects.toThrow(ProspectTemplateUnavailableError);
+
+    expect(executionRepository.save).toHaveBeenCalledWith(execution);
+    expect(execution.status.value).toBe('STOPPED');
+    expect(execution.stopReason?.value).toBe('TEMPLATE_UNAVAILABLE');
+    expect(campaignRepository.save).toHaveBeenCalledWith(campaign);
+    expect(campaign.status.value).toBe('PAUSED');
+  });
+
+  it('should use queueSystemMessage for Instagram campaigns without templateName', async () => {
+    const campaign = makeInstagramCampaign('Oi {{name}}, temos novidades');
+    const execution = makeExecution(campaign);
+
+    executionRepository.findById.mockResolvedValue(execution);
+    campaignRepository.findById.mockResolvedValue(campaign);
+    contactFacade.getContactById.mockResolvedValue({
+      contactId: 'contact-1',
+      name: 'Maria Silva',
+      phone: '',
+      email: 'maria@test.com',
+      prospectingOptOut: false,
+    });
+    messagingFacade.queueSystemMessage.mockResolvedValue({
+      conversationId: 'conversation-1',
+      messageId: 'message-1',
+    });
+
+    const result = await useCase.execute({
+      tenantId: campaign.tenantId.toString(),
+      executionId: execution.id.toString(),
+    });
+
+    expect(messagingFacade.queueSystemMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'Oi Maria Silva, temos novidades' }),
+    );
+    expect(messagingFacade.queueTemplateMessage).not.toHaveBeenCalled();
+    expect(result.status).toBe('CONTACTED');
   });
 });
