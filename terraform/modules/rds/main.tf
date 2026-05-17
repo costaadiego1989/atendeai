@@ -14,6 +14,24 @@ resource "aws_db_subnet_group" "main" {
   )
 }
 
+resource "aws_db_parameter_group" "main" {
+  name   = "${local.name_prefix}-postgres16-params"
+  family = "postgres16"
+
+  parameter {
+    name         = "rds.allowed_extensions"
+    value        = "vector,uuid-ossp,pg_trgm"
+    apply_method = "pending-reboot"
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.name_prefix}-postgres16-params"
+    }
+  )
+}
+
 resource "aws_db_instance" "main" {
   identifier        = "${local.name_prefix}-postgres"
   engine            = "postgres"
@@ -26,6 +44,7 @@ resource "aws_db_instance" "main" {
   password = var.db_password
   port     = 5432
 
+  parameter_group_name   = aws_db_parameter_group.main.name
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [var.security_group_id]
 
