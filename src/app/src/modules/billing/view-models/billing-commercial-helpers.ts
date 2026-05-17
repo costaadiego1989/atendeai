@@ -177,15 +177,15 @@ const NICHE_PROFILES: Record<string, NichePlanProfile> = {
   },
   RECOVERY: {
     summary:
-      'Cobranca precisa priorizar carteira, promessas de pagamento, renegociacao e controle de follow-up.',
+      'Cobranca precisa priorizar carteira, promessas de pagamento, renegociação e controle de follow-up.',
     essentialBenefits: [
-      'Valida carteira pequena com mensagens e historico.',
+      'Valida carteira pequena com mensagens e histórico.',
       'Boa entrada para organizar devedores e casos ativos.',
       'Permite testar abordagem antes de escalar atomação.',
     ],
     professionalBenefits: [
-      'Mais capacidade para ciclos de cobranca e follow-up.',
-      'Indicado quando promessas e renegociacoes viram rotina.',
+      'Mais capacidade para ciclos de cobrança e follow-up.',
+      'Indicado quando promessas e renegociações viram rotina.',
       'Acomoda maior base de contatos e cadências.',
     ],
     scaleBenefits: [

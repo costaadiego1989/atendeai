@@ -43,7 +43,7 @@ export function getRecoveryCommercialContext(
     return createCommercialContext({
       kind: 'RECOVERY',
       kindLabel: 'Recovery em andamento',
-      statusLabel: 'Negociacao ativa',
+      statusLabel: 'Negociação ativa',
       summary:
         'O caso esta em recuperação ativa e ainda nao representa receita realizada.',
       tone: 'info',
