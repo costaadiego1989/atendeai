@@ -185,47 +185,29 @@ jobs:
           
           echo "Resolvendo migrations com falha (se houver)..."
           
-          # Step 1: Resolve failed migrations by marking them as rolled back
-          RESOLVE_ARN=$(aws ecs run-task \
-            --cluster "$CLUSTER_NAME" \
-            --task-definition "$TASK_DEF" \
-            --launch-type EC2 \
-            --overrides '{"containerOverrides": [{"name": "api", "command": ["npx", "prisma", "migrate", "resolve", "--rolled-back", "20260515040000_enable_pgvector_extension"]}]}' \
-            --query "tasks[0].taskArn" \
-            --output text)
-          
-          if [ -n "$RESOLVE_ARN" ] && [ "$RESOLVE_ARN" != "None" ]; then
-            aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$RESOLVE_ARN"
-            echo "Resolve step 1 concluído."
-          fi
+          # Resolve all potentially failed migrations
+          MIGRATIONS_TO_RESOLVE=(
+            "20260330004000_add_user_cpf"
+            "20260515040000_enable_pgvector_extension"
+            "20260515040100_create_tenant_document_chunks"
+            "20260517120000_prospecting_enterprise_campaign"
+          )
 
-          # Step 2: Resolve second pgvector migration
-          RESOLVE_ARN2=$(aws ecs run-task \
-            --cluster "$CLUSTER_NAME" \
-            --task-definition "$TASK_DEF" \
-            --launch-type EC2 \
-            --overrides '{"containerOverrides": [{"name": "api", "command": ["npx", "prisma", "migrate", "resolve", "--rolled-back", "20260515040100_create_tenant_document_chunks"]}]}' \
-            --query "tasks[0].taskArn" \
-            --output text)
-          
-          if [ -n "$RESOLVE_ARN2" ] && [ "$RESOLVE_ARN2" != "None" ]; then
-            aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$RESOLVE_ARN2"
-            echo "Resolve step 2 concluído."
-          fi
-
-          # Step 3: Resolve prospecting migration if failed
-          RESOLVE_ARN3=$(aws ecs run-task \
-            --cluster "$CLUSTER_NAME" \
-            --task-definition "$TASK_DEF" \
-            --launch-type EC2 \
-            --overrides '{"containerOverrides": [{"name": "api", "command": ["npx", "prisma", "migrate", "resolve", "--rolled-back", "20260517120000_prospecting_enterprise_campaign"]}]}' \
-            --query "tasks[0].taskArn" \
-            --output text)
-          
-          if [ -n "$RESOLVE_ARN3" ] && [ "$RESOLVE_ARN3" != "None" ]; then
-            aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$RESOLVE_ARN3"
-            echo "Resolve step 3 concluído."
-          fi
+          for MIGRATION in "${MIGRATIONS_TO_RESOLVE[@]}"; do
+            echo "Resolvendo migration: $MIGRATION"
+            RESOLVE_ARN=$(aws ecs run-task \
+              --cluster "$CLUSTER_NAME" \
+              --task-definition "$TASK_DEF" \
+              --launch-type EC2 \
+              --overrides "{\"containerOverrides\": [{\"name\": \"api\", \"command\": [\"npx\", \"prisma\", \"migrate\", \"resolve\", \"--rolled-back\", \"$MIGRATION\"]}]}" \
+              --query "tasks[0].taskArn" \
+              --output text)
+            
+            if [ -n "$RESOLVE_ARN" ] && [ "$RESOLVE_ARN" != "None" ]; then
+              aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$RESOLVE_ARN"
+              echo "Resolve $MIGRATION concluído."
+            fi
+          done
 
           echo "Iniciando migração do banco de dados Prisma via container no ECS..."
           
