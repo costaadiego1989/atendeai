@@ -16,8 +16,12 @@ import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
 import { ListCommerceOrdersUseCase } from '../../application/use-cases/ListCommerceOrdersUseCase';
 import { GetCommerceOrderDetailsUseCase } from '../../application/use-cases/GetCommerceOrderDetailsUseCase';
 import { UpdateCommerceOrderStatusUseCase } from '../../application/use-cases/UpdateCommerceOrderStatusUseCase';
+import { SetOrderTrackingCodeUseCase } from '../../application/use-cases/SetOrderTrackingCodeUseCase';
 import { CommerceOrdersReportCsvBuilder } from '../../application/services/CommerceOrdersReportCsvBuilder';
-import { UpdateCommerceOrderStatusDTO } from '../dtos/CommerceDTOs';
+import {
+  UpdateCommerceOrderStatusDTO,
+  SetOrderTrackingCodeDTO,
+} from '../dtos/CommerceDTOs';
 
 @Controller('tenants/:tenantId/commerce')
 @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
@@ -26,6 +30,7 @@ export class CommerceOrdersController {
     private readonly listCommerceOrdersUseCase: ListCommerceOrdersUseCase,
     private readonly getCommerceOrderDetailsUseCase: GetCommerceOrderDetailsUseCase,
     private readonly updateCommerceOrderStatusUseCase: UpdateCommerceOrderStatusUseCase,
+    private readonly setOrderTrackingCodeUseCase: SetOrderTrackingCodeUseCase,
     private readonly commerceOrdersReportCsvBuilder: CommerceOrdersReportCsvBuilder,
   ) {}
 
@@ -108,6 +113,40 @@ export class CommerceOrdersController {
       userId: body.userId,
       userName: body.userName,
     });
+  }
+
+  @Put('orders/:orderId/tracking')
+  @Roles('OWNER', 'ADMIN')
+  async setTrackingCode(
+    @Param('tenantId') tenantId: string,
+    @Param('orderId') orderId: string,
+    @Body() body: SetOrderTrackingCodeDTO,
+  ) {
+    return this.setOrderTrackingCodeUseCase.execute({
+      tenantId,
+      orderId,
+      trackingCode: body.trackingCode,
+      trackingUrl: body.trackingUrl,
+    });
+  }
+
+  @Get('orders/:orderId/tracking')
+  @Roles('OWNER', 'ADMIN', 'AGENT')
+  async getTrackingInfo(
+    @Param('tenantId') tenantId: string,
+    @Param('orderId') orderId: string,
+  ) {
+    const result = await this.getCommerceOrderDetailsUseCase.execute(
+      tenantId,
+      orderId,
+    );
+    return {
+      orderId: result.order.id,
+      status: result.order.status,
+      trackingCode: result.order.trackingCode,
+      trackingUrl: result.order.trackingUrl,
+      trackingNotifiedAt: result.order.trackingNotifiedAt,
+    };
   }
 
   private parseOptionalDate(value?: string): Date | undefined {
