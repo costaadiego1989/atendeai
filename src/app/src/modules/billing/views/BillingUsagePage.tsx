@@ -3,7 +3,6 @@ import {
   Bot,
   CalendarClock,
   CreditCard,
-  Download,
   Gauge,
   Loader2,
   MessageSquare,
@@ -12,6 +11,7 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Sheet,
@@ -36,99 +36,13 @@ import type {
   BillingAdvisorField,
   BillingAdvisorQuestion,
 } from '@/modules/billing/view-models/billing-commercial-helpers';
-
-const volumeOptions_DEPRECATED: Array<{ value: string; label: string; description: string }> = [
-  {
-    value: 'LOW',
-    label: 'Começando',
-    description: 'Para quem está começando com poucos atendimentos.',
-  },
-  {
-    value: 'MEDIUM',
-    label: 'Crescendo',
-    description: 'Para quem já tem volume e precisa de mais recursos.',
-  },
-  {
-    value: 'HIGH',
-    label: 'Alta demanda',
-    description: 'Para operações grandes com muitos atendentes e automações.',
-  },
-];
-
-const operationOptions: Array<{
-  value: string;
-  label: string;
-  description: string;
-}> = [
-    {
-      value: 'LEAN',
-      label: 'Enxuta',
-      description: 'Ideal para times pequenos e ativação gradual de módulos.',
-    },
-    {
-      value: 'AUTOMATED',
-      label: 'Automatizada',
-      description: 'Quer usar IA, checkout, cobrança e roteiros do nicho.',
-    },
-    {
-      value: 'GOVERNED',
-      label: 'Estruturada',
-      description: 'Precisa governança, integrações e operação mais crítica.',
-    },
-  ];
-
-interface AdvisorPillGroupProps<T extends string> {
-  label: string;
-  value: T;
-  options: Array<{ value: T; label: string; description: string }>;
-  onChange: (value: T) => void;
-}
-
-function AdvisorPillGroup<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: AdvisorPillGroupProps<T>) {
-  return (
-    <div className="space-y-3">
-      <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
-        {label}
-      </p>
-      <div className="grid gap-2">
-        {options.map((option) => {
-          const active = option.value === value;
-
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onChange(option.value)}
-              className={cn(
-                'rounded-2xl border px-4 py-3 text-left transition-all',
-                active
-                  ? 'border-primary/40 bg-primary/[0.08] shadow-[0_0_0_1px_rgba(20,184,166,0.12)]'
-                  : 'border-border/60 bg-card/80 hover:border-primary/20 hover:bg-muted/40',
-              )}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-semibold text-foreground">{option.label}</span>
-                {active && (
-                  <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
-                    Selecionado
-                  </Badge>
-                )}
-              </div>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                {option.description}
-              </p>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+import {
+  type BillingCycle,
+  calculateMonthlyPrice,
+  calculateAnnualTotal,
+  isPromoActive,
+  getPromoDiscountPercent,
+} from '@/modules/billing/view-models/billing-pricing-helpers';
 
 interface AdvisorQuestionRowProps {
   question: BillingAdvisorQuestion;
@@ -190,6 +104,7 @@ function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
 export default function BillingUsagePage() {
   const vm = useBillingPageViewModel();
   const addonPackage = useAddonPackageViewModel(vm.tenant?.id);
+  const [selectedCycle, setSelectedCycle] = useState<BillingCycle>('monthly');
 
   if (vm.isLoading) {
     return <PageSkeleton />;
@@ -235,6 +150,7 @@ export default function BillingUsagePage() {
         setCancelOpen={vm.setCancelOpen}
         isPendingCancel={vm.cancelSubscriptionMutation.isPending}
         isTrial={usage.plan === 'TRIAL' || vm.tenant?.planStatus === 'TRIALING'}
+        onExportCsv={vm.exportUsageCsv}
       />
 
       {usage.scheduledPlan && (
@@ -330,30 +246,24 @@ export default function BillingUsagePage() {
       <div className="mb-10 grid gap-6 lg:grid-cols-3">
         <BillingUsageProgressCard
           title="Mensagens (WhatsApp)"
-          subtitle="Taxa de ocupação da franquia de disparos."
+          subtitle="Uso da franquia de mensagens do plano."
           value={messagePercent}
           icon={MessageSquare}
         />
         <BillingUsageProgressCard
           title="Processamento IA"
-          subtitle="Consumo de tokens na orquestração de respostas."
+          subtitle="Consumo de tokens de inteligência artificial."
           value={aiPercent}
           icon={Bot}
         />
         <BillingUsageProgressCard
-          title="Gestao de contatos"
-          subtitle="Utilização do limite de armazenamento da base."
+          title="Gestão de contatos"
+          subtitle="Uso do limite de contatos da base."
           value={contactsPercent}
           icon={Users}
         />
       </div>
 
-      <div className="mb-10 flex flex-wrap items-center justify-end gap-3">
-        <Button variant="outline" size="sm" onClick={vm.exportUsageCsv}>
-          <Download className="mr-2 h-4 w-4" />
-          Exportar uso (CSV)
-        </Button>
-      </div>
 
       {addonPackage.isAvailable && (messagePercent >= 80 || aiPercent >= 80 || contactsPercent >= 80) && (
         <Card className="mb-10 overflow-hidden border-primary/20 bg-primary/[0.02]">
@@ -412,12 +322,12 @@ export default function BillingUsagePage() {
       )}
 
       {shouldShowCommercialAdvisor && advisorAnswers && recommendation && (
-        <div className="mb-10 grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
+        <div className="mb-10 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
           <Card className="border-border/60 bg-card/90">
             <CardHeader className="space-y-3">
               <div className="flex items-center gap-2">
                 <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
-                  Teste guiado
+                  Guia rápido
                 </Badge>
                 {tenantNiche && (
                   <Badge variant="outline" className="border-border/60 bg-muted/40">
@@ -428,8 +338,8 @@ export default function BillingUsagePage() {
               <div>
                 <CardTitle className="text-2xl">Assistente de escolha do plano</CardTitle>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Ajuste o perfil da Operação e deixe o sistema indicar o plano base mais coerente
-                  para o teste da assinatura. O valor dos módulos continua separado.
+                  Ajuste o perfil da sua operação e veja qual plano é mais indicado para você.
+                  O valor dos módulos extras é cobrado separadamente.
                 </p>
               </div>
             </CardHeader>
@@ -458,7 +368,7 @@ export default function BillingUsagePage() {
           <Card className="border-primary/20 bg-primary/[0.03]">
             <CardHeader className="space-y-4">
               <Badge className="w-fit border-none bg-primary/10 text-primary hover:bg-primary/20">
-                Recomendação comercial
+                Recomendação
               </Badge>
               <div className="space-y-2">
                 <CardTitle className="text-2xl leading-tight">
@@ -524,111 +434,18 @@ export default function BillingUsagePage() {
 
               <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
-                  Add-ons do nicho
+                  Módulos extras do nicho
                 </p>
                 <p className="mt-2 text-lg font-bold text-foreground">
                   {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'}
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Estimativa das recomendações do nicho caso você decida ativar os módulos depois.
-                  Não estamos somando isso no preço do plano base.
+                  Estimativa caso você ative os módulos recomendados para seu nicho.
+                  Esse valor não está incluído no plano base.
                 </p>
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
-
-      {shouldShowCommercialAdvisor &&
-        (tenantNiche || recommendedModules.length > 0 || optionalModules.length > 0) && (
-        <div className="mb-10 space-y-6">
-          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                  Pacote recomendado para o nicho
-                </h2>
-                {tenantNiche && (
-                  <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
-                    {tenantNiche.displayName}
-                  </Badge>
-                )}
-              </div>
-              <p className="text-muted-foreground">
-                Aqui o sistema separa o que já está no plano do que pode ser ativado como add-on.
-              </p>
-            </div>
-            {recommendation && recommendation.estimatedAddonInvestment > 0 && (
-              <div className="rounded-2xl border border-border/60 bg-card/80 px-4 py-3 text-right">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
-                  Potencial em add-ons
-                </p>
-                <p className="mt-1 text-lg font-bold text-foreground">
-                  {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'} / mês
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {recommendedModules.map((module) => (
-              <Card
-                key={module.code}
-                className="group border-border/50 transition-all hover:border-primary/30"
-              >
-                <CardContent className="flex gap-4 p-5">
-                  <div className="h-fit rounded-lg bg-primary/10 p-2.5 transition-colors group-hover:bg-primary/20">
-                    <ShieldCheck className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-bold leading-none text-foreground">{module.displayName}</p>
-                      <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
-                        Prioritário
-                      </Badge>
-                    </div>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      {module.marketingHeadline || module.salesPitch || module.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <Badge variant="outline">
-                        {module.includedInPlan || module.subscribed ? 'Já disponível' : 'Add-on'}
-                      </Badge>
-                      {!module.includedInPlan && (
-                        <Badge variant="outline">
-                          {formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mês
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-            {optionalModules.map((module) => (
-              <Card key={module.code} className="border-dashed border-border/60 bg-card/70">
-                <CardContent className="flex gap-4 p-5">
-                  <div className="h-fit rounded-lg bg-muted p-2.5">
-                    <Sparkles className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-bold leading-none text-foreground">{module.displayName}</p>
-                      <Badge variant="outline">Opcional</Badge>
-                    </div>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      {module.recommendationSalesPitch || module.salesPitch || module.description}
-                    </p>
-                    <Badge variant="outline">
-                      {module.includedInPlan || module.subscribed
-                        ? 'Já disponível'
-                        : `${formatCurrency(module.monthlyPrice) ?? 'R$ 0,00'} / mês`}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </div>
       )}
 
@@ -639,8 +456,7 @@ export default function BillingUsagePage() {
               Planos e escalabilidade
             </h2>
             <p className="text-muted-foreground">
-              O comparativo abaixo mostra apenas o plano base. Add-ons entram depois, conforme a
-              Operação contratar.
+              O comparativo abaixo mostra apenas o plano base. Módulos extras são contratados separadamente.
             </p>
           </div>
           {recommendation?.recommendedPlan && (
@@ -653,7 +469,10 @@ export default function BillingUsagePage() {
         <PricingComparisonTable
           plans={billingPlans}
           currentPlanCode={usage.plan}
-          onSelectPlan={vm.setSelectedPlan}
+          onSelectPlan={(plan, cycle) => {
+            vm.setSelectedPlan(plan);
+            setSelectedCycle(cycle);
+          }}
           isLoading={vm.changePlanMutation.isPending}
           recommendedPlanCode={recommendation?.recommendedPlan?.code ?? null}
         />
@@ -665,8 +484,8 @@ export default function BillingUsagePage() {
             <SheetTitle className="text-2xl">Confirmar alteração de plano</SheetTitle>
             <SheetDescription className="text-base text-muted-foreground">
               {selectedPlanRelation === 'upgrade'
-                ? `Voce esta realizando o upgrade para o plano ${selectedPlan?.displayName}.`
-                : `Voce esta agendando um downgrade para o plano ${selectedPlan?.displayName}.`}
+                ? `Você está realizando o upgrade para o plano ${selectedPlan?.displayName}.`
+                : `Você está agendando um downgrade para o plano ${selectedPlan?.displayName}.`}
             </SheetDescription>
           </SheetHeader>
 
@@ -691,8 +510,8 @@ export default function BillingUsagePage() {
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {selectedPlanRelation === 'upgrade'
-                  ? 'O upgrade e processado agora. Voce sera redirecionado para o checkout seguro do Asaas.'
-                  : 'A mudanca ocorrera apenas ao final do ciclo atual. não ha reembolso proporcional para downgrades.'}
+                  ? 'O upgrade é processado agora. Você será redirecionado para o checkout seguro do Asaas.'
+                  : 'A mudança ocorrerá apenas ao final do ciclo atual. Não há reembolso proporcional para downgrades.'}
               </p>
             </div>
 
@@ -735,24 +554,33 @@ export default function BillingUsagePage() {
                 Importante
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                O valor abaixo é apenas do plano base. Se você ativar add-ons do nicho depois, eles
-                serao somados separadamente na assinatura.
+                O valor abaixo é apenas do plano base. Módulos extras são cobrados separadamente.
               </p>
             </div>
 
             <div className="flex items-center justify-between border-t pt-6">
               <div className="flex flex-col">
                 <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Valor do plano base
+                  {selectedCycle === 'annual' ? 'Valor anual' : 'Valor mensal'}
                 </span>
-                <span className="text-2xl font-black text-foreground">
-                  {formatCurrency(selectedPlan?.monthlyPrice ?? 0) ?? 'R$ 0,00'}
-                  <span className="text-sm font-medium text-muted-foreground"> /mes</span>
-                </span>
-                {(recommendation?.estimatedAddonInvestment ?? 0) > 0 && (
-                  <span className="text-[10px] font-medium uppercase tracking-tight text-muted-foreground">
-                    Add-ons sugeridos para o nicho podem acrescentar{' '}
-                    {formatCurrency(recommendation?.estimatedAddonInvestment ?? 0) ?? 'R$ 0,00'} /mes
+                {selectedCycle === 'annual' && isPromoActive() ? (
+                  <>
+                    <span className="text-sm text-muted-foreground line-through">
+                      {formatCurrency(selectedPlan?.monthlyPrice ?? 0)}/mês
+                    </span>
+                    <span className="text-2xl font-black text-foreground">
+                      {formatCurrency(calculateMonthlyPrice(selectedPlan?.monthlyPrice ?? 0, 'annual'))}
+                      <span className="text-sm font-medium text-muted-foreground"> /mês</span>
+                    </span>
+                    <span className="text-xs font-medium text-emerald-600">
+                      Total anual: {formatCurrency(calculateAnnualTotal(selectedPlan?.monthlyPrice ?? 0))}
+                      {' '}({getPromoDiscountPercent()}% de desconto)
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-2xl font-black text-foreground">
+                    {formatCurrency(selectedPlan?.monthlyPrice ?? 0)}
+                    <span className="text-sm font-medium text-muted-foreground"> /mês</span>
                   </span>
                 )}
               </div>
