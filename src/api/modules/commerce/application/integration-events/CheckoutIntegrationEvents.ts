@@ -236,3 +236,28 @@ export class CommerceSessionAbandonedIntegrationEvent extends IntegrationEvent {
     this.payload = data;
   }
 }
+
+export class CommerceOrderTrackingSetIntegrationEvent extends IntegrationEvent {
+  readonly queue = 'commerce.order.tracking-set';
+  readonly sourceModule = 'commerce';
+  readonly payload: Record<string, unknown>;
+
+  get eventName(): string {
+    return 'commerce.order.tracking-set.v1';
+  }
+
+  get aggregateId(): string | undefined {
+    return this.payload.orderId as string;
+  }
+
+  constructor(data: {
+    orderId: string;
+    tenantId: string;
+    contactId: string | null;
+    trackingCode: string;
+    trackingUrl: string | null;
+  }) {
+    super();
+    this.payload = data;
+  }
+}
