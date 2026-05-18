@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '@modules/auth/auth.module';
 import { CatalogModule } from '@modules/catalog/catalog.module';
+import { ContactModule } from '@modules/contact/contact.module';
 import { InventoryModule } from '@modules/inventory/inventory.module';
 import { PaymentModule } from '@modules/payment/payment.module';
 import { SalesModule } from '@modules/sales/sales.module';
@@ -21,6 +22,7 @@ import { AdvanceCommerceConversationUseCase } from './application/use-cases/Adva
 import { ListCommerceOrdersUseCase } from './application/use-cases/ListCommerceOrdersUseCase';
 import { GetCommerceOrderDetailsUseCase } from './application/use-cases/GetCommerceOrderDetailsUseCase';
 import { UpdateCommerceOrderStatusUseCase } from './application/use-cases/UpdateCommerceOrderStatusUseCase';
+import { SetOrderTrackingCodeUseCase } from './application/use-cases/SetOrderTrackingCodeUseCase';
 import { DetectAbandonedShoppingSessionsUseCase } from './application/use-cases/DetectAbandonedShoppingSessionsUseCase';
 import { UpdateCommerceAbandonmentStateUseCase } from './application/use-cases/UpdateCommerceAbandonmentStateUseCase';
 import { TriggerCommerceAbandonmentTouchUseCase } from './application/use-cases/TriggerCommerceAbandonmentTouchUseCase';
@@ -30,6 +32,7 @@ import { GenerateAbandonmentMessageUseCase } from './application/use-cases/Gener
 import { COMMERCE_REPOSITORY } from './domain/ports/ICommerceRepository';
 import { PrismaCommerceRepository } from './infrastructure/persistence/PrismaCommerceRepository';
 import { CommercePaymentEventHandler } from './application/handlers/CommercePaymentEventHandler';
+import { OrderTrackingNotificationHandler } from './application/handlers/OrderTrackingNotificationHandler';
 import { CommerceConversationFlowRules } from './application/services/conversation/CommerceConversationFlowRules';
 import { CommerceConversationSearchService } from './application/services/conversation/CommerceConversationSearchService';
 import { CommerceOrdersReportCsvBuilder } from './application/services/CommerceOrdersReportCsvBuilder';
@@ -41,11 +44,21 @@ import { AwaitingFulfillmentStepHandler } from './application/services/conversat
 import { AwaitingDeliveryAddressStepHandler } from './application/services/conversation/AwaitingDeliveryAddressStepHandler';
 import { AwaitingOrderNoteStepHandler } from './application/services/conversation/AwaitingOrderNoteStepHandler';
 import { ReadyForCheckoutStepHandler } from './application/services/conversation/ReadyForCheckoutStepHandler';
+import {
+  MessagingFacade,
+  MESSAGING_FACADE,
+} from '@modules/messaging/application/facades/MessagingFacade';
+import { WhatsAppTemplateMessageAdapter } from '@modules/messaging/infrastructure/acl/WhatsAppTemplateMessageAdapter';
+import { CONVERSATION_REPOSITORY } from '@modules/messaging/domain/repositories/IConversationRepository';
+import { PrismaConversationRepository } from '@modules/messaging/infrastructure/persistence/repositories/PrismaConversationRepository';
+import { MESSAGE_QUEUE } from '@modules/messaging/domain/ports/IMessageQueue';
+import { BullMQMessageQueue } from '@modules/messaging/infrastructure/queue/BullMQMessageQueue';
 
 @Module({
   imports: [
     AuthModule,
     CatalogModule,
+    ContactModule,
     InventoryModule,
     PaymentModule,
     SalesModule,
@@ -92,6 +105,22 @@ import { ReadyForCheckoutStepHandler } from './application/services/conversation
     UpdateAbandonmentConfigUseCase,
     GenerateAbandonmentMessageUseCase,
     CommercePaymentEventHandler,
+    OrderTrackingNotificationHandler,
+    SetOrderTrackingCodeUseCase,
+    MessagingFacade,
+    WhatsAppTemplateMessageAdapter,
+    {
+      provide: MESSAGING_FACADE,
+      useExisting: MessagingFacade,
+    },
+    {
+      provide: CONVERSATION_REPOSITORY,
+      useClass: PrismaConversationRepository,
+    },
+    {
+      provide: MESSAGE_QUEUE,
+      useClass: BullMQMessageQueue,
+    },
   ],
   exports: [
     COMMERCE_REPOSITORY,
@@ -119,5 +148,6 @@ import { ReadyForCheckoutStepHandler } from './application/services/conversation
 export class CommerceModule {
   constructor(
     private readonly _commercePaymentEventHandler: CommercePaymentEventHandler,
+    private readonly _orderTrackingNotificationHandler: OrderTrackingNotificationHandler,
   ) {}
 }
