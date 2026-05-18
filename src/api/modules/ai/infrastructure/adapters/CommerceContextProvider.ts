@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   COMMERCE_REPOSITORY,
   CommercePendingOptionRecord,
+  CommerceOrderRecord,
   CommerceSessionRecord,
   ICommerceRepository,
 } from '@modules/commerce/domain/ports/ICommerceRepository';
@@ -116,6 +117,17 @@ export class CommerceContextProvider implements ICommerceContextProvider {
       blocks.push(this.buildSessionContext(activeSession));
     }
 
+    const contactId = activeSession?.contactId ?? null;
+    if (contactId && transactionalBusiness) {
+      const trackingContext = await this.buildTrackingContext(
+        input.tenantId,
+        contactId,
+      );
+      if (trackingContext) {
+        blocks.push(trackingContext);
+      }
+    }
+
     if (transactionalBusiness) {
       const promotionContext = await this.buildPromotionContext(input.tenantId);
       if (promotionContext) {
@@ -136,6 +148,39 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     }
 
     return blocks.join('\n\n');
+  }
+
+  private async buildTrackingContext(
+    tenantId: string,
+    contactId: string,
+  ): Promise<string | null> {
+    const recentOrders = await this.commerceRepository.findOrdersByContact(
+      tenantId,
+      contactId,
+      3,
+    );
+
+    const ordersWithTracking = recentOrders.filter(
+      (o) => o.trackingCode || o.status !== 'DELIVERED',
+    );
+
+    if (ordersWithTracking.length === 0) {
+      return null;
+    }
+
+    const lines = ['Order tracking context:'];
+    for (const order of ordersWithTracking) {
+      const statusLine = `- Order ${order.id}: status ${order.status}`;
+      const trackingLine = order.trackingCode
+        ? `, tracking code: ${order.trackingCode}`
+        : '';
+      const urlLine = order.trackingUrl
+        ? `, tracking URL: ${order.trackingUrl}`
+        : '';
+      lines.push(`${statusLine}${trackingLine}${urlLine}`);
+    }
+
+    return lines.join('\n');
   }
 
   private buildFlowInstructions(): string {
