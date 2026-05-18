@@ -154,11 +154,11 @@ function mapValidationMessage(error: HttpError): string | null {
 function mapDomainMessage(rawMessage: string): string | null {
   const normalized = normalizeMessage(rawMessage);
 
-  if (normalized.includes('invalid credentials')) {
+  if (normalized.includes('invalid credentials') || normalized.includes('invalid email or password')) {
     return 'Email ou senha invalidos.';
   }
 
-  if (normalized.includes('invalid email')) {
+  if (normalized.includes('invalid email') && !normalized.includes('password')) {
     return 'Informe um email valido.';
   }
 
