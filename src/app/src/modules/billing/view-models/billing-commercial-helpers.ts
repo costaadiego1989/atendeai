@@ -77,111 +77,111 @@ const DEFAULT_NICHE_PROFILE: NichePlanProfile = {
 const NICHE_PROFILES: Record<string, NichePlanProfile> = {
   RETAIL: {
     summary:
-      'Varejo precisa equilibrar atendimento rapido, catalogo, estoque e follow-up de oportunidade.',
+      'Varejo precisa equilibrar atendimento rápido, catálogo, estoque e acompanhamento de vendas.',
     essentialBenefits: [
-      'Valida atendimento e catalogo com baixo risco.',
-      'Mantem contatos organizados para recompra e pos-venda.',
-      'Suporta operacao inicial com produtos e disponibilidade.',
+      'Começa com atendimento e catálogo sem complicação.',
+      'Mantém contatos organizados para recompra e pós-venda.',
+      'Suporta operação inicial com produtos e disponibilidade.',
     ],
     professionalBenefits: [
-      'Mais folego para campanhas, carrinho e atendimento comercial.',
-      'Combina CRM, catalogo e IA para aumentar conversao.',
-      'Ideal quando a loja ja recebe demanda diaria pelo WhatsApp.',
+      'Mais fôlego para campanhas, carrinho e atendimento comercial.',
+      'Combina CRM, catálogo e IA para aumentar conversão.',
+      'Ideal quando a loja já recebe demanda diária pelo WhatsApp.',
     ],
     scaleBenefits: [
-      'Capacidade para multiatendentes e volume intenso.',
-      'Mais margem para integrações com estoque e operacao fisica.',
-      'Indicado para lojas com picos, campanhas e varias frentes.',
+      'Capacidade para vários atendentes e volume intenso.',
+      'Mais margem para integrações com estoque e operação física.',
+      'Indicado para lojas com picos, campanhas e várias frentes.',
     ],
     primaryMetrics: ['Conversas de venda', 'Clientes na base', 'Tokens para ofertas'],
   },
   ECOMMERCE: {
     summary:
-      'E-commerce depende de carrinho, pagamento, entrega e recuperacao de abandono funcionando juntos.',
+      'E-commerce depende de carrinho, pagamento, entrega e recuperação de abandono funcionando juntos.',
     essentialBenefits: [
-      'Valida checkout conversacional e duvidas de produto.',
+      'Começa com checkout e dúvidas de produto.',
       'Atende a primeira carteira sem inflar custo fixo.',
-      'Bom para provar demanda antes de automatizar abandono.',
+      'Bom para testar demanda antes de automatizar.',
     ],
     professionalBenefits: [
-      'Mais volume para carrinho, cupons, entrega e pos-compra.',
-      'Faz sentido quando checkout e recuperacao viram rotina.',
-      'Da folego para campanhas e atendimento simultaneo.',
+      'Mais volume para carrinho, cupons, entrega e pós-compra.',
+      'Faz sentido quando checkout e recuperação viram rotina.',
+      'Dá fôlego para campanhas e atendimento simultâneo.',
     ],
     scaleBenefits: [
       'Suporta alto volume de pedidos e abandono de carrinho.',
-      'Melhor para operacao com catalogo grande e picos promocionais.',
-      'Abre espaco para governança, integrações e relatórios.',
+      'Melhor para operação com catálogo grande e picos promocionais.',
+      'Abre espaço para integrações e relatórios.',
     ],
-    primaryMetrics: ['Pedidos por conversa', 'Carrinhos ativos', 'Recuperacao'],
+    primaryMetrics: ['Pedidos por conversa', 'Carrinhos ativos', 'Recuperação'],
   },
   FOOD: {
     summary:
       'Alimentos e delivery precisam de velocidade, disponibilidade, adicionais, pagamento e entrega.',
     essentialBenefits: [
-      'Começa com cardápio, pedidos simples e atendimento rapido.',
-      'Boa entrada para validar horarios de pico.',
-      'Mantem a base de clientes pronta para recompra.',
+      'Começa com cardápio, pedidos simples e atendimento rápido.',
+      'Boa entrada para testar horários de pico.',
+      'Mantém a base de clientes pronta para recompra.',
     ],
     professionalBenefits: [
-      'Mais capacidade para pedidos simultaneos e cupons.',
-      'Acomoda complementos, entrega e follow-up de abandono.',
-      'Indicado para delivery com demanda diaria.',
+      'Mais capacidade para pedidos simultâneos e cupons.',
+      'Acomoda complementos, entrega e recuperação de abandono.',
+      'Indicado para delivery com demanda diária.',
     ],
     scaleBenefits: [
-      'Preparado para picos de almoco, noite e campanhas.',
-      'Suporta operacao com cozinha, entrega e varios atendentes.',
+      'Preparado para picos de almoço, noite e campanhas.',
+      'Suporta operação com cozinha, entrega e vários atendentes.',
       'Mais margem para integrações e relatórios de performance.',
     ],
     primaryMetrics: ['Pedidos', 'Clientes recorrentes', 'Abandono'],
   },
   HEALTH: {
     summary:
-      'Saude e clinicas combinam captacao, triagem, agenda, confirmacao e relacionamento.',
+      'Saúde e clínicas combinam captação, triagem, agenda, confirmação e relacionamento.',
     essentialBenefits: [
-      'Organiza leads e solicita agendamento com IA assistiva.',
-      'Bom para clinica validando agenda digital.',
-      'Mantem contato e historico de pacientes em volume inicial.',
+      'Organiza leads e agendamento com IA assistiva.',
+      'Bom para clínica testando agenda digital.',
+      'Mantém contato e histórico de pacientes no início.',
     ],
     professionalBenefits: [
       'Mais capacidade para agenda, lembretes e recorrência.',
-      'Indicado para varios profissionais ou alta procura.',
-      'Melhor encaixe quando confirmacoes viram rotina operacional.',
+      'Indicado para vários profissionais ou alta procura.',
+      'Melhor encaixe quando confirmações viram rotina.',
     ],
     scaleBenefits: [
-      'Suporta clinicas com multiagenda e governança.',
-      'Mais tokens para triagem e orientacoes contextualizadas.',
-      'Prepara a operacao para integrações e indicadores.',
+      'Suporta clínicas com múltiplas agendas e controle.',
+      'Mais tokens para triagem e orientações contextualizadas.',
+      'Prepara a operação para integrações e indicadores.',
     ],
-    primaryMetrics: ['Agendamentos', 'Pacientes', 'Confirmacoes'],
+    primaryMetrics: ['Agendamentos', 'Pacientes', 'Confirmações'],
   },
   BEAUTY: {
     summary:
       'Beleza, pet e studios precisam preencher agenda, reduzir faltas e vender recorrência.',
     essentialBenefits: [
-      'Entrada boa para organizar agenda e novos clientes.',
-      'Permite validar confirmacoes e atendimento por horario.',
-      'Ajuda a estruturar retorno e indicacoes.',
+      'Boa entrada para organizar agenda e novos clientes.',
+      'Permite testar confirmações e atendimento por horário.',
+      'Ajuda a estruturar retorno e indicações.',
     ],
     professionalBenefits: [
-      'Mais folego para múltiplos profissionais e lembretes.',
+      'Mais fôlego para múltiplos profissionais e lembretes.',
       'Ideal para rotina diária com agenda cheia.',
       'Ajuda a vender combos, pacotes e recorrência.',
     ],
     scaleBenefits: [
       'Suporta unidades, equipes e campanhas intensas.',
-      'Mais margem para relatórios, roteamento e automacoes.',
+      'Mais margem para relatórios, roteamento e automações.',
       'Indicado para operação com alta recorrência.',
     ],
-    primaryMetrics: ['Horarios', 'Clientes recorrentes', 'No-show'],
+    primaryMetrics: ['Horários', 'Clientes recorrentes', 'No-show'],
   },
   RECOVERY: {
     summary:
-      'Cobranca precisa priorizar carteira, promessas de pagamento, renegociação e controle de follow-up.',
+      'Cobrança precisa priorizar carteira, promessas de pagamento, renegociação e controle de follow-up.',
     essentialBenefits: [
-      'Valida carteira pequena com mensagens e histórico.',
+      'Começa com carteira pequena, mensagens e histórico.',
       'Boa entrada para organizar devedores e casos ativos.',
-      'Permite testar abordagem antes de escalar atomação.',
+      'Permite testar abordagem antes de escalar automação.',
     ],
     professionalBenefits: [
       'Mais capacidade para ciclos de cobrança e follow-up.',
@@ -189,31 +189,31 @@ const NICHE_PROFILES: Record<string, NichePlanProfile> = {
       'Acomoda maior base de contatos e cadências.',
     ],
     scaleBenefits: [
-      'Suporta carteira grande e times de recuperacao.',
-      'Mais margem para governança, auditoria e dashboards.',
+      'Suporta carteira grande e times de recuperação.',
+      'Mais margem para controle, auditoria e painéis.',
       'Ideal para operação crítica de receita recuperada.',
     ],
     primaryMetrics: ['Casos ativos', 'Promessas', 'Follow-ups'],
   },
   HOME_SERV: {
     summary:
-      'Servicos consultivos precisam qualificar demanda, gerar orcamento e organizar retorno comercial.',
+      'Serviços precisam qualificar demanda, gerar orçamento e organizar retorno comercial.',
     essentialBenefits: [
       'Boa entrada para capturar e qualificar leads.',
-      'Mantem historico e proximos passos sem complexidade.',
-      'Ajuda a validar demanda por tipo de servico.',
+      'Mantém histórico e próximos passos sem complicação.',
+      'Ajuda a entender demanda por tipo de serviço.',
     ],
     professionalBenefits: [
       'Mais capacidade para propostas e atendimento recorrente.',
-      'Indicado quando ha equipe ou agenda comercial diaria.',
-      'Melhor para acompanhar oportunidades ate fechamento.',
+      'Indicado quando há equipe ou agenda comercial diária.',
+      'Melhor para acompanhar oportunidades até fechamento.',
     ],
     scaleBenefits: [
-      'Suporta operacao com varios especialistas ou unidades.',
+      'Suporta operação com vários especialistas ou unidades.',
       'Mais margem para roteamento, integrações e indicadores.',
-      'Adequado para operações consultivas criticas.',
+      'Adequado para operações consultivas críticas.',
     ],
-    primaryMetrics: ['Leads', 'Orcamentos', 'Retornos'],
+    primaryMetrics: ['Leads', 'Orçamentos', 'Retornos'],
   },
 };
 
@@ -296,20 +296,20 @@ export const CONTACT_BAND_OPTIONS: BillingAdvisorOption<BillingVolumeBand>[] = [
 export const OPERATION_MODE_OPTIONS: BillingAdvisorOption<BillingOperationMode>[] = [
   {
     value: 'LEAN',
-    label: 'Essencial para iniciar',
-    description: 'Time pequeno, modulos ativados aos poucos e baixo risco operacional.',
+    label: 'Simples',
+    description: 'Time pequeno, módulos ativados aos poucos e baixo risco.',
     planHint: 'ESSENCIAL',
   },
   {
     value: 'AUTOMATED',
-    label: 'Automação como rotina',
-    description: 'IA, checkout, agenda ou cobrança ja fazem parte do processo diario.',
+    label: 'Automatizada',
+    description: 'IA, checkout, agenda ou cobrança já fazem parte do dia a dia.',
     planHint: 'PROFISSIONAL',
   },
   {
     value: 'GOVERNED',
-    label: 'governança e escala',
-    description: 'Precisa de controle, integrações, indicadores e operacao mais critica.',
+    label: 'Estruturada',
+    description: 'Precisa de controle, integrações e indicadores avançados.',
     planHint: 'ESCALA',
   },
 ];
@@ -373,21 +373,21 @@ export function buildBillingAdvisorQuestions(
     {
       field: 'conversationsBand',
       label: 'Volume de conversas',
-      helper: 'Escolha o ritmo esperado de atendimento, vendas ou cobrança no ciclo.',
+      helper: 'Quantos atendimentos você espera por mês?',
       value: answers.conversationsBand,
       options: CONVERSATION_BAND_OPTIONS,
     },
     {
       field: 'contactsBand',
       label: 'Tamanho da base',
-      helper: 'Considere leads, clientes, pacientes, devedores ou recorrentes ativos.',
+      helper: 'Quantos clientes, leads ou pacientes você tem hoje?',
       value: answers.contactsBand,
       options: CONTACT_BAND_OPTIONS,
     },
     {
       field: 'operationMode',
-      label: 'Maturidade operacional',
-      helper: 'Defina se o negócio esta validando, automatizando ou governando escala.',
+      label: 'Nível de automação',
+      helper: 'Como funciona sua operação hoje?',
       value: answers.operationMode,
       options: OPERATION_MODE_OPTIONS,
     },
@@ -448,7 +448,9 @@ export function buildBillingRecommendation(
   subscriptionCatalog: BillingSubscriptionCatalog | null | undefined,
   answers: BillingAdvisorAnswers,
 ): BillingPlanRecommendation {
-  const sortedPlans = [...plans].sort((left, right) => left.sortOrder - right.sortOrder);
+  const sortedPlans = [...plans]
+    .filter((plan) => plan.code !== 'TRIAL')
+    .sort((left, right) => left.sortOrder - right.sortOrder);
   const primaryAddons =
     subscriptionCatalog?.availableAddons.filter((addon) => addon.primaryRecommendation) ?? [];
   const optionalAddons =
