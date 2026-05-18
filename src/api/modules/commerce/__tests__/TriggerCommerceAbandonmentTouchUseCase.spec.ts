@@ -63,6 +63,9 @@ describe('TriggerCommerceAbandonmentTouchUseCase', () => {
       discountAmount: null,
       paymentStatus: 'PENDING',
       paidAt: null,
+      trackingCode: null,
+      trackingUrl: null,
+      trackingNotifiedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
