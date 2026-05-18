@@ -192,3 +192,9 @@ variable "tags" {
   default     = {}
 }
 
+variable "promo_discount_percent" {
+  description = "Promotional discount percentage for annual plans (0-100)"
+  type        = string
+  default     = "0"
+}
+

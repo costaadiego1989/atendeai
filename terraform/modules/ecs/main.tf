@@ -111,6 +111,10 @@ locals {
       value = "797"
     },
     {
+      name  = "PROMO_DISCOUNT_PERCENT"
+      value = var.promo_discount_percent
+    },
+    {
       name  = "PLAN_MESSAGES_QUOTA_ESSENCIAL"
       value = "5000"
     },

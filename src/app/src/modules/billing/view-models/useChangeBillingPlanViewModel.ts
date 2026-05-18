@@ -3,6 +3,11 @@ import { toast } from '@/components/ui/use-toast';
 import { billingService } from '@/modules/billing/services/billing-service';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
 
+interface ChangePlanParams {
+  targetPlan: 'ESSENCIAL' | 'PROFISSIONAL' | 'ESCALA';
+  billingCycle?: 'MONTHLY' | 'YEARLY';
+}
+
 interface UseChangeBillingPlanViewModelOptions {
   onCheckoutRequired?: (result: {
     tenantId: string;
@@ -23,8 +28,16 @@ export function useChangeBillingPlanViewModel(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (targetPlan: 'ESSENCIAL' | 'PROFISSIONAL' | 'ESCALA') =>
-      billingService.changePlan(tenantId as string, targetPlan),
+    mutationFn: (params: ChangePlanParams | 'ESSENCIAL' | 'PROFISSIONAL' | 'ESCALA') => {
+      const resolved = typeof params === 'string'
+        ? { targetPlan: params, billingCycle: undefined }
+        : params;
+      return billingService.changePlan(
+        tenantId as string,
+        resolved.targetPlan,
+        resolved.billingCycle,
+      );
+    },
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ['billing-usage', tenantId] });
 
@@ -41,8 +54,8 @@ export function useChangeBillingPlanViewModel(
         toast({
           title: 'Downgrade agendado',
           description: result.effectiveAt
-            ? `O plano ${result.targetPlan} sera aplicado no proximo ciclo, em ${new Date(result.effectiveAt).toLocaleDateString('pt-BR')}.`
-            : `O plano ${result.targetPlan} foi agendado para o proximo ciclo.`,
+            ? `O plano ${result.targetPlan} será aplicado no próximo ciclo, em ${new Date(result.effectiveAt).toLocaleDateString('pt-BR')}.`
+            : `O plano ${result.targetPlan} foi agendado para o próximo ciclo.`,
         });
         return;
       }
@@ -56,7 +69,7 @@ export function useChangeBillingPlanViewModel(
       toast({
         title: 'Falha ao alterar plano',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível alterar o plano agora.',
+          fallbackMessage: 'Não foi possível alterar o plano agora.',
         }),
         variant: 'destructive',
       });

@@ -12,6 +12,11 @@ export class ChangeSubscriptionPlanDTO {
   @IsNotEmpty()
   @IsIn(['ESSENCIAL', 'PROFISSIONAL', 'ESCALA'])
   targetPlan: 'ESSENCIAL' | 'PROFISSIONAL' | 'ESCALA';
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['MONTHLY', 'YEARLY'])
+  billingCycle?: 'MONTHLY' | 'YEARLY';
 }
 
 export class ReplaceSubscriptionModulesDTO {

@@ -60,7 +60,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
             payload.rawReference,
           );
 
-          // Handle addon package payment confirmation
           if (addonPackageRequest) {
             await this.handleAddonPackagePaymentConfirmed(
               addonPackageRequest.tenantId,
@@ -92,7 +91,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
             subscription.clearScheduledPlan();
             subscription.renewCycleFrom(confirmedAt);
 
-            // Expire addon package from previous cycle
             await this.expireAddonPackageOnRenewal(tenantId, subscription);
 
             await this.syncRecurringBillingAfterUpgrade(
@@ -179,7 +177,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
 
           subscription.renewCycleFrom(confirmedAt);
 
-          // Expire addon package from previous cycle
           await this.expireAddonPackageOnRenewal(tenantId, subscription);
 
           await this.billingRepository.saveSubscription(subscription);
@@ -268,7 +265,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
 
         if (!subscription) return;
 
-        // Check if this refund is for an addon package
         const addonRef = this.parseBillingAddonReference(payload.rawReference);
         if (addonRef) {
           await this.rollbackAddonPackage(tenantId, subscription);
@@ -302,13 +298,14 @@ export class BillingPaymentHandlers implements OnModuleInit {
   private parseBillingUpgradeReference(rawReference?: unknown): {
     tenantId: string;
     targetPlan: PlanType;
+    billingCycle: 'MONTHLY' | 'YEARLY';
   } | null {
     if (typeof rawReference !== 'string') {
       return null;
     }
 
     const match =
-      /^billing-upgrade\|([^|]+)\|(ESSENCIAL|PROFISSIONAL|ESCALA)$/.exec(
+      /^billing-upgrade\|([^|]+)\|(ESSENCIAL|PROFISSIONAL|ESCALA)(?:\|(MONTHLY|YEARLY))?$/.exec(
         rawReference,
       );
 
@@ -319,6 +316,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
     return {
       tenantId: match[1],
       targetPlan: match[2] as PlanType,
+      billingCycle: (match[3] as 'MONTHLY' | 'YEARLY') ?? 'MONTHLY',
     };
   }
 
@@ -342,10 +340,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
     };
   }
 
-  /**
-   * Confirms addon package payment. The quotas were already applied optimistically
-   * at purchase time, so we just mark the module as PAID and log it.
-   */
   private async handleAddonPackagePaymentConfirmed(
     tenantId: string,
     subscription: Subscription,
@@ -376,10 +370,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
     this.logger.log(`Addon package payment confirmed for tenant ${tenantId}`);
   }
 
-  /**
-   * Rollbacks addon package quotas when payment is refunded.
-   * Reverts the optimistic quota adjustment and marks module as REFUNDED.
-   */
   private async rollbackAddonPackage(
     tenantId: string,
     subscription: Subscription,
@@ -399,14 +389,12 @@ export class BillingPaymentHandlers implements OnModuleInit {
 
     const quotaImpact = activeModule.quotaImpact || {};
 
-    // Revert quotas
     subscription.adjustQuotas({
       messages: -(quotaImpact.messages ?? 0),
       aiTokens: -(quotaImpact.aiTokens ?? 0),
       contacts: -(quotaImpact.contacts ?? 0),
     });
 
-    // Revert pricing
     subscription.updatePricing({
       baseMonthlyPrice: subscription.baseMonthlyPrice,
       addonsMonthlyPrice: Math.max(
@@ -417,7 +405,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
 
     await this.billingRepository.saveSubscription(subscription);
 
-    // Mark module as refunded
     await this.billingRepository.updateSubscriptionModuleStatus(
       tenantId,
       ADDON_PACKAGE_MODULE_CODE,
@@ -446,6 +433,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
     customerId: string | undefined,
     asaasSubscriptionId: string | undefined,
     confirmedAt: Date,
+    billingCycle: 'MONTHLY' | 'YEARLY' = 'MONTHLY',
   ): Promise<{ customerId?: string; subscriptionId?: string }> {
     const targetPlanDefinition =
       await this.billingRepository.findPlanByCode(targetPlan);
@@ -508,8 +496,8 @@ export class BillingPaymentHandlers implements OnModuleInit {
       billingType: 'CREDIT_CARD',
       value: commercialState.totalMonthlyPrice,
       nextDueDate: nextDueDateIso,
-      cycle: 'MONTHLY',
-      description: `Plano ${targetPlan} - AtendeAi`,
+      cycle: billingCycle,
+      description: `Plano ${targetPlan}${billingCycle === 'YEARLY' ? ' (anual)' : ''} - AtendeAi`,
       externalReference: tenantId,
     });
 
@@ -519,10 +507,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
     };
   }
 
-  /**
-   * Expires any active addon package (quota-boost) on cycle renewal.
-   * Reverts the quota deltas and marks the module as EXPIRED.
-   */
   private async expireAddonPackageOnRenewal(
     tenantId: string,
     subscription: Subscription,
@@ -537,14 +521,12 @@ export class BillingPaymentHandlers implements OnModuleInit {
 
     const quotaImpact = activeModule.quotaImpact || {};
 
-    // Revert quotas added by the addon package
     subscription.adjustQuotas({
       messages: -(quotaImpact.messages ?? 0),
       aiTokens: -(quotaImpact.aiTokens ?? 0),
       contacts: -(quotaImpact.contacts ?? 0),
     });
 
-    // Revert pricing
     subscription.updatePricing({
       baseMonthlyPrice: subscription.baseMonthlyPrice,
       addonsMonthlyPrice: Math.max(
@@ -553,7 +535,6 @@ export class BillingPaymentHandlers implements OnModuleInit {
       ),
     });
 
-    // Mark module as expired
     await this.billingRepository.updateSubscriptionModuleStatus(
       tenantId,
       ADDON_PACKAGE_MODULE_CODE,

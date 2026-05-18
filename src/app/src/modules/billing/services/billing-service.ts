@@ -88,6 +88,7 @@ export const billingService = {
   async changePlan(
     tenantId: string,
     targetPlan: 'ESSENCIAL' | 'PROFISSIONAL' | 'ESCALA',
+    billingCycle?: 'MONTHLY' | 'YEARLY',
   ): Promise<{
     tenantId: string;
     plan: string;
@@ -97,8 +98,12 @@ export const billingService = {
     mode: 'NO_CHANGE' | 'CHECKOUT_REQUIRED' | 'DOWNGRADE_SCHEDULED';
     checkoutUrl?: string;
     effectiveAt?: string;
+    billingCycle?: string;
   }> {
-    return apiClient.patch(`/tenants/${tenantId}/subscription/plan`, { targetPlan });
+    return apiClient.patch(`/tenants/${tenantId}/subscription/plan`, {
+      targetPlan,
+      billingCycle,
+    });
   },
 
   async cancelSubscription(

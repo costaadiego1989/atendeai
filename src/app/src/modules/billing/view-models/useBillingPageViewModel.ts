@@ -17,6 +17,7 @@ import {
   buildBillingRecommendation,
   buildDefaultAdvisorAnswers,
 } from '@/modules/billing/view-models/billing-commercial-helpers';
+import type { BillingCycle } from '@/modules/billing/view-models/billing-pricing-helpers';
 
 export function useBillingPageViewModel() {
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -361,7 +362,7 @@ export function useBillingPageViewModel() {
     },
     setAdvisorField,
     exportUsageCsv,
-    confirmSelectedPlan() {
+    confirmSelectedPlan(billingCycle?: BillingCycle) {
       if (!selectedPlan) return;
 
       try {
@@ -411,12 +412,16 @@ export function useBillingPageViewModel() {
           return;
         }
 
-        changePlanMutation.mutate(selectedPlan.code);
+        const apiCycle = billingCycle === 'annual' ? 'YEARLY' : 'MONTHLY';
+        changePlanMutation.mutate({
+          targetPlan: selectedPlan.code,
+          billingCycle: apiCycle,
+        });
         setSelectedPlan(null);
       } catch {
         toast({
           title: 'Falha ao confirmar plano',
-          description: 'não foi possível iniciar a alteração de plano.',
+          description: 'Não foi possível iniciar a alteração de plano.',
           variant: 'destructive',
         });
       }

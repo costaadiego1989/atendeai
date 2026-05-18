@@ -563,25 +563,39 @@ export default function BillingUsagePage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                   {selectedCycle === 'annual' ? 'Valor anual' : 'Valor mensal'}
                 </span>
-                {selectedCycle === 'annual' && isPromoActive() ? (
+                {isPromoActive() ? (
                   <>
                     <span className="text-sm text-muted-foreground line-through">
                       {formatCurrency(selectedPlan?.monthlyPrice ?? 0)}/mês
                     </span>
                     <span className="text-2xl font-black text-foreground">
-                      {formatCurrency(calculateMonthlyPrice(selectedPlan?.monthlyPrice ?? 0, 'annual'))}
+                      {formatCurrency(calculateMonthlyPrice(selectedPlan?.monthlyPrice ?? 0))}
                       <span className="text-sm font-medium text-muted-foreground"> /mês</span>
                     </span>
-                    <span className="text-xs font-medium text-emerald-600">
-                      Total anual: {formatCurrency(calculateAnnualTotal(selectedPlan?.monthlyPrice ?? 0))}
-                      {' '}({getPromoDiscountPercent()}% de desconto)
-                    </span>
+                    {selectedCycle === 'annual' && (
+                      <span className="text-xs font-medium text-emerald-600">
+                        Total anual: {formatCurrency(calculateAnnualTotal(selectedPlan?.monthlyPrice ?? 0))}
+                        {' '}({getPromoDiscountPercent()}% de desconto)
+                      </span>
+                    )}
+                    {selectedCycle === 'monthly' && (
+                      <span className="text-xs font-medium text-emerald-600">
+                        Promoção de lançamento: {getPromoDiscountPercent()}% de desconto
+                      </span>
+                    )}
                   </>
                 ) : (
-                  <span className="text-2xl font-black text-foreground">
-                    {formatCurrency(selectedPlan?.monthlyPrice ?? 0)}
-                    <span className="text-sm font-medium text-muted-foreground"> /mês</span>
-                  </span>
+                  <>
+                    <span className="text-2xl font-black text-foreground">
+                      {formatCurrency(selectedPlan?.monthlyPrice ?? 0)}
+                      <span className="text-sm font-medium text-muted-foreground"> /mês</span>
+                    </span>
+                    {selectedCycle === 'annual' && (
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Total anual: {formatCurrency((selectedPlan?.monthlyPrice ?? 0) * 12)}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
               <div className="flex gap-3">
@@ -590,7 +604,7 @@ export default function BillingUsagePage() {
                 </Button>
                 <Button
                   className="px-8"
-                  onClick={vm.confirmSelectedPlan}
+                  onClick={() => vm.confirmSelectedPlan(selectedCycle)}
                   disabled={vm.changePlanMutation.isPending}
                 >
                   {vm.changePlanMutation.isPending && (

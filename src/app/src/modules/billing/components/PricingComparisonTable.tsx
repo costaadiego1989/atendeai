@@ -117,6 +117,11 @@ export function PricingComparisonTable({
           )}
         >
           Mensal
+          {promoActive && (
+            <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
+              -{promoPercent}%
+            </span>
+          )}
         </button>
         <button
           type="button"
@@ -129,17 +134,12 @@ export function PricingComparisonTable({
           )}
         >
           Anual
-          {promoActive && (
-            <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
-              -{promoPercent}%
-            </span>
-          )}
         </button>
       </div>
 
-      {promoActive && billingCycle === 'annual' && (
+      {promoActive && (
         <p className="mb-4 text-center text-sm text-emerald-600">
-          Promoção de lançamento: {promoPercent}% de desconto no plano anual no primeiro ano.
+          Promoção de lançamento: {promoPercent}% de desconto em todos os planos.
         </p>
       )}
 
@@ -176,7 +176,7 @@ export function PricingComparisonTable({
                         )}
                       </div>
 
-                      {billingCycle === 'annual' && promoActive && (
+                      {promoActive && (
                         <p className="text-sm text-muted-foreground line-through">
                           {formatCurrency(plan.monthlyPrice)}/mês
                         </p>

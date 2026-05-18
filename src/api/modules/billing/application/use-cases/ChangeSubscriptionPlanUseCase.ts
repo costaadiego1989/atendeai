@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
+import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
@@ -14,6 +15,7 @@ import { PaymentService } from '../../../payment/application/services/PaymentSer
 import { Subscription } from '../../domain/entities/Subscription';
 import { PlanType } from '../../domain/value-objects/Quotas';
 import {
+  BillingCycleType,
   ChangeSubscriptionPlanInput,
   ChangeSubscriptionPlanOutput,
   IChangeSubscriptionPlanUseCase,
@@ -35,6 +37,7 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
     private readonly paymentService: PaymentService,
+    private readonly configService: ConfigService,
     @InjectQueue('billing-plan-changes')
     private readonly planChangeQueue: Queue,
   ) {}
@@ -51,6 +54,8 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
     }
 
     const currentPlan = subscription.plan;
+    const billingCycle: BillingCycleType = input.billingCycle ?? 'MONTHLY';
+
     if (currentPlan === input.targetPlan) {
       return {
         tenantId: input.tenantId,
@@ -59,6 +64,7 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
         plan: subscription.plan,
         status: subscription.status,
         mode: 'NO_CHANGE',
+        billingCycle,
       };
     }
 
@@ -81,12 +87,19 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
         subscription.config,
       );
 
+      const checkoutValue = this.calculateCheckoutValue(
+        commercialState.totalMonthlyPrice,
+        billingCycle,
+      );
+
       await this.ensureCustomer(input.tenantId, subscription);
       const paymentLink = await this.paymentService.createPaymentLink({
-        name: `Upgrade para ${input.targetPlan}`,
-        description: `Upgrade de plano ${currentPlan} para ${input.targetPlan} no AtendeAi`,
-        value: commercialState.totalMonthlyPrice,
-        externalReference: `billing-upgrade|${input.tenantId}|${input.targetPlan}`,
+        name: `${billingCycle === 'YEARLY' ? 'Assinatura anual' : 'Upgrade para'} ${input.targetPlan}`,
+        description: billingCycle === 'YEARLY'
+          ? `Plano ${input.targetPlan} anual no AtendeAi (12 meses)`
+          : `Upgrade de plano ${currentPlan} para ${input.targetPlan} no AtendeAi`,
+        value: checkoutValue,
+        externalReference: `billing-upgrade|${input.tenantId}|${input.targetPlan}|${billingCycle}`,
         billingType: 'UNDEFINED',
         chargeType: 'DETACHED',
         dueDateLimitDays: 1,
@@ -102,6 +115,7 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
         status: subscription.status,
         mode: 'CHECKOUT_REQUIRED',
         checkoutUrl: paymentLink.url,
+        billingCycle,
       };
     }
 
@@ -142,6 +156,7 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
         status: subscription.status,
         mode: 'DOWNGRADE_SCHEDULED',
         effectiveAt,
+        billingCycle,
       };
     }
 
@@ -182,7 +197,29 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
       status: subscription.status,
       mode: 'DOWNGRADE_SCHEDULED',
       effectiveAt: subscription.billingCycleEnd,
+      billingCycle,
     };
+  }
+
+  private calculateCheckoutValue(
+    monthlyPrice: number,
+    billingCycle: BillingCycleType,
+  ): number {
+    const promoPercent = this.getPromoDiscountPercent();
+    const discountedMonthly = monthlyPrice * (1 - promoPercent / 100);
+
+    if (billingCycle === 'YEARLY') {
+      return Math.round(discountedMonthly * 12 * 100) / 100;
+    }
+
+    return Math.round(discountedMonthly * 100) / 100;
+  }
+
+  private getPromoDiscountPercent(): number {
+    const raw = this.configService.get<string>('PROMO_DISCOUNT_PERCENT', '0');
+    const parsed = Number(raw);
+    if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) return 0;
+    return parsed;
   }
 
   private async ensureCustomer(

@@ -65,6 +65,7 @@ export class SubscriptionController {
     return this.changeSubscriptionPlanUseCase.execute({
       tenantId,
       targetPlan: body.targetPlan,
+      billingCycle: body.billingCycle,
     });
   }
 
