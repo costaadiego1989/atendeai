@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Check, Info, Minus } from 'lucide-react';
 import {
   Table,
@@ -17,11 +18,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { formatCurrency } from '@/shared/lib/formatters';
+import {
+  type BillingCycle,
+  calculateMonthlyPrice,
+  calculateAnnualSavings,
+  getPromoDiscountPercent,
+  isPromoActive,
+} from '@/modules/billing/view-models/billing-pricing-helpers';
 
 interface PricingComparisonTableProps {
   plans: BillingPlan[];
   currentPlanCode: string;
-  onSelectPlan: (plan: BillingPlan) => void;
+  onSelectPlan: (plan: BillingPlan, cycle: BillingCycle) => void;
   isLoading?: boolean;
   recommendedPlanCode?: BillingPlan['code'] | null;
 }
@@ -33,43 +42,49 @@ export function PricingComparisonTable({
   isLoading,
   recommendedPlanCode,
 }: PricingComparisonTableProps) {
-  const sortedPlans = [...plans].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const promoActive = isPromoActive();
+  const promoPercent = getPromoDiscountPercent();
+
+  const sortedPlans = [...plans]
+    .filter((p) => p.code !== 'TRIAL')
+    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   const uniqueFeatures = Array.from(new Set(sortedPlans.flatMap((plan) => plan.features || [])));
 
   const quotaRows = [
     {
-      name: 'Conversas / mes',
-      tooltip: 'Capacidade comercial mensal estimada para conversas atendidas no WhatsApp.',
+      name: 'Conversas / mês',
+      tooltip: 'Capacidade mensal de conversas atendidas no WhatsApp.',
       getValue: (plan: BillingPlan) => plan.messagesQuota.toLocaleString('pt-BR'),
     },
     {
-      name: 'Tokens IA / mes',
-      tooltip: 'Franquia de inteligencia artificial para automação de conversas.',
+      name: 'Tokens IA / mês',
+      tooltip: 'Franquia de inteligência artificial para automação de conversas.',
       getValue: (plan: BillingPlan) => plan.aiTokensQuota.toLocaleString('pt-BR'),
     },
     {
       name: 'Capacidade CRM (contatos)',
-      tooltip: 'Total de clientes unicos armazenados na base.',
+      tooltip: 'Total de clientes únicos armazenados na base.',
       getValue: (plan: BillingPlan) => plan.contactsQuota.toLocaleString('pt-BR'),
     },
     {
       name: 'Filiais ativas',
-      tooltip: 'Quantidade de filiais/unidades incluidas antes de contratar filial adicional.',
+      tooltip: 'Quantidade de filiais/unidades incluídas no plano.',
       getValue: (plan: BillingPlan) => String(plan.config?.limits?.branches ?? 1),
     },
     {
       name: 'WhatsApps conectados',
-      tooltip: 'Quantidade de numeros de WhatsApp incluidos no plano base.',
+      tooltip: 'Quantidade de números de WhatsApp incluídos no plano.',
       getValue: (plan: BillingPlan) => String(plan.config?.limits?.whatsappNumbers ?? 1),
     },
     {
-      name: 'Usuarios operacionais',
-      tooltip: 'Quantidade sugerida de pessoas operando no tenant antes de precisar escalar governança.',
+      name: 'Usuários operacionais',
+      tooltip: 'Quantidade de pessoas operando no sistema.',
       getValue: (plan: BillingPlan) => String(plan.config?.limits?.users ?? 1),
     },
     {
-      name: 'Prospeccoes / dia',
-      tooltip: 'Limite diario de leads pesquisados no modulo de prospeccao.',
+      name: 'Prospecções / dia',
+      tooltip: 'Limite diário de leads pesquisados no módulo de prospecção.',
       getValue: (plan: BillingPlan) =>
         (plan.config?.limits?.prospectingDaily ?? 150).toLocaleString('pt-BR'),
     },
@@ -89,48 +104,103 @@ export function PricingComparisonTable({
 
   return (
     <TooltipProvider>
+      {/* Billing cycle toggle */}
+      <div className="mb-4 flex items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => setBillingCycle('monthly')}
+          className={cn(
+            'rounded-full px-5 py-2 text-sm font-medium transition-all',
+            billingCycle === 'monthly'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-muted/60 text-muted-foreground hover:bg-muted',
+          )}
+        >
+          Mensal
+        </button>
+        <button
+          type="button"
+          onClick={() => setBillingCycle('annual')}
+          className={cn(
+            'rounded-full px-5 py-2 text-sm font-medium transition-all',
+            billingCycle === 'annual'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-muted/60 text-muted-foreground hover:bg-muted',
+          )}
+        >
+          Anual
+          {promoActive && (
+            <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
+              -{promoPercent}%
+            </span>
+          )}
+        </button>
+      </div>
+
+      {promoActive && billingCycle === 'annual' && (
+        <p className="mb-4 text-center text-sm text-emerald-600">
+          Promoção de lançamento: {promoPercent}% de desconto no plano anual no primeiro ano.
+        </p>
+      )}
+
       <div className="overflow-x-auto rounded-xl border border-border/60 bg-card">
         <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[300px]">Funcionalidades</TableHead>
-              {sortedPlans.map((plan) => (
-                <TableHead
-                  key={plan.code}
-                  className={cn(
-                    'py-8 text-center',
-                    plan.code === 'PROFISSIONAL' && 'bg-primary/[0.02]',
-                    currentPlanCode === plan.code && 'bg-primary/[0.05]',
-                  )}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      <span className="text-lg font-bold">{plan.displayName}</span>
-                      {plan.code === 'PROFISSIONAL' && (
-                        <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
-                          Popular
+              {sortedPlans.map((plan) => {
+                const effectiveMonthly = calculateMonthlyPrice(plan.monthlyPrice, billingCycle);
+                const savings = billingCycle === 'annual' ? calculateAnnualSavings(plan.monthlyPrice) : 0;
+
+                return (
+                  <TableHead
+                    key={plan.code}
+                    className={cn(
+                      'py-8 text-center',
+                      plan.code === 'PROFISSIONAL' && 'bg-primary/[0.02]',
+                      currentPlanCode === plan.code && 'bg-primary/[0.05]',
+                    )}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-wrap items-center justify-center gap-2">
+                        <span className="text-lg font-bold">{plan.displayName}</span>
+                        {plan.code === 'PROFISSIONAL' && (
+                          <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
+                            Popular
+                          </Badge>
+                        )}
+                        {recommendedPlanCode === plan.code && (
+                          <Badge className="border-none bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20">
+                            Indicado
+                          </Badge>
+                        )}
+                      </div>
+
+                      {billingCycle === 'annual' && promoActive && (
+                        <p className="text-sm text-muted-foreground line-through">
+                          {formatCurrency(plan.monthlyPrice)}/mês
+                        </p>
+                      )}
+                      <p className="text-2xl font-black">
+                        {formatCurrency(effectiveMonthly)}
+                      </p>
+                      <span className="text-[10px] font-medium uppercase tracking-tighter text-muted-foreground">
+                        {billingCycle === 'annual' ? 'por mês no plano anual' : 'por mês'}
+                      </span>
+                      {billingCycle === 'annual' && savings > 0 && (
+                        <Badge className="border-none bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20">
+                          Economia de {formatCurrency(savings)}/ano
                         </Badge>
                       )}
-                      {recommendedPlanCode === plan.code && (
-                        <Badge className="border-none bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20">
-                          Indicado
+                      {currentPlanCode === plan.code && (
+                        <Badge variant="secondary" className="mt-1">
+                          Atual
                         </Badge>
                       )}
                     </div>
-                    <p className="text-2xl font-black">
-                      R$ {(plan.monthlyPrice || 0).toFixed(2).replace('.', ',')}
-                    </p>
-                    <span className="text-[10px] font-medium uppercase tracking-tighter text-muted-foreground">
-                      Plano base mensal
-                    </span>
-                    {currentPlanCode === plan.code && (
-                      <Badge variant="secondary" className="mt-1">
-                        Atual
-                      </Badge>
-                    )}
-                  </div>
-                </TableHead>
-              ))}
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -176,7 +246,7 @@ export function PricingComparisonTable({
 
             <TableRow className="hover:bg-transparent">
               <TableCell className="text-xs text-muted-foreground">
-                Add-ons do nicho continuam contratados separadamente, conforme a Operação precisar.
+                Módulos extras são contratados separadamente.
               </TableCell>
               {sortedPlans.map((plan) => (
                 <TableCell
@@ -196,9 +266,9 @@ export function PricingComparisonTable({
                     }
                     size="sm"
                     disabled={currentPlanCode === plan.code || isLoading}
-                    onClick={() => onSelectPlan(plan)}
+                    onClick={() => onSelectPlan(plan, billingCycle)}
                   >
-                    {currentPlanCode === plan.code ? 'Plano atual' : 'Ver detalhes do plano'}
+                    {currentPlanCode === plan.code ? 'Plano atual' : 'Contratar plano'}
                   </Button>
                 </TableCell>
               ))}
