@@ -215,6 +215,16 @@ export class UpdateCommerceAbandonmentConfigDTO {
   intervalMinutes: number;
 }
 
+export class SetOrderTrackingCodeDTO {
+  @IsString()
+  @IsNotEmpty()
+  trackingCode: string;
+
+  @IsOptional()
+  @IsString()
+  trackingUrl?: string;
+}
+
 export class ApplyCouponDTO {
   @IsString()
   @IsNotEmpty()
