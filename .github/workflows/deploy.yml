@@ -135,6 +135,7 @@ jobs:
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_PLATFORM_ADMIN_API_KEY=${{ secrets.VITE_PLATFORM_ADMIN_API_KEY }}
             VITE_SHOW_PLATFORM_ADMIN_NAV=${{ secrets.VITE_SHOW_PLATFORM_ADMIN_NAV }}
+            VITE_FILTER_MODULES_BY_NICHE=true
 
       # 3. Web Docker Build & Push
       - name: Build and Push Web Image

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Maps business niche to allowed navigation routes.
  * When VITE_FILTER_MODULES_BY_NICHE=true, only routes relevant to the
  * tenant's niche are shown in the sidebar. When false, all routes are visible.
@@ -69,10 +69,16 @@ export function isNicheFilterEnabled(): boolean {
 
 /**
  * Filters navigation items based on the tenant's business type.
- * If filtering is disabled or no businessType is set, returns all items.
+ * If filtering is disabled, no businessType is set, or user is OWNER, returns all items.
+ * OWNER role bypasses filtering to allow validation of all modules.
  */
-export function filterNavByNiche(items: NavItem[], businessType?: string | null): NavItem[] {
+export function filterNavByNiche(items: NavItem[], businessType?: string | null, userRole?: string | null): NavItem[] {
   if (!isNicheFilterEnabled()) {
+    return items;
+  }
+
+  // OWNER bypasses niche filtering to validate all modules
+  if (userRole === 'OWNER') {
     return items;
   }
 

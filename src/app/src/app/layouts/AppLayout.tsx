@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+﻿import { ReactNode, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { TrialBanner } from '@/components/TrialBanner';
 import {
@@ -54,26 +54,26 @@ const mainNav: NavItem[] = [
   { label: 'Engajamento', path: '/app/social', icon: Share2 },
   { label: 'Contatos', path: '/app/contacts', icon: Contact2 },
   { label: 'Agenda', path: '/app/scheduling', icon: Calendar },
-  { label: 'Cobranças', path: '/app/recovery', icon: History },
+  { label: 'CobranÃ§as', path: '/app/recovery', icon: History },
 ];
 
 const salesNav: NavItem[] = [
-  { label: 'Catálogo', path: '/app/catalog', icon: BookOpen },
+  { label: 'CatÃ¡logo', path: '/app/catalog', icon: BookOpen },
   { label: 'Estoque', path: '/app/inventory', icon: Archive },
   { label: 'Propostas', path: '/app/proposals', icon: FileText },
   { label: 'Checkout', path: '/app/checkout', icon: ShoppingCart },
-  { label: 'Métricas', path: '/app/sales/metrics', icon: BarChart3 },
+  { label: 'MÃ©tricas', path: '/app/sales/metrics', icon: BarChart3 },
   { label: 'Links de pagamento', path: '/app/sales/payment-links', icon: LinkIcon },
-  { label: 'Promoções', path: '/app/sales/promotions', icon: Tag },
+  { label: 'PromoÃ§Ãµes', path: '/app/sales/promotions', icon: Tag },
 ];
 
 const prospectingNav: NavItem[] = [
-  { label: 'Prospecção', path: '/app/prospecting/searches', icon: Search },
+  { label: 'ProspecÃ§Ã£o', path: '/app/prospecting/searches', icon: Search },
 ];
 
 const settingsNav: NavItem[] = [
   { label: 'Empresa', path: '/app/settings/company', icon: Building2 },
-  { label: 'Integrações', path: '/app/settings/integrations', icon: Webhook },
+  { label: 'IntegraÃ§Ãµes', path: '/app/settings/integrations', icon: Webhook },
   { label: 'Canais', path: '/app/settings/channels', icon: MessageSquare },
   { label: 'Alertas', path: '/app/settings/alerts', icon: Bell },
   { label: 'Suporte', path: '/app/settings/support', icon: LifeBuoy },
@@ -153,7 +153,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
       import.meta.env.VITE_SHOW_PLATFORM_ADMIN_NAV === 'true' &&
       !!(import.meta.env.VITE_PLATFORM_ADMIN_API_KEY as string | undefined)?.trim();
     if (!show) return [];
-    return [{ label: 'Plataforma · Tenants', path: '/app/platform/tenants', icon: ShieldHalf }];
+    return [{ label: 'Plataforma Â· Tenants', path: '/app/platform/tenants', icon: ShieldHalf }];
   })();
 
   return (
@@ -211,7 +211,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
           )}
           {filteredProspectingNav.length > 0 && (
             <NavSection
-              title="Prospecção"
+              title="ProspecÃ§Ã£o"
               items={filteredProspectingNav}
               collapsed={sidebarCollapsed}
               currentPath={location.pathname}
@@ -303,3 +303,4 @@ export function AppLayout({ children }: { children?: ReactNode }) {
     </div>
   );
 }
+
