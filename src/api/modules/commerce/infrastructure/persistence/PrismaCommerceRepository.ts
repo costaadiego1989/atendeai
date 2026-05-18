@@ -21,6 +21,7 @@ import {
   ListAbandonedCommerceSessionsInput,
   MarkCommerceOrderPaidInput,
   UpdateCommerceSessionStateInput,
+  UpdateOrderTrackingInput,
   UpsertCommerceShippingPolicyInput,
   CommerceAbandonmentConfigRecord,
   UpsertCommerceAbandonmentConfigInput,
@@ -266,6 +267,11 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       discountAmount:
         row.discount_amount == null ? null : Number(row.discount_amount),
       paidAt: row.paid_at ? new Date(String(row.paid_at)) : null,
+      trackingCode: (row.tracking_code as string | null | undefined) ?? null,
+      trackingUrl: (row.tracking_url as string | null | undefined) ?? null,
+      trackingNotifiedAt: row.tracking_notified_at
+        ? new Date(String(row.tracking_notified_at))
+        : null,
       createdAt: new Date(String(row.created_at)),
       updatedAt: new Date(String(row.updated_at)),
     };
@@ -888,6 +894,48 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     `);
 
     return this.mapOrder(rows[0]);
+  }
+
+  async updateOrderTracking(
+    input: UpdateOrderTrackingInput,
+  ): Promise<CommerceOrderRecord> {
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
+      UPDATE commerce_schema.orders
+      SET
+        tracking_code = ${input.trackingCode},
+        tracking_url = ${input.trackingUrl ?? null},
+        updated_at = now()
+      WHERE tenant_id = ${input.tenantId}::uuid
+        AND id = ${input.orderId}::uuid
+      RETURNING *
+    `);
+
+    if (!rows[0]) {
+      throw new Error(`Order ${input.orderId} not found for tenant ${input.tenantId}`);
+    }
+
+    return this.mapOrder(rows[0]);
+  }
+
+  async findOrdersByContact(
+    tenantId: string,
+    contactId: string,
+    limit = 10,
+  ): Promise<CommerceOrderRecord[]> {
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
+      SELECT *
+      FROM commerce_schema.orders
+      WHERE tenant_id = ${tenantId}::uuid
+        AND contact_id = ${contactId}::uuid
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `);
+
+    return rows.map((row) => this.mapOrder(row));
   }
 
   async listAbandonedSessions(
