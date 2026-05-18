@@ -23,6 +23,7 @@ describe('CommerceContextProvider', () => {
       listOrders: jest.fn(),
       findOrderByPaymentReference: jest.fn(),
       markOrderPaidByPaymentReference: jest.fn(),
+      findOrdersByContact: jest.fn().mockResolvedValue([]),
       findCatalogItemById: jest.fn(),
       findInventoryItemById: jest.fn(),
     } as unknown as jest.Mocked<ICommerceRepository>;
