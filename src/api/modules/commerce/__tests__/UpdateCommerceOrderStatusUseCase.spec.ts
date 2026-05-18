@@ -36,6 +36,9 @@ describe('UpdateCommerceOrderStatusUseCase', () => {
     paymentLinkUrl: 'https://pay.test/plink-1',
     paymentStatus: 'PAID' as const,
     paidAt: new Date('2026-04-08T19:00:00.000Z'),
+    trackingCode: null,
+    trackingUrl: null,
+    trackingNotifiedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
