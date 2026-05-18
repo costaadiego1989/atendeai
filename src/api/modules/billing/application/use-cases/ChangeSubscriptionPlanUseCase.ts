@@ -95,9 +95,10 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
       await this.ensureCustomer(input.tenantId, subscription);
       const paymentLink = await this.paymentService.createPaymentLink({
         name: `${billingCycle === 'YEARLY' ? 'Assinatura anual' : 'Upgrade para'} ${input.targetPlan}`,
-        description: billingCycle === 'YEARLY'
-          ? `Plano ${input.targetPlan} anual no AtendeAi (12 meses)`
-          : `Upgrade de plano ${currentPlan} para ${input.targetPlan} no AtendeAi`,
+        description:
+          billingCycle === 'YEARLY'
+            ? `Plano ${input.targetPlan} anual no AtendeAi (12 meses)`
+            : `Upgrade de plano ${currentPlan} para ${input.targetPlan} no AtendeAi`,
         value: checkoutValue,
         externalReference: `billing-upgrade|${input.tenantId}|${input.targetPlan}|${billingCycle}`,
         billingType: 'UNDEFINED',
