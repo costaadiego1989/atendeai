@@ -31,6 +31,7 @@ import { ICommercialContextProvider } from '../application/ports/ICommercialCont
 import { ICommerceContextProvider } from '../application/ports/ICommerceContextProvider';
 import { ISchedulingContextProvider } from '../application/ports/ISchedulingContextProvider';
 import { ITenantPDFContextProvider } from '../application/ports/ITenantPDFContextProvider';
+import { NicheWelcomeMenuService } from '../application/services/welcome-menu/NicheWelcomeMenuService';
 import { Tenant } from '@modules/tenant/domain/entities/Tenant';
 import { User } from '@modules/tenant/domain/entities/User';
 import { CompanyName } from '@modules/tenant/domain/value-objects/CompanyName';
@@ -112,6 +113,7 @@ function makeAggregator(
     providers.commercial,
     providers.commerce,
     providers.scheduling,
+    new NicheWelcomeMenuService(),
     pdfProvider ?? providers.pdf,
     0,
   );
@@ -404,7 +406,7 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
         true,
       );
 
-      expect(systemPrompt).toContain('[PRIMEIRA INTERAção]');
+      expect(systemPrompt).toContain('[MENU DE BOAS-VINDAS]');
       expect(diagnostics.firstInteractionGuardrail).toBe(true);
       // Dados de negocio ainda presentes no contexto base
       expect(systemPrompt).toContain('Operating Hours:');
@@ -423,7 +425,7 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
         false,
       );
 
-      expect(systemPrompt).not.toContain('[PRIMEIRA INTERAção]');
+      expect(systemPrompt).not.toContain('[MENU DE BOAS-VINDAS]');
     });
   });
 
@@ -512,6 +514,7 @@ describe('AI Context Pipeline — integração PromptBuilder + AIContextAggregat
         providers.commercial,
         providers.commerce,
         providers.scheduling,
+        new NicheWelcomeMenuService(),
         undefined,
         0,
       );
