@@ -55,20 +55,20 @@ interface NichePlanProfile {
 
 const DEFAULT_NICHE_PROFILE: NichePlanProfile = {
   summary:
-    'Equilibra conversas, CRM e IA para validar o atendimento antes de escalar automacoes e governança.',
+    'Combina conversas, CRM e IA para organizar seu atendimento e crescer com segurança.',
   essentialBenefits: [
     'Atendimento centralizado no WhatsApp com IA assistiva.',
-    'CRM suficiente para organizar leads e clientes ativos.',
-    'Base enxuta para validar playbooks antes de contratar add-ons.',
+    'CRM para organizar leads e clientes ativos.',
+    'Ideal para começar e testar antes de adicionar módulos extras.',
   ],
   professionalBenefits: [
-    'Mais conversas e tokens para automacoes recorrentes.',
-    'Espaco para operar vendas, atendimento e CRM no mesmo ciclo.',
-    'Melhor encaixe para equipes com rotina comercial diaria.',
+    'Mais conversas e tokens para automações do dia a dia.',
+    'Espaço para vendas, atendimento e CRM no mesmo ciclo.',
+    'Melhor encaixe para equipes com rotina comercial diária.',
   ],
   scaleBenefits: [
-    'Capacidade alta para operacao multi-time.',
-    'Folga para integrações, roteamento e dashboards de gestao.',
+    'Capacidade alta para vários times simultâneos.',
+    'Folga para integrações, roteamento e painéis de gestão.',
     'Estrutura para picos de demanda sem travar atendimento.',
   ],
   primaryMetrics: ['Conversas', 'Contatos', 'Tokens de IA'],
@@ -254,20 +254,20 @@ const PLAN_BENEFITS_BY_CODE: Record<BillingPlan['code'], keyof NichePlanProfile>
 export const CONVERSATION_BAND_OPTIONS: BillingAdvisorOption<BillingVolumeBand>[] = [
   {
     value: 'LOW',
-    label: 'Validacao controlada',
-    description: 'Baixo volume, primeiros playbooks e atendimento ainda concentrado.',
+    label: 'Começando',
+    description: 'Poucos atendimentos por dia, time pequeno e operação concentrada.',
     planHint: 'ESSENCIAL',
   },
   {
     value: 'MEDIUM',
     label: 'Rotina comercial',
-    description: 'Demanda diaria, campanhas pontuais e necessidade de folga para IA.',
+    description: 'Demanda diária, campanhas pontuais e uso frequente de IA.',
     planHint: 'PROFISSIONAL',
   },
   {
     value: 'HIGH',
-    label: 'Operacao intensa',
-    description: 'Picos frequentes, varios atendentes ou automacoes rodando em escala.',
+    label: 'Alta demanda',
+    description: 'Picos frequentes, vários atendentes ou automações em escala.',
     planHint: 'ESCALA',
   },
 ];
@@ -276,19 +276,19 @@ export const CONTACT_BAND_OPTIONS: BillingAdvisorOption<BillingVolumeBand>[] = [
   {
     value: 'LOW',
     label: 'Carteira inicial',
-    description: 'Base pequena ou em organizacao, com foco em validar relacionamento.',
+    description: 'Base pequena, ainda organizando os primeiros clientes.',
     planHint: 'ESSENCIAL',
   },
   {
     value: 'MEDIUM',
     label: 'CRM em crescimento',
-    description: 'Leads, clientes e historico ja precisam de mais capacidade por ciclo.',
+    description: 'Leads e clientes já precisam de mais espaço por ciclo.',
     planHint: 'PROFISSIONAL',
   },
   {
     value: 'HIGH',
-    label: 'Base robusta',
-    description: 'Carteira grande, recorrência, segmentacao e operacao multi-time.',
+    label: 'Base grande',
+    description: 'Muitos contatos, recorrência e operação com vários times.',
     planHint: 'ESCALA',
   },
 ];
