@@ -23,6 +23,7 @@ import { ListCommerceOrdersUseCase } from './application/use-cases/ListCommerceO
 import { GetCommerceOrderDetailsUseCase } from './application/use-cases/GetCommerceOrderDetailsUseCase';
 import { UpdateCommerceOrderStatusUseCase } from './application/use-cases/UpdateCommerceOrderStatusUseCase';
 import { SetOrderTrackingCodeUseCase } from './application/use-cases/SetOrderTrackingCodeUseCase';
+import { RepeatLastOrderUseCase } from './application/use-cases/RepeatLastOrderUseCase';
 import { DetectAbandonedShoppingSessionsUseCase } from './application/use-cases/DetectAbandonedShoppingSessionsUseCase';
 import { UpdateCommerceAbandonmentStateUseCase } from './application/use-cases/UpdateCommerceAbandonmentStateUseCase';
 import { TriggerCommerceAbandonmentTouchUseCase } from './application/use-cases/TriggerCommerceAbandonmentTouchUseCase';
@@ -107,6 +108,7 @@ import { BullMQMessageQueue } from '@modules/messaging/infrastructure/queue/Bull
     CommercePaymentEventHandler,
     OrderTrackingNotificationHandler,
     SetOrderTrackingCodeUseCase,
+    RepeatLastOrderUseCase,
     MessagingFacade,
     WhatsAppTemplateMessageAdapter,
     {
@@ -143,6 +145,7 @@ import { BullMQMessageQueue } from '@modules/messaging/infrastructure/queue/Bull
     GetAbandonmentConfigUseCase,
     UpdateAbandonmentConfigUseCase,
     GenerateAbandonmentMessageUseCase,
+    RepeatLastOrderUseCase,
   ],
 })
 export class CommerceModule {
