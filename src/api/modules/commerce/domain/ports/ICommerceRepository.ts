@@ -147,6 +147,9 @@ export interface CommerceOrderRecord {
   discountAmount: number | null;
   paymentStatus: 'PENDING' | 'PAID' | null;
   paidAt: Date | null;
+  trackingCode: string | null;
+  trackingUrl: string | null;
+  trackingNotifiedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -311,6 +314,13 @@ export interface MarkCommerceOrderPaidInput {
   paidAt: Date;
 }
 
+export interface UpdateOrderTrackingInput {
+  tenantId: string;
+  orderId: string;
+  trackingCode: string;
+  trackingUrl?: string | null;
+}
+
 export interface ListAbandonedCommerceSessionsInput {
   interval: string;
   staleBefore: Date;
@@ -373,6 +383,14 @@ export interface ICommerceRepository {
   markOrderPaidByPaymentReference(
     input: MarkCommerceOrderPaidInput,
   ): Promise<CommerceOrderRecord | null>;
+  updateOrderTracking(
+    input: UpdateOrderTrackingInput,
+  ): Promise<CommerceOrderRecord>;
+  findOrdersByContact(
+    tenantId: string,
+    contactId: string,
+    limit?: number,
+  ): Promise<CommerceOrderRecord[]>;
   listAbandonedSessions(
     input: ListAbandonedCommerceSessionsInput,
   ): Promise<CommerceSessionRecord[]>;
