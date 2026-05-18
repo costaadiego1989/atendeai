@@ -183,7 +183,7 @@ model TenantPDFResume {
 }
 
 /// Stores chunked text with vector embeddings for RAG similarity search.
-/// The `embedding` column (vector(1536)) is managed via raw SQL — Prisma does not natively support pgvector types.
+/// The `embedding` column (vector(1536)) is managed via raw SQL Ã¢â‚¬â€ Prisma does not natively support pgvector types.
 model TenantDocumentChunk {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId   String   @map("tenant_id") @db.Uuid
@@ -240,6 +240,8 @@ model TenantUserSalesProfile {
 model Contact {
   id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId        String         @map("tenant_id") @db.Uuid
+  branchId        String?        @map("branch_id") @db.Uuid
+  document        String?        @db.VarChar(30)
   name            String         @db.VarChar(255)
   phone           String         @db.VarChar(20)
   email           String?        @db.VarChar(255)
@@ -257,6 +259,7 @@ model Contact {
   @@unique([tenantId, phone])
   @@index([tenantId, stage], name: "idx_contacts_tenant_stage")
   @@index([tenantId, phone], name: "idx_contacts_tenant_phone")
+  @@index([tenantId, branchId, stage], name: "idx_contacts_tenant_branch_stage")
   @@map("contacts")
   @@schema("contact_schema")
 }
