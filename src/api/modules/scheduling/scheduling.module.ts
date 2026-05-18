@@ -38,6 +38,7 @@ import {
   MessagingFacade,
   MESSAGING_FACADE,
 } from '../messaging/application/facades/MessagingFacade';
+import { WhatsAppTemplateMessageAdapter } from '../messaging/infrastructure/acl/WhatsAppTemplateMessageAdapter';
 import { CONVERSATION_REPOSITORY } from '../messaging/domain/repositories/IConversationRepository';
 import { PrismaConversationRepository } from '../messaging/infrastructure/persistence/repositories/PrismaConversationRepository';
 import { MESSAGE_QUEUE } from '../messaging/domain/ports/IMessageQueue';
@@ -132,6 +133,7 @@ import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedu
     JoinSchedulingMeetingUseCase,
     SchedulingPaymentEventHandler,
     MessagingFacade,
+    WhatsAppTemplateMessageAdapter,
     {
       provide: MESSAGING_FACADE,
       useExisting: MessagingFacade,

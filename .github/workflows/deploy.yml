@@ -176,42 +176,16 @@ jobs:
             -var="domain_name=atende-ai.tech" \
             -var="certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }}"
 
-      # 5. Run Prisma Migrations as an ECS One-off Task
-      # First resolve any failed migrations, then deploy
+      # 5. Run Prisma Migrations as a single ECS One-off Task
+      # All existing migrations are marked as applied in production.
+      # This step only applies NEW migrations added after the initial sync.
       - name: Run Prisma Database Migrations
         run: |
           CLUSTER_NAME="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-cluster"
           TASK_DEF="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-api"
-          
-          echo "Resolvendo migrations com falha (se houver)..."
-          
-          # Resolve all potentially failed migrations
-          MIGRATIONS_TO_RESOLVE=(
-            "20260330004000_add_user_cpf"
-            "20260515040000_enable_pgvector_extension"
-            "20260515040100_create_tenant_document_chunks"
-            "20260517120000_prospecting_enterprise_campaign"
-          )
 
-          for MIGRATION in "${MIGRATIONS_TO_RESOLVE[@]}"; do
-            echo "Resolvendo migration: $MIGRATION"
-            RESOLVE_ARN=$(aws ecs run-task \
-              --cluster "$CLUSTER_NAME" \
-              --task-definition "$TASK_DEF" \
-              --launch-type EC2 \
-              --overrides "{\"containerOverrides\": [{\"name\": \"api\", \"command\": [\"npx\", \"prisma\", \"migrate\", \"resolve\", \"--rolled-back\", \"$MIGRATION\"]}]}" \
-              --query "tasks[0].taskArn" \
-              --output text)
-            
-            if [ -n "$RESOLVE_ARN" ] && [ "$RESOLVE_ARN" != "None" ]; then
-              aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$RESOLVE_ARN"
-              echo "Resolve $MIGRATION concluído."
-            fi
-          done
-
-          echo "Iniciando migração do banco de dados Prisma via container no ECS..."
+          echo "Iniciando task de migração no ECS..."
           
-          # Step 4: Run migrate deploy
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEF" \
@@ -225,8 +199,8 @@ jobs:
             exit 1
           fi
           
-          echo "Task de migração iniciada com sucesso! ARN: $TASK_ARN"
-          echo "Aguardando conclusão da migração..."
+          echo "Task iniciada: $TASK_ARN"
+          echo "Aguardando conclusão..."
           
           aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN"
           
@@ -236,8 +210,8 @@ jobs:
             --query "tasks[0].containers[0].exitCode" \
             --output text)
             
-          if [ "$EXIT_CODE" -ne 0 ]; then
-            echo "Erro: A task de migração do Prisma falhou com código de saída $EXIT_CODE!"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Erro: Migração falhou com exit code $EXIT_CODE"
             REASON=$(aws ecs describe-tasks \
               --cluster "$CLUSTER_NAME" \
               --tasks "$TASK_ARN" \
@@ -247,7 +221,7 @@ jobs:
             exit 1
           fi
           
-          echo "Migração do banco de dados Prisma concluída com sucesso!"
+          echo "Migração do banco de dados concluída com sucesso!"
 
 
 
