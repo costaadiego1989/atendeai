@@ -35,6 +35,12 @@ export class TenantBillingCapacityService {
       return;
     }
 
+    if (summary.plan === 'ESSENCIAL' && capacity === 'branches') {
+      throw new ConflictException(
+        'Seu plano Essencial não permite filiais adicionais. Faça upgrade para o plano Profissional ou Escala para adicionar novas filiais.',
+      );
+    }
+
     throw new ConflictException(
       `Limite de ${CAPACITY_LABELS[capacity]} atingido para o plano ${summary.plan}. Limite atual: ${limit}.`,
     );

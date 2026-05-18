@@ -169,7 +169,7 @@ async function seedTenant() {
     data: {
       companyName: 'Sabor & Cia Restaurante',
       businessType: 'RESTAURANTE',
-      plan: 'PROFESSIONAL',
+      plan: 'PROFISSIONAL',
       planStatus: 'ACTIVE',
       description: 'Restaurante e delivery de comida brasileira',
       services: 'Delivery, Retirada, Reservas, Eventos',
@@ -237,7 +237,7 @@ async function seedUsers() {
 
   const users = [
     { id: USER_IDS.admin, tenantId: TENANT_ID, name: 'Roberto Administrador', email: `seed-admin-${tenantSlug}@saborecia.com.br`, phone: '5511999000001', passwordHash: hash, mustChangePassword: false, role: 'ADMIN' },
-    { id: USER_IDS.manager, tenantId: TENANT_ID, name: 'Carla Gerente', email: `seed-manager-${tenantSlug}@saborecia.com.br`, phone: '5511999000002', passwordHash: hash, mustChangePassword: false, role: 'MANAGER' },
+    { id: USER_IDS.manager, tenantId: TENANT_ID, name: 'Carla Gerente', email: `seed-manager-${tenantSlug}@saborecia.com.br`, phone: '5511999000002', passwordHash: hash, mustChangePassword: false, role: 'ADMIN' },
     { id: USER_IDS.agent, tenantId: TENANT_ID, name: 'Felipe Atendente', email: `seed-agent-${tenantSlug}@saborecia.com.br`, phone: '5511999000003', passwordHash: hash, mustChangePassword: false, role: 'AGENT' },
   ];
 
@@ -764,7 +764,7 @@ async function seedBilling() {
     data: {
       id: subscriptionId,
       tenantId: TENANT_ID,
-      plan: 'PROFESSIONAL',
+      plan: 'PROFISSIONAL',
       status: 'ACTIVE',
       messagesQuota: 5000,
       aiTokensQuota: 100000,
@@ -774,7 +774,7 @@ async function seedBilling() {
       baseMonthlyPrice: 149.90,
       addonsMonthlyPrice: 50.00,
       totalMonthlyPrice: 199.90,
-      pricingSnapshot: { plan: 'PROFESSIONAL', basePrice: 149.90 },
+      pricingSnapshot: { plan: 'PROFISSIONAL', basePrice: 149.90 },
       config: { autoRenew: true },
     },
   });
