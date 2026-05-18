@@ -60,6 +60,7 @@ import {
 } from './application/services/inbound-pipeline';
 import { AIEscalationRequestedHandler } from './application/handlers/AIEscalationRequestedHandler';
 import { InstagramGraphAdapter } from './infrastructure/acl/InstagramGraphAdapter';
+import { WhatsAppTemplateMessageAdapter } from './infrastructure/acl/WhatsAppTemplateMessageAdapter';
 import { MessagingGatewayRegistry } from './infrastructure/acl/MessagingGatewayRegistry';
 import { PrismaMessagingWebhookReceiptStore } from './infrastructure/persistence/repositories/PrismaMessagingWebhookReceiptStore';
 import { PrismaConversationIntelligenceRepository } from './infrastructure/persistence/repositories/PrismaConversationIntelligenceRepository';
@@ -96,6 +97,7 @@ import { OutboundMessageRetryService } from './application/services/OutboundMess
     Dialog360Adapter,
     TwilioAdapter,
     InstagramGraphAdapter,
+    WhatsAppTemplateMessageAdapter,
     MessagingGatewayRegistry,
     DeduplicateMessageStep,
     IdentifyContactStep,
