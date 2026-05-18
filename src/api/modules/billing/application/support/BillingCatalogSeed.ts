@@ -160,7 +160,7 @@ export const BILLING_MODULE_SEED = [
   },
   {
     code: 'ANALYTICS_PRO',
-    displayName: 'relatórios avancados',
+    displayName: 'Relatórios avançados',
     description:
       'Indicadores por periodo, modulo, filial, atendente e resultado.',
     category: 'ANALYTICS',
