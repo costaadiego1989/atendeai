@@ -5,6 +5,8 @@ import { ITenantPDFContextProvider } from '../ports/ITenantPDFContextProvider';
 import { PromptBuilder } from '../../domain/services/PromptBuilder';
 import { Tenant } from '../../../tenant/domain/entities/Tenant';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
+import { NicheWelcomeMenuService } from './welcome-menu/NicheWelcomeMenuService';
+import { OperatingHoursEntry } from './welcome-menu/MenuConditionEvaluator';
 
 export interface AIContext {
   systemPrompt: string;
@@ -30,6 +32,7 @@ export class AIContextAggregator {
     private readonly commercialContextProvider: ICommercialContextProvider,
     private readonly commerceContextProvider: ICommerceContextProvider,
     private readonly schedulingContextProvider: ISchedulingContextProvider,
+    private readonly nicheWelcomeMenuService: NicheWelcomeMenuService,
     private readonly tenantPDFContextProvider?: ITenantPDFContextProvider,
     private readonly aggregationCacheTtlMs: number = 0,
   ) {}
@@ -120,7 +123,24 @@ export class AIContextAggregator {
     };
 
     if (isFirstInteraction) {
-      prompt = `${prompt}\n\n[PRIMEIRA INTERAção]: Grito brevemente e pergunto como posso ajudar. não despeje toda a informação de uma vez.`;
+      const welcomeMenu = this.nicheWelcomeMenuService.buildWelcomePrompt({
+        companyName: tenant.companyName?.value ?? '',
+        businessType: tenant.businessType ?? null,
+        operatingHours: (tenant.operatingHours as Record<string, OperatingHoursEntry> | null) ?? null,
+        promotions: (tenant.promotions ?? []).map((p) => ({
+          title: p.title,
+          description: p.description,
+          value: p.value,
+        })),
+        catalogFiles: tenant.catalogFiles ?? [],
+        catalogUrl: tenant.catalogUrl ?? null,
+        services: tenant.services ?? null,
+        schedulingCategories: [],
+        commerceCatalogItemCount: 0,
+        hasRecoveryCases: false,
+      });
+      prompt = `${prompt}\n\n${welcomeMenu}`;
+      diagnostics.nicheWelcomeMenuInjected = true;
     }
 
     const commercialContext =
