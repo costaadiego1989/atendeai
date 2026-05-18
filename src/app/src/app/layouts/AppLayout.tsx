@@ -153,7 +153,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
       import.meta.env.VITE_SHOW_PLATFORM_ADMIN_NAV === 'true' &&
       !!(import.meta.env.VITE_PLATFORM_ADMIN_API_KEY as string | undefined)?.trim();
     if (!show) return [];
-    return [{ label: 'Plataforma Â· Tenants', path: '/app/platform/tenants', icon: ShieldHalf }];
+    return [{ label: 'Tenants', path: '/app/platform/tenants', icon: ShieldHalf }];
   })();
 
   return (
