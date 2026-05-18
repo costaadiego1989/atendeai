@@ -8,11 +8,18 @@ import { ICommercialContextProvider } from '../application/ports/ICommercialCont
 import { ICommerceContextProvider } from '../application/ports/ICommerceContextProvider';
 import { ISchedulingContextProvider } from '../application/ports/ISchedulingContextProvider';
 import { ITenantPDFContextProvider } from '../application/ports/ITenantPDFContextProvider';
+import { NicheWelcomeMenuService } from '../application/services/welcome-menu/NicheWelcomeMenuService';
 
 function makeTenantStub(id = 'tenant-1') {
   return {
     id: { toString: () => id },
     businessType: 'MARKET',
+    companyName: { value: 'Test Company' },
+    operatingHours: null,
+    promotions: [],
+    catalogFiles: [],
+    catalogUrl: null,
+    services: null,
   } as any;
 }
 
@@ -22,6 +29,7 @@ describe('AIContextAggregator', () => {
   let commerceProvider: jest.Mocked<ICommerceContextProvider>;
   let schedulingProvider: jest.Mocked<ISchedulingContextProvider>;
   let pdfProvider: jest.Mocked<ITenantPDFContextProvider>;
+  let nicheWelcomeMenuService: NicheWelcomeMenuService;
 
   beforeEach(() => {
     promptBuilder = { build: jest.fn().mockReturnValue('Base prompt') } as any;
@@ -35,6 +43,7 @@ describe('AIContextAggregator', () => {
       findRelevantAvailability: jest.fn().mockResolvedValue(null),
     };
     pdfProvider = { findRelevantPDFContext: jest.fn().mockResolvedValue(null) };
+    nicheWelcomeMenuService = new NicheWelcomeMenuService();
   });
 
   function createAggregator(ttl = 0, withPdf = true) {
@@ -43,6 +52,7 @@ describe('AIContextAggregator', () => {
       commercialProvider,
       commerceProvider,
       schedulingProvider,
+      nicheWelcomeMenuService,
       withPdf ? pdfProvider : undefined,
       ttl,
     );
@@ -153,7 +163,7 @@ describe('AIContextAggregator', () => {
   });
 
   describe('isFirstInteraction guardrail', () => {
-    it('should append first interaction guardrail when isFirstInteraction=true', async () => {
+    it('should append welcome menu when isFirstInteraction=true', async () => {
       const aggregator = createAggregator(0);
 
       const result = await aggregator.aggregate(
@@ -163,11 +173,12 @@ describe('AIContextAggregator', () => {
         true,
       );
 
-      expect(result.systemPrompt).toContain('[PRIMEIRA INTERAção]');
+      expect(result.systemPrompt).toContain('[MENU DE BOAS-VINDAS]');
       expect(result.diagnostics.firstInteractionGuardrail).toBe(true);
+      expect(result.diagnostics.nicheWelcomeMenuInjected).toBe(true);
     });
 
-    it('should NOT append first interaction guardrail when isFirstInteraction=false', async () => {
+    it('should NOT append welcome menu when isFirstInteraction=false', async () => {
       const aggregator = createAggregator(0);
 
       const result = await aggregator.aggregate(
@@ -177,7 +188,7 @@ describe('AIContextAggregator', () => {
         false,
       );
 
-      expect(result.systemPrompt).not.toContain('[PRIMEIRA INTERAção]');
+      expect(result.systemPrompt).not.toContain('[MENU DE BOAS-VINDAS]');
       expect(result.diagnostics.firstInteractionGuardrail).toBe(false);
     });
   });
