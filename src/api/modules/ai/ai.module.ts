@@ -107,6 +107,7 @@ import { ReserveProfessionalSlotUseCase } from '@modules/scheduling/application/
 import { AiSafetyGate } from './application/services/AiSafetyGate';
 import { ADVANCE_COMMERCE_CONVERSATION } from './application/ports/IAdvanceCommerceConversation';
 import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessionalSlot';
+import { NicheWelcomeMenuService } from './application/services/welcome-menu/NicheWelcomeMenuService';
 
 @Module({
   imports: [
@@ -126,6 +127,10 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
     {
       provide: PromptBuilder,
       useFactory: () => new PromptBuilder(),
+    },
+    {
+      provide: NicheWelcomeMenuService,
+      useFactory: () => new NicheWelcomeMenuService(),
     },
     {
       provide: AIResponseProcessor,
@@ -252,6 +257,7 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
         commercialContextProvider: ICommercialContextProvider,
         commerceContextProvider: ICommerceContextProvider,
         schedulingContextProvider: ISchedulingContextProvider,
+        nicheWelcomeMenuService: NicheWelcomeMenuService,
         tenantPDFContextProvider: ITenantPDFContextProvider,
         config: ConfigService,
       ) => {
@@ -263,6 +269,7 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
           commercialContextProvider,
           commerceContextProvider,
           schedulingContextProvider,
+          nicheWelcomeMenuService,
           tenantPDFContextProvider,
           ttlMs,
         );
@@ -272,6 +279,7 @@ import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessio
         COMMERCIAL_CONTEXT_PROVIDER,
         COMMERCE_CONTEXT_PROVIDER,
         SCHEDULING_CONTEXT_PROVIDER,
+        NicheWelcomeMenuService,
         TENANT_PDF_CONTEXT_PROVIDER,
         ConfigService,
       ],
