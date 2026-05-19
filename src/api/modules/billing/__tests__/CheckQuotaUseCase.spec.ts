@@ -278,6 +278,7 @@ describe('CheckQuotaUseCase', () => {
         quotas: sub.quotas,
         billingCycleStart: pastStart,
         billingCycleEnd: pastEnd,
+        billingCycleType: 'MONTHLY',
         baseMonthlyPrice: 9700,
         addonsMonthlyPrice: 0,
         totalMonthlyPrice: 9700,
