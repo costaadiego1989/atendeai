@@ -78,19 +78,16 @@ export class BillingPaymentHandlers implements OnModuleInit {
               await this.billingRepository.listSubscriptionModules(
                 subscription.id.toString(),
               );
-            subscription.changePlan(
-              planUpgradeRequest.targetPlan,
-              {
-                ...(targetPlanDefinition
-                  ? buildSubscriptionCommercialState(
-                      targetPlanDefinition,
-                      subscriptionModules,
-                      subscription.config,
-                    )
-                  : {}),
-                billingCycleType: planUpgradeRequest.billingCycle,
-              },
-            );
+            subscription.changePlan(planUpgradeRequest.targetPlan, {
+              ...(targetPlanDefinition
+                ? buildSubscriptionCommercialState(
+                    targetPlanDefinition,
+                    subscriptionModules,
+                    subscription.config,
+                  )
+                : {}),
+              billingCycleType: planUpgradeRequest.billingCycle,
+            });
             subscription.clearScheduledPlan();
             subscription.renewCycleFrom(confirmedAt);
 

@@ -255,7 +255,8 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
     },
   ): Subscription {
     const now = new Date();
-    const billingCycleType: BillingCycleType = options?.billingCycleType ?? 'MONTHLY';
+    const billingCycleType: BillingCycleType =
+      options?.billingCycleType ?? 'MONTHLY';
     const cycleEnd = new Date(now);
 
     if (plan === 'TRIAL') {

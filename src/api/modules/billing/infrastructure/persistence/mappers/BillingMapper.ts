@@ -1,4 +1,7 @@
-import { Subscription, BillingCycleType } from '@modules/billing/domain/entities/Subscription';
+import {
+  Subscription,
+  BillingCycleType,
+} from '@modules/billing/domain/entities/Subscription';
 import { UsageRecord } from '@modules/billing/domain/entities/UsageRecord';
 import { TenantId } from '@shared/domain/TenantId';
 import { UniqueEntityID } from '@shared/domain/UniqueEntityID';
@@ -45,7 +48,9 @@ export class BillingMapper {
         ),
         billingCycleStart: raw.billingCycleStart ?? raw.billing_cycle_start!,
         billingCycleEnd: raw.billingCycleEnd ?? raw.billing_cycle_end!,
-        billingCycleType: ((raw as any).billingCycleType ?? raw.billing_cycle_type ?? 'MONTHLY') as BillingCycleType,
+        billingCycleType: ((raw as any).billingCycleType ??
+          raw.billing_cycle_type ??
+          'MONTHLY') as BillingCycleType,
         scheduledPlan: (raw.scheduledPlan ??
           raw.scheduled_plan ??
           undefined) as PlanType | undefined,
