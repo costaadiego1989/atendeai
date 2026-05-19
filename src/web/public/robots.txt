@@ -19,4 +19,4 @@ Disallow: /
 User-agent: BLEXBot
 Disallow: /
 
-Sitemap: https://atendeai.com.br/sitemap.xml
+Sitemap: https://atende-ai.tech/sitemap.xml
