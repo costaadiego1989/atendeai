@@ -58,6 +58,7 @@ describe('ImportContactsListUseCase', () => {
         phone: '5511999999999',
         stage: ContactStageVO.create('LEAD'),
         tags: ['old-tag'],
+        prospectingOptOut: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
