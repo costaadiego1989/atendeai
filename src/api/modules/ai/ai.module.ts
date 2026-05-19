@@ -103,10 +103,15 @@ import {
 } from '@modules/contact/domain/repositories/IContactRepository';
 import { TenantAgentRuleService } from '@modules/agent-rules/application/services/TenantAgentRuleService';
 import { AdvanceCommerceConversationUseCase } from '@modules/commerce/application/use-cases/AdvanceCommerceConversationUseCase';
+import { RepeatLastOrderUseCase } from '@modules/commerce/application/use-cases/RepeatLastOrderUseCase';
 import { ReserveProfessionalSlotUseCase } from '@modules/scheduling/application/use-cases/ReserveProfessionalSlotUseCase';
 import { AiSafetyGate } from './application/services/AiSafetyGate';
 import { ADVANCE_COMMERCE_CONVERSATION } from './application/ports/IAdvanceCommerceConversation';
 import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessionalSlot';
+import {
+  IRepeatLastOrder,
+  REPEAT_LAST_ORDER,
+} from './application/ports/IRepeatLastOrder';
 import { NicheWelcomeMenuService } from './application/services/welcome-menu/NicheWelcomeMenuService';
 
 @Module({
@@ -137,12 +142,14 @@ import { NicheWelcomeMenuService } from './application/services/welcome-menu/Nic
       useFactory: (
         paymentLinkGenerator: IPaymentLinkGenerator,
         reserveProfessionalSlotUseCase: ReserveProfessionalSlotUseCase,
+        repeatLastOrderUseCase: IRepeatLastOrder,
       ) =>
         new AIResponseProcessor(
           paymentLinkGenerator,
           reserveProfessionalSlotUseCase,
+          repeatLastOrderUseCase,
         ),
-      inject: [PAYMENT_LINK_GENERATOR, RESERVE_PROFESSIONAL_SLOT],
+      inject: [PAYMENT_LINK_GENERATOR, RESERVE_PROFESSIONAL_SLOT, REPEAT_LAST_ORDER],
     },
     {
       provide: HumanHandoffPolicy,
@@ -357,6 +364,10 @@ import { NicheWelcomeMenuService } from './application/services/welcome-menu/Nic
     {
       provide: RESERVE_PROFESSIONAL_SLOT,
       useExisting: ReserveProfessionalSlotUseCase,
+    },
+    {
+      provide: REPEAT_LAST_ORDER,
+      useExisting: RepeatLastOrderUseCase,
     },
   ],
   controllers: [],
