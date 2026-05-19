@@ -180,39 +180,39 @@ jobs:
             -var="certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }}"
 
       # 5. Run Prisma Migrations as a single ECS One-off Task
-      # All existing migrations are marked as applied in production.
-      # This step only applies NEW migrations added after the initial sync.
+      # Uses scripts/migrate-deploy.sh which auto-resolves P3009 (failed migrations)
+      # before running migrate deploy — safe to re-run on any CI failure.
       - name: Run Prisma Database Migrations
         run: |
           CLUSTER_NAME="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-cluster"
           TASK_DEF="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-api"
 
           echo "Iniciando task de migração no ECS..."
-          
+
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEF" \
             --launch-type EC2 \
-            --overrides '{"containerOverrides": [{"name": "api", "command": ["npx", "prisma", "migrate", "deploy"]}]}' \
+            --overrides '{"containerOverrides":[{"name":"api","command":["sh","migrate-deploy.sh"]}]}' \
             --query "tasks[0].taskArn" \
             --output text)
-            
+
           if [ -z "$TASK_ARN" ] || [ "$TASK_ARN" == "None" ]; then
             echo "Erro: Falha ao iniciar a task de migração no ECS!"
             exit 1
           fi
-          
+
           echo "Task iniciada: $TASK_ARN"
           echo "Aguardando conclusão..."
-          
+
           aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN"
-          
+
           EXIT_CODE=$(aws ecs describe-tasks \
             --cluster "$CLUSTER_NAME" \
             --tasks "$TASK_ARN" \
             --query "tasks[0].containers[0].exitCode" \
             --output text)
-            
+
           if [ "$EXIT_CODE" != "0" ]; then
             echo "Erro: Migração falhou com exit code $EXIT_CODE"
             REASON=$(aws ecs describe-tasks \
@@ -221,9 +221,11 @@ jobs:
               --query "tasks[0].containers[0].reason" \
               --output text)
             echo "Razão: $REASON"
+            TASK_ID=$(echo "$TASK_ARN" | awk -F/ '{print $NF}')
+            echo "Veja logs completos em CloudWatch: /ecs/atendeai-prod/api -> api/api/$TASK_ID"
             exit 1
           fi
-          
+
           echo "Migração do banco de dados concluída com sucesso!"
 
 
