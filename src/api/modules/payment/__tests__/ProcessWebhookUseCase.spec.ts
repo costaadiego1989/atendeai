@@ -354,7 +354,7 @@ describe('Payment ProcessWebhookUseCase', () => {
       occurredAt: new Date('2026-03-31T21:00:00.000Z'),
     });
 
-    expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+    expect(prisma.$executeRaw).not.toHaveBeenCalled();
     expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
   });
