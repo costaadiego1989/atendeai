@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaSalesRepository } from '../infrastructure/persistence/repositories/PrismaSalesRepository';
-import { PrismaService } from '../../../../shared/infrastructure/database/PrismaService';
+import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { randomUUID } from 'crypto';
 
 describe('PrismaSalesRepository Integration', () => {
