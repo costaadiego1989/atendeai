@@ -154,7 +154,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
 
       <aside
         className={cn(
-          'flex shrink-0 flex-col border-r border-sidebar-border bg-sidebar/40 backdrop-blur-xl transition-all duration-200',
+          'flex shrink-0 flex-col border-r border-sidebar-border bg-sidebar backdrop-blur-xl transition-all duration-200',
           sidebarCollapsed ? 'w-[60px]' : 'w-[240px]',
         )}
       >
