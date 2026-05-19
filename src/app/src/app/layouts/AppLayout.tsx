@@ -148,6 +148,19 @@ export function AppLayout({ children }: { children?: ReactNode }) {
   const filteredSalesNav = filterNavByNiche(salesNav, businessType);
   const filteredProspectingNav = filterNavByNiche(prospectingNav, businessType);
 
+  const tenantPlan = tenant?.billingAccess?.plan?.toUpperCase();
+  const filteredSettingsNav = settingsNav.filter((item) => {
+    // Hide "Integrações" for TRIAL plan — requires at least Essencial
+    if (item.path === '/app/settings/integrations' && tenantPlan === 'TRIAL') {
+      return false;
+    }
+    // Hide team management for AGENT role
+    if (item.path === '/app/team' && user?.role === 'AGENT') {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <div className="flex h-screen overflow-hidden bg-transparent">
       <GlobalConversationNotifier />
@@ -212,9 +225,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
           <Separator className="my-2 bg-sidebar-border" />
           <NavSection
             title="Configuracoes"
-            items={user?.role === 'AGENT'
-              ? settingsNav.filter((item) => item.path !== '/app/team')
-              : settingsNav}
+            items={filteredSettingsNav}
             collapsed={sidebarCollapsed}
             currentPath={location.pathname}
           />
