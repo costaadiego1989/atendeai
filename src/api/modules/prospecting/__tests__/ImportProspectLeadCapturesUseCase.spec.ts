@@ -21,6 +21,7 @@ describe('ImportProspectLeadCapturesUseCase', () => {
       ensureContact: jest.fn(),
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
+      markProspectingOptOut: jest.fn(),
     };
 
     useCase = new ImportProspectLeadCapturesUseCase(
