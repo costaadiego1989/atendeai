@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { GetSubscriptionCatalogUseCase } from '../application/use-cases/GetSubscriptionCatalogUseCase';
 import { Subscription } from '../domain/entities/Subscription';
 import { TenantId } from '@shared/domain/TenantId';
@@ -182,13 +181,21 @@ describe('GetSubscriptionCatalogUseCase', () => {
     });
   });
 
-  describe('error handling', () => {
-    it('should throw NotFoundException when subscription does not exist', async () => {
+  describe('when subscription does not exist', () => {
+    it('should return catalog with null subscription info and available addons', async () => {
       billingRepo.findSubscription.mockResolvedValue(null);
 
-      await expect(
-        useCase.execute({ tenantId: 'tenant-missing' }),
-      ).rejects.toThrow(NotFoundException);
+      const result = await useCase.execute({ tenantId: 'tenant-missing' });
+
+      expect(result.tenantId).toBe('tenant-missing');
+      expect(result.subscription).toBeDefined();
+      expect(result.availableAddons.length).toBeGreaterThan(0);
+      // All addons should be selectable and not subscribed
+      for (const addon of result.availableAddons) {
+        expect(addon.subscribed).toBe(false);
+        expect(addon.includedInPlan).toBe(false);
+        expect(addon.selectable).toBe(true);
+      }
     });
   });
 });
