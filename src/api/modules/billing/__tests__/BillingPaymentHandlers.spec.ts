@@ -239,6 +239,45 @@ describe('BillingPaymentHandlers', () => {
       expect(billingRepo.updateSubscriptionModuleStatus).not.toHaveBeenCalled();
     });
 
+    it('should set billingCycleEnd to +12 months for YEARLY upgrade payment', async () => {
+      const handler = getHandler('payment.confirmed');
+      const subscription = Subscription.create(
+        TenantId.create('tenant-yearly'),
+        'ESSENCIAL',
+      );
+      subscription.renewCycleFrom(new Date('2026-01-01T00:00:00.000Z'));
+      billingRepo.findSubscription.mockResolvedValue(subscription);
+      billingRepo.findPlanByCode.mockResolvedValue({
+        code: 'PROFISSIONAL',
+        displayName: 'Profissional',
+        monthlyPrice: 297,
+        messagesQuota: 75000,
+        aiTokensQuota: 7500000,
+        contactsQuota: 2500,
+        config: {},
+      });
+      paymentService.createSubscription.mockResolvedValue({
+        id: 'sub-yearly',
+        status: 'ACTIVE',
+      });
+
+      const confirmedAt = '2026-02-15T00:00:00.000Z';
+      await handler({
+        payload: {
+          tenantId: 'tenant-yearly',
+          paymentId: 'pay-yearly',
+          amount: 2138.4,
+          confirmedAt,
+          rawReference: 'billing-upgrade|tenant-yearly|PROFISSIONAL|YEARLY',
+        },
+      });
+
+      expect(subscription.billingCycleType).toBe('YEARLY');
+      const expectedEnd = new Date(confirmedAt);
+      expectedEnd.setFullYear(expectedEnd.getFullYear() + 1);
+      expect(subscription.billingCycleEnd).toEqual(expectedEnd);
+    });
+
     it('should handle billing-addon reference and confirm addon payment', async () => {
       const handler = getHandler('payment.confirmed');
       const subscription = Subscription.create(

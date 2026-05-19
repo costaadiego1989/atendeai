@@ -80,13 +80,16 @@ export class BillingPaymentHandlers implements OnModuleInit {
               );
             subscription.changePlan(
               planUpgradeRequest.targetPlan,
-              targetPlanDefinition
-                ? buildSubscriptionCommercialState(
-                    targetPlanDefinition,
-                    subscriptionModules,
-                    subscription.config,
-                  )
-                : undefined,
+              {
+                ...(targetPlanDefinition
+                  ? buildSubscriptionCommercialState(
+                      targetPlanDefinition,
+                      subscriptionModules,
+                      subscription.config,
+                    )
+                  : {}),
+                billingCycleType: planUpgradeRequest.billingCycle,
+              },
             );
             subscription.clearScheduledPlan();
             subscription.renewCycleFrom(confirmedAt);

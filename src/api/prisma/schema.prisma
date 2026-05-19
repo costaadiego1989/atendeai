@@ -588,6 +588,7 @@ model Subscription {
   pricingVersion    String?  @map("pricing_version") @db.VarChar(50)
   pricingSnapshot   Json     @default("{}") @map("pricing_snapshot")
   config            Json     @default("{}")
+  billingCycleType  String   @default("MONTHLY") @map("billing_cycle_type") @db.VarChar(10)
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("subscriptions")

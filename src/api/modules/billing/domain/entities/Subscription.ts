@@ -4,6 +4,8 @@ import { TenantId } from '../../../../shared/domain/TenantId';
 import { PlanType, Quotas } from '../value-objects/Quotas';
 import { ValidationErrorException } from '../../../../shared/domain/exceptions/DomainExceptions';
 
+export type BillingCycleType = 'MONTHLY' | 'YEARLY';
+
 interface SubscriptionProps {
   tenantId: TenantId;
   plan: PlanType;
@@ -11,6 +13,7 @@ interface SubscriptionProps {
   quotas: Quotas;
   billingCycleStart: Date;
   billingCycleEnd: Date;
+  billingCycleType: BillingCycleType;
   scheduledPlan?: PlanType;
   asaasCustomerId?: string;
   asaasSubscriptionId?: string;
@@ -46,6 +49,9 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
   }
   get billingCycleEnd(): Date {
     return this.props.billingCycleEnd;
+  }
+  get billingCycleType(): BillingCycleType {
+    return this.props.billingCycleType;
   }
   get scheduledPlan(): PlanType | undefined {
     return this.props.scheduledPlan;
@@ -144,6 +150,7 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
       pricingVersion?: string;
       pricingSnapshot?: any;
       config?: any;
+      billingCycleType?: BillingCycleType;
     },
   ): void {
     this.props.plan = plan;
@@ -160,6 +167,9 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
     this.props.pricingSnapshot =
       options?.pricingSnapshot ?? this.props.pricingSnapshot;
     this.props.config = options?.config ?? this.props.config;
+    if (options?.billingCycleType) {
+      this.props.billingCycleType = options.billingCycleType;
+    }
   }
 
   public schedulePlanChange(plan: PlanType): void {
@@ -194,7 +204,12 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
   public renewCycleFrom(referenceDate: Date): void {
     const cycleStart = new Date(referenceDate);
     const cycleEnd = new Date(referenceDate);
-    cycleEnd.setMonth(cycleEnd.getMonth() + 1);
+
+    if (this.props.billingCycleType === 'YEARLY') {
+      cycleEnd.setFullYear(cycleEnd.getFullYear() + 1);
+    } else {
+      cycleEnd.setMonth(cycleEnd.getMonth() + 1);
+    }
 
     this.props.billingCycleStart = cycleStart;
     this.props.billingCycleEnd = cycleEnd;
@@ -236,13 +251,17 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
       pricingVersion?: string;
       pricingSnapshot?: any;
       config?: any;
+      billingCycleType?: BillingCycleType;
     },
   ): Subscription {
     const now = new Date();
+    const billingCycleType: BillingCycleType = options?.billingCycleType ?? 'MONTHLY';
     const cycleEnd = new Date(now);
 
     if (plan === 'TRIAL') {
       cycleEnd.setDate(now.getDate() + 7);
+    } else if (billingCycleType === 'YEARLY') {
+      cycleEnd.setFullYear(now.getFullYear() + 1);
     } else {
       cycleEnd.setMonth(now.getMonth() + 1);
     }
@@ -257,6 +276,7 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
       quotas: options?.quotas ?? Quotas.create(plan),
       billingCycleStart: now,
       billingCycleEnd: cycleEnd,
+      billingCycleType,
       baseMonthlyPrice: options?.baseMonthlyPrice ?? 0,
       addonsMonthlyPrice: options?.addonsMonthlyPrice ?? 0,
       totalMonthlyPrice:

@@ -1,4 +1,4 @@
-import { Subscription } from '@modules/billing/domain/entities/Subscription';
+import { Subscription, BillingCycleType } from '@modules/billing/domain/entities/Subscription';
 import { UsageRecord } from '@modules/billing/domain/entities/UsageRecord';
 import { TenantId } from '@shared/domain/TenantId';
 import { UniqueEntityID } from '@shared/domain/UniqueEntityID';
@@ -19,6 +19,7 @@ export class BillingMapper {
       contacts_quota?: number;
       billing_cycle_start?: Date;
       billing_cycle_end?: Date;
+      billing_cycle_type?: string | null;
       scheduled_plan?: string | null;
       asaas_customer_id?: string | null;
       asaas_subscription_id?: string | null;
@@ -44,6 +45,7 @@ export class BillingMapper {
         ),
         billingCycleStart: raw.billingCycleStart ?? raw.billing_cycle_start!,
         billingCycleEnd: raw.billingCycleEnd ?? raw.billing_cycle_end!,
+        billingCycleType: ((raw as any).billingCycleType ?? raw.billing_cycle_type ?? 'MONTHLY') as BillingCycleType,
         scheduledPlan: (raw.scheduledPlan ??
           raw.scheduled_plan ??
           undefined) as PlanType | undefined,
@@ -76,6 +78,7 @@ export class BillingMapper {
       contactsQuota: sub.quotas.contacts,
       billingCycleStart: sub.billingCycleStart,
       billingCycleEnd: sub.billingCycleEnd,
+      billingCycleType: sub.billingCycleType,
       scheduledPlan: sub.scheduledPlan,
       asaasCustomerId: sub.asaasCustomerId,
       asaasSubscriptionId: sub.asaasSubscriptionId,
