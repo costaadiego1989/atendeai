@@ -132,7 +132,10 @@ export class PlatformBillingReadDao {
     // Quota usage
     let totalMessagesUsed = 0;
     let totalAiTokensUsed = 0;
-    const latestUsageByTenant = new Map<string, (typeof usageRecords)[number]>();
+    const latestUsageByTenant = new Map<
+      string,
+      (typeof usageRecords)[number]
+    >();
     for (const u of usageRecords) {
       if (!latestUsageByTenant.has(u.tenantId)) {
         latestUsageByTenant.set(u.tenantId, u);
