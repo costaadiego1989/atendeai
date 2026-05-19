@@ -64,6 +64,9 @@ describe('CreateUserUseCase', () => {
       queueSystemMessage: jest
         .fn()
         .mockResolvedValue({ conversationId: 'conv-1', messageId: 'msg-1' }),
+      queueTemplateMessage: jest
+        .fn()
+        .mockResolvedValue({ conversationId: 'conv-1', messageId: 'msg-1' }),
     };
 
     contactFacade = {
@@ -74,6 +77,7 @@ describe('CreateUserUseCase', () => {
         .mockResolvedValue({ contactId: 'contact-1', created: true }),
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
+      markProspectingOptOut: jest.fn(),
     };
 
     userDomainEventPublisher = {
