@@ -1,10 +1,12 @@
 import { AIResponseProcessor } from '../application/services/AIResponseProcessor';
 import { IPaymentLinkGenerator } from '../application/ports/IPaymentLinkGenerator';
+import { IRepeatLastOrder } from '../application/ports/IRepeatLastOrder';
 
 describe('AIResponseProcessor', () => {
   let processor: AIResponseProcessor;
   let paymentLinkGenerator: jest.Mocked<IPaymentLinkGenerator>;
   let reserveProfessionalSlotUseCase: any;
+  let repeatLastOrderUseCase: jest.Mocked<IRepeatLastOrder>;
 
   beforeEach(() => {
     paymentLinkGenerator = {
@@ -13,10 +15,14 @@ describe('AIResponseProcessor', () => {
     reserveProfessionalSlotUseCase = {
       execute: jest.fn(),
     };
+    repeatLastOrderUseCase = {
+      execute: jest.fn(),
+    };
 
     processor = new AIResponseProcessor(
       paymentLinkGenerator,
       reserveProfessionalSlotUseCase,
+      repeatLastOrderUseCase,
     );
   });
 
@@ -114,5 +120,81 @@ describe('AIResponseProcessor', () => {
     });
     expect(result).toContain('pre-reservado');
     expect(result).toContain('https://pay.test/scheduling');
+  });
+
+  describe('[REPEAT_LAST_ORDER]', () => {
+    it('should replace tag with cart summary when repeat order succeeds', async () => {
+      repeatLastOrderUseCase.execute.mockResolvedValue({
+        session: {
+          id: 'session-1',
+          subtotalAmount: 50,
+          totalAmount: 50,
+          items: [
+            { name: 'Pizza Margherita', quantity: 2, unitPrice: 15, lineTotal: 30 },
+            { name: 'Refrigerante 2L', quantity: 1, unitPrice: 20, lineTotal: 20 },
+          ],
+        },
+        previousOrderId: 'order-1',
+        itemsCopied: 2,
+      });
+
+      const result = await processor.process(
+        'Vou repetir seu pedido. [REPEAT_LAST_ORDER]',
+        {
+          tenantId: 'tenant-1',
+          branchId: 'branch-1',
+          contactId: 'contact-1',
+          conversationId: 'conv-1',
+        },
+      );
+
+      expect(repeatLastOrderUseCase.execute).toHaveBeenCalledWith({
+        tenantId: 'tenant-1',
+        contactId: 'contact-1',
+        conversationId: 'conv-1',
+        branchId: 'branch-1',
+      });
+      expect(result).toContain('Pizza Margherita');
+      expect(result).toContain('Refrigerante 2L');
+      expect(result).toContain('R$ 50.00');
+      expect(result).toContain('Deseja adicionar mais algum item');
+    });
+
+    it('should replace tag with fallback message when repeat order fails', async () => {
+      repeatLastOrderUseCase.execute.mockRejectedValue(
+        new Error('No orders found'),
+      );
+
+      const result = await processor.process(
+        'Vou repetir. [REPEAT_LAST_ORDER]',
+        {
+          tenantId: 'tenant-1',
+          contactId: 'contact-1',
+          conversationId: 'conv-1',
+        },
+      );
+
+      expect(result).toContain('Não consegui repetir seu pedido anterior');
+    });
+
+    it('should replace tag with fallback when context is missing', async () => {
+      const result = await processor.process(
+        'Repetindo. [REPEAT_LAST_ORDER]',
+        'tenant-1',
+      );
+
+      expect(result).toContain('Não consegui repetir seu pedido anterior');
+    });
+
+    it('should not process tag when text has no REPEAT_LAST_ORDER placeholder', async () => {
+      const result = await processor.process('Texto normal sem tag', {
+        tenantId: 'tenant-1',
+        contactId: 'contact-1',
+        conversationId: 'conv-1',
+      });
+
+      expect(repeatLastOrderUseCase.execute).not.toHaveBeenCalled();
+      expect(result).toBe('Texto normal sem tag');
+    });
   });
 });
