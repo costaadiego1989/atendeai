@@ -109,6 +109,10 @@ describe('ProspectCampaignController', () => {
     findLatestContactedByContact: jest.fn(),
     findAllByCampaign: jest.fn(),
     findNextPendingByCampaign: jest.fn(),
+    findLastContactedAt: jest.fn(),
+    findLatestByContactIds: jest.fn(),
+    findActiveByContact: jest.fn(),
+    countContactedTodayByCampaign: jest.fn(),
   };
 
   const contactFacade: jest.Mocked<IContactFacade> = {
@@ -117,6 +121,7 @@ describe('ProspectCampaignController', () => {
     ensureContact: jest.fn(),
     upsertProspectContact: jest.fn(),
     findContactIdsForReengagementAudience: jest.fn(),
+    markProspectingOptOut: jest.fn(),
   };
 
   const dispatchNextCampaignExecutionUseCase = {
@@ -322,6 +327,7 @@ describe('ProspectCampaignController', () => {
       audienceType: ProspectAudienceTypeVO.create('REENGAGEMENT'),
       channel: ProspectChannelVO.create('WHATSAPP'),
       messageTemplate: 'Oi {{first_name}}, tudo bem?',
+      templateName: 'ciclo_template',
     });
     createdCampaign.clearEvents();
     savedCampaigns = [createdCampaign];
@@ -370,6 +376,7 @@ describe('ProspectCampaignController', () => {
       channel: ProspectChannelVO.create('WHATSAPP'),
       targetContactIds: ['contact-1', 'contact-2', 'contact-2'],
       messageTemplate: 'Oi {{first_name}}, tudo bem?',
+      templateName: 'prospect_controller_template',
       dailyLimit: 2,
     });
     createdCampaign.activate();
