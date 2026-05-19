@@ -17,6 +17,7 @@ function makeActiveCampaign() {
     audienceType: ProspectAudienceTypeVO.create('REENGAGEMENT'),
     channel: ProspectChannelVO.create('WHATSAPP'),
     messageTemplate: 'Template inicial',
+    templateName: 'pausa_template',
   });
   campaign.activate();
   return campaign;
