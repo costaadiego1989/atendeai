@@ -13,11 +13,14 @@ describe('GetUsageUseCase', () => {
     useCase = new GetUsageUseCase(billingRepo);
   });
 
-  it('should throw EntityNotFoundException if no subscription', async () => {
+  it('should return TRIAL usage when no subscription exists', async () => {
     billingRepo.findSubscription.mockResolvedValue(null);
-    await expect(useCase.execute({ tenantId: 't1' })).rejects.toThrow(
-      EntityNotFoundException,
-    );
+    const result = await useCase.execute({ tenantId: 't1' });
+
+    expect(result.plan).toBe('TRIAL');
+    expect(result.usage.messages.quota).toBe(50);
+    expect(result.usage.aiTokens.quota).toBe(150000);
+    expect(result.usage.contacts.quota).toBe(50);
   });
 
   it('should return combined usage and quota info', async () => {
