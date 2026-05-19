@@ -60,7 +60,7 @@ describe('CreateProspectCampaignUseCase', () => {
     useCase = new CreateProspectCampaignUseCase(
       tenantRepository,
       campaignRepository,
-      new ProspectDispatchPolicy(),
+      new ProspectDispatchPolicy({} as any),
     );
   });
 
