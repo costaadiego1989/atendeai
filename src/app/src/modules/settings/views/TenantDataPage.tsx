@@ -28,6 +28,9 @@ export default function TenantDataPage() {
     handleZipcodeChange,
   } = useTenantDataViewModel();
 
+  const planCode = tenantData?.plan?.toUpperCase();
+  const hasBranchesAccess = planCode === 'PROFISSIONAL' || planCode === 'ESCALA';
+
   if (isLoading) {
     return <PageSkeleton />;
   }
@@ -54,7 +57,7 @@ export default function TenantDataPage() {
                 { value: 'identity', label: 'Identidade', icon: User },
                 { value: 'address', label: 'Endereço', icon: MapPin },
                 { value: 'hours', label: 'Funcionamento', icon: Clock },
-                ...(tenantData?.plan !== 'ESSENCIAL'
+                ...(hasBranchesAccess
                   ? [{ value: 'branches', label: 'Filiais', icon: GitBranch }]
                   : []),
                 { value: 'audit', label: 'Auditoria', icon: ShieldCheck },
@@ -83,7 +86,7 @@ export default function TenantDataPage() {
               <TenantHoursTab register={register} watch={watch} setValue={setValue} />
             </TabsContent>
 
-            {tenantData?.plan !== 'ESSENCIAL' && (
+            {hasBranchesAccess && (
               <TabsContent value="branches">
                 <TenantBranchesTab tenantId={tenantId} branches={tenantData?.branches ?? []} />
               </TabsContent>
