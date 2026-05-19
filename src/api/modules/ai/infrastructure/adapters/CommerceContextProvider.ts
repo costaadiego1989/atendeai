@@ -31,6 +31,10 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     private readonly searchCommerceCatalogUseCase: SearchCommerceCatalogUseCase,
   ) {}
 
+  async getCatalogItemCount(tenantId: string): Promise<number> {
+    return this.commerceRepository.countActiveCatalogItems(tenantId);
+  }
+
   async findConversationContext(
     input: FindCommerceConversationContextInput,
   ): Promise<string | null> {

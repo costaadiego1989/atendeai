@@ -3,7 +3,10 @@ import {
   ISchedulingFacade,
   SCHEDULING_FACADE,
 } from '@modules/scheduling/application/facades/SchedulingFacade';
-import { ISchedulingContextProvider } from '../../application/ports/ISchedulingContextProvider';
+import {
+  ISchedulingContextProvider,
+  SchedulingCategoryInfo,
+} from '../../application/ports/ISchedulingContextProvider';
 import {
   CategoryAvailabilityRecord,
   SchedulingCategoryRecord,
@@ -16,6 +19,19 @@ export class SchedulingContextProvider implements ISchedulingContextProvider {
     @Inject(SCHEDULING_FACADE)
     private readonly schedulingFacade: ISchedulingFacade,
   ) {}
+
+  async getSchedulingCategories(
+    tenantId: string,
+  ): Promise<SchedulingCategoryInfo[]> {
+    const categories = await this.schedulingFacade.listCategories(tenantId);
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      durationMinutes: c.durationMinutes ?? null,
+      basePrice: c.basePrice ?? null,
+      unit: c.unit ?? null,
+    }));
+  }
 
   async findRelevantAvailability(
     tenantId: string,
