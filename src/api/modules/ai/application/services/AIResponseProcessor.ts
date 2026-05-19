@@ -1,10 +1,12 @@
 import { IPaymentLinkGenerator } from '../ports/IPaymentLinkGenerator';
 import { IReserveProfessionalSlot } from '../ports/IReserveProfessionalSlot';
+import { IRepeatLastOrder } from '../ports/IRepeatLastOrder';
 
 export class AIResponseProcessor {
   constructor(
     private readonly paymentLinkGenerator: IPaymentLinkGenerator,
     private readonly reserveProfessionalSlotUseCase?: IReserveProfessionalSlot,
+    private readonly repeatLastOrderUseCase?: IRepeatLastOrder,
   ) {}
 
   public async process(
@@ -101,6 +103,49 @@ export class AIResponseProcessor {
         processedText = processedText.replace(
           scheduleSlotMatch[0],
           'não consegui confirmar esse horario automaticamente agora. Vou encaminhar para um atendente finalizar com voce.',
+        );
+      }
+    }
+
+    const repeatOrderMatch = processedText.match(/\[REPEAT_LAST_ORDER\]/);
+
+    if (repeatOrderMatch) {
+      try {
+        const context = typeof input === 'string' ? null : input;
+
+        if (!this.repeatLastOrderUseCase) {
+          throw new Error('Repeat order handler is not configured');
+        }
+
+        if (!context?.contactId || !context.conversationId) {
+          throw new Error('Missing conversation context for repeat order');
+        }
+
+        const result = await this.repeatLastOrderUseCase.execute({
+          tenantId,
+          contactId: context.contactId,
+          conversationId: context.conversationId,
+          branchId: context.branchId ?? null,
+        });
+
+        const itemsList = result.session.items
+          .map(
+            (item) =>
+              `• ${item.quantity}x ${item.name} — R$ ${Number(item.lineTotal).toFixed(2)}`,
+          )
+          .join('\n');
+
+        const replacement =
+          `Pronto! Montei seu carrinho com os itens do pedido anterior:\n\n` +
+          `${itemsList}\n\n` +
+          `Subtotal: R$ ${Number(result.session.subtotalAmount).toFixed(2)}\n\n` +
+          `Deseja adicionar mais algum item ou posso seguir para a entrega?`;
+
+        processedText = processedText.replace(repeatOrderMatch[0], replacement);
+      } catch {
+        processedText = processedText.replace(
+          repeatOrderMatch[0],
+          'Não consegui repetir seu pedido anterior automaticamente. Posso ajudar a montar um novo pedido?',
         );
       }
     }
