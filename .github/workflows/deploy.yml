@@ -186,19 +186,22 @@ jobs:
         run: |
           CLUSTER_NAME="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-cluster"
           TASK_DEF="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-api"
+          CAPACITY_PROVIDER="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-capacity-provider"
 
           echo "Iniciando task de migração no ECS..."
 
-          TASK_ARN=$(aws ecs run-task \
+          RUN_RESULT=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEF" \
-            --launch-type EC2 \
+            --capacity-provider-strategy "capacityProvider=${CAPACITY_PROVIDER},weight=100,base=0" \
             --overrides '{"containerOverrides":[{"name":"api","command":["sh","migrate-deploy.sh"]}]}' \
-            --query "tasks[0].taskArn" \
-            --output text)
+            --output json)
 
-          if [ -z "$TASK_ARN" ] || [ "$TASK_ARN" == "None" ]; then
+          TASK_ARN=$(echo "$RUN_RESULT" | jq -r '.tasks[0].taskArn // empty')
+
+          if [ -z "$TASK_ARN" ]; then
             echo "Erro: Falha ao iniciar a task de migração no ECS!"
+            echo "$RUN_RESULT" | jq -r '.failures[]? | "  \(.arn // "n/a"): \(.reason)"'
             exit 1
           fi
 
