@@ -178,10 +178,13 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
         subscription.config,
       );
 
+      const updatedMonthlyValue = Math.round(
+        commercialState.totalMonthlyPrice * (1 - this.getPromoDiscountPercent(billingCycle) / 100) * 100,
+      ) / 100;
       await this.paymentService.updateSubscription(
         subscription.asaasSubscriptionId,
         {
-          value: commercialState.totalMonthlyPrice,
+          value: updatedMonthlyValue,
           description: `Plano ${input.targetPlan} - AtendeAi`,
           updatePendingPayments: false,
         },
@@ -206,7 +209,7 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
     monthlyPrice: number,
     billingCycle: BillingCycleType,
   ): number {
-    const promoPercent = this.getPromoDiscountPercent();
+    const promoPercent = this.getPromoDiscountPercent(billingCycle);
     const discountedMonthly = monthlyPrice * (1 - promoPercent / 100);
 
     if (billingCycle === 'YEARLY') {
@@ -216,8 +219,9 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
     return Math.round(discountedMonthly * 100) / 100;
   }
 
-  private getPromoDiscountPercent(): number {
-    const raw = this.configService.get<string>('PROMO_DISCOUNT_PERCENT', '0');
+  private getPromoDiscountPercent(billingCycle: BillingCycleType = 'MONTHLY'): number {
+    const envKey = billingCycle === 'YEARLY' ? 'PROMO_DISCOUNT_ANNUAL' : 'PROMO_DISCOUNT_MONTHLY';
+    const raw = this.configService.get<string>(envKey, '0');
     const parsed = Number(raw);
     if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) return 0;
     return parsed;

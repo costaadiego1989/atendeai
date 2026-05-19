@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   Bot,
   CalendarClock,
+  Check,
   CreditCard,
   Gauge,
   Loader2,
@@ -44,6 +45,7 @@ import {
   getPromoDiscountPercent,
 } from '@/modules/billing/view-models/billing-pricing-helpers';
 
+
 interface AdvisorQuestionRowProps {
   question: BillingAdvisorQuestion;
   onChange: (field: BillingAdvisorField, value: string) => void;
@@ -77,9 +79,9 @@ function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
               <div className="flex items-center justify-between gap-3">
                 <span className="font-semibold text-foreground">{option.label}</span>
                 {active && (
-                  <Badge className="border-none bg-primary/10 text-primary hover:bg-primary/20">
-                    Selecionado
-                  </Badge>
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15">
+                    <Check className="h-3.5 w-3.5 text-primary" />
+                  </div>
                 )}
               </div>
               <Badge variant="outline" className="mt-3 border-border/60 bg-background/40 text-[10px]">
@@ -381,6 +383,28 @@ export default function BillingUsagePage() {
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="rounded-2xl border border-primary/20 bg-background/40 p-5">
+                <div className="mb-4 flex items-center gap-1.5 rounded-full bg-muted/50 p-1 w-fit">
+                  {(['monthly', 'annual'] as BillingCycle[]).map((cycle) => (
+                    <button
+                      key={cycle}
+                      type="button"
+                      onClick={() => setSelectedCycle(cycle)}
+                      className={cn(
+                        'rounded-full px-3.5 py-1 text-xs font-medium transition-all',
+                        selectedCycle === cycle
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {cycle === 'monthly' ? 'Mensal' : 'Anual'}
+                      {isPromoActive() && getPromoDiscountPercent(cycle) > 0 && (
+                        <span className="ml-1.5 rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                          -{getPromoDiscountPercent(cycle)}%
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
@@ -394,10 +418,17 @@ export default function BillingUsagePage() {
                     <p className="text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
                       Valor do plano
                     </p>
+                    {isPromoActive() && recommendation.recommendedPlan && (
+                      <p className="mt-1 text-sm text-muted-foreground line-through">
+                        {formatCurrency(recommendation.recommendedPlan.monthlyPrice)}/mês
+                      </p>
+                    )}
                     <p className="mt-2 text-2xl font-black text-foreground">
-                      {formatCurrency(recommendation.recommendedPlan?.monthlyPrice ?? 0) ?? 'R$ 0,00'}
+                      {formatCurrency(calculateMonthlyPrice(recommendation.recommendedPlan?.monthlyPrice ?? 0, selectedCycle))}
                     </p>
-                    <p className="text-xs text-muted-foreground">Somente plano base</p>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedCycle === 'annual' ? 'por mês no plano anual' : 'por mês'}
+                    </p>
                   </div>
                 </div>
               </div>

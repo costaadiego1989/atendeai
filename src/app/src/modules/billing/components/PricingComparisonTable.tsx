@@ -24,6 +24,7 @@ import {
   calculateMonthlyPrice,
   calculateAnnualSavings,
   getPromoDiscountPercent,
+  getPromoDiscountPercentAnnual,
   isPromoActive,
 } from '@/modules/billing/view-models/billing-pricing-helpers';
 
@@ -44,7 +45,8 @@ export function PricingComparisonTable({
 }: PricingComparisonTableProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const promoActive = isPromoActive();
-  const promoPercent = getPromoDiscountPercent();
+  const promoPercent = getPromoDiscountPercent(billingCycle);
+  const promoPercentAnnual = getPromoDiscountPercentAnnual();
 
   const sortedPlans = [...plans]
     .filter((p) => p.code !== 'TRIAL')
@@ -134,12 +136,17 @@ export function PricingComparisonTable({
           )}
         >
           Anual
+          {promoPercentAnnual > 0 && (
+            <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
+              -{promoPercentAnnual}%
+            </span>
+          )}
         </button>
       </div>
 
       {promoActive && (
         <p className="mb-4 text-center text-sm text-emerald-600">
-          Promoção de lançamento: {promoPercent}% de desconto em todos os planos.
+          Promoção de lançamento: {promoPercent}% de desconto no ciclo {billingCycle === 'annual' ? 'anual' : 'mensal'}.
         </p>
       )}
 

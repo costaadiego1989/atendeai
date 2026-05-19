@@ -7,6 +7,7 @@ describe('ChangeSubscriptionPlanUseCase', () => {
   let billingRepository: any;
   let tenantRepository: any;
   let paymentService: any;
+  let configService: any;
   let planChangeQueue: any;
 
   beforeEach(() => {
@@ -30,6 +31,9 @@ describe('ChangeSubscriptionPlanUseCase', () => {
       restorePayment: jest.fn(),
       createPaymentLink: jest.fn(),
     };
+    configService = {
+      get: jest.fn().mockReturnValue('0'),
+    };
     planChangeQueue = {
       add: jest.fn(),
     };
@@ -38,6 +42,7 @@ describe('ChangeSubscriptionPlanUseCase', () => {
       billingRepository,
       tenantRepository,
       paymentService,
+      configService,
       planChangeQueue,
     );
   });
@@ -78,7 +83,7 @@ describe('ChangeSubscriptionPlanUseCase', () => {
     expect(paymentService.createCustomer).toHaveBeenCalled();
     expect(paymentService.createPaymentLink).toHaveBeenCalledWith(
       expect.objectContaining({
-        externalReference: 'billing-upgrade|tenant-1|PROFISSIONAL',
+        externalReference: 'billing-upgrade|tenant-1|PROFISSIONAL|MONTHLY',
       }),
     );
     expect(result.mode).toBe('CHECKOUT_REQUIRED');
