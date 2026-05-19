@@ -30,6 +30,7 @@ describe('GenerateContactsReportUseCase', () => {
         phone: overrides.phone ?? '5511999999999',
         stage: ContactStageVO.create(overrides.stage ?? 'LEAD'),
         tags: overrides.tags ?? [],
+        prospectingOptOut: false,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-06-01'),
       },
