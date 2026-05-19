@@ -14,11 +14,16 @@ import { AdjustTenantSubscriptionQuotasUseCase } from '../../application/use-cas
 import { DraftTenantAdminMessageUseCase } from '../../application/use-cases/DraftTenantAdminMessageUseCase';
 import { SendTenantManualWhatsAppUseCase } from '../../application/use-cases/SendTenantManualWhatsAppUseCase';
 import {
+  GetPlatformTenantsMetricsUseCase,
+  GetPlatformTenantDetailUseCase,
+} from '../../application/use-cases/metrics/GetPlatformTenantsMetricsUseCase';
+import {
   AdjustQuotasBodyDto,
   DraftMessageBodyDto,
   ListPlatformTenantsQueryDto,
   SendManualMessageBodyDto,
 } from '../dtos/PlatformAdminDTOs';
+import { PlatformMetricsQueryDto } from '../dtos/PlatformMetricsDTOs';
 
 @Controller('platform/tenants')
 @UseGuards(PlatformAdminApiKeyGuard)
@@ -28,6 +33,8 @@ export class PlatformTenantsController {
     private readonly adjustQuotas: AdjustTenantSubscriptionQuotasUseCase,
     private readonly draftMessage: DraftTenantAdminMessageUseCase,
     private readonly sendManual: SendTenantManualWhatsAppUseCase,
+    private readonly getTenantsMetrics: GetPlatformTenantsMetricsUseCase,
+    private readonly getTenantDetail: GetPlatformTenantDetailUseCase,
   ) {}
 
   @Get()
@@ -67,5 +74,19 @@ export class PlatformTenantsController {
     @Body() body: SendManualMessageBodyDto,
   ) {
     return this.sendManual.execute({ tenantId, text: body.text });
+  }
+
+  @Get('metrics')
+  async metrics(@Query() q: PlatformMetricsQueryDto) {
+    return this.getTenantsMetrics.execute({
+      period: q.period,
+      startDate: q.startDate,
+      endDate: q.endDate,
+    });
+  }
+
+  @Get(':tenantId/details')
+  async details(@Param('tenantId') tenantId: string) {
+    return this.getTenantDetail.execute({ tenantId });
   }
 }
