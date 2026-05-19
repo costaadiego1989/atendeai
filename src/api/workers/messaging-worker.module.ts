@@ -21,6 +21,7 @@ import { FollowUpAuditService } from '@modules/messaging/application/services/Fo
 import { FollowUpWorker } from '@modules/messaging/application/workers/FollowUpWorker';
 import { AIModule } from '@modules/ai/ai.module';
 import { StorageModule } from '@shared/infrastructure/storage/StorageModule';
+import { ObservabilityModule } from '@shared/infrastructure/observability/observability.module';
 import { BullModule } from '@nestjs/bullmq';
 import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
 
@@ -37,6 +38,7 @@ import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connect
         connection: parseRedisConnection(config),
       }),
     }),
+    ObservabilityModule,
     DatabaseModule,
     RedisModule,
     EventBusModule,

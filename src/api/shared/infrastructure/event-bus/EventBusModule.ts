@@ -5,13 +5,14 @@ import { OutboxEventBus } from './OutboxEventBus';
 import { PrismaOutboxStore } from './PrismaOutboxStore';
 import { OutboxDispatcher } from './OutboxDispatcher';
 import { DatabaseModule } from '../database/DatabaseModule';
+import { RedisModule } from '../redis/RedisModule';
 import { RabbitMQEventBus } from './RabbitMQEventBus';
 import { PrismaInboxStore } from './PrismaInboxStore';
 import { PrismaTransactionalEventPublisher } from './PrismaTransactionalEventPublisher';
 
 @Global()
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, RedisModule],
   providers: [
     BullMQEventBus,
     RabbitMQEventBus,
