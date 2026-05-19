@@ -355,15 +355,6 @@ export default function BillingUsagePage() {
                   />
                 ))}
               </div>
-
-              <div className="flex flex-wrap items-center gap-3 border-t border-border/60 pt-4">
-                <Button onClick={vm.openRecommendedPlan}>
-                  Ver e contratar plano indicado
-                </Button>
-                <Button variant="ghost" onClick={vm.resetAdvisorAnswers}>
-                  Recalcular com uso atual
-                </Button>
-              </div>
             </CardContent>
           </Card>
 
@@ -467,12 +458,11 @@ export default function BillingUsagePage() {
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
                   Módulos extras do nicho
                 </p>
-                <p className="mt-2 text-lg font-bold text-foreground">
-                  {formatCurrency(recommendation.estimatedAddonInvestment) ?? 'R$ 0,00'}
+                <p className="mt-2 text-lg font-bold text-emerald-500">
+                  Inclusos no plano
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Estimativa caso você ative os módulos recomendados para seu nicho.
-                  Esse valor não está incluído no plano base.
+                  Os módulos recomendados para o seu nicho já estão disponíveis sem custo adicional no seu plano.
                 </p>
               </div>
             </CardContent>
@@ -600,18 +590,18 @@ export default function BillingUsagePage() {
                       {formatCurrency(selectedPlan?.monthlyPrice ?? 0)}/mês
                     </span>
                     <span className="text-2xl font-black text-foreground">
-                      {formatCurrency(calculateMonthlyPrice(selectedPlan?.monthlyPrice ?? 0))}
+                      {formatCurrency(calculateMonthlyPrice(selectedPlan?.monthlyPrice ?? 0, selectedCycle))}
                       <span className="text-sm font-medium text-muted-foreground"> /mês</span>
                     </span>
                     {selectedCycle === 'annual' && (
                       <span className="text-xs font-medium text-emerald-600">
                         Total anual: {formatCurrency(calculateAnnualTotal(selectedPlan?.monthlyPrice ?? 0))}
-                        {' '}({getPromoDiscountPercent()}% de desconto)
+                        {' '}({getPromoDiscountPercent(selectedCycle)}% de desconto)
                       </span>
                     )}
                     {selectedCycle === 'monthly' && (
                       <span className="text-xs font-medium text-emerald-600">
-                        Promoção de lançamento: {getPromoDiscountPercent()}% de desconto
+                        Promoção de lançamento: {getPromoDiscountPercent(selectedCycle)}% de desconto
                       </span>
                     )}
                   </>
