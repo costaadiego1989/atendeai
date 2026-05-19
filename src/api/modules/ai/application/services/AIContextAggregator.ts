@@ -7,6 +7,8 @@ import { Tenant } from '../../../tenant/domain/entities/Tenant';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 import { NicheWelcomeMenuService } from './welcome-menu/NicheWelcomeMenuService';
 import { OperatingHoursEntry } from './welcome-menu/MenuConditionEvaluator';
+import { TenantAIContextSnapshotService } from './TenantAIContextSnapshotService';
+import { SchedulingCategoryInfo } from '../ports/ITenantAIContextSnapshot';
 
 export interface AIContext {
   systemPrompt: string;
@@ -35,6 +37,7 @@ export class AIContextAggregator {
     private readonly nicheWelcomeMenuService: NicheWelcomeMenuService,
     private readonly tenantPDFContextProvider?: ITenantPDFContextProvider,
     private readonly aggregationCacheTtlMs: number = 0,
+    private readonly snapshotService?: TenantAIContextSnapshotService,
   ) {}
 
   async aggregate(
@@ -123,6 +126,17 @@ export class AIContextAggregator {
     };
 
     if (isFirstInteraction) {
+      let schedulingCategories: SchedulingCategoryInfo[] = [];
+      let commerceCatalogItemCount = 0;
+
+      if (this.snapshotService) {
+        const snapshot = await this.snapshotService.getOrBuild(
+          tenant.id.toString(),
+        );
+        schedulingCategories = snapshot.schedulingCategories;
+        commerceCatalogItemCount = snapshot.commerceCatalogItemCount;
+      }
+
       const welcomeMenu = this.nicheWelcomeMenuService.buildWelcomePrompt({
         companyName: tenant.companyName?.value ?? '',
         businessType: tenant.businessType ?? null,
@@ -139,8 +153,8 @@ export class AIContextAggregator {
         catalogFiles: tenant.catalogFiles ?? [],
         catalogUrl: tenant.catalogUrl ?? null,
         services: tenant.services ?? null,
-        schedulingCategories: [],
-        commerceCatalogItemCount: 0,
+        schedulingCategories,
+        commerceCatalogItemCount,
         hasRecoveryCases: false,
       });
       prompt = `${prompt}\n\n${welcomeMenu}`;

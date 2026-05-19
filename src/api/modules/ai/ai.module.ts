@@ -113,6 +113,10 @@ import {
   REPEAT_LAST_ORDER,
 } from './application/ports/IRepeatLastOrder';
 import { NicheWelcomeMenuService } from './application/services/welcome-menu/NicheWelcomeMenuService';
+import { TenantAIContextSnapshotService } from './application/services/TenantAIContextSnapshotService';
+import { TENANT_AI_CONTEXT_SNAPSHOT_STORE } from './application/ports/ITenantAIContextSnapshot';
+import { RedisTenantAIContextSnapshotStore } from './infrastructure/persistence/RedisTenantAIContextSnapshotStore';
+import { TenantAIContextSnapshotInvalidationHandler } from './infrastructure/handlers/TenantAIContextSnapshotInvalidationHandler';
 
 @Module({
   imports: [
@@ -137,6 +141,12 @@ import { NicheWelcomeMenuService } from './application/services/welcome-menu/Nic
       provide: NicheWelcomeMenuService,
       useFactory: () => new NicheWelcomeMenuService(),
     },
+    {
+      provide: TENANT_AI_CONTEXT_SNAPSHOT_STORE,
+      useClass: RedisTenantAIContextSnapshotStore,
+    },
+    TenantAIContextSnapshotService,
+    TenantAIContextSnapshotInvalidationHandler,
     {
       provide: AIResponseProcessor,
       useFactory: (
@@ -271,6 +281,7 @@ import { NicheWelcomeMenuService } from './application/services/welcome-menu/Nic
         nicheWelcomeMenuService: NicheWelcomeMenuService,
         tenantPDFContextProvider: ITenantPDFContextProvider,
         config: ConfigService,
+        snapshotService: TenantAIContextSnapshotService,
       ) => {
         const raw = Number(config.get<string>('AI_CONTEXT_AGGREGATOR_TTL_MS'));
         const ttlMs =
@@ -283,6 +294,7 @@ import { NicheWelcomeMenuService } from './application/services/welcome-menu/Nic
           nicheWelcomeMenuService,
           tenantPDFContextProvider,
           ttlMs,
+          snapshotService,
         );
       },
       inject: [
@@ -293,6 +305,7 @@ import { NicheWelcomeMenuService } from './application/services/welcome-menu/Nic
         NicheWelcomeMenuService,
         TENANT_PDF_CONTEXT_PROVIDER,
         ConfigService,
+        TenantAIContextSnapshotService,
       ],
     },
     {
