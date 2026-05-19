@@ -131,9 +131,6 @@ export class PlatformSalesReadDao {
         skip,
         take: input.limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          contact: { select: { name: true } },
-        },
       }),
       this.prisma.paymentLink.count({ where }),
     ]);
@@ -146,16 +143,29 @@ export class PlatformSalesReadDao {
     });
     const tenantMap = new Map(tenants.map((t) => [t.id, t.companyName]));
 
+    // Resolve contact names
+    const contactIds = links
+      .map((l) => l.contactId)
+      .filter((id): id is string => id !== null);
+    const contacts = contactIds.length
+      ? await this.prisma.contact.findMany({
+          where: { id: { in: contactIds } },
+          select: { id: true, name: true },
+        })
+      : [];
+    const contactMap = new Map(contacts.map((c) => [c.id, c.name]));
+
     const items: PaymentLinkListItem[] = links.map((l) => ({
       id: l.id,
       tenantId: l.tenantId,
       companyName: tenantMap.get(l.tenantId) ?? 'Unknown',
-      contactName: l.contact?.name ?? null,
-      amount: Number(l.amount),
+      contactName: l.contactId ? (contactMap.get(l.contactId) ?? null) : null,
+      name: l.name,
+      value: Number(l.value),
       status: l.status,
-      billingType: l.billingType ?? null,
+      billingType: l.billingType,
+      source: l.source,
       expiresAt: l.expiresAt ?? null,
-      paidAt: l.paidAt ?? null,
       createdAt: l.createdAt,
     }));
 
