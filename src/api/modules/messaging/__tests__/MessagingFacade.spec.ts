@@ -15,6 +15,7 @@ describe('MessagingFacade', () => {
   let contactFacade: { getContactById: jest.Mock };
   let messageQueue: { addJob: jest.Mock };
   let eventBus: { publish: jest.Mock };
+  let templateAdapter: { buildTemplateMessage: jest.Mock };
 
   beforeEach(() => {
     conversationRepository = {
@@ -32,12 +33,16 @@ describe('MessagingFacade', () => {
     eventBus = {
       publish: jest.fn(),
     };
+    templateAdapter = {
+      buildTemplateMessage: jest.fn(),
+    };
 
     sut = new MessagingFacade(
       conversationRepository as any,
       contactFacade as any,
       messageQueue as any,
       eventBus as any,
+      templateAdapter as any,
     );
   });
 
