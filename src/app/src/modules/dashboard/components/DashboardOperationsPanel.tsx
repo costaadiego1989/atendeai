@@ -80,7 +80,7 @@ export function DashboardOperationsPanel({
                     <p className="truncate text-sm font-semibold text-foreground">
                       {conversation.contactName}
                     </p>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="shrink-0 self-center text-xs text-muted-foreground">
                       {formatDate(conversation.lastMessageAt)}
                     </span>
                   </div>

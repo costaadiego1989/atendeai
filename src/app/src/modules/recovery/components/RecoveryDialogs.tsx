@@ -357,7 +357,9 @@ export function RecoveryDialogs({ vm }: { vm: RecoveryPageViewModel }) {
                     {vm.createForm.chargeTitle || 'Sem título'}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {vm.createForm.amountDue || '0,00'} • {vm.createForm.dueDate || 'Sem vencimento'}
+                    {vm.createForm.amountDue
+                      ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(parseCurrencyInput(vm.createForm.amountDue)))
+                      : 'R$ 0,00'} • {vm.createForm.dueDate ? new Date(vm.createForm.dueDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem vencimento'}
                   </p>
                 </div>
                 <div className="space-y-2">
