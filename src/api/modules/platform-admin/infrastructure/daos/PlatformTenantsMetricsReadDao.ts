@@ -170,7 +170,9 @@ export class PlatformTenantsMetricsReadDao {
     const tenantMap = new Map(tenants.map((t) => [t.id, t.companyName]));
 
     // Calculate tenants above 80% quota
-    const usageMap = new Map(latestUsage.map((u) => [u.tenantId, u.messagesUsed]));
+    const usageMap = new Map(
+      latestUsage.map((u) => [u.tenantId, u.messagesUsed]),
+    );
     let tenantsAbove80Quota = 0;
     for (const sub of allActiveSubs) {
       const used = usageMap.get(sub.tenantId) ?? 0;
@@ -196,7 +198,10 @@ export class PlatformTenantsMetricsReadDao {
         planDistribution.map((g) => [g.plan, g._count]),
       ),
       distributionByBusinessType: Object.fromEntries(
-        businessTypeDistribution.map((g) => [g.businessType ?? 'OTHER', g._count]),
+        businessTypeDistribution.map((g) => [
+          g.businessType ?? 'OTHER',
+          g._count,
+        ]),
       ),
       tenantsAbove80Quota,
       inactiveTenantsNoMessage7d: inactiveConversations,
