@@ -9,6 +9,7 @@ describe('InitiateTrialSubscriptionUseCase', () => {
   let eventBus: any;
   let billingQueue: jest.Mocked<Queue>;
   let configService: jest.Mocked<ConfigService>;
+  let billingRepository: any;
 
   beforeEach(() => {
     paymentGateway = {
@@ -37,11 +38,19 @@ describe('InitiateTrialSubscriptionUseCase', () => {
         }),
     } as unknown as jest.Mocked<ConfigService>;
 
+    billingRepository = {
+      saveSubscription: jest.fn().mockResolvedValue(undefined),
+      saveUsage: jest.fn().mockResolvedValue(undefined),
+      findSubscription: jest.fn().mockResolvedValue(null),
+      getUsage: jest.fn().mockResolvedValue(null),
+    };
+
     useCase = new InitiateTrialSubscriptionUseCase(
       paymentGateway,
       eventBus,
       billingQueue,
       configService,
+      billingRepository,
     );
   });
 
