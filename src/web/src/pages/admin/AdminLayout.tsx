@@ -10,6 +10,23 @@ export default function AdminLayout() {
   }
 
   const navItems = [
+    { label: "Dashboard", path: "/admin/dashboard" },
+    { label: "Tenants", path: "/admin/tenants" },
+    { label: "Billing", path: "/admin/billing" },
+    { label: "Messaging", path: "/admin/messaging" },
+    { label: "Vendas", path: "/admin/sales" },
+    { label: "Commerce", path: "/admin/commerce" },
+    { label: "Cobrança", path: "/admin/recovery" },
+    { label: "Contatos", path: "/admin/contacts" },
+    { label: "Prospecção", path: "/admin/prospecting" },
+    { label: "Agendamento", path: "/admin/scheduling" },
+    { label: "AI", path: "/admin/ai" },
+    { label: "Social", path: "/admin/social" },
+    { label: "Catálogo", path: "/admin/catalog" },
+    { label: "Estoque", path: "/admin/inventory" },
+    { label: "Propostas", path: "/admin/proposals" },
+    { label: "Pagamentos", path: "/admin/payment" },
+    { label: "Auth", path: "/admin/auth" },
     { label: "Suporte", path: "/admin/support" },
   ];
 
@@ -20,7 +37,7 @@ export default function AdminLayout() {
         <div className="p-4 border-b border-gray-200">
           <h1 className="text-lg font-bold text-gray-900">AtendeAi Admin</h1>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => (
             <Link
               key={item.path}
