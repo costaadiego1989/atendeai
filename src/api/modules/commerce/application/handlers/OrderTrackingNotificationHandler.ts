@@ -82,8 +82,7 @@ export class OrderTrackingNotificationHandler implements OnModuleInit {
     trackingUrl: string | null,
   ): string {
     let message =
-      `Seu pedido foi enviado! 📦\n\n` +
-      `Código de rastreio: ${trackingCode}`;
+      `Seu pedido foi enviado! 📦\n\n` + `Código de rastreio: ${trackingCode}`;
 
     if (trackingUrl) {
       message += `\nAcompanhe aqui: ${trackingUrl}`;

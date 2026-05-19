@@ -35,7 +35,9 @@ export class SetOrderTrackingCodeUseCase {
     private readonly eventBus: IEventBus,
   ) {}
 
-  async execute(command: SetOrderTrackingCodeCommand): Promise<CommerceOrderRecord> {
+  async execute(
+    command: SetOrderTrackingCodeCommand,
+  ): Promise<CommerceOrderRecord> {
     const order = await this.commerceRepository.findOrderById(
       command.tenantId,
       command.orderId,

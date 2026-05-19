@@ -913,7 +913,9 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     `);
 
     if (!rows[0]) {
-      throw new Error(`Order ${input.orderId} not found for tenant ${input.tenantId}`);
+      throw new Error(
+        `Order ${input.orderId} not found for tenant ${input.tenantId}`,
+      );
     }
 
     return this.mapOrder(rows[0]);
