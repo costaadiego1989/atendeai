@@ -34,6 +34,7 @@ function makeCampaign(props?: {
     channel: ProspectChannelVO.create('WHATSAPP'),
     targetContactIds: props?.targetContactIds ?? ['contact-1', 'contact-2'],
     messageTemplate: 'Oi {{first_name}}, tudo bem?',
+    templateName: 'prospect_start_template',
     dailyLimit: props?.dailyLimit ?? 10,
   });
   campaign.activate();
@@ -85,6 +86,10 @@ describe('StartProspectCampaignUseCase', () => {
       findLatestContactedByContact: jest.fn(),
       findAllByCampaign: jest.fn(),
       findNextPendingByCampaign: jest.fn(),
+      findLastContactedAt: jest.fn(),
+      findLatestByContactIds: jest.fn(),
+      findActiveByContact: jest.fn(),
+      countContactedTodayByCampaign: jest.fn(),
     };
     contactFacade = {
       identifyContact: jest.fn(),
@@ -92,13 +97,14 @@ describe('StartProspectCampaignUseCase', () => {
       ensureContact: jest.fn(),
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
+      markProspectingOptOut: jest.fn(),
     };
 
     useCase = new StartProspectCampaignUseCase(
       campaignRepository,
       executionRepository,
       contactFacade,
-      new ProspectDispatchPolicy(),
+      new ProspectDispatchPolicy(executionRepository as any),
     );
   });
 
@@ -234,6 +240,7 @@ describe('StartProspectCampaignUseCase', () => {
       channel: ProspectChannelVO.create('WHATSAPP'),
       targetContactIds: ['contact-1'],
       messageTemplate: 'Oi {{first_name}}, tudo bem?',
+      templateName: 'assisted_local_template',
     });
     campaign.activate();
     campaignRepository.findById.mockResolvedValue(campaign);
@@ -256,6 +263,7 @@ describe('StartProspectCampaignUseCase', () => {
       channel: ProspectChannelVO.create('WHATSAPP'),
       targetContactIds: ['contact-1'],
       messageTemplate: 'Olá, temos uma condição especial para você.',
+      templateName: 'generic_template',
     });
     campaign.activate();
     campaignRepository.findById.mockResolvedValue(campaign);
