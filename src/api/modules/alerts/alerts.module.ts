@@ -11,6 +11,7 @@ import { ListAlertRemindersUseCase } from './application/use-cases/ListAlertRemi
 import { UpdateAlertReminderUseCase } from './application/use-cases/UpdateAlertReminderUseCase';
 import { DeleteAlertReminderUseCase } from './application/use-cases/DeleteAlertReminderUseCase';
 import { ProcessAlertReminderUseCase } from './application/use-cases/ProcessAlertReminderUseCase';
+import { OperationalAlertEventHandler } from './application/handlers/OperationalAlertEventHandler';
 import { ALERT_REMINDER_REPOSITORY } from './domain/repositories/IAlertReminderRepository';
 import { PrismaAlertReminderRepository } from './infrastructure/persistence/repositories/PrismaAlertReminderRepository';
 import { ALERT_REMINDER_QUEUE } from './domain/ports/IAlertReminderQueue';
@@ -34,6 +35,7 @@ import { AlertReminderRuntimeConfig } from './application/services/AlertReminder
     UpdateAlertReminderUseCase,
     DeleteAlertReminderUseCase,
     ProcessAlertReminderUseCase,
+    OperationalAlertEventHandler,
     {
       provide: ALERT_REMINDER_REPOSITORY,
       useClass: PrismaAlertReminderRepository,
