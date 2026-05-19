@@ -53,6 +53,7 @@ describe('ProspectCampaign', () => {
       objective: 'Testar transicoes',
       audienceType: ProspectAudienceTypeVO.create('REENGAGEMENT'),
       channel: ProspectChannelVO.create('WHATSAPP'),
+      templateName: 'reativacao_template',
     });
 
     campaign.activate();
