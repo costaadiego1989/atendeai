@@ -60,6 +60,7 @@ describe('GetUsersByTenantUseCase', () => {
         phone: '+5511999998888',
         role: 'OWNER',
         mustChangePassword: false,
+        lastLoginAt: null,
       },
       {
         id: 'user-2',
@@ -68,6 +69,7 @@ describe('GetUsersByTenantUseCase', () => {
         phone: '+5511911112222',
         role: 'ADMIN',
         mustChangePassword: false,
+        lastLoginAt: null,
       },
     ]);
   });
