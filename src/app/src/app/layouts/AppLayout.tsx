@@ -23,7 +23,6 @@ import {
   MessageSquare,
   Search,
   ShoppingCart,
-  ShieldHalf,
   Tag,
   UserPlus,
   Webhook,
@@ -149,14 +148,6 @@ export function AppLayout({ children }: { children?: ReactNode }) {
   const filteredSalesNav = filterNavByNiche(salesNav, businessType);
   const filteredProspectingNav = filterNavByNiche(prospectingNav, businessType);
 
-  const platformNavItems = ((): NavItem[] => {
-    const show =
-      import.meta.env.VITE_SHOW_PLATFORM_ADMIN_NAV === 'true' &&
-      !!(import.meta.env.VITE_PLATFORM_ADMIN_API_KEY as string | undefined)?.trim();
-    if (!show) return [];
-    return [{ label: 'Tenants', path: '/app/platform/tenants', icon: ShieldHalf }];
-  })();
-
   return (
     <div className="flex h-screen overflow-hidden bg-transparent">
       <GlobalConversationNotifier />
@@ -218,17 +209,6 @@ export function AppLayout({ children }: { children?: ReactNode }) {
               currentPath={location.pathname}
             />
           )}
-          {platformNavItems.length > 0 ? (
-            <>
-              <Separator className="my-2 bg-sidebar-border" />
-              <NavSection
-                title="Plataforma (interno)"
-                items={platformNavItems}
-                collapsed={sidebarCollapsed}
-                currentPath={location.pathname}
-              />
-            </>
-          ) : null}
           <Separator className="my-2 bg-sidebar-border" />
           <NavSection
             title="Configuracoes"

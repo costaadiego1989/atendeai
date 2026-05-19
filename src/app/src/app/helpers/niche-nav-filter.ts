@@ -12,15 +12,15 @@ type NicheCode = string;
  * Core routes (dashboard, conversations, contacts, settings) are always visible.
  */
 const nicheRoutes: Record<NicheCode, string[]> = {
-  // Commerce-oriented niches
-  FOOD: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/recovery'],
-  RETAIL: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/recovery'],
+  // Commerce-oriented niches — recovery is not part of the commerce flow
+  FOOD: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
+  RETAIL: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
   ECOMMERCE: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/prospecting'],
-  MARKET: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/recovery'],
-  GROCERY: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/recovery'],
-  BAKERY: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/recovery'],
-  CAFETERIA: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/recovery'],
-  SUPERMARKET: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/recovery'],
+  MARKET: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
+  GROCERY: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
+  BAKERY: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
+  CAFETERIA: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
+  SUPERMARKET: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
 
   // Scheduling-oriented niches
   BEAUTY: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],

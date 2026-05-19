@@ -417,14 +417,13 @@ export function useRecoveryPageViewModel() {
       return recoveryService.createCase(tenant!.id, payload);
     },
     onSuccess: async (result) => {
-      setRefreshKey(Date.now());
       setPage(1);
       setStatusFilter('ALL');
       setSearch('');
       setContactSearch('');
 
-      void queryClient.invalidateQueries({ queryKey: ['recovery-cases'] });
-      void queryClient.invalidateQueries({ queryKey: ['recovery-case-detail'] });
+      await queryClient.invalidateQueries({ queryKey: ['recovery-cases'] });
+      await queryClient.invalidateQueries({ queryKey: ['recovery-case-detail'] });
 
       setCreateOpen(false);
       setCreateForm(DEFAULT_CREATE_FORM);
