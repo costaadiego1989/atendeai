@@ -26,6 +26,7 @@ describe('ProspectLeadCapturesUseCase', () => {
       ensureContact: jest.fn(),
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
+      markProspectingOptOut: jest.fn(),
     };
     campaignRepository = {
       save: jest.fn(),
@@ -39,6 +40,10 @@ describe('ProspectLeadCapturesUseCase', () => {
       findLatestContactedByContact: jest.fn(),
       findAllByCampaign: jest.fn(),
       findNextPendingByCampaign: jest.fn(),
+      findLastContactedAt: jest.fn(),
+      findLatestByContactIds: jest.fn(),
+      findActiveByContact: jest.fn(),
+      countContactedTodayByCampaign: jest.fn(),
     };
 
     useCase = new ProspectLeadCapturesUseCase(
@@ -46,7 +51,7 @@ describe('ProspectLeadCapturesUseCase', () => {
       contactFacade,
       campaignRepository,
       executionRepository,
-      new ProspectDispatchPolicy(),
+      new ProspectDispatchPolicy(executionRepository as any),
     );
   });
 
