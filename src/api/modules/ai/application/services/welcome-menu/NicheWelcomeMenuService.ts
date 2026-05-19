@@ -1,5 +1,11 @@
 import { NicheClassifier, NicheCategory } from './NicheClassifier';
-import { MenuConditionEvaluator, MenuConditionInput, SchedulingCategorySummary, PromotionSummary, OperatingHoursEntry } from './MenuConditionEvaluator';
+import {
+  MenuConditionEvaluator,
+  MenuConditionInput,
+  SchedulingCategorySummary,
+  PromotionSummary,
+  OperatingHoursEntry,
+} from './MenuConditionEvaluator';
 import { IMenuBuilder, MenuBuilderInput } from './builders/IMenuBuilder';
 import { CommerceMenuBuilder } from './builders/CommerceMenuBuilder';
 import { SchedulingMenuBuilder } from './builders/SchedulingMenuBuilder';
@@ -8,7 +14,11 @@ import { ConsultativeMenuBuilder } from './builders/ConsultativeMenuBuilder';
 import { EducationMenuBuilder } from './builders/EducationMenuBuilder';
 import { B2BMenuBuilder } from './builders/B2BMenuBuilder';
 import { DefaultMenuBuilder } from './builders/DefaultMenuBuilder';
-import { formatGreeting, getToneDescription, MENU_INSTRUCTIONS_TEMPLATE } from './NicheMenuTemplates';
+import {
+  formatGreeting,
+  getToneDescription,
+  MENU_INSTRUCTIONS_TEMPLATE,
+} from './NicheMenuTemplates';
 
 export interface NicheWelcomeMenuInput {
   companyName: string;
@@ -45,7 +55,9 @@ export class NicheWelcomeMenuService {
   buildWelcomePrompt(input: NicheWelcomeMenuInput): string {
     const { category } = this.classifier.classify(input.businessType);
 
-    const conditions = this.conditionEvaluator.evaluate(this.toConditionInput(input));
+    const conditions = this.conditionEvaluator.evaluate(
+      this.toConditionInput(input),
+    );
 
     const menuContent = this.buildMenu(category, input, conditions);
 

@@ -13,8 +13,12 @@ export class ConsultativeMenuBuilder implements IMenuBuilder {
     const options: string[] = [];
 
     options.push('Nossos serviços — áreas de atuação');
-    options.push('Solicitar orçamento — descreva sua necessidade para receber proposta');
-    options.push('Acompanhar proposta — ver status de proposta/orçamento enviado');
+    options.push(
+      'Solicitar orçamento — descreva sua necessidade para receber proposta',
+    );
+    options.push(
+      'Acompanhar proposta — ver status de proposta/orçamento enviado',
+    );
 
     if (conditions.hasSchedulingCategories) {
       options.push('Agendar reunião ou visita');

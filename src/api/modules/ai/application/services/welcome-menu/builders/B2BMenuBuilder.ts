@@ -13,7 +13,9 @@ export class B2BMenuBuilder implements IMenuBuilder {
     const options: string[] = [];
 
     options.push('Nossas soluções — serviços e diferenciais');
-    options.push('Solicitar proposta comercial — personalizada para sua empresa');
+    options.push(
+      'Solicitar proposta comercial — personalizada para sua empresa',
+    );
     options.push('Acompanhar proposta — status de negociação em andamento');
 
     if (conditions.hasCatalogFiles) {

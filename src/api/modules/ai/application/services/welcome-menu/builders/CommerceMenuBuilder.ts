@@ -4,7 +4,11 @@ import { NicheCategory } from '../NicheClassifier';
 const EMOJI_NUMBERS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
 
 export class CommerceMenuBuilder implements IMenuBuilder {
-  private static readonly SUPPORTED: NicheCategory[] = ['RETAIL', 'ECOMMERCE', 'FOOD'];
+  private static readonly SUPPORTED: NicheCategory[] = [
+    'RETAIL',
+    'ECOMMERCE',
+    'FOOD',
+  ];
 
   supports(category: NicheCategory): boolean {
     return CommerceMenuBuilder.SUPPORTED.includes(category);
@@ -27,8 +31,12 @@ export class CommerceMenuBuilder implements IMenuBuilder {
     const { conditions } = input;
     const options: string[] = [];
 
-    options.push('Pesquisar produtos — busca no catálogo por nome, mostra preço e estoque');
-    options.push('Meu carrinho — ver itens no carrinho atual ou continuar compra');
+    options.push(
+      'Pesquisar produtos — busca no catálogo por nome, mostra preço e estoque',
+    );
+    options.push(
+      'Meu carrinho — ver itens no carrinho atual ou continuar compra',
+    );
     options.push('Acompanhar pedido — status do pedido e código de rastreio');
     options.push('Repetir último pedido — refaz o pedido anterior');
 

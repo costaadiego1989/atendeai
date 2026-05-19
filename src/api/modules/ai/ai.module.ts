@@ -149,7 +149,11 @@ import { NicheWelcomeMenuService } from './application/services/welcome-menu/Nic
           reserveProfessionalSlotUseCase,
           repeatLastOrderUseCase,
         ),
-      inject: [PAYMENT_LINK_GENERATOR, RESERVE_PROFESSIONAL_SLOT, REPEAT_LAST_ORDER],
+      inject: [
+        PAYMENT_LINK_GENERATOR,
+        RESERVE_PROFESSIONAL_SLOT,
+        REPEAT_LAST_ORDER,
+      ],
     },
     {
       provide: HumanHandoffPolicy,

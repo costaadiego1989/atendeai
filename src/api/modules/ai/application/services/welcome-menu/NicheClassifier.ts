@@ -10,7 +10,11 @@ export type NicheCategory =
   | 'B2B'
   | 'DEFAULT';
 
-export type NicheStrategy = 'COMMERCE' | 'SCHEDULING' | 'RECOVERY' | 'CONSULTATIVE';
+export type NicheStrategy =
+  | 'COMMERCE'
+  | 'SCHEDULING'
+  | 'RECOVERY'
+  | 'CONSULTATIVE';
 
 export interface NicheClassification {
   category: NicheCategory;

@@ -126,7 +126,11 @@ export class AIContextAggregator {
       const welcomeMenu = this.nicheWelcomeMenuService.buildWelcomePrompt({
         companyName: tenant.companyName?.value ?? '',
         businessType: tenant.businessType ?? null,
-        operatingHours: (tenant.operatingHours as Record<string, OperatingHoursEntry> | null) ?? null,
+        operatingHours:
+          (tenant.operatingHours as Record<
+            string,
+            OperatingHoursEntry
+          > | null) ?? null,
         promotions: (tenant.promotions ?? []).map((p) => ({
           title: p.title,
           description: p.description,

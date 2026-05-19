@@ -32,7 +32,8 @@ const NICHE_TEMPLATES: Record<NicheCategory, NicheTemplate> = {
   },
   HOME_SERV: {
     tone: 'Consultivo, profissional, cordial',
-    greeting: 'Olá! Obrigado pelo contato com a {companyName}. Como posso ajudar?',
+    greeting:
+      'Olá! Obrigado pelo contato com a {companyName}. Como posso ajudar?',
   },
   EDUCATION: {
     tone: 'Motivador, acessível, informativo',
@@ -62,7 +63,10 @@ export function getNicheTemplate(category: NicheCategory): NicheTemplate {
   return NICHE_TEMPLATES[category];
 }
 
-export function formatGreeting(category: NicheCategory, companyName: string): string {
+export function formatGreeting(
+  category: NicheCategory,
+  companyName: string,
+): string {
   const template = NICHE_TEMPLATES[category];
   return template.greeting.replace(/{companyName}/g, companyName);
 }
