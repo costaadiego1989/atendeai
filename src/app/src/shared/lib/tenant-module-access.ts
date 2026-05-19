@@ -1,10 +1,19 @@
 import type { Tenant } from '@/shared/types';
 
+/** Modules that require a paid plan (above TRIAL) */
+const PAID_ONLY_MODULES = new Set(['INTEGRATIONS_HUB']);
+
 export function hasTenantModuleAccess(
   tenant: Tenant | null | undefined,
   moduleCode: string,
 ): boolean {
   if (!tenant || !moduleCode) {
+    return false;
+  }
+
+  // TRIAL plan cannot access paid-only modules regardless of moduleAccess state
+  const plan = tenant.billingAccess?.plan?.toUpperCase();
+  if (plan === 'TRIAL' && PAID_ONLY_MODULES.has(moduleCode)) {
     return false;
   }
 
