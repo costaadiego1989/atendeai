@@ -129,6 +129,7 @@ export class ProspectLeadCapturesUseCase implements IProspectLeadCapturesUseCase
       channel: ProspectChannelVO.create(channel),
       targetContactIds: uniqueTargetContactIds,
       messageTemplate: input.messageTemplate.trim(),
+      templateName: channel === 'WHATSAPP' ? 'prospect_lead_capture' : undefined,
       dailyLimit: uniqueTargetContactIds.length,
     });
     campaign.activate();
