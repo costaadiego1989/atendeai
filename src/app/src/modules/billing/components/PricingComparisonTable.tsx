@@ -45,8 +45,9 @@ export function PricingComparisonTable({
 }: PricingComparisonTableProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const promoActive = isPromoActive();
-  const promoPercent = getPromoDiscountPercent(billingCycle);
+  const promoPercentMonthly = getPromoDiscountPercent('monthly');
   const promoPercentAnnual = getPromoDiscountPercentAnnual();
+  const promoPercent = getPromoDiscountPercent(billingCycle);
 
   const sortedPlans = [...plans]
     .filter((p) => p.code !== 'TRIAL')
@@ -119,9 +120,9 @@ export function PricingComparisonTable({
           )}
         >
           Mensal
-          {promoActive && (
+          {promoActive && promoPercentMonthly > 0 && (
             <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
-              -{promoPercent}%
+              -{promoPercentMonthly}%
             </span>
           )}
         </button>
