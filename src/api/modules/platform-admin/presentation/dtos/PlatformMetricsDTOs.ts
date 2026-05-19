@@ -81,3 +81,45 @@ export class PlatformBillingQueryDto extends PlatformPaginatedQueryDto {
   @IsIn(['MONTHLY', 'YEARLY'])
   billingCycleType?: string;
 }
+
+export class PlatformRecoveryQueryDto extends PlatformPaginatedQueryDto {
+  @IsOptional()
+  @IsIn(['READY_TO_CONTACT', 'IN_PROGRESS', 'PAID', 'LOST', 'CANCELLED'])
+  status?: string;
+
+  @IsOptional()
+  @IsIn(['MANUAL', 'RECURRING', 'SYSTEM'])
+  source?: string;
+}
+
+export class PlatformContactsQueryDto extends PlatformPaginatedQueryDto {
+  @IsOptional()
+  @IsIn(['LEAD', 'CUSTOMER', 'PROSPECT', 'INACTIVE'])
+  stage?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
+}
+
+export class PlatformProspectingQueryDto extends PlatformPaginatedQueryDto {
+  @IsOptional()
+  @IsIn(['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED'])
+  status?: string;
+}
+
+export class PlatformSchedulingQueryDto extends PlatformPaginatedQueryDto {
+  @IsOptional()
+  @IsIn(['ACTIVE', 'COMPLETED', 'CANCELLED'])
+  status?: string;
+}
+
+export class PlatformAIQueryDto extends PlatformPaginatedQueryDto {
+  @IsOptional()
+  @IsString()
+  intent?: string;
+
+  @IsOptional()
+  @IsString()
+  sentiment?: string;
+}
