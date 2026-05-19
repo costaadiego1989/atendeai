@@ -28,6 +28,10 @@ describe('RegisterProspectResponseUseCase', () => {
       findAllByCampaign: jest.fn(),
       findLatestContactedByContact: jest.fn(),
       findNextPendingByCampaign: jest.fn(),
+      findLastContactedAt: jest.fn(),
+      findLatestByContactIds: jest.fn(),
+      findActiveByContact: jest.fn(),
+      countContactedTodayByCampaign: jest.fn(),
     };
 
     useCase = new RegisterProspectResponseUseCase(executionRepository);
