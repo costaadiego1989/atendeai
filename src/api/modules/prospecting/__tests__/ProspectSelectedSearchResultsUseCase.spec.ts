@@ -45,6 +45,7 @@ describe('ProspectSelectedSearchResultsUseCase', () => {
       ensureContact: jest.fn(),
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
+      markProspectingOptOut: jest.fn(),
     };
     campaignRepository = {
       save: jest.fn(),
@@ -56,7 +57,7 @@ describe('ProspectSelectedSearchResultsUseCase', () => {
       searchResultRepository,
       contactFacade,
       campaignRepository,
-      new ProspectDispatchPolicy(),
+      new ProspectDispatchPolicy({} as any),
     );
   });
 
