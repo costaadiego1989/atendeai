@@ -136,7 +136,8 @@ jobs:
             VITE_PLATFORM_ADMIN_API_KEY=${{ secrets.VITE_PLATFORM_ADMIN_API_KEY }}
             VITE_SHOW_PLATFORM_ADMIN_NAV=${{ secrets.VITE_SHOW_PLATFORM_ADMIN_NAV }}
             VITE_FILTER_MODULES_BY_NICHE=true
-            VITE_PROMO_DISCOUNT_PERCENT=${{ secrets.VITE_PROMO_DISCOUNT_PERCENT }}
+            VITE_PROMO_DISCOUNT_MONTHLY=20
+            VITE_PROMO_DISCOUNT_ANNUAL=40
 
       # 3. Web Docker Build & Push
       - name: Build and Push Web Image
