@@ -66,6 +66,7 @@ describe('UpdateCommerceOrderStatusUseCase', () => {
       markOrderPaidByPaymentReference: jest.fn(),
       findCatalogItemById: jest.fn(),
       findInventoryItemById: jest.fn(),
+      countActiveCatalogItems: jest.fn().mockResolvedValue(0),
     } as unknown as jest.Mocked<ICommerceRepository>;
 
     useCase = new UpdateCommerceOrderStatusUseCase(

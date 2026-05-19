@@ -183,6 +183,7 @@ describe('RepeatLastOrder Integration', () => {
       listSessionAbandonmentTouches: jest.fn(),
       findCatalogItemById: jest.fn(),
       findInventoryItemById: jest.fn(),
+      countActiveCatalogItems: jest.fn().mockResolvedValue(0),
     } as unknown as jest.Mocked<ICommerceRepository>;
 
     eventBus = { publish: jest.fn() };
