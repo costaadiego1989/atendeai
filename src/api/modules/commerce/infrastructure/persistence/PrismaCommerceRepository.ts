@@ -1080,6 +1080,16 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       availabilityStatus: String(rows[0].availability_status ?? 'AVAILABLE'),
     };
   }
+
+  async countActiveCatalogItems(tenantId: string): Promise<number> {
+    const rows = await this.prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
+      SELECT COUNT(*) AS count
+      FROM catalog_schema.catalog_items
+      WHERE tenant_id = ${tenantId}::uuid
+        AND active = TRUE
+    `);
+    return Number(rows[0]?.count ?? 0);
+  }
 }
 
 export const __COMMERCE_REPOSITORY_CLASS__ = COMMERCE_REPOSITORY;

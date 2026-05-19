@@ -406,6 +406,7 @@ export interface ICommerceRepository {
     tenantId: string,
     itemId: string,
   ): Promise<CommerceInventoryLookupreçord | null>;
+  countActiveCatalogItems(tenantId: string): Promise<number>;
 }
 
 export const COMMERCE_REPOSITORY = Symbol('COMMERCE_REPOSITORY');
