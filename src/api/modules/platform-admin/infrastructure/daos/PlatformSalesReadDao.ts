@@ -22,11 +22,12 @@ export interface PaymentLinkListItem {
   tenantId: string;
   companyName: string;
   contactName: string | null;
-  amount: number;
+  name: string;
+  value: number;
   status: string;
-  billingType: string | null;
+  billingType: string;
+  source: string;
   expiresAt: Date | null;
-  paidAt: Date | null;
   createdAt: Date;
 }
 
