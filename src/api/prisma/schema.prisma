@@ -388,6 +388,7 @@ model InventoryConnection {
 model RecoveryCase {
   id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId          String   @map("tenant_id") @db.Uuid
+  branchId          String?  @map("branch_id") @db.Uuid
   contactId         String?  @map("contact_id") @db.Uuid
   debtorName        String   @map("debtor_name") @db.VarChar(255)
   debtorCompanyName String?  @map("debtor_company_name") @db.VarChar(255)
@@ -413,11 +414,15 @@ model RecoveryCase {
   suggestedReply    String?  @map("suggested_reply") @db.Text
   suggestedNextAction String? @map("suggested_next_action") @db.Text
   guidanceGeneratedAt DateTime? @map("guidance_generated_at") @db.Timestamptz
+  playbookId        String?  @map("playbook_id") @db.Uuid
+  playbookPhaseIndex Int      @default(0) @map("playbook_phase_index")
+  lastPlaybookPhaseExecutedAt DateTime? @map("last_playbook_phase_executed_at") @db.Timestamptz
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, status], name: "idx_recovery_cases_tenant_status")
   @@index([tenantId, source], name: "idx_recovery_cases_tenant_source")
+  @@index([tenantId, branchId], name: "idx_recovery_cases_tenant_branch")
   @@map("recovery_cases")
   @@schema("recovery_schema")
 }
