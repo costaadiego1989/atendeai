@@ -1,6 +1,7 @@
 ﻿import { ReactNode, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { TrialBanner } from '@/components/TrialBanner';
+import { QuotaExhaustedBanner } from '@/components/QuotaExhaustedBanner';
 import {
   Archive,
   BarChart3,
@@ -271,6 +272,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TrialBanner />
+        <QuotaExhaustedBanner />
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 bg-background/40 px-5 backdrop-blur-md">
           <ActiveBranchSelector />
 

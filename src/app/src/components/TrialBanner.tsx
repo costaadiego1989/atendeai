@@ -32,9 +32,7 @@ export function TrialBanner() {
     return () => clearInterval(interval);
   }, [tenant?.createdAt]);
 
-  // Only show if tenant has no plan (trial) and is within or just after trial period
-  // We can also check planStatus if needed
-  const isTrial = !tenant?.plan || tenant?.planStatus === 'TRIALING' || tenant?.planStatus === 'TRIAL' || !tenant?.planStatus;
+  const isTrial = tenant?.plan === 'TRIAL';
 
   if (!isTrial || daysLeft === null) return null;
 
