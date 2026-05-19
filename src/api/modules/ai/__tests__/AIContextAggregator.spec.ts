@@ -38,9 +38,11 @@ describe('AIContextAggregator', () => {
     };
     commerceProvider = {
       findConversationContext: jest.fn().mockResolvedValue(null),
+      getCatalogItemCount: jest.fn().mockResolvedValue(0),
     };
     schedulingProvider = {
       findRelevantAvailability: jest.fn().mockResolvedValue(null),
+      getSchedulingCategories: jest.fn().mockResolvedValue([]),
     };
     pdfProvider = { findRelevantPDFContext: jest.fn().mockResolvedValue(null) };
     nicheWelcomeMenuService = new NicheWelcomeMenuService();

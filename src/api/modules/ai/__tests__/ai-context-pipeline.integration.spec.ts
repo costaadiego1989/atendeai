@@ -94,9 +94,11 @@ function makeNullProviders() {
   };
   const commerce: jest.Mocked<ICommerceContextProvider> = {
     findConversationContext: jest.fn().mockResolvedValue(null),
+    getCatalogItemCount: jest.fn().mockResolvedValue(0),
   };
   const scheduling: jest.Mocked<ISchedulingContextProvider> = {
     findRelevantAvailability: jest.fn().mockResolvedValue(null),
+    getSchedulingCategories: jest.fn().mockResolvedValue([]),
   };
   const pdf: jest.Mocked<ITenantPDFContextProvider> = {
     findRelevantPDFContext: jest.fn().mockResolvedValue(null),
