@@ -34,18 +34,11 @@ export class HybridSearchService {
     private readonly prisma: PrismaService,
   ) {}
 
-  /**
-   * Performs hybrid search: vector similarity + keyword matching.
-   * Returns context with citations for AI response generation.
-   */
   async search(input: HybridSearchInput): Promise<RAGResultWithCitations> {
     const topK = input.topK || this.defaultTopK;
     const threshold = input.threshold || this.defaultThreshold;
-
-    // 1. Generate query embedding
     const queryEmbedding = await this.embeddingProvider.generateEmbedding(input.query);
 
-    // 2. Vector similarity search
     const vectorResults = await this.chunkRepository.findSimilar(
       input.tenantId,
       queryEmbedding,
@@ -53,13 +46,9 @@ export class HybridSearchService {
       threshold,
     );
 
-    // 3. Keyword search (simple text matching as fallback/boost)
     const keywordResults = await this.keywordSearch(input.tenantId, input.query, topK);
-
-    // 4. Merge and deduplicate results
     const merged = this.mergeResults(vectorResults, keywordResults);
 
-    // 5. Rerank by combined score (vector similarity + keyword boost)
     const reranked = merged
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
@@ -68,7 +57,6 @@ export class HybridSearchService {
       return { context: '', citations: [] };
     }
 
-    // 6. Build context and citations
     const citations: Citation[] = [];
     const contextParts: string[] = [];
 
@@ -101,7 +89,6 @@ export class HybridSearchService {
     const keywords = this.extractKeywords(query);
     if (keywords.length === 0) return [];
 
-    // Search chunks by keyword matching
     const searchPattern = keywords.join('|');
 
     try {
@@ -143,7 +130,6 @@ export class HybridSearchService {
     const seen = new Set<string>();
     const merged: { documentId: string; content: string; score: number; metadata: any }[] = [];
 
-    // Add vector results first (higher priority)
     for (const r of vectorResults) {
       const key = `${r.documentId}:${r.chunkIndex}`;
       if (!seen.has(key)) {
@@ -157,7 +143,6 @@ export class HybridSearchService {
       }
     }
 
-    // Add keyword results with boost if they overlap
     for (const r of keywordResults) {
       const existingIdx = merged.findIndex(
         (m) => m.content === r.content,
