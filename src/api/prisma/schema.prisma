@@ -11,33 +11,33 @@ datasource db {
 
 // --- Tenant Module ---
 model Tenant {
-  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  companyName     String           @map("company_name") @db.VarChar(255)
-  cnpj            String           @unique @db.VarChar(18)
-  plan            String           @default("TRIAL") @db.VarChar(20)
-  planStatus      String           @default("ACTIVE") @map("plan_status") @db.VarChar(20)
-  apiKey          String           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  businessType    String?          @map("business_type") @db.VarChar(100)
-  ownerBirthDate  DateTime?        @map("owner_birth_date") @db.Date
-  description     String?          @db.Text
-  services        String?          @db.Text
-  zipcode         String?          @db.VarChar(20)
-  street          String?          @db.Text
-  streetNumber    String?          @map("street_number") @db.VarChar(30)
-  neighborhood    String?          @db.VarChar(100)
-  city            String?          @db.VarChar(100)
-  state           String?          @db.VarChar(50)
-  catalogUrl      String?          @map("catalog_url") @db.Text
-  catalogFiles    Json?            @default("[]") @map("catalog_files")
-  operatingHours  Json?            @map("operating_hours")
-  ownerUserId     String?          @map("owner_user_id") @db.Uuid
-  promotions      Json?            @default("[]")
-  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  users          User[]
-  whatsappConfig  WhatsAppConfig?
-  aiConfig        AIConfig?
-  agentRules      TenantAgentRule[]
+  id                      String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyName             String                         @map("company_name") @db.VarChar(255)
+  cnpj                    String                         @unique @db.VarChar(18)
+  plan                    String                         @default("TRIAL") @db.VarChar(20)
+  planStatus              String                         @default("ACTIVE") @map("plan_status") @db.VarChar(20)
+  apiKey                  String                         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  businessType            String?                        @map("business_type") @db.VarChar(100)
+  ownerBirthDate          DateTime?                      @map("owner_birth_date") @db.Date
+  description             String?                        @db.Text
+  services                String?                        @db.Text
+  zipcode                 String?                        @db.VarChar(20)
+  street                  String?                        @db.Text
+  streetNumber            String?                        @map("street_number") @db.VarChar(30)
+  neighborhood            String?                        @db.VarChar(100)
+  city                    String?                        @db.VarChar(100)
+  state                   String?                        @db.VarChar(50)
+  catalogUrl              String?                        @map("catalog_url") @db.Text
+  catalogFiles            Json?                          @default("[]") @map("catalog_files")
+  operatingHours          Json?                          @map("operating_hours")
+  ownerUserId             String?                        @map("owner_user_id") @db.Uuid
+  promotions              Json?                          @default("[]")
+  createdAt               DateTime                       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt               DateTime                       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  users                   User[]
+  whatsappConfig          WhatsAppConfig?
+  aiConfig                AIConfig?
+  agentRules              TenantAgentRule[]
   salesCommissionDefaults TenantSalesCommissionDefaults?
 
   @@map("tenants")
@@ -59,19 +59,19 @@ model TenantFinancialAccount {
 }
 
 model User {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId     String   @map("tenant_id") @db.Uuid
-  name         String   @db.VarChar(255)
-  email        String   @unique @db.VarChar(255)
-  cpf          String?  @db.VarChar(14)
-  phone        String   @db.VarChar(20)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  mustChangePassword Boolean @default(false) @map("must_change_password")
-  role         String   @default("AGENT") @db.VarChar(20)
-  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  tenant       Tenant   @relation(fields: [tenantId], references: [id])
-  salesProfile TenantUserSalesProfile?
+  id                 String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String                  @map("tenant_id") @db.Uuid
+  name               String                  @db.VarChar(255)
+  email              String                  @unique @db.VarChar(255)
+  cpf                String?                 @db.VarChar(14)
+  phone              String                  @db.VarChar(20)
+  passwordHash       String                  @map("password_hash") @db.VarChar(255)
+  mustChangePassword Boolean                 @default(false) @map("must_change_password")
+  role               String                  @default("AGENT") @db.VarChar(20)
+  lastLoginAt        DateTime?               @map("last_login_at") @db.Timestamptz
+  createdAt          DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  tenant             Tenant                  @relation(fields: [tenantId], references: [id])
+  salesProfile       TenantUserSalesProfile?
 
   @@map("users")
   @@schema("tenant_schema")
@@ -123,23 +123,21 @@ model AIConfig {
   @@schema("tenant_schema")
 }
 
-
-
 model TenantAgentRule {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId         String   @map("tenant_id") @db.Uuid
-  branchId         String?  @map("branch_id") @db.Uuid
-  moduleId         String   @map("module_id") @db.VarChar(50)
-  customPrompt     String   @map("custom_prompt") @db.Text
-  isActive         Boolean  @default(true) @map("is_active")
-  fallbackToGlobal Boolean  @default(true) @map("fallback_to_global")
-  revision         Int      @default(1)
-  notes            String?  @db.Text
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  updatedByUserId  String?  @map("updated_by_user_id") @db.Uuid
-  updatedByUserName String? @map("updated_by_user_name") @db.VarChar(255)
-  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  branchId          String?  @map("branch_id") @db.Uuid
+  moduleId          String   @map("module_id") @db.VarChar(50)
+  customPrompt      String   @map("custom_prompt") @db.Text
+  isActive          Boolean  @default(true) @map("is_active")
+  fallbackToGlobal  Boolean  @default(true) @map("fallback_to_global")
+  revision          Int      @default(1)
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  updatedByUserId   String?  @map("updated_by_user_id") @db.Uuid
+  updatedByUserName String?  @map("updated_by_user_name") @db.VarChar(255)
+  tenant            Tenant   @relation(fields: [tenantId], references: [id])
 
   @@unique([tenantId, moduleId], name: "uq_tenant_agent_rules")
   @@map("tenant_agent_rules")
@@ -147,15 +145,15 @@ model TenantAgentRule {
 }
 
 model TenantAgentRuleHistory {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId         String   @map("tenant_id") @db.Uuid
-  branchId         String?  @map("branch_id") @db.Uuid
-  moduleId         String   @map("module_id") @db.VarChar(50)
-  customPrompt     String   @map("custom_prompt") @db.Text
-  revision         Int
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedByUserId  String?  @map("updated_by_user_id") @db.Uuid
-  updatedByUserName String? @map("updated_by_user_name") @db.VarChar(255)
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  branchId          String?  @map("branch_id") @db.Uuid
+  moduleId          String   @map("module_id") @db.VarChar(50)
+  customPrompt      String   @map("custom_prompt") @db.Text
+  revision          Int
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedByUserId   String?  @map("updated_by_user_id") @db.Uuid
+  updatedByUserName String?  @map("updated_by_user_name") @db.VarChar(255)
 
   @@index([tenantId, moduleId], name: "idx_agent_rule_history_lookup")
   @@map("tenant_agent_rule_history")
@@ -163,17 +161,17 @@ model TenantAgentRuleHistory {
 }
 
 model TenantPDFResume {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId   String   @map("tenant_id") @db.Uuid
-  fileName   String   @map("file_name") @db.VarChar(255)
-  fileUrl    String?  @map("file_url") @db.Text
-  checksum   String?  @db.VarChar(128)
-  summaries  Json     @default("[]")
-  status     String   @default("PROCESSING") @db.VarChar(20)
-  error      String?  @db.Text
-  canSendIt  Boolean  @default(false) @map("can_send_it")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  fileName  String   @map("file_name") @db.VarChar(255)
+  fileUrl   String?  @map("file_url") @db.Text
+  checksum  String?  @db.VarChar(128)
+  summaries Json     @default("[]")
+  status    String   @default("PROCESSING") @db.VarChar(20)
+  error     String?  @db.Text
+  canSendIt Boolean  @default(false) @map("can_send_it")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   chunks TenantDocumentChunk[]
 
@@ -238,22 +236,22 @@ model TenantUserSalesProfile {
 
 // --- Contact Module ---
 model Contact {
-  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId        String         @map("tenant_id") @db.Uuid
-  branchId        String?        @map("branch_id") @db.Uuid
-  document        String?        @db.VarChar(30)
-  name            String         @db.VarChar(255)
-  phone           String         @db.VarChar(20)
-  email           String?        @db.VarChar(255)
-  stage           String         @default("LEAD") @db.VarChar(20)
-  tags            Json?          @default("[]")
-  notes           String?
-  lastInteraction      DateTime? @map("last_interaction") @db.Timestamptz
-  prospectingOptOut    Boolean   @default(false) @map("prospecting_opt_out")
-  prospectingOptOutAt  DateTime? @map("prospecting_opt_out_at") @db.Timestamptz
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  conversations        Conversation[]
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String         @map("tenant_id") @db.Uuid
+  branchId            String?        @map("branch_id") @db.Uuid
+  document            String?        @db.VarChar(30)
+  name                String         @db.VarChar(255)
+  phone               String         @db.VarChar(20)
+  email               String?        @db.VarChar(255)
+  stage               String         @default("LEAD") @db.VarChar(20)
+  tags                Json?          @default("[]")
+  notes               String?
+  lastInteraction     DateTime?      @map("last_interaction") @db.Timestamptz
+  prospectingOptOut   Boolean        @default(false) @map("prospecting_opt_out")
+  prospectingOptOutAt DateTime?      @map("prospecting_opt_out_at") @db.Timestamptz
+  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  conversations       Conversation[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, phone])
@@ -265,13 +263,13 @@ model Contact {
 }
 
 model ContactFinancialProfile {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId       String   @map("tenant_id") @db.Uuid
-  contactId      String   @map("contact_id") @db.Uuid
-  provider       String   @default("ASAAS") @db.VarChar(20)
-  asaasCustomerId String  @map("asaas_customer_id") @db.VarChar(80)
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  contactId       String   @map("contact_id") @db.Uuid
+  provider        String   @default("ASAAS") @db.VarChar(20)
+  asaasCustomerId String   @map("asaas_customer_id") @db.VarChar(80)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([tenantId, contactId], name: "uq_contact_financial_profiles_tenant_contact")
   @@map("contact_financial_profiles")
@@ -280,23 +278,23 @@ model ContactFinancialProfile {
 
 // --- Catalog Module ---
 model CatalogCategory {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId    String        @map("tenant_id") @db.Uuid
-  parentCategoryId String?  @map("parent_category_id") @db.Uuid
-  name        String        @db.VarChar(255)
-  description String?       @db.Text
-  path        String[]      @default([])
-  level       Int           @default(0)
-  active      Boolean       @default(true)
-  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  items       CatalogItem[]
-  parent      CatalogCategory? @relation("CatalogCategoryTree", fields: [parentCategoryId], references: [id])
-  children    CatalogCategory[] @relation("CatalogCategoryTree")
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String            @map("tenant_id") @db.Uuid
+  parentCategoryId String?           @map("parent_category_id") @db.Uuid
+  name             String            @db.VarChar(255)
+  description      String?           @db.Text
+  path             String[]          @default([])
+  level            Int               @default(0)
+  active           Boolean           @default(true)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  items            CatalogItem[]
+  parent           CatalogCategory?  @relation("CatalogCategoryTree", fields: [parentCategoryId], references: [id])
+  children         CatalogCategory[] @relation("CatalogCategoryTree")
 
+  @@unique([tenantId, name], name: "uq_catalog_categories_tenant_name")
   @@index([tenantId, active], name: "idx_catalog_categories_tenant_active")
   @@index([tenantId, parentCategoryId, active], name: "idx_catalog_categories_parent")
-  @@unique([tenantId, name], name: "uq_catalog_categories_tenant_name")
   @@map("catalog_categories")
   @@schema("catalog_schema")
 }
@@ -329,15 +327,15 @@ model CatalogItem {
 }
 
 model CatalogAuditLog {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  userId    String?  @map("user_id") @db.Uuid
-  userName  String?  @map("user_name") @db.VarChar(255)
-  event     String   @db.VarChar(50) // ITEM_CREATED, ITEM_UPDATED, ITEM_DEACTIVATED, CATEGORY_CREATED, etc.
-  entityId  String   @map("entity_id") @db.Uuid
-  entityType String  @map("entity_type") @db.VarChar(30) // ITEM, CATEGORY
-  metadata  Json?    @default("{}")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  userName   String?  @map("user_name") @db.VarChar(255)
+  event      String   @db.VarChar(50) // ITEM_CREATED, ITEM_UPDATED, ITEM_DEACTIVATED, CATEGORY_CREATED, etc.
+  entityId   String   @map("entity_id") @db.Uuid
+  entityType String   @map("entity_type") @db.VarChar(30) // ITEM, CATEGORY
+  metadata   Json?    @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([tenantId])
   @@index([entityId])
@@ -347,20 +345,20 @@ model CatalogAuditLog {
 
 // --- Inventory Module ---
 model InventoryItem {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @map("tenant_id") @db.Uuid
-  catalogItemId     String?  @map("catalog_item_id") @db.Uuid
-  sku               String   @db.VarChar(100)
-  externalReference String?  @map("external_reference") @db.VarChar(255)
-  name              String   @db.VarChar(255)
-  availableQuantity Int      @default(0) @map("available_quantity")
-  availabilityStatus String  @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
-  currentPrice      Decimal? @map("current_price") @db.Decimal(12, 2)
-  currency          String   @default("BRL") @db.VarChar(10)
-  source            String   @default("MANUAL_SNAPSHOT") @db.VarChar(30)
-  lastSyncedAt      DateTime @default(now()) @map("last_synced_at") @db.Timestamptz
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  catalogItemId      String?  @map("catalog_item_id") @db.Uuid
+  sku                String   @db.VarChar(100)
+  externalReference  String?  @map("external_reference") @db.VarChar(255)
+  name               String   @db.VarChar(255)
+  availableQuantity  Int      @default(0) @map("available_quantity")
+  availabilityStatus String   @default("AVAILABLE") @map("availability_status") @db.VarChar(30)
+  currentPrice       Decimal? @map("current_price") @db.Decimal(12, 2)
+  currency           String   @default("BRL") @db.VarChar(10)
+  source             String   @default("MANUAL_SNAPSHOT") @db.VarChar(30)
+  lastSyncedAt       DateTime @default(now()) @map("last_synced_at") @db.Timestamptz
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([tenantId, sku])
   @@index([tenantId, availabilityStatus], name: "idx_inventory_items_tenant_status")
@@ -370,15 +368,15 @@ model InventoryItem {
 }
 
 model InventoryConnection {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId     String   @map("tenant_id") @db.Uuid
-  sourceType   String   @map("source_type") @db.VarChar(30)
-  providerName String   @map("provider_name") @db.VarChar(255)
-  status       String   @default("ACTIVE") @db.VarChar(20)
-  config       Json     @default("{}")
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  sourceType   String    @map("source_type") @db.VarChar(30)
+  providerName String    @map("provider_name") @db.VarChar(255)
+  status       String    @default("ACTIVE") @db.VarChar(20)
+  config       Json      @default("{}")
   lastSyncedAt DateTime? @map("last_synced_at") @db.Timestamptz
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, sourceType], name: "idx_inventory_connections_tenant_source")
   @@map("inventory_connections")
@@ -386,39 +384,39 @@ model InventoryConnection {
 }
 
 model RecoveryCase {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @map("tenant_id") @db.Uuid
-  branchId          String?  @map("branch_id") @db.Uuid
-  contactId         String?  @map("contact_id") @db.Uuid
-  debtorName        String   @map("debtor_name") @db.VarChar(255)
-  debtorCompanyName String?  @map("debtor_company_name") @db.VarChar(255)
-  debtorDocument    String?  @map("debtor_document") @db.VarChar(30)
-  phone             String   @db.VarChar(30)
-  externalReference String?  @map("external_reference") @db.VarChar(255)
-  paymentReference  String?  @unique @map("payment_reference") @db.VarChar(255)
-  source            String   @default("MANUAL") @db.VarChar(20)
-  chargeType        String?  @map("charge_type") @db.VarChar(50)
-  chargeTitle       String?  @map("charge_title") @db.VarChar(255)
-  chargeDescription String?  @map("charge_description") @db.Text
-  referencePeriod   String?  @map("reference_period") @db.VarChar(30)
-  relatedEntityType String?  @map("related_entity_type") @db.VarChar(50)
-  relatedEntityId   String?  @map("related_entity_id") @db.VarChar(255)
-  relatedEntityLabel String? @map("related_entity_label") @db.VarChar(255)
-  amountDue         Decimal? @map("amount_due") @db.Decimal(12, 2)
-  dueDate           DateTime? @map("due_date") @db.Date
-  status            String   @default("READY_TO_CONTACT") @db.VarChar(30)
-  assignedTags      Json?    @default("[]") @map("assigned_tags")
-  lastContactedAt   DateTime? @map("last_contacted_at") @db.Timestamptz
-  nextActionAt      DateTime? @map("next_action_at") @db.Timestamptz
-  paidAt            DateTime? @map("paid_at") @db.Timestamptz
-  suggestedReply    String?  @map("suggested_reply") @db.Text
-  suggestedNextAction String? @map("suggested_next_action") @db.Text
-  guidanceGeneratedAt DateTime? @map("guidance_generated_at") @db.Timestamptz
-  playbookId        String?  @map("playbook_id") @db.Uuid
-  playbookPhaseIndex Int      @default(0) @map("playbook_phase_index")
+  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                    String    @map("tenant_id") @db.Uuid
+  branchId                    String?   @map("branch_id") @db.Uuid
+  contactId                   String?   @map("contact_id") @db.Uuid
+  debtorName                  String    @map("debtor_name") @db.VarChar(255)
+  debtorCompanyName           String?   @map("debtor_company_name") @db.VarChar(255)
+  debtorDocument              String?   @map("debtor_document") @db.VarChar(30)
+  phone                       String    @db.VarChar(30)
+  externalReference           String?   @map("external_reference") @db.VarChar(255)
+  paymentReference            String?   @unique @map("payment_reference") @db.VarChar(255)
+  source                      String    @default("MANUAL") @db.VarChar(20)
+  chargeType                  String?   @map("charge_type") @db.VarChar(50)
+  chargeTitle                 String?   @map("charge_title") @db.VarChar(255)
+  chargeDescription           String?   @map("charge_description") @db.Text
+  referencePeriod             String?   @map("reference_period") @db.VarChar(30)
+  relatedEntityType           String?   @map("related_entity_type") @db.VarChar(50)
+  relatedEntityId             String?   @map("related_entity_id") @db.VarChar(255)
+  relatedEntityLabel          String?   @map("related_entity_label") @db.VarChar(255)
+  amountDue                   Decimal?  @map("amount_due") @db.Decimal(12, 2)
+  dueDate                     DateTime? @map("due_date") @db.Date
+  status                      String    @default("READY_TO_CONTACT") @db.VarChar(30)
+  assignedTags                Json?     @default("[]") @map("assigned_tags")
+  lastContactedAt             DateTime? @map("last_contacted_at") @db.Timestamptz
+  nextActionAt                DateTime? @map("next_action_at") @db.Timestamptz
+  paidAt                      DateTime? @map("paid_at") @db.Timestamptz
+  suggestedReply              String?   @map("suggested_reply") @db.Text
+  suggestedNextAction         String?   @map("suggested_next_action") @db.Text
+  guidanceGeneratedAt         DateTime? @map("guidance_generated_at") @db.Timestamptz
+  playbookId                  String?   @map("playbook_id") @db.Uuid
+  playbookPhaseIndex          Int       @default(0) @map("playbook_phase_index")
   lastPlaybookPhaseExecutedAt DateTime? @map("last_playbook_phase_executed_at") @db.Timestamptz
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt                   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, status], name: "idx_recovery_cases_tenant_status")
   @@index([tenantId, source], name: "idx_recovery_cases_tenant_source")
@@ -428,15 +426,15 @@ model RecoveryCase {
 }
 
 model CommerceAuditLog {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  userId    String?  @map("user_id") @db.Uuid
-  userName  String?  @map("user_name") @db.VarChar(255)
-  event     String   @db.VarChar(50) // SESSION_STARTED, CHECKOUT_CREATED, ORDER_PAID, ORDER_STATUS_CHANGED, SHIPPING_UPDATED
-  entityId  String   @map("entity_id") @db.Uuid
-  entityType String  @map("entity_type") @db.VarChar(30) // SESSION, ORDER, SHIPPING_POLICY
-  metadata  Json?    @default("{}")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  userName   String?  @map("user_name") @db.VarChar(255)
+  event      String   @db.VarChar(50) // SESSION_STARTED, CHECKOUT_CREATED, ORDER_PAID, ORDER_STATUS_CHANGED, SHIPPING_UPDATED
+  entityId   String   @map("entity_id") @db.Uuid
+  entityType String   @map("entity_type") @db.VarChar(30) // SESSION, ORDER, SHIPPING_POLICY
+  metadata   Json?    @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([tenantId])
   @@index([entityId])
@@ -445,17 +443,17 @@ model CommerceAuditLog {
 }
 
 model CommerceAbandonmentConfig {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @unique @map("tenant_id") @db.Uuid
-  active            Boolean  @default(true)
-  message           String?  @db.Text
-  useAiMessage      Boolean  @default(true) @map("use_ai_message")
-  mode              String   @default("SINGLE") @db.VarChar(20)
-  maxTouches        Int      @default(3) @map("max_touches")
-  intervalMinutes   Int      @default(60) @map("interval_minutes")
-  minimumIntervalMinutes Int @default(30) @map("minimum_interval_minutes")
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String   @unique @map("tenant_id") @db.Uuid
+  active                 Boolean  @default(true)
+  message                String?  @db.Text
+  useAiMessage           Boolean  @default(true) @map("use_ai_message")
+  mode                   String   @default("SINGLE") @db.VarChar(20)
+  maxTouches             Int      @default(3) @map("max_touches")
+  intervalMinutes        Int      @default(60) @map("interval_minutes")
+  minimumIntervalMinutes Int      @default(30) @map("minimum_interval_minutes")
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("commerce_abandonment_configs")
   @@schema("commerce_schema")
@@ -513,21 +511,21 @@ model Message {
 }
 
 model MessagingWebhookReceipt {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  receiptKey        String   @unique @map("receipt_key") @db.VarChar(255)
-  channel           String   @db.VarChar(20)
-  provider          String   @db.VarChar(50)
-  externalMessageId String   @map("external_message_id") @db.VarChar(255)
-  externalAccountId String?  @map("external_account_id") @db.VarChar(255)
-  fromPhone         String?  @map("from_phone") @db.VarChar(30)
-  toPhone           String?  @map("to_phone") @db.VarChar(30)
-  signature         String?  @db.Text
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  receiptKey        String    @unique @map("receipt_key") @db.VarChar(255)
+  channel           String    @db.VarChar(20)
+  provider          String    @db.VarChar(50)
+  externalMessageId String    @map("external_message_id") @db.VarChar(255)
+  externalAccountId String?   @map("external_account_id") @db.VarChar(255)
+  fromPhone         String?   @map("from_phone") @db.VarChar(30)
+  toPhone           String?   @map("to_phone") @db.VarChar(30)
+  signature         String?   @db.Text
   payload           Json
-  status            String   @default("RECEIVED") @db.VarChar(20)
-  ignoreReason      String?  @map("ignore_reason") @db.VarChar(100)
+  status            String    @default("RECEIVED") @db.VarChar(20)
+  ignoreReason      String?   @map("ignore_reason") @db.VarChar(100)
   processedAt       DateTime? @map("processed_at") @db.Timestamptz
   ignoredAt         DateTime? @map("ignored_at") @db.Timestamptz
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([status, createdAt], name: "idx_messaging_webhook_receipts_status")
   @@map("messaging_webhook_receipts")
@@ -535,20 +533,20 @@ model MessagingWebhookReceipt {
 }
 
 model AISession {
-  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  conversationId String?     @map("conversation_id") @db.Uuid
-  tenantId       String      @map("tenant_id") @db.Uuid
-  contactId      String?     @map("contact_id") @db.Uuid
-  intent         String?     @db.VarChar(50)
-  sentiment      String?     @db.VarChar(20)
-  confidence     Decimal?    @db.Decimal(3, 2)
-  status         String      @default("ACTIVE") @db.VarChar(30)
-  totalTokens    Int         @default(0) @map("total_tokens")
-  metadata       Json?       @default("{}")
-  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId String?  @map("conversation_id") @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  contactId      String?  @map("contact_id") @db.Uuid
+  intent         String?  @db.VarChar(50)
+  sentiment      String?  @db.VarChar(20)
+  confidence     Decimal? @db.Decimal(3, 2)
+  status         String   @default("ACTIVE") @db.VarChar(30)
+  totalTokens    Int      @default(0) @map("total_tokens")
+  metadata       Json?    @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  messages       AIMessage[]
+  messages AIMessage[]
 
   @@index([conversationId], name: "idx_ai_sessions_conversation")
   @@index([tenantId, contactId])
@@ -557,15 +555,15 @@ model AISession {
 }
 
 model AIMessage {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId    String    @map("session_id") @db.Uuid
-  role         String    @db.VarChar(20) // user, assistant, system
-  content      String    @db.Text
-  tokens       Int       @default(0)
-  diagnostics  Json?     @default("{}")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  
-  session      AISession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId   String   @map("session_id") @db.Uuid
+  role        String   @db.VarChar(20) // user, assistant, system
+  content     String   @db.Text
+  tokens      Int      @default(0)
+  diagnostics Json?    @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  session AISession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@map("ai_messages")
@@ -574,27 +572,27 @@ model AIMessage {
 
 // --- Billing Module ---
 model Subscription {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @unique @map("tenant_id") @db.Uuid
-  plan              String   @default("TRIAL") @db.VarChar(20)
-  status            String   @default("PENDING") @db.VarChar(20)
-  scheduledPlan     String?  @map("scheduled_plan") @db.VarChar(20)
-  messagesQuota     Int      @map("messages_quota")
-  aiTokensQuota     Int      @map("ai_tokens_quota")
-  contactsQuota     Int      @map("contacts_quota")
-  billingCycleStart DateTime @map("billing_cycle_start") @db.Date
-  billingCycleEnd   DateTime @map("billing_cycle_end") @db.Date
-  asaasCustomerId   String?  @map("asaas_customer_id") @db.VarChar(50)
-  asaasSubscriptionId String?  @map("asaas_subscription_id") @db.VarChar(50)
-  lastQuotaAlertAt  DateTime? @map("last_quota_alert_at") @db.Timestamptz
-  baseMonthlyPrice  Decimal  @default(0) @map("base_monthly_price") @db.Decimal(12, 2)
-  addonsMonthlyPrice Decimal @default(0) @map("addons_monthly_price") @db.Decimal(12, 2)
-  totalMonthlyPrice Decimal  @default(0) @map("total_monthly_price") @db.Decimal(12, 2)
-  pricingVersion    String?  @map("pricing_version") @db.VarChar(50)
-  pricingSnapshot   Json     @default("{}") @map("pricing_snapshot")
-  config            Json     @default("{}")
-  billingCycleType  String   @default("MONTHLY") @map("billing_cycle_type") @db.VarChar(10)
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @unique @map("tenant_id") @db.Uuid
+  plan                String    @default("TRIAL") @db.VarChar(20)
+  status              String    @default("PENDING") @db.VarChar(20)
+  scheduledPlan       String?   @map("scheduled_plan") @db.VarChar(20)
+  messagesQuota       Int       @map("messages_quota")
+  aiTokensQuota       Int       @map("ai_tokens_quota")
+  contactsQuota       Int       @map("contacts_quota")
+  billingCycleStart   DateTime  @map("billing_cycle_start") @db.Date
+  billingCycleEnd     DateTime  @map("billing_cycle_end") @db.Date
+  asaasCustomerId     String?   @map("asaas_customer_id") @db.VarChar(50)
+  asaasSubscriptionId String?   @map("asaas_subscription_id") @db.VarChar(50)
+  lastQuotaAlertAt    DateTime? @map("last_quota_alert_at") @db.Timestamptz
+  baseMonthlyPrice    Decimal   @default(0) @map("base_monthly_price") @db.Decimal(12, 2)
+  addonsMonthlyPrice  Decimal   @default(0) @map("addons_monthly_price") @db.Decimal(12, 2)
+  totalMonthlyPrice   Decimal   @default(0) @map("total_monthly_price") @db.Decimal(12, 2)
+  pricingVersion      String?   @map("pricing_version") @db.VarChar(50)
+  pricingSnapshot     Json      @default("{}") @map("pricing_snapshot")
+  config              Json      @default("{}")
+  billingCycleType    String    @default("MONTHLY") @map("billing_cycle_type") @db.VarChar(10)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("subscriptions")
   @@schema("billing_schema")
@@ -615,71 +613,71 @@ model BillingAuditLog {
 }
 
 model BillingPlanCatalog {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code          String   @unique @db.VarChar(20)
-  displayName   String   @map("display_name") @db.VarChar(100)
-  description   String?  @db.Text
-  monthlyPrice  Decimal  @map("monthly_price") @db.Decimal(12, 2)
-  messagesQuota Int      @map("messages_quota")
-  aiTokensQuota Int      @map("ai_tokens_quota")
-  contactsQuota Int      @map("contacts_quota")
-  pricingVersion String? @map("pricing_version") @db.VarChar(50)
-  sortOrder     Int      @default(0) @map("sort_order")
-  active        Boolean  @default(true)
-  features      Json     @default("[]")
-  isStandard    Boolean  @default(false) @map("is_standard")
-  config        Json     @default("{}")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code           String   @unique @db.VarChar(20)
+  displayName    String   @map("display_name") @db.VarChar(100)
+  description    String?  @db.Text
+  monthlyPrice   Decimal  @map("monthly_price") @db.Decimal(12, 2)
+  messagesQuota  Int      @map("messages_quota")
+  aiTokensQuota  Int      @map("ai_tokens_quota")
+  contactsQuota  Int      @map("contacts_quota")
+  pricingVersion String?  @map("pricing_version") @db.VarChar(50)
+  sortOrder      Int      @default(0) @map("sort_order")
+  active         Boolean  @default(true)
+  features       Json     @default("[]")
+  isStandard     Boolean  @default(false) @map("is_standard")
+  config         Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("billing_plan_catalog")
   @@schema("billing_schema")
 }
 
 model BillingModule {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code         String   @unique @db.VarChar(50)
-  displayName  String   @map("display_name") @db.VarChar(100)
-  description  String?  @db.Text
-  category     String?  @db.VarChar(50)
-  billingMode  String   @default("ADDON") @map("billing_mode") @db.VarChar(20)
-  monthlyPrice Decimal  @default(0) @map("monthly_price") @db.Decimal(10, 2)
-  pricingVersion String? @map("pricing_version") @db.VarChar(50)
-  salesPitch   String?  @map("sales_pitch") @db.Text
-  quotaImpact  Json     @default("{}") @map("quota_impact")
-  includedInPlans Json  @default("[]") @map("included_in_plans")
-  config       Json     @default("{}")
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String   @unique @db.VarChar(50)
+  displayName     String   @map("display_name") @db.VarChar(100)
+  description     String?  @db.Text
+  category        String?  @db.VarChar(50)
+  billingMode     String   @default("ADDON") @map("billing_mode") @db.VarChar(20)
+  monthlyPrice    Decimal  @default(0) @map("monthly_price") @db.Decimal(10, 2)
+  pricingVersion  String?  @map("pricing_version") @db.VarChar(50)
+  salesPitch      String?  @map("sales_pitch") @db.Text
+  quotaImpact     Json     @default("{}") @map("quota_impact")
+  includedInPlans Json     @default("[]") @map("included_in_plans")
+  config          Json     @default("{}")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("billing_modules")
   @@schema("billing_schema")
 }
 
 model BusinessNiche {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code         String   @unique @db.VarChar(50)
-  displayName  String   @map("display_name") @db.VarChar(100)
-  description  String?  @db.Text
-  pains        Json     @default("[]")
-  iconName     String?  @map("icon_name") @db.VarChar(50)
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String   @unique @db.VarChar(50)
+  displayName String   @map("display_name") @db.VarChar(100)
+  description String?  @db.Text
+  pains       Json     @default("[]")
+  iconName    String?  @map("icon_name") @db.VarChar(50)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("business_niches")
   @@schema("billing_schema")
 }
 
 model NicheModule {
-  nicheCode    String   @map("niche_code") @db.VarChar(50)
-  moduleCode   String   @map("module_code") @db.VarChar(50)
-  isRecommended Boolean @default(true) @map("is_recommended")
-  isPrimary    Boolean  @default(false) @map("is_primary")
+  nicheCode         String  @map("niche_code") @db.VarChar(50)
+  moduleCode        String  @map("module_code") @db.VarChar(50)
+  isRecommended     Boolean @default(true) @map("is_recommended")
+  isPrimary         Boolean @default(false) @map("is_primary")
   marketingHeadline String? @map("marketing_headline") @db.VarChar(255)
-  salesPitch   String?  @map("sales_pitch") @db.Text
-  sortOrder    Int      @default(0) @map("sort_order")
+  salesPitch        String? @map("sales_pitch") @db.Text
+  sortOrder         Int     @default(0) @map("sort_order")
 
   @@id([nicheCode, moduleCode])
   @@map("niche_modules")
@@ -687,20 +685,20 @@ model NicheModule {
 }
 
 model SubscriptionModule {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subscriptionId String   @map("subscription_id") @db.Uuid
-  tenantId       String   @map("tenant_id") @db.Uuid
-  moduleCode     String   @map("module_code") @db.VarChar(50)
-  status         String   @default("ACTIVE") @db.VarChar(20)
-  monthlyPrice   Decimal  @default(0) @map("monthly_price") @db.Decimal(12, 2)
-  pricingVersion String?  @map("pricing_version") @db.VarChar(50)
-  pricingSnapshot Json    @default("{}") @map("pricing_snapshot")
-  quotaImpact    Json     @default("{}") @map("quota_impact")
-  metadata       Json     @default("{}")
-  startedAt      DateTime @default(now()) @map("started_at") @db.Timestamptz
-  endedAt        DateTime? @map("ended_at") @db.Timestamptz
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subscriptionId  String    @map("subscription_id") @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  moduleCode      String    @map("module_code") @db.VarChar(50)
+  status          String    @default("ACTIVE") @db.VarChar(20)
+  monthlyPrice    Decimal   @default(0) @map("monthly_price") @db.Decimal(12, 2)
+  pricingVersion  String?   @map("pricing_version") @db.VarChar(50)
+  pricingSnapshot Json      @default("{}") @map("pricing_snapshot")
+  quotaImpact     Json      @default("{}") @map("quota_impact")
+  metadata        Json      @default("{}")
+  startedAt       DateTime  @default(now()) @map("started_at") @db.Timestamptz
+  endedAt         DateTime? @map("ended_at") @db.Timestamptz
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([subscriptionId, moduleCode], name: "uq_subscription_modules_subscription_module")
   @@index([tenantId, status], name: "idx_subscription_modules_tenant_status")
@@ -741,34 +739,34 @@ model SalesMetric {
 }
 
 model PaymentLink {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId    String   @map("tenant_id") @db.Uuid
-  providerLinkId String? @map("provider_link_id") @db.VarChar(80)
-  externalId  String   @unique @map("external_id") @db.VarChar(120)
-  name        String   @db.VarChar(255)
-  description String?  @db.Text
-  label       String?  @db.VarChar(120)
-  value       Decimal  @db.Decimal(12, 2)
-  url         String   @db.Text
-  billingType String   @default("PIX") @map("billing_type") @db.VarChar(20)
-  status      String   @default("ACTIVE") @db.VarChar(20)
-  source      String   @default("MANUAL") @db.VarChar(20)
-  resourceType String  @default("PAYMENT_LINK") @map("resource_type") @db.VarChar(20)
-  contactId   String?  @map("contact_id") @db.Uuid
-  conversationId String? @map("conversation_id") @db.Uuid
-  catalogItemId String? @map("catalog_item_id") @db.Uuid
-  catalogItemSku String? @map("catalog_item_sku") @db.VarChar(80)
-  catalogItemName String? @map("catalog_item_name") @db.VarChar(255)
-  expiresAt   DateTime? @map("expires_at") @db.Timestamptz
-  recurrenceEnabled Boolean @default(false) @map("recurrence_enabled")
-  recurrenceFrequency String? @map("recurrence_frequency") @db.VarChar(20)
-  recurrenceStartDate DateTime? @map("recurrence_start_date") @db.Date
-  recurrenceEndDate DateTime? @map("recurrence_end_date") @db.Date
-  recurrenceTotalValue Decimal? @map("recurrence_total_value") @db.Decimal(12, 2)
-  recurrenceNextRunAt DateTime? @map("recurrence_next_run_at") @db.Timestamptz
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
+  providerLinkId       String?   @map("provider_link_id") @db.VarChar(80)
+  externalId           String    @unique @map("external_id") @db.VarChar(120)
+  name                 String    @db.VarChar(255)
+  description          String?   @db.Text
+  label                String?   @db.VarChar(120)
+  value                Decimal   @db.Decimal(12, 2)
+  url                  String    @db.Text
+  billingType          String    @default("PIX") @map("billing_type") @db.VarChar(20)
+  status               String    @default("ACTIVE") @db.VarChar(20)
+  source               String    @default("MANUAL") @db.VarChar(20)
+  resourceType         String    @default("PAYMENT_LINK") @map("resource_type") @db.VarChar(20)
+  contactId            String?   @map("contact_id") @db.Uuid
+  conversationId       String?   @map("conversation_id") @db.Uuid
+  catalogItemId        String?   @map("catalog_item_id") @db.Uuid
+  catalogItemSku       String?   @map("catalog_item_sku") @db.VarChar(80)
+  catalogItemName      String?   @map("catalog_item_name") @db.VarChar(255)
+  expiresAt            DateTime? @map("expires_at") @db.Timestamptz
+  recurrenceEnabled    Boolean   @default(false) @map("recurrence_enabled")
+  recurrenceFrequency  String?   @map("recurrence_frequency") @db.VarChar(20)
+  recurrenceStartDate  DateTime? @map("recurrence_start_date") @db.Date
+  recurrenceEndDate    DateTime? @map("recurrence_end_date") @db.Date
+  recurrenceTotalValue Decimal?  @map("recurrence_total_value") @db.Decimal(12, 2)
+  recurrenceNextRunAt  DateTime? @map("recurrence_next_run_at") @db.Timestamptz
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz
 
   @@index([tenantId, recurrenceEnabled, recurrenceNextRunAt], name: "idx_sales_payment_links_recurring_due")
   @@map("payment_links")
@@ -799,23 +797,23 @@ model ConversationSaleEvent {
 }
 
 model SalesPromotion {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId        String    @map("tenant_id") @db.Uuid
-  title           String    @db.VarChar(255)
-  description     String    @db.Text
-  discountType    String    @map("discount_type") @db.VarChar(20)
-  discountValue   Decimal   @map("discount_value") @db.Decimal(12, 2)
-  minimumOrder    Decimal?  @map("minimum_order") @db.Decimal(12, 2)
-  imageUrl        String?   @map("image_url") @db.Text
-  startsAt        DateTime  @map("starts_at") @db.Timestamptz
-  expiresAt       DateTime? @map("expires_at") @db.Timestamptz
-  active          Boolean   @default(true)
-  catalogItemId   String?   @map("catalog_item_id") @db.Uuid
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  title         String    @db.VarChar(255)
+  description   String    @db.Text
+  discountType  String    @map("discount_type") @db.VarChar(20)
+  discountValue Decimal   @map("discount_value") @db.Decimal(12, 2)
+  minimumOrder  Decimal?  @map("minimum_order") @db.Decimal(12, 2)
+  imageUrl      String?   @map("image_url") @db.Text
+  startsAt      DateTime  @map("starts_at") @db.Timestamptz
+  expiresAt     DateTime? @map("expires_at") @db.Timestamptz
+  active        Boolean   @default(true)
+  catalogItemId String?   @map("catalog_item_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  coupons         SalesCoupon[]
-  targets         SalesPromotionTarget[]
+  coupons SalesCoupon[]
+  targets SalesPromotionTarget[]
 
   @@index([tenantId, active], name: "idx_sales_promotions_tenant_active")
   @@map("sales_promotions")
@@ -823,13 +821,13 @@ model SalesPromotion {
 }
 
 model SalesPromotionTarget {
-  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  promotionId   String         @map("promotion_id") @db.Uuid
-  targetType    String         @map("target_type") @db.VarChar(20)
-  targetId      String         @map("target_id") @db.Uuid
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  promotionId String   @map("promotion_id") @db.Uuid
+  targetType  String   @map("target_type") @db.VarChar(20)
+  targetId    String   @map("target_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  promotion     SalesPromotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotion SalesPromotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
 
   @@unique([promotionId, targetType, targetId], name: "uq_sales_promotion_targets_target")
   @@index([targetType, targetId], name: "idx_sales_promotion_targets_lookup")
@@ -838,24 +836,24 @@ model SalesPromotionTarget {
 }
 
 model SalesCoupon {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId        String    @map("tenant_id") @db.Uuid
-  promotionId     String?   @map("promotion_id") @db.Uuid
-  code            String    @db.VarChar(50)
-  description     String?   @db.Text
-  discountType    String    @map("discount_type") @db.VarChar(20)
-  discountValue   Decimal   @map("discount_value") @db.Decimal(12, 2)
-  maxUses         Int       @default(0) @map("max_uses")
-  usedCount       Int       @default(0) @map("used_count")
-  startsAt        DateTime  @map("starts_at") @db.Timestamptz
-  expiresAt       DateTime? @map("expires_at") @db.Timestamptz
-  active          Boolean   @default(true)
-  catalogItemId   String?   @map("catalog_item_id") @db.Uuid
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  promotionId   String?   @map("promotion_id") @db.Uuid
+  code          String    @db.VarChar(50)
+  description   String?   @db.Text
+  discountType  String    @map("discount_type") @db.VarChar(20)
+  discountValue Decimal   @map("discount_value") @db.Decimal(12, 2)
+  maxUses       Int       @default(0) @map("max_uses")
+  usedCount     Int       @default(0) @map("used_count")
+  startsAt      DateTime  @map("starts_at") @db.Timestamptz
+  expiresAt     DateTime? @map("expires_at") @db.Timestamptz
+  active        Boolean   @default(true)
+  catalogItemId String?   @map("catalog_item_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  promotion       SalesPromotion? @relation(fields: [promotionId], references: [id])
-  targets         SalesCouponTarget[]
+  promotion SalesPromotion?     @relation(fields: [promotionId], references: [id])
+  targets   SalesCouponTarget[]
 
   @@unique([tenantId, code], name: "uq_sales_coupons_tenant_code")
   @@index([tenantId, active], name: "idx_sales_coupons_tenant_active")
@@ -864,23 +862,23 @@ model SalesCoupon {
 }
 
 model Proposal {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId        String   @map("tenant_id") @db.Uuid
-  contactId       String   @map("contact_id") @db.Uuid
-  userId          String   @map("user_id") @db.Uuid
-  title           String   @db.VarChar(255)
-  description     String?  @db.Text
-  benefits        String?  @db.Text
-  items           Json     @default("[]")
-  totalAmount     Decimal  @map("total_amount") @db.Decimal(12, 2)
-  status          String   @default("DRAFT") @db.VarChar(20)
-  validUntil      DateTime? @map("valid_until") @db.Timestamptz
-  scheduledAt     DateTime? @map("scheduled_at") @db.Timestamptz
-  pdfUrl          String?  @map("pdf_url") @db.Text
-  notes           String?  @db.Text
-  metadata        Json?    @default("{}")
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  contactId   String    @map("contact_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  benefits    String?   @db.Text
+  items       Json      @default("[]")
+  totalAmount Decimal   @map("total_amount") @db.Decimal(12, 2)
+  status      String    @default("DRAFT") @db.VarChar(20)
+  validUntil  DateTime? @map("valid_until") @db.Timestamptz
+  scheduledAt DateTime? @map("scheduled_at") @db.Timestamptz
+  pdfUrl      String?   @map("pdf_url") @db.Text
+  notes       String?   @db.Text
+  metadata    Json?     @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, status], name: "idx_proposals_tenant_status")
   @@index([tenantId, contactId], name: "idx_proposals_tenant_contact")
@@ -889,13 +887,13 @@ model Proposal {
 }
 
 model SalesCouponTarget {
-  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  couponId      String      @map("coupon_id") @db.Uuid
-  targetType    String      @map("target_type") @db.VarChar(20)
-  targetId      String      @map("target_id") @db.Uuid
-  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  couponId   String   @map("coupon_id") @db.Uuid
+  targetType String   @map("target_type") @db.VarChar(20)
+  targetId   String   @map("target_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  coupon        SalesCoupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  coupon SalesCoupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
 
   @@unique([couponId, targetType, targetId], name: "uq_sales_coupon_targets_target")
   @@index([targetType, targetId], name: "idx_sales_coupon_targets_lookup")
@@ -905,13 +903,13 @@ model SalesCouponTarget {
 
 // --- Prospecting Module ---
 model ProspectCampaign {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId         String   @map("tenant_id") @db.Uuid
-  name             String   @db.VarChar(255)
-  objective        String   @db.Text
-  audienceType     String   @map("audience_type") @db.VarChar(30)
-  channel          String   @db.VarChar(20)
-  targetContactIds Json?    @default("[]") @map("target_contact_ids")
+  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String   @map("tenant_id") @db.Uuid
+  name                    String   @db.VarChar(255)
+  objective               String   @db.Text
+  audienceType            String   @map("audience_type") @db.VarChar(30)
+  channel                 String   @db.VarChar(20)
+  targetContactIds        Json?    @default("[]") @map("target_contact_ids")
   messageTemplate         String?  @map("message_template") @db.Text
   templateName            String?  @map("template_name") @db.VarChar(255)
   languageCode            String   @default("pt_BR") @map("language_code") @db.VarChar(10)
@@ -973,21 +971,21 @@ model ProspectSearch {
 }
 
 model ProspectSearchResult {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId     String   @map("tenant_id") @db.Uuid
-  searchId     String   @map("search_id") @db.Uuid
-  source       String   @db.VarChar(30)
-  externalId   String?  @map("external_id") @db.VarChar(255)
-  businessName String   @map("business_name") @db.VarChar(255)
-  city         String   @db.VarChar(100)
-  state        String?  @db.VarChar(50)
-  phone        String?  @db.VarChar(30)
-  whatsappPhone String? @map("whatsapp_phone") @db.Text
-  instagramUrl String?  @map("instagram_url") @db.Text
-  email        String?  @db.VarChar(255)
-  website      String?  @db.Text
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  searchId      String   @map("search_id") @db.Uuid
+  source        String   @db.VarChar(30)
+  externalId    String?  @map("external_id") @db.VarChar(255)
+  businessName  String   @map("business_name") @db.VarChar(255)
+  city          String   @db.VarChar(100)
+  state         String?  @db.VarChar(50)
+  phone         String?  @db.VarChar(30)
+  whatsappPhone String?  @map("whatsapp_phone") @db.Text
+  instagramUrl  String?  @map("instagram_url") @db.Text
+  email         String?  @db.VarChar(255)
+  website       String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, searchId], name: "idx_prospect_search_results_tenant_search")
   @@map("prospect_search_results")
@@ -1035,27 +1033,27 @@ model ProspectAdsInsightResult {
 }
 
 model ProspectLeadCapture {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId           String   @map("tenant_id") @db.Uuid
-  source             String   @default("GOOGLE_ADS_LEAD_FORM") @db.VarChar(40)
-  externalLeadId     String   @map("external_lead_id") @db.VarChar(255)
-  googleAdsCustomerId String? @map("google_ads_customer_id") @db.VarChar(64)
-  campaignName       String?  @map("campaign_name") @db.VarChar(255)
-  formName           String?  @map("form_name") @db.VarChar(255)
-  fullName           String?  @map("full_name") @db.VarChar(255)
-  phone              String?  @db.VarChar(40)
-  email              String?  @db.VarChar(255)
-  city               String?  @db.VarChar(100)
-  state              String?  @db.VarChar(50)
-  instagramHandle    String?  @map("instagram_handle") @db.VarChar(255)
-  document           String?  @db.VarChar(30)
-  interests          Json?    @db.JsonB
-  rawPayload         Json?    @map("raw_payload") @db.JsonB
-  submissionAt       DateTime @map("submission_at") @db.Timestamptz
-  importStatus       String   @default("NEW") @map("import_status") @db.VarChar(30)
-  contactId          String?  @map("contact_id") @db.VarChar(255)
-  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  source              String   @default("GOOGLE_ADS_LEAD_FORM") @db.VarChar(40)
+  externalLeadId      String   @map("external_lead_id") @db.VarChar(255)
+  googleAdsCustomerId String?  @map("google_ads_customer_id") @db.VarChar(64)
+  campaignName        String?  @map("campaign_name") @db.VarChar(255)
+  formName            String?  @map("form_name") @db.VarChar(255)
+  fullName            String?  @map("full_name") @db.VarChar(255)
+  phone               String?  @db.VarChar(40)
+  email               String?  @db.VarChar(255)
+  city                String?  @db.VarChar(100)
+  state               String?  @db.VarChar(50)
+  instagramHandle     String?  @map("instagram_handle") @db.VarChar(255)
+  document            String?  @db.VarChar(30)
+  interests           Json?    @db.JsonB
+  rawPayload          Json?    @map("raw_payload") @db.JsonB
+  submissionAt        DateTime @map("submission_at") @db.Timestamptz
+  importStatus        String   @default("NEW") @map("import_status") @db.VarChar(30)
+  contactId           String?  @map("contact_id") @db.VarChar(255)
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([tenantId, externalLeadId], name: "uq_prospect_lead_captures_tenant_external")
   @@index([tenantId, importStatus], name: "idx_prospect_lead_captures_tenant_status")
@@ -1065,18 +1063,18 @@ model ProspectLeadCapture {
 }
 
 model OutboxEvent {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventId     String   @unique @map("event_id") @db.VarChar(255)
-  eventType   String   @map("event_type") @db.VarChar(255)
-  queue       String   @map("queue_name") @db.VarChar(255)
-  sourceModule String  @map("source_module") @db.VarChar(100)
-  payload     Json
-  eventTimestamp DateTime @map("event_timestamp") @db.Timestamptz
-  attemptCount Int      @default(0) @map("attempt_count")
-  processingAt DateTime? @map("processing_at") @db.Timestamptz
-  publishedAt DateTime? @map("published_at") @db.Timestamptz
-  lastError   String?   @map("last_error") @db.Text
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId        String    @unique @map("event_id") @db.VarChar(255)
+  eventType      String    @map("event_type") @db.VarChar(255)
+  queue          String    @map("queue_name") @db.VarChar(255)
+  sourceModule   String    @map("source_module") @db.VarChar(100)
+  payload        Json
+  eventTimestamp DateTime  @map("event_timestamp") @db.Timestamptz
+  attemptCount   Int       @default(0) @map("attempt_count")
+  processingAt   DateTime? @map("processing_at") @db.Timestamptz
+  publishedAt    DateTime? @map("published_at") @db.Timestamptz
+  lastError      String?   @map("last_error") @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([publishedAt, createdAt], name: "idx_outbox_pending")
   @@index([processingAt], name: "idx_outbox_processing")
@@ -1121,20 +1119,20 @@ model PasswordResetToken {
 }
 
 model PaymentWebhookReceipt {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  receiptKey     String   @unique @map("receipt_key") @db.VarChar(255)
-  provider       String   @db.VarChar(50)
-  eventType      String   @map("event_type") @db.VarChar(100)
-  paymentId      String   @map("payment_id") @db.VarChar(100)
-  tenantId       String?  @map("tenant_id") @db.Uuid
-  rawReference   String?  @map("raw_reference") @db.VarChar(255)
-  signature      String?  @db.Text
-  payload        Json
-  status         String   @default("RECEIVED") @db.VarChar(20)
-  ignoreReason   String?  @map("ignore_reason") @db.VarChar(100)
-  processedAt    DateTime? @map("processed_at") @db.Timestamptz
-  ignoredAt      DateTime? @map("ignored_at") @db.Timestamptz
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  receiptKey   String    @unique @map("receipt_key") @db.VarChar(255)
+  provider     String    @db.VarChar(50)
+  eventType    String    @map("event_type") @db.VarChar(100)
+  paymentId    String    @map("payment_id") @db.VarChar(100)
+  tenantId     String?   @map("tenant_id") @db.Uuid
+  rawReference String?   @map("raw_reference") @db.VarChar(255)
+  signature    String?   @db.Text
+  payload      Json
+  status       String    @default("RECEIVED") @db.VarChar(20)
+  ignoreReason String?   @map("ignore_reason") @db.VarChar(100)
+  processedAt  DateTime? @map("processed_at") @db.Timestamptz
+  ignoredAt    DateTime? @map("ignored_at") @db.Timestamptz
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([status, createdAt], name: "idx_payment_webhook_receipts_status")
   @@map("payment_webhook_receipts")
@@ -1143,21 +1141,21 @@ model PaymentWebhookReceipt {
 
 // --- Social Engagement Module ---
 model SocialAccount {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @map("tenant_id") @db.Uuid
-  platform          String   @db.VarChar(20) // INSTAGRAM, LINKEDIN
-  externalAccountId String   @map("external_account_id") @db.VarChar(255)
-  username          String?  @db.VarChar(255)
-  displayName       String?  @map("display_name") @db.VarChar(255)
-  profilePictureUrl String?  @map("profile_picture_url") @db.Text
-  accessToken       String   @map("access_token") @db.Text
-  refreshToken      String?  @map("refresh_token") @db.Text
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  platform          String    @db.VarChar(20) // INSTAGRAM, LINKEDIN
+  externalAccountId String    @map("external_account_id") @db.VarChar(255)
+  username          String?   @db.VarChar(255)
+  displayName       String?   @map("display_name") @db.VarChar(255)
+  profilePictureUrl String?   @map("profile_picture_url") @db.Text
+  accessToken       String    @map("access_token") @db.Text
+  refreshToken      String?   @map("refresh_token") @db.Text
   tokenExpiresAt    DateTime? @map("token_expires_at") @db.Timestamptz
-  pageId            String?  @map("page_id") @db.VarChar(255)
-  webhookSecret     String?  @map("webhook_secret") @db.VarChar(255)
-  status            String   @default("ACTIVE") @db.VarChar(20) // ACTIVE, DISCONNECTED, TOKEN_EXPIRED
-  connectedAt       DateTime @default(now()) @map("connected_at") @db.Timestamptz
-  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  pageId            String?   @map("page_id") @db.VarChar(255)
+  webhookSecret     String?   @map("webhook_secret") @db.VarChar(255)
+  status            String    @default("ACTIVE") @db.VarChar(20) // ACTIVE, DISCONNECTED, TOKEN_EXPIRED
+  connectedAt       DateTime  @default(now()) @map("connected_at") @db.Timestamptz
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([tenantId, platform, externalAccountId], name: "uq_social_accounts_tenant_platform_ext")
   @@index([tenantId, platform], name: "idx_social_accounts_tenant_platform")
@@ -1166,18 +1164,18 @@ model SocialAccount {
 }
 
 model SocialPost {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @map("tenant_id") @db.Uuid
-  socialAccountId   String   @map("social_account_id") @db.Uuid
-  platform          String   @db.VarChar(20)
-  externalPostId    String   @map("external_post_id") @db.VarChar(255)
-  postType          String?  @map("post_type") @db.VarChar(30) // IMAGE, VIDEO, CAROUSEL, REEL, STORY
-  caption           String?  @db.Text
-  mediaUrl          String?  @map("media_url") @db.Text
-  permalink         String?  @db.Text
-  commentCount      Int      @default(0) @map("comment_count")
-  postedAt          DateTime? @map("posted_at") @db.Timestamptz
-  discoveredAt      DateTime @default(now()) @map("discovered_at") @db.Timestamptz
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  socialAccountId String    @map("social_account_id") @db.Uuid
+  platform        String    @db.VarChar(20)
+  externalPostId  String    @map("external_post_id") @db.VarChar(255)
+  postType        String?   @map("post_type") @db.VarChar(30) // IMAGE, VIDEO, CAROUSEL, REEL, STORY
+  caption         String?   @db.Text
+  mediaUrl        String?   @map("media_url") @db.Text
+  permalink       String?   @db.Text
+  commentCount    Int       @default(0) @map("comment_count")
+  postedAt        DateTime? @map("posted_at") @db.Timestamptz
+  discoveredAt    DateTime  @default(now()) @map("discovered_at") @db.Timestamptz
 
   @@unique([tenantId, externalPostId], name: "uq_social_posts_tenant_ext")
   @@index([tenantId, socialAccountId], name: "idx_social_posts_tenant_account")
@@ -1186,21 +1184,21 @@ model SocialPost {
 }
 
 model SocialComment {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @map("tenant_id") @db.Uuid
-  socialAccountId   String   @map("social_account_id") @db.Uuid
-  postId            String   @map("post_id") @db.Uuid
-  platform          String   @db.VarChar(20)
-  externalCommentId String   @map("external_comment_id") @db.VarChar(255)
-  parentCommentId   String?  @map("parent_comment_id") @db.Uuid // for threaded replies
-  authorExternalId  String?  @map("author_external_id") @db.VarChar(255)
-  authorUsername    String?  @map("author_username") @db.VarChar(255)
-  authorName        String?  @map("author_name") @db.VarChar(255)
-  text              String   @db.Text
-  sentiment         String?  @db.VarChar(20) // POSITIVE, NEGATIVE, NEUTRAL, QUESTION
-  status            String   @default("PENDING") @db.VarChar(20) // PENDING, REPLIED, IGNORED, AUTO_REPLIED
-  isHidden          Boolean  @default(false) @map("is_hidden")
-  receivedAt        DateTime @default(now()) @map("received_at") @db.Timestamptz
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  socialAccountId   String    @map("social_account_id") @db.Uuid
+  postId            String    @map("post_id") @db.Uuid
+  platform          String    @db.VarChar(20)
+  externalCommentId String    @map("external_comment_id") @db.VarChar(255)
+  parentCommentId   String?   @map("parent_comment_id") @db.Uuid // for threaded replies
+  authorExternalId  String?   @map("author_external_id") @db.VarChar(255)
+  authorUsername    String?   @map("author_username") @db.VarChar(255)
+  authorName        String?   @map("author_name") @db.VarChar(255)
+  text              String    @db.Text
+  sentiment         String?   @db.VarChar(20) // POSITIVE, NEGATIVE, NEUTRAL, QUESTION
+  status            String    @default("PENDING") @db.VarChar(20) // PENDING, REPLIED, IGNORED, AUTO_REPLIED
+  isHidden          Boolean   @default(false) @map("is_hidden")
+  receivedAt        DateTime  @default(now()) @map("received_at") @db.Timestamptz
   repliedAt         DateTime? @map("replied_at") @db.Timestamptz
 
   @@unique([tenantId, externalCommentId], name: "uq_social_comments_tenant_ext")
@@ -1211,17 +1209,17 @@ model SocialComment {
 }
 
 model SocialCommentReply {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId          String   @map("tenant_id") @db.Uuid
-  commentId         String   @map("comment_id") @db.Uuid
-  externalReplyId   String?  @map("external_reply_id") @db.VarChar(255)
-  text              String   @db.Text
-  repliedBy         String   @map("replied_by") @db.VarChar(20) // AI, HUMAN
-  ruleId            String?  @map("rule_id") @db.Uuid // which auto-reply rule triggered this
-  userId            String?  @map("user_id") @db.Uuid // if HUMAN
-  status            String   @default("SENT") @db.VarChar(20) // SENT, FAILED, DELETED
-  errorMessage      String?  @map("error_message") @db.Text
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  commentId       String   @map("comment_id") @db.Uuid
+  externalReplyId String?  @map("external_reply_id") @db.VarChar(255)
+  text            String   @db.Text
+  repliedBy       String   @map("replied_by") @db.VarChar(20) // AI, HUMAN
+  ruleId          String?  @map("rule_id") @db.Uuid // which auto-reply rule triggered this
+  userId          String?  @map("user_id") @db.Uuid // if HUMAN
+  status          String   @default("SENT") @db.VarChar(20) // SENT, FAILED, DELETED
+  errorMessage    String?  @map("error_message") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([tenantId, commentId], name: "idx_social_comment_replies_tenant_comment")
   @@map("social_comment_replies")
@@ -1229,19 +1227,19 @@ model SocialCommentReply {
 }
 
 model SocialAutoReplyRule {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId      String   @map("tenant_id") @db.Uuid
-  name          String   @db.VarChar(255)
-  isActive      Boolean  @default(true) @map("is_active")
-  priority      Int      @default(0)
-  platform      String   @default("INSTAGRAM") @db.VarChar(20) // INSTAGRAM, ALL
-  conditions    Json     @default("{}") // keywords, excludeKeywords, postIds, timeWindow, etc.
-  actions       Json     @default("{}") // replyToComment, sendInboxMessage config
-  limits        Json     @default("{}") // maxRepliesPerPost, maxRepliesPerHour, cooldownPerUser
-  totalFired    Int      @default(0) @map("total_fired")
-  lastFiredAt   DateTime? @map("last_fired_at") @db.Timestamptz
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  name        String    @db.VarChar(255)
+  isActive    Boolean   @default(true) @map("is_active")
+  priority    Int       @default(0)
+  platform    String    @default("INSTAGRAM") @db.VarChar(20) // INSTAGRAM, ALL
+  conditions  Json      @default("{}") // keywords, excludeKeywords, postIds, timeWindow, etc.
+  actions     Json      @default("{}") // replyToComment, sendInboxMessage config
+  limits      Json      @default("{}") // maxRepliesPerPost, maxRepliesPerHour, cooldownPerUser
+  totalFired  Int       @default(0) @map("total_fired")
+  lastFiredAt DateTime? @map("last_fired_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, isActive], name: "idx_social_auto_reply_rules_tenant_active")
   @@map("social_auto_reply_rules")
@@ -1249,19 +1247,19 @@ model SocialAutoReplyRule {
 }
 
 model SocialInboxThread {
-  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId            String   @map("tenant_id") @db.Uuid
-  socialAccountId     String   @map("social_account_id") @db.Uuid
-  platform            String   @db.VarChar(20)
-  recipientExternalId String   @map("recipient_external_id") @db.VarChar(255)
-  recipientUsername   String?  @map("recipient_username") @db.VarChar(255)
-  originCommentId     String?  @map("origin_comment_id") @db.Uuid // the comment that started this thread
-  lastMessageText     String?  @map("last_message_text") @db.Text
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @map("tenant_id") @db.Uuid
+  socialAccountId     String    @map("social_account_id") @db.Uuid
+  platform            String    @db.VarChar(20)
+  recipientExternalId String    @map("recipient_external_id") @db.VarChar(255)
+  recipientUsername   String?   @map("recipient_username") @db.VarChar(255)
+  originCommentId     String?   @map("origin_comment_id") @db.Uuid // the comment that started this thread
+  lastMessageText     String?   @map("last_message_text") @db.Text
   lastMessageAt       DateTime? @map("last_message_at") @db.Timestamptz
-  messageCount        Int      @default(0) @map("message_count")
-  status              String   @default("ACTIVE") @db.VarChar(20) // ACTIVE, CLOSED
-  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  messageCount        Int       @default(0) @map("message_count")
+  status              String    @default("ACTIVE") @db.VarChar(20) // ACTIVE, CLOSED
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([tenantId, platform, recipientExternalId], name: "uq_social_inbox_threads_tenant_recipient")
   @@index([tenantId, status], name: "idx_social_inbox_threads_tenant_status")
@@ -1270,15 +1268,15 @@ model SocialInboxThread {
 }
 
 model SocialAuditLog {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId    String   @map("tenant_id") @db.Uuid
-  event       String   @db.VarChar(50) // COMMENT_RECEIVED, AUTO_REPLY_SENT, INBOX_MESSAGE_SENT, RULE_CREATED, ACCOUNT_CONNECTED
-  entityId    String?  @map("entity_id") @db.Uuid
-  entityType  String?  @map("entity_type") @db.VarChar(30) // COMMENT, REPLY, RULE, ACCOUNT, INBOX_THREAD
-  platform    String?  @db.VarChar(20)
-  ruleId      String?  @map("rule_id") @db.Uuid
-  metadata    Json?    @default("{}")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  event      String   @db.VarChar(50) // COMMENT_RECEIVED, AUTO_REPLY_SENT, INBOX_MESSAGE_SENT, RULE_CREATED, ACCOUNT_CONNECTED
+  entityId   String?  @map("entity_id") @db.Uuid
+  entityType String?  @map("entity_type") @db.VarChar(30) // COMMENT, REPLY, RULE, ACCOUNT, INBOX_THREAD
+  platform   String?  @db.VarChar(20)
+  ruleId     String?  @map("rule_id") @db.Uuid
+  metadata   Json?    @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([tenantId])
   @@index([entityId])
@@ -1287,35 +1285,35 @@ model SocialAuditLog {
 }
 
 model SchedulingRecurringReservation {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId           String    @map("tenant_id") @db.Uuid
-  branchId           String?   @map("branch_id") @db.Uuid
-  professionalId     String    @map("professional_id") @db.VarChar(80)
-  contactId          String?   @map("contact_id") @db.Uuid
-  categoryId         String?   @map("category_id") @db.VarChar(80)
-  conversationId     String?   @map("conversation_id") @db.Uuid
-  period             String    @db.VarChar(20)
-  interval           Int       @default(1)
-  maxOccurrences     Int       @map("max_occurrences")
-  occurrencesCreated Int       @default(0) @map("occurrences_created")
-  startsAt           String    @map("starts_at") @db.VarChar(5)
-  endsAt             String    @map("ends_at") @db.VarChar(5)
-  firstDate          DateTime  @map("first_date") @db.Date
-  endDate            DateTime? @map("end_date") @db.Date
-  nextDate           DateTime? @map("next_date") @db.Date
-  nextRunAt          DateTime? @map("next_run_at") @db.Timestamptz
-  isFree             Boolean   @default(true) @map("is_free")
-  isOnline           Boolean   @default(false) @map("is_online")
-  paymentTimeoutHours Int?     @map("payment_timeout_hours")
-  notes              String?   @db.Text
-  status             String    @default("ACTIVE") @db.VarChar(20)
-  lastError          String?   @map("last_error") @db.Text
-  leaseUntil         DateTime? @map("lease_until") @db.Timestamptz
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  completedAt        DateTime? @map("completed_at") @db.Timestamptz
-  cancelledAt        DateTime? @map("cancelled_at") @db.Timestamptz
-  runs               SchedulingRecurringReservationRun[]
+  id                  String                              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String                              @map("tenant_id") @db.Uuid
+  branchId            String?                             @map("branch_id") @db.Uuid
+  professionalId      String                              @map("professional_id") @db.VarChar(80)
+  contactId           String?                             @map("contact_id") @db.Uuid
+  categoryId          String?                             @map("category_id") @db.VarChar(80)
+  conversationId      String?                             @map("conversation_id") @db.Uuid
+  period              String                              @db.VarChar(20)
+  interval            Int                                 @default(1)
+  maxOccurrences      Int                                 @map("max_occurrences")
+  occurrencesCreated  Int                                 @default(0) @map("occurrences_created")
+  startsAt            String                              @map("starts_at") @db.VarChar(5)
+  endsAt              String                              @map("ends_at") @db.VarChar(5)
+  firstDate           DateTime                            @map("first_date") @db.Date
+  endDate             DateTime?                           @map("end_date") @db.Date
+  nextDate            DateTime?                           @map("next_date") @db.Date
+  nextRunAt           DateTime?                           @map("next_run_at") @db.Timestamptz
+  isFree              Boolean                             @default(true) @map("is_free")
+  isOnline            Boolean                             @default(false) @map("is_online")
+  paymentTimeoutHours Int?                                @map("payment_timeout_hours")
+  notes               String?                             @db.Text
+  status              String                              @default("ACTIVE") @db.VarChar(20)
+  lastError           String?                             @map("last_error") @db.Text
+  leaseUntil          DateTime?                           @map("lease_until") @db.Timestamptz
+  createdAt           DateTime                            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime                            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  completedAt         DateTime?                           @map("completed_at") @db.Timestamptz
+  cancelledAt         DateTime?                           @map("cancelled_at") @db.Timestamptz
+  runs                SchedulingRecurringReservationRun[]
 
   @@index([status, nextRunAt, leaseUntil], name: "idx_scheduling_recurring_reservations_due")
   @@index([tenantId, professionalId, status], name: "idx_scheduling_recurring_reservations_tenant_professional")
@@ -1324,16 +1322,16 @@ model SchedulingRecurringReservation {
 }
 
 model SchedulingRecurringReservationRun {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  recurrenceId     String   @map("recurrence_id") @db.Uuid
-  tenantId         String   @map("tenant_id") @db.Uuid
-  occurrenceNumber Int      @map("occurrence_number")
-  targetDate       DateTime @map("target_date") @db.Date
-  slotId           String?  @map("slot_id") @db.VarChar(80)
-  status           String   @default("PROCESSING") @db.VarChar(20)
-  errorMessage     String?  @map("error_message") @db.Text
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
-  completedAt      DateTime? @map("completed_at") @db.Timestamptz
+  id               String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recurrenceId     String                         @map("recurrence_id") @db.Uuid
+  tenantId         String                         @map("tenant_id") @db.Uuid
+  occurrenceNumber Int                            @map("occurrence_number")
+  targetDate       DateTime                       @map("target_date") @db.Date
+  slotId           String?                        @map("slot_id") @db.VarChar(80)
+  status           String                         @default("PROCESSING") @db.VarChar(20)
+  errorMessage     String?                        @map("error_message") @db.Text
+  createdAt        DateTime                       @default(now()) @map("created_at") @db.Timestamptz
+  completedAt      DateTime?                      @map("completed_at") @db.Timestamptz
   recurrence       SchedulingRecurringReservation @relation(fields: [recurrenceId], references: [id])
 
   @@unique([recurrenceId, occurrenceNumber], name: "uq_scheduling_recurring_reservation_runs_occurrence")
@@ -1343,28 +1341,28 @@ model SchedulingRecurringReservationRun {
 
 // --- Tenant Branches ---
 model TenantBranch {
-  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId            String   @map("tenant_id") @db.Uuid
-  name                String   @db.VarChar(255)
-  phone               String?  @db.VarChar(20)
-  email               String?  @db.VarChar(255)
-  whatsappNumber      String?  @map("whatsapp_number") @db.VarChar(30)
-  instagramAccountId  String?  @map("instagram_account_id") @db.VarChar(255)
-  whatsappProvider    String?  @map("whatsapp_provider") @db.VarChar(30)
-  whatsappCredentials Json     @default("{}") @map("whatsapp_credentials")
-  whatsappWebhookSecret String? @map("whatsapp_webhook_secret") @db.Text
-  cnpj                String?  @db.VarChar(20)
-  zipcode             String?  @db.VarChar(20)
-  street              String?  @db.VarChar(255)
-  streetNumber        String?  @map("street_number") @db.VarChar(30)
-  neighborhood        String?  @db.VarChar(255)
-  city                String?  @db.VarChar(120)
-  state               String?  @db.VarChar(10)
-  operatingHours      Json?    @map("operating_hours")
-  isHeadquarters      Boolean  @default(false) @map("is_headquarters")
-  active              Boolean  @default(true)
-  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @map("tenant_id") @db.Uuid
+  name                  String   @db.VarChar(255)
+  phone                 String?  @db.VarChar(20)
+  email                 String?  @db.VarChar(255)
+  whatsappNumber        String?  @map("whatsapp_number") @db.VarChar(30)
+  instagramAccountId    String?  @map("instagram_account_id") @db.VarChar(255)
+  whatsappProvider      String?  @map("whatsapp_provider") @db.VarChar(30)
+  whatsappCredentials   Json     @default("{}") @map("whatsapp_credentials")
+  whatsappWebhookSecret String?  @map("whatsapp_webhook_secret") @db.Text
+  cnpj                  String?  @db.VarChar(20)
+  zipcode               String?  @db.VarChar(20)
+  street                String?  @db.VarChar(255)
+  streetNumber          String?  @map("street_number") @db.VarChar(30)
+  neighborhood          String?  @db.VarChar(255)
+  city                  String?  @db.VarChar(120)
+  state                 String?  @db.VarChar(10)
+  operatingHours        Json?    @map("operating_hours")
+  isHeadquarters        Boolean  @default(false) @map("is_headquarters")
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, active], name: "idx_tenant_branches_tenant_active")
   @@map("tenant_branches")
@@ -1392,7 +1390,7 @@ model TenantAuditLog {
   userId    String?  @map("user_id") @db.Uuid
   email     String?  @db.VarChar(255)
   eventType String   @map("event_type") @db.VarChar(80)
-  metadata  Json     @default("{}") 
+  metadata  Json     @default("{}")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([tenantId, createdAt(sort: Desc)], name: "idx_tenant_audit_logs_tenant_created")
@@ -1520,17 +1518,17 @@ model SchedulingAsyncJob {
 
 // --- Google Calendar Connection Scopes ---
 model GoogleCalendarConnectionScope {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId      String    @map("tenant_id") @db.Uuid
-  branchId      String?   @map("branch_id") @db.Uuid
-  userId        String    @map("user_id") @db.Uuid
-  refreshToken  String    @map("refresh_token") @db.Text
-  accessToken   String?   @map("access_token") @db.Text
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  branchId       String?   @map("branch_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  refreshToken   String    @map("refresh_token") @db.Text
+  accessToken    String?   @map("access_token") @db.Text
   tokenExpiresAt DateTime? @map("token_expires_at") @db.Timestamptz
-  calendarId    String?   @map("calendar_id") @db.VarChar(255)
-  status        String    @default("ACTIVE") @db.VarChar(30)
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  calendarId     String?   @map("calendar_id") @db.VarChar(255)
+  status         String    @default("ACTIVE") @db.VarChar(30)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@index([tenantId, branchId], name: "idx_google_calendar_scopes_tenant_branch")
   @@map("google_calendar_connection_scopes")
@@ -1539,15 +1537,15 @@ model GoogleCalendarConnectionScope {
 
 // --- Google Calendar Event Links ---
 model GoogleCalendarEventLink {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId       String   @map("tenant_id") @db.Uuid
-  branchId       String?  @map("branch_id") @db.Uuid
-  slotId         String   @map("slot_id") @db.VarChar(80)
-  googleEventId  String   @map("google_event_id") @db.VarChar(255)
-  calendarId     String   @map("calendar_id") @db.VarChar(255)
-  syncStatus     String   @default("SYNCED") @map("sync_status") @db.VarChar(20)
-  lastSyncedAt   DateTime @default(now()) @map("last_synced_at") @db.Timestamptz
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  branchId      String?  @map("branch_id") @db.Uuid
+  slotId        String   @map("slot_id") @db.VarChar(80)
+  googleEventId String   @map("google_event_id") @db.VarChar(255)
+  calendarId    String   @map("calendar_id") @db.VarChar(255)
+  syncStatus    String   @default("SYNCED") @map("sync_status") @db.VarChar(20)
+  lastSyncedAt  DateTime @default(now()) @map("last_synced_at") @db.Timestamptz
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([tenantId, branchId], name: "idx_google_calendar_event_links_tenant_branch")
   @@map("google_calendar_event_links")
@@ -1591,4 +1589,178 @@ model SupportFeedbackReply {
   @@index([feedbackId], name: "idx_feedback_replies_feedback")
   @@map("feedback_replies")
   @@schema("support_schema")
+}
+
+// --- Widget Chat Config ---
+model WidgetConfig {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  enabled        Boolean  @default(true)
+  publicToken    String   @unique @default(dbgenerated("gen_random_uuid()")) @map("public_token") @db.Uuid
+  name           String   @default("Chat") @db.VarChar(100)
+  greeting       String?  @db.Text
+  color          String   @default("#00C59E") @db.VarChar(20)
+  position       String   @default("bottom-right") @db.VarChar(20)
+  avatarUrl      String?  @map("avatar_url") @db.Text
+  collectName    Boolean  @default(true) @map("collect_name")
+  collectPhone   Boolean  @default(true) @map("collect_phone")
+  proactiveDelay Int?     @map("proactive_delay")
+  proactiveMsg   String?  @map("proactive_msg") @db.Text
+  allowedOrigins Json     @default("[]") @map("allowed_origins")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  sessions WidgetSession[]
+
+  @@index([tenantId], name: "idx_widget_configs_tenant")
+  @@map("widget_configs")
+  @@schema("messaging_schema")
+}
+
+// --- Widget Chat Sessions ---
+model WidgetSession {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  widgetConfigId String   @map("widget_config_id") @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  contactId      String?  @map("contact_id") @db.Uuid
+  conversationId String?  @map("conversation_id") @db.Uuid
+  visitorId      String   @map("visitor_id") @db.VarChar(100)
+  visitorName    String?  @map("visitor_name") @db.VarChar(255)
+  visitorPhone   String?  @map("visitor_phone") @db.VarChar(20)
+  visitorEmail   String?  @map("visitor_email") @db.VarChar(255)
+  pageUrl        String?  @map("page_url") @db.Text
+  status         String   @default("ACTIVE") @db.VarChar(20)
+  lastActiveAt   DateTime @default(now()) @map("last_active_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  widgetConfig WidgetConfig @relation(fields: [widgetConfigId], references: [id])
+
+  @@index([tenantId, visitorId], name: "idx_widget_sessions_tenant_visitor")
+  @@index([widgetConfigId, status], name: "idx_widget_sessions_config_status")
+  @@map("widget_sessions")
+  @@schema("messaging_schema")
+}
+
+// --- Voice Calls ---
+model VoiceCall {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  contactId      String   @map("contact_id") @db.Uuid
+  recoveryCaseId String?  @map("recovery_case_id") @db.Uuid
+  direction      String   @db.VarChar(10)
+  status         String   @default("QUEUED") @db.VarChar(20)
+  duration       Int?
+  recordingUrl   String?  @map("recording_url") @db.Text
+  transcript     Json?
+  sentiment      String?  @db.VarChar(20)
+  outcome        String?  @db.VarChar(20)
+  negotiation    Json?
+  externalCallId String?  @map("external_call_id") @db.VarChar(100)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, status], name: "idx_voice_calls_tenant_status")
+  @@index([tenantId, contactId], name: "idx_voice_calls_tenant_contact")
+  @@index([recoveryCaseId], name: "idx_voice_calls_recovery_case")
+  @@map("voice_calls")
+  @@schema("messaging_schema")
+}
+
+// --- Voice Agent Config ---
+model VoiceAgentConfig {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String   @unique @map("tenant_id") @db.Uuid
+  enabled             Boolean  @default(false)
+  voiceId             String   @default("") @map("voice_id") @db.VarChar(100)
+  language            String   @default("pt-BR") @db.VarChar(10)
+  maxDiscount         Float    @default(10) @map("max_discount")
+  maxInstallments     Int      @default(3) @map("max_installments")
+  minInstallmentValue Float    @default(50) @map("min_installment_value")
+  callWindowStart     String   @default("09:00") @map("call_window_start") @db.VarChar(5)
+  callWindowEnd       String   @default("18:00") @map("call_window_end") @db.VarChar(5)
+  blockedDays         String[] @default(["sunday"]) @map("blocked_days")
+  greeting            String?  @db.Text
+  transferPhone       String?  @map("transfer_phone") @db.VarChar(20)
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("voice_agent_configs")
+  @@schema("messaging_schema")
+}
+
+// --- Knowledge Sources ---
+model KnowledgeSource {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  type        String    @db.VarChar(30)
+  name        String    @db.VarChar(255)
+  sourceUrl   String?   @map("source_url") @db.Text
+  credentials Json?     @default("{}")
+  lastSyncAt  DateTime? @map("last_sync_at") @db.Timestamptz
+  contentHash String?   @map("content_hash") @db.VarChar(128)
+  status      String    @default("PENDING") @db.VarChar(20)
+  syncCron    String?   @map("sync_cron") @db.VarChar(50)
+  error       String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, status], name: "idx_knowledge_sources_tenant_status")
+  @@index([tenantId, type], name: "idx_knowledge_sources_tenant_type")
+  @@map("knowledge_sources")
+  @@schema("ai_schema")
+}
+
+// --- Automations Self-Service ---
+model Automation {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  isActive    Boolean  @default(false) @map("is_active")
+  trigger     Json // { type, config } — event trigger definition
+  conditions  Json?    @default("[]") // filter conditions array
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  steps      AutomationStep[]
+  executions AutomationExecution[]
+
+  @@index([tenantId, isActive], name: "idx_automations_tenant_active")
+  @@map("automations")
+  @@schema("tenant_schema")
+}
+
+model AutomationStep {
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  automationId String  @map("automation_id") @db.Uuid
+  order        Int     @default(0)
+  type         String  @db.VarChar(50) // send_message, wait_delay, condition_branch, http_request, update_contact, add_tag
+  config       Json // step-specific configuration
+  nextStepId   String? @map("next_step_id") @db.Uuid
+
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId, order], name: "idx_automation_steps_order")
+  @@map("automation_steps")
+  @@schema("tenant_schema")
+}
+
+model AutomationExecution {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  automationId String    @map("automation_id") @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  contactId    String?   @map("contact_id") @db.Uuid
+  status       String    @default("RUNNING") @db.VarChar(20) // RUNNING, COMPLETED, FAILED, CANCELLED
+  currentStep  Int       @default(0) @map("current_step")
+  context      Json?     @default("{}") // execution context/variables
+  startedAt    DateTime  @default(now()) @map("started_at") @db.Timestamptz
+  completedAt  DateTime? @map("completed_at") @db.Timestamptz
+  error        String?   @db.Text
+
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status], name: "idx_automation_executions_tenant_status")
+  @@index([automationId, status], name: "idx_automation_executions_automation_status")
+  @@map("automation_executions")
+  @@schema("tenant_schema")
 }
