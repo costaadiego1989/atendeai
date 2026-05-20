@@ -39,11 +39,14 @@ import {
   ProspectingSearchesPage,
 } from '@/modules/prospecting/views/ProspectingPages';
 import SupportPage from '@/modules/support/views/SupportPage';
+import AutomationsPage from '@/modules/automations/views/AutomationsPage';
 import {
   ChannelsSettingsPage,
 } from '@/modules/settings/views/SettingsPages';
 import { IntegrationsSettingsPage } from '@/modules/settings/views/IntegrationsSettingsPage';
 import { AISettingsPage } from '@/modules/settings/views/AISettingsPage';
+import { WidgetSettingsPage } from '@/modules/settings/views/WidgetSettingsPage';
+import { VoiceSettingsPage } from '@/modules/settings/views/VoiceSettingsPage';
 import TenantDataPage from '@/modules/settings/views/TenantDataPage';
 import { SocialPage } from '@/modules/social/views/SocialPage';
 import TeamPage from '@/modules/users/views/TeamPage';
@@ -171,6 +174,9 @@ function AppRoutes() {
         <Route path="settings/alerts" element={<AlertsPage />} />
         <Route path="settings/support" element={<SupportPage />} />
         <Route path="settings/ai" element={<AISettingsPage />} />
+        <Route path="settings/widget" element={<WidgetSettingsPage />} />
+        <Route path="settings/voice" element={<VoiceSettingsPage />} />
+        <Route path="automations" element={<AutomationsPage />} />
         <Route
           path="social"
           element={withModuleAccess('OMNICHANNEL_SOCIAL', <SocialPage />)}

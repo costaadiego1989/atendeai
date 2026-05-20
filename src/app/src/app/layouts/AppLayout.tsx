@@ -21,12 +21,15 @@ import {
   Link as LinkIcon,
   LogOut,
   MessageSquare,
+  MessageCircle,
+  Phone,
   Search,
   ShoppingCart,
   Tag,
   UserPlus,
   Webhook,
   Share2,
+  Zap,
 } from 'lucide-react';
 import { ActiveBranchSelector } from '@/components/ActiveBranchSelector';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -55,6 +58,7 @@ const mainNav: NavItem[] = [
   { label: 'Contatos', path: '/app/contacts', icon: Contact2 },
   { label: 'Agenda', path: '/app/scheduling', icon: Calendar },
   { label: 'Cobranças', path: '/app/recovery', icon: History },
+  { label: 'Automações', path: '/app/automations', icon: Zap },
 ];
 
 const salesNav: NavItem[] = [
@@ -78,6 +82,8 @@ const settingsNav: NavItem[] = [
   { label: 'Alertas', path: '/app/settings/alerts', icon: Bell },
   { label: 'Suporte', path: '/app/settings/support', icon: LifeBuoy },
   { label: 'Assistente IA', path: '/app/settings/ai', icon: Bot },
+  { label: 'Widget Chat', path: '/app/settings/widget', icon: MessageCircle },
+  { label: 'Agente de Voz', path: '/app/settings/voice', icon: Phone },
   { label: 'Equipe', path: '/app/team', icon: UserPlus },
   { label: 'Plano e consumo', path: '/app/billing/usage', icon: CreditCard },
 ];
