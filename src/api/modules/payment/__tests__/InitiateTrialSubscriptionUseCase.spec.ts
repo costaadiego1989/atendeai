@@ -54,13 +54,9 @@ describe('InitiateTrialSubscriptionUseCase', () => {
     );
   });
 
-  it('should create an Asaas customer and subscription, then enqueue a warning notification job', async () => {
+  it('should create an Asaas customer (without subscription) and enqueue trial jobs', async () => {
     // Arrange
     paymentGateway.createCustomer.mockResolvedValue({ id: 'cus_123' } as any);
-    paymentGateway.createSubscription.mockResolvedValue({
-      id: 'sub_123',
-      invoiceUrl: 'http://test',
-    } as any);
 
     const input = {
       tenantId: 'uuid-tenant-123',
@@ -75,33 +71,45 @@ describe('InitiateTrialSubscriptionUseCase', () => {
     // Act
     const result = await useCase.execute(input);
 
-    // Assert
+    // Assert — customer is created in Asaas
     expect(paymentGateway.createCustomer).toHaveBeenCalledWith(
       expect.objectContaining({
         email: input.email,
       }),
     );
 
-    expect(paymentGateway.createSubscription).toHaveBeenCalledWith(
-      expect.objectContaining({
-        customer: 'cus_123',
-        externalReference: 'trial|uuid-tenant-123',
-        trialDays: 7,
-      }),
-    );
+    // Assert — NO subscription is created in Asaas during trial
+    expect(paymentGateway.createSubscription).not.toHaveBeenCalled();
 
+    // Assert — local subscription is saved
+    expect(billingRepository.saveSubscription).toHaveBeenCalled();
+
+    // Assert — trial jobs are enqueued with local subscription ID
     expect(billingQueue.add).toHaveBeenCalledWith(
       'check-trial-expiration',
-      { subscriptionId: 'sub_123', tenantId: 'uuid-tenant-123' },
+      expect.objectContaining({ tenantId: 'uuid-tenant-123' }),
       { delay: 165 * 60 * 60 * 1000 },
     );
 
     expect(billingQueue.add).toHaveBeenCalledWith(
       'trial-expired',
-      { subscriptionId: 'sub_123', tenantId: 'uuid-tenant-123' },
+      expect.objectContaining({ tenantId: 'uuid-tenant-123' }),
       { delay: 168 * 60 * 60 * 1000 },
     );
 
-    expect(result.subscriptionId).toBe('sub_123');
+    // Assert — event is published with empty asaasSubscriptionId
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          tenantId: 'uuid-tenant-123',
+          asaasCustomerId: 'cus_123',
+          asaasSubscriptionId: '',
+        }),
+      }),
+    );
+
+    // Assert — returns local subscription ID (not Asaas ID)
+    expect(result.subscriptionId).toBeDefined();
+    expect(result.invoiceUrl).toBeUndefined();
   });
 });
