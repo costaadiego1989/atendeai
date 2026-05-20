@@ -321,7 +321,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full" />
       </div>
 
-      <div className="max-w-3xl mx-auto relative z-10">
+      <div className="max-w-6xl mx-auto relative z-10">
         {!hideHeader && (
           <div className="text-center mb-16">
             <motion.div

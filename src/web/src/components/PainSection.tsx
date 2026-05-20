@@ -31,7 +31,7 @@ const PainSection = () => {
         className="absolute top-20 right-[10%] w-[350px] h-[350px] rounded-full bg-destructive/4 blur-[120px]"
       />
 
-      <div className="relative z-10 max-w-4xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}

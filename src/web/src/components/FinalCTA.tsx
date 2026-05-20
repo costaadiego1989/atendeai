@@ -23,7 +23,7 @@ const FinalCTA: React.FC<FinalCTAProps> = ({ onSignupClick }) => {
     <section ref={ref} className="px-6 py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,hsl(168_100%_36%/0.06),transparent_70%)]" />
 
-      <div className="relative z-10 max-w-4xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}

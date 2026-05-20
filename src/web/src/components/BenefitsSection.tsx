@@ -29,7 +29,7 @@ const BenefitsSection = () => {
         className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-primary/4 blur-[120px]"
       />
 
-      <div className="relative z-10 max-w-5xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}

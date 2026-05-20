@@ -22,7 +22,7 @@ const StatsSection = () => {
         className="absolute inset-y-0 w-1/4 bg-gradient-to-r from-transparent via-primary/5 to-transparent"
       />
 
-      <div className="relative z-10 max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
         {stats.map((s, i) => {
           const Icon = s.icon;
           return (

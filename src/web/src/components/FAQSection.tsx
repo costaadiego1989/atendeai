@@ -46,7 +46,7 @@ const FAQSection = () => {
         className="absolute top-[20%] right-[5%] w-[250px] h-[250px] rounded-full bg-primary/3 blur-[100px]"
       />
 
-      <div className="relative z-10 max-w-3xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}

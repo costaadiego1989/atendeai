@@ -25,7 +25,7 @@ const solucoesLinks = [
 const Footer = () => (
   <footer className="relative px-6 pt-16 pb-28 md:pb-12 border-t border-primary/5 bg-card/30">
     <div className="absolute inset-0 bg-gradient-to-t from-primary/3 to-transparent" />
-    <div className="relative z-10 max-w-5xl mx-auto">
+    <div className="relative z-10 max-w-6xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-10 mb-10">
         <div className="flex flex-col items-start gap-3">
           <a href="#" className="flex items-center gap-2.5">

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 const SectionDivider = ({ flip = false }: { flip?: boolean }) => {
   return (
-    <div className="relative h-px mx-auto max-w-5xl overflow-hidden">
+    <div className="relative h-px mx-auto max-w-6xl overflow-hidden">
       <div
         className={`absolute inset-0 bg-gradient-to-r from-transparent ${
           flip ? "via-primary/20" : "via-border/40"

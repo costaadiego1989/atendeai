@@ -29,7 +29,7 @@ const SolutionSection = () => {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[conic-gradient(from_0deg,transparent,hsl(168_100%_36%/0.03),transparent,hsl(168_100%_36%/0.05),transparent)] blur-[40px]"
       />
 
-      <div className="relative z-10 max-w-5xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}

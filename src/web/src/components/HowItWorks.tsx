@@ -45,7 +45,7 @@ const HowItWorks = () => {
     <section id="como-funciona" ref={containerRef} className="px-6 py-[16vh] relative overflow-hidden font-inter">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(168_100%_36%/0.05)_0%,transparent_50%)]" />
 
-      <div className="relative z-10 max-w-5xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
