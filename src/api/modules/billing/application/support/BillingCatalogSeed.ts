@@ -46,7 +46,7 @@ export const BILLING_PLAN_SEED = [
     contactsQuota: 2500,
     sortOrder: 2,
     features: [
-      'Até 3 filiais ativas incluidas',
+      'Até 3 filiais ativas incluídas',
       'Até 3 números de WhatsApp conectados',
       'IA com contexto comercial por nicho',
       'Automações operacionais',
@@ -72,18 +72,18 @@ export const BILLING_PLAN_SEED = [
     code: 'ESCALA',
     displayName: 'Escala',
     description:
-      'Operacao multi-time com filiais, multiplos WhatsApps e governança.',
+      'Operação multi-time com filiais, múltiplos WhatsApps e governança.',
     monthlyPrice: 797,
     messagesQuota: 300000,
     aiTokensQuota: 30000000,
     contactsQuota: 10000,
     sortOrder: 3,
     features: [
-      'Até 10 filiais ativas incluidas',
+      'Até 10 filiais ativas incluídas',
       'Até 10 números de WhatsApp conectados',
       'Governança e roteamento multi-time',
       'Mais margem para integrações e picos',
-      'Dashboards avancados por necessidade do negocio',
+      'Dashboards avançados por necessidade do negócio',
     ],
     config: {
       limits: {
@@ -124,11 +124,11 @@ export const BILLING_MODULE_SEED = [
     code: 'EXTRA_WHATSAPP_NUMBER',
     displayName: 'WhatsApp adicional',
     description:
-      'Adiciona mais um numero de WhatsApp conectado para filial, equipe ou canal.',
+      'Adiciona mais um número de WhatsApp conectado para filial, equipe ou canal.',
     category: 'CHANNELS',
     monthlyPrice: 79,
     salesPitch:
-      'Ideal para separar matriz, filial, delivery, cobranca ou suporte.',
+      'Ideal para separar matriz, filial, delivery, cobrança ou suporte.',
     config: {
       capacity: {
         whatsappNumbers: 1,
@@ -137,9 +137,9 @@ export const BILLING_MODULE_SEED = [
   },
   {
     code: 'EXTRA_USER',
-    displayName: 'Usuario operacional adicional',
+    displayName: 'Usuário operacional adicional',
     description:
-      'Adiciona mais um usuario operacional acima do limite do plano base.',
+      'Adiciona mais um usuário operacional acima do limite do plano base.',
     category: 'OPERATIONS',
     monthlyPrice: 39,
     salesPitch: 'Para crescer equipe sem mudar de plano antes da hora.',
@@ -153,7 +153,7 @@ export const BILLING_MODULE_SEED = [
     code: 'TEAM_ROUTING',
     displayName: 'Roteamento de equipe',
     description:
-      'Distribuicao de conversas por fila, usuario, filial e regra operacional.',
+      'Distribuição de conversas por fila, usuário, filial e regra operacional.',
     category: 'OPERATIONS',
     monthlyPrice: 129,
     salesPitch: 'Evita gargalo quando mais pessoas atendem no mesmo tenant.',
@@ -162,7 +162,7 @@ export const BILLING_MODULE_SEED = [
     code: 'ANALYTICS_PRO',
     displayName: 'Relatórios avançados',
     description:
-      'Indicadores por periodo, modulo, filial, atendente e resultado.',
+      'Indicadores por período, módulo, filial, atendente e resultado.',
     category: 'ANALYTICS',
     monthlyPrice: 197,
     salesPitch: 'Transforma uso em decisao de gestao.',
@@ -171,7 +171,7 @@ export const BILLING_MODULE_SEED = [
     code: 'INTEGRATIONS_HUB',
     displayName: 'Hub de integrações',
     description:
-      'Conecta operações criticas com agenda, catalogo, pagamento e sistemas externos.',
+      'Conecta operações criticas com agenda, catálogo, pagamento e sistemas externos.',
     category: 'INTEGRATIONS',
     monthlyPrice: 297,
     salesPitch:
@@ -188,9 +188,9 @@ export const BILLING_MODULE_SEED = [
   },
   {
     code: 'CATALOG_INVENTORY',
-    displayName: 'Catalogo e estoque avancado',
+    displayName: 'Catálogo e estoque avançado',
     description:
-      'Produtos complexos, categorias, variacoes livres e snapshot de estoque.',
+      'Produtos complexos, categorias, variações livres e snapshot de estoque.',
     category: 'COMMERCE',
     monthlyPrice: 147,
     salesPitch:
@@ -206,7 +206,7 @@ export const BILLING_MODULE_SEED = [
   },
   {
     code: 'COUPONS_PROMOTIONS',
-    displayName: 'Cupons e promocoes',
+    displayName: 'Cupons e promoções',
     description: 'Cupons, campanhas e incentivos por conversa.',
     category: 'COMMERCE',
     monthlyPrice: 97,
@@ -215,7 +215,7 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'DELIVERY_SHIPPING',
     displayName: 'Entrega e frete',
-    description: 'Politica de entrega, retirada, taxa fixa ou por area.',
+    description: 'Política de entrega, retirada, taxa fixa ou por area.',
     category: 'COMMERCE',
     monthlyPrice: 97,
     salesPitch: 'Essencial para delivery, mercado, padaria e e-commerce local.',
@@ -227,22 +227,22 @@ export const BILLING_MODULE_SEED = [
       'Categorias, profissionais, disponibilidade, reserva e reagendamento.',
     category: 'SCHEDULING',
     monthlyPrice: 197,
-    salesPitch: 'Converte conversa em horario reservado.',
+    salesPitch: 'Converte conversa em horário reservado.',
   },
   {
     code: 'GOOGLE_CALENDAR_MEET',
     displayName: 'Google Calendar e Meet',
     description:
-      'Sincronizacao com calendario e criacao de link online quando necessario.',
+      'Sincronização com calendário e criação de link online quando necessário.',
     category: 'SCHEDULING',
     monthlyPrice: 97,
     salesPitch:
-      'Reduz agenda duplicada e melhora experiencia em consultas online.',
+      'Reduz agenda duplicada e melhora experiência em consultas online.',
   },
   {
     code: 'SCHEDULING_REMINDERS',
     displayName: 'Lembretes e confirmacoes',
-    description: 'Confirmacao automatica, lembretes e reducao de faltas.',
+    description: 'Confirmação automática, lembretes e redução de faltas.',
     category: 'SCHEDULING',
     monthlyPrice: 97,
     salesPitch: 'Protege a agenda e reduz no-show.',
@@ -250,7 +250,7 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'PREPAID_BOOKING',
     displayName: 'Pagamento antecipado de agenda',
-    description: 'Reserva com pagamento, expiracao e confirmacao automatica.',
+    description: 'Reserva com pagamento, expiração e confirmação automática.',
     category: 'SCHEDULING',
     monthlyPrice: 97,
     salesPitch: 'Aumenta compromisso em servicos de alto valor.',
@@ -258,18 +258,18 @@ export const BILLING_MODULE_SEED = [
   {
     code: 'RECOVERY_WALLET',
     displayName: 'Carteira de cobranca',
-    description: 'Casos, valores, status, responsavel e historico de cobranca.',
+    description: 'Casos, valores, status, responsável e histórico de cobrança.',
     category: 'RECOVERY',
     monthlyPrice: 197,
-    salesPitch: 'Organiza devedores e prioriza recuperacao.',
+    salesPitch: 'Organiza devedores e prioriza recuperação.',
   },
   {
     code: 'RECOVERY_AUTOMATION',
-    displayName: 'Regua de cobranca',
+    displayName: 'Regua de cobrança',
     description: 'Cadencias, promessas de pagamento, negociação e follow-up.',
     category: 'RECOVERY',
     monthlyPrice: 147,
-    salesPitch: 'Aumenta recuperacao com cadencia controlada.',
+    salesPitch: 'Aumenta recuperação com cadência controlada.',
   },
   {
     code: 'RECOVERY_REPORTS',
@@ -281,25 +281,25 @@ export const BILLING_MODULE_SEED = [
   },
   {
     code: 'LEAD_QUALIFICATION',
-    displayName: 'Qualificacao de leads',
+    displayName: 'Qualificação de leads',
     description:
-      'Playbooks para entender necessidade, urgencia, perfil e proximo passo.',
+      'Playbooks para entender necessidade, urgência, perfil e próximo passo.',
     category: 'SALES',
     monthlyPrice: 147,
-    salesPitch: 'Ajuda servicos consultivos a vender com contexto.',
+    salesPitch: 'Ajuda serviços consultivos a vender com contexto.',
   },
   {
     code: 'PROPOSALS_QUOTES',
-    displayName: 'Orcamentos e propostas',
-    description: 'Coleta dados e organiza pedidos de orcamento ou proposta.',
+    displayName: 'Orçamentos e propostas',
+    description: 'Coleta dados e organiza pedidos de orçamento ou proposta.',
     category: 'SALES',
     monthlyPrice: 97,
     salesPitch: 'Reduz retrabalho e acelera resposta comercial.',
   },
   {
     code: 'PROSPECTING_ENGINE',
-    displayName: 'Motor de prospeccao',
-    description: 'Busca, segmentacao e campanhas outbound controladas.',
+    displayName: 'Motor de prospecção',
+    description: 'Busca, segmentação e campanhas outbound controladas.',
     category: 'PROSPECTING',
     monthlyPrice: 197,
     salesPitch: 'Gera novas oportunidades para operações comerciais.',
@@ -319,7 +319,7 @@ export const BILLING_NICHE_SEED = [
   {
     code: 'RETAIL',
     displayName: 'Varejo',
-    description: 'Lojas com catalogo, estoque, atendimento e recompra.',
+    description: 'Lojas com catálogo, estoque, atendimento e recompra.',
     pains: [
       'responder rapido',
       'mostrar disponibilidade',

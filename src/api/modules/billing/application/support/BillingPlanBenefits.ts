@@ -6,21 +6,21 @@ const ENTERPRISE_PLAN_BENEFITS: Record<string, string[]> = {
     '1 filial ativa incluida',
     '1 numero de WhatsApp conectado',
     'Inbox, CRM e IA assistiva para validar o canal',
-    'relatórios basicos de uso e atendimento',
+    'Relatórios basicos de uso e atendimento',
   ],
   PROFISSIONAL: [
     'Ate 3 filiais ativas incluidas',
     'Ate 3 numeros de WhatsApp conectados',
     'IA com contexto comercial por nicho',
     'Automacoes operacionais para vendas, agenda ou cobranca',
-    'relatórios por periodo, filtros e rotina de equipe',
+    'Relatórios por periodo, filtros e rotina de equipe',
   ],
   ESCALA: [
     'Ate 10 filiais ativas incluidas',
     'Ate 10 numeros de WhatsApp conectados',
     'governança, roteamento e operacao multi-time',
     'Maior margem para integrações, picos e playbooks',
-    'Dashboards avancados por necessidade do negocio',
+    'Dashboards avançados por necessidade do negócio',
   ],
 };
 
