@@ -9,6 +9,7 @@ import { BubbleWhatsAdapter } from './BubbleWhatsAdapter';
 import { InstagramGraphAdapter } from './InstagramGraphAdapter';
 import { Dialog360Adapter } from './Dialog360Adapter';
 import { TwilioAdapter } from './TwilioAdapter';
+import { WebChatWidgetAdapter } from './WebChatWidgetAdapter';
 
 @Injectable()
 export class MessagingGatewayRegistry implements IMessagingGatewayRegistry {
@@ -19,6 +20,7 @@ export class MessagingGatewayRegistry implements IMessagingGatewayRegistry {
     dialog360Adapter: Dialog360Adapter,
     twilioAdapter: TwilioAdapter,
     instagramGraphAdapter: InstagramGraphAdapter,
+    webChatWidgetAdapter: WebChatWidgetAdapter,
   ) {
     this.gateways.set(
       this.getKey(bubbleWhatsAdapter.channel, bubbleWhatsAdapter.provider),
@@ -33,11 +35,12 @@ export class MessagingGatewayRegistry implements IMessagingGatewayRegistry {
       twilioAdapter,
     );
     this.gateways.set(
-      this.getKey(
-        instagramGraphAdapter.channel,
-        instagramGraphAdapter.provider,
-      ),
+      this.getKey(instagramGraphAdapter.channel, instagramGraphAdapter.provider),
       instagramGraphAdapter,
+    );
+    this.gateways.set(
+      this.getKey(webChatWidgetAdapter.channel, webChatWidgetAdapter.provider),
+      webChatWidgetAdapter,
     );
   }
 
