@@ -8,6 +8,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
 import DataDeletion from "./pages/DataDeletion.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import SolucoesPage from "./pages/solucoes/SolucoesPage.tsx";
 import AdminLogin from "./pages/admin/AdminLogin.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import SupportFeedbacksPage from "./pages/admin/support/SupportFeedbacksPage.tsx";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/privacidade" element={<PrivacyPolicy />} />
           <Route path="/termos" element={<TermsOfService />} />
           <Route path="/data-deletion" element={<DataDeletion />} />
+          <Route path="/solucoes/:slug" element={<SolucoesPage />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<DashboardPage />} />
