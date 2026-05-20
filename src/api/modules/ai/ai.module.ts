@@ -117,6 +117,12 @@ import { TenantAIContextSnapshotService } from './application/services/TenantAIC
 import { TENANT_AI_CONTEXT_SNAPSHOT_STORE } from './application/ports/ITenantAIContextSnapshot';
 import { RedisTenantAIContextSnapshotStore } from './infrastructure/persistence/RedisTenantAIContextSnapshotStore';
 import { TenantAIContextSnapshotInvalidationHandler } from './infrastructure/handlers/TenantAIContextSnapshotInvalidationHandler';
+import { WebCrawlerAdapter } from './infrastructure/adapters/knowledge-sources/WebCrawlerAdapter';
+import { GoogleDriveAdapter } from './infrastructure/adapters/knowledge-sources/GoogleDriveAdapter';
+import { NotionAdapter } from './infrastructure/adapters/knowledge-sources/NotionAdapter';
+import { KnowledgeBaseSyncWorker } from './infrastructure/adapters/knowledge-sources/KnowledgeBaseSyncWorker';
+import { IngestKnowledgeSourceUseCase } from './application/use-cases/knowledge-base/IngestKnowledgeSourceUseCase';
+import { HybridSearchService } from './application/use-cases/knowledge-base/HybridSearchService';
 
 @Module({
   imports: [
@@ -213,6 +219,12 @@ import { TenantAIContextSnapshotInvalidationHandler } from './infrastructure/han
     },
     ProcessDocumentForRAGUseCase,
     PDFProcessingProcessor,
+    WebCrawlerAdapter,
+    GoogleDriveAdapter,
+    NotionAdapter,
+    IngestKnowledgeSourceUseCase,
+    HybridSearchService,
+    KnowledgeBaseSyncWorker,
     {
       provide: LeadScoringService,
       useFactory: () => new LeadScoringService(),
@@ -398,6 +410,8 @@ import { TenantAIContextSnapshotInvalidationHandler } from './infrastructure/han
     EMBEDDING_PROVIDER,
     DOCUMENT_CHUNK_REPOSITORY,
     DocumentChunkingService,
+    HybridSearchService,
+    IngestKnowledgeSourceUseCase,
   ],
 })
 export class AIModule {}
