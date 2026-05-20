@@ -81,7 +81,7 @@ export const BILLING_PLAN_SEED = [
     features: [
       'Até 10 filiais ativas incluidas',
       'Até 10 números de WhatsApp conectados',
-      'governança e roteamento multi-time',
+      'Governança e roteamento multi-time',
       'Mais margem para integrações e picos',
       'Dashboards avancados por necessidade do negocio',
     ],
