@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { AuthShell } from '@/modules/auth/components/AuthShell';
 import { useLoginViewModel } from '@/modules/auth/view-models/useLoginViewModel';
+import { authService } from '@/modules/auth/services/auth-service';
 
 const loginSchema = z.object({
   email: z.string().email('Informe um e-mail válido'),
@@ -20,25 +21,31 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, clearSession } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
-  const [searchParams] = useSearchParams();
+  const [clearingSession, setClearingSession] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const loginMutation = useLoginViewModel();
   const sessionExpired = searchParams.get('reason') === 'session-expired';
+  const isFreshLogin = searchParams.get('fresh') === '1';
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
+  useEffect(() => {
+    if (isFreshLogin) {
+      setClearingSession(true);
+      clearSession();
+      authService.logout().catch(() => {}).finally(() => {
+        setClearingSession(false);
+        searchParams.delete('fresh');
+        setSearchParams(searchParams, { replace: true });
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (isAuthenticated) {
+  if (clearingSession) {
+    return null;
+  }
+
+  if (isAuthenticated && !isFreshLogin) {
     return (
       <Navigate
         to={user?.mustChangePassword ? '/first-access-password' : '/app/dashboard'}
