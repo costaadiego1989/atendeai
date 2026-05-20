@@ -126,9 +126,9 @@ const PLAN_ICONS: Record<string, React.ElementType> = {
 };
 
 const VOLUME_OPTIONS: VolumeOption[] = [
-  { id: "low", label: "Operação inicial", description: "Volume mais controlado, equipe enxuta e validação do fluxo comercial", icon: Zap, recommendation: "ESSENCIAL" },
-  { id: "mid", label: "Rotina comercial ativa", description: "Demanda diária com mais conversas, retorno e módulos já entrando na rotina", icon: Crown, recommendation: "PROFISSIONAL" },
-  { id: "high", label: "Escala operacional", description: "Mais equipe, mais filiais, mais canais ou uma operação comercial mais crítica", icon: Globe, recommendation: "ESCALA" },
+  { id: "low", label: "Operação inicial", description: "Validação com WhatsApp, CRM, IA e automações básicas", icon: Zap, recommendation: "ESSENCIAL" },
+  { id: "mid", label: "Rotina comercial ativa", description: "Rotina com agenda, checkout, propostas e cobrança ativa", icon: Crown, recommendation: "PROFISSIONAL" },
+  { id: "high", label: "Escala operacional", description: "Multi-time com voz, prospecção, recovery e governança", icon: Globe, recommendation: "ESCALA" },
 ];
 
 function calculateRecommendation(
@@ -194,6 +194,38 @@ const StepHeader = ({ step, title, subtitle }: { step: number; title: string; su
   </div>
 );
 
+const ANALYZING_TEXTS = [
+  "Cruzando nicho e momento operacional...",
+  "Avaliando módulos mais aderentes...",
+  "Montando recomendação personalizada...",
+];
+
+const AnalyzingSubtext = () => {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % ANALYZING_TEXTS.length);
+    }, 600);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.p
+        key={index}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.25 }}
+        className="text-sm text-white/40 text-center max-w-sm"
+      >
+        {ANALYZING_TEXTS[index]}
+      </motion.p>
+    </AnimatePresence>
+  );
+};
+
 const slideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 80 : -80,
@@ -218,6 +250,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
   const [recommendedPlan, setRecommendedPlan] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [showAllPlans, setShowAllPlans] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
 
   const { data: plansData, isLoading: loadingPlans } = useQuery({
     queryKey: ["public-plans"],
@@ -306,6 +339,11 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
   const painIcons = [Clock, Package, Briefcase, Crown, BarChart3];
   const TOTAL_STEPS = 5;
 
+  const PROMO_DISCOUNT = 20;
+  const discountedPrice = (price: number) => Math.round(price * (1 - PROMO_DISCOUNT / 100));
+  const annualTotal = (price: number) => discountedPrice(price) * 12;
+  const annualSavings = (price: number) => (price * 12) - annualTotal(price);
+
   return (
     <section
       id="planos"
@@ -350,6 +388,38 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
             </motion.p>
           </div>
         )}
+
+        <div className="flex flex-col items-center gap-3 mb-8">
+          <div className="relative flex items-center p-1 rounded-full bg-white/[0.06] border border-white/10">
+            <button
+              onClick={() => setBillingCycle("MONTHLY")}
+              className={cn(
+                "relative z-10 px-5 py-2 rounded-full text-xs font-black transition-colors duration-200",
+                billingCycle === "MONTHLY" ? "text-black" : "text-white/50 hover:text-white/70"
+              )}
+            >
+              Mensal
+            </button>
+            <button
+              onClick={() => setBillingCycle("YEARLY")}
+              className={cn(
+                "relative z-10 px-5 py-2 rounded-full text-xs font-black transition-colors duration-200",
+                billingCycle === "YEARLY" ? "text-black" : "text-white/50 hover:text-white/70"
+              )}
+            >
+              Anual
+            </button>
+            <motion.div
+              className="absolute top-1 bottom-1 rounded-full bg-primary"
+              animate={{ left: billingCycle === "MONTHLY" ? "4px" : "50%", right: billingCycle === "YEARLY" ? "4px" : "50%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+            <Sparkles className="w-3 h-3" />
+            Promoção de lançamento — 20% off
+          </span>
+        </div>
 
         {isLoading ? (
           <div className="flex justify-center py-20">
@@ -560,17 +630,18 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                     transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
                     className="flex flex-col items-center justify-center py-20"
                   >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="w-16 h-16 rounded-full border-2 border-primary/30 border-t-primary flex items-center justify-center mb-8"
-                    >
-                      <BarChart3 className="w-6 h-6 text-primary" />
-                    </motion.div>
-                    <h3 className="text-xl font-black text-white mb-3">Montando sua recomendação...</h3>
-                    <p className="text-sm text-white/40 text-center max-w-sm">
-                      Cruzando nicho, momento operacional e dores selecionadas para sugerir um plano base e os módulos mais aderentes.
-                    </p>
+                    <div className="flex items-center gap-2 mb-10">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-3 h-3 rounded-full bg-gradient-to-br from-primary to-primary/60"
+                          animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
+                        />
+                      ))}
+                    </div>
+                    <h3 className="text-xl font-black text-white mb-3">Analisando sua operação...</h3>
+                    <AnalyzingSubtext />
                   </motion.div>
                 )}
 
@@ -615,10 +686,20 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                             <p className="text-sm text-white/40">{recommendedPlanData.description}</p>
                           </div>
                           <div className="text-right">
-                            <span className="text-4xl md:text-5xl font-black text-white">
-                              R$ {recommendedPlanData.monthlyPrice}
+                            <span className="block text-sm text-white/30 line-through font-semibold mb-1">
+                              R$ {recommendedPlanData.monthlyPrice}/mês
                             </span>
-                            <span className="block text-sm text-white/40 font-semibold">plano base mensal</span>
+                            <span className="text-4xl md:text-5xl font-black text-white">
+                              R$ {discountedPrice(recommendedPlanData.monthlyPrice)}
+                            </span>
+                            <span className="block text-sm text-white/40 font-semibold">
+                              {billingCycle === "YEARLY" ? `R$ ${annualTotal(recommendedPlanData.monthlyPrice).toLocaleString("pt-BR")}/ano` : "plano base mensal"}
+                            </span>
+                            {billingCycle === "YEARLY" && (
+                              <span className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-[10px] font-black">
+                                Economia de R$ {annualSavings(recommendedPlanData.monthlyPrice).toLocaleString("pt-BR")}/ano
+                              </span>
+                            )}
                           </div>
                         </div>
 
@@ -637,12 +718,13 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                           </div>
                         </div>
 
-                        <div className="mb-8 rounded-2xl border border-white/8 bg-white/[0.03] p-5">
-                          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/70 mb-2">
-                            Importante
+                        <div className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+                          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-2 flex items-center gap-1.5">
+                            <Sparkles className="w-3 h-3" />
+                            20% off — promoção de lançamento
                           </p>
                           <p className="text-sm text-white/55 leading-relaxed">
-                            O valor acima é do plano base. Módulos por nicho e add-ons operacionais podem aumentar o total conforme a sua necessidade.
+                            O valor acima já inclui o desconto de lançamento. Módulos por nicho e add-ons operacionais podem ser contratados conforme a sua necessidade.
                           </p>
                         </div>
 
@@ -762,9 +844,17 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                                           <span className="text-[9px] px-2 py-0.5 rounded-full bg-primary/20 text-primary font-black">INDICADO</span>
                                         )}
                                       </h4>
-                                      <span className="text-lg font-black text-white">
-                                        R$ {plan.monthlyPrice}<span className="text-xs text-white/40 font-semibold">/mês</span>
+                                      <span className="text-xs text-white/30 line-through font-semibold">
+                                        R$ {plan.monthlyPrice}/mês
                                       </span>
+                                      <span className="text-lg font-black text-white block">
+                                        R$ {discountedPrice(plan.monthlyPrice)}<span className="text-xs text-white/40 font-semibold">/mês</span>
+                                      </span>
+                                      {billingCycle === "YEARLY" && (
+                                        <span className="text-[10px] text-green-400 font-bold">
+                                          R$ {annualTotal(plan.monthlyPrice).toLocaleString("pt-BR")}/ano
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
 

@@ -41,7 +41,7 @@ const Index = () => {
       <SectionDivider flip />
 
       <section id="pricing" className="py-24 bg-black/95">
-        <div className="container mx-auto px-4">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col items-start mb-16">
             <h2 className="text-4xl md:text-6xl font-black text-left mb-4 text-white leading-tight tracking-tighter">
               Planos base para operar. <span className="text-gradient-primary">Módulos para crescer</span>.
