@@ -42,11 +42,11 @@ const Index = () => {
 
       <section id="pricing" className="py-24 bg-black/95">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center mb-16">
-            <h2 className="text-4xl md:text-6xl font-black text-center mb-4 text-white leading-tight tracking-tighter">
+          <div className="flex flex-col items-start mb-16">
+            <h2 className="text-4xl md:text-6xl font-black text-left mb-4 text-white leading-tight tracking-tighter">
               Planos base para operar. <span className="text-gradient-primary">Módulos para crescer</span>.
             </h2>
-            <p className="text-white/40 text-center text-sm md:text-base max-w-xl">
+            <p className="text-white/40 text-left text-sm md:text-base max-w-xl">
               Responda algumas perguntas rápidas e receba uma recomendação alinhada ao seu nicho, ao seu momento operacional e aos módulos da sua operação.
             </p>
           </div>

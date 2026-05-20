@@ -98,7 +98,7 @@ const PlatformSection = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-16"
+          className="text-left mb-16"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-xs font-semibold tracking-widest uppercase enterprise-border rounded-full bg-primary/5 text-primary">
             <BrainCircuit className="w-3.5 h-3.5" />
@@ -107,7 +107,7 @@ const PlatformSection = () => {
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter mb-4">
             Uma <span className="text-gradient-primary">operação comercial</span> completa
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
             Atendimento, agenda, propostas, pagamento, cobrança, prospecção e operação conectados em um único fluxo.
           </p>
         </motion.div>
@@ -126,6 +126,17 @@ const PlatformSection = () => {
                 className="group relative enterprise-card rounded-2xl p-8 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                {/* Border light sweep effect */}
+                <motion.div
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 3 + i * 0.5 }}
+                  className="absolute top-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+                />
+                <motion.div
+                  animate={{ y: ["-100%", "200%"] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 4 + i * 0.5 }}
+                  className="absolute top-0 right-0 w-px h-1/3 bg-gradient-to-b from-transparent via-primary/50 to-transparent"
+                />
                 <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-10 transition-opacity">
                   <AccentIcon className="w-24 h-24 text-primary" />
                 </div>

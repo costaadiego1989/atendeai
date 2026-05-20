@@ -28,8 +28,30 @@ const FinalCTA: React.FC<FinalCTAProps> = ({ onSignupClick }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="rounded-3xl border border-primary/10 bg-card/40 backdrop-blur-sm p-10 md:p-14 text-center"
+          className="relative rounded-3xl enterprise-card p-10 md:p-14 text-left overflow-hidden"
         >
+          {/* Border light sweep effects */}
+          <motion.div
+            animate={{ x: ["-100%", "200%"] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 3 }}
+            className="absolute top-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent"
+          />
+          <motion.div
+            animate={{ x: ["200%", "-100%"] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 4 }}
+            className="absolute bottom-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+          />
+          <motion.div
+            animate={{ y: ["-100%", "200%"] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+            className="absolute top-0 right-0 w-px h-1/3 bg-gradient-to-b from-transparent via-primary/50 to-transparent"
+          />
+          <motion.div
+            animate={{ y: ["200%", "-100%"] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 3.5 }}
+            className="absolute top-0 left-0 w-px h-1/3 bg-gradient-to-b from-transparent via-primary/40 to-transparent"
+          />
+
           <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-xs font-semibold tracking-widest uppercase enterprise-border rounded-full bg-primary/5 text-primary">
             <Rocket className="w-3.5 h-3.5" />
             Pronto para começar?
@@ -40,12 +62,12 @@ const FinalCTA: React.FC<FinalCTAProps> = ({ onSignupClick }) => {
             <span className="text-gradient-primary">máquina de vendas</span>
           </h2>
 
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-lg text-muted-foreground max-w-2xl mb-8">
             Agende uma reunião com nosso time ou comece agora com 7 dias grátis.
             Sem compromisso, sem cartão.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row items-start gap-4 mb-8">
             <motion.a
               href={MEETING_LINK}
               target="_blank"
@@ -71,7 +93,7 @@ const FinalCTA: React.FC<FinalCTAProps> = ({ onSignupClick }) => {
             </motion.button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             {benefits.map((benefit) => (
               <div key={benefit} className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-primary" />

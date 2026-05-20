@@ -14,7 +14,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
     <section ref={ref} className="px-6 py-[16vh] relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,hsl(168_100%_36%/0.08),transparent_70%)]" />
 
-      <div className="relative z-10 max-w-3xl mx-auto text-center">
+      <div className="relative z-10 max-w-3xl mx-auto text-left">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -38,7 +38,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed"
         >
           Comece pelo plano base, ative os módulos do seu nicho e valide atendimento, agenda, cobrança, propostas e pagamento com 7 dias grátis.
         </motion.p>
@@ -50,7 +50,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
           transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
-          className="inline-flex items-center gap-2.5 h-14 px-10 bg-primary text-primary-foreground font-bold rounded-xl shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-lg)] transition-all duration-300 text-base mx-auto"
+          className="inline-flex items-center gap-2.5 h-14 px-10 bg-primary text-primary-foreground font-bold rounded-xl shadow-[var(--shadow-glow)] hover:shadow-[var(--shadow-glow-lg)] transition-all duration-300 text-base"
         >
           <Sparkles className="w-5 h-5" />
           Começar trial

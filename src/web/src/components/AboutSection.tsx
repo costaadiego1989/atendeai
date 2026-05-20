@@ -138,6 +138,17 @@ const AboutSection = () => {
                 className="group relative p-10 rounded-[2.5rem] bg-[#0d1112] border border-white/5 hover:border-[#00C59E]/30 transition-all duration-500 overflow-hidden"
               >
                 <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-[#00C59E]/5 blur-[50px] rounded-full group-hover:bg-[#00C59E]/10 transition-all" />
+                {/* Border light sweep */}
+                <motion.div
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 3 + i * 1.2 }}
+                  className="absolute top-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-[#00C59E]/50 to-transparent"
+                />
+                <motion.div
+                  animate={{ y: ["-100%", "200%"] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 4 + i * 0.8 }}
+                  className="absolute top-0 right-0 w-px h-1/3 bg-gradient-to-b from-transparent via-[#00C59E]/40 to-transparent"
+                />
 
                 <div className="relative z-10 text-left">
                   <div className="w-14 h-14 rounded-2xl bg-[#00C59E]/5 flex items-center justify-center mb-8 border border-[#00C59E]/10 group-hover:scale-110 group-hover:bg-[#00C59E]/10 transition-all duration-500">

@@ -55,9 +55,15 @@ const BenefitsSection = () => {
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                className="flex items-center gap-4 p-5 rounded-xl enterprise-card hover:border-primary/15 transition-all group"
+                className="relative flex items-center gap-4 p-5 rounded-xl enterprise-card hover:border-primary/15 transition-all group overflow-hidden"
                 style={{ borderColor: "hsl(168 100% 36% / 0.06)" }}
               >
+                {/* Border light sweep */}
+                <motion.div
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 + i * 0.8 }}
+                  className="absolute top-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+                />
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover:from-primary/25 group-hover:to-primary/10 transition-all">
                   <Icon className="w-5 h-5 text-primary" />
                 </div>

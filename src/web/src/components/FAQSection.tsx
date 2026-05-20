@@ -69,8 +69,14 @@ const FAQSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.4, delay: 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded-xl border border-border bg-card/80 backdrop-blur-sm overflow-hidden"
+              className="relative rounded-xl border border-border bg-card/80 backdrop-blur-sm overflow-hidden"
             >
+              {/* Border light sweep */}
+              <motion.div
+                animate={{ x: ["-100%", "200%"] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 3 + i * 0.6 }}
+                className="absolute top-0 left-0 w-1/4 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+              />
               <button
                 onClick={() => setOpen(open === i ? null : i)}
                 className="w-full text-left px-6 py-5 flex justify-between items-center gap-4 hover:bg-muted/5 transition-colors"
