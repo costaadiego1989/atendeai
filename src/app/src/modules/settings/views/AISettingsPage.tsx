@@ -1,6 +1,6 @@
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { PageTabsList } from '@/components/PageTabs';
-import { Bot, ShieldCheck, Sparkles } from 'lucide-react';
+import { Bot, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useAISettingsViewModel } from '@/modules/settings/view-models/useAISettingsViewModel';
+import { KnowledgeBaseTab } from '@/modules/settings/components/KnowledgeBaseTab';
 
 export function AISettingsPage() {
   const vm = useAISettingsViewModel();
@@ -43,6 +44,7 @@ export function AISettingsPage() {
           tabs={[
             { value: 'persona', label: 'Persona', icon: Bot },
             { value: 'guardrails', label: 'Guardrails', icon: ShieldCheck },
+            { value: 'knowledge', label: 'Base de Conhecimento', icon: BookOpen },
           ]}
         />
 
@@ -283,6 +285,10 @@ export function AISettingsPage() {
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="knowledge">
+          <KnowledgeBaseTab />
         </TabsContent>
       </Tabs>
 
