@@ -63,7 +63,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-5 text-xs text-muted-foreground/60"
         >
-          Sem cartão na largada. Setup orientado.
+          7 dias grátis. Não requer cartão de crédito.
         </motion.p>
       </div>
     </section>

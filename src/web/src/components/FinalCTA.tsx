@@ -64,7 +64,7 @@ const FinalCTA: React.FC<FinalCTAProps> = ({ onSignupClick }) => {
 
           <p className="text-lg text-muted-foreground max-w-2xl mb-8">
             Agende uma reunião com nosso time ou comece agora com 7 dias grátis.
-            Sem compromisso, sem cartão.
+            Sem compromisso, sem cartão de crédito.
           </p>
 
           <div className="flex flex-col sm:flex-row items-start gap-4 mb-8">

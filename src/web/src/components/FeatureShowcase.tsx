@@ -86,7 +86,7 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
               <DialogTrigger asChild>
                 <motion.button
                   whileHover={{ x: 10 }}
-                  className="inline-flex items-center gap-3 group text-primary font-bold text-sm tracking-tight"
+                  className="inline-flex items-center gap-3 group text-muted-foreground font-semibold text-sm tracking-tight hover:text-foreground transition-colors"
                 >
                   Conhecer em detalhes <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
@@ -140,7 +140,7 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
             {slug && (
               <Link
                 to={`/solucoes/${slug}`}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors group"
+                className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors group"
               >
                 Ver solução
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -208,14 +208,14 @@ const FeatureShowcase = () => {
   const sections = [
     {
       title: "Atendimento com IA e handoff humano",
-      description: "Concentre a operação comercial em uma inbox única com IA, contexto do negócio e transbordo para o time sempre que a conversa precisar.",
+      description: "Concentre a operação comercial em uma inbox única com IA, knowledge base do negócio e transbordo para o time sempre que a conversa precisar.",
       image: "/images/snapshots/dashboard.png",
       icon: LayoutDashboard,
       highlight: "Inbox operacional",
       slug: "clinicas-saude",
       benefits: [
         "Inbox única para atendimento e operação",
-        "IA assistida com histórico do contato",
+        "Knowledge base com contexto do negócio",
         "Handoff humano sem perder contexto"
       ],
       detailTitle: "Atendimento, contexto e operação no mesmo lugar",
@@ -268,14 +268,14 @@ const FeatureShowcase = () => {
     },
     {
       title: "Cobrança, recovery e receita recuperada",
-      description: "Organize carteira, negociações, promessas e recebimentos com visão mais clara do que é nova venda e do que é recuperação de receita.",
+      description: "Organize carteira, negociações, promessas e recebimentos com régua automatizada, agente de voz e visão clara do que é recuperação de receita.",
       image: "/images/snapshots/recovery.png",
       icon: RefreshCcw,
       highlight: "Recovery",
       slug: "imobiliarias",
       benefits: [
         "Carteira de cobrança com histórico",
-        "Régua de follow-up e promessas",
+        "Agente de voz para cobrança ativa",
         "Relatórios de receita recuperada"
       ],
       detailTitle: "Cobrança com operação, não improviso",
@@ -313,7 +313,7 @@ const FeatureShowcase = () => {
     },
     {
       title: "Dashboards, roteamento e governança",
-      description: "Acompanhe operação, distribua conversas, conecte módulos e tenha uma visão mais madura da máquina comercial por trás do atendimento.",
+      description: "Acompanhe operação, distribua conversas, configure automações e tenha uma visão mais madura da máquina comercial por trás do atendimento.",
       image: "/images/snapshots/alerts.png",
       icon: CreditCard,
       highlight: "Operação",
@@ -321,7 +321,7 @@ const FeatureShowcase = () => {
       benefits: [
         "Roteamento de equipe por regra",
         "Relatórios avançados por operação",
-        "Hub de integrações para escalar"
+        "Automações e fluxos configuráveis"
       ],
       detailTitle: "A operação cresce com mais controle",
       detailDescription: "À medida que a rotina comercial amadurece, a plataforma ajuda a dar mais governança, visibilidade e coordenação ao time.",

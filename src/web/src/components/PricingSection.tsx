@@ -389,37 +389,39 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
           </div>
         )}
 
-        <div className="flex flex-col items-center gap-3 mb-8">
-          <div className="relative flex items-center p-1 rounded-full bg-white/[0.06] border border-white/10">
-            <button
-              onClick={() => setBillingCycle("MONTHLY")}
-              className={cn(
-                "relative z-10 px-5 py-2 rounded-full text-xs font-black transition-colors duration-200",
-                billingCycle === "MONTHLY" ? "text-black" : "text-white/50 hover:text-white/70"
-              )}
-            >
-              Mensal
-            </button>
-            <button
-              onClick={() => setBillingCycle("YEARLY")}
-              className={cn(
-                "relative z-10 px-5 py-2 rounded-full text-xs font-black transition-colors duration-200",
-                billingCycle === "YEARLY" ? "text-black" : "text-white/50 hover:text-white/70"
-              )}
-            >
-              Anual
-            </button>
-            <motion.div
-              className="absolute top-1 bottom-1 rounded-full bg-primary"
-              animate={{ left: billingCycle === "MONTHLY" ? "4px" : "50%", right: billingCycle === "YEARLY" ? "4px" : "50%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            />
+        {step === 4 && (
+          <div className="flex flex-col items-center gap-3 mb-8">
+            <div className="relative flex items-center p-1 rounded-full bg-white/[0.06] border border-white/10">
+              <button
+                onClick={() => setBillingCycle("MONTHLY")}
+                className={cn(
+                  "relative z-10 px-5 py-2 rounded-full text-xs font-black transition-colors duration-200",
+                  billingCycle === "MONTHLY" ? "text-black" : "text-white/50 hover:text-white/70"
+                )}
+              >
+                Mensal
+              </button>
+              <button
+                onClick={() => setBillingCycle("YEARLY")}
+                className={cn(
+                  "relative z-10 px-5 py-2 rounded-full text-xs font-black transition-colors duration-200",
+                  billingCycle === "YEARLY" ? "text-black" : "text-white/50 hover:text-white/70"
+                )}
+              >
+                Anual
+              </button>
+              <motion.div
+                className="absolute top-1 bottom-1 rounded-full bg-primary"
+                animate={{ left: billingCycle === "MONTHLY" ? "4px" : "50%", right: billingCycle === "YEARLY" ? "4px" : "50%" }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+              <Sparkles className="w-3 h-3" />
+              Promoção de lançamento — 20% off
+            </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-            <Sparkles className="w-3 h-3" />
-            Promoção de lançamento — 20% off
-          </span>
-        </div>
+        )}
 
         {isLoading ? (
           <div className="flex justify-center py-20">
@@ -788,6 +790,9 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                           Começar 7 dias grátis
                           <ArrowRight className="w-5 h-5" />
                         </motion.button>
+                        <p className="text-center text-xs text-white/40 mt-3 font-medium">
+                          Não requer cartão de crédito. Cancele quando quiser.
+                        </p>
                       </div>
                     </motion.div>
 
@@ -892,6 +897,9 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                                   >
                                     Iniciar 7 dias grátis
                                   </button>
+                                  <p className="text-center text-[10px] text-white/30 mt-2 font-medium">
+                                    Sem cartão de crédito
+                                  </p>
                                 </div>
                               );
                             })}

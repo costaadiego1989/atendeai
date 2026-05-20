@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: "Como funciona o trial de 7 dias?",
-    a: "Você ativa a conta, testa a base da plataforma e valida a operação com 7 dias de trial antes de seguir com a contratação.",
+    a: "Você ativa a conta, testa a base da plataforma e valida a operação com 7 dias de trial antes de seguir com a contratação. Não requer cartão de crédito.",
   },
   {
     q: "Quando faz sentido usar agenda, checkout, cobrança, propostas ou prospecção?",
@@ -57,7 +57,7 @@ const FAQSection = () => {
             <HelpCircle className="w-3.5 h-3.5" />
             FAQ
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tighter">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter">
             Perguntas frequentes
           </h2>
         </motion.div>

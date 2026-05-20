@@ -192,6 +192,10 @@ const Hero = () => {
             </a>
           </motion.div>
 
+          <p className="text-xs text-muted-foreground/60 text-center lg:text-left">
+            7 dias grátis. Não requer cartão de crédito.
+          </p>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -219,7 +223,7 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="flex-shrink-0 w-full max-w-sm"
         >
-          <div className="enterprise-card rounded-2xl p-4 shadow-[var(--shadow-glow-lg)]">
+          <div className="enterprise-card rounded-2xl p-4 ring-1 ring-primary/20 shadow-[0_0_30px_-5px_hsl(168_100%_36%/0.25),var(--shadow-glow-lg)]">
             <div className="flex items-center gap-3 mb-4 pb-3 border-b border-primary/8">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-primary font-bold text-sm">AI</div>
               <div className="flex-1">

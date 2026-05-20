@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import StatsSection from "@/components/StatsSection";
@@ -19,6 +20,8 @@ import TrialSignupDialog from "@/components/TrialSignupDialog";
 const Index = () => {
   const [signupOpen, setSignupOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("TRIAL");
+  const pricingRef = useRef(null);
+  const pricingInView = useInView(pricingRef, { once: true, margin: "-100px" });
 
   const openSignup = (plan = "TRIAL") => {
     setSelectedPlan(plan);
@@ -40,20 +43,36 @@ const Index = () => {
       <AboutSection />
       <SectionDivider flip />
 
-      <section id="pricing" className="py-24 bg-black/95">
+      <section id="pricing" ref={pricingRef} className="py-24 bg-black/95">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col items-start mb-16">
-            <h2 className="text-4xl md:text-6xl font-black text-left mb-4 text-white leading-tight tracking-tighter">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              animate={pricingInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="text-4xl md:text-6xl font-black text-left mb-4 text-white leading-tight tracking-tighter"
+            >
               Planos base para operar. <span className="text-gradient-primary">Módulos para crescer</span>.
-            </h2>
-            <p className="text-white/40 text-left text-sm md:text-base max-w-xl">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={pricingInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="text-white/40 text-left text-sm md:text-base max-w-xl"
+            >
               Responda algumas perguntas rápidas e receba uma recomendação alinhada ao seu nicho, ao seu momento operacional e aos módulos da sua operação.
-            </p>
+            </motion.p>
           </div>
 
-          <div id="planos" className="transition-all duration-500">
+          <motion.div
+            id="planos"
+            initial={{ opacity: 0, y: 30 }}
+            animate={pricingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="transition-all duration-500"
+          >
             <PricingSection onSignupClick={openSignup} hideHeader />
-          </div>
+          </motion.div>
         </div>
       </section>
 
