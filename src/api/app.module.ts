@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './shared/infrastructure/database/DatabaseModule';
 import { RedisModule } from './shared/infrastructure/redis/RedisModule';
 import { EventBusModule } from './shared/infrastructure/event-bus/EventBusModule';
@@ -20,6 +21,8 @@ import { SupportModule } from './modules/support/support.module';
 import { CommerceModule } from './modules/commerce/commerce.module';
 import { SocialModule } from './modules/social/social.module';
 import { ProposalModule } from './modules/proposal/proposal.module';
+import { VoiceModule } from './modules/voice/voice.module';
+import { AutomationModule } from './modules/automation/automation.module';
 import { BullModule } from '@nestjs/bullmq';
 import { StorageModule } from './shared/infrastructure/storage/StorageModule';
 import { ConfigService } from '@nestjs/config';
@@ -46,6 +49,7 @@ import { parseRedisConnection } from './shared/infrastructure/redis/redis-connec
         connection: parseRedisConnection(config),
       }),
     }),
+    ScheduleModule.forRoot(),
     ObservabilityModule,
     ResilienceModule,
     HealthModule,
@@ -70,6 +74,8 @@ import { parseRedisConnection } from './shared/infrastructure/redis/redis-connec
     SocialModule,
     StorageModule,
     ProposalModule,
+    VoiceModule,
+    AutomationModule,
     PlatformAdminModule,
   ],
   providers: [
