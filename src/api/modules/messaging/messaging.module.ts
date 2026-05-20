@@ -80,6 +80,8 @@ import { SalesIntegrationHandlers } from './application/handlers/SalesIntegratio
 import { CommerceIntegrationHandlers } from './application/handlers/CommerceIntegrationHandlers';
 import { CommerceModule } from '@modules/commerce/commerce.module';
 import { OutboundMessageRetryService } from './application/services/OutboundMessageRetryService';
+import { WebChatWidgetAdapter } from './infrastructure/acl/WebChatWidgetAdapter';
+import { WidgetController } from './presentation/controllers/WidgetController';
 
 @Module({
   imports: [
@@ -91,12 +93,13 @@ import { OutboundMessageRetryService } from './application/services/OutboundMess
     BillingModule,
     CommerceModule,
   ],
-  controllers: [WebhookController, MessagingController],
+  controllers: [WebhookController, MessagingController, WidgetController],
   providers: [
     BubbleWhatsAdapter,
     Dialog360Adapter,
     TwilioAdapter,
     InstagramGraphAdapter,
+    WebChatWidgetAdapter,
     WhatsAppTemplateMessageAdapter,
     MessagingGatewayRegistry,
     DeduplicateMessageStep,
