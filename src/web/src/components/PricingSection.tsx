@@ -14,6 +14,7 @@ import {
   BarChart3,
   Clock,
   Briefcase,
+  Gift,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { publicService, NicheAPI } from "@/services/PublicService";
@@ -339,8 +340,10 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
   const painIcons = [Clock, Package, Briefcase, Crown, BarChart3];
   const TOTAL_STEPS = 5;
 
-  const PROMO_DISCOUNT = 20;
-  const discountedPrice = (price: number) => Math.round(price * (1 - PROMO_DISCOUNT / 100));
+  const PROMO_DISCOUNT_MONTHLY = Number(import.meta.env.VITE_PROMO_DISCOUNT_MONTHLY) || 20;
+  const PROMO_DISCOUNT_ANNUAL = Number(import.meta.env.VITE_PROMO_DISCOUNT_ANNUAL) || 40;
+  const currentDiscount = billingCycle === "YEARLY" ? PROMO_DISCOUNT_ANNUAL : PROMO_DISCOUNT_MONTHLY;
+  const discountedPrice = (price: number) => Math.round(price * (1 - currentDiscount / 100));
   const annualTotal = (price: number) => discountedPrice(price) * 12;
   const annualSavings = (price: number) => (price * 12) - annualTotal(price);
 
@@ -418,7 +421,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
               <Sparkles className="w-3 h-3" />
-              Promoção de lançamento — 20% off
+              Promoção de lançamento — {currentDiscount}% off
             </span>
           </div>
         )}
@@ -723,7 +726,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                         <div className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-5">
                           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary mb-2 flex items-center gap-1.5">
                             <Sparkles className="w-3 h-3" />
-                            20% off — promoção de lançamento
+                            {currentDiscount}% off — promoção de lançamento
                           </p>
                           <p className="text-sm text-white/55 leading-relaxed">
                             O valor acima já inclui o desconto de lançamento. Módulos por nicho e add-ons operacionais podem ser contratados conforme a sua necessidade.
@@ -772,11 +775,27 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSignupClick, hideHead
                                     <h5 className="text-xs font-bold text-white truncate">{mod.displayName}</h5>
                                     <p className="text-[10px] text-white/30 truncate">{mod.description}</p>
                                   </div>
-                                  <span className="text-xs font-black text-primary/70 whitespace-nowrap">
+                                  <span className="text-xs font-black text-white/30 line-through whitespace-nowrap">
                                     +R$ {mod.monthlyPrice}
                                   </span>
                                 </motion.div>
                               ))}
+                            </div>
+                            <div className="mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5">
+                                    <Gift className="w-3 h-3" />
+                                    Módulos inclusos grátis
+                                  </p>
+                                  <p className="text-xs text-white/50 mt-1">
+                                    Contratando hoje, todos os módulos do seu nicho saem grátis no plano.
+                                  </p>
+                                </div>
+                                <span className="text-sm font-black text-white/30 line-through whitespace-nowrap">
+                                  +R$ {nicheModules.reduce((sum, m) => sum + m.monthlyPrice, 0)}/mês
+                                </span>
+                              </div>
                             </div>
                           </motion.div>
                         )}
