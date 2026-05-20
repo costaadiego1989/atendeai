@@ -1,6 +1,21 @@
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { Zap, Gift, Users, CreditCard, HelpCircle, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import {
+  Zap,
+  Gift,
+  Users,
+  CreditCard,
+  HelpCircle,
+  Sparkles,
+  ChevronDown,
+  Stethoscope,
+  Building2,
+  ShoppingBag,
+  Briefcase,
+  Scale,
+  GraduationCap,
+} from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const WA_LINK = "https://wa.me/5521993001883";
@@ -13,13 +28,34 @@ const navItems = [
   { label: "FAQ", href: "#faq", icon: HelpCircle },
 ];
 
+const solucoesItems = [
+  { label: "Clínicas e Saúde", slug: "clinicas-saude", icon: Stethoscope },
+  { label: "Imobiliárias", slug: "imobiliarias", icon: Building2 },
+  { label: "Ecommerce", slug: "ecommerce", icon: ShoppingBag },
+  { label: "Serviços B2B", slug: "servicos-b2b", icon: Briefcase },
+  { label: "Advocacia", slug: "advocacia", icon: Scale },
+  { label: "Educação", slug: "educacao", icon: GraduationCap },
+];
+
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [solucoesOpen, setSolucoesOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setSolucoesOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -34,12 +70,53 @@ const Header = () => {
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2.5 md:flex-none flex-1 justify-center md:justify-start">
+        <a href="/" className="flex items-center gap-2.5 md:flex-none flex-1 justify-center md:justify-start">
           <img src={logo} alt="AtendeAI" className="h-10 w-10 md:h-14 md:w-14" />
           <span className="font-bold text-lg md:text-2xl text-foreground tracking-tight">AtendeAI</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-5">
+          {/* Soluções dropdown */}
+          <div ref={dropdownRef} className="relative">
+            <button
+              onClick={() => setSolucoesOpen(!solucoesOpen)}
+              onMouseEnter={() => setSolucoesOpen(true)}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-300"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Soluções
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${solucoesOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            <AnimatePresence>
+              {solucoesOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  onMouseLeave={() => setSolucoesOpen(false)}
+                  className="absolute top-full left-0 mt-2 w-56 py-2 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl"
+                >
+                  {solucoesItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.slug}
+                        to={`/solucoes/${item.slug}`}
+                        onClick={() => setSolucoesOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors"
+                      >
+                        <Icon className="w-4 h-4 text-primary/70" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
