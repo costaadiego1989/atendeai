@@ -123,7 +123,7 @@ const TrialSignupDialog: React.FC<TrialSignupDialogProps> = ({
 
       setTimeout(() => {
         toast.success("Trial ativado com sucesso! Redirecionando...");
-        window.location.href = `${appUrl}/login`;
+        window.location.href = `${appUrl}/login?fresh=1`;
       }, 2500);
     } catch (error: any) {
       toast.error(error.message || "Erro ao processar sua solicitação.");
