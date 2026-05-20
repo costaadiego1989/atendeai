@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -31,9 +32,10 @@ interface FeatureSectionProps {
   benefits: string[];
   detailTitle: string;
   detailDescription: string;
+  slug?: string;
 }
 
-const FeatureSection = ({ title, description, image, icon: Icon, index, highlight, benefits, detailTitle, detailDescription }: FeatureSectionProps) => {
+const FeatureSection = ({ title, description, image, icon: Icon, index, highlight, benefits, detailTitle, detailDescription, slug }: FeatureSectionProps) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -79,60 +81,72 @@ const FeatureSection = ({ title, description, image, icon: Icon, index, highligh
             ))}
           </div>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <motion.button
-                whileHover={{ x: 10 }}
-                className="inline-flex items-center gap-3 group text-primary font-bold text-sm tracking-tight"
-              >
-                Conhecer em detalhes <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[540px] bg-[#080c0d] border-white/5 text-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_0_120px_rgba(0,0,0,0.9)] outline-none overflow-hidden">
-              <DialogHeader className="mb-8 relative text-left">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-3.5 h-3.5 text-[#00C59E]">
-                    <Icon className="w-full h-full" />
+          <div className="flex flex-wrap items-center gap-5">
+            <Dialog>
+              <DialogTrigger asChild>
+                <motion.button
+                  whileHover={{ x: 10 }}
+                  className="inline-flex items-center gap-3 group text-primary font-bold text-sm tracking-tight"
+                >
+                  Conhecer em detalhes <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </motion.button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[540px] bg-[#080c0d] border-white/5 text-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_0_120px_rgba(0,0,0,0.9)] outline-none overflow-hidden">
+                <DialogHeader className="mb-8 relative text-left">
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-3.5 h-3.5 text-[#00C59E]">
+                      <Icon className="w-full h-full" />
+                    </div>
+                    <span className="text-[9px] font-black text-[#00C59E] uppercase tracking-[0.3em]">Resumo do módulo</span>
                   </div>
-                  <span className="text-[9px] font-black text-[#00C59E] uppercase tracking-[0.3em]">Resumo do módulo</span>
-                </div>
 
-                <DialogTitle className="text-4xl font-black tracking-tighter text-white leading-tight mb-4">
-                  {detailTitle}
-                </DialogTitle>
+                  <DialogTitle className="text-4xl font-black tracking-tighter text-white leading-tight mb-4">
+                    {detailTitle}
+                  </DialogTitle>
 
-                <DialogDescription className="text-base text-white/50 leading-relaxed font-medium text-pretty">
-                  {detailDescription}
-                </DialogDescription>
-              </DialogHeader>
+                  <DialogDescription className="text-base text-white/50 leading-relaxed font-medium text-pretty">
+                    {detailDescription}
+                  </DialogDescription>
+                </DialogHeader>
 
-              <div className="space-y-10">
-                <div>
-                  <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-6">Principais benefícios:</p>
-                  <div className="space-y-4">
-                    {benefits.map((benefit: string, i: number) => (
-                      <div key={i} className="flex items-start gap-4 group">
-                        <div className="w-7 h-7 rounded-full bg-[#00C59E]/10 flex items-center justify-center shrink-0 border border-[#00C59E]/20 mt-0.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#00C59E]" />
+                <div className="space-y-10">
+                  <div>
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-6">Principais benefícios:</p>
+                    <div className="space-y-4">
+                      {benefits.map((benefit: string, i: number) => (
+                        <div key={i} className="flex items-start gap-4 group">
+                          <div className="w-7 h-7 rounded-full bg-[#00C59E]/10 flex items-center justify-center shrink-0 border border-[#00C59E]/20 mt-0.5">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#00C59E]" />
+                          </div>
+                          <span className="text-[15px] font-bold text-white/80 tracking-tight leading-relaxed">{benefit}</span>
                         </div>
-                        <span className="text-[15px] font-bold text-white/80 tracking-tight leading-relaxed">{benefit}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-8">
+                    <DialogTrigger asChild>
+                      <button
+                        className="w-full py-5 rounded-2xl bg-[#00C59E] text-black font-black text-xs uppercase tracking-[0.3em] hover:brightness-110 hover:scale-[1.01] active:scale-[0.98] transition-all shadow-[0_20px_40px_-10px_rgba(0,197,158,0.4)] flex items-center justify-center"
+                      >
+                        ENTENDI, FECHAR
+                      </button>
+                    </DialogTrigger>
                   </div>
                 </div>
+              </DialogContent>
+            </Dialog>
 
-                <div className="mt-8">
-                  <DialogTrigger asChild>
-                    <button
-                      className="w-full py-5 rounded-2xl bg-[#00C59E] text-black font-black text-xs uppercase tracking-[0.3em] hover:brightness-110 hover:scale-[1.01] active:scale-[0.98] transition-all shadow-[0_20px_40px_-10px_rgba(0,197,158,0.4)] flex items-center justify-center"
-                    >
-                      ENTENDI, FECHAR
-                    </button>
-                  </DialogTrigger>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+            {slug && (
+              <Link
+                to={`/solucoes/${slug}`}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors group"
+              >
+                Ver solução
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            )}
+          </div>
         </motion.div>
 
         <div className={`relative ${!isEven ? "lg:order-1" : ""}`}>
@@ -198,6 +212,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/dashboard.png",
       icon: LayoutDashboard,
       highlight: "Inbox operacional",
+      slug: "clinicas-saude",
       benefits: [
         "Inbox única para atendimento e operação",
         "IA assistida com histórico do contato",
@@ -212,6 +227,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/messaging.png",
       icon: MessageSquare,
       highlight: "CRM comercial",
+      slug: "servicos-b2b",
       benefits: [
         "Histórico da conversa e do relacionamento",
         "Qualificação por contexto e necessidade",
@@ -226,6 +242,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/stock.png",
       icon: FileText,
       highlight: "Propostas",
+      slug: "advocacia",
       benefits: [
         "Orçamentos e propostas organizados",
         "Aceite em jornada pública",
@@ -240,6 +257,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/checkout.png",
       icon: ShoppingCart,
       highlight: "Conversão",
+      slug: "ecommerce",
       benefits: [
         "Checkout conversacional e links rápidos",
         "Cupons, promoções e campanhas",
@@ -254,6 +272,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/recovery.png",
       icon: RefreshCcw,
       highlight: "Recovery",
+      slug: "imobiliarias",
       benefits: [
         "Carteira de cobrança com histórico",
         "Régua de follow-up e promessas",
@@ -268,6 +287,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/payment_link.png",
       icon: Calendar,
       highlight: "Scheduling",
+      slug: "clinicas-saude",
       benefits: [
         "Agenda por profissional e categoria",
         "Lembretes e confirmações automáticas",
@@ -282,6 +302,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/prospect.png",
       icon: Search,
       highlight: "Prospecção",
+      slug: "servicos-b2b",
       benefits: [
         "Qualificação de leads por contexto",
         "Busca e segmentação de oportunidades",
@@ -296,6 +317,7 @@ const FeatureShowcase = () => {
       image: "/images/snapshots/alerts.png",
       icon: CreditCard,
       highlight: "Operação",
+      slug: "educacao",
       benefits: [
         "Roteamento de equipe por regra",
         "Relatórios avançados por operação",
