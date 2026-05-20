@@ -1,4 +1,4 @@
-import { Zap, Users, CreditCard, HelpCircle, ArrowUp, Gift, BrainCircuit, Shield, FileText } from "lucide-react";
+import { Zap, Users, CreditCard, HelpCircle, ArrowUp, Gift, BrainCircuit, Shield, FileText, Stethoscope, Building2, ShoppingBag, Briefcase, Scale, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import WhatsAppIcon from "./WhatsAppIcon";
 import logo from "@/assets/logo.png";
@@ -13,11 +13,20 @@ const navLinks = [
   { label: "FAQ", href: "#faq", icon: HelpCircle },
 ];
 
+const solucoesLinks = [
+  { label: "Clínicas e Saúde", slug: "clinicas-saude", icon: Stethoscope },
+  { label: "Imobiliárias", slug: "imobiliarias", icon: Building2 },
+  { label: "Ecommerce", slug: "ecommerce", icon: ShoppingBag },
+  { label: "Serviços B2B", slug: "servicos-b2b", icon: Briefcase },
+  { label: "Advocacia", slug: "advocacia", icon: Scale },
+  { label: "Educação", slug: "educacao", icon: GraduationCap },
+];
+
 const Footer = () => (
   <footer className="relative px-6 pt-16 pb-28 md:pb-12 border-t border-primary/5 bg-card/30">
     <div className="absolute inset-0 bg-gradient-to-t from-primary/3 to-transparent" />
     <div className="relative z-10 max-w-5xl mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-10 mb-10">
         <div className="flex flex-col items-start gap-3">
           <a href="#" className="flex items-center gap-2.5">
             <img src={logo} alt="AtendeAI" className="h-10 w-10" />
@@ -41,6 +50,19 @@ const Footer = () => (
                 <Icon className="w-3.5 h-3.5 text-primary" />
                 {link.label}
               </a>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col items-start gap-2">
+          <h4 className="text-sm font-semibold text-foreground mb-1">Soluções</h4>
+          {solucoesLinks.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.slug} to={`/solucoes/${item.slug}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Icon className="w-3.5 h-3.5 text-primary" />
+                {item.label}
+              </Link>
             );
           })}
         </div>

@@ -13,6 +13,7 @@ import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
 import MobileFooterNav from "@/components/MobileFooterNav";
 import SectionDivider from "@/components/SectionDivider";
+import FinalCTA from "@/components/FinalCTA";
 import TrialSignupDialog from "@/components/TrialSignupDialog";
 
 const Index = () => {
@@ -60,6 +61,7 @@ const Index = () => {
       <CTASection onSignupClick={() => openSignup("TRIAL")} />
       <SectionDivider flip />
       <FAQSection />
+      <FinalCTA onSignupClick={() => openSignup("TRIAL")} />
       <Footer />
       <MobileFooterNav />
 

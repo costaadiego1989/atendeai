@@ -15,10 +15,12 @@ import {
   Briefcase,
   Scale,
   GraduationCap,
+  CalendarCheck,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const WA_LINK = "https://wa.me/5521993001883";
+const MEETING_LINK = "https://wa.me/5521993001883?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20reuni%C3%A3o%20para%20conhecer%20o%20AtendeAI";
 
 const navItems = [
   { label: "Como funciona", href: "#como-funciona", icon: Zap },
@@ -112,6 +114,17 @@ const Header = () => {
                       </Link>
                     );
                   })}
+                  <div className="border-t border-border/40 my-1.5" />
+                  <a
+                    href={MEETING_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setSolucoesOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-primary font-medium hover:bg-primary/5 transition-colors"
+                  >
+                    <CalendarCheck className="w-4 h-4 text-primary" />
+                    Agendar reunião
+                  </a>
                 </motion.div>
               )}
             </AnimatePresence>
