@@ -39,7 +39,7 @@ export const BILLING_PLAN_SEED = [
     code: 'PROFISSIONAL',
     displayName: 'Profissional',
     description:
-      'Rotina diaria com mais capacidade, equipe e automacoes por nicho.',
+      'Rotina diária com mais capacidade, equipe e automações por nicho.',
     monthlyPrice: 597,
     messagesQuota: 75000,
     aiTokensQuota: 7500000,
@@ -50,7 +50,7 @@ export const BILLING_PLAN_SEED = [
       'Até 3 números de WhatsApp conectados',
       'IA com contexto comercial por nicho',
       'Automações operacionais',
-      'Relatórios por periodo e filtros',
+      'Relatórios por período e filtros',
     ],
     config: {
       limits: {
