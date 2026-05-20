@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { DatabaseModule } from '@shared/infrastructure/database/DatabaseModule';
 import { ConfigModule } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
 import {
   IProspectCampaignRepository,
   PROSPECT_CAMPAIGN_REPOSITORY,
@@ -86,10 +87,8 @@ describe('PrismaProspectCampaignRepository (integration)', () => {
       PROSPECT_CAMPAIGN_REPOSITORY,
     );
 
-    await prisma.$executeRaw(Prisma.sql(
-      'CREATE SCHEMA IF NOT EXISTS prospecting_schema',
-    );
-    await prisma.$executeRaw(Prisma.sql(`
+    await prisma.$executeRaw(Prisma.sql`CREATE SCHEMA IF NOT EXISTS prospecting_schema`);
+    await prisma.$executeRaw(Prisma.sql`
       CREATE TABLE IF NOT EXISTS prospecting_schema.prospect_campaigns (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         tenant_id UUID NOT NULL,
@@ -105,7 +104,7 @@ describe('PrismaProspectCampaignRepository (integration)', () => {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    await prisma.$executeRaw(Prisma.sql(`
+    await prisma.$executeRaw(Prisma.sql`
       CREATE UNIQUE INDEX IF NOT EXISTS prospect_campaigns_tenant_id_id_key
       ON prospecting_schema.prospect_campaigns (tenant_id, id)
     `);

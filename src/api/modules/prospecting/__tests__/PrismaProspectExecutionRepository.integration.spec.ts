@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
 import { DatabaseModule } from '@shared/infrastructure/database/DatabaseModule';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { TenantId } from '@shared/domain/TenantId';
@@ -84,10 +85,8 @@ describe('PrismaProspectExecutionRepository (integration)', () => {
       PROSPECT_EXECUTION_REPOSITORY,
     );
 
-    await prisma.$executeRaw(Prisma.sql(
-      'CREATE SCHEMA IF NOT EXISTS prospecting_schema',
-    );
-    await prisma.$executeRaw(Prisma.sql(`
+    await prisma.$executeRaw(Prisma.sql`CREATE SCHEMA IF NOT EXISTS prospecting_schema`);
+    await prisma.$executeRaw(Prisma.sql`
       CREATE TABLE IF NOT EXISTS prospecting_schema.prospect_executions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         tenant_id UUID NOT NULL,
@@ -101,11 +100,11 @@ describe('PrismaProspectExecutionRepository (integration)', () => {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    await prisma.$executeRaw(Prisma.sql(`
+    await prisma.$executeRaw(Prisma.sql`
       ALTER TABLE prospecting_schema.prospect_executions
       ADD COLUMN IF NOT EXISTS stop_reason VARCHAR(30) NULL
     `);
-    await prisma.$executeRaw(Prisma.sql(`
+    await prisma.$executeRaw(Prisma.sql`
       CREATE UNIQUE INDEX IF NOT EXISTS prospect_executions_tenant_campaign_contact_key
       ON prospecting_schema.prospect_executions (tenant_id, campaign_id, contact_id)
     `);
@@ -137,10 +136,8 @@ describe('PrismaProspectExecutionRepository (integration)', () => {
       return;
     }
 
-    await prisma.$executeRaw(Prisma.sql(
-      'DELETE FROM prospecting_schema.prospect_executions WHERE tenant_id = $1 OR tenant_id = $2',
-      tenantId,
-      otherTenantId,
+    await prisma.$executeRaw(
+      Prisma.sql`DELETE FROM prospecting_schema.prospect_executions WHERE tenant_id = ${tenantId}::uuid OR tenant_id = ${otherTenantId}::uuid`,
     ).catch(() => { });
     await prisma.subscription
       .deleteMany({
