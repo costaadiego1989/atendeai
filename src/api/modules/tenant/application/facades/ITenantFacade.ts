@@ -19,9 +19,10 @@ export type MessagingProvider =
   | 'BUBBLEWHATS'
   | 'TWILIO'
   | 'D360'
-  | 'META_GRAPH';
+  | 'META_GRAPH'
+  | 'WIDGET';
 
-export type MessagingChannel = 'WHATSAPP' | 'INSTAGRAM';
+export type MessagingChannel = 'WHATSAPP' | 'INSTAGRAM' | 'WEB_CHAT';
 
 export interface MessagingChannelConfig {
   channel: MessagingChannel;
