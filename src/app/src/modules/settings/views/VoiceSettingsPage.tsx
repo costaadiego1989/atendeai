@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Phone } from 'lucide-react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { PageTabsList } from '@/components/PageTabs';
 import { Button } from '@/components/ui/button';
@@ -56,6 +55,7 @@ export function VoiceSettingsPage() {
       <div className="page-container animate-fade-in">
         <div className="page-header">
           <h1 className="page-title">Agente de Voz</h1>
+          <p className="page-description">Configure o agente de voz com IA para cobrança automatizada, confirmações e follow-up.</p>
         </div>
         <div className="space-y-4">
           <CardSkeleton />
@@ -69,10 +69,7 @@ export function VoiceSettingsPage() {
     <div className="page-container animate-fade-in">
       <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="page-title flex items-center gap-2">
-            <Phone className="h-5 w-5 text-primary" />
-            Agente de Voz
-          </h1>
+          <h1 className="page-title">Agente de Voz</h1>
           <p className="page-description mt-1">
             Configure o agente de voz com IA para cobrança automatizada, confirmações e follow-up.
           </p>
