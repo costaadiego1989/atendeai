@@ -1600,6 +1600,7 @@ model WidgetConfig {
   name           String   @default("Chat") @db.VarChar(100)
   greeting       String?  @db.Text
   color          String   @default("#00C59E") @db.VarChar(20)
+  backgroundColor String?  @map("background_color") @db.VarChar(20)
   position       String   @default("bottom-right") @db.VarChar(20)
   avatarUrl      String?  @map("avatar_url") @db.Text
   collectName    Boolean  @default(true) @map("collect_name")
