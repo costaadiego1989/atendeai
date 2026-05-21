@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
-import type { VoiceAgentConfig } from '@prisma/client';
+import { GetVoiceConfigUseCase } from './GetVoiceConfigUseCase';
 
 export interface UpdateVoiceConfigInput {
   enabled?: boolean;
   persona?: {
+    name?: string;
     voiceId?: string;
     language?: string;
-    name?: string;
     tone?: string;
     speed?: number;
   };
@@ -27,75 +27,53 @@ export interface UpdateVoiceConfigInput {
 
 @Injectable()
 export class UpdateVoiceConfigUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly getVoiceConfig: GetVoiceConfigUseCase,
+  ) {}
 
   async execute(tenantId: string, input: UpdateVoiceConfigInput) {
-    const flat = this.flatten(input);
+    const existing = await this.prisma.voiceAgentConfig.findUnique({
+      where: { tenantId },
+    });
+
+    const flat = this.flatten(input, existing);
     const config = await this.prisma.voiceAgentConfig.upsert({
       where: { tenantId },
       create: { tenantId, ...flat },
       update: flat,
     });
-    return this.toVoiceConfig(config);
+    return this.getVoiceConfig.toVoiceConfig(config);
   }
 
-  private toVoiceConfig(c: VoiceAgentConfig) {
-    return {
-      enabled: c.enabled,
-      persona: {
-        name: 'Assistente de Voz',
-        tone: 'professional' as const,
-        voiceId: c.voiceId || '',
-        language: c.language || 'pt-BR',
-      },
-      allowedHours: {
-        start: c.callWindowStart || '09:00',
-        end: c.callWindowEnd || '18:00',
-      },
-      recovery: {
-        enabled: false,
-        daysAfterDue: 3,
-        minAmount: 50,
-        maxAttempts: 3,
-        intervalHours: 24,
-      },
-      scripts: [] as unknown[],
-      twilioPhoneNumber: null as string | null,
-    };
-  }
+  private flatten(input: UpdateVoiceConfigInput, existing: any) {
+    const result: Record<string, unknown> = {};
 
-  private flatten(input: UpdateVoiceConfigInput) {
-    return {
-      ...(input.enabled !== undefined && { enabled: input.enabled }),
-      ...(input.voiceId !== undefined && { voiceId: input.voiceId }),
-      ...(input.persona?.voiceId !== undefined && {
-        voiceId: input.persona.voiceId,
-      }),
-      ...(input.language !== undefined && { language: input.language }),
-      ...(input.persona?.language !== undefined && {
-        language: input.persona.language,
-      }),
-      ...(input.maxDiscount !== undefined && {
-        maxDiscount: input.maxDiscount,
-      }),
-      ...(input.maxInstallments !== undefined && {
-        maxInstallments: input.maxInstallments,
-      }),
-      ...(input.callWindowStart !== undefined && {
-        callWindowStart: input.callWindowStart,
-      }),
-      ...(input.allowedHours?.start !== undefined && {
-        callWindowStart: input.allowedHours.start,
-      }),
-      ...(input.callWindowEnd !== undefined && {
-        callWindowEnd: input.callWindowEnd,
-      }),
-      ...(input.allowedHours?.end !== undefined && {
-        callWindowEnd: input.allowedHours.end,
-      }),
-      ...(input.blockedDays !== undefined && {
-        blockedDays: input.blockedDays,
-      }),
-    };
+    if (input.enabled !== undefined) result.enabled = input.enabled;
+
+    // Persona — merge with existing
+    if (input.persona) {
+      const existingPersona = (existing?.persona as Record<string, unknown>) ?? {};
+      result.persona = { ...existingPersona, ...input.persona };
+      if (input.persona.voiceId !== undefined) result.voiceId = input.persona.voiceId;
+      if (input.persona.language !== undefined) result.language = input.persona.language;
+    }
+    if (input.voiceId !== undefined) result.voiceId = input.voiceId;
+    if (input.language !== undefined) result.language = input.language;
+
+    if (input.allowedHours?.start !== undefined) result.callWindowStart = input.allowedHours.start;
+    if (input.allowedHours?.end !== undefined) result.callWindowEnd = input.allowedHours.end;
+    if (input.callWindowStart !== undefined) result.callWindowStart = input.callWindowStart;
+    if (input.callWindowEnd !== undefined) result.callWindowEnd = input.callWindowEnd;
+
+    if (input.maxDiscount !== undefined) result.maxDiscount = input.maxDiscount;
+    if (input.maxInstallments !== undefined) result.maxInstallments = input.maxInstallments;
+    if (input.blockedDays !== undefined) result.blockedDays = input.blockedDays;
+
+    if (input.scripts !== undefined) result.scripts = input.scripts;
+    if (input.recovery !== undefined) result.recoveryConfig = input.recovery;
+    if (input.twilioPhoneNumber !== undefined) result.twilioPhoneNumber = input.twilioPhoneNumber;
+
+    return result;
   }
 }

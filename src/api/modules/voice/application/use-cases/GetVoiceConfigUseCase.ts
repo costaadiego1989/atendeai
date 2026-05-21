@@ -18,28 +18,35 @@ export class GetVoiceConfigUseCase {
     return this.toVoiceConfig(config);
   }
 
-  private toVoiceConfig(c: VoiceAgentConfig) {
+  toVoiceConfig(c: VoiceAgentConfig) {
+    const persona = (c.persona as Record<string, unknown>) ?? {};
+    const scripts = (c.scripts as unknown[]) ?? [];
+    const recoveryConfig = (c.recoveryConfig as Record<string, unknown>) ?? null;
+
     return {
       enabled: c.enabled,
       persona: {
-        name: 'Assistente de Voz',
-        tone: 'professional' as const,
-        voiceId: c.voiceId || '',
-        language: c.language || 'pt-BR',
+        name: (persona.name as string) || 'Assistente de Voz',
+        tone: (persona.tone as string) || 'professional',
+        voiceId: (persona.voiceId as string) || c.voiceId || '',
+        language: (persona.language as string) || c.language || 'pt-BR',
+        speed: (persona.speed as number) || 1.0,
       },
       allowedHours: {
         start: c.callWindowStart || '09:00',
         end: c.callWindowEnd || '18:00',
       },
-      recovery: {
-        enabled: false,
-        daysAfterDue: 3,
-        minAmount: 50,
-        maxAttempts: 3,
-        intervalHours: 24,
-      },
-      scripts: [] as unknown[],
-      twilioPhoneNumber: null as string | null,
+      recovery: recoveryConfig
+        ? recoveryConfig
+        : {
+            enabled: false,
+            daysAfterDue: 3,
+            minAmount: 50,
+            maxAttempts: 3,
+            intervalHours: 24,
+          },
+      scripts,
+      twilioPhoneNumber: c.twilioPhoneNumber ?? null,
     };
   }
 }
