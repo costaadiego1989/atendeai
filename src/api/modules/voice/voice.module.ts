@@ -10,12 +10,15 @@ import { VoiceNegotiationService } from './application/services/VoiceNegotiation
 import { MakeOutboundCallUseCase } from './application/use-cases/MakeOutboundCallUseCase';
 import { VoiceCallWorker } from './infrastructure/queue/VoiceCallWorker';
 import { VoiceWebhookController } from './presentation/controllers/VoiceWebhookController';
+import { VoiceConfigController } from './presentation/controllers/VoiceConfigController';
+import { GetVoiceConfigUseCase } from './application/use-cases/GetVoiceConfigUseCase';
+import { UpdateVoiceConfigUseCase } from './application/use-cases/UpdateVoiceConfigUseCase';
+import { ListVoiceCallsUseCase } from './application/use-cases/ListVoiceCallsUseCase';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [
-    BullModule.registerQueue({ name: 'voice-calls' }),
-  ],
-  controllers: [VoiceWebhookController],
+  imports: [BullModule.registerQueue({ name: 'voice-calls' }), AuthModule],
+  controllers: [VoiceWebhookController, VoiceConfigController],
   providers: [
     {
       provide: TELEPHONY_PROVIDER,
@@ -35,6 +38,9 @@ import { VoiceWebhookController } from './presentation/controllers/VoiceWebhookC
     VoiceNegotiationService,
     MakeOutboundCallUseCase,
     VoiceCallWorker,
+    GetVoiceConfigUseCase,
+    UpdateVoiceConfigUseCase,
+    ListVoiceCallsUseCase,
   ],
   exports: [
     MakeOutboundCallUseCase,
