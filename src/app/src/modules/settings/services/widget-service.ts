@@ -8,6 +8,7 @@ export interface WidgetConfig {
   enabled: boolean;
   greeting: string | null;
   color: string | null;
+  backgroundColor: string | null;
   position: 'bottom-right' | 'bottom-left';
   avatarUrl: string | null;
   collectName: boolean;
@@ -23,6 +24,7 @@ export interface UpdateWidgetConfigInput {
   enabled?: boolean;
   greeting?: string | null;
   color?: string | null;
+  backgroundColor?: string | null;
   position?: 'bottom-right' | 'bottom-left';
   avatarUrl?: string | null;
   collectName?: boolean;
@@ -38,5 +40,11 @@ export const widgetService = {
 
   async updateConfig(tenantId: string, input: UpdateWidgetConfigInput): Promise<WidgetConfig> {
     return apiClient.put<WidgetConfig>(`/tenants/${tenantId}/widget-config`, input);
+  },
+
+  async uploadAvatar(tenantId: string, file: File): Promise<{ avatarUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post<{ avatarUrl: string }>(`/tenants/${tenantId}/widget-config/avatar`, formData);
   },
 };

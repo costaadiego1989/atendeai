@@ -33,6 +33,21 @@ export function useWidgetSettingsViewModel() {
     },
   });
 
+  const avatarMutation = useMutation({
+    mutationFn: (file: File) => widgetService.uploadAvatar(tenantId!, file),
+    onSuccess: () => {
+      toast({ title: 'Avatar atualizado', description: 'Imagem do agente salva com sucesso.' });
+      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY, tenantId] });
+    },
+    onError: () => {
+      toast({
+        title: 'Erro ao enviar imagem',
+        description: 'Não foi possível fazer upload do avatar.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const embedSnippet = useMemo(() => {
     if (!config?.publicToken) return '';
     const origin = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -43,7 +58,9 @@ export function useWidgetSettingsViewModel() {
     config: config ?? null,
     isLoading,
     isSaving: saveMutation.isPending,
+    isUploadingAvatar: avatarMutation.isPending,
     embedSnippet,
     saveConfig: (input: UpdateWidgetConfigInput) => saveMutation.mutateAsync(input),
+    uploadAvatar: (file: File) => avatarMutation.mutateAsync(file),
   };
 }

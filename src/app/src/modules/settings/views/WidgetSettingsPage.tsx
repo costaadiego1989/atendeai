@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MessageCircle } from 'lucide-react';
+import { Bot, Loader2, MessageCircle, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,7 @@ const widgetSchema = z.object({
   enabled: z.boolean(),
   greeting: z.string().optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Cor inválida').optional(),
+  backgroundColor: z.string().optional(),
   position: z.enum(['bottom-right', 'bottom-left']),
   collectName: z.boolean(),
   collectPhone: z.boolean(),
@@ -37,6 +38,14 @@ type WidgetFormValues = z.infer<typeof widgetSchema>;
 
 export function WidgetSettingsPage() {
   const vm = useWidgetSettingsViewModel();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await vm.uploadAvatar(file);
+    e.target.value = '';
+  };
 
   const form = useForm<WidgetFormValues>({
     resolver: zodResolver(widgetSchema),
@@ -45,6 +54,7 @@ export function WidgetSettingsPage() {
       enabled: true,
       greeting: '',
       color: '#3b82f6',
+      backgroundColor: '',
       position: 'bottom-right',
       collectName: true,
       collectPhone: false,
@@ -60,6 +70,7 @@ export function WidgetSettingsPage() {
         enabled: vm.config.enabled,
         greeting: vm.config.greeting ?? '',
         color: vm.config.color ?? '#3b82f6',
+        backgroundColor: vm.config.backgroundColor ?? '',
         position: vm.config.position,
         collectName: vm.config.collectName,
         collectPhone: vm.config.collectPhone,
@@ -77,6 +88,7 @@ export function WidgetSettingsPage() {
       enabled: values.enabled,
       greeting: values.greeting || null,
       color: values.color || null,
+      backgroundColor: values.backgroundColor || null,
       position: values.position,
       collectName: values.collectName,
       collectPhone: values.collectPhone,
@@ -148,6 +160,62 @@ export function WidgetSettingsPage() {
                     placeholder="Olá! Como posso ajudar?"
                     {...form.register('greeting')}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Avatar do agente</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-border overflow-hidden bg-muted/30">
+                      {vm.config?.avatarUrl ? (
+                        <img
+                          src={vm.config.avatarUrl}
+                          alt="Avatar"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <Bot className="h-7 w-7 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        className="hidden"
+                        onChange={handleAvatarChange}
+                        disabled={vm.isUploadingAvatar}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={vm.isUploadingAvatar}
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="h-8 gap-2"
+                      >
+                        {vm.isUploadingAvatar ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <UploadCloud className="h-3.5 w-3.5" />
+                        )}
+                        {vm.isUploadingAvatar ? 'Enviando...' : 'Enviar imagem'}
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground">JPG, PNG, GIF ou WebP</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Cor de fundo das mensagens</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      className="h-8 w-8 cursor-pointer rounded border border-border"
+                      value={watchedValues.backgroundColor || '#ffffff'}
+                      onChange={(e) => form.setValue('backgroundColor', e.target.value, { shouldDirty: true })}
+                    />
+                    <Input className="flex-1" placeholder="#ffffff" {...form.register('backgroundColor')} />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -240,6 +308,8 @@ export function WidgetSettingsPage() {
                   name={watchedValues.name}
                   greeting={watchedValues.greeting}
                   color={watchedValues.color}
+                  backgroundColor={watchedValues.backgroundColor}
+                  avatarUrl={vm.config?.avatarUrl}
                   position={watchedValues.position}
                 />
               </CardContent>
