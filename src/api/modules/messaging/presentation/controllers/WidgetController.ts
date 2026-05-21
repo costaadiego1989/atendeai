@@ -114,6 +114,7 @@ export class WidgetController {
           visitorPhone,
           visitorEmail: dto.visitorEmail || existing.visitorEmail,
           visitorCpf: dto.visitorCpf || existing.visitorCpf,
+          quickReplies: (config.quickReplies as string[]) ?? [],
         });
 
       await this.prisma.widgetSession.update({
@@ -155,6 +156,7 @@ export class WidgetController {
         visitorPhone: dto.visitorPhone,
         visitorEmail: dto.visitorEmail,
         visitorCpf: dto.visitorCpf,
+        quickReplies: (config.quickReplies as string[]) ?? [],
       });
 
     await this.prisma.widgetSession.update({
@@ -253,7 +255,7 @@ export class WidgetController {
     }
 
     const messages = await this.prisma.message.findMany({
-      where: { conversationId: session.conversationId },
+      where: { conversationId: session.conversationId, sentBy: { not: 'SYSTEM' } },
       orderBy: { createdAt: 'asc' },
       take: 100,
     });
