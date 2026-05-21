@@ -5,10 +5,12 @@ export interface MessagingRealtimeEvent {
     | 'message.queued'
     | 'message.sent'
     | 'message.failed'
-    | 'conversation.status.changed';
+    | 'conversation.status.changed'
+    | 'conversation.created';
   tenantId: string;
   conversationId?: string;
   messageId?: string;
+  contactId?: string;
   channel?: string;
   status?: string;
   at: string;
