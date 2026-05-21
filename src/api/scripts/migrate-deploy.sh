@@ -3,29 +3,27 @@ set -e
 
 echo "=== Running prisma migrate deploy ==="
 
-run_deploy() {
-  npx prisma migrate deploy 2>&1
-}
-
-OUTPUT=$(run_deploy) && echo "$OUTPUT" && echo "=== Migration complete ===" && exit 0
+OUTPUT=$(npx prisma migrate deploy 2>&1) && echo "$OUTPUT" && echo "=== Migration complete ===" && exit 0
 
 echo "$OUTPUT"
 
-# P3009 = failed migrations blocking deploy — safe to resolve since all SQL uses IF NOT EXISTS
+# P3009 = migration recorded as failed (process was killed before Prisma could mark it as applied).
+# Use --rolled-back so Prisma re-runs the SQL on next deploy.
+# Safe because all migrations use IF NOT EXISTS (idempotent).
 if echo "$OUTPUT" | grep -q "P3009"; then
   echo ""
-  echo "=== Detected P3009: resolving failed migrations ==="
+  echo "=== P3009 detected: rolling back failed migrations so they re-run ==="
 
-  FAILED=$(echo "$OUTPUT" | grep -oP 'The `\K[^`]+' | head -20)
+  FAILED=$(echo "$OUTPUT" | grep -oP 'The `\K[^`]+')
 
   if [ -z "$FAILED" ]; then
-    echo "Could not extract migration name from error output. Aborting."
+    echo "Could not extract migration name from error. Aborting."
     exit 1
   fi
 
   for migration in $FAILED; do
-    echo "  Resolving: $migration"
-    npx prisma migrate resolve --applied "$migration"
+    echo "  Rolling back: $migration"
+    npx prisma migrate resolve --rolled-back "$migration"
   done
 
   echo "=== Retrying migrate deploy ==="
