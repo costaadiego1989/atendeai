@@ -43,11 +43,14 @@ export class ProcessWidgetMessageUseCase {
     const phone = input.visitorPhone?.trim() || `widget_${input.visitorId}`;
     const name = input.visitorName?.trim() || 'Visitante Web';
 
-    const { contactId } = await this.contactFacade.identifyContact(
-      input.tenantId,
-      phone,
+    const { contactId } = await this.contactFacade.ensureContact({
+      tenantId: input.tenantId,
       name,
-    );
+      phone,
+      email: input.visitorEmail ?? undefined,
+      document: input.visitorCpf ?? undefined,
+      stage: 'LEAD',
+    });
 
     const result = await this.transactionalEventPublisher.execute<ProcessWidgetMessageOutput>(
       async (tx) => {
@@ -133,6 +136,7 @@ export class ProcessWidgetMessageUseCase {
                 ...(input.url ? { url: input.url } : {}),
               },
               channel: 'WEB_CHAT',
+              moduleId: 'widget',
               ...(input.quickReplies?.length ? { contextHints: input.quickReplies } : {}),
             },
             `messaging:inbound:${message.id}`,
