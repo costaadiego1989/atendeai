@@ -194,7 +194,7 @@ jobs:
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEF" \
             --capacity-provider-strategy "capacityProvider=${CAPACITY_PROVIDER},weight=100,base=0" \
-            --overrides '{"containerOverrides":[{"name":"api","command":["sh","migrate-deploy.sh"]}]}' \
+            --overrides '{"cpu":"256","memory":"384","containerOverrides":[{"name":"api","cpu":256,"memory":384,"command":["sh","migrate-deploy.sh"]}]}' \
             --output json)
 
           TASK_ARN=$(echo "$RUN_RESULT" | jq -r '.tasks[0].taskArn // empty')
