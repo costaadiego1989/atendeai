@@ -10,9 +10,14 @@ interface DocumentsListProps {
 }
 
 const STATUS_MAP: Record<string, { label: string; className: string }> = {
+  READY: { label: 'Processado', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
   PROCESSED: { label: 'Processado', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
   PROCESSING: { label: 'Processando', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+  EXTRACTING: { label: 'Processando', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+  CHUNKING: { label: 'Processando', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+  EMBEDDING: { label: 'Processando', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
   PENDING: { label: 'Pendente', className: 'bg-gray-100 text-gray-800 dark:bg-gray-800/30 dark:text-gray-400' },
+  ERROR: { label: 'Falhou', className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
   FAILED: { label: 'Falhou', className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
 };
 
