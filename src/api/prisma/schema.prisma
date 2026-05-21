@@ -1685,6 +1685,10 @@ model VoiceAgentConfig {
   blockedDays         String[] @default(["sunday"]) @map("blocked_days")
   greeting            String?  @db.Text
   transferPhone       String?  @map("transfer_phone") @db.VarChar(20)
+  twilioPhoneNumber   String?  @map("twilio_phone_number") @db.VarChar(30)
+  persona             Json     @default("{}")
+  scripts             Json     @default("[]")
+  recoveryConfig      Json?    @map("recovery_config")
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
