@@ -15,6 +15,7 @@ export interface UpdateWidgetConfigInput {
   collectCpf?: boolean;
   proactiveDelay?: number | null;
   proactiveMsg?: string | null;
+  quickReplies?: string[];
 }
 
 @Injectable()

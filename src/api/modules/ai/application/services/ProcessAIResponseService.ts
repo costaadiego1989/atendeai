@@ -161,6 +161,13 @@ export class ProcessAIResponseService {
       resolvedBranchId,
     );
 
+    if (input.contextHints?.length) {
+      promptWithAgentRule =
+        promptWithAgentRule +
+        '\n\n[OPÇÕES PRÉ-DEFINIDAS DO WIDGET — use como contexto de intenção do visitante]:\n' +
+        input.contextHints.map((h) => `- ${h}`).join('\n');
+    }
+
     promptWithAgentRule =
       this.aiSafetyGate.appendPlatformLimits(promptWithAgentRule);
 

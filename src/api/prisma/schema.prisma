@@ -1609,6 +1609,7 @@ model WidgetConfig {
   collectCpf     Boolean  @default(false) @map("collect_cpf")
   proactiveDelay Int?     @map("proactive_delay")
   proactiveMsg   String?  @map("proactive_msg") @db.Text
+  quickReplies   Json     @default("[]") @map("quick_replies")
   allowedOrigins Json     @default("[]") @map("allowed_origins")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz

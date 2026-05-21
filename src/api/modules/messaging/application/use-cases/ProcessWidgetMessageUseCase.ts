@@ -20,6 +20,7 @@ export interface ProcessWidgetMessageInput {
   text: string;
   contentType?: 'text' | 'image' | 'audio';
   url?: string | null;
+  quickReplies?: string[];
 }
 
 export interface ProcessWidgetMessageOutput {
@@ -132,6 +133,7 @@ export class ProcessWidgetMessageUseCase {
                 ...(input.url ? { url: input.url } : {}),
               },
               channel: 'WEB_CHAT',
+              ...(input.quickReplies?.length ? { contextHints: input.quickReplies } : {}),
             },
             `messaging:inbound:${message.id}`,
           ),

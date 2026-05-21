@@ -13,6 +13,7 @@ export interface ProcessAIResponseInput {
     fileName?: string;
   };
   moduleId?: string;
+  contextHints?: string[];
 }
 
 export interface ProcessAIResponseOutput {

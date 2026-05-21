@@ -67,6 +67,7 @@ export class WidgetController {
       collectCpf: config.collectCpf,
       proactiveDelay: config.proactiveDelay,
       proactiveMsg: config.proactiveMsg,
+      quickReplies: (config.quickReplies as string[]) ?? [],
     };
   }
 
@@ -212,6 +213,7 @@ export class WidgetController {
         text: dto.text,
         contentType: dto.type,
         url: dto.url,
+        quickReplies: (config.quickReplies as string[]) ?? [],
       });
 
     await this.prisma.widgetSession.update({

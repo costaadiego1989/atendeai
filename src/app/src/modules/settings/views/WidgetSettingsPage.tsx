@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bot, Loader2, UploadCloud } from 'lucide-react';
+import { Bot, Loader2, UploadCloud, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +34,7 @@ const widgetSchema = z.object({
   collectCpf: z.boolean(),
   proactiveDelay: z.coerce.number().min(0).optional(),
   proactiveMsg: z.string().optional(),
+  quickReplies: z.array(z.string().max(80)).max(8).optional(),
 });
 
 type WidgetFormValues = z.infer<typeof widgetSchema>;
@@ -41,6 +42,7 @@ type WidgetFormValues = z.infer<typeof widgetSchema>;
 export function WidgetSettingsPage() {
   const vm = useWidgetSettingsViewModel();
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [qrInput, setQrInput] = useState('');
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,6 +63,7 @@ export function WidgetSettingsPage() {
       collectCpf: false,
       proactiveDelay: 5000,
       proactiveMsg: '',
+      quickReplies: [],
     },
   });
 
@@ -76,6 +79,7 @@ export function WidgetSettingsPage() {
         collectCpf: vm.config.collectCpf,
         proactiveDelay: vm.config.proactiveDelay ?? 5000,
         proactiveMsg: vm.config.proactiveMsg ?? '',
+        quickReplies: vm.config.quickReplies ?? [],
       });
     }
   }, [vm.config, form]);
@@ -96,6 +100,7 @@ export function WidgetSettingsPage() {
       collectCpf: values.collectCpf,
       proactiveDelay: values.proactiveDelay || null,
       proactiveMsg: values.proactiveMsg || null,
+      quickReplies: values.quickReplies ?? [],
     });
   });
 
@@ -305,6 +310,73 @@ export function WidgetSettingsPage() {
                         {...form.register('proactiveMsg')}
                       />
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="text-base">Quick Replies</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-xs text-muted-foreground">
+                      Botões de resposta rápida exibidos no widget. A IA usa essas opções como contexto de intenção. Máx. 8 itens, 80 caracteres cada.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {(watchedValues.quickReplies ?? []).map((chip, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1 text-sm"
+                        >
+                          {chip}
+                          <button
+                            type="button"
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                            onClick={() => {
+                              const next = (watchedValues.quickReplies ?? []).filter((_, i) => i !== idx);
+                              form.setValue('quickReplies', next, { shouldDirty: true });
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    {(watchedValues.quickReplies ?? []).length < 8 && (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ex: Ver cardápio"
+                          value={qrInput}
+                          maxLength={80}
+                          onChange={(e) => setQrInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const val = qrInput.trim();
+                              if (!val) return;
+                              const current = watchedValues.quickReplies ?? [];
+                              if (current.length >= 8 || current.includes(val)) return;
+                              form.setValue('quickReplies', [...current, val], { shouldDirty: true });
+                              setQrInput('');
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const val = qrInput.trim();
+                            if (!val) return;
+                            const current = watchedValues.quickReplies ?? [];
+                            if (current.length >= 8 || current.includes(val)) return;
+                            form.setValue('quickReplies', [...current, val], { shouldDirty: true });
+                            setQrInput('');
+                          }}
+                        >
+                          Adicionar
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

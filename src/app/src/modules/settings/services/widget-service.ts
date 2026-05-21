@@ -17,6 +17,7 @@ export interface WidgetConfig {
   collectCpf: boolean;
   proactiveDelay: number | null;
   proactiveMsg: string | null;
+  quickReplies: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -35,6 +36,7 @@ export interface UpdateWidgetConfigInput {
   collectCpf?: boolean;
   proactiveDelay?: number | null;
   proactiveMsg?: string | null;
+  quickReplies?: string[];
 }
 
 export const widgetService = {

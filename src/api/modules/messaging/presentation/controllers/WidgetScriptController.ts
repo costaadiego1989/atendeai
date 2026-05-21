@@ -14,7 +14,7 @@ const WIDGET_SCRIPT = `(function(){
   var isOpen=false,pollIv=null,outboundCnt=0,typingRow=null,typingTimer=null;
   var state='idle'; // idle|collecting|connecting|chatting
   var collectSteps=[],collectIdx=0,collectData={};
-  var sessionProm=null,wCfg=null;
+  var sessionProm=null,wCfg=null,qrDismissed=false;
 
   function $id(id){return document.getElementById(id);}
   function $msgs(){return $id('_atai-msgs');}
@@ -59,6 +59,10 @@ const WIDGET_SCRIPT = `(function(){
       '#_atai-snd{background:'+c+';border:none;border-radius:50%;width:38px;height:38px;min-width:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .15s,transform .1s;flex-shrink:0;}',
       '#_atai-snd:hover{opacity:.88;}#_atai-snd:active{transform:scale(.92);}#_atai-snd:disabled{opacity:.4;cursor:default;}',
       '#_atai-snd svg{width:17px;height:17px;fill:#fff;}',
+      '#_atai-qr{padding:8px 12px 4px;display:flex;flex-wrap:wrap;gap:7px;background:#fff;flex-shrink:0;}',
+      '#_atai-qr.hidden{display:none;}',
+      '._qr-chip{background:#fff;border:1.5px solid '+c+';color:'+c+';border-radius:20px;padding:5px 13px;font-size:13px;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}',
+      '._qr-chip:hover{background:'+c+';color:#fff;}',
       '#_atai-wm{text-align:center;padding:5px 0 7px;font-size:11px;color:#c8c8c8;flex-shrink:0;background:#fff;}',
       '@keyframes _pop{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}',
       '@keyframes _bnc{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-7px);}}',
@@ -103,6 +107,7 @@ const WIDGET_SCRIPT = `(function(){
     typingTimer=setTimeout(function(){
       hideTyping();
       addRow('in','Não recebi resposta no momento. Tente novamente em instantes.');
+      qrDismissed=false;showChips();
     },25000);
   }
 
@@ -111,6 +116,15 @@ const WIDGET_SCRIPT = `(function(){
     if(typingRow&&typingRow.parentNode)typingRow.parentNode.removeChild(typingRow);
     typingRow=null;var old=$id('_atai-tr');
     if(old&&old.parentNode)old.parentNode.removeChild(old);
+  }
+
+  function showChips(){
+    if(qrDismissed||!wCfg||!wCfg.quickReplies||!wCfg.quickReplies.length)return;
+    var c=$id('_atai-qr');if(c)c.classList.remove('hidden');
+  }
+  function hideChips(){
+    qrDismissed=true;
+    var c=$id('_atai-qr');if(c)c.classList.add('hidden');
   }
 
   function agentSay(txt,delay){
@@ -198,7 +212,7 @@ const WIDGET_SCRIPT = `(function(){
         if(i2){i2.disabled=false;i2.placeholder='Digite sua mensagem...';}
         if(sb)sb.disabled=false;
         return agentSay('Tudo certo! Como posso te ajudar?',200);
-      }).then(startPolling);
+      }).then(function(){showChips();startPolling();});
       return;
     }
     var step=collectSteps[collectIdx];
@@ -231,6 +245,7 @@ const WIDGET_SCRIPT = `(function(){
     var i2=$inp();if(!i2)return;
     var txt=i2.value.trim();if(!txt)return;
     i2.value='';i2.style.height='auto';
+    hideChips();
     addRow('out',txt);
     showTyping();
     ensureSession().then(function(sid){if(sid)doSend(sid,txt);});
@@ -275,6 +290,20 @@ const WIDGET_SCRIPT = `(function(){
 
     var msgs=document.createElement('div');msgs.id='_atai-msgs';
 
+    var qr=document.createElement('div');qr.id='_atai-qr';qr.classList.add('hidden');
+    if(cfg.quickReplies&&cfg.quickReplies.length){
+      cfg.quickReplies.forEach(function(label){
+        var chip=document.createElement('button');chip.className='_qr-chip';chip.textContent=label;
+        chip.addEventListener('click',function(){
+          if(state!=='chatting')return;
+          hideChips();
+          var i2=$inp();if(i2){i2.value=label;}
+          sendMessage();
+        });
+        qr.appendChild(chip);
+      });
+    }
+
     var ft=document.createElement('div');ft.id='_atai-footer';
     var i2=document.createElement('textarea');i2.id='_atai-inp';i2.rows=1;i2.placeholder='...';i2.disabled=true;
     var sb=document.createElement('button');sb.id='_atai-snd';sb.setAttribute('aria-label','Enviar');
@@ -283,7 +312,7 @@ const WIDGET_SCRIPT = `(function(){
 
     var wm=document.createElement('div');wm.id='_atai-wm';wm.textContent='Powered by AtendeAi';
 
-    panel.appendChild(hdr);panel.appendChild(msgs);panel.appendChild(ft);panel.appendChild(wm);
+    panel.appendChild(hdr);panel.appendChild(msgs);panel.appendChild(qr);panel.appendChild(ft);panel.appendChild(wm);
     document.body.appendChild(btn);document.body.appendChild(panel);
 
     btn.addEventListener('click',function(){isOpen?closePanel():openPanel();});
@@ -315,7 +344,8 @@ const WIDGET_SCRIPT = `(function(){
         } else {
           state='chatting';
           var i2=$inp();if(i2)i2.disabled=false;
-          if(cfg.greeting)addRow('in',cfg.greeting,{type:true});
+          if(cfg.greeting)addRow('in',cfg.greeting,{type:true,done:function(){showChips();}});
+          else showChips();
           // Returning visitor with saved session: start polling right away
           if(sessionId)startPolling();
         }

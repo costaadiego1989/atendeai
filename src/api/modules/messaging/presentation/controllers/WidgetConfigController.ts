@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  IsArray,
   IsBoolean,
   IsHexColor,
   IsIn,
@@ -44,6 +45,7 @@ class UpdateWidgetConfigDTO {
     | number
     | null;
   @IsOptional() @IsString() proactiveMsg?: string | null;
+  @IsOptional() @IsArray() @IsString({ each: true }) @MaxLength(80, { each: true }) quickReplies?: string[];
 }
 
 @Controller('tenants/:tenantId/widget-config')

@@ -4,6 +4,8 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 describe('WidgetController', () => {
   let controller: WidgetController;
   let prisma: any;
+  let processWidgetMessage: any;
+  let initiateWidgetContact: any;
 
   const mockConfig = {
     id: 'wc-1',
@@ -19,6 +21,7 @@ describe('WidgetController', () => {
     collectPhone: false,
     proactiveDelay: 5000,
     proactiveMsg: 'Precisa de ajuda?',
+    quickReplies: [],
   };
 
   beforeEach(() => {
@@ -29,8 +32,10 @@ describe('WidgetController', () => {
       conversation: { create: jest.fn(), update: jest.fn() },
       message: { create: jest.fn(), findMany: jest.fn() },
     };
+    processWidgetMessage = { execute: jest.fn() };
+    initiateWidgetContact = { execute: jest.fn() };
 
-    controller = new WidgetController(prisma);
+    controller = new WidgetController(prisma, processWidgetMessage, initiateWidgetContact);
   });
 
   describe('getConfig', () => {
@@ -62,10 +67,9 @@ describe('WidgetController', () => {
     it('should create a new session', async () => {
       prisma.widgetConfig.findUnique.mockResolvedValue(mockConfig);
       prisma.widgetSession.findFirst.mockResolvedValue(null);
-      prisma.widgetSession.create.mockResolvedValue({
-        id: 'session-1',
-        conversationId: null,
-      });
+      prisma.widgetSession.create.mockResolvedValue({ id: 'session-1' });
+      prisma.widgetSession.update.mockResolvedValue({});
+      initiateWidgetContact.execute.mockResolvedValue({ contactId: 'c-1', conversationId: 'conv-1' });
 
       const result = await controller.initSession('pub-token-123', {
         visitorId: 'visitor-abc',
@@ -74,14 +78,8 @@ describe('WidgetController', () => {
 
       expect(result.sessionId).toBe('session-1');
       expect(result.resumed).toBe(false);
-      expect(prisma.widgetSession.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            tenantId: 'tenant-1',
-            visitorId: 'visitor-abc',
-            visitorName: 'João',
-          }),
-        }),
+      expect(initiateWidgetContact.execute).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantId: 'tenant-1', visitorId: 'visitor-abc' }),
       );
     });
 
@@ -91,7 +89,13 @@ describe('WidgetController', () => {
         id: 'session-existing',
         conversationId: 'conv-1',
         visitorName: 'Old Name',
+        visitorPhone: null,
+        visitorEmail: null,
+        visitorCpf: null,
+        pageUrl: null,
       });
+      prisma.widgetSession.update.mockResolvedValue({});
+      initiateWidgetContact.execute.mockResolvedValue({ contactId: 'c-1', conversationId: 'conv-1' });
 
       const result = await controller.initSession('pub-token-123', {
         visitorId: 'visitor-abc',
@@ -131,13 +135,15 @@ describe('WidgetController', () => {
       visitorEmail: null,
     };
 
-    it('should create message, contact, and conversation on first message', async () => {
+    it('should delegate to processWidgetMessage use case', async () => {
       prisma.widgetConfig.findUnique.mockResolvedValue(mockConfig);
       prisma.widgetSession.findFirst.mockResolvedValue(mockSession);
-      prisma.contact.findFirst.mockResolvedValue(null);
-      prisma.contact.create.mockResolvedValue({ id: 'contact-new' });
-      prisma.conversation.create.mockResolvedValue({ id: 'conv-new' });
-      prisma.message.create.mockResolvedValue({ id: 'msg-1' });
+      prisma.widgetSession.update.mockResolvedValue({});
+      processWidgetMessage.execute.mockResolvedValue({
+        contactId: 'contact-new',
+        conversationId: 'conv-new',
+        messageId: 'msg-1',
+      });
 
       const result = await controller.sendMessage('pub-token-123', {
         sessionId: 'session-1',
@@ -148,8 +154,9 @@ describe('WidgetController', () => {
       expect(result.messageId).toBe('msg-1');
       expect(result.conversationId).toBe('conv-new');
       expect(result.contactId).toBe('contact-new');
-      expect(prisma.contact.create).toHaveBeenCalled();
-      expect(prisma.conversation.create).toHaveBeenCalled();
+      expect(processWidgetMessage.execute).toHaveBeenCalledWith(
+        expect.objectContaining({ text: 'Hello!', tenantId: 'tenant-1' }),
+      );
     });
 
     it('should throw BadRequestException when required fields are missing', async () => {
@@ -175,12 +182,15 @@ describe('WidgetController', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should reuse existing contact when found', async () => {
+    it('should pass session data to processWidgetMessage use case', async () => {
       prisma.widgetConfig.findUnique.mockResolvedValue(mockConfig);
-      prisma.widgetSession.findFirst.mockResolvedValue(mockSession);
-      prisma.contact.findFirst.mockResolvedValue({ id: 'existing-contact' });
-      prisma.conversation.create.mockResolvedValue({ id: 'conv-1' });
-      prisma.message.create.mockResolvedValue({ id: 'msg-1' });
+      prisma.widgetSession.findFirst.mockResolvedValue({ ...mockSession, visitorPhone: '+55119' });
+      prisma.widgetSession.update.mockResolvedValue({});
+      processWidgetMessage.execute.mockResolvedValue({
+        contactId: 'contact-1',
+        conversationId: 'conv-1',
+        messageId: 'msg-1',
+      });
 
       const result = await controller.sendMessage('pub-token-123', {
         sessionId: 'session-1',
@@ -188,8 +198,10 @@ describe('WidgetController', () => {
         text: 'Hello',
       });
 
-      expect(result.contactId).toBe('existing-contact');
-      expect(prisma.contact.create).not.toHaveBeenCalled();
+      expect(result.contactId).toBe('contact-1');
+      expect(processWidgetMessage.execute).toHaveBeenCalledWith(
+        expect.objectContaining({ visitorPhone: '+55119' }),
+      );
     });
   });
 
