@@ -1605,6 +1605,8 @@ model WidgetConfig {
   avatarUrl      String?  @map("avatar_url") @db.Text
   collectName    Boolean  @default(true) @map("collect_name")
   collectPhone   Boolean  @default(true) @map("collect_phone")
+  collectEmail   Boolean  @default(true) @map("collect_email")
+  collectCpf     Boolean  @default(false) @map("collect_cpf")
   proactiveDelay Int?     @map("proactive_delay")
   proactiveMsg   String?  @map("proactive_msg") @db.Text
   allowedOrigins Json     @default("[]") @map("allowed_origins")
@@ -1629,6 +1631,7 @@ model WidgetSession {
   visitorName    String?  @map("visitor_name") @db.VarChar(255)
   visitorPhone   String?  @map("visitor_phone") @db.VarChar(20)
   visitorEmail   String?  @map("visitor_email") @db.VarChar(255)
+  visitorCpf     String?  @map("visitor_cpf") @db.VarChar(14)
   pageUrl        String?  @map("page_url") @db.Text
   status         String   @default("ACTIVE") @db.VarChar(20)
   lastActiveAt   DateTime @default(now()) @map("last_active_at") @db.Timestamptz
