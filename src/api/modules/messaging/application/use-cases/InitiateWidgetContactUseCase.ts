@@ -5,6 +5,7 @@ import {
   CONTACT_FACADE,
 } from '@modules/contact/application/facades/ContactFacade';
 import { ConversationCreatedIntegrationEvent } from '../integration-events/publishers/ConversationCreatedIntegrationEvent';
+import { MessageReceivedIntegrationEvent } from '../integration-events/publishers/MessageReceivedIntegrationEvent';
 import { IntegrationEvent } from '@shared/infrastructure/event-bus';
 import { Prisma } from '@prisma/client';
 
@@ -15,6 +16,7 @@ export interface InitiateWidgetContactInput {
   visitorPhone?: string | null;
   visitorEmail?: string | null;
   visitorCpf?: string | null;
+  quickReplies?: string[];
 }
 
 export interface InitiateWidgetContactOutput {
@@ -37,11 +39,14 @@ export class InitiateWidgetContactUseCase {
       input.visitorPhone?.trim() || `widget_${input.visitorId}`;
     const name = input.visitorName?.trim() || 'Visitante Web';
 
-    const { contactId } = await this.contactFacade.identifyContact(
-      input.tenantId,
-      phone,
+    const { contactId } = await this.contactFacade.ensureContact({
+      tenantId: input.tenantId,
       name,
-    );
+      phone,
+      email: input.visitorEmail ?? undefined,
+      document: input.visitorCpf ?? undefined,
+      stage: 'LEAD',
+    });
 
     return this.transactionalEventPublisher.execute<InitiateWidgetContactOutput>(
       async (tx) => {
@@ -83,6 +88,41 @@ export class InitiateWidgetContactUseCase {
                 channel: 'WEB_CHAT',
               },
               `messaging:conv-created:${conversation.id}`,
+            ),
+          );
+
+          // Synthetic init message triggers proactive AI welcome
+          const initText =
+            '[WIDGET_INIT] Visitante iniciou conversa pelo site. Apresente-se e ofereça as opções disponíveis.';
+          const initMessage = await (
+            tx as Prisma.TransactionClient
+          ).message.create({
+            data: {
+              conversationId: conversation.id,
+              direction: 'INBOUND',
+              contentType: 'TEXT',
+              content: { text: initText },
+              sentBy: 'SYSTEM',
+              deliveryStatus: 'DELIVERED',
+            },
+          });
+
+          events.push(
+            new MessageReceivedIntegrationEvent(
+              {
+                conversationId: conversation.id,
+                tenantId: input.tenantId,
+                contactId,
+                branchId: null,
+                messageId: initMessage.id,
+                content: { type: 'TEXT', text: initText },
+                channel: 'WEB_CHAT',
+                moduleId: 'widget',
+                ...(input.quickReplies?.length
+                  ? { contextHints: input.quickReplies }
+                  : {}),
+              },
+              `messaging:widget-init:${initMessage.id}`,
             ),
           );
         }
