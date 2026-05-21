@@ -38,6 +38,8 @@ class UpdateWidgetConfigDTO {
   @IsOptional() @IsIn(['bottom-right', 'bottom-left']) position?: string;
   @IsOptional() @IsBoolean() collectName?: boolean;
   @IsOptional() @IsBoolean() collectPhone?: boolean;
+  @IsOptional() @IsBoolean() collectEmail?: boolean;
+  @IsOptional() @IsBoolean() collectCpf?: boolean;
   @IsOptional() @IsNumber() @Min(0) @Type(() => Number) proactiveDelay?:
     | number
     | null;

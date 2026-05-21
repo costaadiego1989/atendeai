@@ -14,6 +14,7 @@ interface InitSessionDTO {
   visitorName?: string;
   visitorPhone?: string;
   visitorEmail?: string;
+  visitorCpf?: string;
   pageUrl?: string;
 }
 
@@ -56,6 +57,8 @@ export class WidgetController {
       avatarUrl: config.avatarUrl,
       collectName: config.collectName,
       collectPhone: config.collectPhone,
+      collectEmail: config.collectEmail,
+      collectCpf: config.collectCpf,
       proactiveDelay: config.proactiveDelay,
       proactiveMsg: config.proactiveMsg,
     };
@@ -101,6 +104,7 @@ export class WidgetController {
           visitorName: dto.visitorName || existing.visitorName,
           visitorPhone: dto.visitorPhone || existing.visitorPhone,
           visitorEmail: dto.visitorEmail || existing.visitorEmail,
+          visitorCpf: dto.visitorCpf || existing.visitorCpf,
           pageUrl: dto.pageUrl || existing.pageUrl,
         },
       });
@@ -121,6 +125,7 @@ export class WidgetController {
         visitorName: dto.visitorName,
         visitorPhone: dto.visitorPhone,
         visitorEmail: dto.visitorEmail,
+        visitorCpf: dto.visitorCpf,
         pageUrl: dto.pageUrl,
       },
     });
@@ -188,6 +193,7 @@ export class WidgetController {
             name: session.visitorName || 'Visitante Web',
             phone,
             email: session.visitorEmail,
+            document: session.visitorCpf ?? null,
             stage: 'LEAD',
           },
         });

@@ -135,6 +135,17 @@ describe('WidgetConfigController (e2e)', () => {
       expect(res.body.position).toBe('bottom-left');
     });
 
+    it('should save collectEmail and collectCpf fields', async () => {
+      const res = await request(app.getHttpServer())
+        .put(`/api/v1/tenants/${tenantId}/widget-config`)
+        .set('Cookie', [authCookie])
+        .send({ collectEmail: false, collectCpf: true })
+        .expect(200);
+
+      expect(res.body.collectEmail).toBe(false);
+      expect(res.body.collectCpf).toBe(true);
+    });
+
     it('should return 403 when updating another tenant config', async () => {
       await request(app.getHttpServer())
         .put(`/api/v1/tenants/${tenantId}/widget-config`)
