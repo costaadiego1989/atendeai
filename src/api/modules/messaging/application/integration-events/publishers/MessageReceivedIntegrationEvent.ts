@@ -26,6 +26,7 @@ export class MessageReceivedIntegrationEvent extends IntegrationEvent {
       };
       channel: 'WHATSAPP' | 'INSTAGRAM' | 'WEB_CHAT';
       contextHints?: string[];
+      moduleId?: string;
     },
     eventId?: string,
   ) {
