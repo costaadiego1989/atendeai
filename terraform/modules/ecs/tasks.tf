@@ -11,10 +11,11 @@ resource "aws_ecs_task_definition" "api" {
 
   container_definitions = jsonencode([
     {
-      name      = "api"
-      image     = local.api_image
-      essential = true
-      command   = ["node", "dist/main"]
+      name         = "api"
+      image        = local.api_image
+      essential    = true
+      command      = ["node", "dist/main"]
+      stopTimeout  = 120
       portMappings = [
         {
           containerPort = var.api_container_port
