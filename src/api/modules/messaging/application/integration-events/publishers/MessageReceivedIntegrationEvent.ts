@@ -24,7 +24,7 @@ export class MessageReceivedIntegrationEvent extends IntegrationEvent {
         mimeType?: string;
         fileName?: string;
       };
-      channel: 'WHATSAPP' | 'INSTAGRAM';
+      channel: 'WHATSAPP' | 'INSTAGRAM' | 'WEB_CHAT';
     },
     eventId?: string,
   ) {

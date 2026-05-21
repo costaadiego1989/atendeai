@@ -8,6 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import { ProcessWidgetMessageUseCase } from '../../application/use-cases/ProcessWidgetMessageUseCase';
 
 interface InitSessionDTO {
   visitorId: string;
@@ -32,7 +33,10 @@ interface SendWidgetMessageDTO {
  */
 @Controller('widget')
 export class WidgetController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly processWidgetMessage: ProcessWidgetMessageUseCase,
+  ) {}
 
   /**
    * GET /api/v1/widget/:publicToken/config
@@ -173,90 +177,26 @@ export class WidgetController {
       throw new NotFoundException('Session not found');
     }
 
-    // Ensure we have a contact and conversation for this visitor
-    let contactId = session.contactId;
-    let conversationId = session.conversationId;
-
-    if (!contactId) {
-      // Create or find contact
-      const phone = session.visitorPhone || `widget_${session.visitorId}`;
-      const existingContact = await this.prisma.contact.findFirst({
-        where: { tenantId: config.tenantId, phone },
+    const { contactId, conversationId, messageId } =
+      await this.processWidgetMessage.execute({
+        tenantId: config.tenantId,
+        widgetSessionId: session.id,
+        visitorId: session.visitorId,
+        visitorName: session.visitorName,
+        visitorPhone: session.visitorPhone,
+        visitorEmail: session.visitorEmail,
+        visitorCpf: session.visitorCpf,
+        text: dto.text,
+        contentType: dto.type,
+        url: dto.url,
       });
 
-      if (existingContact) {
-        contactId = existingContact.id;
-      } else {
-        const contact = await this.prisma.contact.create({
-          data: {
-            tenantId: config.tenantId,
-            name: session.visitorName || 'Visitante Web',
-            phone,
-            email: session.visitorEmail,
-            document: session.visitorCpf ?? null,
-            stage: 'LEAD',
-          },
-        });
-        contactId = contact.id;
-      }
-    }
-
-    if (!conversationId) {
-      // Create conversation for this widget session
-      const conversation = await this.prisma.conversation.create({
-        data: {
-          tenantId: config.tenantId,
-          contactId,
-          channel: 'WEB_CHAT',
-          status: 'ACTIVE',
-          lastMessageAt: new Date(),
-          lastMessageDirection: 'INBOUND',
-          lastMessagePreview: dto.text.substring(0, 100),
-          lastInboundAt: new Date(),
-        },
-      });
-      conversationId = conversation.id;
-    }
-
-    // Update session with contact and conversation
     await this.prisma.widgetSession.update({
       where: { id: session.id },
-      data: {
-        contactId,
-        conversationId,
-        lastActiveAt: new Date(),
-      },
+      data: { contactId, conversationId, lastActiveAt: new Date() },
     });
 
-    // Create the message
-    const message = await this.prisma.message.create({
-      data: {
-        conversationId,
-        direction: 'INBOUND',
-        contentType: (dto.type || 'text').toUpperCase(),
-        content: { text: dto.text, url: dto.url },
-        sentBy: 'CONTACT',
-        deliveryStatus: 'DELIVERED',
-      },
-    });
-
-    // Update conversation
-    await this.prisma.conversation.update({
-      where: { id: conversationId },
-      data: {
-        lastMessageAt: new Date(),
-        lastMessageDirection: 'INBOUND',
-        lastMessagePreview: dto.text.substring(0, 100),
-        lastInboundAt: new Date(),
-        unreadCount: { increment: 1 },
-      },
-    });
-
-    return {
-      messageId: message.id,
-      conversationId,
-      contactId,
-    };
+    return { messageId, conversationId, contactId };
   }
 
   /**

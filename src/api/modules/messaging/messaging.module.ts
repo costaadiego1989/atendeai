@@ -87,6 +87,7 @@ import { WidgetScriptController } from './presentation/controllers/WidgetScriptC
 import { GetWidgetConfigUseCase } from './application/use-cases/GetWidgetConfigUseCase';
 import { UpdateWidgetConfigUseCase } from './application/use-cases/UpdateWidgetConfigUseCase';
 import { UploadWidgetAvatarUseCase } from './application/use-cases/UploadWidgetAvatarUseCase';
+import { ProcessWidgetMessageUseCase } from './application/use-cases/ProcessWidgetMessageUseCase';
 
 @Module({
   imports: [
@@ -212,6 +213,7 @@ import { UploadWidgetAvatarUseCase } from './application/use-cases/UploadWidgetA
     GetWidgetConfigUseCase,
     UpdateWidgetConfigUseCase,
     UploadWidgetAvatarUseCase,
+    ProcessWidgetMessageUseCase,
     TrialWelcomeNotificationHandler,
     BillingQuotaMessagingHandlers,
     {
