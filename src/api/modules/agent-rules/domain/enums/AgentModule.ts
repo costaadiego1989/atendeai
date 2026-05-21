@@ -9,4 +9,5 @@ export enum AgentModule {
   ALERTS = 'alerts',
   TEAM = 'team',
   BILLING = 'billing',
+  WIDGET = 'widget',
 }

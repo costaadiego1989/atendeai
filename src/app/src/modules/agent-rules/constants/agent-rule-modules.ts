@@ -16,6 +16,7 @@ export const AGENT_RULE_MODULE_IDS = [
   'alerts',
   'team',
   'billing',
+  'widget',
 ] as const;
 
 export type AgentRuleModuleId = (typeof AGENT_RULE_MODULE_IDS)[number];
@@ -203,6 +204,25 @@ export const AGENT_MODULES_CONFIG: Record<AgentRuleModuleId, AgentRuleModuleConf
         title: 'Upgrade consultivo',
         prompt:
           'Explique ganhos claros em capacidade antes de sugerir upgrade e mencione que add-ons podem incidir à parte.',
+      },
+    ],
+  },
+  widget: {
+    moduleId: 'widget',
+    moduleLabel: 'Widget de Chat',
+    moduleDescription: 'Define como a IA responde no widget de chat instalado no site do negócio.',
+    placeholder:
+      'Ex.: Seja direto e acolhedor. Colete o contato do visitante antes de aprofundar o atendimento.',
+    trainingExamples: [
+      {
+        title: 'Primeira impressão',
+        prompt:
+          'Cumprimente o visitante pelo nome se disponível, explique brevemente o que pode ajudar e pergunte em qual assunto posso ajudar.',
+      },
+      {
+        title: 'Qualificação de lead',
+        prompt:
+          'Colete nome, telefone e necessidade principal antes de aprofundar. Se não conseguir, direcione para o WhatsApp ou formulário de contato.',
       },
     ],
   },
