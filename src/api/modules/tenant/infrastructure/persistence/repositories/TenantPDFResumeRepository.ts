@@ -187,4 +187,26 @@ export class TenantPDFResumeRepository {
     if (!rows[0]) return null;
     return this.map(rows[0]);
   }
+
+  async findByChecksum(
+    tenantId: string,
+    checksum: string,
+  ): Promise<TenantPDFResumeRecord | null> {
+    const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
+      SELECT *
+      FROM tenant_schema.tenant_pdf_resumes
+      WHERE tenant_id = ${tenantId}::uuid
+        AND checksum = ${checksum}
+      LIMIT 1
+    `);
+    if (!rows[0]) return null;
+    return this.map(rows[0]);
+  }
+
+  async deleteById(documentId: string): Promise<void> {
+    await this.prisma.$executeRaw(Prisma.sql`
+      DELETE FROM tenant_schema.tenant_pdf_resumes
+      WHERE id = ${documentId}::uuid
+    `);
+  }
 }

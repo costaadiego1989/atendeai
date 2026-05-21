@@ -82,6 +82,9 @@ import { TenantTwilioProvisioningHandler } from './application/handlers/TenantTw
 import { TenantPDFResumeRepository } from './infrastructure/persistence/repositories/TenantPDFResumeRepository';
 import { UpsertTenantPDFResumeUseCase } from './application/use-cases/UpsertTenantPDFResumeUseCase';
 import { ListTenantPDFResumesUseCase } from './application/use-cases/ListTenantPDFResumesUseCase';
+import { UploadDocumentUseCase } from './application/use-cases/UploadDocumentUseCase';
+import { DeleteDocumentUseCase } from './application/use-cases/DeleteDocumentUseCase';
+import { DocumentsController } from './presentation/controllers/DocumentsController';
 import { DOCUMENT_CHUNK_REPOSITORY } from '@modules/ai/application/ports/IDocumentChunkRepository';
 import { PrismaDocumentChunkRepository } from '@modules/ai/infrastructure/persistence/PrismaDocumentChunkRepository';
 
@@ -169,6 +172,8 @@ const TENANT_USE_CASE_PROVIDERS = [
   UpdateTenantPlanStatusUseCase,
   UpsertTenantPDFResumeUseCase,
   ListTenantPDFResumesUseCase,
+  UploadDocumentUseCase,
+  DeleteDocumentUseCase,
 ];
 
 const TENANT_INTEGRATION_PROVIDERS = [
@@ -230,6 +235,7 @@ const TENANT_BILLING_PROVIDERS = [
     UserController,
     InstagramMetaConnectionController,
     MetaDataDeletionController,
+    DocumentsController,
   ],
   providers: [
     ...TENANT_REPOSITORY_PROVIDERS,
