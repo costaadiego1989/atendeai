@@ -82,6 +82,10 @@ import { CommerceModule } from '@modules/commerce/commerce.module';
 import { OutboundMessageRetryService } from './application/services/OutboundMessageRetryService';
 import { WebChatWidgetAdapter } from './infrastructure/acl/WebChatWidgetAdapter';
 import { WidgetController } from './presentation/controllers/WidgetController';
+import { WidgetConfigController } from './presentation/controllers/WidgetConfigController';
+import { GetWidgetConfigUseCase } from './application/use-cases/GetWidgetConfigUseCase';
+import { UpdateWidgetConfigUseCase } from './application/use-cases/UpdateWidgetConfigUseCase';
+import { UploadWidgetAvatarUseCase } from './application/use-cases/UploadWidgetAvatarUseCase';
 
 @Module({
   imports: [
@@ -93,7 +97,12 @@ import { WidgetController } from './presentation/controllers/WidgetController';
     BillingModule,
     CommerceModule,
   ],
-  controllers: [WebhookController, MessagingController, WidgetController],
+  controllers: [
+    WebhookController,
+    MessagingController,
+    WidgetController,
+    WidgetConfigController,
+  ],
   providers: [
     BubbleWhatsAdapter,
     Dialog360Adapter,
@@ -198,6 +207,9 @@ import { WidgetController } from './presentation/controllers/WidgetController';
     PrismaMessagingWebhookReceiptStore,
     WebSocketMessagingRealtimePublisher,
     MessagingFacade,
+    GetWidgetConfigUseCase,
+    UpdateWidgetConfigUseCase,
+    UploadWidgetAvatarUseCase,
     TrialWelcomeNotificationHandler,
     BillingQuotaMessagingHandlers,
     {
