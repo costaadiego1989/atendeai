@@ -11,7 +11,7 @@ const WIDGET_SCRIPT = `(function(){
   if(!visitorId){visitorId='v_'+Math.random().toString(36).substr(2,9)+Date.now().toString(36);localStorage.setItem('_atai_vid',visitorId);}
   var sessionId=localStorage.getItem('_atai_sid_'+token)||null;
 
-  var isOpen=false,pollIv=null,outboundCnt=0,typingRow=null;
+  var isOpen=false,pollIv=null,outboundCnt=0,typingRow=null,typingTimer=null;
   var state='idle'; // idle|collecting|connecting|chatting
   var collectSteps=[],collectIdx=0,collectData={};
   var sessionProm=null,wCfg=null;
@@ -26,7 +26,7 @@ const WIDGET_SCRIPT = `(function(){
     var side=cfg.position==='bottom-left'?'left':'right';
     var opp=side==='left'?'right':'left';
     var css=[
-      '#_atai-btn,#_atai-panel,#_atai-btn *,#_atai-panel *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:0;padding:0;}',
+      '#_atai-btn,#_atai-panel,#_atai-btn *,#_atai-panel *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}',
       '#_atai-btn{position:fixed;bottom:20px;'+side+':20px;'+opp+':auto;z-index:2147483647;width:56px;height:56px;border-radius:50%;background:'+c+';border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s;}',
       '#_atai-btn:hover{transform:scale(1.08);box-shadow:0 6px 22px rgba(0,0,0,.3);}',
       '#_atai-btn svg{width:26px;height:26px;fill:#fff;}',
@@ -100,9 +100,14 @@ const WIDGET_SCRIPT = `(function(){
     var b=document.createElement('div');b.className='_bub _typing-bub';
     b.innerHTML='<i></i><i></i><i></i>';
     row.appendChild(b);m.appendChild(row);m.scrollTop=m.scrollHeight;typingRow=row;
+    typingTimer=setTimeout(function(){
+      hideTyping();
+      addRow('in','Não recebi resposta no momento. Tente novamente em instantes.');
+    },25000);
   }
 
   function hideTyping(){
+    clearTimeout(typingTimer);typingTimer=null;
     if(typingRow&&typingRow.parentNode)typingRow.parentNode.removeChild(typingRow);
     typingRow=null;var old=$id('_atai-tr');
     if(old&&old.parentNode)old.parentNode.removeChild(old);
