@@ -36,9 +36,9 @@ class UpdateWidgetConfigDTO {
   @IsOptional() @IsHexColor() color?: string | null;
   @IsOptional() @IsString() @MaxLength(20) backgroundColor?: string | null;
   @IsOptional() @IsIn(['bottom-right', 'bottom-left']) position?: string;
-  @IsOptional() @IsBoolean() collectName?: boolean;
-  @IsOptional() @IsBoolean() collectPhone?: boolean;
-  @IsOptional() @IsBoolean() collectEmail?: boolean;
+  @IsBoolean() collectName: boolean;
+  @IsBoolean() collectPhone: boolean;
+  @IsBoolean() collectEmail: boolean;
   @IsOptional() @IsBoolean() collectCpf?: boolean;
   @IsOptional() @IsNumber() @Min(0) @Type(() => Number) proactiveDelay?:
     | number

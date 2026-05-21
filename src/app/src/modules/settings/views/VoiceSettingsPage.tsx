@@ -11,9 +11,11 @@ import { VoiceRecoveryIntegration } from '../components/VoiceRecoveryIntegration
 import { VoiceCallsHistory } from '../components/VoiceCallsHistory';
 import { VoiceMetricsCards } from '../components/VoiceMetricsCards';
 import type { VoiceConfig, VoiceScript, VoiceRecoveryConfig } from '../services/voice-service';
+import { useAuthStore } from '@/shared/stores/auth-store';
 
 export function VoiceSettingsPage() {
   const vm = useVoiceSettingsViewModel();
+  const tenant = useAuthStore((s) => s.tenant);
 
   // Local state for form editing
   const [localConfig, setLocalConfig] = useState<VoiceConfig | null>(null);
@@ -41,6 +43,12 @@ export function VoiceSettingsPage() {
   const handleRecoveryChange = (recovery: VoiceRecoveryConfig) => {
     if (!localConfig) return;
     setLocalConfig({ ...localConfig, recovery });
+    setIsDirty(true);
+  };
+
+  const handleActiveScriptChange = (name: string | null) => {
+    if (!localConfig) return;
+    setLocalConfig({ ...localConfig, activeScriptName: name });
     setIsDirty(true);
   };
 
@@ -100,6 +108,9 @@ export function VoiceSettingsPage() {
             <VoiceScriptsEditor
               scripts={localConfig.scripts}
               onChange={handleScriptsChange}
+              activeScriptName={localConfig.activeScriptName}
+              onActiveScriptChange={handleActiveScriptChange}
+              tenantId={tenant?.id ?? ''}
             />
           )}
         </TabsContent>

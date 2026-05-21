@@ -9,9 +9,9 @@ export interface UpdateWidgetConfigInput {
   backgroundColor?: string | null;
   position?: string;
   avatarUrl?: string | null;
-  collectName?: boolean;
-  collectPhone?: boolean;
-  collectEmail?: boolean;
+  collectName: boolean;
+  collectPhone: boolean;
+  collectEmail: boolean;
   collectCpf?: boolean;
   proactiveDelay?: number | null;
   proactiveMsg?: string | null;

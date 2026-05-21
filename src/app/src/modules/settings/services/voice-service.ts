@@ -42,6 +42,7 @@ export interface VoiceConfig {
   recovery: VoiceRecoveryConfig;
   scripts: VoiceScript[];
   twilioPhoneNumber?: string | null;
+  activeScriptName?: string | null;
 }
 
 export interface VoiceCall {
@@ -100,5 +101,15 @@ export const voiceService = {
 
   async initiateCall(tenantId: string, input: InitiateCallInput): Promise<{ callId: string; status: string }> {
     return apiClient.post<{ callId: string; status: string }>(`/tenants/${tenantId}/voice/calls`, input);
+  },
+
+  async suggestScript(
+    tenantId: string,
+    input: { name: string; type: string },
+  ): Promise<{ template: string }> {
+    return apiClient.post<{ template: string }>(
+      `/tenants/${tenantId}/voice/suggest-script`,
+      input,
+    );
   },
 };

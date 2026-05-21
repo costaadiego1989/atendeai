@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Post,
   Param,
   Body,
   Query,
@@ -25,6 +26,12 @@ import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
 import { GetVoiceConfigUseCase } from '../../application/use-cases/GetVoiceConfigUseCase';
 import { UpdateVoiceConfigUseCase } from '../../application/use-cases/UpdateVoiceConfigUseCase';
 import { ListVoiceCallsUseCase } from '../../application/use-cases/ListVoiceCallsUseCase';
+import { SuggestVoiceScriptUseCase } from '../../application/use-cases/SuggestVoiceScriptUseCase';
+
+class SuggestScriptDTO {
+  @IsString() name: string;
+  @IsString() type: string;
+}
 
 class UpdateVoiceConfigDTO {
   @IsOptional() @IsBoolean() enabled?: boolean;
@@ -33,6 +40,7 @@ class UpdateVoiceConfigDTO {
   @IsOptional() @IsObject() recovery?: Record<string, unknown>;
   @IsOptional() @IsArray() scripts?: unknown[];
   @IsOptional() twilioPhoneNumber?: string | null;
+  @IsOptional() @IsString() activeScriptName?: string | null;
 }
 
 class ListCallsQueryDTO {
@@ -54,6 +62,7 @@ export class VoiceConfigController {
     private readonly getConfig: GetVoiceConfigUseCase,
     private readonly updateConfig: UpdateVoiceConfigUseCase,
     private readonly listCalls: ListVoiceCallsUseCase,
+    private readonly suggestVoiceScript: SuggestVoiceScriptUseCase,
   ) {}
 
   @Get('config')
@@ -92,5 +101,13 @@ export class VoiceConfigController {
       avgDuration: 0,
       callsByResult: {},
     };
+  }
+
+  @Post('suggest-script')
+  async suggestScript(
+    @Param('tenantId') tenantId: string,
+    @Body() dto: SuggestScriptDTO,
+  ) {
+    return this.suggestVoiceScript.execute(tenantId, dto);
   }
 }

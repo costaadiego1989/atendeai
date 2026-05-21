@@ -11,12 +11,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, FileText } from 'lucide-react';
+import { Plus, Trash2, FileText, Sparkles } from 'lucide-react';
 import type { VoiceScript } from '../services/voice-service';
+import { voiceService } from '../services/voice-service';
+import { toast } from '@/components/ui/use-toast';
 
 interface VoiceScriptsEditorProps {
   scripts: VoiceScript[];
   onChange: (scripts: VoiceScript[]) => void;
+  activeScriptName?: string | null;
+  onActiveScriptChange: (name: string | null) => void;
+  tenantId: string;
 }
 
 const SCRIPT_TYPES = [
@@ -26,10 +31,17 @@ const SCRIPT_TYPES = [
   { value: 'custom', label: 'Personalizado' },
 ];
 
-export function VoiceScriptsEditor({ scripts, onChange }: VoiceScriptsEditorProps) {
+export function VoiceScriptsEditor({
+  scripts,
+  onChange,
+  activeScriptName,
+  onActiveScriptChange,
+  tenantId,
+}: VoiceScriptsEditorProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(
     scripts.length > 0 ? 0 : null,
   );
+  const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
 
   const addScript = () => {
     const newScript: VoiceScript = {
@@ -51,6 +63,24 @@ export function VoiceScriptsEditor({ scripts, onChange }: VoiceScriptsEditorProp
     onChange(scripts.map((s, i) => (i === index ? { ...s, ...partial } : s)));
   };
 
+  const handleSuggestScript = async (index: number) => {
+    const script = scripts[index];
+    if (!script || !tenantId) return;
+    setGeneratingIndex(index);
+    try {
+      const result = await voiceService.suggestScript(tenantId, {
+        name: script.name,
+        type: script.type,
+      });
+      updateScript(index, { template: result.template });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao gerar sugestão.';
+      toast({ title: 'Erro', description: message, variant: 'destructive' });
+    } finally {
+      setGeneratingIndex(null);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -65,6 +95,31 @@ export function VoiceScriptsEditor({ scripts, onChange }: VoiceScriptsEditorProp
           Novo script
         </Button>
       </div>
+
+      {scripts.length > 0 && (
+        <div className="rounded-lg border border-border/60 bg-muted/10 p-3 space-y-2">
+          <p className="text-xs font-medium text-foreground">Script ativo</p>
+          <p className="text-[10px] text-muted-foreground">
+            Script que o agente usará por padrão nas ligações.
+          </p>
+          <Select
+            value={activeScriptName ?? '__none__'}
+            onValueChange={(v) => onActiveScriptChange(v === '__none__' ? null : v)}
+          >
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Selecionar script ativo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">Nenhum (manual)</SelectItem>
+              {scripts.map((s) => (
+                <SelectItem key={s.name} value={s.name}>
+                  {s.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {scripts.length === 0 && (
         <div className="flex flex-col items-center py-8 text-center">
@@ -90,17 +145,29 @@ export function VoiceScriptsEditor({ scripts, onChange }: VoiceScriptsEditorProp
                   ({SCRIPT_TYPES.find((t) => t.value === script.type)?.label})
                 </span>
               </CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-destructive hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeScript(index);
-                }}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-[10px] gap-1 text-muted-foreground hover:text-primary"
+                  onClick={(e) => { e.stopPropagation(); void handleSuggestScript(index); }}
+                  disabled={generatingIndex === index}
+                >
+                  <Sparkles className="h-3 w-3" />
+                  {generatingIndex === index ? 'Gerando...' : 'Gerar com IA'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive hover:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeScript(index);
+                  }}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
 

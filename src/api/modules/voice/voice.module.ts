@@ -14,6 +14,7 @@ import { VoiceConfigController } from './presentation/controllers/VoiceConfigCon
 import { GetVoiceConfigUseCase } from './application/use-cases/GetVoiceConfigUseCase';
 import { UpdateVoiceConfigUseCase } from './application/use-cases/UpdateVoiceConfigUseCase';
 import { ListVoiceCallsUseCase } from './application/use-cases/ListVoiceCallsUseCase';
+import { SuggestVoiceScriptUseCase } from './application/use-cases/SuggestVoiceScriptUseCase';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { AuthModule } from '../auth/auth.module';
     GetVoiceConfigUseCase,
     UpdateVoiceConfigUseCase,
     ListVoiceCallsUseCase,
+    SuggestVoiceScriptUseCase,
   ],
   exports: [
     MakeOutboundCallUseCase,

@@ -21,7 +21,8 @@ export class GetVoiceConfigUseCase {
   toVoiceConfig(c: VoiceAgentConfig) {
     const persona = (c.persona as Record<string, unknown>) ?? {};
     const scripts = (c.scripts as unknown[]) ?? [];
-    const recoveryConfig = (c.recoveryConfig as Record<string, unknown>) ?? null;
+    const recoveryConfig =
+      (c.recoveryConfig as Record<string, unknown>) ?? null;
 
     return {
       enabled: c.enabled,
@@ -47,6 +48,7 @@ export class GetVoiceConfigUseCase {
           },
       scripts,
       twilioPhoneNumber: c.twilioPhoneNumber ?? null,
+      activeScriptName: c.activeScriptName ?? null,
     };
   }
 }

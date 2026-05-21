@@ -1689,6 +1689,7 @@ model VoiceAgentConfig {
   persona             Json     @default("{}")
   scripts             Json     @default("[]")
   recoveryConfig      Json?    @map("recovery_config")
+  activeScriptName    String?  @map("active_script_name") @db.VarChar(255)
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 

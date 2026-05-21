@@ -26,10 +26,14 @@ export function useKnowledgeBaseViewModel() {
       toast({ title: 'Documento enviado', description: 'O documento está sendo processado.' });
       void invalidate();
     },
-    onError: () => {
+    onError: (error: unknown) => {
+      const description =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Não foi possível enviar o documento.';
       toast({
         title: 'Erro no upload',
-        description: 'Não foi possível enviar o documento.',
+        description,
         variant: 'destructive',
       });
     },
