@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { ProcessWidgetMessageUseCase } from '../../application/use-cases/ProcessWidgetMessageUseCase';
+import { InitiateWidgetContactUseCase } from '../../application/use-cases/InitiateWidgetContactUseCase';
 
 interface InitSessionDTO {
   visitorId: string;
@@ -36,6 +37,7 @@ export class WidgetController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly processWidgetMessage: ProcessWidgetMessageUseCase,
+    private readonly initiateWidgetContact: InitiateWidgetContactUseCase,
   ) {}
 
   /**
@@ -100,27 +102,37 @@ export class WidgetController {
     });
 
     if (existing) {
-      // Update last active
+      const visitorName = dto.visitorName || existing.visitorName;
+      const visitorPhone = dto.visitorPhone || existing.visitorPhone;
+
+      const { contactId, conversationId } =
+        await this.initiateWidgetContact.execute({
+          tenantId: config.tenantId,
+          visitorId: dto.visitorId,
+          visitorName,
+          visitorPhone,
+          visitorEmail: dto.visitorEmail || existing.visitorEmail,
+          visitorCpf: dto.visitorCpf || existing.visitorCpf,
+        });
+
       await this.prisma.widgetSession.update({
         where: { id: existing.id },
         data: {
           lastActiveAt: new Date(),
-          visitorName: dto.visitorName || existing.visitorName,
-          visitorPhone: dto.visitorPhone || existing.visitorPhone,
+          visitorName,
+          visitorPhone,
           visitorEmail: dto.visitorEmail || existing.visitorEmail,
           visitorCpf: dto.visitorCpf || existing.visitorCpf,
           pageUrl: dto.pageUrl || existing.pageUrl,
+          contactId,
+          conversationId,
         },
       });
 
-      return {
-        sessionId: existing.id,
-        conversationId: existing.conversationId,
-        resumed: true,
-      };
+      return { sessionId: existing.id, conversationId, resumed: true };
     }
 
-    // Create new session
+    // Create new session then immediately register contact + start conversation
     const session = await this.prisma.widgetSession.create({
       data: {
         widgetConfigId: config.id,
@@ -134,11 +146,22 @@ export class WidgetController {
       },
     });
 
-    return {
-      sessionId: session.id,
-      conversationId: null,
-      resumed: false,
-    };
+    const { contactId, conversationId } =
+      await this.initiateWidgetContact.execute({
+        tenantId: config.tenantId,
+        visitorId: dto.visitorId,
+        visitorName: dto.visitorName,
+        visitorPhone: dto.visitorPhone,
+        visitorEmail: dto.visitorEmail,
+        visitorCpf: dto.visitorCpf,
+      });
+
+    await this.prisma.widgetSession.update({
+      where: { id: session.id },
+      data: { contactId, conversationId },
+    });
+
+    return { sessionId: session.id, conversationId, resumed: false };
   }
 
   /**

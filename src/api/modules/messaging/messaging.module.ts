@@ -88,6 +88,7 @@ import { GetWidgetConfigUseCase } from './application/use-cases/GetWidgetConfigU
 import { UpdateWidgetConfigUseCase } from './application/use-cases/UpdateWidgetConfigUseCase';
 import { UploadWidgetAvatarUseCase } from './application/use-cases/UploadWidgetAvatarUseCase';
 import { ProcessWidgetMessageUseCase } from './application/use-cases/ProcessWidgetMessageUseCase';
+import { InitiateWidgetContactUseCase } from './application/use-cases/InitiateWidgetContactUseCase';
 
 @Module({
   imports: [
@@ -214,6 +215,7 @@ import { ProcessWidgetMessageUseCase } from './application/use-cases/ProcessWidg
     UpdateWidgetConfigUseCase,
     UploadWidgetAvatarUseCase,
     ProcessWidgetMessageUseCase,
+    InitiateWidgetContactUseCase,
     TrialWelcomeNotificationHandler,
     BillingQuotaMessagingHandlers,
     {
