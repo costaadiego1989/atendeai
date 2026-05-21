@@ -83,6 +83,7 @@ import { OutboundMessageRetryService } from './application/services/OutboundMess
 import { WebChatWidgetAdapter } from './infrastructure/acl/WebChatWidgetAdapter';
 import { WidgetController } from './presentation/controllers/WidgetController';
 import { WidgetConfigController } from './presentation/controllers/WidgetConfigController';
+import { WidgetScriptController } from './presentation/controllers/WidgetScriptController';
 import { GetWidgetConfigUseCase } from './application/use-cases/GetWidgetConfigUseCase';
 import { UpdateWidgetConfigUseCase } from './application/use-cases/UpdateWidgetConfigUseCase';
 import { UploadWidgetAvatarUseCase } from './application/use-cases/UploadWidgetAvatarUseCase';
@@ -102,6 +103,7 @@ import { UploadWidgetAvatarUseCase } from './application/use-cases/UploadWidgetA
     MessagingController,
     WidgetController,
     WidgetConfigController,
+    WidgetScriptController,
   ],
   providers: [
     BubbleWhatsAdapter,
