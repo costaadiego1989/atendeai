@@ -88,7 +88,8 @@ export class VoiceNegotiationService {
       };
     }
 
-    const installmentValue = (amountDue * (1 - requestedDiscount / 100)) / requestedInstallments;
+    const installmentValue =
+      (amountDue * (1 - requestedDiscount / 100)) / requestedInstallments;
     if (installmentValue < rules.minInstallmentValue) {
       return {
         acceptable: false,
@@ -99,7 +100,10 @@ export class VoiceNegotiationService {
     return { acceptable: true };
   }
 
-  private calculateOffers(amountDue: number, rules: NegotiationRules): NegotiationOffer[] {
+  private calculateOffers(
+    amountDue: number,
+    rules: NegotiationRules,
+  ): NegotiationOffer[] {
     const offers: NegotiationOffer[] = [];
 
     // Option 1: Full payment with max discount
@@ -140,7 +144,10 @@ export class VoiceNegotiationService {
     return offers;
   }
 
-  private buildGreeting(config: VoiceAgentConfig, context: NegotiationContext): string {
+  private buildGreeting(
+    config: VoiceAgentConfig,
+    context: NegotiationContext,
+  ): string {
     if (config.greeting) {
       return config.greeting
         .replace('{nome}', context.debtorName)

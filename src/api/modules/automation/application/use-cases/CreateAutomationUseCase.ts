@@ -25,7 +25,9 @@ export class CreateAutomationUseCase {
   ) {}
 
   async execute(input: CreateAutomationInput): Promise<AutomationEntity> {
-    this.logger.log(`Creating automation "${input.name}" for tenant ${input.tenantId}`);
+    this.logger.log(
+      `Creating automation "${input.name}" for tenant ${input.tenantId}`,
+    );
 
     const automation = await this.repository.create({
       tenantId: input.tenantId,

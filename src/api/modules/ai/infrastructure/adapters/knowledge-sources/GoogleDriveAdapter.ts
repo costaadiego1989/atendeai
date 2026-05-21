@@ -62,7 +62,9 @@ export class GoogleDriveAdapter implements IKnowledgeSourceAdapter {
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );
       if (!exportResponse.ok) {
-        throw new Error(`Failed to export spreadsheet: ${exportResponse.status}`);
+        throw new Error(
+          `Failed to export spreadsheet: ${exportResponse.status}`,
+        );
       }
       text = await exportResponse.text();
     } else {
@@ -93,7 +95,9 @@ export class GoogleDriveAdapter implements IKnowledgeSourceAdapter {
 
   private extractFileId(url: string): string | null {
     // Handles: /file/d/{id}/, /document/d/{id}/, /spreadsheets/d/{id}/
-    const match = url.match(/\/(?:file|document|spreadsheets)\/d\/([a-zA-Z0-9_-]+)/);
+    const match = url.match(
+      /\/(?:file|document|spreadsheets)\/d\/([a-zA-Z0-9_-]+)/,
+    );
     if (match) return match[1];
 
     // Handles: ?id={id}

@@ -54,18 +54,23 @@ export class KnowledgeBaseSyncWorker {
             sourceType: source.type as any,
             sourceUrl: source.sourceUrl || '',
             sourceName: source.name,
-            credentials: (source.credentials as Record<string, string>) || undefined,
+            credentials:
+              (source.credentials as Record<string, string>) || undefined,
           });
 
           if (result.success) {
             synced++;
           } else {
             errors++;
-            this.logger.warn(`Sync failed for source ${source.id}: ${result.error}`);
+            this.logger.warn(
+              `Sync failed for source ${source.id}: ${result.error}`,
+            );
           }
         } catch (error: any) {
           errors++;
-          this.logger.error(`Sync error for source ${source.id}: ${error.message}`);
+          this.logger.error(
+            `Sync error for source ${source.id}: ${error.message}`,
+          );
         }
 
         // Small delay between sources to avoid rate limits

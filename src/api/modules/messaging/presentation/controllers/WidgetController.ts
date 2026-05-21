@@ -142,7 +142,9 @@ export class WidgetController {
     @Body() dto: SendWidgetMessageDTO,
   ) {
     if (!dto.sessionId || !dto.visitorId || !dto.text) {
-      throw new BadRequestException('sessionId, visitorId, and text are required');
+      throw new BadRequestException(
+        'sessionId, visitorId, and text are required',
+      );
     }
 
     const config = await this.prisma.widgetConfig.findUnique({

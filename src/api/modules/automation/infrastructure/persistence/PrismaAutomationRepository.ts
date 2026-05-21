@@ -4,7 +4,10 @@ import {
   IAutomationRepository,
   IAutomationExecutionRepository,
 } from '../../application/ports/IAutomationRepository';
-import { AutomationEntity, AutomationExecution } from '../../domain/entities/Automation';
+import {
+  AutomationEntity,
+  AutomationExecution,
+} from '../../domain/entities/Automation';
 
 @Injectable()
 export class PrismaAutomationRepository implements IAutomationRepository {
@@ -12,7 +15,10 @@ export class PrismaAutomationRepository implements IAutomationRepository {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async findById(tenantId: string, id: string): Promise<AutomationEntity | null> {
+  async findById(
+    tenantId: string,
+    id: string,
+  ): Promise<AutomationEntity | null> {
     const record = await this.prisma.automation.findFirst({
       where: { id, tenantId },
       include: { steps: { orderBy: { order: 'asc' } } },
@@ -20,7 +26,10 @@ export class PrismaAutomationRepository implements IAutomationRepository {
     return record ? this.toEntity(record) : null;
   }
 
-  async findAllByTenant(tenantId: string, onlyActive?: boolean): Promise<AutomationEntity[]> {
+  async findAllByTenant(
+    tenantId: string,
+    onlyActive?: boolean,
+  ): Promise<AutomationEntity[]> {
     const where: any = { tenantId };
     if (onlyActive) where.isActive = true;
 
@@ -32,7 +41,10 @@ export class PrismaAutomationRepository implements IAutomationRepository {
     return records.map((r) => this.toEntity(r));
   }
 
-  async findByTriggerType(tenantId: string, triggerType: string): Promise<AutomationEntity[]> {
+  async findByTriggerType(
+    tenantId: string,
+    triggerType: string,
+  ): Promise<AutomationEntity[]> {
     const records = await this.prisma.automation.findMany({
       where: {
         tenantId,
@@ -50,7 +62,9 @@ export class PrismaAutomationRepository implements IAutomationRepository {
       .map((r) => this.toEntity(r));
   }
 
-  async create(data: Omit<AutomationEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<AutomationEntity> {
+  async create(
+    data: Omit<AutomationEntity, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<AutomationEntity> {
     const record = await this.prisma.automation.create({
       data: {
         tenantId: data.tenantId,
@@ -73,10 +87,16 @@ export class PrismaAutomationRepository implements IAutomationRepository {
     return this.toEntity(record);
   }
 
-  async update(tenantId: string, id: string, data: Partial<AutomationEntity>): Promise<AutomationEntity> {
+  async update(
+    tenantId: string,
+    id: string,
+    data: Partial<AutomationEntity>,
+  ): Promise<AutomationEntity> {
     // If steps are being updated, delete old ones and recreate
     if (data.steps) {
-      await this.prisma.automationStep.deleteMany({ where: { automationId: id } });
+      await this.prisma.automationStep.deleteMany({
+        where: { automationId: id },
+      });
       await this.prisma.automationStep.createMany({
         data: data.steps.map((s) => ({
           automationId: id,
@@ -92,10 +112,14 @@ export class PrismaAutomationRepository implements IAutomationRepository {
       where: { id },
       data: {
         ...(data.name !== undefined && { name: data.name }),
-        ...(data.description !== undefined && { description: data.description }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
         ...(data.isActive !== undefined && { isActive: data.isActive }),
         ...(data.trigger !== undefined && { trigger: data.trigger as any }),
-        ...(data.conditions !== undefined && { conditions: data.conditions as any }),
+        ...(data.conditions !== undefined && {
+          conditions: data.conditions as any,
+        }),
       },
       include: { steps: { orderBy: { order: 'asc' } } },
     });
@@ -106,7 +130,11 @@ export class PrismaAutomationRepository implements IAutomationRepository {
     await this.prisma.automation.delete({ where: { id } });
   }
 
-  async toggleActive(tenantId: string, id: string, isActive: boolean): Promise<void> {
+  async toggleActive(
+    tenantId: string,
+    id: string,
+    isActive: boolean,
+  ): Promise<void> {
     await this.prisma.automation.update({
       where: { id },
       data: { isActive },
@@ -140,7 +168,9 @@ export class PrismaAutomationRepository implements IAutomationRepository {
 export class PrismaAutomationExecutionRepository implements IAutomationExecutionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Omit<AutomationExecution, 'id' | 'startedAt'>): Promise<AutomationExecution> {
+  async create(
+    data: Omit<AutomationExecution, 'id' | 'startedAt'>,
+  ): Promise<AutomationExecution> {
     const record = await this.prisma.automationExecution.create({
       data: {
         automationId: data.automationId,
@@ -155,24 +185,36 @@ export class PrismaAutomationExecutionRepository implements IAutomationExecution
   }
 
   async findById(id: string): Promise<AutomationExecution | null> {
-    const record = await this.prisma.automationExecution.findUnique({ where: { id } });
+    const record = await this.prisma.automationExecution.findUnique({
+      where: { id },
+    });
     return record ? this.toExecution(record) : null;
   }
 
-  async updateStatus(id: string, status: string, error?: string): Promise<void> {
+  async updateStatus(
+    id: string,
+    status: string,
+    error?: string,
+  ): Promise<void> {
     await this.prisma.automationExecution.update({
       where: { id },
       data: {
         status,
         error,
-        ...(status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED'
+        ...(status === 'COMPLETED' ||
+        status === 'FAILED' ||
+        status === 'CANCELLED'
           ? { completedAt: new Date() }
           : {}),
       },
     });
   }
 
-  async updateStep(id: string, currentStep: number, context?: Record<string, unknown>): Promise<void> {
+  async updateStep(
+    id: string,
+    currentStep: number,
+    context?: Record<string, unknown>,
+  ): Promise<void> {
     await this.prisma.automationExecution.update({
       where: { id },
       data: {
@@ -182,7 +224,11 @@ export class PrismaAutomationExecutionRepository implements IAutomationExecution
     });
   }
 
-  async findByAutomation(tenantId: string, automationId: string, limit = 20): Promise<AutomationExecution[]> {
+  async findByAutomation(
+    tenantId: string,
+    automationId: string,
+    limit = 20,
+  ): Promise<AutomationExecution[]> {
     const records = await this.prisma.automationExecution.findMany({
       where: { tenantId, automationId },
       orderBy: { startedAt: 'desc' },

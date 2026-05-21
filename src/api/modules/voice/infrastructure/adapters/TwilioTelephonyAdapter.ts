@@ -18,7 +18,8 @@ export class TwilioTelephonyAdapter implements ITelephonyProvider {
   private readonly baseUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID') || '';
+    this.accountSid =
+      this.configService.get<string>('TWILIO_ACCOUNT_SID') || '';
     this.authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN') || '';
     this.baseUrl = `https://api.twilio.com/2010-04-01/Accounts/${this.accountSid}`;
   }

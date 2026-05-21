@@ -104,7 +104,10 @@ export class NotionAdapter implements IKnowledgeSourceAdapter {
 
         if (type.startsWith('heading')) {
           lines.push(`\n${text}\n`);
-        } else if (type === 'bulleted_list_item' || type === 'numbered_list_item') {
+        } else if (
+          type === 'bulleted_list_item' ||
+          type === 'numbered_list_item'
+        ) {
           lines.push(`• ${text}`);
         } else if (type === 'to_do') {
           const checked = content.checked ? '✓' : '○';
@@ -115,7 +118,9 @@ export class NotionAdapter implements IKnowledgeSourceAdapter {
       } else if (type === 'divider') {
         lines.push('---');
       } else if (type === 'code') {
-        const code = content.rich_text?.map((rt: any) => rt.plain_text || '').join('') || '';
+        const code =
+          content.rich_text?.map((rt: any) => rt.plain_text || '').join('') ||
+          '';
         lines.push(`\`\`\`\n${code}\n\`\`\``);
       }
     }

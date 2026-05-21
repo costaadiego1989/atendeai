@@ -25,7 +25,9 @@ export interface VoiceAgentConfig {
 
 export function isWithinCallWindow(config: VoiceAgentConfig): boolean {
   const now = new Date();
-  const day = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const day = now
+    .toLocaleDateString('en-US', { weekday: 'long' })
+    .toLowerCase();
 
   if (config.blockedDays.includes(day)) return false;
 
@@ -38,7 +40,9 @@ export function isWithinCallWindow(config: VoiceAgentConfig): boolean {
   return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
 }
 
-export function buildNegotiationRules(config: VoiceAgentConfig): NegotiationRules {
+export function buildNegotiationRules(
+  config: VoiceAgentConfig,
+): NegotiationRules {
   return {
     maxDiscountPercent: config.maxDiscountPercent,
     maxInstallments: config.maxInstallments,

@@ -35,7 +35,10 @@ export class MessagingGatewayRegistry implements IMessagingGatewayRegistry {
       twilioAdapter,
     );
     this.gateways.set(
-      this.getKey(instagramGraphAdapter.channel, instagramGraphAdapter.provider),
+      this.getKey(
+        instagramGraphAdapter.channel,
+        instagramGraphAdapter.provider,
+      ),
       instagramGraphAdapter,
     );
     this.gateways.set(

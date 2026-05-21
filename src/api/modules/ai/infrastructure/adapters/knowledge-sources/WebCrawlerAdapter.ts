@@ -89,7 +89,9 @@ export class WebCrawlerAdapter implements IKnowledgeSourceAdapter {
     return match ? match[1].trim() : null;
   }
 
-  private splitBySections(text: string): { heading: string | null; text: string }[] {
+  private splitBySections(
+    text: string,
+  ): { heading: string | null; text: string }[] {
     const lines = text.split('\n');
     const sections: { heading: string | null; text: string }[] = [];
     let currentHeading: string | null = null;
@@ -104,7 +106,10 @@ export class WebCrawlerAdapter implements IKnowledgeSourceAdapter {
         !line.endsWith(',');
 
       if (isHeading && currentText.length > 0) {
-        sections.push({ heading: currentHeading, text: currentText.join('\n') });
+        sections.push({
+          heading: currentHeading,
+          text: currentText.join('\n'),
+        });
         currentText = [];
         currentHeading = line;
       } else {

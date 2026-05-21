@@ -23,16 +23,30 @@ export class AutomationEventListener implements OnModuleInit {
       'automation.contact_created',
       async (event: IntegrationEvent) => {
         const payload = event.payload as any;
-        await this.trigger(payload.tenantId, TriggerType.CONTACT_CREATED, payload, payload.contactId);
+        await this.trigger(
+          payload.tenantId,
+          TriggerType.CONTACT_CREATED,
+          payload,
+          payload.contactId,
+        );
       },
-      { consumerName: 'automation-contact-created', concurrency: 5, retries: 3 },
+      {
+        consumerName: 'automation-contact-created',
+        concurrency: 5,
+        retries: 3,
+      },
     );
 
     this.eventBus.subscribe(
       'automation.tag_added',
       async (event: IntegrationEvent) => {
         const payload = event.payload as any;
-        await this.trigger(payload.tenantId, TriggerType.TAG_ADDED, payload, payload.contactId);
+        await this.trigger(
+          payload.tenantId,
+          TriggerType.TAG_ADDED,
+          payload,
+          payload.contactId,
+        );
       },
       { consumerName: 'automation-tag-added', concurrency: 5, retries: 3 },
     );
@@ -41,34 +55,66 @@ export class AutomationEventListener implements OnModuleInit {
       'automation.message_received',
       async (event: IntegrationEvent) => {
         const payload = event.payload as any;
-        await this.trigger(payload.tenantId, TriggerType.MESSAGE_RECEIVED, payload, payload.contactId);
+        await this.trigger(
+          payload.tenantId,
+          TriggerType.MESSAGE_RECEIVED,
+          payload,
+          payload.contactId,
+        );
       },
-      { consumerName: 'automation-message-received', concurrency: 5, retries: 3 },
+      {
+        consumerName: 'automation-message-received',
+        concurrency: 5,
+        retries: 3,
+      },
     );
 
     this.eventBus.subscribe(
       'automation.payment_overdue',
       async (event: IntegrationEvent) => {
         const payload = event.payload as any;
-        await this.trigger(payload.tenantId, TriggerType.PAYMENT_OVERDUE, payload, payload.contactId);
+        await this.trigger(
+          payload.tenantId,
+          TriggerType.PAYMENT_OVERDUE,
+          payload,
+          payload.contactId,
+        );
       },
-      { consumerName: 'automation-payment-overdue', concurrency: 5, retries: 3 },
+      {
+        consumerName: 'automation-payment-overdue',
+        concurrency: 5,
+        retries: 3,
+      },
     );
 
     this.eventBus.subscribe(
       'automation.appointment_confirmed',
       async (event: IntegrationEvent) => {
         const payload = event.payload as any;
-        await this.trigger(payload.tenantId, TriggerType.APPOINTMENT_CONFIRMED, payload, payload.contactId);
+        await this.trigger(
+          payload.tenantId,
+          TriggerType.APPOINTMENT_CONFIRMED,
+          payload,
+          payload.contactId,
+        );
       },
-      { consumerName: 'automation-appointment-confirmed', concurrency: 5, retries: 3 },
+      {
+        consumerName: 'automation-appointment-confirmed',
+        concurrency: 5,
+        retries: 3,
+      },
     );
 
     this.eventBus.subscribe(
       'automation.order_placed',
       async (event: IntegrationEvent) => {
         const payload = event.payload as any;
-        await this.trigger(payload.tenantId, TriggerType.ORDER_PLACED, payload, payload.contactId);
+        await this.trigger(
+          payload.tenantId,
+          TriggerType.ORDER_PLACED,
+          payload,
+          payload.contactId,
+        );
       },
       { consumerName: 'automation-order-placed', concurrency: 5, retries: 3 },
     );
@@ -77,7 +123,12 @@ export class AutomationEventListener implements OnModuleInit {
       'automation.cart_abandoned',
       async (event: IntegrationEvent) => {
         const payload = event.payload as any;
-        await this.trigger(payload.tenantId, TriggerType.CART_ABANDONED, payload, payload.contactId);
+        await this.trigger(
+          payload.tenantId,
+          TriggerType.CART_ABANDONED,
+          payload,
+          payload.contactId,
+        );
       },
       { consumerName: 'automation-cart-abandoned', concurrency: 5, retries: 3 },
     );
@@ -104,7 +155,9 @@ export class AutomationEventListener implements OnModuleInit {
         );
       }
     } catch (error: any) {
-      this.logger.error(`Error triggering automations for ${triggerType}: ${error.message}`);
+      this.logger.error(
+        `Error triggering automations for ${triggerType}: ${error.message}`,
+      );
     }
   }
 }

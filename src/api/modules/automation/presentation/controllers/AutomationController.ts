@@ -10,7 +10,10 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { CreateAutomationDto, UpdateAutomationDto } from '../dtos/AutomationDto';
+import {
+  CreateAutomationDto,
+  UpdateAutomationDto,
+} from '../dtos/AutomationDto';
 import { CreateAutomationUseCase } from '../../application/use-cases/CreateAutomationUseCase';
 import { UpdateAutomationUseCase } from '../../application/use-cases/UpdateAutomationUseCase';
 import { ListAutomationsUseCase } from '../../application/use-cases/ListAutomationsUseCase';
@@ -78,18 +81,12 @@ export class AutomationController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(
-    @Param('tenantId') tenantId: string,
-    @Param('id') id: string,
-  ) {
+  async delete(@Param('tenantId') tenantId: string, @Param('id') id: string) {
     await this.deleteUseCase.execute(tenantId, id);
   }
 
   @Put(':id/activate')
-  async activate(
-    @Param('tenantId') tenantId: string,
-    @Param('id') id: string,
-  ) {
+  async activate(@Param('tenantId') tenantId: string, @Param('id') id: string) {
     return this.updateUseCase.execute({
       tenantId,
       automationId: id,

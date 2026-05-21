@@ -37,7 +37,9 @@ export class HybridSearchService {
   async search(input: HybridSearchInput): Promise<RAGResultWithCitations> {
     const topK = input.topK || this.defaultTopK;
     const threshold = input.threshold || this.defaultThreshold;
-    const queryEmbedding = await this.embeddingProvider.generateEmbedding(input.query);
+    const queryEmbedding = await this.embeddingProvider.generateEmbedding(
+      input.query,
+    );
 
     const vectorResults = await this.chunkRepository.findSimilar(
       input.tenantId,
@@ -46,12 +48,14 @@ export class HybridSearchService {
       threshold,
     );
 
-    const keywordResults = await this.keywordSearch(input.tenantId, input.query, topK);
+    const keywordResults = await this.keywordSearch(
+      input.tenantId,
+      input.query,
+      topK,
+    );
     const merged = this.mergeResults(vectorResults, keywordResults);
 
-    const reranked = merged
-      .sort((a, b) => b.score - a.score)
-      .slice(0, topK);
+    const reranked = merged.sort((a, b) => b.score - a.score).slice(0, topK);
 
     if (reranked.length === 0) {
       return { context: '', citations: [] };
@@ -84,7 +88,9 @@ export class HybridSearchService {
     tenantId: string,
     query: string,
     limit: number,
-  ): Promise<{ documentId: string; content: string; score: number; metadata: any }[]> {
+  ): Promise<
+    { documentId: string; content: string; score: number; metadata: any }[]
+  > {
     // Extract keywords (remove stop words, keep meaningful terms)
     const keywords = this.extractKeywords(query);
     if (keywords.length === 0) return [];
@@ -128,7 +134,12 @@ export class HybridSearchService {
     keywordResults: any[],
   ): { documentId: string; content: string; score: number; metadata: any }[] {
     const seen = new Set<string>();
-    const merged: { documentId: string; content: string; score: number; metadata: any }[] = [];
+    const merged: {
+      documentId: string;
+      content: string;
+      score: number;
+      metadata: any;
+    }[] = [];
 
     for (const r of vectorResults) {
       const key = `${r.documentId}:${r.chunkIndex}`;
@@ -144,12 +155,13 @@ export class HybridSearchService {
     }
 
     for (const r of keywordResults) {
-      const existingIdx = merged.findIndex(
-        (m) => m.content === r.content,
-      );
+      const existingIdx = merged.findIndex((m) => m.content === r.content);
       if (existingIdx >= 0) {
         // Boost score for results found by both methods
-        merged[existingIdx].score = Math.min(1, merged[existingIdx].score + 0.1);
+        merged[existingIdx].score = Math.min(
+          1,
+          merged[existingIdx].score + 0.1,
+        );
       } else {
         merged.push(r);
       }
@@ -160,11 +172,52 @@ export class HybridSearchService {
 
   private extractKeywords(query: string): string[] {
     const stopWords = new Set([
-      'o', 'a', 'os', 'as', 'um', 'uma', 'de', 'do', 'da', 'dos', 'das',
-      'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com', 'sem', 'que',
-      'e', 'ou', 'mas', 'se', 'como', 'qual', 'quais', 'quando', 'onde',
-      'é', 'são', 'foi', 'ser', 'ter', 'está', 'isso', 'este', 'esta',
-      'esse', 'essa', 'aquele', 'aquela', 'meu', 'seu', 'nosso',
+      'o',
+      'a',
+      'os',
+      'as',
+      'um',
+      'uma',
+      'de',
+      'do',
+      'da',
+      'dos',
+      'das',
+      'em',
+      'no',
+      'na',
+      'nos',
+      'nas',
+      'por',
+      'para',
+      'com',
+      'sem',
+      'que',
+      'e',
+      'ou',
+      'mas',
+      'se',
+      'como',
+      'qual',
+      'quais',
+      'quando',
+      'onde',
+      'é',
+      'são',
+      'foi',
+      'ser',
+      'ter',
+      'está',
+      'isso',
+      'este',
+      'esta',
+      'esse',
+      'essa',
+      'aquele',
+      'aquela',
+      'meu',
+      'seu',
+      'nosso',
     ]);
 
     return query

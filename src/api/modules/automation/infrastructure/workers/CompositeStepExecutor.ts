@@ -56,7 +56,7 @@ export class CompositeStepExecutor implements IStepExecutor {
   ): Promise<StepExecutionResult> {
     // Interpolate variables in message body
     const body = this.interpolate(config['body'] as string, context.variables);
-    const channel = config['channel'] as string || 'whatsapp';
+    const channel = (config['channel'] as string) || 'whatsapp';
 
     this.logger.log(
       `[${context.tenantId}] Sending message via ${channel} to contact ${context.contactId}`,
@@ -103,7 +103,8 @@ export class CompositeStepExecutor implements IStepExecutor {
         conditionMet = actual !== expected;
         break;
       case 'contains':
-        conditionMet = typeof actual === 'string' && actual.includes(String(expected));
+        conditionMet =
+          typeof actual === 'string' && actual.includes(String(expected));
         break;
       case 'gt':
         conditionMet = Number(actual) > Number(expected);
@@ -177,7 +178,9 @@ export class CompositeStepExecutor implements IStepExecutor {
     context: StepExecutionContext,
   ): Promise<StepExecutionResult> {
     const tag = config['tag'] as string;
-    this.logger.log(`[${context.tenantId}] Adding tag "${tag}" to contact ${context.contactId}`);
+    this.logger.log(
+      `[${context.tenantId}] Adding tag "${tag}" to contact ${context.contactId}`,
+    );
     return { success: true, output: { tagAdded: tag } };
   }
 
@@ -186,7 +189,9 @@ export class CompositeStepExecutor implements IStepExecutor {
     context: StepExecutionContext,
   ): Promise<StepExecutionResult> {
     const tag = config['tag'] as string;
-    this.logger.log(`[${context.tenantId}] Removing tag "${tag}" from contact ${context.contactId}`);
+    this.logger.log(
+      `[${context.tenantId}] Removing tag "${tag}" from contact ${context.contactId}`,
+    );
     return { success: true, output: { tagRemoved: tag } };
   }
 
@@ -210,16 +215,24 @@ export class CompositeStepExecutor implements IStepExecutor {
       (config['prompt'] as string) || 'Responda ao cliente',
       context.variables,
     );
-    this.logger.log(`[${context.tenantId}] Generating AI response for contact ${context.contactId}`);
+    this.logger.log(
+      `[${context.tenantId}] Generating AI response for contact ${context.contactId}`,
+    );
     // Integration point: call AI module
-    return { success: true, output: { aiPrompt: prompt, aiResponseGenerated: true } };
+    return {
+      success: true,
+      output: { aiPrompt: prompt, aiResponseGenerated: true },
+    };
   }
 
   private async executeCreateTask(
     config: Record<string, unknown>,
     context: StepExecutionContext,
   ): Promise<StepExecutionResult> {
-    const title = this.interpolate(config['title'] as string, context.variables);
+    const title = this.interpolate(
+      config['title'] as string,
+      context.variables,
+    );
     const dueInMs = Number(config['dueInMs']) || 86400000; // default 24h
     this.logger.log(`[${context.tenantId}] Creating task: "${title}"`);
     return { success: true, output: { taskCreated: true, title, dueInMs } };
@@ -228,7 +241,10 @@ export class CompositeStepExecutor implements IStepExecutor {
   /**
    * Simple variable interpolation: replaces {{varName}} with context values.
    */
-  private interpolate(template: string, variables: Record<string, unknown>): string {
+  private interpolate(
+    template: string,
+    variables: Record<string, unknown>,
+  ): string {
     if (!template) return '';
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
       const val = variables[key];

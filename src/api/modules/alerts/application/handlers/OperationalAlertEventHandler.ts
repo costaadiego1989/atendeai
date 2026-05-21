@@ -32,7 +32,9 @@ export class OperationalAlertEventHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'scheduling.professional_slot.reserved',
       async (event) => {
-        await this.handleSchedulingReserved(event.payload as unknown as SchedulingReservedPayload);
+        await this.handleSchedulingReserved(
+          event.payload as unknown as SchedulingReservedPayload,
+        );
       },
       { consumerName: 'alerts' },
     );
@@ -40,7 +42,9 @@ export class OperationalAlertEventHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'scheduling.professional_slot.payment_confirmed',
       async (event) => {
-        await this.handleSchedulingPaymentConfirmed(event.payload as unknown as SchedulingPaymentConfirmedPayload);
+        await this.handleSchedulingPaymentConfirmed(
+          event.payload as unknown as SchedulingPaymentConfirmedPayload,
+        );
       },
       { consumerName: 'alerts' },
     );
@@ -48,13 +52,17 @@ export class OperationalAlertEventHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'commerce.order.paid',
       async (event) => {
-        await this.handleCommerceOrderPaid(event.payload as unknown as CommerceOrderPaidPayload);
+        await this.handleCommerceOrderPaid(
+          event.payload as unknown as CommerceOrderPaidPayload,
+        );
       },
       { consumerName: 'alerts' },
     );
   }
 
-  async handleSchedulingReserved(payload: SchedulingReservedPayload): Promise<void> {
+  async handleSchedulingReserved(
+    payload: SchedulingReservedPayload,
+  ): Promise<void> {
     const text =
       `*Novo agendamento confirmado*\n\n` +
       `Profissional: ${payload.professionalName}\n` +
@@ -65,7 +73,9 @@ export class OperationalAlertEventHandler implements OnModuleInit {
     await this.notifyTenantUsers(payload.tenantId, payload.branchId, text);
   }
 
-  async handleSchedulingPaymentConfirmed(payload: SchedulingPaymentConfirmedPayload): Promise<void> {
+  async handleSchedulingPaymentConfirmed(
+    payload: SchedulingPaymentConfirmedPayload,
+  ): Promise<void> {
     const text =
       `*Agendamento com pagamento confirmado*\n\n` +
       `Profissional: ${payload.professionalName}\n` +
@@ -78,11 +88,16 @@ export class OperationalAlertEventHandler implements OnModuleInit {
     await this.notifyTenantUsers(payload.tenantId, payload.branchId, text);
   }
 
-  async handleCommerceOrderPaid(payload: CommerceOrderPaidPayload): Promise<void> {
-    const formattedAmount = (payload.totalAmount / 100).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+  async handleCommerceOrderPaid(
+    payload: CommerceOrderPaidPayload,
+  ): Promise<void> {
+    const formattedAmount = (payload.totalAmount / 100).toLocaleString(
+      'pt-BR',
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    );
 
     const text =
       `*Nova venda realizada*\n\n` +

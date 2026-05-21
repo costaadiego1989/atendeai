@@ -26,16 +26,21 @@ export class UpdateAutomationUseCase {
   ) {}
 
   async execute(input: UpdateAutomationInput): Promise<AutomationEntity> {
-    const existing = await this.repository.findById(input.tenantId, input.automationId);
+    const existing = await this.repository.findById(
+      input.tenantId,
+      input.automationId,
+    );
     if (!existing) {
       throw new Error(`Automation ${input.automationId} not found`);
     }
 
     const updateData: Partial<AutomationEntity> = {};
     if (input.name !== undefined) updateData.name = input.name;
-    if (input.description !== undefined) updateData.description = input.description;
+    if (input.description !== undefined)
+      updateData.description = input.description;
     if (input.trigger !== undefined) updateData.trigger = input.trigger;
-    if (input.conditions !== undefined) updateData.conditions = input.conditions;
+    if (input.conditions !== undefined)
+      updateData.conditions = input.conditions;
     if (input.isActive !== undefined) updateData.isActive = input.isActive;
     if (input.steps !== undefined) {
       updateData.steps = input.steps.map((s, idx) => ({
@@ -48,6 +53,10 @@ export class UpdateAutomationUseCase {
       }));
     }
 
-    return this.repository.update(input.tenantId, input.automationId, updateData);
+    return this.repository.update(
+      input.tenantId,
+      input.automationId,
+      updateData,
+    );
   }
 }

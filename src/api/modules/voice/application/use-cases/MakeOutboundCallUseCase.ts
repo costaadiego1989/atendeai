@@ -37,14 +37,19 @@ export class MakeOutboundCallUseCase {
     private readonly negotiationService: VoiceNegotiationService,
   ) {}
 
-  async execute(command: MakeOutboundCallCommand): Promise<MakeOutboundCallResult> {
+  async execute(
+    command: MakeOutboundCallCommand,
+  ): Promise<MakeOutboundCallResult> {
     // 1. Load voice agent config for tenant
     const config = await this.prisma.voiceAgentConfig.findUnique({
       where: { tenantId: command.tenantId },
     });
 
     if (!config || !config.enabled) {
-      return { success: false, error: 'Voice agent not configured or disabled' };
+      return {
+        success: false,
+        error: 'Voice agent not configured or disabled',
+      };
     }
 
     const agentConfig = this.mapToVoiceAgentConfig(config);
@@ -66,10 +71,13 @@ export class MakeOutboundCallUseCase {
     });
 
     // 4. Make the call via telephony provider
-    const apiBaseUrl = this.configService.get<string>('API_BASE_URL') || 'https://api.atendeai.com';
+    const apiBaseUrl =
+      this.configService.get<string>('API_BASE_URL') ||
+      'https://api.atendeai.com';
     const webhookUrl = `${apiBaseUrl}/api/v1/voice/webhook/twiml/${call.id}`;
     const statusUrl = `${apiBaseUrl}/api/v1/voice/webhook/status/${call.id}`;
-    const fromNumber = this.configService.get<string>('TWILIO_PHONE_NUMBER') || '';
+    const fromNumber =
+      this.configService.get<string>('TWILIO_PHONE_NUMBER') || '';
 
     const result = await this.telephony.makeCall({
       to: command.phone,
@@ -83,7 +91,9 @@ export class MakeOutboundCallUseCase {
         where: { id: call.id },
         data: { status: 'FAILED' },
       });
-      this.logger.error(`Call failed for case ${command.recoveryCaseId}: ${result.error}`);
+      this.logger.error(
+        `Call failed for case ${command.recoveryCaseId}: ${result.error}`,
+      );
       return { success: false, callId: call.id, error: result.error };
     }
 

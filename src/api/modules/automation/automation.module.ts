@@ -11,7 +11,10 @@ import { ExecuteAutomationUseCase } from './application/use-cases/ExecuteAutomat
 import { TriggerAutomationUseCase } from './application/use-cases/TriggerAutomationUseCase';
 
 // Ports
-import { AUTOMATION_REPOSITORY, AUTOMATION_EXECUTION_REPOSITORY } from './application/ports/IAutomationRepository';
+import {
+  AUTOMATION_REPOSITORY,
+  AUTOMATION_EXECUTION_REPOSITORY,
+} from './application/ports/IAutomationRepository';
 import { STEP_EXECUTOR } from './application/ports/IStepExecutor';
 
 // Infrastructure

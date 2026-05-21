@@ -36,7 +36,9 @@ export class VoiceWebhookController {
       where: { tenantId: call.tenantId },
     });
 
-    const greeting = config?.greeting || 'Olá, estou entrando em contato sobre um assunto importante.';
+    const greeting =
+      config?.greeting ||
+      'Olá, estou entrando em contato sobre um assunto importante.';
 
     // Update call status
     await this.prisma.voiceCall.update({
@@ -70,10 +72,14 @@ export class VoiceWebhookController {
     const speechResult = req.body?.SpeechResult || '';
     const confidence = parseFloat(req.body?.Confidence || '0');
 
-    this.logger.log(`Call ${callId} speech: "${speechResult}" (confidence: ${confidence})`);
+    this.logger.log(
+      `Call ${callId} speech: "${speechResult}" (confidence: ${confidence})`,
+    );
 
     // Store transcript entry
-    const call = await this.prisma.voiceCall.findUnique({ where: { id: callId } });
+    const call = await this.prisma.voiceCall.findUnique({
+      where: { id: callId },
+    });
     if (call) {
       const transcript = (call.transcript as any[]) || [];
       transcript.push({
@@ -90,9 +96,19 @@ export class VoiceWebhookController {
 
     // Simple intent detection for MVP
     const lower = speechResult.toLowerCase();
-    const isPositive = lower.includes('sim') || lower.includes('quero') || lower.includes('pode') || lower.includes('vamos');
-    const isNegative = lower.includes('não') || lower.includes('agora não') || lower.includes('depois');
-    const wantsTransfer = lower.includes('supervisor') || lower.includes('gerente') || lower.includes('humano');
+    const isPositive =
+      lower.includes('sim') ||
+      lower.includes('quero') ||
+      lower.includes('pode') ||
+      lower.includes('vamos');
+    const isNegative =
+      lower.includes('não') ||
+      lower.includes('agora não') ||
+      lower.includes('depois');
+    const wantsTransfer =
+      lower.includes('supervisor') ||
+      lower.includes('gerente') ||
+      lower.includes('humano');
 
     let twiml: string;
 
@@ -186,7 +202,9 @@ export class VoiceWebhookController {
 
     if (['COMPLETED', 'FAILED', 'NO_ANSWER', 'BUSY'].includes(mappedStatus)) {
       // Set outcome if not already set
-      const call = await this.prisma.voiceCall.findUnique({ where: { id: callId } });
+      const call = await this.prisma.voiceCall.findUnique({
+        where: { id: callId },
+      });
       if (call && !call.outcome) {
         if (mappedStatus === 'NO_ANSWER') updateData.outcome = 'NO_ANSWER';
         if (mappedStatus === 'FAILED') updateData.outcome = 'ERROR';

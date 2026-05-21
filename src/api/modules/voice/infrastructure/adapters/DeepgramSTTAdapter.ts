@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ISTTProvider, STTRequest, STTResult } from '../../application/ports/ISTTProvider';
+import {
+  ISTTProvider,
+  STTRequest,
+  STTResult,
+} from '../../application/ports/ISTTProvider';
 
 /**
  * Deepgram adapter for speech-to-text transcription.

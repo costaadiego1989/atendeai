@@ -103,13 +103,19 @@ export class InitiateTrialSubscriptionUseCase {
 
     await this.billingQueue.add(
       'check-trial-expiration',
-      { subscriptionId: localSubscription.id.toString(), tenantId: input.tenantId },
+      {
+        subscriptionId: localSubscription.id.toString(),
+        tenantId: input.tenantId,
+      },
       { delay: warningHours * 60 * 60 * 1000 },
     );
 
     await this.billingQueue.add(
       'trial-expired',
-      { subscriptionId: localSubscription.id.toString(), tenantId: input.tenantId },
+      {
+        subscriptionId: localSubscription.id.toString(),
+        tenantId: input.tenantId,
+      },
       { delay: expirationHours * 60 * 60 * 1000 },
     );
 

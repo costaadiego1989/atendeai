@@ -9,9 +9,7 @@ import {
   IDocumentChunkRepository,
   DOCUMENT_CHUNK_REPOSITORY,
 } from '../../ports/IDocumentChunkRepository';
-import {
-  IKnowledgeSourceAdapter,
-} from '../../ports/IKnowledgeSourceAdapter';
+import { IKnowledgeSourceAdapter } from '../../ports/IKnowledgeSourceAdapter';
 import { WebCrawlerAdapter } from '../../../infrastructure/adapters/knowledge-sources/WebCrawlerAdapter';
 import { GoogleDriveAdapter } from '../../../infrastructure/adapters/knowledge-sources/GoogleDriveAdapter';
 import { NotionAdapter } from '../../../infrastructure/adapters/knowledge-sources/NotionAdapter';
@@ -55,10 +53,17 @@ export class IngestKnowledgeSourceUseCase {
     ]);
   }
 
-  async execute(input: IngestKnowledgeSourceInput): Promise<IngestKnowledgeSourceResult> {
+  async execute(
+    input: IngestKnowledgeSourceInput,
+  ): Promise<IngestKnowledgeSourceResult> {
     const adapter = this.adapters.get(input.sourceType);
     if (!adapter) {
-      return { success: false, chunksCreated: 0, contentHash: '', error: `Unsupported source type: ${input.sourceType}` };
+      return {
+        success: false,
+        chunksCreated: 0,
+        contentHash: '',
+        error: `Unsupported source type: ${input.sourceType}`,
+      };
     }
 
     try {
@@ -82,12 +87,21 @@ export class IngestKnowledgeSourceUseCase {
           where: { id: input.sourceId },
           data: { status: 'ACTIVE', lastSyncAt: new Date() },
         });
-        this.logger.log(`Content unchanged for source ${input.sourceId}, skipping`);
-        return { success: true, chunksCreated: 0, contentHash: result.contentHash };
+        this.logger.log(
+          `Content unchanged for source ${input.sourceId}, skipping`,
+        );
+        return {
+          success: true,
+          chunksCreated: 0,
+          contentHash: result.contentHash,
+        };
       }
 
       // 4. Chunk all content
-      const allChunks: { content: string; metadata: Record<string, unknown> }[] = [];
+      const allChunks: {
+        content: string;
+        metadata: Record<string, unknown>;
+      }[] = [];
 
       for (const content of result.contents) {
         const chunks = this.chunkingService.chunk(content.text);
@@ -116,7 +130,8 @@ export class IngestKnowledgeSourceUseCase {
       for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
         const batch = allChunks.slice(i, i + BATCH_SIZE);
         const texts = batch.map((c) => c.content);
-        const embeddings = await this.embeddingProvider.generateEmbeddings(texts);
+        const embeddings =
+          await this.embeddingProvider.generateEmbeddings(texts);
 
         const saveInputs = batch.map((chunk, idx) => ({
           tenantId: input.tenantId,
@@ -142,15 +157,24 @@ export class IngestKnowledgeSourceUseCase {
         },
       });
 
-      this.logger.log(`Ingested ${chunksCreated} chunks from ${input.sourceName}`);
+      this.logger.log(
+        `Ingested ${chunksCreated} chunks from ${input.sourceName}`,
+      );
       return { success: true, chunksCreated, contentHash: result.contentHash };
     } catch (error: any) {
-      this.logger.error(`Ingestion failed for ${input.sourceId}: ${error.message}`);
+      this.logger.error(
+        `Ingestion failed for ${input.sourceId}: ${error.message}`,
+      );
       await this.prisma.knowledgeSource.update({
         where: { id: input.sourceId },
         data: { status: 'ERROR' },
       });
-      return { success: false, chunksCreated: 0, contentHash: '', error: error.message };
+      return {
+        success: false,
+        chunksCreated: 0,
+        contentHash: '',
+        error: error.message,
+      };
     }
   }
 }

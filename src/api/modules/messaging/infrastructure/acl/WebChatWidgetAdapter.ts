@@ -60,7 +60,9 @@ export class WebChatWidgetAdapter implements IMessagingGateway {
   /**
    * Parse inbound message from widget client.
    */
-  parseInboundMessage(body: Record<string, unknown>): WebChatInboundData | null {
+  parseInboundMessage(
+    body: Record<string, unknown>,
+  ): WebChatInboundData | null {
     const sessionId = body.sessionId as string;
     const visitorId = body.visitorId as string;
     const text = body.text as string | undefined;

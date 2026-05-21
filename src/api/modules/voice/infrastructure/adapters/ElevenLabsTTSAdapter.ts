@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ITTSProvider, TTSRequest, TTSResult } from '../../application/ports/ITTSProvider';
+import {
+  ITTSProvider,
+  TTSRequest,
+  TTSResult,
+} from '../../application/ports/ITTSProvider';
 
 /**
  * ElevenLabs adapter for text-to-speech synthesis.
@@ -57,7 +61,9 @@ export class ElevenLabsTTSAdapter implements ITTSProvider {
     };
   }
 
-  async listVoices(language?: string): Promise<{ id: string; name: string; language: string }[]> {
+  async listVoices(
+    language?: string,
+  ): Promise<{ id: string; name: string; language: string }[]> {
     try {
       const response = await fetch(`${this.baseUrl}/voices`, {
         headers: { 'xi-api-key': this.apiKey },

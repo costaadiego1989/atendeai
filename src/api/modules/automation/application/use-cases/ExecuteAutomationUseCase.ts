@@ -34,19 +34,26 @@ export class ExecuteAutomationUseCase {
   ) {}
 
   async execute(input: ExecuteAutomationInput): Promise<string> {
-    const automation = await this.automationRepo.findById(input.tenantId, input.automationId);
+    const automation = await this.automationRepo.findById(
+      input.tenantId,
+      input.automationId,
+    );
     if (!automation) {
       throw new Error(`Automation ${input.automationId} not found`);
     }
 
     if (!automation.isActive) {
-      this.logger.warn(`Automation ${input.automationId} is not active, skipping`);
+      this.logger.warn(
+        `Automation ${input.automationId} is not active, skipping`,
+      );
       return '';
     }
 
     // Check conditions
     if (!this.evaluateConditions(automation, input.triggerPayload)) {
-      this.logger.debug(`Conditions not met for automation ${input.automationId}`);
+      this.logger.debug(
+        `Conditions not met for automation ${input.automationId}`,
+      );
       return '';
     }
 
@@ -60,7 +67,9 @@ export class ExecuteAutomationUseCase {
       context: { triggerPayload: input.triggerPayload },
     });
 
-    this.logger.log(`Starting execution ${execution.id} for automation ${automation.name}`);
+    this.logger.log(
+      `Starting execution ${execution.id} for automation ${automation.name}`,
+    );
 
     // Execute steps sequentially
     const sortedSteps = [...automation.steps].sort((a, b) => a.order - b.order);
@@ -81,10 +90,18 @@ export class ExecuteAutomationUseCase {
           variables,
         };
 
-        const result = await this.stepExecutor.execute(step.type, step.config, context);
+        const result = await this.stepExecutor.execute(
+          step.type,
+          step.config,
+          context,
+        );
 
         if (!result.success) {
-          await this.executionRepo.updateStatus(execution.id, 'FAILED', result.error);
+          await this.executionRepo.updateStatus(
+            execution.id,
+            'FAILED',
+            result.error,
+          );
           this.logger.error(`Step ${stepIndex} failed: ${result.error}`);
           return execution.id;
         }
@@ -96,7 +113,9 @@ export class ExecuteAutomationUseCase {
 
         // Handle branching
         if (result.nextStepId) {
-          const branchIdx = sortedSteps.findIndex((s) => s.id === result.nextStepId);
+          const branchIdx = sortedSteps.findIndex(
+            (s) => s.id === result.nextStepId,
+          );
           if (branchIdx >= 0) {
             stepIndex = branchIdx;
           } else {
@@ -111,7 +130,11 @@ export class ExecuteAutomationUseCase {
       this.logger.log(`Execution ${execution.id} completed successfully`);
       return execution.id;
     } catch (error: any) {
-      await this.executionRepo.updateStatus(execution.id, 'FAILED', error.message);
+      await this.executionRepo.updateStatus(
+        execution.id,
+        'FAILED',
+        error.message,
+      );
       this.logger.error(`Execution ${execution.id} failed: ${error.message}`);
       return execution.id;
     }
@@ -137,7 +160,9 @@ export class ExecuteAutomationUseCase {
         case 'not_equals':
           return actual !== expected;
         case 'contains':
-          return typeof actual === 'string' && actual.includes(String(expected));
+          return (
+            typeof actual === 'string' && actual.includes(String(expected))
+          );
         case 'gt':
           return Number(actual) > Number(expected);
         case 'lt':

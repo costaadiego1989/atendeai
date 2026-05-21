@@ -12,7 +12,10 @@ export class ListAutomationsUseCase {
     private readonly repository: IAutomationRepository,
   ) {}
 
-  async execute(tenantId: string, onlyActive?: boolean): Promise<AutomationEntity[]> {
+  async execute(
+    tenantId: string,
+    onlyActive?: boolean,
+  ): Promise<AutomationEntity[]> {
     return this.repository.findAllByTenant(tenantId, onlyActive);
   }
 }

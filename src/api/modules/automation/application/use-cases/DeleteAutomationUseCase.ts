@@ -20,6 +20,8 @@ export class DeleteAutomationUseCase {
     }
 
     await this.repository.delete(tenantId, automationId);
-    this.logger.log(`Deleted automation ${automationId} for tenant ${tenantId}`);
+    this.logger.log(
+      `Deleted automation ${automationId} for tenant ${tenantId}`,
+    );
   }
 }

@@ -24,7 +24,9 @@ export class VoiceCallWorker extends WorkerHost {
   async process(job: Job<VoiceCallJobData>): Promise<any> {
     const { tenantId, contactId, recoveryCaseId, phone } = job.data;
 
-    this.logger.log(`Processing voice call job ${job.id} for tenant ${tenantId}`);
+    this.logger.log(
+      `Processing voice call job ${job.id} for tenant ${tenantId}`,
+    );
 
     const result = await this.makeOutboundCallUseCase.execute({
       tenantId,

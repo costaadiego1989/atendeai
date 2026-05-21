@@ -28,7 +28,10 @@ export class TriggerAutomationUseCase {
     payload: Record<string, unknown>,
     contactId?: string,
   ): Promise<string[]> {
-    const automations = await this.repository.findByTriggerType(tenantId, triggerType);
+    const automations = await this.repository.findByTriggerType(
+      tenantId,
+      triggerType,
+    );
 
     if (automations.length === 0) {
       return [];
