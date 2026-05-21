@@ -30,6 +30,8 @@ const widgetSchema = z.object({
   position: z.enum(['bottom-right', 'bottom-left']),
   collectName: z.boolean(),
   collectPhone: z.boolean(),
+  collectEmail: z.boolean(),
+  collectCpf: z.boolean(),
   proactiveDelay: z.coerce.number().min(0).optional(),
   proactiveMsg: z.string().optional(),
 });
@@ -58,6 +60,8 @@ export function WidgetSettingsPage() {
       position: 'bottom-right',
       collectName: true,
       collectPhone: false,
+      collectEmail: true,
+      collectCpf: false,
       proactiveDelay: 5000,
       proactiveMsg: '',
     },
@@ -74,6 +78,8 @@ export function WidgetSettingsPage() {
         position: vm.config.position,
         collectName: vm.config.collectName,
         collectPhone: vm.config.collectPhone,
+        collectEmail: vm.config.collectEmail,
+        collectCpf: vm.config.collectCpf,
         proactiveDelay: vm.config.proactiveDelay ?? 5000,
         proactiveMsg: vm.config.proactiveMsg ?? '',
       });
@@ -92,6 +98,8 @@ export function WidgetSettingsPage() {
       position: values.position,
       collectName: values.collectName,
       collectPhone: values.collectPhone,
+      collectEmail: values.collectEmail,
+      collectCpf: values.collectCpf,
       proactiveDelay: values.proactiveDelay || null,
       proactiveMsg: values.proactiveMsg || null,
     });
@@ -263,6 +271,25 @@ export function WidgetSettingsPage() {
                   <Switch
                     checked={watchedValues.collectPhone}
                     onCheckedChange={(v) => form.setValue('collectPhone', v, { shouldDirty: true })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label>Coletar e-mail</Label>
+                  <Switch
+                    checked={watchedValues.collectEmail}
+                    onCheckedChange={(v) => form.setValue('collectEmail', v, { shouldDirty: true })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Coletar CPF</Label>
+                    <p className="text-xs text-muted-foreground">Opcional — visitante pode pular.</p>
+                  </div>
+                  <Switch
+                    checked={watchedValues.collectCpf}
+                    onCheckedChange={(v) => form.setValue('collectCpf', v, { shouldDirty: true })}
                   />
                 </div>
               </CardContent>

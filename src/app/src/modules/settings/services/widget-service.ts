@@ -13,6 +13,8 @@ export interface WidgetConfig {
   avatarUrl: string | null;
   collectName: boolean;
   collectPhone: boolean;
+  collectEmail: boolean;
+  collectCpf: boolean;
   proactiveDelay: number | null;
   proactiveMsg: string | null;
   createdAt: string;
@@ -29,6 +31,8 @@ export interface UpdateWidgetConfigInput {
   avatarUrl?: string | null;
   collectName?: boolean;
   collectPhone?: boolean;
+  collectEmail?: boolean;
+  collectCpf?: boolean;
   proactiveDelay?: number | null;
   proactiveMsg?: string | null;
 }
