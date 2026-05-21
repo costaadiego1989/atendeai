@@ -11,6 +11,7 @@ import {
   MessageSentIntegrationEvent,
 } from '../integration-events/publishers/MessageSentIntegrationEvent';
 import { ConversationStatusChangedIntegrationEvent } from '../integration-events/publishers/ConversationStatusChangedIntegrationEvent';
+import { ConversationCreatedIntegrationEvent } from '../integration-events/publishers/ConversationCreatedIntegrationEvent';
 
 @Injectable()
 export class MessagingRealtimeEventsHandler implements OnModuleInit {
@@ -66,6 +67,16 @@ export class MessagingRealtimeEventsHandler implements OnModuleInit {
         );
       },
       { consumerName: 'messaging-realtime-conversation-status-changed' },
+    );
+
+    this.eventBus.subscribe(
+      'messaging.conversation-created',
+      async (event) => {
+        await this.handleConversationCreated(
+          event as ConversationCreatedIntegrationEvent,
+        );
+      },
+      { consumerName: 'messaging-realtime-conversation-created' },
     );
   }
 
@@ -128,6 +139,21 @@ export class MessagingRealtimeEventsHandler implements OnModuleInit {
       tenantId: payload.tenantId,
       conversationId: payload.conversationId,
       messageId: payload.messageId,
+      channel: payload.channel,
+      at: new Date().toISOString(),
+    });
+  }
+
+  private async handleConversationCreated(
+    event: ConversationCreatedIntegrationEvent,
+  ): Promise<void> {
+    const payload = event.payload;
+
+    await this.realtimePublisher.publish({
+      type: 'conversation.created',
+      tenantId: payload.tenantId,
+      conversationId: payload.conversationId,
+      contactId: payload.contactId,
       channel: payload.channel,
       at: new Date().toISOString(),
     });
