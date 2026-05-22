@@ -1,6 +1,7 @@
 import { ProcessWidgetMessageUseCase } from '../application/use-cases/ProcessWidgetMessageUseCase';
 import { PrismaTransactionalEventPublisher } from '@shared/infrastructure/event-bus/PrismaTransactionalEventPublisher';
 import { IContactFacade } from '@modules/contact/application/facades/ContactFacade';
+import { IMessagingRealtimePublisher } from '../application/ports/IMessagingRealtimePublisher';
 import { ConversationCreatedIntegrationEvent } from '../application/integration-events/publishers/ConversationCreatedIntegrationEvent';
 import { MessageReceivedIntegrationEvent } from '../application/integration-events/publishers/MessageReceivedIntegrationEvent';
 
@@ -8,6 +9,7 @@ describe('ProcessWidgetMessageUseCase', () => {
   let useCase: ProcessWidgetMessageUseCase;
   let transactionalEventPublisher: jest.Mocked<PrismaTransactionalEventPublisher>;
   let contactFacade: jest.Mocked<IContactFacade>;
+  let realtimePublisher: jest.Mocked<IMessagingRealtimePublisher>;
   let tx: {
     conversation: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock };
     message: { create: jest.Mock };
@@ -51,9 +53,14 @@ describe('ProcessWidgetMessageUseCase', () => {
       ensureContact: jest.fn().mockResolvedValue({ contactId: 'contact-1', created: false }),
     } as any;
 
+    realtimePublisher = {
+      publish: jest.fn().mockResolvedValue(undefined),
+    } as any;
+
     useCase = new ProcessWidgetMessageUseCase(
       transactionalEventPublisher,
       contactFacade,
+      realtimePublisher,
     );
   });
 
@@ -68,13 +75,16 @@ describe('ProcessWidgetMessageUseCase', () => {
       );
     });
 
-    it('falls back to widget_<visitorId> when phone absent', async () => {
+    it('falls back to wgt_<hash> when phone absent', async () => {
       tx.conversation.findFirst.mockResolvedValue(existingConversation);
 
       await useCase.execute(baseInput);
 
+      const { createHash } = require('crypto');
+      const expectedPhone = `wgt_${createHash('sha256').update('visitor-abc').digest('hex').slice(0, 15)}`;
+
       expect(contactFacade.ensureContact).toHaveBeenCalledWith(
-        expect.objectContaining({ phone: 'widget_visitor-abc' }),
+        expect.objectContaining({ phone: expectedPhone }),
       );
     });
 
@@ -308,6 +318,18 @@ describe('ProcessWidgetMessageUseCase', () => {
       await useCase.execute(baseInput);
 
       expect(capturedEvents[0].payload.contextHints).toBeUndefined();
+    });
+
+    it('calls realtimePublisher.publish with message.received after save', async () => {
+      await useCase.execute(baseInput);
+
+      expect(realtimePublisher.publish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'message.received',
+          tenantId: 'tenant-1',
+          channel: 'WEB_CHAT',
+        }),
+      );
     });
 
     it('omits url from event content when not provided', async () => {
