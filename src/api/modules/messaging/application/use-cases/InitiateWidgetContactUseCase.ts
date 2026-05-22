@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { PrismaTransactionalEventPublisher } from '@shared/infrastructure/event-bus/PrismaTransactionalEventPublisher';
 import {
   IContactFacade,
@@ -36,7 +37,8 @@ export class InitiateWidgetContactUseCase {
     input: InitiateWidgetContactInput,
   ): Promise<InitiateWidgetContactOutput> {
     const phone =
-      input.visitorPhone?.trim() || `widget_${input.visitorId}`;
+      input.visitorPhone?.trim() ||
+      `wgt_${createHash('sha256').update(input.visitorId).digest('hex').slice(0, 15)}`;
     const name = input.visitorName?.trim() || 'Visitante Web';
 
     const { contactId } = await this.contactFacade.ensureContact({
