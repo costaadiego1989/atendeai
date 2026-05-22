@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { PrismaTransactionalEventPublisher } from '@shared/infrastructure/event-bus/PrismaTransactionalEventPublisher';
 import {
   IContactFacade,
@@ -8,6 +9,10 @@ import { MessageReceivedIntegrationEvent } from '../integration-events/publisher
 import { ConversationCreatedIntegrationEvent } from '../integration-events/publishers/ConversationCreatedIntegrationEvent';
 import { IntegrationEvent } from '@shared/infrastructure/event-bus';
 import { Prisma } from '@prisma/client';
+import {
+  IMessagingRealtimePublisher,
+  MESSAGING_REALTIME_PUBLISHER,
+} from '../ports/IMessagingRealtimePublisher';
 
 export interface ProcessWidgetMessageInput {
   tenantId: string;
@@ -35,12 +40,16 @@ export class ProcessWidgetMessageUseCase {
     private readonly transactionalEventPublisher: PrismaTransactionalEventPublisher,
     @Inject(CONTACT_FACADE)
     private readonly contactFacade: IContactFacade,
+    @Inject(MESSAGING_REALTIME_PUBLISHER)
+    private readonly realtimePublisher: IMessagingRealtimePublisher,
   ) {}
 
   async execute(
     input: ProcessWidgetMessageInput,
   ): Promise<ProcessWidgetMessageOutput> {
-    const phone = input.visitorPhone?.trim() || `widget_${input.visitorId}`;
+    const phone =
+      input.visitorPhone?.trim() ||
+      `wgt_${createHash('sha256').update(input.visitorId).digest('hex').slice(0, 15)}`;
     const name = input.visitorName?.trim() || 'Visitante Web';
 
     const { contactId } = await this.contactFacade.ensureContact({
@@ -153,6 +162,20 @@ export class ProcessWidgetMessageUseCase {
         };
       },
     );
+
+    try {
+      await this.realtimePublisher.publish({
+        type: 'message.received',
+        tenantId: input.tenantId,
+        conversationId: result.conversationId,
+        messageId: result.messageId,
+        contactId: result.contactId,
+        channel: 'WEB_CHAT',
+        at: new Date().toISOString(),
+      });
+    } catch {
+      // Non-fatal: internal app notification failure must not break widget delivery
+    }
 
     return result;
   }
