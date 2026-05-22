@@ -153,9 +153,9 @@ const WIDGET_SCRIPT = `(function(){
         visitorCpf:collectData.cpf||undefined,
         pageUrl:window.location.href,
       }),
-    }).then(function(r){return r.json();})
+    }).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(d){var x=d.data||d;sessionResumed=!!(x.resumed);sessionId=x.sessionId;localStorage.setItem('_atai_sid_'+token,sessionId);return sessionId;})
-    .catch(function(){return null;});
+    .catch(function(e){sessionProm=null;console.warn('[AtendeAi widget] session error',e);return null;});
     return sessionProm;
   }
 
@@ -255,7 +255,16 @@ const WIDGET_SCRIPT = `(function(){
       state='connecting';
       if(i2){i2.disabled=true;i2.placeholder='Aguarde...';}
       if(sb)sb.disabled=true;
-      ensureSession().then(function(){
+      ensureSession().then(function(sid){
+        if(!sid){
+          // Session creation failed — reset so user can retry
+          sessionProm=null;
+          state='collecting';collectIdx=Math.max(0,collectIdx-1);
+          if(i2){i2.disabled=false;i2.placeholder='Tente novamente...';}
+          if(sb)sb.disabled=false;
+          addRow('in','Ops! Falha ao conectar. Verifique sua conexão e tente novamente.');
+          return;
+        }
         state='chatting';
         if(i2){i2.disabled=false;i2.placeholder='Digite sua mensagem...';}
         if(sb)sb.disabled=false;
@@ -387,10 +396,10 @@ const WIDGET_SCRIPT = `(function(){
         injectCSS(cfg);
         buildDOM(cfg);
         collectSteps=buildCollectSteps(cfg);
-        var needsCollect=collectSteps.length>0;
+        // Skip collect if we already have an active session in localStorage
+        var needsCollect=collectSteps.length>0&&!sessionId;
         if(needsCollect){
           state='collecting';
-          // Show greeting first, then start asking fields sequentially
           if(cfg.greeting){
             addRow('in',cfg.greeting,{type:true,done:function(){nextStep();}});
           } else {
@@ -399,14 +408,13 @@ const WIDGET_SCRIPT = `(function(){
         } else {
           state='chatting';
           var i2=$inp();if(i2)i2.disabled=false;
-          if(cfg.greeting){
-            addRow('in',cfg.greeting,{type:true,done:function(){
-              if(sessionId){loadHistory(function(){showChips();startPolling();});}
-              else showChips();
-            }});
+          if(sessionId){
+            // Resume: skip greeting, just load history
+            loadHistory(function(){showChips();startPolling();});
+          } else if(cfg.greeting){
+            addRow('in',cfg.greeting,{type:true,done:function(){showChips();}});
           } else {
-            if(sessionId){loadHistory(function(){showChips();startPolling();});}
-            else showChips();
+            showChips();
           }
         }
         // Proactive message
