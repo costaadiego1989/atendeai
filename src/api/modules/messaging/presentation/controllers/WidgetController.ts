@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Post,
   Param,
   BadRequestException,
@@ -224,6 +226,47 @@ export class WidgetController {
     });
 
     return { messageId, conversationId, contactId };
+  }
+
+  /**
+   * DELETE /api/v1/widget/:publicToken/sessions/:sessionId
+   * Closes session and archives the linked conversation, enabling a fresh restart.
+   */
+  @Delete(':publicToken/sessions/:sessionId')
+  @HttpCode(200)
+  async restartSession(
+    @Param('publicToken') publicToken: string,
+    @Param('sessionId') sessionId: string,
+  ) {
+    const config = await this.prisma.widgetConfig.findUnique({
+      where: { publicToken },
+    });
+
+    if (!config || !config.enabled) {
+      throw new NotFoundException('Widget not found or disabled');
+    }
+
+    const session = await this.prisma.widgetSession.findFirst({
+      where: { id: sessionId, tenantId: config.tenantId },
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+
+    await this.prisma.widgetSession.update({
+      where: { id: session.id },
+      data: { status: 'CLOSED' },
+    });
+
+    if (session.conversationId) {
+      await this.prisma.conversation.update({
+        where: { id: session.conversationId },
+        data: { status: 'ARCHIVED' },
+      });
+    }
+
+    return { success: true };
   }
 
   /**
