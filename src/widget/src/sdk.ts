@@ -47,24 +47,21 @@ class AtendeAiWidget {
   private isOpen: boolean = false;
   private messages: WidgetMessage[] = [];
   private pollInterval: ReturnType<typeof setInterval> | null = null;
+  private lastOutboundAt: number = 0;
 
   async init(options: InitOptions) {
     this.token = options.token;
     this.baseUrl = options.baseUrl || API_BASE;
     this.visitorId = this.getOrCreateVisitorId();
 
-    // Fetch widget config
     const config = await this.fetchConfig();
     if (!config) return;
     this.config = config;
 
-    // Init session
     await this.initSession();
 
-    // Render widget
     this.render();
 
-    // Setup proactive message
     if (config.proactiveDelay && config.proactiveMsg) {
       setTimeout(() => {
         if (!this.isOpen) this.showProactive();
@@ -82,6 +79,18 @@ class AtendeAiWidget {
     return id;
   }
 
+  private saveSession(sessionId: string): void {
+    localStorage.setItem(`atendeai_session_${this.token}`, sessionId);
+  }
+
+  private restoreSession(): string | null {
+    return localStorage.getItem(`atendeai_session_${this.token}`);
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem(`atendeai_session_${this.token}`);
+  }
+
   private async fetchConfig(): Promise<WidgetConfig | null> {
     try {
       const res = await fetch(`${this.baseUrl}/widget/${this.token}/config`);
@@ -94,6 +103,19 @@ class AtendeAiWidget {
 
   private async initSession() {
     try {
+      // Try to restore a previously persisted session
+      const stored = this.restoreSession();
+      if (stored) {
+        const valid = await this.validateStoredSession(stored);
+        if (valid) {
+          this.sessionId = stored;
+          await this.loadMessages();
+          return;
+        }
+        this.clearSession();
+      }
+
+      // Create or resume session via server (server deduplicates by visitorId)
       const res = await fetch(`${this.baseUrl}/widget/${this.token}/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -102,15 +124,28 @@ class AtendeAiWidget {
           pageUrl: window.location.href,
         }),
       });
+
       if (res.ok) {
         const data = await res.json();
         this.sessionId = data.sessionId;
+        this.saveSession(data.sessionId);
         if (data.resumed && data.conversationId) {
           await this.loadMessages();
         }
       }
     } catch {
       // Silent fail — widget degrades gracefully
+    }
+  }
+
+  private async validateStoredSession(sessionId: string): Promise<boolean> {
+    try {
+      const res = await fetch(
+        `${this.baseUrl}/widget/${this.token}/sessions/${sessionId}/messages`,
+      );
+      return res.ok;
+    } catch {
+      return false;
     }
   }
 
@@ -132,7 +167,6 @@ class AtendeAiWidget {
   async sendMessage(text: string) {
     if (!this.sessionId || !text.trim()) return;
 
-    // Optimistic UI
     const tempMsg: WidgetMessage = {
       id: crypto.randomUUID(),
       direction: 'INBOUND',
@@ -155,7 +189,6 @@ class AtendeAiWidget {
         }),
       });
       if (res.ok) {
-        // Start polling for AI response
         this.startPolling();
       }
     } catch {
@@ -163,21 +196,52 @@ class AtendeAiWidget {
     }
   }
 
+  private async restartChat() {
+    this.stopPolling();
+
+    if (this.sessionId) {
+      try {
+        await fetch(
+          `${this.baseUrl}/widget/${this.token}/sessions/${this.sessionId}`,
+          { method: 'DELETE' },
+        );
+      } catch {
+        // Non-fatal
+      }
+    }
+
+    this.clearSession();
+    this.sessionId = null;
+    this.messages = [];
+    this.lastOutboundAt = 0;
+
+    await this.initSession();
+    this.renderMessages();
+  }
+
   private startPolling() {
     if (this.pollInterval) return;
     this.pollInterval = setInterval(async () => {
       await this.loadMessages();
       this.renderMessages();
-      // Stop polling if last message is outbound (AI replied)
+
       if (this.messages.length > 0) {
         const last = this.messages[this.messages.length - 1];
         if (last.direction === 'OUTBOUND') {
-          this.stopPolling();
+          if (this.lastOutboundAt === 0) {
+            this.lastOutboundAt = Date.now();
+          }
+          // Wait 5s quiet after last OUTBOUND before stopping
+          if (Date.now() - this.lastOutboundAt > 5000) {
+            this.stopPolling();
+          }
+        } else {
+          this.lastOutboundAt = 0;
         }
       }
     }, 1500);
-    // Auto-stop after 30s
-    setTimeout(() => this.stopPolling(), 30000);
+    // Auto-stop after 90s (covers slow AI pipelines)
+    setTimeout(() => this.stopPolling(), 90000);
   }
 
   private stopPolling() {
@@ -185,12 +249,12 @@ class AtendeAiWidget {
       clearInterval(this.pollInterval);
       this.pollInterval = null;
     }
+    this.lastOutboundAt = 0;
   }
 
   private render() {
     if (!this.config) return;
 
-    // Create shadow DOM container
     this.container = document.createElement('div');
     this.container.id = 'atendeai-widget-root';
     document.body.appendChild(this.container);
@@ -198,7 +262,6 @@ class AtendeAiWidget {
     const shadow = this.container.attachShadow({ mode: 'open' });
     shadow.innerHTML = this.getWidgetHTML();
 
-    // Bind events
     this.bindEvents(shadow);
   }
 
@@ -215,7 +278,12 @@ class AtendeAiWidget {
               ${cfg.avatarUrl ? `<img src="${cfg.avatarUrl}" class="aw-avatar" alt="" />` : '<div class="aw-avatar-placeholder"></div>'}
               <span class="aw-header-title">${cfg.name}</span>
             </div>
-            <button class="aw-close-btn" aria-label="Fechar chat">&times;</button>
+            <div class="aw-header-actions">
+              <button class="aw-restart-btn" aria-label="Reiniciar conversa" title="Reiniciar conversa">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+              </button>
+              <button class="aw-close-btn" aria-label="Fechar chat">&times;</button>
+            </div>
           </div>
           <div class="aw-messages" id="aw-messages">
             ${cfg.greeting ? `<div class="aw-msg aw-msg-bot"><div class="aw-msg-bubble">${cfg.greeting}</div></div>` : ''}
@@ -241,6 +309,7 @@ class AtendeAiWidget {
   private bindEvents(shadow: ShadowRoot) {
     const fab = shadow.querySelector('.aw-fab') as HTMLElement;
     const closeBtn = shadow.querySelector('.aw-close-btn') as HTMLElement;
+    const restartBtn = shadow.querySelector('.aw-restart-btn') as HTMLElement;
     const input = shadow.querySelector('.aw-input') as HTMLInputElement;
     const sendBtn = shadow.querySelector('.aw-send-btn') as HTMLElement;
     const chatWindow = shadow.querySelector('.aw-chat-window') as HTMLElement;
@@ -260,6 +329,10 @@ class AtendeAiWidget {
       this.isOpen = false;
       chatWindow?.classList.remove('aw-open');
       fab.style.display = 'flex';
+    });
+
+    restartBtn?.addEventListener('click', async () => {
+      await this.restartChat();
     });
 
     const doSend = () => {
@@ -331,10 +404,13 @@ class AtendeAiWidget {
       .aw-chat-window.aw-open { display: flex; }
       .aw-header { padding: 16px; color: white; display: flex; align-items: center; justify-content: space-between; }
       .aw-header-info { display: flex; align-items: center; gap: 10px; }
+      .aw-header-actions { display: flex; align-items: center; gap: 4px; }
       .aw-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
       .aw-avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.3); }
       .aw-header-title { font-weight: 600; font-size: 14px; }
       .aw-close-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 4px; line-height: 1; }
+      .aw-restart-btn { background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: color 0.2s, background 0.2s; }
+      .aw-restart-btn:hover { color: white; background: rgba(255,255,255,0.15); }
       .aw-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; background: #f9fafb; }
       .aw-msg { display: flex; }
       .aw-msg-bot { justify-content: flex-start; }
