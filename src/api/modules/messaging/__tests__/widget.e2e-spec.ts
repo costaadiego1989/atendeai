@@ -408,4 +408,354 @@ describe('Widget (e2e)', () => {
       ).toBe(true);
     });
   });
+
+  // ─── Contact (user) creation — DB verification ──────────────────────────────
+
+  describe('Contact (user) creation — DB verification', () => {
+    it('creates contact in DB with visitorName as name', async () => {
+      const visitorId = `db-contact-name-${Date.now()}`;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'João da Silva' })
+        .expect(201);
+
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId, phone: widgetPhone(visitorId) },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.name).toBe('João da Silva');
+    });
+
+    it('creates contact with real phone when visitorPhone provided', async () => {
+      const visitorId = `db-contact-phone-${Date.now()}`;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Fone Test', visitorPhone: '21999990001' })
+        .expect(201);
+
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId, phone: '21999990001' },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.name).toBe('Fone Test');
+    });
+
+    it('falls back to wgt_hash phone when no visitorPhone provided', async () => {
+      const visitorId = `db-contact-hash-${Date.now()}`;
+      const expectedPhone = widgetPhone(visitorId);
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Hash Phone Test' })
+        .expect(201);
+
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId, phone: expectedPhone },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.phone).toBe(expectedPhone);
+    });
+
+    it('stores email on contact when visitorEmail provided', async () => {
+      const visitorId = `db-contact-email-${Date.now()}`;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({
+          visitorId,
+          visitorName: 'Email Test',
+          visitorEmail: 'widget-test@example.com',
+        })
+        .expect(201);
+
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId, email: 'widget-test@example.com' },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.email).toBe('widget-test@example.com');
+    });
+
+    it('creates contact with stage LEAD', async () => {
+      const visitorId = `db-contact-stage-${Date.now()}`;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Stage Test' })
+        .expect(201);
+
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId, phone: widgetPhone(visitorId) },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.stage).toBe('LEAD');
+    });
+
+    it('creates conversation immediately on session init — conversationId in response', async () => {
+      const visitorId = `db-conv-immediate-${Date.now()}`;
+
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Conv Immediate' })
+        .expect(201);
+
+      expect(res.body.conversationId).toBeTruthy();
+
+      const conv = await prisma.conversation.findUnique({
+        where: { id: res.body.conversationId },
+      });
+
+      expect(conv).not.toBeNull();
+      expect(conv!.channel).toBe('WEB_CHAT');
+      expect(conv!.tenantId).toBe(tenantId);
+    });
+
+    it('does NOT create duplicate contact on session resume', async () => {
+      const visitorId = `db-no-dup-${Date.now()}`;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'First Visit' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Second Visit' })
+        .expect(201);
+
+      const contacts = await prisma.contact.findMany({
+        where: { tenantId, phone: widgetPhone(visitorId) },
+      });
+
+      expect(contacts.length).toBe(1);
+    });
+
+    it('widgetSession.contactId and conversationId populated after init', async () => {
+      const visitorId = `db-session-refs-${Date.now()}`;
+
+      const sessRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Refs Test' })
+        .expect(201);
+
+      const session = await prisma.widgetSession.findUnique({
+        where: { id: sessRes.body.sessionId },
+      });
+
+      expect(session).not.toBeNull();
+      expect(session!.contactId).not.toBeNull();
+      expect(session!.conversationId).not.toBeNull();
+      expect(session!.conversationId).toBe(sessRes.body.conversationId);
+    });
+  });
+
+  // ─── Message creation — DB verification ─────────────────────────────────────
+
+  describe('Message creation — DB verification', () => {
+    let msgSessionId: string;
+    let msgVisitorId: string;
+
+    beforeAll(async () => {
+      msgVisitorId = `db-msg-visitor-${Date.now()}`;
+
+      const sessRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId: msgVisitorId, visitorName: 'Msg DB Visitor' })
+        .expect(201);
+
+      msgSessionId = sessRes.body.sessionId;
+    });
+
+    it('message saved to DB with direction INBOUND and sentBy CONTACT', async () => {
+      const text = `Olá, quero saber mais! ${Date.now()}`;
+
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: msgSessionId, visitorId: msgVisitorId, text })
+        .expect(201);
+
+      const message = await prisma.message.findUnique({
+        where: { id: res.body.messageId },
+      });
+
+      expect(message).not.toBeNull();
+      expect(message!.direction).toBe('INBOUND');
+      expect(message!.sentBy).toBe('CONTACT');
+      expect(message!.contentType).toBe('TEXT');
+      expect((message!.content as any).text).toBe(text);
+    });
+
+    it('message content.text stored exactly as sent', async () => {
+      const text = 'Texto exato com acentuação: ção üéà';
+
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: msgSessionId, visitorId: msgVisitorId, text })
+        .expect(201);
+
+      const message = await prisma.message.findUnique({
+        where: { id: res.body.messageId },
+      });
+
+      expect((message!.content as any).text).toBe(text);
+    });
+
+    it('conversation lastMessagePreview updated after message', async () => {
+      const text = `Preview test message ${Date.now()}`;
+
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: msgSessionId, visitorId: msgVisitorId, text })
+        .expect(201);
+
+      const conv = await prisma.conversation.findUnique({
+        where: { id: res.body.conversationId },
+      });
+
+      expect(conv!.lastMessagePreview).toBe(text.substring(0, 100));
+      expect(conv!.lastMessageDirection).toBe('INBOUND');
+    });
+
+    it('conversation unreadCount increments per message', async () => {
+      const convRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: msgSessionId, visitorId: msgVisitorId, text: 'First unread' })
+        .expect(201);
+
+      const convBefore = await prisma.conversation.findUnique({
+        where: { id: convRes.body.conversationId },
+      });
+      const unreadBefore = convBefore!.unreadCount;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: msgSessionId, visitorId: msgVisitorId, text: 'Second unread' })
+        .expect(201);
+
+      const convAfter = await prisma.conversation.findUnique({
+        where: { id: convRes.body.conversationId },
+      });
+
+      expect(convAfter!.unreadCount).toBeGreaterThan(unreadBefore);
+    });
+
+    it('multiple messages go to same conversation (no duplicate created)', async () => {
+      const visitorId = `db-msg-single-conv-${Date.now()}`;
+
+      const sessRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Single Conv Visitor' })
+        .expect(201);
+
+      const sid = sessRes.body.sessionId;
+
+      const msg1 = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: sid, visitorId, text: 'First message' })
+        .expect(201);
+
+      const msg2 = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: sid, visitorId, text: 'Second message' })
+        .expect(201);
+
+      expect(msg1.body.conversationId).toBe(msg2.body.conversationId);
+
+      const conversations = await prisma.conversation.findMany({
+        where: { tenantId, contactId: msg1.body.contactId, channel: 'WEB_CHAT' },
+      });
+      expect(conversations.length).toBe(1);
+    });
+
+    it('SYSTEM [WIDGET_INIT] message hidden from GET /sessions/:id/messages', async () => {
+      const visitorId = `db-hidden-sys-${Date.now()}`;
+
+      const sessRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Hidden System Visitor' })
+        .expect(201);
+
+      const sysSessionId = sessRes.body.sessionId;
+
+      const msgRes = await request(app.getHttpServer())
+        .get(`/api/v1/widget/${publicToken}/sessions/${sysSessionId}/messages`)
+        .expect(200);
+
+      const systemMessages = msgRes.body.messages.filter(
+        (m: any) =>
+          m.sentBy === 'SYSTEM' ||
+          (typeof m.content?.text === 'string' &&
+            m.content.text.includes('[WIDGET_INIT]')),
+      );
+
+      expect(systemMessages.length).toBe(0);
+    });
+
+    it('conversation created with channel WEB_CHAT', async () => {
+      const visitorId = `db-msg-channel-${Date.now()}`;
+
+      const sessRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Channel Test' })
+        .expect(201);
+
+      const sid = sessRes.body.sessionId;
+
+      const msgRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: sid, visitorId, text: 'Canal test' })
+        .expect(201);
+
+      const conv = await prisma.conversation.findUnique({
+        where: { id: msgRes.body.conversationId },
+      });
+
+      expect(conv!.channel).toBe('WEB_CHAT');
+    });
+
+    it('message deliveryStatus is DELIVERED', async () => {
+      const text = 'Status test message';
+
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: msgSessionId, visitorId: msgVisitorId, text })
+        .expect(201);
+
+      const message = await prisma.message.findUnique({
+        where: { id: res.body.messageId },
+      });
+
+      expect(message!.deliveryStatus).toBe('DELIVERED');
+    });
+
+    it('response includes contactId matching the created contact', async () => {
+      const visitorId = `db-contact-match-${Date.now()}`;
+
+      const sessRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/sessions`)
+        .send({ visitorId, visitorName: 'Contact Match Test' })
+        .expect(201);
+
+      const sid = sessRes.body.sessionId;
+
+      const msgRes = await request(app.getHttpServer())
+        .post(`/api/v1/widget/${publicToken}/messages`)
+        .send({ sessionId: sid, visitorId, text: 'Match contact' })
+        .expect(201);
+
+      const contact = await prisma.contact.findUnique({
+        where: { id: msgRes.body.contactId },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.tenantId).toBe(tenantId);
+      expect(contact!.phone).toBe(widgetPhone(visitorId));
+    });
+  });
 });
