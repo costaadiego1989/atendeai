@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bot, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import type { VoiceConfig } from '../services/voice-service';
 
 interface VoiceAgentConfigProps {
@@ -25,8 +25,7 @@ export function VoiceAgentConfig({ config, onChange }: VoiceAgentConfigProps) {
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Bot className="h-4 w-4 text-primary" />
+          <CardTitle className="text-base">
             Persona do Agente
           </CardTitle>
           <p className="text-xs text-muted-foreground">

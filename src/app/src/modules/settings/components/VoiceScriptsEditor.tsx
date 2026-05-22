@@ -106,7 +106,7 @@ export function VoiceScriptsEditor({
             value={activeScriptName ?? '__none__'}
             onValueChange={(v) => onActiveScriptChange(v === '__none__' ? null : v)}
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger>
               <SelectValue placeholder="Selecionar script ativo" />
             </SelectTrigger>
             <SelectContent>
@@ -177,7 +177,6 @@ export function VoiceScriptsEditor({
                 <div className="space-y-1">
                   <Label className="text-xs">Nome</Label>
                   <Input
-                    className="h-8 text-xs"
                     value={script.name}
                     onChange={(e) => updateScript(index, { name: e.target.value })}
                   />
@@ -190,7 +189,7 @@ export function VoiceScriptsEditor({
                       updateScript(index, { type: v as VoiceScript['type'] })
                     }
                   >
-                    <SelectTrigger className="h-8 text-xs">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -221,7 +220,7 @@ export function VoiceScriptsEditor({
                     <Label className="text-xs">Desconto máximo (%)</Label>
                     <Input
                       type="number"
-                      className="h-8 text-xs"
+                      className="text-sm"
                       value={script.negotiationRules?.maxDiscount ?? 10}
                       onChange={(e) =>
                         updateScript(index, {
@@ -237,7 +236,7 @@ export function VoiceScriptsEditor({
                     <Label className="text-xs">Parcelas máximas</Label>
                     <Input
                       type="number"
-                      className="h-8 text-xs"
+                      className="text-sm"
                       value={script.negotiationRules?.maxInstallments ?? 6}
                       onChange={(e) =>
                         updateScript(index, {
@@ -255,7 +254,7 @@ export function VoiceScriptsEditor({
               <div className="space-y-1">
                 <Label className="text-xs">Mensagem de escalação</Label>
                 <Input
-                  className="h-8 text-xs"
+                  className="text-sm"
                   placeholder="Vou transferir para um atendente humano."
                   value={script.escalationMessage ?? ''}
                   onChange={(e) =>
