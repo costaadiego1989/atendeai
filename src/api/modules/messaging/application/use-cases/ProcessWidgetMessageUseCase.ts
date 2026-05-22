@@ -61,107 +61,116 @@ export class ProcessWidgetMessageUseCase {
       stage: 'LEAD',
     });
 
-    const result = await this.transactionalEventPublisher.execute<ProcessWidgetMessageOutput>(
-      async (tx) => {
-        const events: IntegrationEvent[] = [];
+    const result =
+      await this.transactionalEventPublisher.execute<ProcessWidgetMessageOutput>(
+        async (tx) => {
+          const events: IntegrationEvent[] = [];
 
-        let conversation = await (tx as Prisma.TransactionClient).conversation.findFirst({
-          where: {
-            tenantId: input.tenantId,
-            contactId,
-            channel: 'WEB_CHAT',
-            status: { not: 'ARCHIVED' },
-          },
-          orderBy: { startedAt: 'desc' },
-        });
-
-        let isNewConversation = false;
-
-        if (!conversation) {
-          conversation = await (tx as Prisma.TransactionClient).conversation.create({
-            data: {
+          let conversation = await (
+            tx as Prisma.TransactionClient
+          ).conversation.findFirst({
+            where: {
               tenantId: input.tenantId,
               contactId,
               channel: 'WEB_CHAT',
-              status: 'ACTIVE',
+              status: { not: 'ARCHIVED' },
+            },
+            orderBy: { startedAt: 'desc' },
+          });
+
+          let isNewConversation = false;
+
+          if (!conversation) {
+            conversation = await (
+              tx as Prisma.TransactionClient
+            ).conversation.create({
+              data: {
+                tenantId: input.tenantId,
+                contactId,
+                channel: 'WEB_CHAT',
+                status: 'ACTIVE',
+                lastMessageAt: new Date(),
+                lastMessageDirection: 'INBOUND',
+                lastMessagePreview: input.text.substring(0, 100),
+                lastInboundAt: new Date(),
+              },
+            });
+            isNewConversation = true;
+          }
+
+          const contentType = (input.contentType || 'text').toUpperCase();
+          const message = await (tx as Prisma.TransactionClient).message.create(
+            {
+              data: {
+                conversationId: conversation.id,
+                direction: 'INBOUND',
+                contentType,
+                content: { text: input.text, url: input.url ?? undefined },
+                sentBy: 'CONTACT',
+                deliveryStatus: 'DELIVERED',
+              },
+            },
+          );
+
+          await (tx as Prisma.TransactionClient).conversation.update({
+            where: { id: conversation.id },
+            data: {
               lastMessageAt: new Date(),
               lastMessageDirection: 'INBOUND',
               lastMessagePreview: input.text.substring(0, 100),
               lastInboundAt: new Date(),
+              unreadCount: { increment: 1 },
+              status: 'ACTIVE',
             },
           });
-          isNewConversation = true;
-        }
 
-        const contentType = (input.contentType || 'text').toUpperCase();
-        const message = await (tx as Prisma.TransactionClient).message.create({
-          data: {
-            conversationId: conversation.id,
-            direction: 'INBOUND',
-            contentType,
-            content: { text: input.text, url: input.url ?? undefined },
-            sentBy: 'CONTACT',
-            deliveryStatus: 'DELIVERED',
-          },
-        });
+          if (isNewConversation) {
+            events.push(
+              new ConversationCreatedIntegrationEvent(
+                {
+                  tenantId: input.tenantId,
+                  conversationId: conversation.id,
+                  contactId,
+                  channel: 'WEB_CHAT',
+                },
+                `messaging:conv-created:${conversation.id}`,
+              ),
+            );
+          }
 
-        await (tx as Prisma.TransactionClient).conversation.update({
-          where: { id: conversation.id },
-          data: {
-            lastMessageAt: new Date(),
-            lastMessageDirection: 'INBOUND',
-            lastMessagePreview: input.text.substring(0, 100),
-            lastInboundAt: new Date(),
-            unreadCount: { increment: 1 },
-            status: 'ACTIVE',
-          },
-        });
-
-        if (isNewConversation) {
           events.push(
-            new ConversationCreatedIntegrationEvent(
+            new MessageReceivedIntegrationEvent(
               {
-                tenantId: input.tenantId,
                 conversationId: conversation.id,
+                tenantId: input.tenantId,
                 contactId,
+                branchId: null,
+                messageId: message.id,
+                content: {
+                  type: contentType,
+                  text: input.text,
+                  ...(input.url ? { url: input.url } : {}),
+                },
                 channel: 'WEB_CHAT',
+                moduleId: 'widget',
+                ...(input.quickReplies?.length
+                  ? { contextHints: input.quickReplies }
+                  : {}),
               },
-              `messaging:conv-created:${conversation.id}`,
+              `messaging:inbound:${message.id}`,
             ),
           );
-        }
 
-        events.push(
-          new MessageReceivedIntegrationEvent(
-            {
-              conversationId: conversation.id,
-              tenantId: input.tenantId,
+          return {
+            result: {
               contactId,
-              branchId: null,
+              conversationId: conversation.id,
               messageId: message.id,
-              content: {
-                type: contentType,
-                text: input.text,
-                ...(input.url ? { url: input.url } : {}),
-              },
-              channel: 'WEB_CHAT',
-              moduleId: 'widget',
-              ...(input.quickReplies?.length ? { contextHints: input.quickReplies } : {}),
-            },
-            `messaging:inbound:${message.id}`,
-          ),
-        );
-
-        return {
-          result: {
-            contactId,
-            conversationId: conversation.id,
-            messageId: message.id,
-          } as ProcessWidgetMessageOutput,
-          events,
-        };
-      },
-    );
+            } as ProcessWidgetMessageOutput,
+            events,
+          };
+        },
+      );
 
     try {
       await this.realtimePublisher.publish({

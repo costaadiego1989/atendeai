@@ -14,7 +14,7 @@ const WIDGET_SCRIPT = `(function(){
   var isOpen=false,pollIv=null,outboundCnt=0,typingRow=null,typingTimer=null;
   var state='idle'; // idle|collecting|connecting|chatting
   var collectSteps=[],collectIdx=0,collectData={};
-  var sessionProm=null,wCfg=null,qrDismissed=false;
+  var sessionProm=null,wCfg=null,qrDismissed=false,sessionResumed=false;
 
   function $id(id){return document.getElementById(id);}
   function $msgs(){return $id('_atai-msgs');}
@@ -43,6 +43,9 @@ const WIDGET_SCRIPT = `(function(){
       '#_atai-xbtn{background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;width:30px;height:30px;flex-shrink:0;transition:background .15s;margin-left:auto;}',
       '#_atai-xbtn:hover{background:rgba(255,255,255,.18);}',
       '#_atai-xbtn svg{width:18px;height:18px;fill:rgba(255,255,255,.9);}',
+      '#_atai-rbtn{background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;width:28px;height:28px;flex-shrink:0;transition:background .15s;opacity:.75;}',
+      '#_atai-rbtn:hover{background:rgba(255,255,255,.18);opacity:1;}',
+      '#_atai-rbtn svg{width:15px;height:15px;fill:#fff;}',
       '#_atai-msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:340px;background:#f6f7f9;}',
       '._row{display:flex;align-items:flex-end;gap:7px;}._row.out{flex-direction:row-reverse;}',
       '._av{width:28px;height:28px;border-radius:50%;flex-shrink:0;overflow:hidden;background:'+c+';display:flex;align-items:center;justify-content:center;}',
@@ -151,7 +154,7 @@ const WIDGET_SCRIPT = `(function(){
         pageUrl:window.location.href,
       }),
     }).then(function(r){return r.json();})
-    .then(function(d){var x=d.data||d;sessionId=x.sessionId;localStorage.setItem('_atai_sid_'+token,sessionId);return sessionId;})
+    .then(function(d){var x=d.data||d;sessionResumed=!!(x.resumed);sessionId=x.sessionId;localStorage.setItem('_atai_sid_'+token,sessionId);return sessionId;})
     .catch(function(){return null;});
     return sessionProm;
   }
@@ -190,6 +193,51 @@ const WIDGET_SCRIPT = `(function(){
 
   function stopPolling(){clearInterval(pollIv);pollIv=null;}
 
+  function loadHistory(cb){
+    if(!sessionId){if(cb)cb();return;}
+    fetch(apiBase+'/widget/'+token+'/sessions/'+sessionId+'/messages')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var msgs=((d.data||d).messages||[]);
+        var m=$msgs();
+        if(m&&msgs.length>0){
+          msgs.forEach(function(msg){
+            var dir=msg.direction==='OUTBOUND'?'in':'out';
+            var t=(msg.content&&msg.content.text)||'';
+            if(t)addRow(dir,t);
+          });
+          outboundCnt=msgs.filter(function(msg){return msg.direction==='OUTBOUND';}).length;
+          m.scrollTop=m.scrollHeight;
+        }
+        if(cb)cb();
+      })
+      .catch(function(){if(cb)cb();});
+  }
+
+  function restartChat(){
+    stopPolling();
+    var sid=sessionId;
+    sessionId=null;sessionProm=null;sessionResumed=false;outboundCnt=0;qrDismissed=false;
+    localStorage.removeItem('_atai_sid_'+token);
+    if(sid)fetch(apiBase+'/widget/'+token+'/sessions/'+sid,{method:'DELETE'}).catch(function(){});
+    var m=$msgs();if(m)m.innerHTML='';
+    collectIdx=0;collectData={};
+    var i2=$inp(),sb=$snd();
+    if(wCfg&&collectSteps.length>0){
+      state='collecting';
+      if(i2){i2.value='';i2.disabled=true;i2.placeholder='...';}
+      if(sb)sb.disabled=true;
+      if(wCfg.greeting)addRow('in',wCfg.greeting,{type:true,done:function(){nextStep();}});
+      else nextStep();
+    } else {
+      state='chatting';
+      if(i2){i2.value='';i2.disabled=false;i2.placeholder='Digite sua mensagem...';}
+      if(sb)sb.disabled=false;
+      if(wCfg&&wCfg.greeting)addRow('in',wCfg.greeting,{type:true,done:function(){showChips();}});
+      else showChips();
+    }
+  }
+
   // ---- COLLECT FLOW ----
   function buildCollectSteps(cfg){
     var steps=[];
@@ -211,8 +259,12 @@ const WIDGET_SCRIPT = `(function(){
         state='chatting';
         if(i2){i2.disabled=false;i2.placeholder='Digite sua mensagem...';}
         if(sb)sb.disabled=false;
-        return agentSay('Tudo certo! Como posso te ajudar?',200);
-      }).then(function(){showChips();startPolling();});
+        if(sessionResumed){
+          loadHistory(function(){showChips();startPolling();});
+        } else {
+          agentSay('Tudo certo! Como posso te ajudar?',200).then(function(){showChips();startPolling();});
+        }
+      });
       return;
     }
     var step=collectSteps[collectIdx];
@@ -286,7 +338,9 @@ const WIDGET_SCRIPT = `(function(){
     info.appendChild(nm);info.appendChild(sub);
     var xbtn=document.createElement('button');xbtn.id='_atai-xbtn';xbtn.setAttribute('aria-label','Fechar');
     xbtn.innerHTML='<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-    hdr.appendChild(avh);hdr.appendChild(info);hdr.appendChild(xbtn);
+    var rbtn=document.createElement('button');rbtn.id='_atai-rbtn';rbtn.setAttribute('aria-label','Reiniciar conversa');rbtn.title='Reiniciar conversa';
+    rbtn.innerHTML='<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+    hdr.appendChild(avh);hdr.appendChild(info);hdr.appendChild(rbtn);hdr.appendChild(xbtn);
 
     var msgs=document.createElement('div');msgs.id='_atai-msgs';
 
@@ -317,6 +371,7 @@ const WIDGET_SCRIPT = `(function(){
 
     btn.addEventListener('click',function(){isOpen?closePanel():openPanel();});
     xbtn.addEventListener('click',function(e){e.stopPropagation();closePanel();});
+    rbtn.addEventListener('click',function(e){e.stopPropagation();restartChat();});
     sb.addEventListener('click',sendMessage);
     i2.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
     i2.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px';});
@@ -344,10 +399,15 @@ const WIDGET_SCRIPT = `(function(){
         } else {
           state='chatting';
           var i2=$inp();if(i2)i2.disabled=false;
-          if(cfg.greeting)addRow('in',cfg.greeting,{type:true,done:function(){showChips();}});
-          else showChips();
-          // Returning visitor with saved session: start polling right away
-          if(sessionId)startPolling();
+          if(cfg.greeting){
+            addRow('in',cfg.greeting,{type:true,done:function(){
+              if(sessionId){loadHistory(function(){showChips();startPolling();});}
+              else showChips();
+            }});
+          } else {
+            if(sessionId){loadHistory(function(){showChips();startPolling();});}
+            else showChips();
+          }
         }
         // Proactive message
         if(cfg.proactiveDelay&&cfg.proactiveMsg&&cfg.proactiveDelay>0){

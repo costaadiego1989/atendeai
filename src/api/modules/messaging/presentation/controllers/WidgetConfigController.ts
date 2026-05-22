@@ -45,7 +45,11 @@ class UpdateWidgetConfigDTO {
     | number
     | null;
   @IsOptional() @IsString() proactiveMsg?: string | null;
-  @IsOptional() @IsArray() @IsString({ each: true }) @MaxLength(80, { each: true }) quickReplies?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  quickReplies?: string[];
 }
 
 @Controller('tenants/:tenantId/widget-config')

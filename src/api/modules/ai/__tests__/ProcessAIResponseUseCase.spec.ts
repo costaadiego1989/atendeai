@@ -210,7 +210,8 @@ describe('ProcessAIResponseUseCase', () => {
     });
     expect(aiEngine.generateResponse).not.toHaveBeenCalled();
     expect(chatHistoryRepository.saveMessage).not.toHaveBeenCalled();
-    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    // publishes AIQuotaDenied + AIResponseFailed (fallback to DB)
+    expect(eventBus.publish).toHaveBeenCalledTimes(2);
     expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(
       AIQuotaDeniedIntegrationEvent,
     );
@@ -238,7 +239,8 @@ describe('ProcessAIResponseUseCase', () => {
       message: 'Conta em configuração. Tente novamente em instantes.',
     });
     expect(aiEngine.generateResponse).not.toHaveBeenCalled();
-    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    // publishes AIQuotaDenied + AIResponseFailed (fallback to DB)
+    expect(eventBus.publish).toHaveBeenCalledTimes(2);
     expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(
       AIQuotaDeniedIntegrationEvent,
     );
@@ -266,7 +268,8 @@ describe('ProcessAIResponseUseCase', () => {
       message: 'Assinatura inativa.',
     });
     expect(aiEngine.generateResponse).not.toHaveBeenCalled();
-    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    // publishes AIQuotaDenied + AIResponseFailed (fallback to DB)
+    expect(eventBus.publish).toHaveBeenCalledTimes(2);
     expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(
       AIQuotaDeniedIntegrationEvent,
     );

@@ -23,6 +23,33 @@ export class AIResponseGeneratedHandler implements OnModuleInit {
       },
       { consumerName: 'messaging-ai-response-generated' },
     );
+
+    this.eventBus.subscribe(
+      'ai.response-failed',
+      async (event) => {
+        await this.handleFailed(event);
+      },
+      { consumerName: 'messaging-ai-response-failed' },
+    );
+  }
+
+  private async handleFailed(event: any) {
+    const data = event.payload || event;
+    const fallback = data.fallbackMessage as string | undefined;
+    const conversationId = data.conversationId as string | undefined;
+    if (!fallback || !conversationId) return;
+
+    try {
+      await this.sendAiMessageUseCase.execute({
+        conversationId,
+        text: fallback,
+        type: 'TEXT',
+      });
+    } catch (err) {
+      this.logger.warn(
+        `Failed to persist fallback AI message for conversation [${conversationId}]: ${(err as Error).message}`,
+      );
+    }
   }
 
   private async handle(event: AIResponseGeneratedIntegrationEvent) {

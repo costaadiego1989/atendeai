@@ -298,7 +298,10 @@ export class WidgetController {
     }
 
     const messages = await this.prisma.message.findMany({
-      where: { conversationId: session.conversationId, sentBy: { not: 'SYSTEM' } },
+      where: {
+        conversationId: session.conversationId,
+        sentBy: { not: 'SYSTEM' },
+      },
       orderBy: { createdAt: 'asc' },
       take: 100,
     });

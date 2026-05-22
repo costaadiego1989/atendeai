@@ -99,6 +99,10 @@ export class ProcessAIResponseService {
     if (!quotaCheck.canProceed) {
       await this.publishQuotaDenied(input, quotaCheck);
       if (quotaCheck.status === 'NO_SUBSCRIPTION') {
+        await this.publishFallbackFailed(
+          input,
+          'Estou em configuração. Tente novamente em breve.',
+        );
         return {
           success: false,
           error: 'NO_SUBSCRIPTION',
@@ -106,12 +110,20 @@ export class ProcessAIResponseService {
         };
       }
       if (quotaCheck.status !== 'ACTIVE') {
+        await this.publishFallbackFailed(
+          input,
+          'Assinatura inativa. Entre em contato com o suporte.',
+        );
         return {
           success: false,
           error: 'SUBSCRIPTION_INACTIVE',
           message: 'Assinatura inativa.',
         };
       }
+      await this.publishFallbackFailed(
+        input,
+        'Limite de uso atingido. Tente novamente mais tarde.',
+      );
       return {
         success: false,
         error: 'QUOTA_EXCEEDED',
@@ -407,6 +419,22 @@ export class ProcessAIResponseService {
     );
 
     return { success: false, error: 'AI_PROVIDER_ERROR', message: msg };
+  }
+
+  private async publishFallbackFailed(
+    input: ProcessAIResponseInput,
+    fallbackMessage: string,
+  ) {
+    await this.eventBus.publish(
+      new AIResponseFailedIntegrationEvent({
+        conversationId: input.conversationId,
+        tenantId: input.tenantId,
+        contactId: input.contactId,
+        reason: 'QUOTA_DENIED',
+        provider: 'internal',
+        fallbackMessage,
+      }),
+    );
   }
 
   private async publishQuotaDenied(

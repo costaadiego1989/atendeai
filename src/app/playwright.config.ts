@@ -36,6 +36,14 @@ export default defineConfig({
         // No storageState — bug-hunting tests mock everything via page.route()
       },
     },
+    {
+      name: 'production',
+      testMatch: /production\/.*\.spec\.ts/,
+      use: {
+        // No browser — uses Playwright's request fixture only (REST API tests)
+        // Runs against real production: api.atende-ai.tech
+      },
+    },
   ],
 
   webServer: {
