@@ -485,40 +485,18 @@ export class PrismaConversationRepository implements IConversationRepository {
         }>
       >(Prisma.sql`
           SELECT
-            ordered.id,
-            ordered."conversationId",
-            ordered.direction,
-            ordered."contentType",
-            ordered.content,
-            ordered."sentBy",
-            ordered."deliveryStatus",
-            ordered."externalId",
-            ordered."createdAt"
-          FROM (
-            SELECT
-              id,
-              conversation_id AS "conversationId",
-              direction,
-              content_type AS "contentType",
-              content,
-              sent_by AS "sentBy",
-              delivery_status AS "deliveryStatus",
-              external_id AS "externalId",
-              (
-                created_at +
-                (
-                  (ROW_NUMBER() OVER (
-                    PARTITION BY created_at
-                    ORDER BY sort_order ASC NULLS LAST, id ASC
-                  ) - 1) * INTERVAL '1 second'
-                )
-              ) AS "createdAt",
-              created_at AS base_created_at,
-              sort_order
-            FROM messaging_schema.messages
-            WHERE conversation_id = ${conversationId}::uuid
-          ) AS ordered
-          ORDER BY ordered.sort_order ASC NULLS LAST, ordered.base_created_at ASC, ordered.id ASC
+            id,
+            conversation_id AS "conversationId",
+            direction,
+            content_type AS "contentType",
+            content,
+            sent_by AS "sentBy",
+            delivery_status AS "deliveryStatus",
+            external_id AS "externalId",
+            inserted_at AS "createdAt"
+          FROM messaging_schema.messages
+          WHERE conversation_id = ${conversationId}::uuid
+          ORDER BY sort_order ASC NULLS LAST, inserted_at ASC
           OFFSET ${(page - 1) * limit}
           LIMIT ${limit}
         `),
