@@ -121,7 +121,7 @@ export function PricingComparisonTable({
         >
           Mensal
           {promoActive && promoPercentMonthly > 0 && (
-            <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
+            <span className="ml-2 rounded-full bg-success/20 px-2 py-0.5 text-xs font-bold text-success">
               -{promoPercentMonthly}%
             </span>
           )}
@@ -138,7 +138,7 @@ export function PricingComparisonTable({
         >
           Anual
           {promoPercentAnnual > 0 && (
-            <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
+            <span className="ml-2 rounded-full bg-success/20 px-2 py-0.5 text-xs font-bold text-success">
               -{promoPercentAnnual}%
             </span>
           )}
@@ -146,7 +146,7 @@ export function PricingComparisonTable({
       </div>
 
       {promoActive && (
-        <p className="mb-4 text-center text-sm text-emerald-600">
+        <p className="mb-4 text-center text-sm text-success">
           Promoção de lançamento: {promoPercent}% de desconto no ciclo {billingCycle === 'annual' ? 'anual' : 'mensal'}.
         </p>
       )}
@@ -178,7 +178,7 @@ export function PricingComparisonTable({
                           </Badge>
                         )}
                         {recommendedPlanCode === plan.code && (
-                          <Badge className="border-none bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20">
+                          <Badge className="border-none bg-success/10 text-success hover:bg-success/20">
                             Indicado
                           </Badge>
                         )}
@@ -196,7 +196,7 @@ export function PricingComparisonTable({
                         {billingCycle === 'annual' ? 'por mês no plano anual' : 'por mês'}
                       </span>
                       {billingCycle === 'annual' && savings > 0 && (
-                        <Badge className="border-none bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20">
+                        <Badge className="border-none bg-success/10 text-success hover:bg-success/20">
                           Economia de {formatCurrency(savings)}/ano
                         </Badge>
                       )}

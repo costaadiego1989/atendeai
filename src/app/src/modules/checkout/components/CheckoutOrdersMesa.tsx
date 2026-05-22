@@ -257,7 +257,7 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
                   type="button"
                   size="sm"
                   variant={action.variant ?? 'default'}
-                  className="h-8 justify-center gap-1.5 rounded-md px-2 text-[11px]"
+                  className="justify-center gap-1.5 rounded-md px-2"
                   disabled={isMoving}
                   onClick={(event) => {
                     event.stopPropagation();

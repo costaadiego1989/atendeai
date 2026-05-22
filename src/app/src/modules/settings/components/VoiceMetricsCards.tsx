@@ -27,29 +27,21 @@ export function VoiceMetricsCards({ metrics }: VoiceMetricsCardsProps) {
       icon: Phone,
       label: 'Total de chamadas',
       value: metrics.totalCalls.toLocaleString('pt-BR'),
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
     },
     {
       icon: CheckCircle2,
       label: 'Taxa de atendimento',
       value: `${metrics.answeredRate}%`,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100 dark:bg-green-900/30',
     },
     {
       icon: TrendingUp,
       label: 'Taxa de acordo',
       value: `${metrics.agreementRate}%`,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-100 dark:bg-amber-900/30',
     },
     {
       icon: DollarSign,
       label: 'Valor recuperado',
       value: `R$ ${metrics.totalRecovered.toLocaleString('pt-BR')}`,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
     },
   ];
 
@@ -59,8 +51,8 @@ export function VoiceMetricsCards({ metrics }: VoiceMetricsCardsProps) {
         <Card key={card.label} className="glass-card">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${card.bgColor}`}>
-                <card.icon className={`h-3.5 w-3.5 ${card.color}`} />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <card.icon className="h-4 w-4" />
               </div>
             </div>
             <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">

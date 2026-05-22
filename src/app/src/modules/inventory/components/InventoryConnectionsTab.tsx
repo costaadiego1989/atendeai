@@ -68,7 +68,7 @@ export function InventoryConnectionsTab({
             className={[
               'glass-card transition-all duration-300',
               isSyncing ? 'border-primary/50 shadow-md shadow-primary/10' : '',
-              justSucceeded ? 'border-green-500/40' : '',
+              justSucceeded ? 'border-success/40' : '',
               justFailed ? 'border-destructive/40' : '',
             ]
               .filter(Boolean)

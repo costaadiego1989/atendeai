@@ -115,7 +115,7 @@ export function AuthShell({
               <p className="text-sm leading-6 text-muted-foreground">{subtitle}</p>
             </div>
 
-            <Card className="border-border/50 bg-card/70 backdrop-blur-md shadow-xl rounded-[32px] overflow-hidden">
+            <Card className="border-border/50 bg-card/70 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden">
               <CardContent className="p-6">{children}</CardContent>
             </Card>
 

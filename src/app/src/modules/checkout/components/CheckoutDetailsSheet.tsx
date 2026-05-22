@@ -152,7 +152,7 @@ export const CheckoutDetailsSheet: React.FC<CheckoutDetailsSheetProps> = ({
                   const stateStyles = isActive
                     ? 'border-primary/40 bg-primary/10 text-primary shadow-[0_0_15px_-3px_rgba(16,185,129,0.2)]'
                     : isPast
-                      ? 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400'
+                      ? 'border-success/20 bg-success/5 text-success'
                       : 'border-border/40 bg-background/40 text-muted-foreground/50';
 
                   return (
@@ -186,7 +186,7 @@ export const CheckoutDetailsSheet: React.FC<CheckoutDetailsSheetProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 gap-2 rounded-lg text-xs font-semibold"
+                    className="gap-2 font-semibold"
                   >
                     <ExternalLink className="h-3 w-3" />
                     Abrir conversa

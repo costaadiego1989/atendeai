@@ -37,7 +37,7 @@ export function BillingHeader({
           Acompanhe seu uso e gerencie sua assinatura.
         </p>
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {onExportCsv && (
           <Button variant="outline" size="sm" onClick={onExportCsv}>
             <Download className="mr-2 h-4 w-4" />

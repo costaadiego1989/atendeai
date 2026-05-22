@@ -68,7 +68,7 @@ function StepConfigFields({
               value={(config.channel as string) || 'whatsapp'}
               onValueChange={(v) => onConfigChange({ ...config, channel: v })}
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -96,7 +96,7 @@ function StepConfigFields({
         <div className="space-y-1">
           <Label className="text-xs">Tempo de espera</Label>
           <Input
-            className="h-8 text-xs"
+            className="text-sm"
             placeholder="Ex: 5m, 1h, 2d"
             value={(config.delayHuman as string) || ''}
             onChange={(e) => onConfigChange({ ...config, delayHuman: e.target.value })}
@@ -113,7 +113,7 @@ function StepConfigFields({
         <div className="space-y-1">
           <Label className="text-xs">Tag</Label>
           <Input
-            className="h-8 text-xs"
+            className="text-sm"
             placeholder="Nome da tag"
             value={(config.tag as string) || ''}
             onChange={(e) => onConfigChange({ ...config, tag: e.target.value })}
@@ -126,7 +126,7 @@ function StepConfigFields({
         <div className="space-y-1">
           <Label className="text-xs">ID do agente</Label>
           <Input
-            className="h-8 text-xs"
+            className="text-sm"
             placeholder="UUID do usuário"
             value={(config.userId as string) || ''}
             onChange={(e) => onConfigChange({ ...config, userId: e.target.value })}
@@ -140,7 +140,7 @@ function StepConfigFields({
           <div className="space-y-1">
             <Label className="text-xs">Título da tarefa</Label>
             <Input
-              className="h-8 text-xs"
+              className="text-sm"
               placeholder="Ligar para o contato"
               value={(config.title as string) || ''}
               onChange={(e) => onConfigChange({ ...config, title: e.target.value })}
@@ -150,7 +150,7 @@ function StepConfigFields({
             <Label className="text-xs">Prazo (horas)</Label>
             <Input
               type="number"
-              className="h-8 text-xs"
+              className="text-sm"
               value={(config.dueInHours as number) || 24}
               onChange={(e) =>
                 onConfigChange({ ...config, dueInHours: Number(e.target.value) })
@@ -224,7 +224,7 @@ export function AutomationStepBuilder({ steps, onChange }: AutomationStepBuilder
               value={step.type}
               onValueChange={(v) => updateStepType(index, v as StepType)}
             >
-              <SelectTrigger className="h-8 flex-1 text-xs">
+              <SelectTrigger className="flex-1 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -239,7 +239,7 @@ export function AutomationStepBuilder({ steps, onChange }: AutomationStepBuilder
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive"
               onClick={() => removeStep(index)}
               aria-label={`Remover passo ${index + 1}`}
             >

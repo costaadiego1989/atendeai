@@ -228,7 +228,7 @@ export function SchedulingProfessionalsTab({ vm }: Props) {
       <Card className="glass-card lg:col-span-1 h-fit">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-base">Profissionais</CardTitle>
-          <Button size="icon" onClick={() => vm.setCreateProfessionalOpen(true)} className="h-8 w-8 rounded-lg shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 transition-all text-primary-foreground">
+          <Button size="icon" onClick={() => vm.setCreateProfessionalOpen(true)} className="rounded-lg shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 transition-all text-primary-foreground">
             <Plus className="h-4 w-4" />
           </Button>
         </CardHeader>

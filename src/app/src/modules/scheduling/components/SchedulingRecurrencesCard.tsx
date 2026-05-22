@@ -499,7 +499,7 @@ export function SchedulingRecurrencesCard({ vm, sheetOnly = false }: Props) {
             <Button
               size="icon"
               onClick={() => vm.setCreateProfessionalOpen(true)}
-              className="h-8 w-8 rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90"
+              className="rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90"
             >
               <Plus className="h-4 w-4" />
             </Button>

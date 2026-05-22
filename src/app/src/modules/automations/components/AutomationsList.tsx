@@ -47,7 +47,7 @@ export function AutomationsList({
                 variant={automation.isActive ? 'default' : 'secondary'}
                 className={
                   automation.isActive
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    ? 'bg-success/10 text-success'
                     : ''
                 }
               >

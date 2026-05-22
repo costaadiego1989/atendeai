@@ -23,7 +23,7 @@ import { CalendarDays, Download } from 'lucide-react';
 function getOrderTone(status: string) {
   switch (status) {
     case 'PAID':
-      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      return 'bg-success/10 text-success border-success/20';
     case 'CANCELLED':
       return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
     case 'AWAITING_PAYMENT':
@@ -197,7 +197,7 @@ export default function CheckoutPage() {
         <Card className="glass-card border-border/40 bg-background/20">
           <CardContent className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Horários de Entrega Ativos</p>
             </div>
             <div className="flex flex-wrap gap-2">

@@ -458,7 +458,7 @@ export default function BillingUsagePage() {
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
                   Módulos extras do nicho
                 </p>
-                <p className="mt-2 text-lg font-bold text-emerald-500">
+                <p className="mt-2 text-lg font-bold text-success">
                   Inclusos no plano
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
@@ -594,13 +594,13 @@ export default function BillingUsagePage() {
                       <span className="text-sm font-medium text-muted-foreground"> /mês</span>
                     </span>
                     {selectedCycle === 'annual' && (
-                      <span className="text-xs font-medium text-emerald-600">
+                      <span className="text-xs font-medium text-success">
                         Total anual: {formatCurrency(calculateAnnualTotal(selectedPlan?.monthlyPrice ?? 0))}
                         {' '}({getPromoDiscountPercent(selectedCycle)}% de desconto)
                       </span>
                     )}
                     {selectedCycle === 'monthly' && (
-                      <span className="text-xs font-medium text-emerald-600">
+                      <span className="text-xs font-medium text-success">
                         Promoção de lançamento: {getPromoDiscountPercent(selectedCycle)}% de desconto
                       </span>
                     )}

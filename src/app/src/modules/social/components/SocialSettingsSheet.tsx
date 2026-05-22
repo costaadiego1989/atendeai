@@ -48,7 +48,7 @@ export function SocialSettingsSheet({ open, onOpenChange }: SocialSettingsSheetP
                   <p className="text-xs text-muted-foreground mr-4">Rate limit diário máximo no Direct.</p>
                 </div>
                 <Select defaultValue="1000">
-                   <SelectTrigger className="w-[100px] h-8 text-xs">
+                   <SelectTrigger className="w-[100px] text-sm">
                       <SelectValue />
                    </SelectTrigger>
                    <SelectContent>

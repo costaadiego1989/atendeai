@@ -246,7 +246,7 @@ export const ShippingPolicySheet: React.FC<ShippingPolicySheetProps> = ({
                   <div className="flex items-center gap-2">
                     <Input
                       type="time"
-                      className="h-8 text-[11px] rounded-lg"
+                      className="rounded-lg text-sm"
                       value={slot.startTime ?? ''}
                       disabled={!slot.enabled}
                       onChange={(e) =>
@@ -261,7 +261,7 @@ export const ShippingPolicySheet: React.FC<ShippingPolicySheetProps> = ({
                     <span className="text-muted-foreground">às</span>
                     <Input
                       type="time"
-                      className="h-8 text-[11px] rounded-lg"
+                      className="rounded-lg text-sm"
                       value={slot.endTime ?? ''}
                       disabled={!slot.enabled}
                       onChange={(e) =>

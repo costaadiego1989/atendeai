@@ -147,7 +147,7 @@ export function CreateRuleSheet({ open, onOpenChange, vm }: CreateRuleSheetProps
                       )
                     }
                   >
-                    <SelectTrigger className="h-8 text-xs">
+                    <SelectTrigger className="text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -202,7 +202,6 @@ export function CreateRuleSheet({ open, onOpenChange, vm }: CreateRuleSheetProps
                           },
                         }))
                       }
-                      className="h-8"
                     />
                   </div>
                 </div>
@@ -261,7 +260,7 @@ export function CreateRuleSheet({ open, onOpenChange, vm }: CreateRuleSheetProps
         </div>
 
         <div className="flex justify-between items-center mt-10 p-4 border-t bg-background/80 sticky bottom-0 -mx-6">
-          <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 font-normal shadow-sm gap-1">Status Pré-ativo <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse ml-1" /></Badge>
+          <Badge variant="secondary" className="bg-success/10 text-success font-normal shadow-sm gap-1">Status Pré-ativo <div className="w-1.5 h-1.5 bg-success rounded-full animate-pulse ml-1" /></Badge>
           <div className="gap-2 flex">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
