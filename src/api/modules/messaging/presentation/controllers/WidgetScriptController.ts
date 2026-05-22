@@ -122,9 +122,12 @@ const WIDGET_SCRIPT = `(function(){
   }
 
   function maskPhone(v){
-    v=v.replace(/\D/g,'');if(v.length>11)v=v.slice(0,11);
-    if(v.length<=10)return v.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/,function(_,a,b,c){return a?(b?'('+a+') '+b+(c?'-'+c:''):'('+a+')'):a;});
-    return v.replace(/^(\d{2})(\d{5})(\d{0,4})$/,function(_,a,b,c){return '('+a+') '+b+(c?'-'+c:'');});
+    var d=v.replace(/\D/g,'').slice(0,11);
+    if(!d)return '';
+    if(d.length<=2)return '('+d;
+    if(d.length<=6)return '('+d.slice(0,2)+') '+d.slice(2);
+    if(d.length<=10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
+    return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
   }
   function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());}
   function isValidPhone(p){return p.replace(/\D/g,'').length>=10;}
