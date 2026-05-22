@@ -60,13 +60,16 @@ describe('InitiateWidgetContactUseCase', () => {
       );
     });
 
-    it('falls back to widget_<visitorId> when phone absent', async () => {
+    it('falls back to wgt_<hash> when phone absent', async () => {
       tx.conversation.findFirst.mockResolvedValue(existingConversation);
 
       await useCase.execute(baseInput);
 
+      const { createHash } = require('crypto');
+      const expectedPhone = `wgt_${createHash('sha256').update('visitor-abc').digest('hex').slice(0, 15)}`;
+
       expect(contactFacade.ensureContact).toHaveBeenCalledWith(
-        expect.objectContaining({ phone: 'widget_visitor-abc' }),
+        expect.objectContaining({ phone: expectedPhone }),
       );
     });
 
