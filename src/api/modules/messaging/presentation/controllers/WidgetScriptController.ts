@@ -121,6 +121,14 @@ const WIDGET_SCRIPT = `(function(){
     if(old&&old.parentNode)old.parentNode.removeChild(old);
   }
 
+  function maskPhone(v){
+    v=v.replace(/\D/g,'');if(v.length>11)v=v.slice(0,11);
+    if(v.length<=10)return v.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/,function(_,a,b,c){return a?(b?'('+a+') '+b+(c?'-'+c:''):'('+a+')'):a;});
+    return v.replace(/^(\d{2})(\d{5})(\d{0,4})$/,function(_,a,b,c){return '('+a+') '+b+(c?'-'+c:'');});
+  }
+  function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());}
+  function isValidPhone(p){return p.replace(/\D/g,'').length>=10;}
+
   function showChips(){
     if(qrDismissed||!wCfg||!wCfg.quickReplies||!wCfg.quickReplies.length)return;
     var c=$id('_atai-qr');if(c)c.classList.remove('hidden');
@@ -291,6 +299,17 @@ const WIDGET_SCRIPT = `(function(){
       setTimeout(function(){if(i2)i2.style.borderColor='';},900);
       return;
     }
+    if(val&&step.id==='phone'&&!isValidPhone(val)){
+      i2.style.borderColor='#ef4444';i2.value='';
+      agentSay('Número inválido. Digite com DDD, ex: (11) 9 9999-9999');
+      return;
+    }
+    if(val&&step.id==='email'&&!isValidEmail(val)){
+      i2.style.borderColor='#ef4444';
+      var phBk=i2.placeholder;i2.placeholder='E-mail inválido. Ex: nome@email.com';
+      setTimeout(function(){if(i2){i2.style.borderColor='';i2.placeholder=phBk;}},2200);
+      return;
+    }
     collectData[step.id]=val||null;
     i2.value='';i2.style.height='auto';i2.disabled=true;
     if(val)addRow('out',val);
@@ -383,7 +402,13 @@ const WIDGET_SCRIPT = `(function(){
     rbtn.addEventListener('click',function(e){e.stopPropagation();restartChat();});
     sb.addEventListener('click',sendMessage);
     i2.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
-    i2.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px';});
+    i2.addEventListener('input',function(){
+      if(state==='collecting'&&collectSteps[collectIdx]&&collectSteps[collectIdx].id==='phone'){
+        var cur=this.selectionStart,raw=this.value,m=maskPhone(raw);
+        if(m!==raw){this.value=m;try{var d=m.length-raw.length;this.setSelectionRange(cur+d,cur+d);}catch(e){}}
+      }
+      this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px';
+    });
   }
 
   // ---- INIT ----

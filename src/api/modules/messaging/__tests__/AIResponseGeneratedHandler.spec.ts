@@ -64,4 +64,65 @@ describe('AIResponseGeneratedHandler', () => {
       'contact-1',
     );
   });
+
+  it('should subscribe to ai.response-failed and persist fallback message via sendAIMessageUseCase', async () => {
+    let failedHandler: ((event: any) => Promise<void>) | undefined;
+    eventBus.subscribe.mockImplementation((queue, callback) => {
+      if (queue === 'ai.response-failed') {
+        failedHandler = callback as (event: any) => Promise<void>;
+      }
+    });
+
+    handler.onModuleInit();
+
+    expect(eventBus.subscribe).toHaveBeenCalledWith(
+      'ai.response-failed',
+      expect.any(Function),
+      { consumerName: 'messaging-ai-response-failed' },
+    );
+
+    await failedHandler!({
+      payload: {
+        conversationId: 'conversation-2',
+        fallbackMessage: 'Estou em configuração. Tente novamente em breve.',
+      },
+    });
+
+    expect(sendAIMessageUseCase.execute).toHaveBeenCalledWith({
+      conversationId: 'conversation-2',
+      text: 'Estou em configuração. Tente novamente em breve.',
+      type: 'TEXT',
+    });
+    expect(followUpService.scheduleFollowUps).not.toHaveBeenCalled();
+  });
+
+  it('should not call sendAIMessageUseCase when ai.response-failed has no fallbackMessage', async () => {
+    let failedHandler: ((event: any) => Promise<void>) | undefined;
+    eventBus.subscribe.mockImplementation((queue, callback) => {
+      if (queue === 'ai.response-failed') {
+        failedHandler = callback as (event: any) => Promise<void>;
+      }
+    });
+
+    handler.onModuleInit();
+
+    await failedHandler!({ payload: { conversationId: 'conversation-3' } });
+
+    expect(sendAIMessageUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it('should not call sendAIMessageUseCase when ai.response-failed has no conversationId', async () => {
+    let failedHandler: ((event: any) => Promise<void>) | undefined;
+    eventBus.subscribe.mockImplementation((queue, callback) => {
+      if (queue === 'ai.response-failed') {
+        failedHandler = callback as (event: any) => Promise<void>;
+      }
+    });
+
+    handler.onModuleInit();
+
+    await failedHandler!({ payload: { fallbackMessage: 'some message' } });
+
+    expect(sendAIMessageUseCase.execute).not.toHaveBeenCalled();
+  });
 });
