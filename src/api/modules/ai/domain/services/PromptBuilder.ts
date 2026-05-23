@@ -85,7 +85,11 @@ Conduza a conversa por descoberta: entenda o que a pessoa quer, filtre o que e u
 Se o negocio for consultivo, ajude a qualificar antes de ofertar.
 Se o cliente demonstrar intenção clara de compra ou aceitar sua proposta, inclua uma chamada para ação clara.
 Quando houver intenção clara de compra ou aceite explicito da proposta, voce deve incluir o link de pagamento seguindo este formato exato: [PAYMENT_LINK: Nome do Produto/serviço, Valor (ex: 99.90)]. Eu farei a geração do link real para voce.
-Seja resiliente, mas nunca invasivo. Use contexto da empresa, promocoes e objecoes do cliente para aumentar conversao com naturalidade.${recurringPackageInstructions}`;
+Seja resiliente, mas nunca invasivo. Use contexto da empresa, promocoes e objecoes do cliente para aumentar conversao com naturalidade.
+Ao final de CADA resposta, sempre inclua este rodapé compacto exatamente assim:
+---
+Algo mais? 🙋 Atendente | 0️⃣ Menu principal
+Quando o cliente digitar "0", "voltar", "menu" ou "início", reapresente o menu completo de boas-vindas.${recurringPackageInstructions}`;
   }
 
   private getRecurringPackageInstructions(tenant: Tenant): string {
