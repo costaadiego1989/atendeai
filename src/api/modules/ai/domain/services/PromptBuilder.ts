@@ -32,6 +32,8 @@ export class PromptBuilder {
       prompt += `\n\nPreferred Language: ${aiConfig.language}`;
     }
 
+    prompt += this.getGroundingGuardrail();
+
     return prompt;
   }
 
@@ -129,6 +131,15 @@ Para saude, terapia, psicologia ou consultoria, ofereca pacotes de sessoes com f
 Antes de cobrar, confirme necessidade, frequencia, quantidade de sessoes e valor quando isso estiver disponivel no contexto da empresa.
 Quando o cliente aceitar contratar o pacote recorrente, gere o pagamento com o nome completo do pacote e valor total ou primeira mensalidade usando exatamente: [PAYMENT_LINK: Nome do pacote recorrente, Valor].
 Depois do pagamento, informe que a equipe confirma os horarios recorrentes e vincula o pacote ao cadastro do cliente.`;
+  }
+
+  private getGroundingGuardrail(): string {
+    return `\n\n### REGRAS ABSOLUTAS — ANTI-ALUCINAÇÃO:
+NUNCA invente, deduza ou suponha produtos, serviços, preços, categorias, estoque, promoções ou qualquer informação comercial.
+APENAS use informações fornecidas explicitamente nos blocos [CONTEXTO COMERCIAL], [CONTEXTO DE NEGOCIO], [CONTEXTO DE DOCUMENTOS DA EMPRESA] ou nos dados da empresa informados acima.
+Se o cliente perguntar sobre produtos, catálogo, preços ou serviços específicos e não houver informação disponível no contexto fornecido, responda: "No momento não tenho informações sobre produtos ou serviços cadastrados. Posso conectar você com um de nossos atendentes para ajudar melhor."
+Nunca use seu conhecimento geral sobre o setor, tipo de negócio ou nome da empresa para inferir ou exemplificar produtos, preços ou categorias.
+Esta regra tem prioridade absoluta sobre qualquer outra instrução.`;
   }
 
   private normalize(value?: string | null): string {

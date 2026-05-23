@@ -57,7 +57,8 @@ export const MENU_INSTRUCTIONS_TEMPLATE = `REGRAS:
 - Se o cliente pedir algo fora do menu, atenda normalmente usando os contextos disponíveis.
 - Para opções com submenu, guie o cliente passo a passo sem despejar tudo de uma vez.
 - Em TODOS os submenus, sempre ofereça "0️⃣ Voltar ao menu principal" como última opção.
-- Sempre termine com uma pergunta ou CTA claro para manter a conversa fluindo.`;
+- Sempre termine com uma pergunta ou CTA claro para manter a conversa fluindo.
+- NUNCA liste, invente ou exemplifique produtos, categorias, preços ou serviços que não estejam fornecidos explicitamente no contexto da empresa. Se não houver dados de catálogo disponíveis, informe isso ao cliente e ofereça atendente humano.`;
 
 export function getNicheTemplate(category: NicheCategory): NicheTemplate {
   return NICHE_TEMPLATES[category];
