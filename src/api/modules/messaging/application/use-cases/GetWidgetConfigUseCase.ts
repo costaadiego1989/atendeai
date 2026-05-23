@@ -1,19 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import { Injectable, Inject } from '@nestjs/common';
+import {
+  IWidgetConfigRepository,
+  WIDGET_CONFIG_REPOSITORY,
+} from '@modules/messaging/domain/repositories/IWidgetConfigRepository';
 
 @Injectable()
 export class GetWidgetConfigUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(WIDGET_CONFIG_REPOSITORY)
+    private readonly repo: IWidgetConfigRepository,
+  ) {}
 
   async execute(tenantId: string) {
-    const existing = await this.prisma.widgetConfig.findFirst({
-      where: { tenantId },
-    });
-
-    if (existing) return existing;
-
-    return this.prisma.widgetConfig.create({
-      data: { tenantId },
-    });
+    return this.repo.findOrCreate(tenantId);
   }
 }

@@ -7,14 +7,12 @@ import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import {
+  IWidgetConfigRepository,
+  WIDGET_CONFIG_REPOSITORY,
+} from '@modules/messaging/domain/repositories/IWidgetConfigRepository';
 
-const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-];
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 const MIME_TO_EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -27,7 +25,8 @@ const MIME_TO_EXT: Record<string, string> = {
 export class UploadWidgetAvatarUseCase {
   constructor(
     @Inject(FILE_STORAGE_SERVICE) private readonly storage: FileStorageService,
-    private readonly prisma: PrismaService,
+    @Inject(WIDGET_CONFIG_REPOSITORY)
+    private readonly repo: IWidgetConfigRepository,
   ) {}
 
   async execute(
@@ -40,7 +39,6 @@ export class UploadWidgetAvatarUseCase {
         'Tipo de imagem não suportado. Use JPG, PNG, GIF ou WebP.',
       );
     }
-
     const ext = MIME_TO_EXT[mimeType];
     const avatarUrl = await this.storage.upload(
       file,
@@ -48,22 +46,7 @@ export class UploadWidgetAvatarUseCase {
       mimeType,
       { folder: `widget-avatars/${tenantId}`, isPublic: true },
     );
-
-    const existing = await this.prisma.widgetConfig.findFirst({
-      where: { tenantId },
-    });
-
-    if (existing) {
-      await this.prisma.widgetConfig.update({
-        where: { id: existing.id },
-        data: { avatarUrl },
-      });
-    } else {
-      await this.prisma.widgetConfig.create({
-        data: { tenantId, avatarUrl },
-      });
-    }
-
+    await this.repo.updateAvatar(tenantId, avatarUrl);
     return { avatarUrl };
   }
 }

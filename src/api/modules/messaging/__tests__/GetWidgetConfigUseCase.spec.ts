@@ -1,54 +1,68 @@
 import { GetWidgetConfigUseCase } from '../application/use-cases/GetWidgetConfigUseCase';
+import { IWidgetConfigRepository } from '../domain/repositories/IWidgetConfigRepository';
 
 describe('GetWidgetConfigUseCase', () => {
   let useCase: GetWidgetConfigUseCase;
-  let prisma: { widgetConfig: { findFirst: jest.Mock; create: jest.Mock } };
+  let repo: jest.Mocked<IWidgetConfigRepository>;
 
   const existingConfig = {
     id: 'cfg-1',
     tenantId: 'tenant-1',
     enabled: true,
     publicToken: 'tok-abc',
+    name: 'Widget',
+    greeting: null,
+    color: '#000',
+    backgroundColor: null,
+    position: 'bottom-right',
+    avatarUrl: null,
+    collectName: false,
+    collectPhone: false,
+    collectEmail: false,
+    collectCpf: false,
+    proactiveDelay: null,
+    proactiveMsg: null,
+    quickReplies: [],
+    allowedOrigins: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   beforeEach(() => {
-    prisma = {
-      widgetConfig: {
-        findFirst: jest.fn(),
-        create: jest.fn(),
-      },
+    repo = {
+      findByPublicToken: jest.fn(),
+      findByTenantId: jest.fn(),
+      findOrCreate: jest.fn(),
+      update: jest.fn(),
+      upsertByTenantId: jest.fn(),
+      updateAvatar: jest.fn(),
     };
-    useCase = new GetWidgetConfigUseCase(prisma as any);
+    useCase = new GetWidgetConfigUseCase(repo);
   });
 
   it('returns existing config without creating a new one', async () => {
-    prisma.widgetConfig.findFirst.mockResolvedValue(existingConfig);
+    repo.findOrCreate.mockResolvedValue(existingConfig);
 
     const result = await useCase.execute('tenant-1');
 
     expect(result).toEqual(existingConfig);
-    expect(prisma.widgetConfig.create).not.toHaveBeenCalled();
+    expect(repo.findOrCreate).toHaveBeenCalledWith('tenant-1');
   });
 
   it('creates default config when none exists', async () => {
-    prisma.widgetConfig.findFirst.mockResolvedValue(null);
-    prisma.widgetConfig.create.mockResolvedValue({ ...existingConfig, id: 'cfg-new' });
+    const newConfig = { ...existingConfig, id: 'cfg-new' };
+    repo.findOrCreate.mockResolvedValue(newConfig);
 
     const result = await useCase.execute('tenant-1');
 
-    expect(prisma.widgetConfig.create).toHaveBeenCalledWith({
-      data: { tenantId: 'tenant-1' },
-    });
     expect(result.id).toBe('cfg-new');
   });
 
   it('queries by tenantId', async () => {
-    prisma.widgetConfig.findFirst.mockResolvedValue(existingConfig);
+    repo.findOrCreate.mockResolvedValue(existingConfig);
 
     await useCase.execute('tenant-xyz');
 
-    expect(prisma.widgetConfig.findFirst).toHaveBeenCalledWith({
-      where: { tenantId: 'tenant-xyz' },
-    });
+    expect(repo.findOrCreate).toHaveBeenCalledWith('tenant-xyz');
   });
 });

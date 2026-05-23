@@ -50,7 +50,7 @@ const WIDGET_SCRIPT = `(function(){
       '._row{display:flex;align-items:flex-end;gap:7px;}._row.out{flex-direction:row-reverse;}',
       '._av{width:28px;height:28px;border-radius:50%;flex-shrink:0;overflow:hidden;background:'+c+';display:flex;align-items:center;justify-content:center;}',
       '._av img{width:100%;height:100%;object-fit:cover;}._av svg{width:15px;height:15px;fill:#fff;}',
-      '._bub{max-width:78%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word;animation:_pop .17s ease;}',
+      '._bub{max-width:78%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word;white-space:pre-wrap;animation:_pop .17s ease;}',
       '._row.in ._bub{background:#fff;color:#111;border-bottom-left-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.07);}',
       '._row.out ._bub{background:'+c+';color:#fff;border-bottom-right-radius:3px;}',
       '._typing-bub{display:flex;gap:5px;align-items:center;padding:12px 14px;}',
@@ -131,6 +131,7 @@ const WIDGET_SCRIPT = `(function(){
   }
   function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());}
   function isValidPhone(p){return p.replace(/\D/g,'').length>=10;}
+  function stripTags(s){return s?s.replace(/<[^>]*>/g,''):''}
 
   function showChips(){
     if(qrDismissed||!wCfg||!wCfg.quickReplies||!wCfg.quickReplies.length)return;
@@ -158,10 +159,10 @@ const WIDGET_SCRIPT = `(function(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         visitorId:visitorId,
-        visitorName:collectData.name||undefined,
-        visitorPhone:collectData.phone||undefined,
-        visitorEmail:collectData.email||undefined,
-        visitorCpf:collectData.cpf||undefined,
+        visitorName:collectData.name?stripTags(collectData.name):undefined,
+        visitorPhone:collectData.phone?stripTags(collectData.phone):undefined,
+        visitorEmail:collectData.email?stripTags(collectData.email):undefined,
+        visitorCpf:collectData.cpf?stripTags(collectData.cpf):undefined,
         pageUrl:window.location.href,
       }),
     }).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
@@ -194,9 +195,10 @@ const WIDGET_SCRIPT = `(function(){
             hideTyping();
             all.slice(outboundCnt).forEach(function(m){
               var t=m.content&&m.content.text?m.content.text:'';
-              if(t)addRow('in',t,{type:true});
+              if(t)addRow('in',t);
             });
             outboundCnt=all.length;
+            qrDismissed=false;showChips();
           }
         }).catch(function(){});
     },3000);
@@ -207,8 +209,12 @@ const WIDGET_SCRIPT = `(function(){
   function loadHistory(cb){
     if(!sessionId){if(cb)cb();return;}
     fetch(apiBase+'/widget/'+token+'/sessions/'+sessionId+'/messages')
-      .then(function(r){return r.json();})
+      .then(function(r){
+        if(!r.ok){sessionId=null;sessionProm=null;localStorage.removeItem('_atai_sid_'+token);if(cb)cb();return null;}
+        return r.json();
+      })
       .then(function(d){
+        if(!d)return;
         var msgs=((d.data||d).messages||[]);
         var m=$msgs();
         if(m&&msgs.length>0){
@@ -222,7 +228,7 @@ const WIDGET_SCRIPT = `(function(){
         }
         if(cb)cb();
       })
-      .catch(function(){if(cb)cb();});
+      .catch(function(){sessionId=null;sessionProm=null;localStorage.removeItem('_atai_sid_'+token);if(cb)cb();});
   }
 
   function restartChat(){
@@ -417,7 +423,7 @@ const WIDGET_SCRIPT = `(function(){
   // ---- INIT ----
   function init(){
     fetch(apiBase+'/widget/'+token+'/config')
-      .then(function(r){return r.json();})
+      .then(function(r){if(!r.ok)throw new Error('Config '+r.status);return r.json();})
       .then(function(d){return d.data||d;})
       .then(function(cfg){
         wCfg=cfg;
@@ -437,8 +443,13 @@ const WIDGET_SCRIPT = `(function(){
           state='chatting';
           var i2=$inp();if(i2)i2.disabled=false;
           if(sessionId){
-            // Resume: skip greeting, just load history
-            loadHistory(function(){showChips();startPolling();});
+            loadHistory(function(){
+              var m=$msgs();
+              if(m&&m.children.length===0&&cfg.greeting){
+                addRow('in',cfg.greeting,{type:true,done:function(){showChips();}});
+              } else {showChips();}
+              startPolling();
+            });
           } else if(cfg.greeting){
             addRow('in',cfg.greeting,{type:true,done:function(){showChips();}});
           } else {

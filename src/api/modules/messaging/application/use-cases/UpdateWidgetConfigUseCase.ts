@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import { Injectable, Inject } from '@nestjs/common';
+import {
+  IWidgetConfigRepository,
+  WIDGET_CONFIG_REPOSITORY,
+} from '@modules/messaging/domain/repositories/IWidgetConfigRepository';
 
 export interface UpdateWidgetConfigInput {
   name?: string;
@@ -20,32 +23,17 @@ export interface UpdateWidgetConfigInput {
 
 @Injectable()
 export class UpdateWidgetConfigUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(WIDGET_CONFIG_REPOSITORY)
+    private readonly repo: IWidgetConfigRepository,
+  ) {}
 
   async execute(tenantId: string, input: UpdateWidgetConfigInput) {
-    // color and position are non-nullable in schema — strip null values
-    const data: Omit<UpdateWidgetConfigInput, 'color' | 'position'> & {
-      color?: string;
-      position?: string;
-    } = {
+    const data = {
       ...input,
       color: input.color ?? undefined,
       position: input.position ?? undefined,
     };
-
-    const existing = await this.prisma.widgetConfig.findFirst({
-      where: { tenantId },
-    });
-
-    if (existing) {
-      return this.prisma.widgetConfig.update({
-        where: { id: existing.id },
-        data,
-      });
-    }
-
-    return this.prisma.widgetConfig.create({
-      data: { tenantId, ...data },
-    });
+    return this.repo.upsertByTenantId(tenantId, data);
   }
 }

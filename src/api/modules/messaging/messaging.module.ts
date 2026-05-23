@@ -89,6 +89,14 @@ import { UpdateWidgetConfigUseCase } from './application/use-cases/UpdateWidgetC
 import { UploadWidgetAvatarUseCase } from './application/use-cases/UploadWidgetAvatarUseCase';
 import { ProcessWidgetMessageUseCase } from './application/use-cases/ProcessWidgetMessageUseCase';
 import { InitiateWidgetContactUseCase } from './application/use-cases/InitiateWidgetContactUseCase';
+import { GetWidgetPublicConfigUseCase } from './application/use-cases/GetWidgetPublicConfigUseCase';
+import { InitWidgetSessionUseCase } from './application/use-cases/InitWidgetSessionUseCase';
+import { CloseWidgetSessionUseCase } from './application/use-cases/CloseWidgetSessionUseCase';
+import { GetWidgetSessionMessagesUseCase } from './application/use-cases/GetWidgetSessionMessagesUseCase';
+import { PrismaWidgetConfigRepository } from './infrastructure/persistence/repositories/PrismaWidgetConfigRepository';
+import { PrismaWidgetSessionRepository } from './infrastructure/persistence/repositories/PrismaWidgetSessionRepository';
+import { WIDGET_CONFIG_REPOSITORY } from './domain/repositories/IWidgetConfigRepository';
+import { WIDGET_SESSION_REPOSITORY } from './domain/repositories/IWidgetSessionRepository';
 
 @Module({
   imports: [
@@ -211,11 +219,23 @@ import { InitiateWidgetContactUseCase } from './application/use-cases/InitiateWi
     PrismaMessagingWebhookReceiptStore,
     WebSocketMessagingRealtimePublisher,
     MessagingFacade,
+    {
+      provide: WIDGET_CONFIG_REPOSITORY,
+      useClass: PrismaWidgetConfigRepository,
+    },
+    {
+      provide: WIDGET_SESSION_REPOSITORY,
+      useClass: PrismaWidgetSessionRepository,
+    },
     GetWidgetConfigUseCase,
     UpdateWidgetConfigUseCase,
     UploadWidgetAvatarUseCase,
     ProcessWidgetMessageUseCase,
     InitiateWidgetContactUseCase,
+    GetWidgetPublicConfigUseCase,
+    InitWidgetSessionUseCase,
+    CloseWidgetSessionUseCase,
+    GetWidgetSessionMessagesUseCase,
     TrialWelcomeNotificationHandler,
     BillingQuotaMessagingHandlers,
     {

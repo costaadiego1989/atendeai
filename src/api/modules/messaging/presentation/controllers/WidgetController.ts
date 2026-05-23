@@ -4,14 +4,21 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
+  NotFoundException,
+  BadRequestException,
   Post,
   Param,
-  BadRequestException,
-  NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import { GetWidgetPublicConfigUseCase } from '../../application/use-cases/GetWidgetPublicConfigUseCase';
+import { InitWidgetSessionUseCase } from '../../application/use-cases/InitWidgetSessionUseCase';
+import { CloseWidgetSessionUseCase } from '../../application/use-cases/CloseWidgetSessionUseCase';
+import { GetWidgetSessionMessagesUseCase } from '../../application/use-cases/GetWidgetSessionMessagesUseCase';
 import { ProcessWidgetMessageUseCase } from '../../application/use-cases/ProcessWidgetMessageUseCase';
-import { InitiateWidgetContactUseCase } from '../../application/use-cases/InitiateWidgetContactUseCase';
+import {
+  IWidgetSessionRepository,
+  WIDGET_SESSION_REPOSITORY,
+} from '../../domain/repositories/IWidgetSessionRepository';
 
 interface InitSessionDTO {
   visitorId: string;
@@ -30,184 +37,58 @@ interface SendWidgetMessageDTO {
   url?: string;
 }
 
-/**
- * Public controller for the Chat Embed Widget.
- * No auth guard — uses publicToken to identify the tenant/widget config.
- */
 @Controller('widget')
 export class WidgetController {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly processWidgetMessage: ProcessWidgetMessageUseCase,
-    private readonly initiateWidgetContact: InitiateWidgetContactUseCase,
+    private readonly getPublicConfig: GetWidgetPublicConfigUseCase,
+    private readonly initSession: InitWidgetSessionUseCase,
+    private readonly closeSession: CloseWidgetSessionUseCase,
+    private readonly getMessages: GetWidgetSessionMessagesUseCase,
+    private readonly processMessage: ProcessWidgetMessageUseCase,
+    @Inject(WIDGET_SESSION_REPOSITORY)
+    private readonly sessionRepo: IWidgetSessionRepository,
   ) {}
 
-  /**
-   * GET /api/v1/widget/:publicToken/config
-   * Returns widget configuration for the embed SDK to render.
-   */
   @Get(':publicToken/config')
   async getConfig(@Param('publicToken') publicToken: string) {
-    const config = await this.prisma.widgetConfig.findUnique({
-      where: { publicToken },
-    });
-
-    if (!config || !config.enabled) {
-      throw new NotFoundException('Widget not found or disabled');
-    }
-
-    return {
-      id: config.id,
-      name: config.name,
-      greeting: config.greeting,
-      color: config.color,
-      position: config.position,
-      avatarUrl: config.avatarUrl,
-      collectName: config.collectName,
-      collectPhone: config.collectPhone,
-      collectEmail: config.collectEmail,
-      collectCpf: config.collectCpf,
-      proactiveDelay: config.proactiveDelay,
-      proactiveMsg: config.proactiveMsg,
-      quickReplies: (config.quickReplies as string[]) ?? [],
-    };
+    return this.getPublicConfig.execute(publicToken);
   }
 
-  /**
-   * POST /api/v1/widget/:publicToken/sessions
-   * Creates or resumes a widget chat session.
-   */
   @Post(':publicToken/sessions')
-  async initSession(
+  async initWidgetSession(
     @Param('publicToken') publicToken: string,
     @Body() dto: InitSessionDTO,
   ) {
-    if (!dto.visitorId) {
-      throw new BadRequestException('visitorId is required');
-    }
-
-    const config = await this.prisma.widgetConfig.findUnique({
-      where: { publicToken },
+    return this.initSession.execute({
+      publicToken,
+      visitorId: dto.visitorId,
+      visitorName: dto.visitorName,
+      visitorPhone: dto.visitorPhone,
+      visitorEmail: dto.visitorEmail,
+      visitorCpf: dto.visitorCpf,
+      pageUrl: dto.pageUrl,
     });
-
-    if (!config || !config.enabled) {
-      throw new NotFoundException('Widget not found or disabled');
-    }
-
-    // Try to resume existing session
-    const existing = await this.prisma.widgetSession.findFirst({
-      where: {
-        widgetConfigId: config.id,
-        tenantId: config.tenantId,
-        visitorId: dto.visitorId,
-        status: 'ACTIVE',
-      },
-    });
-
-    if (existing) {
-      const visitorName = dto.visitorName || existing.visitorName;
-      const visitorPhone = dto.visitorPhone || existing.visitorPhone;
-
-      const { contactId, conversationId } =
-        await this.initiateWidgetContact.execute({
-          tenantId: config.tenantId,
-          visitorId: dto.visitorId,
-          visitorName,
-          visitorPhone,
-          visitorEmail: dto.visitorEmail || existing.visitorEmail,
-          visitorCpf: dto.visitorCpf || existing.visitorCpf,
-          quickReplies: (config.quickReplies as string[]) ?? [],
-        });
-
-      await this.prisma.widgetSession.update({
-        where: { id: existing.id },
-        data: {
-          lastActiveAt: new Date(),
-          visitorName,
-          visitorPhone,
-          visitorEmail: dto.visitorEmail || existing.visitorEmail,
-          visitorCpf: dto.visitorCpf || existing.visitorCpf,
-          pageUrl: dto.pageUrl || existing.pageUrl,
-          contactId,
-          conversationId,
-        },
-      });
-
-      return { sessionId: existing.id, conversationId, resumed: true };
-    }
-
-    // Create new session then immediately register contact + start conversation
-    const session = await this.prisma.widgetSession.create({
-      data: {
-        widgetConfigId: config.id,
-        tenantId: config.tenantId,
-        visitorId: dto.visitorId,
-        visitorName: dto.visitorName,
-        visitorPhone: dto.visitorPhone,
-        visitorEmail: dto.visitorEmail,
-        visitorCpf: dto.visitorCpf,
-        pageUrl: dto.pageUrl,
-      },
-    });
-
-    const { contactId, conversationId } =
-      await this.initiateWidgetContact.execute({
-        tenantId: config.tenantId,
-        visitorId: dto.visitorId,
-        visitorName: dto.visitorName,
-        visitorPhone: dto.visitorPhone,
-        visitorEmail: dto.visitorEmail,
-        visitorCpf: dto.visitorCpf,
-        quickReplies: (config.quickReplies as string[]) ?? [],
-      });
-
-    await this.prisma.widgetSession.update({
-      where: { id: session.id },
-      data: { contactId, conversationId },
-    });
-
-    return { sessionId: session.id, conversationId, resumed: false };
   }
 
-  /**
-   * POST /api/v1/widget/:publicToken/messages
-   * Receives a message from the widget visitor.
-   */
   @Post(':publicToken/messages')
   async sendMessage(
     @Param('publicToken') publicToken: string,
     @Body() dto: SendWidgetMessageDTO,
   ) {
     if (!dto.sessionId || !dto.visitorId || !dto.text) {
-      throw new BadRequestException(
-        'sessionId, visitorId, and text are required',
-      );
+      throw new BadRequestException('sessionId, visitorId, and text are required');
     }
 
-    const config = await this.prisma.widgetConfig.findUnique({
-      where: { publicToken },
-    });
+    const config = await this.getPublicConfig.execute(publicToken);
 
-    if (!config || !config.enabled) {
-      throw new NotFoundException('Widget not found or disabled');
-    }
-
-    const session = await this.prisma.widgetSession.findFirst({
-      where: {
-        id: dto.sessionId,
-        tenantId: config.tenantId,
-        visitorId: dto.visitorId,
-        status: 'ACTIVE',
-      },
-    });
-
-    if (!session) {
+    const session = await this.sessionRepo.findById(dto.sessionId, config.tenantId);
+    if (!session || session.visitorId !== dto.visitorId || session.status !== 'ACTIVE') {
       throw new NotFoundException('Session not found');
     }
 
     const { contactId, conversationId, messageId } =
-      await this.processWidgetMessage.execute({
-        tenantId: config.tenantId,
+      await this.processMessage.execute({
+        tenantId: session.tenantId,
         widgetSessionId: session.id,
         visitorId: session.visitorId,
         visitorName: session.visitorName,
@@ -217,104 +98,33 @@ export class WidgetController {
         text: dto.text,
         contentType: dto.type,
         url: dto.url,
-        quickReplies: (config.quickReplies as string[]) ?? [],
+        quickReplies: config.quickReplies,
       });
 
-    await this.prisma.widgetSession.update({
-      where: { id: session.id },
-      data: { contactId, conversationId, lastActiveAt: new Date() },
+    await this.sessionRepo.update(session.id, config.tenantId, {
+      contactId,
+      conversationId,
+      lastActiveAt: new Date(),
     });
 
     return { messageId, conversationId, contactId };
   }
 
-  /**
-   * DELETE /api/v1/widget/:publicToken/sessions/:sessionId
-   * Closes session and archives the linked conversation, enabling a fresh restart.
-   */
   @Delete(':publicToken/sessions/:sessionId')
   @HttpCode(200)
   async restartSession(
     @Param('publicToken') publicToken: string,
     @Param('sessionId') sessionId: string,
   ) {
-    const config = await this.prisma.widgetConfig.findUnique({
-      where: { publicToken },
-    });
-
-    if (!config || !config.enabled) {
-      throw new NotFoundException('Widget not found or disabled');
-    }
-
-    const session = await this.prisma.widgetSession.findFirst({
-      where: { id: sessionId, tenantId: config.tenantId },
-    });
-
-    if (!session) {
-      throw new NotFoundException('Session not found');
-    }
-
-    await this.prisma.widgetSession.update({
-      where: { id: session.id },
-      data: { status: 'CLOSED' },
-    });
-
-    if (session.conversationId) {
-      await this.prisma.conversation.update({
-        where: { id: session.conversationId },
-        data: { status: 'ARCHIVED' },
-      });
-    }
-
+    await this.closeSession.execute({ publicToken, sessionId });
     return { success: true };
   }
 
-  /**
-   * GET /api/v1/widget/:publicToken/sessions/:sessionId/messages
-   * Returns message history for a widget session.
-   */
   @Get(':publicToken/sessions/:sessionId/messages')
-  async getMessages(
+  async getSessionMessages(
     @Param('publicToken') publicToken: string,
     @Param('sessionId') sessionId: string,
   ) {
-    const config = await this.prisma.widgetConfig.findUnique({
-      where: { publicToken },
-    });
-
-    if (!config || !config.enabled) {
-      throw new NotFoundException('Widget not found or disabled');
-    }
-
-    const session = await this.prisma.widgetSession.findFirst({
-      where: {
-        id: sessionId,
-        tenantId: config.tenantId,
-      },
-    });
-
-    if (!session || !session.conversationId) {
-      return { messages: [] };
-    }
-
-    const messages = await this.prisma.message.findMany({
-      where: {
-        conversationId: session.conversationId,
-        sentBy: { not: 'SYSTEM' },
-      },
-      orderBy: { createdAt: 'asc' },
-      take: 100,
-    });
-
-    return {
-      messages: messages.map((m: any) => ({
-        id: m.id,
-        direction: m.direction,
-        contentType: m.contentType,
-        content: m.content,
-        sentBy: m.sentBy,
-        createdAt: m.createdAt,
-      })),
-    };
+    return this.getMessages.execute({ publicToken, sessionId });
   }
 }
