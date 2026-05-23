@@ -183,6 +183,11 @@ export class AIContextAggregator {
       diagnostics.commerceContextFound = true;
     }
 
+    if (!commercialContext && !commerceContext) {
+      prompt = `${prompt}\n\n[ESTADO DO CATÁLOGO]: Nenhum produto, serviço ou oferta cadastrado foi encontrado para esta consulta. Quando o cliente perguntar sobre produtos, catálogo ou preços, informe que não há produtos cadastrados no momento e ofereça conectar com um atendente humano. Não invente exemplos.`;
+      diagnostics.catalogEmptyStateInjected = true;
+    }
+
     const schedulingContext =
       await this.schedulingContextProvider.findRelevantAvailability(
         tenant.id.toString(),

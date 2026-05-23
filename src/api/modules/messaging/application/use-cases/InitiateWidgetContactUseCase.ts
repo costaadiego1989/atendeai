@@ -94,17 +94,10 @@ export class InitiateWidgetContactUseCase {
           );
 
           // Synthetic init message triggers proactive AI welcome.
-          // Instructions here persist in conversation history and shape ALL subsequent AI responses.
-          const initText =
-            '[WIDGET_INIT] Novo visitante no site. Siga estas regras em TODAS as respostas:\n' +
-            '1. BOAS-VINDAS: Apresente-se em no máximo 2 frases curtas e diretas.\n' +
-            '2. MENU: Logo após a saudação, liste as opções do negócio com emojis numerados.\n' +
-            '3. OPÇÕES FIXAS: Inclua SEMPRE estas opções em todo menu:\n' +
-            '   🙋 Falar com atendente humano\n' +
-            '   0️⃣ Voltar ao menu principal\n' +
-            '4. RODAPÉ OBRIGATÓRIO: Ao final de CADA resposta, exiba um mini-menu compacto:\n' +
-            '   "Algo mais? 🙋 Atendente | 0️⃣ Menu principal"\n' +
-            '5. FORMATO: Respostas objetivas, máx 4 frases. Nunca omita o rodapé.';
+          // Keep minimal — instructions live in system prompt (NicheWelcomeMenuService).
+          // DO NOT add menu-building instructions here: they persist in conversation history
+          // on every turn and override system prompt guardrails, causing hallucination.
+          const initText = '[WIDGET_INIT] Novo visitante no site. Apresente-se brevemente e exiba o menu de boas-vindas conforme as instruções do sistema. Não invente produtos, serviços ou preços — use apenas o contexto fornecido.';
           const initMessage = await (
             tx as Prisma.TransactionClient
           ).message.create({
