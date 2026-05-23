@@ -1,8 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import { GetTenantAgentRuleUseCase } from '../use-cases/GetTenantAgentRuleUseCase';
 import { UpsertTenantAgentRuleUseCase } from '../use-cases/UpsertTenantAgentRuleUseCase';
 import { TenantAgentRuleResponseDto } from '../../presentation/dtos/TenantAgentRuleResponseDto';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 
+@Injectable()
 export class TenantAgentRuleService {
   constructor(
     private readonly getRuleUseCase: GetTenantAgentRuleUseCase,

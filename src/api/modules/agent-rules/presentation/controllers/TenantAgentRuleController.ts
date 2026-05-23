@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -42,7 +43,8 @@ export class TenantAgentRuleController {
   async previewRule(
     @Param('tenantId') tenantId: string,
     @Param('moduleId') moduleId: string,
-    @Query('branchId') branchId: string | undefined,
+    @Query('branchId', new ParseUUIDPipe({ optional: true }))
+    branchId: string | undefined,
     @Body() body: UpsertTenantAgentRuleDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<PreviewTenantAgentRuleOutput> {
@@ -65,7 +67,8 @@ export class TenantAgentRuleController {
   async history(
     @Param('tenantId') tenantId: string,
     @Param('moduleId') moduleId: string,
-    @Query('branchId') branchId: string | undefined,
+    @Query('branchId', new ParseUUIDPipe({ optional: true }))
+    branchId: string | undefined,
     @Query('limit') limitRaw: string | undefined,
     @Req() req: AuthenticatedRequest,
   ): Promise<TenantAgentRuleHistoryEntryDto[]> {
@@ -86,7 +89,8 @@ export class TenantAgentRuleController {
   async getRule(
     @Param('tenantId') tenantId: string,
     @Param('moduleId') moduleId: string,
-    @Query('branchId') branchId: string | undefined,
+    @Query('branchId', new ParseUUIDPipe({ optional: true }))
+    branchId: string | undefined,
     @Req() req: AuthenticatedRequest,
   ): Promise<TenantAgentRuleResponseDto> {
     const user = req.user;
@@ -124,7 +128,8 @@ export class TenantAgentRuleController {
   async upsertRule(
     @Param('tenantId') tenantId: string,
     @Param('moduleId') moduleId: string,
-    @Query('branchId') branchId: string | undefined,
+    @Query('branchId', new ParseUUIDPipe({ optional: true }))
+    branchId: string | undefined,
     @Body() body: UpsertTenantAgentRuleDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<TenantAgentRuleResponseDto> {

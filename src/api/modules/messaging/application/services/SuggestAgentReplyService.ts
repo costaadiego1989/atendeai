@@ -15,6 +15,10 @@ import {
   UsageType,
 } from '../../../billing/application/use-cases/interfaces/IRecordUsageUseCase';
 import { toBillableAiTokens } from '../../../billing/domain/constants/AiTokenBillingPolicy';
+import {
+  IContactRepository,
+  CONTACT_REPOSITORY,
+} from '@modules/contact/domain/repositories/IContactRepository';
 
 /** Sugestões usam `UsageType.AI_TOKEN` (quota + recordUsage); mudanças aqui afetam faturação — alinhar com `AiTokenBillingPolicy`. */
 @Injectable()
@@ -31,6 +35,8 @@ export class SuggestAgentReplyService {
     private readonly checkQuotaUseCase: ICheckQuotaUseCase,
     @Inject(IRecordUsageUseCase)
     private readonly recordUsageUseCase: IRecordUsageUseCase,
+    @Inject(CONTACT_REPOSITORY)
+    private readonly contactRepository: IContactRepository,
   ) {}
 
   async generateSuggestion(
@@ -85,12 +91,14 @@ export class SuggestAgentReplyService {
       })
       .join('\n');
 
+    const branchId = await this.resolveBranchId(tenantId, contactId);
+
     const agentRule = await this.tenantAgentRuleService.getRule(
       tenantId,
       'messaging',
       'SYSTEM',
       tenantId,
-      contactId,
+      branchId,
     );
 
     const customPrompt = agentRule?.isActive
@@ -144,6 +152,21 @@ export class SuggestAgentReplyService {
       return {
         text: 'Falha ao processar rascunho na IA. Tente novamente mais tarde.',
       };
+    }
+  }
+
+  private async resolveBranchId(
+    tenantId: string,
+    contactId: string,
+  ): Promise<string | null> {
+    try {
+      const contact = await this.contactRepository.findById(
+        tenantId,
+        contactId,
+      );
+      return contact?.branchId ?? null;
+    } catch {
+      return null;
     }
   }
 }

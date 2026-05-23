@@ -1,6 +1,7 @@
+import { Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import { TenantAgentRule } from '../../domain/repositories/ITenantAgentRuleRepository';
 import { UpsertTenantAgentRuleService } from '../services/UpsertTenantAgentRuleService';
-import { IAgentRuleUseCase } from './IAgentRuleUseCase';
 
 export interface UpsertTenantAgentRuleInput {
   tenantId: string;
@@ -17,7 +18,8 @@ export interface UpsertTenantAgentRuleInput {
 
 export type UpsertTenantAgentRuleOutput = TenantAgentRule;
 
-export class UpsertTenantAgentRuleUseCase implements IAgentRuleUseCase<
+@Injectable()
+export class UpsertTenantAgentRuleUseCase implements IUseCase<
   UpsertTenantAgentRuleInput,
   UpsertTenantAgentRuleOutput
 > {

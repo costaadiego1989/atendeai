@@ -1,7 +1,9 @@
+import { Inject, Injectable } from '@nestjs/common';
 import { AgentModule } from '../../domain/enums/AgentModule';
 import {
   ITenantAgentRuleRepository,
   TenantAgentRule,
+  TENANT_AGENT_RULE_REPOSITORY,
 } from '../../domain/repositories/ITenantAgentRuleRepository';
 import type { UpsertTenantAgentRuleInput } from '../use-cases/UpsertTenantAgentRuleUseCase';
 import { ensureAgentRuleTenantAccess } from '../support/agentRuleTenantAccess';
@@ -10,8 +12,12 @@ import {
   parseAgentModule,
 } from '../support/agentRuleDraft';
 
+@Injectable()
 export class UpsertTenantAgentRuleService {
-  constructor(private readonly repository: ITenantAgentRuleRepository) {}
+  constructor(
+    @Inject(TENANT_AGENT_RULE_REPOSITORY)
+    private readonly repository: ITenantAgentRuleRepository,
+  ) {}
 
   async upsert(input: UpsertTenantAgentRuleInput): Promise<TenantAgentRule> {
     ensureAgentRuleTenantAccess(input.tenantId, input.requestingUserTenantId);

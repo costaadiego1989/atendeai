@@ -8,31 +8,8 @@ import {
   TenantAgentRuleHistory,
 } from '../../../domain/repositories/ITenantAgentRuleRepository';
 
-type AgentRuleRow = {
-  tenantId: string;
-  branchId: string | null;
-  moduleId: string;
-  customPrompt: string;
-  isActive: boolean;
-  fallbackToGlobal: boolean;
-  revision: number;
-  notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  updatedByUserId: string | null;
-  updatedByUserName: string | null;
-};
-
-type AgentRuleHistoryRow = {
-  tenantId: string;
-  branchId: string | null;
-  moduleId: string;
-  customPrompt: string;
-  revision: number;
-  createdAt: Date;
-  updatedByUserId: string | null;
-  updatedByUserName: string | null;
-};
+type RuleRecord = Prisma.TenantAgentRuleGetPayload<object>;
+type HistoryRecord = Prisma.TenantAgentRuleHistoryGetPayload<object>;
 
 @Injectable()
 export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleRepository {
@@ -73,185 +50,78 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     moduleId: AgentModule,
     branchId?: string | null,
   ): Promise<TenantAgentRule | null> {
-    const rows = branchId
-      ? await this.prisma.$queryRaw<AgentRuleRow[]>(Prisma.sql`
-            SELECT
-              tenant_id AS "tenantId",
-              branch_id AS "branchId",
-              module_id AS "moduleId",
-              custom_prompt AS "customPrompt",
-              is_active AS "isActive",
-              fallback_to_global AS "fallbackToGlobal",
-              revision,
-              notes,
-              created_at AS "createdAt",
-              updated_at AS "updatedAt",
-              updated_by_user_id AS "updatedByUserId",
-              updated_by_user_name AS "updatedByUserName"
-            FROM tenant_schema.tenant_agent_rules
-            WHERE tenant_id = ${tenantId}::uuid
-              AND module_id = ${moduleId}
-              AND branch_id = ${branchId}::uuid
-            LIMIT 1
-          `)
-      : await this.prisma.$queryRaw<AgentRuleRow[]>(Prisma.sql`
-            SELECT
-              tenant_id AS "tenantId",
-              branch_id AS "branchId",
-              module_id AS "moduleId",
-              custom_prompt AS "customPrompt",
-              is_active AS "isActive",
-              fallback_to_global AS "fallbackToGlobal",
-              revision,
-              notes,
-              created_at AS "createdAt",
-              updated_at AS "updatedAt",
-              updated_by_user_id AS "updatedByUserId",
-              updated_by_user_name AS "updatedByUserName"
-            FROM tenant_schema.tenant_agent_rules
-            WHERE tenant_id = ${tenantId}::uuid
-              AND module_id = ${moduleId}
-              AND branch_id IS NULL
-            LIMIT 1
-          `);
+    const record = await this.prisma.tenantAgentRule.findFirst({
+      where: {
+        tenantId,
+        moduleId,
+        branchId: branchId ?? null,
+      },
+    });
 
-    const row = rows[0];
-    if (!row) {
+    if (!record) {
       return null;
     }
 
-    return this.toDomain(row);
+    return this.toDomain(record);
   }
 
   async save(rule: TenantAgentRule): Promise<void> {
-    if (rule.branchId) {
-      const updatedRows = await this.prisma.$executeRaw(Prisma.sql`
-          UPDATE tenant_schema.tenant_agent_rules
-          SET
-            custom_prompt = ${rule.customPrompt},
-            is_active = ${rule.isActive},
-            fallback_to_global = ${rule.fallbackToGlobal},
-            revision = ${rule.revision},
-            notes = ${rule.notes ?? null},
-            updated_by_user_id = ${rule.updatedByUserId ?? null}::uuid,
-            updated_by_user_name = ${rule.updatedByUserName ?? null},
-            updated_at = NOW()
-          WHERE tenant_id = ${rule.tenantId}::uuid
-            AND module_id = ${rule.moduleId}
-            AND branch_id = ${rule.branchId}::uuid
-        `);
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.tenantAgentRule.findFirst({
+        where: {
+          tenantId: rule.tenantId,
+          moduleId: rule.moduleId,
+          branchId: rule.branchId ?? null,
+        },
+        select: { id: true },
+      });
 
-      if (updatedRows > 0) {
+      if (existing) {
+        await tx.tenantAgentRule.update({
+          where: { id: existing.id, tenantId: rule.tenantId },
+          data: {
+            customPrompt: rule.customPrompt,
+            isActive: rule.isActive,
+            fallbackToGlobal: rule.fallbackToGlobal,
+            revision: rule.revision,
+            notes: rule.notes ?? null,
+            updatedByUserId: rule.updatedByUserId ?? null,
+            updatedByUserName: rule.updatedByUserName ?? null,
+          },
+        });
         return;
       }
 
-      await this.prisma.$executeRaw(Prisma.sql`
-          INSERT INTO tenant_schema.tenant_agent_rules (
-            id,
-            tenant_id,
-            branch_id,
-            module_id,
-            custom_prompt,
-            is_active,
-            fallback_to_global,
-            revision,
-            notes,
-            updated_by_user_id,
-            updated_by_user_name
-          )
-          VALUES (
-            gen_random_uuid(),
-            ${rule.tenantId}::uuid,
-            ${rule.branchId}::uuid,
-            ${rule.moduleId},
-            ${rule.customPrompt},
-            ${rule.isActive},
-            ${rule.fallbackToGlobal},
-            ${rule.revision},
-            ${rule.notes ?? null},
-            ${rule.updatedByUserId ?? null}::uuid,
-            ${rule.updatedByUserName ?? null}
-          )
-        `);
-
-      return;
-    }
-
-    const updatedRows = await this.prisma.$executeRaw(Prisma.sql`
-        UPDATE tenant_schema.tenant_agent_rules
-        SET
-          custom_prompt = ${rule.customPrompt},
-          is_active = ${rule.isActive},
-          fallback_to_global = ${rule.fallbackToGlobal},
-          revision = ${rule.revision},
-          notes = ${rule.notes ?? null},
-          updated_by_user_id = ${rule.updatedByUserId ?? null}::uuid,
-          updated_by_user_name = ${rule.updatedByUserName ?? null},
-          updated_at = NOW()
-        WHERE tenant_id = ${rule.tenantId}::uuid
-          AND module_id = ${rule.moduleId}
-          AND branch_id IS NULL
-      `);
-
-    if (updatedRows > 0) {
-      return;
-    }
-
-    await this.prisma.$executeRaw(Prisma.sql`
-        INSERT INTO tenant_schema.tenant_agent_rules (
-          id,
-          tenant_id,
-          branch_id,
-          module_id,
-          custom_prompt,
-          is_active,
-          fallback_to_global,
-          revision,
-          notes,
-          updated_by_user_id,
-          updated_by_user_name
-        )
-        VALUES (
-          gen_random_uuid(),
-          ${rule.tenantId}::uuid,
-          NULL,
-          ${rule.moduleId},
-          ${rule.customPrompt},
-          ${rule.isActive},
-          ${rule.fallbackToGlobal},
-          ${rule.revision},
-          ${rule.notes ?? null},
-          ${rule.updatedByUserId ?? null}::uuid,
-          ${rule.updatedByUserName ?? null}
-        )
-      `);
+      await tx.tenantAgentRule.create({
+        data: {
+          tenantId: rule.tenantId,
+          branchId: rule.branchId ?? null,
+          moduleId: rule.moduleId,
+          customPrompt: rule.customPrompt,
+          isActive: rule.isActive,
+          fallbackToGlobal: rule.fallbackToGlobal,
+          revision: rule.revision,
+          notes: rule.notes ?? null,
+          updatedByUserId: rule.updatedByUserId ?? null,
+          updatedByUserName: rule.updatedByUserName ?? null,
+        },
+      });
+    });
   }
 
   async saveHistory(history: TenantAgentRuleHistory): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-        INSERT INTO tenant_schema.tenant_agent_rule_history (
-          id,
-          tenant_id,
-          branch_id,
-          module_id,
-          custom_prompt,
-          revision,
-          created_at,
-          updated_by_user_id,
-          updated_by_user_name
-        )
-        VALUES (
-          gen_random_uuid(),
-          ${history.tenantId}::uuid,
-          ${history.branchId ?? null}::uuid,
-          ${history.moduleId},
-          ${history.customPrompt},
-          ${history.revision},
-          ${history.createdAt}::timestamptz,
-          ${history.updatedByUserId ?? null}::uuid,
-          ${history.updatedByUserName ?? null}
-        )
-      `);
+    await this.prisma.tenantAgentRuleHistory.create({
+      data: {
+        tenantId: history.tenantId,
+        branchId: history.branchId ?? null,
+        moduleId: history.moduleId,
+        customPrompt: history.customPrompt,
+        revision: history.revision,
+        createdAt: history.createdAt,
+        updatedByUserId: history.updatedByUserId ?? null,
+        updatedByUserName: history.updatedByUserName ?? null,
+      },
+    });
   }
 
   async listRecentHistory(params: {
@@ -260,71 +130,49 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     branchId?: string | null;
     limit: number;
   }): Promise<TenantAgentRuleHistory[]> {
-    const lim = Math.min(100, Math.max(1, params.limit));
+    const limit = Math.min(100, Math.max(1, params.limit));
 
-    const rows = params.branchId
-      ? await this.prisma.$queryRaw<AgentRuleHistoryRow[]>(Prisma.sql`
-            SELECT
-              tenant_id AS "tenantId",
-              branch_id AS "branchId",
-              module_id AS "moduleId",
-              custom_prompt AS "customPrompt",
-              revision,
-              created_at AS "createdAt",
-              updated_by_user_id AS "updatedByUserId",
-              updated_by_user_name AS "updatedByUserName"
-            FROM tenant_schema.tenant_agent_rule_history
-            WHERE tenant_id = ${params.tenantId}::uuid
-              AND module_id = ${params.moduleId}
-              AND branch_id = ${params.branchId}::uuid
-            ORDER BY created_at DESC
-            LIMIT ${lim}
-          `)
-      : await this.prisma.$queryRaw<AgentRuleHistoryRow[]>(Prisma.sql`
-            SELECT
-              tenant_id AS "tenantId",
-              branch_id AS "branchId",
-              module_id AS "moduleId",
-              custom_prompt AS "customPrompt",
-              revision,
-              created_at AS "createdAt",
-              updated_by_user_id AS "updatedByUserId",
-              updated_by_user_name AS "updatedByUserName"
-            FROM tenant_schema.tenant_agent_rule_history
-            WHERE tenant_id = ${params.tenantId}::uuid
-              AND module_id = ${params.moduleId}
-              AND branch_id IS NULL
-            ORDER BY created_at DESC
-            LIMIT ${lim}
-          `);
+    const records = await this.prisma.tenantAgentRuleHistory.findMany({
+      where: {
+        tenantId: params.tenantId,
+        moduleId: params.moduleId,
+        branchId: params.branchId ?? null,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
 
-    return rows.map((row) => ({
-      tenantId: row.tenantId,
-      branchId: row.branchId,
-      moduleId: row.moduleId as AgentModule,
-      customPrompt: row.customPrompt,
-      revision: row.revision,
-      createdAt: row.createdAt,
-      updatedByUserId: row.updatedByUserId ?? undefined,
-      updatedByUserName: row.updatedByUserName ?? undefined,
-    }));
+    return records.map((record) => this.toHistoryDomain(record));
   }
 
-  private toDomain(row: AgentRuleRow): TenantAgentRule {
+  private toDomain(record: RuleRecord): TenantAgentRule {
     return {
-      tenantId: row.tenantId,
-      branchId: row.branchId,
-      moduleId: row.moduleId as AgentModule,
-      customPrompt: row.customPrompt,
-      isActive: row.isActive,
-      fallbackToGlobal: row.fallbackToGlobal,
-      revision: row.revision,
-      notes: row.notes,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      updatedByUserId: row.updatedByUserId,
-      updatedByUserName: row.updatedByUserName,
+      tenantId: record.tenantId,
+      branchId: record.branchId,
+      moduleId: record.moduleId as AgentModule,
+      customPrompt: record.customPrompt,
+      isActive: record.isActive,
+      fallbackToGlobal: record.fallbackToGlobal,
+      revision: record.revision,
+      notes: record.notes,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+      updatedByUserId: record.updatedByUserId,
+      updatedByUserName: record.updatedByUserName,
       inheritedFromTenant: false,
+    };
+  }
+
+  private toHistoryDomain(record: HistoryRecord): TenantAgentRuleHistory {
+    return {
+      tenantId: record.tenantId,
+      branchId: record.branchId,
+      moduleId: record.moduleId as AgentModule,
+      customPrompt: record.customPrompt,
+      revision: record.revision,
+      createdAt: record.createdAt,
+      updatedByUserId: record.updatedByUserId ?? undefined,
+      updatedByUserName: record.updatedByUserName ?? undefined,
     };
   }
 }

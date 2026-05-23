@@ -1,6 +1,9 @@
-import type {
+import { Inject, Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
+import {
   ITenantAgentRuleRepository,
   TenantAgentRuleHistory,
+  TENANT_AGENT_RULE_REPOSITORY,
 } from '../../domain/repositories/ITenantAgentRuleRepository';
 import { ensureAgentRuleTenantAccess } from '../support/agentRuleTenantAccess';
 import { parseAgentModule } from '../support/agentRuleDraft';
@@ -16,8 +19,15 @@ export interface ListTenantAgentRuleHistoryInput {
 
 export type ListTenantAgentRuleHistoryOutput = TenantAgentRuleHistory[];
 
-export class ListTenantAgentRuleHistoryUseCase {
-  constructor(private readonly repository: ITenantAgentRuleRepository) {}
+@Injectable()
+export class ListTenantAgentRuleHistoryUseCase implements IUseCase<
+  ListTenantAgentRuleHistoryInput,
+  ListTenantAgentRuleHistoryOutput
+> {
+  constructor(
+    @Inject(TENANT_AGENT_RULE_REPOSITORY)
+    private readonly repository: ITenantAgentRuleRepository,
+  ) {}
 
   async execute(
     input: ListTenantAgentRuleHistoryInput,

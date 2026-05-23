@@ -5,6 +5,7 @@ import { IAIEngine } from '../../ai/application/ports/IAIEngine';
 import { TenantAgentRuleService } from '../../agent-rules/application/services/TenantAgentRuleService';
 import { ICheckQuotaUseCase } from '../../billing/application/use-cases/interfaces/ICheckQuotaUseCase';
 import { IRecordUsageUseCase } from '../../billing/application/use-cases/interfaces/IRecordUsageUseCase';
+import { IContactRepository } from '../../contact/domain/repositories/IContactRepository';
 
 describe('SuggestAgentReplyService', () => {
   let service: SuggestAgentReplyService;
@@ -14,6 +15,7 @@ describe('SuggestAgentReplyService', () => {
   let tenantAgentRuleService: jest.Mocked<TenantAgentRuleService>;
   let checkQuotaUseCase: jest.Mocked<ICheckQuotaUseCase>;
   let recordUsageUseCase: jest.Mocked<IRecordUsageUseCase>;
+  let contactRepository: jest.Mocked<IContactRepository>;
 
   const tenantId = 'tenant-1';
   const conversationId = 'conversation-1';
@@ -55,6 +57,10 @@ describe('SuggestAgentReplyService', () => {
       execute: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<IRecordUsageUseCase>;
 
+    contactRepository = {
+      findById: jest.fn().mockResolvedValue(null),
+    } as unknown as jest.Mocked<IContactRepository>;
+
     service = new SuggestAgentReplyService(
       conversationRepository,
       intelligenceRepository,
@@ -62,6 +68,7 @@ describe('SuggestAgentReplyService', () => {
       tenantAgentRuleService,
       checkQuotaUseCase,
       recordUsageUseCase,
+      contactRepository,
     );
   });
 
@@ -155,5 +162,74 @@ describe('SuggestAgentReplyService', () => {
 
     expect(result.text).toBe('Resposta IA');
     expect(aiEngine.generateResponse).toHaveBeenCalled();
+  });
+
+  describe('ADR D2 — branch resolution (regression)', () => {
+    beforeEach(() => {
+      checkQuotaUseCase.execute.mockResolvedValue({
+        canProceed: true,
+        used: 10,
+        quota: 1000,
+        status: 'ACTIVE',
+      });
+    });
+
+    it('AGENT-U-200: resolves real branchId from contact and never passes contactId as branchId', async () => {
+      const realBranchId = 'branch-99';
+      contactRepository.findById.mockResolvedValue({
+        branchId: realBranchId,
+      } as never);
+
+      await service.generateSuggestion(tenantId, conversationId, contactId);
+
+      expect(contactRepository.findById).toHaveBeenCalledWith(
+        tenantId,
+        contactId,
+      );
+      expect(tenantAgentRuleService.getRule).toHaveBeenCalledWith(
+        tenantId,
+        'messaging',
+        'SYSTEM',
+        tenantId,
+        realBranchId,
+      );
+      const branchArg = tenantAgentRuleService.getRule.mock.calls[0][4];
+      expect(branchArg).not.toBe(contactId);
+    });
+
+    it('AGENT-U-201: passes null branchId when contact has no branch', async () => {
+      contactRepository.findById.mockResolvedValue({
+        branchId: null,
+      } as never);
+
+      await service.generateSuggestion(tenantId, conversationId, contactId);
+
+      expect(tenantAgentRuleService.getRule).toHaveBeenCalledWith(
+        tenantId,
+        'messaging',
+        'SYSTEM',
+        tenantId,
+        null,
+      );
+    });
+
+    it('AGENT-U-202: treats contact lookup failure as non-fatal and passes null branchId', async () => {
+      contactRepository.findById.mockRejectedValue(new Error('db down'));
+
+      const result = await service.generateSuggestion(
+        tenantId,
+        conversationId,
+        contactId,
+      );
+
+      expect(result.text).toBe('Resposta IA');
+      expect(tenantAgentRuleService.getRule).toHaveBeenCalledWith(
+        tenantId,
+        'messaging',
+        'SYSTEM',
+        tenantId,
+        null,
+      );
+    });
   });
 });

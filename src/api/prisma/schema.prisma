@@ -139,7 +139,8 @@ model TenantAgentRule {
   updatedByUserName String?  @map("updated_by_user_name") @db.VarChar(255)
   tenant            Tenant   @relation(fields: [tenantId], references: [id])
 
-  @@unique([tenantId, moduleId], name: "uq_tenant_agent_rules")
+  // Partial unique indexes managed via raw migration — Prisma cannot express partial unique natively.
+  // See migrations/..._fix_agent_rules_branch_scope/migration.sql
   @@map("tenant_agent_rules")
   @@schema("tenant_schema")
 }

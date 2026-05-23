@@ -1,4 +1,9 @@
-import type { ITenantAgentRuleRepository } from '../../domain/repositories/ITenantAgentRuleRepository';
+import { Inject, Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
+import {
+  ITenantAgentRuleRepository,
+  TENANT_AGENT_RULE_REPOSITORY,
+} from '../../domain/repositories/ITenantAgentRuleRepository';
 import { ensureAgentRuleTenantAccess } from '../support/agentRuleTenantAccess';
 import {
   normalizeAgentPrompt,
@@ -28,8 +33,15 @@ export interface PreviewTenantAgentRuleOutput {
   notesTrimmed: string | null;
 }
 
-export class PreviewTenantAgentRuleUseCase {
-  constructor(private readonly repository: ITenantAgentRuleRepository) {}
+@Injectable()
+export class PreviewTenantAgentRuleUseCase implements IUseCase<
+  PreviewTenantAgentRuleInput,
+  PreviewTenantAgentRuleOutput
+> {
+  constructor(
+    @Inject(TENANT_AGENT_RULE_REPOSITORY)
+    private readonly repository: ITenantAgentRuleRepository,
+  ) {}
 
   async execute(
     input: PreviewTenantAgentRuleInput,
