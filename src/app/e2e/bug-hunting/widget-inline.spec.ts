@@ -22,6 +22,9 @@
 import { test, expect, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const TOKEN = 'wgt-playwright-inline';
@@ -33,7 +36,7 @@ const TEST_PAGE_URL = `${API_BASE}/_widget_test_inline`;
 function extractWidgetScript(): string {
   const filePath = path.resolve(
     __dirname,
-    '../../../../api/modules/messaging/presentation/controllers/WidgetScriptController.ts',
+    '../../../api/modules/messaging/presentation/controllers/WidgetScriptController.ts',
   );
   const src = fs.readFileSync(filePath, 'utf8');
   const match = src.match(/const WIDGET_SCRIPT = `([\s\S]*?)`;/);

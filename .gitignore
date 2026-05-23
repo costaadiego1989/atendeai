@@ -79,3 +79,6 @@ skills
 docs/
 docs
 
+
+# code-review approval marker (local gate state)
+.specs/.review-approved.json

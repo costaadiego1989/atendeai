@@ -37,6 +37,16 @@ export default defineConfig({
       },
     },
     {
+      name: 'widget-integration',
+      testMatch: /widget-integration\/.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // No storageState — widget API is public (no auth required)
+        // NO page.route() mocks for widget API — real backend + real AI
+        actionTimeout: 35_000,
+      },
+    },
+    {
       name: 'production',
       testMatch: /production\/.*\.spec\.ts/,
       use: {
