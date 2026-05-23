@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import {
   IDocumentChunkRepository,
+  KeywordChunkResult,
   SaveChunkInput,
   SimilarChunkResult,
 } from '@modules/ai/application/ports/IDocumentChunkRepository';
@@ -104,23 +105,51 @@ export class PrismaDocumentChunkRepository implements IDocumentChunkRepository {
     return results.slice(0, topK);
   }
 
-  async deleteByDocument(documentId: string): Promise<void> {
+  async deleteByDocument(tenantId: string, documentId: string): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       DELETE FROM tenant_schema.tenant_document_chunks
       WHERE document_id = ${documentId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
   }
 
-  async countByDocument(documentId: string): Promise<number> {
+  async countByDocument(tenantId: string, documentId: string): Promise<number> {
     const rows = await this.prisma.$queryRaw<
       Array<{ count: bigint }>
     >(Prisma.sql`
       SELECT COUNT(*) as count
       FROM tenant_schema.tenant_document_chunks
       WHERE document_id = ${documentId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
 
     return Number(rows[0]?.count ?? 0);
+  }
+
+  async keywordSearch(
+    tenantId: string,
+    keywords: string[],
+    limit: number,
+  ): Promise<KeywordChunkResult[]> {
+    if (keywords.length === 0) {
+      return [];
+    }
+
+    const chunks = await this.prisma.tenantDocumentChunk.findMany({
+      where: {
+        tenantId,
+        content: { contains: keywords[0] },
+      },
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return chunks.map((chunk) => ({
+      documentId: chunk.documentId,
+      chunkIndex: chunk.chunkIndex,
+      content: chunk.content,
+      metadata: (chunk.metadata as Record<string, unknown>) ?? {},
+    }));
   }
 
   /**

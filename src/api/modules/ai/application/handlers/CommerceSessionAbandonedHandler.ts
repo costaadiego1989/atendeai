@@ -1,10 +1,12 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { IEventBus, EVENT_BUS } from '@shared/infrastructure/event-bus';
 import { IProcessAIResponseUseCase } from '../use-cases/interfaces/IProcessAIResponseUseCase';
 import { CommerceSessionAbandonedIntegrationEvent } from '@modules/commerce/application/integration-events/CheckoutIntegrationEvents';
 
 @Injectable()
 export class CommerceSessionAbandonedHandler implements OnModuleInit {
+  private readonly logger = new Logger(CommerceSessionAbandonedHandler.name);
+
   constructor(
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
@@ -29,8 +31,13 @@ export class CommerceSessionAbandonedHandler implements OnModuleInit {
       typeof payload.conversationId !== 'string' ||
       !payload.conversationId ||
       typeof payload.contactId !== 'string' ||
-      !payload.contactId
+      !payload.contactId ||
+      typeof payload.tenantId !== 'string' ||
+      !payload.tenantId
     ) {
+      this.logger.warn(
+        `commerce_session_abandoned_invalid_payload conversation=${String(payload?.conversationId)}`,
+      );
       return;
     }
 

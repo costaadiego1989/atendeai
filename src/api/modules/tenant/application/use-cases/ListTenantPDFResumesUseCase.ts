@@ -32,7 +32,7 @@ export class ListTenantPDFResumesUseCase {
       resumes.map(async (resume) => {
         const chunkCount =
           resume.status === 'READY'
-            ? await this.chunkRepository!.countByDocument(resume.id)
+            ? await this.chunkRepository!.countByDocument(tenantId, resume.id)
             : 0;
         return { ...resume, chunkCount };
       }),

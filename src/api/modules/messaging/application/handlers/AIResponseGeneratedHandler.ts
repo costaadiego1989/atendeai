@@ -19,7 +19,9 @@ export class AIResponseGeneratedHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'ai.response-generated',
       async (event) => {
-        await this.handle(event as AIResponseGeneratedIntegrationEvent);
+        await this.handle(
+          event as unknown as AIResponseGeneratedIntegrationEvent,
+        );
       },
       { consumerName: 'messaging-ai-response-generated' },
     );

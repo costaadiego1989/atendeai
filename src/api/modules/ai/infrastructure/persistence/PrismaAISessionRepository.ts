@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import {
   AISessionDto,
@@ -57,11 +57,11 @@ export class PrismaAISessionRepository implements IAISessionRepository {
           role: data.role,
           content: data.content,
           tokens: data.tokens,
-          diagnostics: data.diagnostics,
+          diagnostics: data.diagnostics as Prisma.InputJsonValue,
         },
       }),
-      this.prisma.aISession.update({
-        where: { id: data.sessionId },
+      this.prisma.aISession.updateMany({
+        where: { id: data.sessionId, tenantId: data.tenantId },
         data: {
           totalTokens: { increment: data.tokens },
           updatedAt: new Date(),
@@ -71,11 +71,12 @@ export class PrismaAISessionRepository implements IAISessionRepository {
   }
 
   async close(
+    tenantId: string,
     sessionId: string,
     status: 'CLOSED' | 'EXPIRED' | 'HANDOFF',
   ): Promise<void> {
-    await this.prisma.aISession.update({
-      where: { id: sessionId },
+    await this.prisma.aISession.updateMany({
+      where: { id: sessionId, tenantId },
       data: { status, updatedAt: new Date() },
     });
   }
@@ -86,7 +87,7 @@ export class PrismaAISessionRepository implements IAISessionRepository {
     contactId: string | null;
     status: string;
     totalTokens: number;
-    metadata: any;
+    metadata: Prisma.JsonValue;
   }): AISessionDto {
     return {
       id: session.id,
@@ -94,7 +95,7 @@ export class PrismaAISessionRepository implements IAISessionRepository {
       contactId: session.contactId!,
       status: session.status,
       totalTokens: session.totalTokens,
-      metadata: session.metadata,
+      metadata: (session.metadata as Record<string, unknown>) ?? {},
     };
   }
 }

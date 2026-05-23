@@ -6,7 +6,6 @@ describe('HybridSearchService', () => {
   let service: HybridSearchService;
   let embeddingProvider: jest.Mocked<IEmbeddingProvider>;
   let chunkRepository: jest.Mocked<IDocumentChunkRepository>;
-  let prisma: any;
 
   beforeEach(() => {
     embeddingProvider = {
@@ -19,15 +18,10 @@ describe('HybridSearchService', () => {
       saveChunks: jest.fn(),
       deleteByDocument: jest.fn(),
       countByDocument: jest.fn(),
+      keywordSearch: jest.fn().mockResolvedValue([]),
     } as any;
 
-    prisma = {
-      tenantDocumentChunk: {
-        findMany: jest.fn().mockResolvedValue([]),
-      },
-    };
-
-    service = new HybridSearchService(embeddingProvider, chunkRepository, prisma);
+    service = new HybridSearchService(embeddingProvider, chunkRepository);
   });
 
   describe('search', () => {
@@ -84,9 +78,10 @@ describe('HybridSearchService', () => {
       ]);
 
       // Keyword search returns same content
-      prisma.tenantDocumentChunk.findMany.mockResolvedValue([
+      chunkRepository.keywordSearch.mockResolvedValue([
         {
           documentId: 'doc-1',
+          chunkIndex: 0,
           content: 'Pagamento via PIX é instantâneo.',
           metadata: { sourceTitle: 'FAQ' },
         },

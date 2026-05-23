@@ -1,5 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { TenantPDFResumeRepository } from '@modules/tenant/infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import {
+  ITenantPDFResumeQueryPort,
+  TENANT_PDF_RESUME_QUERY_PORT,
+} from '@modules/tenant/application/facades/TenantPDFResumeFacade';
 import { ITenantPDFContextProvider } from '../../application/ports/ITenantPDFContextProvider';
 import {
   IEmbeddingProvider,
@@ -19,7 +22,8 @@ export class TenantPDFContextProvider implements ITenantPDFContextProvider {
   private readonly topK: number;
 
   constructor(
-    private readonly repository: TenantPDFResumeRepository,
+    @Inject(TENANT_PDF_RESUME_QUERY_PORT)
+    private readonly pdfResumeQueryPort: ITenantPDFResumeQueryPort,
     @Inject(EMBEDDING_PROVIDER)
     private readonly embeddingProvider: IEmbeddingProvider,
     @Inject(DOCUMENT_CHUNK_REPOSITORY)
@@ -99,7 +103,7 @@ export class TenantPDFContextProvider implements ITenantPDFContextProvider {
    * Used when no RAG chunks are indexed or when embedding fails.
    */
   private async findLegacyContext(tenantId: string): Promise<string | null> {
-    const docs = await this.repository.listReadyWithMeta(tenantId);
+    const docs = await this.pdfResumeQueryPort.listReadyWithMeta(tenantId);
     if (!docs.length) return null;
 
     const parts: string[] = [];

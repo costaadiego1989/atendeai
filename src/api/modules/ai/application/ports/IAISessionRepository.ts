@@ -4,15 +4,16 @@ export interface AISessionDto {
   contactId: string;
   status: string;
   totalTokens: number;
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 export interface AISessionMessageData {
+  tenantId: string;
   sessionId: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   tokens: number;
-  diagnostics: any;
+  diagnostics: Record<string, unknown>;
 }
 
 export interface IAISessionRepository {
@@ -28,6 +29,7 @@ export interface IAISessionRepository {
   ): Promise<AISessionDto>;
   recordMessage(data: AISessionMessageData): Promise<void>;
   close(
+    tenantId: string,
     sessionId: string,
     status: 'CLOSED' | 'EXPIRED' | 'HANDOFF',
   ): Promise<void>;

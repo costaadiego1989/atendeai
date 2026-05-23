@@ -1,21 +1,34 @@
 import {
+  AUDIO_TRANSCRIPTION_PROVIDER,
   AudioTranscriptionProvider,
+  DOCUMENT_TEXT_EXTRACTOR,
   DocumentTextExtractor,
+  IMAGE_OCR_PROVIDER,
   ImageOcrProvider,
   MediaUnderstandingInput,
   MediaUnderstandingOutput,
   MediaUnderstandingType,
 } from '../ports/IMediaUnderstandingProviders';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 
 export interface BuildMediaAiMessageInput extends MediaUnderstandingInput {
   type: MediaUnderstandingType;
 }
 
+@Injectable()
 export class MediaUnderstandingService {
+  private readonly logger = new Logger(MediaUnderstandingService.name);
+
   constructor(
+    @Optional()
+    @Inject(IMAGE_OCR_PROVIDER)
     private readonly imageOcrProvider?: ImageOcrProvider,
+    @Optional()
+    @Inject(AUDIO_TRANSCRIPTION_PROVIDER)
     private readonly audioTranscriptionProvider?: AudioTranscriptionProvider,
+    @Optional()
+    @Inject(DOCUMENT_TEXT_EXTRACTOR)
     private readonly documentTextExtractor?: DocumentTextExtractor,
   ) {}
 
@@ -91,7 +104,10 @@ export class MediaUnderstandingService {
       }
 
       return null;
-    } catch {
+    } catch (e: unknown) {
+      this.logger.warn(
+        `media_understanding_extract_failed tenant=${input.tenantId ?? ''} conversation=${input.conversationId ?? ''} kind=${input.type} detail=${e instanceof Error ? e.message : String(e)}`,
+      );
       return null;
     }
   }

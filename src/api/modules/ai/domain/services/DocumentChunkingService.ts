@@ -1,3 +1,5 @@
+import { Injectable } from '@nestjs/common';
+
 export interface ChunkResult {
   content: string;
   index: number;
@@ -18,6 +20,7 @@ const SEPARATORS = ['\n\n', '\n', '. ', ' '];
  * Splits text into semantically meaningful chunks with overlap
  * to preserve context across chunk boundaries.
  */
+@Injectable()
 export class DocumentChunkingService {
   chunk(text: string, options?: ChunkingOptions): ChunkResult[] {
     const chunkSize = options?.chunkSize ?? DEFAULT_CHUNK_SIZE;

@@ -163,6 +163,7 @@ export class TenantPDFResumeRepository {
   }
 
   async updateStatus(
+    tenantId: string,
     documentId: string,
     status: string,
     error?: string | null,
@@ -173,6 +174,7 @@ export class TenantPDFResumeRepository {
           error = ${error ?? null},
           updated_at = NOW()
       WHERE id = ${documentId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
   }
 

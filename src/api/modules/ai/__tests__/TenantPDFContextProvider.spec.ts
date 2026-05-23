@@ -5,13 +5,13 @@ import {
   IDocumentChunkRepository,
   SimilarChunkResult,
 } from '../application/ports/IDocumentChunkRepository';
-import { TenantPDFResumeRepository } from '@modules/tenant/infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import { ITenantPDFResumeQueryPort } from '@modules/tenant/application/facades/TenantPDFResumeFacade';
 
 describe('TenantPDFContextProvider (RAG)', () => {
   let provider: TenantPDFContextProvider;
   let mockEmbeddingProvider: jest.Mocked<IEmbeddingProvider>;
   let mockChunkRepository: jest.Mocked<IDocumentChunkRepository>;
-  let mockPdfResumeRepository: jest.Mocked<TenantPDFResumeRepository>;
+  let mockPdfResumeQueryPort: jest.Mocked<ITenantPDFResumeQueryPort>;
   let mockConfigService: jest.Mocked<ConfigService>;
 
   beforeEach(() => {
@@ -25,23 +25,20 @@ describe('TenantPDFContextProvider (RAG)', () => {
       findSimilar: jest.fn(),
       deleteByDocument: jest.fn(),
       countByDocument: jest.fn(),
+      keywordSearch: jest.fn(),
     };
 
-    mockPdfResumeRepository = {
+    mockPdfResumeQueryPort = {
       listReadyWithMeta: jest.fn(),
-      listReadySummaries: jest.fn(),
-      upsert: jest.fn(),
-      listByTenant: jest.fn(),
       updateStatus: jest.fn(),
-      findById: jest.fn(),
-    } as any;
+    };
 
     mockConfigService = {
       get: jest.fn().mockReturnValue(undefined),
     } as any;
 
     provider = new TenantPDFContextProvider(
-      mockPdfResumeRepository,
+      mockPdfResumeQueryPort,
       mockEmbeddingProvider,
       mockChunkRepository,
       mockConfigService,
@@ -105,7 +102,7 @@ describe('TenantPDFContextProvider (RAG)', () => {
     mockEmbeddingProvider.generateEmbedding.mockResolvedValue([0.1, 0.2]);
     mockChunkRepository.findSimilar.mockResolvedValue([]);
 
-    mockPdfResumeRepository.listReadyWithMeta.mockResolvedValue([
+    mockPdfResumeQueryPort.listReadyWithMeta.mockResolvedValue([
       {
         fileName: 'Catalogo.pdf',
         fileUrl: 'https://s3.example.com/catalogo.pdf',
@@ -129,7 +126,7 @@ describe('TenantPDFContextProvider (RAG)', () => {
       new Error('API unavailable'),
     );
 
-    mockPdfResumeRepository.listReadyWithMeta.mockResolvedValue([
+    mockPdfResumeQueryPort.listReadyWithMeta.mockResolvedValue([
       {
         fileName: 'FAQ.pdf',
         fileUrl: null,
@@ -150,7 +147,7 @@ describe('TenantPDFContextProvider (RAG)', () => {
   it('should return null when no chunks and no summaries exist', async () => {
     mockEmbeddingProvider.generateEmbedding.mockResolvedValue([0.1]);
     mockChunkRepository.findSimilar.mockResolvedValue([]);
-    mockPdfResumeRepository.listReadyWithMeta.mockResolvedValue([]);
+    mockPdfResumeQueryPort.listReadyWithMeta.mockResolvedValue([]);
 
     const result = await provider.findRelevantPDFContext(
       'tenant-1',
@@ -164,7 +161,7 @@ describe('TenantPDFContextProvider (RAG)', () => {
     mockEmbeddingProvider.generateEmbedding.mockResolvedValue([0.1]);
     mockChunkRepository.findSimilar.mockResolvedValue([]);
 
-    mockPdfResumeRepository.listReadyWithMeta.mockResolvedValue([
+    mockPdfResumeQueryPort.listReadyWithMeta.mockResolvedValue([
       {
         fileName: 'Contrato.pdf',
         fileUrl: 'https://s3.example.com/contrato.pdf',

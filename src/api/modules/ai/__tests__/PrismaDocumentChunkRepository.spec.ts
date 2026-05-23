@@ -175,25 +175,41 @@ describe('PrismaDocumentChunkRepository', () => {
 
   describe('deleteByDocument', () => {
     it('calls $executeRaw once with the document id', async () => {
-      await repo.deleteByDocument('doc-xyz');
+      await repo.deleteByDocument('tenant-1', 'doc-xyz');
       expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+    });
+
+    it('scopes the delete by tenantId (cross-tenant mutation blocked)', async () => {
+      await repo.deleteByDocument('tenant-1', 'doc-xyz');
+      const sql = prisma.$executeRaw.mock.calls[0][0];
+      expect(sql.values).toContain('doc-xyz');
+      expect(sql.values).toContain('tenant-1');
+      expect(sql.strings.join(' ')).toMatch(/tenant_id/);
     });
   });
 
   describe('countByDocument', () => {
     it('returns numeric count from BigInt row', async () => {
       prisma.$queryRaw.mockResolvedValue([{ count: BigInt(7) }]);
-      expect(await repo.countByDocument('doc-1')).toBe(7);
+      expect(await repo.countByDocument('tenant-1', 'doc-1')).toBe(7);
     });
 
     it('returns 0 when query returns no rows', async () => {
       prisma.$queryRaw.mockResolvedValue([]);
-      expect(await repo.countByDocument('doc-1')).toBe(0);
+      expect(await repo.countByDocument('tenant-1', 'doc-1')).toBe(0);
     });
 
     it('returns 0 when count field is null', async () => {
       prisma.$queryRaw.mockResolvedValue([{ count: null }]);
-      expect(await repo.countByDocument('doc-1')).toBe(0);
+      expect(await repo.countByDocument('tenant-1', 'doc-1')).toBe(0);
+    });
+
+    it('scopes the count by tenantId', async () => {
+      prisma.$queryRaw.mockResolvedValue([{ count: BigInt(1) }]);
+      await repo.countByDocument('tenant-1', 'doc-1');
+      const sql = prisma.$queryRaw.mock.calls[0][0];
+      expect(sql.values).toContain('tenant-1');
+      expect(sql.strings.join(' ')).toMatch(/tenant_id/);
     });
   });
 });

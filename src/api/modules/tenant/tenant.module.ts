@@ -80,6 +80,10 @@ import { TenantBillingCapacityService } from '@shared/infrastructure/billing/Ten
 import { TenantTwilioAccountService } from './application/services/TenantTwilioAccountService';
 import { TenantTwilioProvisioningHandler } from './application/handlers/TenantTwilioProvisioningHandler';
 import { TenantPDFResumeRepository } from './infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import {
+  TenantPDFResumeFacade,
+  TENANT_PDF_RESUME_QUERY_PORT,
+} from './application/facades/TenantPDFResumeFacade';
 import { UpsertTenantPDFResumeUseCase } from './application/use-cases/UpsertTenantPDFResumeUseCase';
 import { ListTenantPDFResumesUseCase } from './application/use-cases/ListTenantPDFResumesUseCase';
 import { UploadDocumentUseCase } from './application/use-cases/UploadDocumentUseCase';
@@ -110,6 +114,10 @@ const TENANT_REPOSITORY_PROVIDERS = [
     useClass: PrismaDocumentChunkRepository,
   },
   TenantPDFResumeRepository,
+  {
+    provide: TENANT_PDF_RESUME_QUERY_PORT,
+    useClass: TenantPDFResumeFacade,
+  },
 ];
 
 const TENANT_USE_CASE_PROVIDERS = [
@@ -251,6 +259,7 @@ const TENANT_BILLING_PROVIDERS = [
     OnboardTrialTenantUseCase,
     ICreateTenantUseCase,
     TenantPDFResumeRepository,
+    TENANT_PDF_RESUME_QUERY_PORT,
   ],
 })
 export class TenantModule {}

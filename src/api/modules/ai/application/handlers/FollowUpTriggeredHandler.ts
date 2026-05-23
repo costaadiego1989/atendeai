@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { IEventBus, EVENT_BUS } from '@shared/infrastructure/event-bus';
 import { IProcessAIResponseUseCase } from '../use-cases/interfaces/IProcessAIResponseUseCase';
 import {
@@ -8,6 +8,8 @@ import {
 
 @Injectable()
 export class FollowUpTriggeredHandler implements OnModuleInit {
+  private readonly logger = new Logger(FollowUpTriggeredHandler.name);
+
   constructor(
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
@@ -26,6 +28,22 @@ export class FollowUpTriggeredHandler implements OnModuleInit {
   }
 
   private async handle(payload: FollowUpTriggeredPayload) {
+    if (
+      typeof payload?.tenantId !== 'string' ||
+      !payload.tenantId ||
+      typeof payload.contactId !== 'string' ||
+      !payload.contactId ||
+      typeof payload.conversationId !== 'string' ||
+      !payload.conversationId
+    ) {
+      this.logger.warn(
+        `follow_up_triggered_invalid_payload conversation=${String(
+          payload?.conversationId,
+        )}`,
+      );
+      return;
+    }
+
     await this.processAIResponseUseCase.execute({
       conversationId: payload.conversationId,
       tenantId: payload.tenantId,

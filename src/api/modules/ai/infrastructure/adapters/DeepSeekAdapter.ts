@@ -18,6 +18,7 @@ export class DeepSeekAdapter implements IAIEngine {
   private readonly logger = new Logger(DeepSeekAdapter.name);
   private readonly apiKey: string;
   private readonly baseUrl: string;
+  private readonly model: string;
   private readonly httpTimeoutMs: number;
   private readonly estimatedUsdPerMillionTokens: number;
 
@@ -26,6 +27,8 @@ export class DeepSeekAdapter implements IAIEngine {
     this.baseUrl =
       this.configService.get<string>('DEEPSEEK_BASE_URL') ||
       'https://api.deepseek.com/v1';
+    this.model =
+      this.configService.get<string>('DEEPSEEK_MODEL') || 'deepseek-chat';
     const rawTimeout = Number(
       this.configService.get<string>('DEEPSEEK_HTTP_TIMEOUT_MS'),
     );
@@ -47,7 +50,7 @@ export class DeepSeekAdapter implements IAIEngine {
       {
         'tenant.id': tenantId,
         'ai.conversation_id': conversationId,
-        'ai.provider': 'deepseek-chat',
+        'ai.provider': this.model,
       },
       async () => this.executeChatCompletion(request),
     );
@@ -69,7 +72,7 @@ export class DeepSeekAdapter implements IAIEngine {
       const response = await axios.post(
         `${this.baseUrl}/chat/completions`,
         {
-          model: 'deepseek-chat',
+          model: this.model,
           messages,
           max_tokens: request.maxTokens || 1000,
           temperature: request.temperature || 0.7,

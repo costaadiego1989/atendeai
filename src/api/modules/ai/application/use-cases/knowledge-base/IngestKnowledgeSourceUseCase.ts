@@ -1,5 +1,4 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { DocumentChunkingService } from '../../../domain/services/DocumentChunkingService';
 import {
   IEmbeddingProvider,
@@ -9,6 +8,10 @@ import {
   IDocumentChunkRepository,
   DOCUMENT_CHUNK_REPOSITORY,
 } from '../../ports/IDocumentChunkRepository';
+import {
+  IKnowledgeSourceRepository,
+  KNOWLEDGE_SOURCE_REPOSITORY,
+} from '../../ports/IKnowledgeSourceRepository';
 import { IKnowledgeSourceAdapter } from '../../ports/IKnowledgeSourceAdapter';
 import { WebCrawlerAdapter } from '../../../infrastructure/adapters/knowledge-sources/WebCrawlerAdapter';
 import { GoogleDriveAdapter } from '../../../infrastructure/adapters/knowledge-sources/GoogleDriveAdapter';
@@ -30,13 +33,16 @@ export interface IngestKnowledgeSourceResult {
   error?: string;
 }
 
+const INGEST_EMBEDDING_BATCH_SIZE = 50;
+
 @Injectable()
 export class IngestKnowledgeSourceUseCase {
   private readonly logger = new Logger(IngestKnowledgeSourceUseCase.name);
   private readonly adapters: Map<string, IKnowledgeSourceAdapter>;
 
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(KNOWLEDGE_SOURCE_REPOSITORY)
+    private readonly knowledgeSourceRepository: IKnowledgeSourceRepository,
     private readonly chunkingService: DocumentChunkingService,
     @Inject(EMBEDDING_PROVIDER)
     private readonly embeddingProvider: IEmbeddingProvider,
@@ -67,26 +73,27 @@ export class IngestKnowledgeSourceUseCase {
     }
 
     try {
-      // 1. Update source status
-      await this.prisma.knowledgeSource.update({
-        where: { id: input.sourceId },
-        data: { status: 'INGESTING' },
-      });
+      await this.knowledgeSourceRepository.updateStatus(
+        input.tenantId,
+        input.sourceId,
+        'INGESTING',
+      );
 
-      // 2. Ingest content from source
       this.logger.log(`Ingesting ${input.sourceType}: ${input.sourceUrl}`);
       const result = await adapter.ingest(input.sourceUrl, input.credentials);
 
-      // 3. Check if content changed
-      const existingSource = await this.prisma.knowledgeSource.findUnique({
-        where: { id: input.sourceId },
-      });
+      const existingSource = await this.knowledgeSourceRepository.findById(
+        input.tenantId,
+        input.sourceId,
+      );
 
       if (existingSource?.contentHash === result.contentHash) {
-        await this.prisma.knowledgeSource.update({
-          where: { id: input.sourceId },
-          data: { status: 'ACTIVE', lastSyncAt: new Date() },
-        });
+        await this.knowledgeSourceRepository.markSynced(
+          input.tenantId,
+          input.sourceId,
+          'ACTIVE',
+          result.contentHash,
+        );
         this.logger.log(
           `Content unchanged for source ${input.sourceId}, skipping`,
         );
@@ -97,7 +104,6 @@ export class IngestKnowledgeSourceUseCase {
         };
       }
 
-      // 4. Chunk all content
       const allChunks: {
         content: string;
         metadata: Record<string, unknown>;
@@ -120,15 +126,15 @@ export class IngestKnowledgeSourceUseCase {
         }
       }
 
-      // 5. Delete old chunks for this source
-      await this.chunkRepository.deleteByDocument(input.sourceId);
+      await this.chunkRepository.deleteByDocument(
+        input.tenantId,
+        input.sourceId,
+      );
 
-      // 6. Generate embeddings and save in batches
-      const BATCH_SIZE = 50;
       let chunksCreated = 0;
 
-      for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
-        const batch = allChunks.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < allChunks.length; i += INGEST_EMBEDDING_BATCH_SIZE) {
+        const batch = allChunks.slice(i, i + INGEST_EMBEDDING_BATCH_SIZE);
         const texts = batch.map((c) => c.content);
         const embeddings =
           await this.embeddingProvider.generateEmbeddings(texts);
@@ -147,33 +153,30 @@ export class IngestKnowledgeSourceUseCase {
         chunksCreated += batch.length;
       }
 
-      // 7. Update source status
-      await this.prisma.knowledgeSource.update({
-        where: { id: input.sourceId },
-        data: {
-          status: 'ACTIVE',
-          contentHash: result.contentHash,
-          lastSyncAt: new Date(),
-        },
-      });
+      await this.knowledgeSourceRepository.markSynced(
+        input.tenantId,
+        input.sourceId,
+        'ACTIVE',
+        result.contentHash,
+      );
 
       this.logger.log(
         `Ingested ${chunksCreated} chunks from ${input.sourceName}`,
       );
       return { success: true, chunksCreated, contentHash: result.contentHash };
-    } catch (error: any) {
-      this.logger.error(
-        `Ingestion failed for ${input.sourceId}: ${error.message}`,
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Ingestion failed for ${input.sourceId}: ${message}`);
+      await this.knowledgeSourceRepository.updateStatus(
+        input.tenantId,
+        input.sourceId,
+        'ERROR',
       );
-      await this.prisma.knowledgeSource.update({
-        where: { id: input.sourceId },
-        data: { status: 'ERROR' },
-      });
       return {
         success: false,
         chunksCreated: 0,
         contentHash: '',
-        error: error.message,
+        error: message,
       };
     }
   }

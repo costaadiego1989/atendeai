@@ -28,7 +28,9 @@ export class AIEscalationRequestedHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'ai.escalation-requested',
       async (event) => {
-        await this.handle(event as AIEscalationRequestedIntegrationEvent);
+        await this.handle(
+          event as unknown as AIEscalationRequestedIntegrationEvent,
+        );
       },
       { consumerName: 'messaging-ai-escalation-requested' },
     );

@@ -4,7 +4,7 @@ import { DocumentChunkingService } from '../domain/services/DocumentChunkingServ
 import { IEmbeddingProvider } from '../application/ports/IEmbeddingProvider';
 import { IDocumentChunkRepository } from '../application/ports/IDocumentChunkRepository';
 import { IRAGResponseCache } from '../application/ports/IRAGResponseCache';
-import { TenantPDFResumeRepository } from '@modules/tenant/infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import { ITenantPDFResumeQueryPort } from '@modules/tenant/application/facades/TenantPDFResumeFacade';
 
 jest.mock('axios');
 jest.mock('pdf-parse', () => jest.fn());
@@ -19,7 +19,7 @@ describe('ProcessDocumentForRAGUseCase', () => {
   let chunkingService: jest.Mocked<DocumentChunkingService>;
   let embeddingProvider: jest.Mocked<IEmbeddingProvider>;
   let chunkRepository: jest.Mocked<IDocumentChunkRepository>;
-  let pdfResumeRepository: jest.Mocked<TenantPDFResumeRepository>;
+  let pdfResumeQueryPort: jest.Mocked<ITenantPDFResumeQueryPort>;
   let ragResponseCache: jest.Mocked<IRAGResponseCache>;
 
   const input = {
@@ -49,11 +49,13 @@ describe('ProcessDocumentForRAGUseCase', () => {
       findSimilar: jest.fn(),
       deleteByDocument: jest.fn().mockResolvedValue(undefined),
       countByDocument: jest.fn(),
+      keywordSearch: jest.fn().mockResolvedValue([]),
     };
 
-    pdfResumeRepository = {
+    pdfResumeQueryPort = {
+      listReadyWithMeta: jest.fn().mockResolvedValue([]),
       updateStatus: jest.fn().mockResolvedValue(undefined),
-    } as any;
+    };
 
     ragResponseCache = {
       findSimilarResponse: jest.fn(),
@@ -68,7 +70,7 @@ describe('ProcessDocumentForRAGUseCase', () => {
       chunkingService,
       embeddingProvider,
       chunkRepository,
-      pdfResumeRepository,
+      pdfResumeQueryPort,
       ragResponseCache,
     );
   });
@@ -77,15 +79,18 @@ describe('ProcessDocumentForRAGUseCase', () => {
     it('transitions through EXTRACTING → CHUNKING → EMBEDDING → READY', async () => {
       await useCase.execute(input);
 
-      const statuses = (pdfResumeRepository.updateStatus as jest.Mock).mock.calls.map(
-        (c) => c[1],
-      );
+      const statuses = (
+        pdfResumeQueryPort.updateStatus as jest.Mock
+      ).mock.calls.map((c) => c[2]);
       expect(statuses).toEqual(['EXTRACTING', 'CHUNKING', 'EMBEDDING', 'READY']);
     });
 
     it('deletes old chunks before saving new ones', async () => {
       await useCase.execute(input);
-      expect(chunkRepository.deleteByDocument).toHaveBeenCalledWith('doc-1');
+      expect(chunkRepository.deleteByDocument).toHaveBeenCalledWith(
+        'tenant-1',
+        'doc-1',
+      );
     });
 
     it('generates embeddings for all chunk contents', async () => {
@@ -122,7 +127,8 @@ describe('ProcessDocumentForRAGUseCase', () => {
 
       await useCase.execute(input);
 
-      expect(pdfResumeRepository.updateStatus).toHaveBeenCalledWith(
+      expect(pdfResumeQueryPort.updateStatus).toHaveBeenCalledWith(
+        'tenant-1',
         'doc-1',
         'ERROR',
         'PDF sem texto extraível',
@@ -135,7 +141,8 @@ describe('ProcessDocumentForRAGUseCase', () => {
 
       await useCase.execute(input);
 
-      expect(pdfResumeRepository.updateStatus).toHaveBeenCalledWith(
+      expect(pdfResumeQueryPort.updateStatus).toHaveBeenCalledWith(
+        'tenant-1',
         'doc-1',
         'ERROR',
         'Nenhum chunk gerado',
@@ -150,7 +157,8 @@ describe('ProcessDocumentForRAGUseCase', () => {
 
       await useCase.execute(input);
 
-      expect(pdfResumeRepository.updateStatus).toHaveBeenCalledWith(
+      expect(pdfResumeQueryPort.updateStatus).toHaveBeenCalledWith(
+        'tenant-1',
         'doc-1',
         'ERROR',
         'Network timeout',
@@ -165,7 +173,8 @@ describe('ProcessDocumentForRAGUseCase', () => {
 
       await useCase.execute(input);
 
-      expect(pdfResumeRepository.updateStatus).toHaveBeenCalledWith(
+      expect(pdfResumeQueryPort.updateStatus).toHaveBeenCalledWith(
+        'tenant-1',
         'doc-1',
         'ERROR',
         'Embedding generation failed: 429',
@@ -178,9 +187,9 @@ describe('ProcessDocumentForRAGUseCase', () => {
 
       await useCase.execute(input);
 
-      const errorArg = (pdfResumeRepository.updateStatus as jest.Mock).mock.calls.find(
-        (c) => c[1] === 'ERROR',
-      )?.[2];
+      const errorArg = (
+        pdfResumeQueryPort.updateStatus as jest.Mock
+      ).mock.calls.find((c) => c[2] === 'ERROR')?.[3];
       expect(errorArg).toHaveLength(500);
     });
   });
@@ -191,12 +200,17 @@ describe('ProcessDocumentForRAGUseCase', () => {
         chunkingService,
         embeddingProvider,
         chunkRepository,
-        pdfResumeRepository,
+        pdfResumeQueryPort,
       );
 
       await useCaseNoCache.execute(input);
 
-      expect(pdfResumeRepository.updateStatus).toHaveBeenCalledWith('doc-1', 'READY', null);
+      expect(pdfResumeQueryPort.updateStatus).toHaveBeenCalledWith(
+        'tenant-1',
+        'doc-1',
+        'READY',
+        null,
+      );
       expect(ragResponseCache.invalidateTenant).not.toHaveBeenCalled();
     });
   });
@@ -212,7 +226,12 @@ describe('ProcessDocumentForRAGUseCase', () => {
 
       expect(embeddingProvider.generateEmbeddings).toHaveBeenCalledTimes(2);
       expect(chunkRepository.saveChunks).toHaveBeenCalledTimes(2);
-      expect(pdfResumeRepository.updateStatus).toHaveBeenCalledWith('doc-1', 'READY', null);
+      expect(pdfResumeQueryPort.updateStatus).toHaveBeenCalledWith(
+        'tenant-1',
+        'doc-1',
+        'READY',
+        null,
+      );
     });
 
     it('first batch has 100 texts, second has remainder', async () => {

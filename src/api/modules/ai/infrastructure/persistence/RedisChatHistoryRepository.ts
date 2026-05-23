@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
 import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import {
@@ -8,6 +8,7 @@ import {
 
 @Injectable()
 export class RedisChatHistoryRepository implements IChatHistoryRepository {
+  private readonly logger = new Logger(RedisChatHistoryRepository.name);
   private readonly TTL = 30 * 24 * 60 * 60; // 30 days in seconds
   private readonly PREFIX = 'chat_history:';
 
@@ -20,13 +21,22 @@ export class RedisChatHistoryRepository implements IChatHistoryRepository {
     const key = this.getKey(conversationId);
     const data = await this.redis.lrange(key, 0, -1);
 
-    return data.map((item) => {
-      const parsed = JSON.parse(item);
-      return {
-        ...parsed,
-        timestamp: new Date(parsed.timestamp),
-      };
-    });
+    const messages: ChatMessage[] = [];
+    for (const item of data) {
+      try {
+        const parsed = JSON.parse(item) as ChatMessage & { timestamp: string };
+        messages.push({
+          ...parsed,
+          timestamp: new Date(parsed.timestamp),
+        });
+      } catch (e: unknown) {
+        this.logger.warn(
+          `chat_history_corrupt_entry_skipped conversation=${conversationId} detail=${e instanceof Error ? e.message : String(e)}`,
+        );
+      }
+    }
+
+    return messages;
   }
 
   async saveMessage(

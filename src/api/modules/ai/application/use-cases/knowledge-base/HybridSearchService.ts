@@ -6,18 +6,25 @@ import {
 import {
   IDocumentChunkRepository,
   DOCUMENT_CHUNK_REPOSITORY,
+  SimilarChunkResult,
 } from '../../ports/IDocumentChunkRepository';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import {
-  Citation,
+  CitationDto as Citation,
   RAGResultWithCitations,
-} from '../../../domain/value-objects/Citation';
+} from '../../dtos/CitationDto';
 
 export interface HybridSearchInput {
   tenantId: string;
   query: string;
   topK?: number;
   threshold?: number;
+}
+
+interface MergedSearchResult {
+  documentId: string;
+  content: string;
+  score: number;
+  metadata: Record<string, unknown>;
 }
 
 @Injectable()
@@ -31,7 +38,6 @@ export class HybridSearchService {
     private readonly embeddingProvider: IEmbeddingProvider,
     @Inject(DOCUMENT_CHUNK_REPOSITORY)
     private readonly chunkRepository: IDocumentChunkRepository,
-    private readonly prisma: PrismaService,
   ) {}
 
   async search(input: HybridSearchInput): Promise<RAGResultWithCitations> {
@@ -69,7 +75,7 @@ export class HybridSearchService {
 
       citations.push({
         sourceId: result.documentId,
-        sourceType: result.metadata?.sourceType || 'document',
+        sourceType: (result.metadata?.sourceType as string) || 'document',
         sourceTitle: (result.metadata?.sourceTitle as string) || 'Documento',
         sourceUrl: result.metadata?.sourceUrl as string | undefined,
         pageNumber: result.metadata?.pageNumber as number | undefined,
@@ -88,28 +94,19 @@ export class HybridSearchService {
     tenantId: string,
     query: string,
     limit: number,
-  ): Promise<
-    { documentId: string; content: string; score: number; metadata: any }[]
-  > {
-    // Extract keywords (remove stop words, keep meaningful terms)
+  ): Promise<MergedSearchResult[]> {
     const keywords = this.extractKeywords(query);
     if (keywords.length === 0) return [];
 
-    const searchPattern = keywords.join('|');
-
     try {
-      const chunks = await this.prisma.tenantDocumentChunk.findMany({
-        where: {
-          tenantId,
-          content: { contains: keywords[0] }, // Primary keyword
-        },
-        take: limit * 2,
-        orderBy: { createdAt: 'desc' },
-      });
+      const chunks = await this.chunkRepository.keywordSearch(
+        tenantId,
+        keywords,
+        limit * 2,
+      );
 
       return chunks
-        .map((chunk: any) => {
-          // Score based on keyword matches
+        .map((chunk) => {
           const matchCount = keywords.filter((kw) =>
             chunk.content.toLowerCase().includes(kw.toLowerCase()),
           ).length;
@@ -124,22 +121,20 @@ export class HybridSearchService {
         })
         .filter((r) => r.score > 0.3)
         .slice(0, limit);
-    } catch {
+    } catch (e: unknown) {
+      this.logger.warn(
+        `keyword_search_failed tenant=${tenantId} detail=${e instanceof Error ? e.message : String(e)}`,
+      );
       return [];
     }
   }
 
   private mergeResults(
-    vectorResults: any[],
-    keywordResults: any[],
-  ): { documentId: string; content: string; score: number; metadata: any }[] {
+    vectorResults: SimilarChunkResult[],
+    keywordResults: MergedSearchResult[],
+  ): MergedSearchResult[] {
     const seen = new Set<string>();
-    const merged: {
-      documentId: string;
-      content: string;
-      score: number;
-      metadata: any;
-    }[] = [];
+    const merged: MergedSearchResult[] = [];
 
     for (const r of vectorResults) {
       const key = `${r.documentId}:${r.chunkIndex}`;
@@ -157,7 +152,6 @@ export class HybridSearchService {
     for (const r of keywordResults) {
       const existingIdx = merged.findIndex((m) => m.content === r.content);
       if (existingIdx >= 0) {
-        // Boost score for results found by both methods
         merged[existingIdx].score = Math.min(
           1,
           merged[existingIdx].score + 0.1,

@@ -1,13 +1,14 @@
 import { IngestKnowledgeSourceUseCase } from '../application/use-cases/knowledge-base/IngestKnowledgeSourceUseCase';
 import { IEmbeddingProvider } from '../application/ports/IEmbeddingProvider';
 import { IDocumentChunkRepository } from '../application/ports/IDocumentChunkRepository';
+import { IKnowledgeSourceRepository } from '../application/ports/IKnowledgeSourceRepository';
 import { WebCrawlerAdapter } from '../infrastructure/adapters/knowledge-sources/WebCrawlerAdapter';
 import { GoogleDriveAdapter } from '../infrastructure/adapters/knowledge-sources/GoogleDriveAdapter';
 import { NotionAdapter } from '../infrastructure/adapters/knowledge-sources/NotionAdapter';
 
 describe('IngestKnowledgeSourceUseCase', () => {
   let useCase: IngestKnowledgeSourceUseCase;
-  let prisma: any;
+  let knowledgeSourceRepository: jest.Mocked<IKnowledgeSourceRepository>;
   let chunkingService: any;
   let embeddingProvider: jest.Mocked<IEmbeddingProvider>;
   let chunkRepository: jest.Mocked<IDocumentChunkRepository>;
@@ -16,11 +17,17 @@ describe('IngestKnowledgeSourceUseCase', () => {
   let notion: jest.Mocked<NotionAdapter>;
 
   beforeEach(() => {
-    prisma = {
-      knowledgeSource: {
-        update: jest.fn(),
-        findUnique: jest.fn().mockResolvedValue({ id: 'src-1', contentHash: 'old-hash' }),
-      },
+    knowledgeSourceRepository = {
+      findById: jest
+        .fn()
+        .mockResolvedValue({
+          id: 'src-1',
+          tenantId: 'tenant-1',
+          status: 'ACTIVE',
+          contentHash: 'old-hash',
+        }),
+      updateStatus: jest.fn().mockResolvedValue(undefined),
+      markSynced: jest.fn().mockResolvedValue(undefined),
     };
 
     chunkingService = {
@@ -58,7 +65,7 @@ describe('IngestKnowledgeSourceUseCase', () => {
     } as any;
 
     useCase = new IngestKnowledgeSourceUseCase(
-      prisma,
+      knowledgeSourceRepository,
       chunkingService,
       embeddingProvider,
       chunkRepository,
@@ -85,12 +92,16 @@ describe('IngestKnowledgeSourceUseCase', () => {
     expect(result.success).toBe(true);
     expect(result.chunksCreated).toBe(2);
     expect(result.contentHash).toBe('new-hash-123');
-    expect(chunkRepository.deleteByDocument).toHaveBeenCalledWith('src-1');
+    expect(chunkRepository.deleteByDocument).toHaveBeenCalledWith(
+      'tenant-1',
+      'src-1',
+    );
     expect(chunkRepository.saveChunks).toHaveBeenCalled();
-    expect(prisma.knowledgeSource.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ status: 'ACTIVE', contentHash: 'new-hash-123' }),
-      }),
+    expect(knowledgeSourceRepository.markSynced).toHaveBeenCalledWith(
+      'tenant-1',
+      'src-1',
+      'ACTIVE',
+      'new-hash-123',
     );
   });
 
@@ -140,10 +151,10 @@ describe('IngestKnowledgeSourceUseCase', () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Connection timeout');
-    expect(prisma.knowledgeSource.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: { status: 'ERROR' },
-      }),
+    expect(knowledgeSourceRepository.updateStatus).toHaveBeenCalledWith(
+      'tenant-1',
+      'src-1',
+      'ERROR',
     );
   });
 
@@ -205,9 +216,12 @@ describe('IngestKnowledgeSourceUseCase', () => {
       sourceName: 'X',
     });
 
-    // First update should set INGESTING
-    expect(prisma.knowledgeSource.update).toHaveBeenNthCalledWith(1,
-      expect.objectContaining({ data: { status: 'INGESTING' } }),
+    // First status update should set INGESTING (tenant-scoped)
+    expect(knowledgeSourceRepository.updateStatus).toHaveBeenNthCalledWith(
+      1,
+      'tenant-1',
+      'src-1',
+      'INGESTING',
     );
   });
 });

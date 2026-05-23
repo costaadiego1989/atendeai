@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { NicheClassifier, NicheCategory } from './NicheClassifier';
 import {
   MenuConditionEvaluator,
@@ -33,6 +34,7 @@ export interface NicheWelcomeMenuInput {
   hasRecoveryCases: boolean;
 }
 
+@Injectable()
 export class NicheWelcomeMenuService {
   private readonly classifier: NicheClassifier;
   private readonly conditionEvaluator: MenuConditionEvaluator;

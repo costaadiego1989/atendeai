@@ -1,5 +1,7 @@
+import { Injectable } from '@nestjs/common';
 import { Tenant } from '../../../tenant/domain/entities/Tenant';
 
+@Injectable()
 export class PromptBuilder {
   public build(tenant: Tenant): string {
     const aiConfig = tenant.aiConfig;

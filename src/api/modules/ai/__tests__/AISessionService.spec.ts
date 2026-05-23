@@ -76,14 +76,20 @@ describe('AISessionService', () => {
   });
 
   describe('recordMessage', () => {
-    it('should record a message with tokens and diagnostics', async () => {
+    it('should record a message with tenantId, tokens and diagnostics', async () => {
       repository.recordMessage.mockResolvedValue(undefined);
 
-      await service.recordMessage('session-123', 'user', 'Olá', 10, {
-        latency: 200,
-      });
+      await service.recordMessage(
+        'tenant-1',
+        'session-123',
+        'user',
+        'Olá',
+        10,
+        { latency: 200 },
+      );
 
       expect(repository.recordMessage).toHaveBeenCalledWith({
+        tenantId: 'tenant-1',
         sessionId: 'session-123',
         role: 'user',
         content: 'Olá',
@@ -95,9 +101,15 @@ describe('AISessionService', () => {
     it('should default tokens to 0 and diagnostics to empty object', async () => {
       repository.recordMessage.mockResolvedValue(undefined);
 
-      await service.recordMessage('session-123', 'assistant', 'Resposta');
+      await service.recordMessage(
+        'tenant-1',
+        'session-123',
+        'assistant',
+        'Resposta',
+      );
 
       expect(repository.recordMessage).toHaveBeenCalledWith({
+        tenantId: 'tenant-1',
         sessionId: 'session-123',
         role: 'assistant',
         content: 'Resposta',
@@ -106,18 +118,20 @@ describe('AISessionService', () => {
       });
     });
 
-    it('should record system messages', async () => {
+    it('should forward the tenantId so the repository can scope the write', async () => {
       repository.recordMessage.mockResolvedValue(undefined);
 
-      await service.recordMessage('session-123', 'system', 'System prompt', 5);
+      await service.recordMessage(
+        'tenant-1',
+        'session-123',
+        'system',
+        'System prompt',
+        5,
+      );
 
-      expect(repository.recordMessage).toHaveBeenCalledWith({
-        sessionId: 'session-123',
-        role: 'system',
-        content: 'System prompt',
-        tokens: 5,
-        diagnostics: {},
-      });
+      expect(repository.recordMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantId: 'tenant-1' }),
+      );
     });
   });
 
@@ -125,25 +139,37 @@ describe('AISessionService', () => {
     it('should close session with CLOSED status by default', async () => {
       repository.close.mockResolvedValue(undefined);
 
-      await service.closeSession('session-123');
+      await service.closeSession('tenant-1', 'session-123');
 
-      expect(repository.close).toHaveBeenCalledWith('session-123', 'CLOSED');
+      expect(repository.close).toHaveBeenCalledWith(
+        'tenant-1',
+        'session-123',
+        'CLOSED',
+      );
     });
 
-    it('should close session with EXPIRED status', async () => {
+    it('should close session with EXPIRED status scoped by tenantId', async () => {
       repository.close.mockResolvedValue(undefined);
 
-      await service.closeSession('session-123', 'EXPIRED');
+      await service.closeSession('tenant-1', 'session-123', 'EXPIRED');
 
-      expect(repository.close).toHaveBeenCalledWith('session-123', 'EXPIRED');
+      expect(repository.close).toHaveBeenCalledWith(
+        'tenant-1',
+        'session-123',
+        'EXPIRED',
+      );
     });
 
-    it('should close session with HANDOFF status', async () => {
+    it('should close session with HANDOFF status scoped by tenantId', async () => {
       repository.close.mockResolvedValue(undefined);
 
-      await service.closeSession('session-123', 'HANDOFF');
+      await service.closeSession('tenant-1', 'session-123', 'HANDOFF');
 
-      expect(repository.close).toHaveBeenCalledWith('session-123', 'HANDOFF');
+      expect(repository.close).toHaveBeenCalledWith(
+        'tenant-1',
+        'session-123',
+        'HANDOFF',
+      );
     });
   });
 });

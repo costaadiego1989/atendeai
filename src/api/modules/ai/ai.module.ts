@@ -5,11 +5,10 @@ import Redis from 'ioredis';
 import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import { ProcessAIResponseUseCase } from '@modules/ai/application/use-cases/ProcessAIResponseUseCase';
 import { IProcessAIResponseUseCase } from '@modules/ai/application/use-cases/interfaces/IProcessAIResponseUseCase';
-import { AI_ENGINE, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
+import { AI_ENGINE } from '@modules/ai/application/ports/IAIEngine';
 import { DeepSeekAdapter } from '@modules/ai/infrastructure/adapters/DeepSeekAdapter';
 import {
   CHAT_HISTORY_REPOSITORY,
-  IChatHistoryRepository,
 } from '@modules/ai/application/ports/IChatHistoryRepository';
 import { RedisChatHistoryRepository } from '@modules/ai/infrastructure/persistence/RedisChatHistoryRepository';
 import { TenantModule } from '@modules/tenant/tenant.module';
@@ -25,10 +24,7 @@ import { CommerceSessionAbandonedHandler } from '@modules/ai/application/handler
 import { AIResponseGeneratedHandler } from '@modules/ai/application/handlers/AIResponseGeneratedHandler';
 import { AISessionService } from './application/services/AISessionService';
 import { AIContextAggregator } from './application/services/AIContextAggregator';
-import {
-  IPaymentLinkGenerator,
-  PAYMENT_LINK_GENERATOR,
-} from './application/ports/IPaymentLinkGenerator';
+import { PAYMENT_LINK_GENERATOR } from './application/ports/IPaymentLinkGenerator';
 import { SalesPaymentLinkGenerator } from './infrastructure/adapters/SalesPaymentLinkGenerator';
 import { SchedulingModule } from '@modules/scheduling/scheduling.module';
 import { CatalogModule } from '@modules/catalog/catalog.module';
@@ -53,11 +49,9 @@ import {
 } from './application/ports/ITenantPDFContextProvider';
 import {
   EMBEDDING_PROVIDER,
-  IEmbeddingProvider,
 } from './application/ports/IEmbeddingProvider';
 import { DOCUMENT_CHUNK_REPOSITORY } from './application/ports/IDocumentChunkRepository';
 import {
-  IRAGResponseCache,
   RAG_RESPONSE_CACHE,
 } from './application/ports/IRAGResponseCache';
 import { CommerceContextProvider } from './infrastructure/adapters/CommerceContextProvider';
@@ -75,43 +69,23 @@ import { MediaUnderstandingService } from './application/services/MediaUnderstan
 import { ProcessAIResponseService } from './application/services/ProcessAIResponseService';
 import {
   AUDIO_TRANSCRIPTION_PROVIDER,
-  AudioTranscriptionProvider,
   DOCUMENT_TEXT_EXTRACTOR,
-  DocumentTextExtractor,
   IMAGE_OCR_PROVIDER,
-  ImageOcrProvider,
 } from './application/ports/IMediaUnderstandingProviders';
 import {
   HttpAudioTranscriptionAdapter,
   HttpDocumentTextExtractorAdapter,
   HttpImageOcrAdapter,
 } from './infrastructure/adapters/HttpMediaUnderstandingAdapters';
-import {
-  AI_SESSION_REPOSITORY,
-  IAISessionRepository,
-} from './application/ports/IAISessionRepository';
+import { AI_SESSION_REPOSITORY } from './application/ports/IAISessionRepository';
 import { PrismaAISessionRepository } from './infrastructure/persistence/PrismaAISessionRepository';
-import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
-import {
-  ITenantRepository,
-  TENANT_REPOSITORY,
-} from '@modules/tenant/domain/repositories/ITenantRepository';
-import { ICheckQuotaUseCase } from '@modules/billing/application/use-cases/interfaces/ICheckQuotaUseCase';
-import {
-  CONTACT_REPOSITORY,
-  IContactRepository,
-} from '@modules/contact/domain/repositories/IContactRepository';
-import { TenantAgentRuleService } from '@modules/agent-rules/application/services/TenantAgentRuleService';
 import { AdvanceCommerceConversationUseCase } from '@modules/commerce/application/use-cases/AdvanceCommerceConversationUseCase';
 import { RepeatLastOrderUseCase } from '@modules/commerce/application/use-cases/RepeatLastOrderUseCase';
 import { ReserveProfessionalSlotUseCase } from '@modules/scheduling/application/use-cases/ReserveProfessionalSlotUseCase';
 import { AiSafetyGate } from './application/services/AiSafetyGate';
 import { ADVANCE_COMMERCE_CONVERSATION } from './application/ports/IAdvanceCommerceConversation';
 import { RESERVE_PROFESSIONAL_SLOT } from './application/ports/IReserveProfessionalSlot';
-import {
-  IRepeatLastOrder,
-  REPEAT_LAST_ORDER,
-} from './application/ports/IRepeatLastOrder';
+import { REPEAT_LAST_ORDER } from './application/ports/IRepeatLastOrder';
 import { NicheWelcomeMenuService } from './application/services/welcome-menu/NicheWelcomeMenuService';
 import { TenantAIContextSnapshotService } from './application/services/TenantAIContextSnapshotService';
 import { TENANT_AI_CONTEXT_SNAPSHOT_STORE } from './application/ports/ITenantAIContextSnapshot';
@@ -123,6 +97,10 @@ import { NotionAdapter } from './infrastructure/adapters/knowledge-sources/Notio
 import { KnowledgeBaseSyncWorker } from './infrastructure/adapters/knowledge-sources/KnowledgeBaseSyncWorker';
 import { IngestKnowledgeSourceUseCase } from './application/use-cases/knowledge-base/IngestKnowledgeSourceUseCase';
 import { HybridSearchService } from './application/use-cases/knowledge-base/HybridSearchService';
+import { KNOWLEDGE_SOURCE_REPOSITORY } from './application/ports/IKnowledgeSourceRepository';
+import { PrismaKnowledgeSourceRepository } from './infrastructure/persistence/PrismaKnowledgeSourceRepository';
+import { COMMERCE_CATALOG_SEARCH } from './application/ports/ICommerceCatalogSearch';
+import { CommerceCatalogSearchAdapter } from './infrastructure/adapters/CommerceCatalogSearchAdapter';
 
 @Module({
   imports: [
@@ -139,42 +117,16 @@ import { HybridSearchService } from './application/use-cases/knowledge-base/Hybr
     ContactModule,
   ],
   providers: [
-    {
-      provide: PromptBuilder,
-      useFactory: () => new PromptBuilder(),
-    },
-    {
-      provide: NicheWelcomeMenuService,
-      useFactory: () => new NicheWelcomeMenuService(),
-    },
+    PromptBuilder,
+    NicheWelcomeMenuService,
     {
       provide: TENANT_AI_CONTEXT_SNAPSHOT_STORE,
       useClass: RedisTenantAIContextSnapshotStore,
     },
     TenantAIContextSnapshotService,
     TenantAIContextSnapshotInvalidationHandler,
-    {
-      provide: AIResponseProcessor,
-      useFactory: (
-        paymentLinkGenerator: IPaymentLinkGenerator,
-        reserveProfessionalSlotUseCase: ReserveProfessionalSlotUseCase,
-        repeatLastOrderUseCase: IRepeatLastOrder,
-      ) =>
-        new AIResponseProcessor(
-          paymentLinkGenerator,
-          reserveProfessionalSlotUseCase,
-          repeatLastOrderUseCase,
-        ),
-      inject: [
-        PAYMENT_LINK_GENERATOR,
-        RESERVE_PROFESSIONAL_SLOT,
-        REPEAT_LAST_ORDER,
-      ],
-    },
-    {
-      provide: HumanHandoffPolicy,
-      useFactory: () => new HumanHandoffPolicy(),
-    },
+    AIResponseProcessor,
+    HumanHandoffPolicy,
     {
       provide: PAYMENT_LINK_GENERATOR,
       useClass: SalesPaymentLinkGenerator,
@@ -204,6 +156,14 @@ import { HybridSearchService } from './application/use-cases/knowledge-base/Hybr
       useClass: PrismaDocumentChunkRepository,
     },
     {
+      provide: KNOWLEDGE_SOURCE_REPOSITORY,
+      useClass: PrismaKnowledgeSourceRepository,
+    },
+    {
+      provide: COMMERCE_CATALOG_SEARCH,
+      useClass: CommerceCatalogSearchAdapter,
+    },
+    {
       provide: RAG_RESPONSE_CACHE,
       useFactory: (redis: Redis, config: ConfigService) => {
         const ttl = Number(config.get<string>('RAG_CACHE_TTL_SECONDS')) || 3600;
@@ -213,10 +173,7 @@ import { HybridSearchService } from './application/use-cases/knowledge-base/Hybr
       },
       inject: [REDIS_CLIENT, ConfigService],
     },
-    {
-      provide: DocumentChunkingService,
-      useFactory: () => new DocumentChunkingService(),
-    },
+    DocumentChunkingService,
     ProcessDocumentForRAGUseCase,
     PDFProcessingProcessor,
     WebCrawlerAdapter,
@@ -225,32 +182,12 @@ import { HybridSearchService } from './application/use-cases/knowledge-base/Hybr
     IngestKnowledgeSourceUseCase,
     HybridSearchService,
     KnowledgeBaseSyncWorker,
-    {
-      provide: LeadScoringService,
-      useFactory: () => new LeadScoringService(),
-    },
+    LeadScoringService,
     MessageReceivedHandler,
     FollowUpTriggeredHandler,
     CommerceSessionAbandonedHandler,
     AIResponseGeneratedHandler,
-    {
-      provide: MediaUnderstandingService,
-      useFactory: (
-        imageOcrProvider: ImageOcrProvider,
-        audioTranscriptionProvider: AudioTranscriptionProvider,
-        documentTextExtractor: DocumentTextExtractor,
-      ) =>
-        new MediaUnderstandingService(
-          imageOcrProvider,
-          audioTranscriptionProvider,
-          documentTextExtractor,
-        ),
-      inject: [
-        IMAGE_OCR_PROVIDER,
-        AUDIO_TRANSCRIPTION_PROVIDER,
-        DOCUMENT_TEXT_EXTRACTOR,
-      ],
-    },
+    MediaUnderstandingService,
     {
       provide: IMAGE_OCR_PROVIDER,
       useClass: HttpImageOcrAdapter,
@@ -277,12 +214,7 @@ import { HybridSearchService } from './application/use-cases/knowledge-base/Hybr
       provide: AI_SESSION_REPOSITORY,
       useClass: PrismaAISessionRepository,
     },
-    {
-      provide: AISessionService,
-      useFactory: (repository: IAISessionRepository) =>
-        new AISessionService(repository),
-      inject: [AI_SESSION_REPOSITORY],
-    },
+    AISessionService,
     {
       provide: AIContextAggregator,
       useFactory: (
@@ -325,63 +257,7 @@ import { HybridSearchService } from './application/use-cases/knowledge-base/Hybr
       useFactory: (config: ConfigService) => AiSafetyGate.fromEnvLike(config),
       inject: [ConfigService],
     },
-    {
-      provide: ProcessAIResponseService,
-      useFactory: (
-        aiEngine: IAIEngine,
-        eventBus: IEventBus,
-        tenantRepository: ITenantRepository,
-        chatHistoryRepository: IChatHistoryRepository,
-        checkQuotaUseCase: ICheckQuotaUseCase,
-        responseProcessor: AIResponseProcessor,
-        humanHandoffPolicy: HumanHandoffPolicy,
-        advanceCommerceConversationUseCase: AdvanceCommerceConversationUseCase,
-        aiSessionService: AISessionService,
-        contextAggregator: AIContextAggregator,
-        contactRepository: IContactRepository,
-        tenantAgentRuleService: TenantAgentRuleService,
-        aiSafetyGate: AiSafetyGate,
-        mediaUnderstandingService: MediaUnderstandingService,
-        ragResponseCache: IRAGResponseCache,
-        embeddingProvider: IEmbeddingProvider,
-      ) =>
-        new ProcessAIResponseService(
-          aiEngine,
-          eventBus,
-          tenantRepository,
-          chatHistoryRepository,
-          checkQuotaUseCase,
-          responseProcessor,
-          humanHandoffPolicy,
-          advanceCommerceConversationUseCase,
-          aiSessionService,
-          contextAggregator,
-          contactRepository,
-          tenantAgentRuleService,
-          aiSafetyGate,
-          mediaUnderstandingService,
-          ragResponseCache,
-          embeddingProvider,
-        ),
-      inject: [
-        AI_ENGINE,
-        EVENT_BUS,
-        TENANT_REPOSITORY,
-        CHAT_HISTORY_REPOSITORY,
-        ICheckQuotaUseCase,
-        AIResponseProcessor,
-        HumanHandoffPolicy,
-        ADVANCE_COMMERCE_CONVERSATION,
-        AISessionService,
-        AIContextAggregator,
-        CONTACT_REPOSITORY,
-        TenantAgentRuleService,
-        AiSafetyGate,
-        MediaUnderstandingService,
-        RAG_RESPONSE_CACHE,
-        EMBEDDING_PROVIDER,
-      ],
-    },
+    ProcessAIResponseService,
     {
       provide: CHAT_HISTORY_REPOSITORY,
       useClass: RedisChatHistoryRepository,

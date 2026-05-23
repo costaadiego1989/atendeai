@@ -1,10 +1,16 @@
+import { Inject, Injectable } from '@nestjs/common';
 import {
   AISessionDto,
+  AI_SESSION_REPOSITORY,
   IAISessionRepository,
 } from '../ports/IAISessionRepository';
 
+@Injectable()
 export class AISessionService {
-  constructor(private readonly repository: IAISessionRepository) {}
+  constructor(
+    @Inject(AI_SESSION_REPOSITORY)
+    private readonly repository: IAISessionRepository,
+  ) {}
 
   async getOrCreateSession(
     tenantId: string,
@@ -18,13 +24,15 @@ export class AISessionService {
   }
 
   async recordMessage(
+    tenantId: string,
     sessionId: string,
     role: 'user' | 'assistant' | 'system',
     content: string,
     tokens: number = 0,
-    diagnostics: any = {},
+    diagnostics: Record<string, unknown> = {},
   ): Promise<void> {
     await this.repository.recordMessage({
+      tenantId,
       sessionId,
       role,
       content,
@@ -34,9 +42,10 @@ export class AISessionService {
   }
 
   async closeSession(
+    tenantId: string,
     sessionId: string,
     status: 'CLOSED' | 'EXPIRED' | 'HANDOFF' = 'CLOSED',
   ): Promise<void> {
-    await this.repository.close(sessionId, status);
+    await this.repository.close(tenantId, sessionId, status);
   }
 }

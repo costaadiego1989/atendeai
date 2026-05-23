@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { AIResponse } from '../ports/IAIEngine';
 
 export interface HumanHandoffDecision {
@@ -5,6 +6,7 @@ export interface HumanHandoffDecision {
   reason?: string;
 }
 
+@Injectable()
 export class HumanHandoffPolicy {
   evaluate(input: {
     userMessage: string;

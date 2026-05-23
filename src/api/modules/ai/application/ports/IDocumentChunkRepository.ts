@@ -13,6 +13,13 @@ export interface SimilarChunkResult extends DocumentChunkRecord {
   fileName?: string;
 }
 
+export interface KeywordChunkResult {
+  documentId: string;
+  chunkIndex: number;
+  content: string;
+  metadata: Record<string, unknown>;
+}
+
 export interface SaveChunkInput {
   tenantId: string;
   documentId: string;
@@ -31,8 +38,13 @@ export interface IDocumentChunkRepository {
     topK: number,
     threshold: number,
   ): Promise<SimilarChunkResult[]>;
-  deleteByDocument(documentId: string): Promise<void>;
-  countByDocument(documentId: string): Promise<number>;
+  deleteByDocument(tenantId: string, documentId: string): Promise<void>;
+  countByDocument(tenantId: string, documentId: string): Promise<number>;
+  keywordSearch(
+    tenantId: string,
+    keywords: string[],
+    limit: number,
+  ): Promise<KeywordChunkResult[]>;
 }
 
 export const DOCUMENT_CHUNK_REPOSITORY = Symbol('DOCUMENT_CHUNK_REPOSITORY');

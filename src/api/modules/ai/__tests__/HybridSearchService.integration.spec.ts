@@ -102,7 +102,7 @@ describe('HybridSearchService (integration)', () => {
     );
 
     // Verify chunks were saved
-    const count = await chunkRepo.countByDocument(sourceId);
+    const count = await chunkRepo.countByDocument(tenantId, sourceId);
     expect(count).toBe(3);
   });
 
@@ -142,8 +142,8 @@ describe('HybridSearchService (integration)', () => {
   });
 
   it('should delete chunks by document', async () => {
-    await chunkRepo.deleteByDocument(sourceId);
-    const count = await chunkRepo.countByDocument(sourceId);
+    await chunkRepo.deleteByDocument(tenantId, sourceId);
+    const count = await chunkRepo.countByDocument(tenantId, sourceId);
     expect(count).toBe(0);
   });
 });

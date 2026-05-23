@@ -1,7 +1,7 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
-import { IAIEngine } from '../ports/IAIEngine';
-import { IEventBus } from '@shared/application/ports/IEventBus';
+import { AI_ENGINE, IAIEngine } from '../ports/IAIEngine';
+import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import {
   AIQuotaDeniedIntegrationEvent,
   AIResponseFailedIntegrationEvent,
@@ -13,45 +13,76 @@ import {
   ProcessAIResponseInput,
   ProcessAIResponseOutput,
 } from '../use-cases/interfaces/IProcessAIResponseUseCase';
-import { ITenantRepository } from '../../../tenant/domain/repositories/ITenantRepository';
-import { IChatHistoryRepository } from '../ports/IChatHistoryRepository';
+import {
+  ITenantRepository,
+  TENANT_REPOSITORY,
+} from '../../../tenant/domain/repositories/ITenantRepository';
+import {
+  CHAT_HISTORY_REPOSITORY,
+  IChatHistoryRepository,
+} from '../ports/IChatHistoryRepository';
 import { ICheckQuotaUseCase } from '../../../billing/application/use-cases/interfaces/ICheckQuotaUseCase';
 import { UsageType } from '../../../billing/application/use-cases/interfaces/IRecordUsageUseCase';
 import { AIResponseProcessor } from './AIResponseProcessor';
 import { HumanHandoffPolicy } from './HumanHandoffPolicy';
-import { IAdvanceCommerceConversation } from '../ports/IAdvanceCommerceConversation';
+import {
+  ADVANCE_COMMERCE_CONVERSATION,
+  IAdvanceCommerceConversation,
+} from '../ports/IAdvanceCommerceConversation';
 import { AISessionService } from './AISessionService';
 import { AIContextAggregator } from './AIContextAggregator';
-import { IContactRepository } from '@modules/contact/domain/repositories/IContactRepository';
+import {
+  CONTACT_REPOSITORY,
+  IContactRepository,
+} from '@modules/contact/domain/repositories/IContactRepository';
 import { TenantAgentRuleService } from '@modules/agent-rules/application/services/TenantAgentRuleService';
 import { MediaUnderstandingService } from './MediaUnderstandingService';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 import { AiSafetyGate } from './AiSafetyGate';
 import { Tenant } from '../../../tenant/domain/entities/Tenant';
-import { IRAGResponseCache } from '../ports/IRAGResponseCache';
-import { IEmbeddingProvider } from '../ports/IEmbeddingProvider';
+import {
+  IRAGResponseCache,
+  RAG_RESPONSE_CACHE,
+} from '../ports/IRAGResponseCache';
+import {
+  EMBEDDING_PROVIDER,
+  IEmbeddingProvider,
+} from '../ports/IEmbeddingProvider';
 
+@Injectable()
 export class ProcessAIResponseService {
   private readonly logger = new Logger(ProcessAIResponseService.name);
 
   private static readonly RAG_CACHE_THRESHOLD = 0.95;
 
   constructor(
+    @Inject(AI_ENGINE)
     private readonly aiEngine: IAIEngine,
+    @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
+    @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
+    @Inject(CHAT_HISTORY_REPOSITORY)
     private readonly chatHistoryRepository: IChatHistoryRepository,
+    @Inject(ICheckQuotaUseCase)
     private readonly checkQuotaUseCase: ICheckQuotaUseCase,
     private readonly responseProcessor: AIResponseProcessor,
     private readonly humanHandoffPolicy: HumanHandoffPolicy,
+    @Inject(ADVANCE_COMMERCE_CONVERSATION)
     private readonly advanceCommerceConversationUseCase: IAdvanceCommerceConversation,
     private readonly aiSessionService: AISessionService,
     private readonly contextAggregator: AIContextAggregator,
+    @Inject(CONTACT_REPOSITORY)
     private readonly contactRepository: IContactRepository,
     private readonly tenantAgentRuleService: TenantAgentRuleService,
     private readonly aiSafetyGate: AiSafetyGate,
+    @Optional()
     private readonly mediaUnderstandingService?: MediaUnderstandingService,
+    @Optional()
+    @Inject(RAG_RESPONSE_CACHE)
     private readonly ragResponseCache?: IRAGResponseCache,
+    @Optional()
+    @Inject(EMBEDDING_PROVIDER)
     private readonly embeddingProvider?: IEmbeddingProvider,
   ) {}
 
@@ -337,8 +368,14 @@ export class ProcessAIResponseService {
       timestamp: new Date(),
     });
 
-    await this.aiSessionService.recordMessage(sessionId, 'user', userMessage);
     await this.aiSessionService.recordMessage(
+      input.tenantId,
+      sessionId,
+      'user',
+      userMessage,
+    );
+    await this.aiSessionService.recordMessage(
+      input.tenantId,
       sessionId,
       'assistant',
       processedText,
@@ -378,7 +415,11 @@ export class ProcessAIResponseService {
       timestamp: new Date(),
     });
 
-    await this.aiSessionService.closeSession(sessionId, 'HANDOFF');
+    await this.aiSessionService.closeSession(
+      input.tenantId,
+      sessionId,
+      'HANDOFF',
+    );
 
     await this.eventBus.publish(
       new AIEscalationRequestedIntegrationEvent({
@@ -471,7 +512,10 @@ export class ProcessAIResponseService {
         input.contactId,
       );
       return contact?.branchId ?? null;
-    } catch {
+    } catch (e: unknown) {
+      this.logger.warn(
+        `resolve_branch_id_failed tenant=${input.tenantId} contact=${input.contactId} conversation=${input.conversationId} detail=${e instanceof Error ? e.message : String(e)}`,
+      );
       return null;
     }
   }
@@ -517,7 +561,10 @@ export class ProcessAIResponseService {
         `[DIRETRIZES PERSONALIZADAS DE CONVERSAS ${scopeLabel}]:`,
         customPrompt,
       ].join('\n\n');
-    } catch {
+    } catch (e: unknown) {
+      this.logger.warn(
+        `apply_messaging_agent_rule_failed tenant=${tenantId} module=${moduleId} branch=${branchId ?? 'none'} detail=${e instanceof Error ? e.message : String(e)}`,
+      );
       return systemPrompt;
     }
   }

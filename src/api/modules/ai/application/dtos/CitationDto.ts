@@ -1,4 +1,4 @@
-export interface Citation {
+export interface CitationDto {
   sourceId: string;
   sourceType: string;
   sourceTitle: string;
@@ -11,10 +11,10 @@ export interface Citation {
 
 export interface RAGResultWithCitations {
   context: string;
-  citations: Citation[];
+  citations: CitationDto[];
 }
 
-export function formatCitations(citations: Citation[]): string {
+export function formatCitations(citations: CitationDto[]): string {
   if (citations.length === 0) return '';
 
   const lines = citations.map((c, i) => {

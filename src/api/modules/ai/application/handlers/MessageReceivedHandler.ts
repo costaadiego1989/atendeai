@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { IEventBus, EVENT_BUS } from '@shared/infrastructure/event-bus';
 import {
   IProcessAIResponseUseCase,
@@ -7,6 +7,8 @@ import {
 
 @Injectable()
 export class MessageReceivedHandler implements OnModuleInit {
+  private readonly logger = new Logger(MessageReceivedHandler.name);
+
   constructor(
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
@@ -18,14 +20,38 @@ export class MessageReceivedHandler implements OnModuleInit {
     this.eventBus.subscribe(
       'messaging.message-received',
       async (event) => {
-        const payload = event.payload as unknown as ProcessAIResponseInput;
-        await this.handle(payload);
+        await this.handle(event.payload);
       },
       { consumerName: 'ai-message-received' },
     );
   }
 
-  private async handle(payload: ProcessAIResponseInput) {
-    await this.processAIResponseUseCase.execute(payload);
+  private async handle(rawPayload: Record<string, unknown>) {
+    if (!this.isValidPayload(rawPayload)) {
+      this.logger.warn(
+        `message_received_invalid_payload conversation=${String(
+          rawPayload?.conversationId,
+        )}`,
+      );
+      return;
+    }
+
+    await this.processAIResponseUseCase.execute(rawPayload);
+  }
+
+  private isValidPayload(
+    payload: Record<string, unknown>,
+  ): payload is ProcessAIResponseInput & Record<string, unknown> {
+    const content = payload?.content as { type?: unknown } | undefined;
+    return (
+      typeof payload?.tenantId === 'string' &&
+      payload.tenantId.length > 0 &&
+      typeof payload.contactId === 'string' &&
+      payload.contactId.length > 0 &&
+      typeof payload.conversationId === 'string' &&
+      payload.conversationId.length > 0 &&
+      typeof content === 'object' &&
+      content !== null
+    );
   }
 }

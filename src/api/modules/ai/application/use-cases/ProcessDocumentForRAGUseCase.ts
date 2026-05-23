@@ -13,10 +13,15 @@ import {
   IRAGResponseCache,
   RAG_RESPONSE_CACHE,
 } from '@modules/ai/application/ports/IRAGResponseCache';
-import { TenantPDFResumeRepository } from '@modules/tenant/infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import {
+  ITenantPDFResumeQueryPort,
+  TENANT_PDF_RESUME_QUERY_PORT,
+} from '@modules/tenant/application/facades/TenantPDFResumeFacade';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 
-const pdfParse = require('pdf-parse');
+type PdfParseResult = { text: string; numpages: number; info: Record<string, unknown> };
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse: (dataBuffer: Buffer) => Promise<PdfParseResult> = require('pdf-parse');
 
 export interface ProcessDocumentForRAGInput {
   tenantId: string;
@@ -37,7 +42,8 @@ export class ProcessDocumentForRAGUseCase {
     private readonly embeddingProvider: IEmbeddingProvider,
     @Inject(DOCUMENT_CHUNK_REPOSITORY)
     private readonly chunkRepository: IDocumentChunkRepository,
-    private readonly pdfResumeRepository: TenantPDFResumeRepository,
+    @Inject(TENANT_PDF_RESUME_QUERY_PORT)
+    private readonly pdfResumeQueryPort: ITenantPDFResumeQueryPort,
     @Optional()
     @Inject(RAG_RESPONSE_CACHE)
     private readonly ragResponseCache?: IRAGResponseCache,
@@ -65,7 +71,7 @@ export class ProcessDocumentForRAGUseCase {
   ): Promise<void> {
     try {
       // 1. Update status to EXTRACTING
-      await this.updateStatus(documentId, 'EXTRACTING');
+      await this.updateStatus(tenantId, documentId, 'EXTRACTING');
 
       // 2. Download PDF from S3
       const pdfBuffer = await this.downloadPDF(fileUrl);
@@ -73,17 +79,27 @@ export class ProcessDocumentForRAGUseCase {
       // 3. Extract text with pdf-parse
       const text = await this.extractText(pdfBuffer);
       if (!text.trim()) {
-        await this.updateStatus(documentId, 'ERROR', 'PDF sem texto extraível');
+        await this.updateStatus(
+          tenantId,
+          documentId,
+          'ERROR',
+          'PDF sem texto extraível',
+        );
         return;
       }
 
       // 4. Update status to CHUNKING
-      await this.updateStatus(documentId, 'CHUNKING');
+      await this.updateStatus(tenantId, documentId, 'CHUNKING');
 
       // 5. Chunk the text
       const chunks = this.chunkingService.chunk(text);
       if (chunks.length === 0) {
-        await this.updateStatus(documentId, 'ERROR', 'Nenhum chunk gerado');
+        await this.updateStatus(
+          tenantId,
+          documentId,
+          'ERROR',
+          'Nenhum chunk gerado',
+        );
         return;
       }
 
@@ -92,10 +108,10 @@ export class ProcessDocumentForRAGUseCase {
       );
 
       // 6. Update status to EMBEDDING
-      await this.updateStatus(documentId, 'EMBEDDING');
+      await this.updateStatus(tenantId, documentId, 'EMBEDDING');
 
       // 7. Delete old chunks (in case of reprocessing)
-      await this.chunkRepository.deleteByDocument(documentId);
+      await this.chunkRepository.deleteByDocument(tenantId, documentId);
 
       // 8. Generate embeddings in batches and save
       for (let i = 0; i < chunks.length; i += EMBEDDING_BATCH_SIZE) {
@@ -121,7 +137,7 @@ export class ProcessDocumentForRAGUseCase {
       }
 
       // 9. Update status to READY
-      await this.updateStatus(documentId, 'READY');
+      await this.updateStatus(tenantId, documentId, 'READY');
 
       // 10. Invalidate RAG response cache for this tenant (chunks changed)
       if (this.ragResponseCache) {
@@ -136,7 +152,12 @@ export class ProcessDocumentForRAGUseCase {
       this.logger.error(
         `[ProcessDocumentForRAG] failed doc=${documentId}: ${message}`,
       );
-      await this.updateStatus(documentId, 'ERROR', message.slice(0, 500));
+      await this.updateStatus(
+        tenantId,
+        documentId,
+        'ERROR',
+        message.slice(0, 500),
+      );
     }
   }
 
@@ -154,11 +175,13 @@ export class ProcessDocumentForRAGUseCase {
   }
 
   private async updateStatus(
+    tenantId: string,
     documentId: string,
     status: string,
     error?: string,
   ): Promise<void> {
-    await this.pdfResumeRepository.updateStatus(
+    await this.pdfResumeQueryPort.updateStatus(
+      tenantId,
       documentId,
       status,
       error ?? null,

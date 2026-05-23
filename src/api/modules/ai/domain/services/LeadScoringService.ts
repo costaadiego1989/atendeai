@@ -1,3 +1,5 @@
+import { Injectable } from '@nestjs/common';
+
 export type IntentType =
   | 'PURCHASE'
   | 'QUESTION'
@@ -6,6 +8,7 @@ export type IntentType =
   | 'GENERAL';
 export type SentimentType = 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
 
+@Injectable()
 export class LeadScoringService {
   calculateScore(
     intent: IntentType,

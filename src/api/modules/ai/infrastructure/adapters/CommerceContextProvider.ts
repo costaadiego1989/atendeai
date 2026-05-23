@@ -6,20 +6,21 @@ import {
   CommerceSessionRecord,
   ICommerceRepository,
 } from '@modules/commerce/domain/ports/ICommerceRepository';
-import { SearchCommerceCatalogUseCase } from '@modules/commerce/application/use-cases/SearchCommerceCatalogUseCase';
 import {
   FindCommerceConversationContextInput,
   ICommerceContextProvider,
 } from '../../application/ports/ICommerceContextProvider';
-
-type CatalogOption = Awaited<
-  ReturnType<SearchCommerceCatalogUseCase['execute']>
->[number];
-
+import {
+  COMMERCE_CATALOG_SEARCH,
+  CommerceCatalogSearchOption,
+  ICommerceCatalogSearch,
+} from '../../application/ports/ICommerceCatalogSearch';
 import {
   SALES_REPOSITORY,
   ISalesRepository,
 } from '@modules/sales/domain/repositories/ISalesRepository';
+
+type CatalogOption = CommerceCatalogSearchOption;
 
 @Injectable()
 export class CommerceContextProvider implements ICommerceContextProvider {
@@ -28,7 +29,8 @@ export class CommerceContextProvider implements ICommerceContextProvider {
     private readonly commerceRepository: ICommerceRepository,
     @Inject(SALES_REPOSITORY)
     private readonly salesRepository: ISalesRepository,
-    private readonly searchCommerceCatalogUseCase: SearchCommerceCatalogUseCase,
+    @Inject(COMMERCE_CATALOG_SEARCH)
+    private readonly commerceCatalogSearch: ICommerceCatalogSearch,
   ) {}
 
   async getCatalogItemCount(tenantId: string): Promise<number> {
@@ -58,7 +60,7 @@ export class CommerceContextProvider implements ICommerceContextProvider {
       input.userMessage.trim().length >= 2;
 
     const catalogMatches = shouldSearchCatalog
-      ? await this.searchCommerceCatalogUseCase.execute({
+      ? await this.commerceCatalogSearch.search({
           tenantId: input.tenantId,
           query: input.userMessage,
           limit: 5,

@@ -1,11 +1,26 @@
-import { IPaymentLinkGenerator } from '../ports/IPaymentLinkGenerator';
-import { IReserveProfessionalSlot } from '../ports/IReserveProfessionalSlot';
-import { IRepeatLastOrder } from '../ports/IRepeatLastOrder';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import {
+  IPaymentLinkGenerator,
+  PAYMENT_LINK_GENERATOR,
+} from '../ports/IPaymentLinkGenerator';
+import {
+  IReserveProfessionalSlot,
+  RESERVE_PROFESSIONAL_SLOT,
+} from '../ports/IReserveProfessionalSlot';
+import { IRepeatLastOrder, REPEAT_LAST_ORDER } from '../ports/IRepeatLastOrder';
 
+@Injectable()
 export class AIResponseProcessor {
+  private readonly logger = new Logger(AIResponseProcessor.name);
+
   constructor(
+    @Inject(PAYMENT_LINK_GENERATOR)
     private readonly paymentLinkGenerator: IPaymentLinkGenerator,
+    @Optional()
+    @Inject(RESERVE_PROFESSIONAL_SLOT)
     private readonly reserveProfessionalSlotUseCase?: IReserveProfessionalSlot,
+    @Optional()
+    @Inject(REPEAT_LAST_ORDER)
     private readonly repeatLastOrderUseCase?: IRepeatLastOrder,
   ) {}
 
@@ -42,7 +57,10 @@ export class AIResponseProcessor {
           paymentLinkMatch[0],
           `Clique aqui para pagar: ${link.url}`,
         );
-      } catch {
+      } catch (e: unknown) {
+        this.logger.warn(
+          `payment_link_placeholder_failed tenant=${tenantId} conversation=${typeof input === 'string' ? '' : (input.conversationId ?? '')} detail=${e instanceof Error ? e.message : String(e)}`,
+        );
         processedText = processedText.replace(
           paymentLinkMatch[0],
           '(Link de pagamento momentaneamente indisponível, por favor aguarde)',
@@ -99,7 +117,10 @@ export class AIResponseProcessor {
           scheduleSlotMatch[0],
           replacement,
         );
-      } catch {
+      } catch (e: unknown) {
+        this.logger.warn(
+          `schedule_slot_placeholder_failed tenant=${tenantId} conversation=${typeof input === 'string' ? '' : (input.conversationId ?? '')} detail=${e instanceof Error ? e.message : String(e)}`,
+        );
         processedText = processedText.replace(
           scheduleSlotMatch[0],
           'não consegui confirmar esse horario automaticamente agora. Vou encaminhar para um atendente finalizar com voce.',
@@ -142,7 +163,10 @@ export class AIResponseProcessor {
           `Deseja adicionar mais algum item ou posso seguir para a entrega?`;
 
         processedText = processedText.replace(repeatOrderMatch[0], replacement);
-      } catch {
+      } catch (e: unknown) {
+        this.logger.warn(
+          `repeat_last_order_placeholder_failed tenant=${tenantId} conversation=${typeof input === 'string' ? '' : (input.conversationId ?? '')} detail=${e instanceof Error ? e.message : String(e)}`,
+        );
         processedText = processedText.replace(
           repeatOrderMatch[0],
           'Não consegui repetir seu pedido anterior automaticamente. Posso ajudar a montar um novo pedido?',

@@ -1,12 +1,12 @@
 import { CommerceContextProvider } from '../infrastructure/adapters/CommerceContextProvider';
 import { ICommerceRepository } from '@modules/commerce/domain/ports/ICommerceRepository';
 import { ISalesRepository } from '@modules/sales/domain/repositories/ISalesRepository';
-import { SearchCommerceCatalogUseCase } from '@modules/commerce/application/use-cases/SearchCommerceCatalogUseCase';
+import { ICommerceCatalogSearch } from '../application/ports/ICommerceCatalogSearch';
 
 describe('CommerceContextProvider', () => {
   let commerceRepository: jest.Mocked<ICommerceRepository>;
   let salesRepository: jest.Mocked<ISalesRepository>;
-  let searchCommerceCatalogUseCase: jest.Mocked<SearchCommerceCatalogUseCase>;
+  let commerceCatalogSearch: { search: jest.Mock };
   let provider: CommerceContextProvider;
 
   beforeEach(() => {
@@ -34,21 +34,21 @@ describe('CommerceContextProvider', () => {
       listPromotions: jest.fn().mockResolvedValue([]),
     } as unknown as jest.Mocked<ISalesRepository>;
 
-    searchCommerceCatalogUseCase = {
-      execute: jest.fn(),
-    } as unknown as jest.Mocked<SearchCommerceCatalogUseCase>;
+    commerceCatalogSearch = {
+      search: jest.fn().mockResolvedValue([]),
+    };
 
     provider = new CommerceContextProvider(
       commerceRepository,
       salesRepository,
-      searchCommerceCatalogUseCase,
+      commerceCatalogSearch as unknown as ICommerceCatalogSearch,
     );
   });
 
   it('should build numbered catalog options for transactional businesses', async () => {
     commerceRepository.findActiveSessionByConversation.mockResolvedValue(null);
     commerceRepository.findShippingPolicyByTenantId.mockResolvedValue(null);
-    searchCommerceCatalogUseCase.execute.mockResolvedValue([
+    commerceCatalogSearch.search.mockResolvedValue([
       {
         optionNumber: 1,
         source: 'INVENTORY',
@@ -183,7 +183,7 @@ describe('CommerceContextProvider', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    searchCommerceCatalogUseCase.execute.mockResolvedValue([]);
+    commerceCatalogSearch.search.mockResolvedValue([]);
 
     const result = await provider.findConversationContext({
       tenantId: 'tenant-1',
