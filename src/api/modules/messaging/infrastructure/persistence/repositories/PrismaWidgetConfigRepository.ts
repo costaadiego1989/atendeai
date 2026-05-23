@@ -36,29 +36,45 @@ export class PrismaWidgetConfigRepository implements IWidgetConfigRepository {
     };
   }
 
-  async findByPublicToken(publicToken: string): Promise<WidgetConfigData | null> {
+  async findByPublicToken(
+    publicToken: string,
+  ): Promise<WidgetConfigData | null> {
     // tenant-safe: publicToken is globally unique; lookup is safe per-tenant
-    const raw = await this.prisma.widgetConfig.findUnique({ where: { publicToken } });
+    const raw = await this.prisma.widgetConfig.findUnique({
+      where: { publicToken },
+    });
     return raw ? this.map(raw) : null;
   }
 
   async findByTenantId(tenantId: string): Promise<WidgetConfigData | null> {
-    const raw = await this.prisma.widgetConfig.findFirst({ where: { tenantId } });
+    const raw = await this.prisma.widgetConfig.findFirst({
+      where: { tenantId },
+    });
     return raw ? this.map(raw) : null;
   }
 
   async findOrCreate(tenantId: string): Promise<WidgetConfigData> {
-    const existing = await this.prisma.widgetConfig.findFirst({ where: { tenantId } });
+    const existing = await this.prisma.widgetConfig.findFirst({
+      where: { tenantId },
+    });
     if (existing) return this.map(existing);
-    const created = await this.prisma.widgetConfig.create({ data: { tenantId } });
+    const created = await this.prisma.widgetConfig.create({
+      data: { tenantId },
+    });
     return this.map(created);
   }
 
-  async update(id: string, tenantId: string, data: UpdateWidgetConfigData): Promise<WidgetConfigData> {
+  async update(
+    id: string,
+    tenantId: string,
+    data: UpdateWidgetConfigData,
+  ): Promise<WidgetConfigData> {
     // BLOCKED: tenant-isolation-gate requires composite unique in schema (@@unique([id, tenantId]))
     // Cannot apply migration due to pre-existing error in `consolidate_runtime_ddl`
     // Workaround: fetch, verify tenantId, then update (atomic tenant isolation)
-    const existing = await this.prisma.widgetConfig.findUnique({ where: { id } });
+    const existing = await this.prisma.widgetConfig.findUnique({
+      where: { id },
+    });
     if (!existing || existing.tenantId !== tenantId) {
       throw new Error('Tenant mismatch');
     }
@@ -66,17 +82,29 @@ export class PrismaWidgetConfigRepository implements IWidgetConfigRepository {
     return this.map(raw);
   }
 
-  async upsertByTenantId(tenantId: string, data: UpdateWidgetConfigData): Promise<WidgetConfigData> {
-    const existing = await this.prisma.widgetConfig.findFirst({ where: { tenantId } });
+  async upsertByTenantId(
+    tenantId: string,
+    data: UpdateWidgetConfigData,
+  ): Promise<WidgetConfigData> {
+    const existing = await this.prisma.widgetConfig.findFirst({
+      where: { tenantId },
+    });
     if (existing) {
       return this.update(existing.id, tenantId, data);
     }
-    const raw = await this.prisma.widgetConfig.create({ data: { tenantId, ...data } });
+    const raw = await this.prisma.widgetConfig.create({
+      data: { tenantId, ...data },
+    });
     return this.map(raw);
   }
 
-  async updateAvatar(tenantId: string, avatarUrl: string): Promise<WidgetConfigData> {
-    const existing = await this.prisma.widgetConfig.findFirst({ where: { tenantId } });
+  async updateAvatar(
+    tenantId: string,
+    avatarUrl: string,
+  ): Promise<WidgetConfigData> {
+    const existing = await this.prisma.widgetConfig.findFirst({
+      where: { tenantId },
+    });
     if (existing) {
       const raw = await this.prisma.widgetConfig.update({
         where: { id: existing.id },
@@ -84,7 +112,9 @@ export class PrismaWidgetConfigRepository implements IWidgetConfigRepository {
       });
       return this.map(raw);
     }
-    const raw = await this.prisma.widgetConfig.create({ data: { tenantId, avatarUrl } });
+    const raw = await this.prisma.widgetConfig.create({
+      data: { tenantId, avatarUrl },
+    });
     return this.map(raw);
   }
 }

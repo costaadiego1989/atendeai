@@ -97,7 +97,8 @@ export class InitiateWidgetContactUseCase {
           // Keep minimal — instructions live in system prompt (NicheWelcomeMenuService).
           // DO NOT add menu-building instructions here: they persist in conversation history
           // on every turn and override system prompt guardrails, causing hallucination.
-          const initText = '[WIDGET_INIT] Novo visitante no site. Apresente-se brevemente e exiba o menu de boas-vindas conforme as instruções do sistema. Não invente produtos, serviços ou preços — use apenas o contexto fornecido.';
+          const initText =
+            '[WIDGET_INIT] Novo visitante no site. Apresente-se brevemente e exiba o menu de boas-vindas conforme as instruções do sistema. Não invente produtos, serviços ou preços — use apenas o contexto fornecido.';
           const initMessage = await (
             tx as Prisma.TransactionClient
           ).message.create({

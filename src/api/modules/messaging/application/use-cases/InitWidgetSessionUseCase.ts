@@ -40,7 +40,9 @@ export class InitWidgetSessionUseCase {
     private readonly initiateContact: InitiateWidgetContactUseCase,
   ) {}
 
-  async execute(input: InitWidgetSessionInput): Promise<InitWidgetSessionOutput> {
+  async execute(
+    input: InitWidgetSessionInput,
+  ): Promise<InitWidgetSessionOutput> {
     if (!input.visitorId) {
       throw new BadRequestException('visitorId is required');
     }
@@ -107,7 +109,10 @@ export class InitWidgetSessionUseCase {
       quickReplies: config.quickReplies,
     });
 
-    await this.sessionRepo.update(session.id, config.tenantId, { contactId, conversationId });
+    await this.sessionRepo.update(session.id, config.tenantId, {
+      contactId,
+      conversationId,
+    });
 
     return { sessionId: session.id, conversationId, resumed: false };
   }

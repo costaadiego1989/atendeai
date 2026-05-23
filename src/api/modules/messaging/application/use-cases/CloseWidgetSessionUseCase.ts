@@ -35,7 +35,10 @@ export class CloseWidgetSessionUseCase {
       throw new NotFoundException('Widget not found or disabled');
     }
 
-    const session = await this.sessionRepo.findById(input.sessionId, config.tenantId);
+    const session = await this.sessionRepo.findById(
+      input.sessionId,
+      config.tenantId,
+    );
     if (!session) {
       throw new NotFoundException('Session not found');
     }

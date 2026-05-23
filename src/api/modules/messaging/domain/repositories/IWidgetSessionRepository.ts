@@ -46,7 +46,11 @@ export interface IWidgetSessionRepository {
   ): Promise<WidgetSessionData | null>;
   findById(id: string, tenantId: string): Promise<WidgetSessionData | null>;
   create(data: CreateWidgetSessionData): Promise<WidgetSessionData>;
-  update(id: string, tenantId: string, data: UpdateWidgetSessionData): Promise<WidgetSessionData>;
+  update(
+    id: string,
+    tenantId: string,
+    data: UpdateWidgetSessionData,
+  ): Promise<WidgetSessionData>;
   close(id: string, tenantId: string): Promise<void>;
 }
 

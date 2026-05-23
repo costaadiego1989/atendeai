@@ -76,13 +76,22 @@ export class WidgetController {
     @Body() dto: SendWidgetMessageDTO,
   ) {
     if (!dto.sessionId || !dto.visitorId || !dto.text) {
-      throw new BadRequestException('sessionId, visitorId, and text are required');
+      throw new BadRequestException(
+        'sessionId, visitorId, and text are required',
+      );
     }
 
     const config = await this.getPublicConfig.execute(publicToken);
 
-    const session = await this.sessionRepo.findById(dto.sessionId, config.tenantId);
-    if (!session || session.visitorId !== dto.visitorId || session.status !== 'ACTIVE') {
+    const session = await this.sessionRepo.findById(
+      dto.sessionId,
+      config.tenantId,
+    );
+    if (
+      !session ||
+      session.visitorId !== dto.visitorId ||
+      session.status !== 'ACTIVE'
+    ) {
       throw new NotFoundException('Session not found');
     }
 

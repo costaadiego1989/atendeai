@@ -49,16 +49,20 @@ export class GetWidgetSessionMessagesUseCase {
       throw new NotFoundException('Widget not found or disabled');
     }
 
-    const session = await this.sessionRepo.findById(input.sessionId, config.tenantId);
+    const session = await this.sessionRepo.findById(
+      input.sessionId,
+      config.tenantId,
+    );
     if (!session || !session.conversationId) {
       return { messages: [] };
     }
 
-    const { data: messages } = await this.conversationRepo.findMessagesByConversation(
-      session.conversationId,
-      1,
-      100,
-    );
+    const { data: messages } =
+      await this.conversationRepo.findMessagesByConversation(
+        session.conversationId,
+        1,
+        100,
+      );
 
     return {
       messages: messages

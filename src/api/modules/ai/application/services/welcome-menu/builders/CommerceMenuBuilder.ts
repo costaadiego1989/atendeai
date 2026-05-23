@@ -36,7 +36,9 @@ export class CommerceMenuBuilder implements IMenuBuilder {
         'Pesquisar produtos — busca no catálogo por nome, mostra preço e estoque',
       );
     } else {
-      options.push('Falar com atendente sobre produtos — sem catálogo cadastrado no momento');
+      options.push(
+        'Falar com atendente sobre produtos — sem catálogo cadastrado no momento',
+      );
     }
     options.push(
       'Meu carrinho — ver itens no carrinho atual ou continuar compra',
@@ -64,7 +66,9 @@ export class CommerceMenuBuilder implements IMenuBuilder {
     if (conditions.hasCommerceCatalog) {
       options.push('Pesquisar produtos — busca por nome ou categoria');
     } else {
-      options.push('Falar com atendente sobre produtos — sem catálogo cadastrado no momento');
+      options.push(
+        'Falar com atendente sobre produtos — sem catálogo cadastrado no momento',
+      );
     }
     options.push('Meu carrinho — ver ou continuar compra');
     options.push('Acompanhar pedido — rastreio e status');

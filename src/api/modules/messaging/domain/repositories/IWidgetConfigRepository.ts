@@ -59,8 +59,15 @@ export interface IWidgetConfigRepository {
   findByPublicToken(publicToken: string): Promise<WidgetConfigData | null>;
   findByTenantId(tenantId: string): Promise<WidgetConfigData | null>;
   findOrCreate(tenantId: string): Promise<WidgetConfigData>;
-  update(id: string, tenantId: string, data: UpdateWidgetConfigData): Promise<WidgetConfigData>;
-  upsertByTenantId(tenantId: string, data: UpdateWidgetConfigData): Promise<WidgetConfigData>;
+  update(
+    id: string,
+    tenantId: string,
+    data: UpdateWidgetConfigData,
+  ): Promise<WidgetConfigData>;
+  upsertByTenantId(
+    tenantId: string,
+    data: UpdateWidgetConfigData,
+  ): Promise<WidgetConfigData>;
   updateAvatar(tenantId: string, avatarUrl: string): Promise<WidgetConfigData>;
 }
 

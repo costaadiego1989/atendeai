@@ -12,7 +12,12 @@ import {
   WIDGET_CONFIG_REPOSITORY,
 } from '@modules/messaging/domain/repositories/IWidgetConfigRepository';
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+];
 
 const MIME_TO_EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
