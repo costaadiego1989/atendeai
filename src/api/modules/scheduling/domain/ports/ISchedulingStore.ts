@@ -213,11 +213,14 @@ export interface ISchedulingStore {
     billingType: 'UNDEFINED' | 'BOLETO' | 'CREDIT_CARD' | 'PIX';
     expiresAt?: string;
   }): Promise<AvailabilitySlotRecord | null>;
-  markSlotPaymentConfirmedByReference(
-    tenantId: string,
-    paymentReference: string,
-    confirmedAt: string,
-  ): Promise<MarkSlotPaymentConfirmedResult>;
+  markSlotPaymentConfirmedByReference(input: {
+    tenantId: string;
+    professionalId: string;
+    date: string;
+    slotId: string;
+    paymentReference: string;
+    confirmedAt: string;
+  }): Promise<MarkSlotPaymentConfirmedResult>;
   attachMeetingLinkToReservedSlot(input: {
     tenantId: string;
     professionalId: string;
