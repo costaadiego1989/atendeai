@@ -15,12 +15,9 @@ import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { MessageQueuedIntegrationEvent } from '../integration-events/publishers/MessageSentIntegrationEvent';
 import { TenantId } from '@shared/domain/TenantId';
 import { UniqueEntityID } from '@shared/domain/UniqueEntityID';
-import {
-  WhatsAppTemplateComponent,
-  WhatsAppTemplateMessageAdapter,
-} from '../../infrastructure/acl/WhatsAppTemplateMessageAdapter';
+import { TemplateComponent } from '../ports/IWhatsAppTemplateSender';
 
-export type { WhatsAppTemplateComponent };
+export type { TemplateComponent };
 
 export interface QueueTemplateMessageParams {
   tenantId: string;
@@ -29,7 +26,7 @@ export interface QueueTemplateMessageParams {
   channel: 'WHATSAPP';
   templateName: string;
   languageCode: string;
-  components: WhatsAppTemplateComponent[];
+  components: TemplateComponent[];
   renderedBody?: string;
 }
 
@@ -61,7 +58,6 @@ export class MessagingFacade implements IMessagingFacade {
     private readonly messageQueue: IMessageQueue,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
-    private readonly templateAdapter: WhatsAppTemplateMessageAdapter,
   ) {}
 
   async queueSystemMessage(input: {
@@ -180,19 +176,18 @@ export class MessagingFacade implements IMessagingFacade {
       shouldReleaseAssignment = true;
     }
 
-    const { messageId: externalMessageId } = await this.templateAdapter.send({
-      to: input.phone,
-      templateName: input.templateName,
-      languageCode: input.languageCode,
-      components: input.components,
-    });
-
     const bodyText = input.renderedBody ?? input.templateName;
     const message = Message.create({
       conversationId: conversation.id,
       direction: 'OUTBOUND',
-      contentType: 'TEXT',
-      content: MessageContent.createText(bodyText),
+      contentType: 'TEMPLATE',
+      content: MessageContent.createTemplate({
+        renderedBody: bodyText,
+        phone: input.phone,
+        templateName: input.templateName,
+        languageCode: input.languageCode,
+        components: input.components as unknown as Record<string, unknown>[],
+      }),
       sentBy: 'SYSTEM',
     });
 
@@ -207,12 +202,16 @@ export class MessagingFacade implements IMessagingFacade {
       );
     }
 
+    await this.messageQueue.addJob({
+      messageId: message.id.toString(),
+    });
+
     await this.eventBus.publish(
       new MessageQueuedIntegrationEvent({
         tenantId: input.tenantId,
         conversationId: conversation.id.toString(),
         contactId: input.contactId,
-        messageId: externalMessageId,
+        messageId: message.id.toString(),
         channel: conversation.channel,
         queuedBy: 'SYSTEM',
         content: {
@@ -224,7 +223,7 @@ export class MessagingFacade implements IMessagingFacade {
 
     return {
       conversationId: conversation.id.toString(),
-      messageId: externalMessageId,
+      messageId: message.id.toString(),
     };
   }
 }

@@ -7,18 +7,26 @@ import {
 } from '@nestjs/common';
 import { Worker, Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
 import { ProcessOutboundMessageUseCase } from '../../application/use-cases/ProcessOutboundMessageUseCase';
 import { buildQueueTelemetry } from '@shared/infrastructure/queue/QueueJobTelemetry';
 import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connection.helper';
+import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
+
+const HEARTBEAT_KEY = 'messaging:worker:heartbeat';
+const HEARTBEAT_TTL_S = 30;
+const HEARTBEAT_INTERVAL_MS = 15_000;
 
 @Injectable()
 export class OutboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(OutboundMessageProcessor.name);
   private worker: Worker;
+  private heartbeatInterval: ReturnType<typeof setInterval>;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly processOutboundUseCase: ProcessOutboundMessageUseCase,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
   onModuleInit() {
@@ -68,9 +76,21 @@ export class OutboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
         ),
       );
     });
+
+    const writeHeartbeat = () => {
+      this.redis
+        .set(HEARTBEAT_KEY, '1', 'EX', HEARTBEAT_TTL_S)
+        .catch((err) =>
+          this.logger.warn(`Heartbeat write failed: ${(err as Error).message}`),
+        );
+    };
+    writeHeartbeat();
+    this.heartbeatInterval = setInterval(writeHeartbeat, HEARTBEAT_INTERVAL_MS);
+    this.logger.log('Outbound worker started — heartbeat active');
   }
 
   async onModuleDestroy() {
+    clearInterval(this.heartbeatInterval);
     if (this.worker) {
       await this.worker.close();
     }

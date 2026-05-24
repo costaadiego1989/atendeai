@@ -44,6 +44,7 @@ describe('GetMessageHistoryUseCase', () => {
     });
 
     const result = await useCase.execute({
+      tenantId: 'tenant-1',
       conversationId: 'conversation-1',
       page: 2,
       limit: 2,
@@ -51,7 +52,7 @@ describe('GetMessageHistoryUseCase', () => {
 
     expect(
       conversationRepository.findMessagesByConversation,
-    ).toHaveBeenCalledWith('conversation-1', 2, 2);
+    ).toHaveBeenCalledWith('tenant-1', 'conversation-1', 2, 2);
     expect(result.data).toEqual([
       expect.objectContaining({
         id: 'message-1',
@@ -81,12 +82,13 @@ describe('GetMessageHistoryUseCase', () => {
     });
 
     const result = await useCase.execute({
+      tenantId: 'tenant-1',
       conversationId: 'conversation-1',
     });
 
     expect(
       conversationRepository.findMessagesByConversation,
-    ).toHaveBeenCalledWith('conversation-1', 1, 50);
+    ).toHaveBeenCalledWith('tenant-1', 'conversation-1', 1, 50);
     expect(result.meta).toEqual({
       total: 0,
       page: 1,

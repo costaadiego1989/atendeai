@@ -74,6 +74,7 @@ export class SuggestAgentReplyService {
 
     const messagesPage =
       await this.conversationRepository.findMessagesByConversation(
+        tenantId,
         conversationId,
         1,
         3,

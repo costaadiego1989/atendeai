@@ -6,7 +6,8 @@ export type MessageContentType =
   | 'AUDIO'
   | 'VIDEO'
   | 'DOCUMENT'
-  | 'BUTTON';
+  | 'BUTTON'
+  | 'TEMPLATE';
 
 export type MessageContentProps = {
   type: MessageContentType;
@@ -42,6 +43,25 @@ export class MessageContent extends ValueObject<MessageContentProps> {
 
   public static createText(text: string): MessageContent {
     return new MessageContent({ type: 'TEXT', text });
+  }
+
+  public static createTemplate(params: {
+    renderedBody: string;
+    phone: string;
+    templateName: string;
+    languageCode: string;
+    components: Record<string, unknown>[];
+  }): MessageContent {
+    return new MessageContent({
+      type: 'TEMPLATE',
+      text: params.renderedBody,
+      metadata: {
+        phone: params.phone,
+        templateName: params.templateName,
+        languageCode: params.languageCode,
+        components: params.components,
+      },
+    });
   }
 
   public static create(props: MessageContentProps): MessageContent {

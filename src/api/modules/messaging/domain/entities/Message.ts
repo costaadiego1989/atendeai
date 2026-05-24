@@ -23,8 +23,6 @@ interface MessageProps {
 }
 
 export class Message extends Entity<MessageProps> {
-  private static lastCreatedAtMs = 0;
-
   private constructor(props: MessageProps, id?: UniqueEntityID) {
     super(props, id);
   }
@@ -59,16 +57,11 @@ export class Message extends Entity<MessageProps> {
     props: Omit<MessageProps, 'deliveryStatus' | 'createdAt'>,
     id?: UniqueEntityID,
   ): Message {
-    const now = Date.now();
-    const nextCreatedAtMs =
-      now <= Message.lastCreatedAtMs ? Message.lastCreatedAtMs + 1 : now;
-    Message.lastCreatedAtMs = nextCreatedAtMs;
-
     return new Message(
       {
         ...props,
         deliveryStatus: props.direction === 'INBOUND' ? 'SENT' : 'PENDING',
-        createdAt: new Date(nextCreatedAtMs),
+        createdAt: new Date(),
       },
       id,
     );
@@ -76,5 +69,9 @@ export class Message extends Entity<MessageProps> {
 
   public updateStatus(status: DeliveryStatus): void {
     this.props.deliveryStatus = status;
+  }
+
+  public setExternalId(externalId: string): void {
+    this.props.externalId = externalId;
   }
 }

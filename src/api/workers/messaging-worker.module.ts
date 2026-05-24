@@ -5,16 +5,7 @@ import { RedisModule } from '@shared/infrastructure/redis/RedisModule';
 import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule';
 import { ContactModule } from '@modules/contact/contact.module';
 import { TenantModule } from '@modules/tenant/tenant.module';
-import { PrismaConversationRepository } from '@modules/messaging/infrastructure/persistence/repositories/PrismaConversationRepository';
-import { CONVERSATION_REPOSITORY } from '@modules/messaging/domain/repositories/IConversationRepository';
-import { BubbleWhatsAdapter } from '@modules/messaging/infrastructure/acl/BubbleWhatsAdapter';
-import { InstagramGraphAdapter } from '@modules/messaging/infrastructure/acl/InstagramGraphAdapter';
-import { PrismaConversationIntelligenceRepository } from '@modules/messaging/infrastructure/persistence/repositories/PrismaConversationIntelligenceRepository';
-import { CONVERSATION_INTELLIGENCE_REPOSITORY } from '@modules/messaging/domain/repositories/IConversationIntelligenceRepository';
-import { Dialog360Adapter } from '@modules/messaging/infrastructure/acl/Dialog360Adapter';
-import { TwilioAdapter } from '@modules/messaging/infrastructure/acl/TwilioAdapter';
-import { MessagingGatewayRegistry } from '@modules/messaging/infrastructure/acl/MessagingGatewayRegistry';
-import { MESSAGING_GATEWAY_REGISTRY } from '@modules/messaging/domain/ports/IMessagingGatewayRegistry';
+import { MessagingInfrastructureModule } from '@modules/messaging/infrastructure/messaging-infrastructure.module';
 import { ProcessOutboundMessageUseCase } from '@modules/messaging/application/use-cases/ProcessOutboundMessageUseCase';
 import { OutboundMessageProcessor } from '@modules/messaging/infrastructure/queue/OutboundMessageProcessor';
 import { FollowUpAuditService } from '@modules/messaging/application/services/FollowUpAuditService';
@@ -46,25 +37,9 @@ import { parseRedisConnection } from '@shared/infrastructure/redis/redis-connect
     TenantModule,
     AIModule,
     StorageModule,
+    MessagingInfrastructureModule,
   ],
   providers: [
-    BubbleWhatsAdapter,
-    InstagramGraphAdapter,
-    Dialog360Adapter,
-    TwilioAdapter,
-    MessagingGatewayRegistry,
-    {
-      provide: CONVERSATION_REPOSITORY,
-      useClass: PrismaConversationRepository,
-    },
-    {
-      provide: CONVERSATION_INTELLIGENCE_REPOSITORY,
-      useClass: PrismaConversationIntelligenceRepository,
-    },
-    {
-      provide: MESSAGING_GATEWAY_REGISTRY,
-      useExisting: MessagingGatewayRegistry,
-    },
     ProcessOutboundMessageUseCase,
     OutboundMessageProcessor,
     FollowUpAuditService,

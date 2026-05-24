@@ -32,25 +32,18 @@ export class InboundMessagePipeline {
       events: [],
     };
 
-    // Step 1: Deduplicate
     ctx = await this.deduplicateStep.execute(ctx);
     if (ctx.isDuplicate) {
       return [];
     }
 
-    // Step 2: Identify contact
     ctx = await this.identifyContactStep.execute(ctx);
-
-    // Step 3: Ensure conversation exists
     ctx = await this.ensureConversationStep.execute(ctx);
-
-    // Step 4: Persist message
     ctx = await this.persistMessageStep.execute(ctx);
-
-    // Step 5: Analyze (intelligence)
+    if (ctx.isDuplicate) {
+      return [];
+    }
     ctx = await this.analyzeMessageStep.execute(ctx);
-
-    // Step 6: Dispatch reply events
     ctx = await this.dispatchReplyStep.execute(ctx);
 
     return ctx.events;

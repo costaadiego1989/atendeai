@@ -9,6 +9,7 @@ import {
   DeliveryStatus,
 } from '@modules/messaging/domain/entities/Message';
 import { MessageContent } from '@modules/messaging/domain/value-objects/MessageContent';
+import { assertMessagingChannel } from '@modules/messaging/domain/value-objects/MessagingChannel';
 import { TenantId } from '@shared/domain/TenantId';
 import { UniqueEntityID } from '@shared/domain/UniqueEntityID';
 import {
@@ -38,7 +39,7 @@ export class MessagingMapper {
             }
           ).branch_id ??
           null,
-        channel: raw.channel,
+        channel: assertMessagingChannel(raw.channel),
         status: raw.status as ConversationStatus,
         messages: [],
         startedAt: raw.startedAt,

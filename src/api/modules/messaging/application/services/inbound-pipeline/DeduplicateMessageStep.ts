@@ -19,6 +19,8 @@ export class DeduplicateMessageStep {
 
     const existing = await this.conversationRepository.findByExternalMessageId(
       ctx.input.externalMessageId,
+      ctx.input.tenantId,
+      { tx: ctx.tx },
     );
 
     return { ...ctx, isDuplicate: !!existing };

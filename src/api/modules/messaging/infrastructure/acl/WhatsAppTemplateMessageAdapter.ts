@@ -2,26 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { ProspectTemplateUnavailableError } from '@modules/prospecting/domain/errors/ProspectingErrors';
-
-export interface WhatsAppTemplateComponent {
-  type: 'body';
-  parameters: Array<{ type: 'text'; text: string }>;
-}
-
-export interface SendTemplateParams {
-  to: string;
-  templateName: string;
-  languageCode: string;
-  components: WhatsAppTemplateComponent[];
-}
+import {
+  IWhatsAppTemplateSender,
+  SendTemplateMessageParams,
+} from '../../application/ports/IWhatsAppTemplateSender';
 
 const META_TEMPLATE_ERROR_CODES = new Set([132000, 132001]);
 
 @Injectable()
-export class WhatsAppTemplateMessageAdapter {
+export class WhatsAppTemplateMessageAdapter implements IWhatsAppTemplateSender {
   constructor(private readonly configService: ConfigService) {}
 
-  async send(params: SendTemplateParams): Promise<{ messageId: string }> {
+  async send(
+    params: SendTemplateMessageParams,
+  ): Promise<{ messageId: string }> {
     const token = this.configService.get<string>('WHATSAPP_ACCESS_TOKEN');
     const phoneNumberId = this.configService.get<string>(
       'WHATSAPP_PHONE_NUMBER_ID',

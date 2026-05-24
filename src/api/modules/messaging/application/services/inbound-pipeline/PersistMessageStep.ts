@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import {
   IConversationRepository,
   CONVERSATION_REPOSITORY,
@@ -52,7 +53,17 @@ export class PersistMessageStep {
 
     conversation.addMessage(message);
 
-    await this.conversationRepository.save(conversation, { tx: ctx.tx });
+    try {
+      await this.conversationRepository.save(conversation, { tx: ctx.tx });
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        return { ...ctx, isDuplicate: true };
+      }
+      throw err;
+    }
 
     if (ctx.shouldReleaseAssignment) {
       await this.conversationRepository.setAssignedUser(

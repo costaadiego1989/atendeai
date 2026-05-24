@@ -10,7 +10,10 @@ import {
 } from '../../domain/ports/IMessagingGatewayRegistry';
 import { UnauthorizedException } from '@shared/domain/exceptions/DomainExceptions';
 import { PrismaMessagingWebhookReceiptStore } from '../../infrastructure/persistence/repositories/PrismaMessagingWebhookReceiptStore';
-import { ProcessInboundMessageUseCase } from './ProcessInboundMessageUseCase';
+import {
+  IInboundMessagePersister,
+  INBOUND_MESSAGE_PERSISTER,
+} from '../ports/IInboundMessagePersister';
 import { PrismaTransactionalEventPublisher } from '@shared/infrastructure/event-bus/PrismaTransactionalEventPublisher';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
 import { otelTraceLogFields } from '@shared/infrastructure/observability/otelTraceLogFields';
@@ -29,7 +32,8 @@ export class ProcessWebhookUseCase {
     private readonly tenantFacade: ITenantFacade,
     @Inject(MESSAGING_GATEWAY_REGISTRY)
     private readonly messagingGatewayRegistry: IMessagingGatewayRegistry,
-    private readonly processInboundUseCase: ProcessInboundMessageUseCase,
+    @Inject(INBOUND_MESSAGE_PERSISTER)
+    private readonly processInboundUseCase: IInboundMessagePersister,
     private readonly webhookReceiptStore: PrismaMessagingWebhookReceiptStore,
     private readonly transactionalEventPublisher: PrismaTransactionalEventPublisher,
     private readonly structuredLog: StructuredLogEmitter,

@@ -11,6 +11,8 @@ export interface IConversationRepository {
   findByMessageId(messageId: string): Promise<Conversation | null>;
   findByExternalMessageId(
     externalMessageId: string,
+    tenantId: string,
+    options?: { tx?: Prisma.TransactionClient },
   ): Promise<Conversation | null>;
   findActiveByContact(
     tenantId: string,
@@ -58,6 +60,7 @@ export interface IConversationRepository {
   >;
   markAsRead(tenantId: string, conversationId: string): Promise<void>;
   findMessagesByConversation(
+    tenantId: string,
     conversationId: string,
     page: number,
     limit: number,

@@ -5,11 +5,14 @@ import {
   IProcessInboundMessageUseCase,
   ProcessInboundMessageInput,
 } from './interfaces/IProcessInboundMessageUseCase';
+import { IInboundMessagePersister } from '../ports/IInboundMessagePersister';
 import { PrismaTransactionalEventPublisher } from '@shared/infrastructure/event-bus/PrismaTransactionalEventPublisher';
 import { InboundMessagePipeline } from '../services/inbound-pipeline/InboundMessagePipeline';
 
 @Injectable()
-export class ProcessInboundMessageUseCase implements IProcessInboundMessageUseCase {
+export class ProcessInboundMessageUseCase
+  implements IProcessInboundMessageUseCase, IInboundMessagePersister
+{
   constructor(
     private readonly transactionalEventPublisher: PrismaTransactionalEventPublisher,
     private readonly pipeline: InboundMessagePipeline,

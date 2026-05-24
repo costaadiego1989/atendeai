@@ -133,6 +133,7 @@ describe('PrismaConversationRepository (integration)', () => {
     const byContact = await repository.findActiveByContact(tenantId, contactId);
     const byExternalId = await repository.findByExternalMessageId(
       message.externalId!,
+      tenantId,
     );
     const byMessageId = await repository.findByMessageId(message.id.toString());
 
@@ -182,6 +183,7 @@ describe('PrismaConversationRepository (integration)', () => {
       status: 'ACTIVE',
     });
     const pagedMessages = await repository.findMessagesByConversation(
+      tenantId,
       activeConversation.id.toString(),
       1,
       1,

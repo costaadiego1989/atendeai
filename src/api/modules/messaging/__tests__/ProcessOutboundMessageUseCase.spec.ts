@@ -57,6 +57,7 @@ describe('ProcessOutboundMessageUseCase', () => {
       eventBus as any,
       structuredLog as any,
       retryService as any,
+      { send: jest.fn() } as any,
     );
   });
 

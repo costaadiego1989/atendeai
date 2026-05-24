@@ -6,7 +6,7 @@ import {
 import {
   IMessagingFacade,
   MESSAGING_FACADE,
-  WhatsAppTemplateComponent,
+  TemplateComponent,
 } from '@modules/messaging/application/facades/MessagingFacade';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import { ProspectDispatchPolicy } from '../services/ProspectDispatchPolicy';
@@ -164,7 +164,7 @@ export class DispatchProspectExecutionUseCase implements IDispatchProspectExecut
   private buildTemplateComponents(
     campaign: ProspectCampaign,
     contact: { name: string; phone: string; email?: string },
-  ): WhatsAppTemplateComponent[] {
+  ): TemplateComponent[] {
     const mapping = campaign.templateVariableMapping ?? {};
     const sortedKeys = Object.keys(mapping).sort(
       (a, b) => Number(a) - Number(b),

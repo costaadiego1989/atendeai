@@ -2,6 +2,10 @@ import { AggregateRoot } from '../../../../shared/domain/AggregateRoot';
 import { UniqueEntityID } from '../../../../shared/domain/UniqueEntityID';
 import { TenantId } from '../../../../shared/domain/TenantId';
 import { Message } from './Message';
+import {
+  MessagingChannel,
+  assertMessagingChannel,
+} from '../value-objects/MessagingChannel';
 
 export type ConversationStatus = 'ACTIVE' | 'ARCHIVED' | 'PENDING_HUMAN';
 
@@ -9,7 +13,7 @@ interface ConversationProps {
   tenantId: TenantId;
   contactId: UniqueEntityID;
   branchId?: string | null;
-  channel: string;
+  channel: MessagingChannel;
   status: ConversationStatus;
   messages: Message[];
   startedAt: Date;
@@ -30,7 +34,7 @@ export class Conversation extends AggregateRoot<ConversationProps> {
   get branchId(): string | null | undefined {
     return this.props.branchId;
   }
-  get channel(): string {
+  get channel(): MessagingChannel {
     return this.props.channel;
   }
   get status(): ConversationStatus {
@@ -63,6 +67,7 @@ export class Conversation extends AggregateRoot<ConversationProps> {
     return new Conversation(
       {
         ...props,
+        channel: assertMessagingChannel(props.channel),
         status: 'ACTIVE',
         messages: [],
         startedAt: new Date(),

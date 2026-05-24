@@ -2,6 +2,7 @@ import { IUseCase } from '@shared/application/IUseCase';
 import { MessageContentProps } from '../../../domain/value-objects/MessageContent';
 
 export interface GetMessageHistoryInput {
+  tenantId: string;
   conversationId: string;
   page?: number;
   limit?: number;

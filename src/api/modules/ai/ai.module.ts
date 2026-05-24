@@ -7,9 +7,7 @@ import { ProcessAIResponseUseCase } from '@modules/ai/application/use-cases/Proc
 import { IProcessAIResponseUseCase } from '@modules/ai/application/use-cases/interfaces/IProcessAIResponseUseCase';
 import { AI_ENGINE } from '@modules/ai/application/ports/IAIEngine';
 import { DeepSeekAdapter } from '@modules/ai/infrastructure/adapters/DeepSeekAdapter';
-import {
-  CHAT_HISTORY_REPOSITORY,
-} from '@modules/ai/application/ports/IChatHistoryRepository';
+import { CHAT_HISTORY_REPOSITORY } from '@modules/ai/application/ports/IChatHistoryRepository';
 import { RedisChatHistoryRepository } from '@modules/ai/infrastructure/persistence/RedisChatHistoryRepository';
 import { TenantModule } from '@modules/tenant/tenant.module';
 import { SalesModule } from '@modules/sales/sales.module';
@@ -47,13 +45,9 @@ import {
   ITenantPDFContextProvider,
   TENANT_PDF_CONTEXT_PROVIDER,
 } from './application/ports/ITenantPDFContextProvider';
-import {
-  EMBEDDING_PROVIDER,
-} from './application/ports/IEmbeddingProvider';
+import { EMBEDDING_PROVIDER } from './application/ports/IEmbeddingProvider';
 import { DOCUMENT_CHUNK_REPOSITORY } from './application/ports/IDocumentChunkRepository';
-import {
-  RAG_RESPONSE_CACHE,
-} from './application/ports/IRAGResponseCache';
+import { RAG_RESPONSE_CACHE } from './application/ports/IRAGResponseCache';
 import { CommerceContextProvider } from './infrastructure/adapters/CommerceContextProvider';
 import { TenantPDFContextProvider } from './infrastructure/adapters/TenantPDFContextProvider';
 import { OpenAIEmbeddingAdapter } from './infrastructure/adapters/OpenAIEmbeddingAdapter';

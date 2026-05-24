@@ -118,9 +118,13 @@ export class PrismaConversationRepository implements IConversationRepository {
 
   async findByExternalMessageId(
     externalMessageId: string,
+    tenantId: string,
+    options?: { tx?: Prisma.TransactionClient },
   ): Promise<Conversation | null> {
-    const raw = await this.prisma.conversation.findFirst({
+    const client = options?.tx ?? this.prisma;
+    const raw = await client.conversation.findFirst({
       where: {
+        tenantId,
         messages: {
           some: { externalId: externalMessageId },
         },
@@ -466,6 +470,7 @@ export class PrismaConversationRepository implements IConversationRepository {
   }
 
   async findMessagesByConversation(
+    tenantId: string,
     conversationId: string,
     page: number,
     limit: number,
@@ -485,23 +490,29 @@ export class PrismaConversationRepository implements IConversationRepository {
         }>
       >(Prisma.sql`
           SELECT
-            id,
-            conversation_id AS "conversationId",
-            direction,
-            content_type AS "contentType",
-            content,
-            sent_by AS "sentBy",
-            delivery_status AS "deliveryStatus",
-            external_id AS "externalId",
-            inserted_at AS "createdAt"
-          FROM messaging_schema.messages
-          WHERE conversation_id = ${conversationId}::uuid
-          ORDER BY sort_order ASC NULLS LAST, inserted_at ASC
+            m.id,
+            m.conversation_id AS "conversationId",
+            m.direction,
+            m.content_type AS "contentType",
+            m.content,
+            m.sent_by AS "sentBy",
+            m.delivery_status AS "deliveryStatus",
+            m.external_id AS "externalId",
+            m.inserted_at AS "createdAt"
+          FROM messaging_schema.messages m
+          INNER JOIN messaging_schema.conversations c
+            ON c.id = m.conversation_id
+          WHERE m.conversation_id = ${conversationId}::uuid
+            AND c.tenant_id = ${tenantId}::uuid
+          ORDER BY m.sort_order ASC NULLS LAST, m.inserted_at ASC
           OFFSET ${(page - 1) * limit}
           LIMIT ${limit}
         `),
       this.prisma.message.count({
-        where: { conversationId },
+        where: {
+          conversationId,
+          conversation: { tenantId },
+        },
       }),
     ]);
 

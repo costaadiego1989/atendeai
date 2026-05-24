@@ -24,6 +24,7 @@ export class GetMessageHistoryUseCase implements IGetMessageHistoryUseCase {
 
     const { data, total } =
       await this.conversationRepository.findMessagesByConversation(
+        input.tenantId,
         input.conversationId,
         page,
         limit,

@@ -27,6 +27,11 @@ import {
 import { MessageDeliveryFailedIntegrationEvent } from '../integration-events/publishers/MessageDeliveryFailedIntegrationEvent';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';
 import { OutboundMessageRetryService } from '../services/OutboundMessageRetryService';
+import {
+  WHATSAPP_TEMPLATE_SENDER,
+  IWhatsAppTemplateSender,
+  TemplateComponent,
+} from '../ports/IWhatsAppTemplateSender';
 
 export interface ProcessOutboundMessageInput {
   messageId: string;
@@ -49,6 +54,8 @@ export class ProcessOutboundMessageUseCase {
     private readonly eventBus: IEventBus,
     private readonly structuredLog: StructuredLogEmitter,
     private readonly retryService: OutboundMessageRetryService,
+    @Inject(WHATSAPP_TEMPLATE_SENDER)
+    private readonly templateSender: IWhatsAppTemplateSender,
   ) {}
 
   async execute(input: ProcessOutboundMessageInput): Promise<void> {
@@ -85,6 +92,11 @@ export class ProcessOutboundMessageUseCase {
           reason: 'MESSAGE_NOT_PENDING',
         },
       });
+      return;
+    }
+
+    if (message.contentType === 'TEMPLATE') {
+      await this.processTemplateOutbound(input, conversation, message);
       return;
     }
 
@@ -245,6 +257,99 @@ export class ProcessOutboundMessageUseCase {
       throw new Error(
         `Failed to send message after ${result.attempts} attempt(s): ${result.error}`,
       );
+    }
+  }
+
+  private async processTemplateOutbound(
+    input: ProcessOutboundMessageInput,
+    conversation: NonNullable<
+      Awaited<ReturnType<IConversationRepository['findByMessageId']>>
+    >,
+    message: NonNullable<
+      Awaited<ReturnType<IConversationRepository['findByMessageId']>>
+    >['messages'][number],
+  ): Promise<void> {
+    const meta = (message.content.toPersistence().metadata ?? {}) as {
+      phone?: string;
+      templateName?: string;
+      languageCode?: string;
+      components?: TemplateComponent[];
+    };
+
+    if (!meta.phone || !meta.templateName || !meta.languageCode) {
+      this.structuredLog.emit({
+        level: 'error',
+        event: 'messaging.outbound.template_metadata_missing',
+        message: 'Template message missing required metadata',
+        tenantId: conversation.tenantId.toString(),
+        attributes: { message_id: input.messageId },
+      });
+      message.updateStatus('FAILED');
+      await this.conversationRepository.save(conversation);
+      return;
+    }
+
+    try {
+      const result = await this.templateSender.send({
+        to: meta.phone,
+        templateName: meta.templateName,
+        languageCode: meta.languageCode,
+        components: meta.components ?? [],
+      });
+      message.updateStatus('SENT');
+      message.setExternalId(result.messageId);
+      await this.conversationRepository.save(conversation);
+      await this.eventBus.publish(
+        new MessageSentIntegrationEvent(
+          {
+            tenantId: conversation.tenantId.toString(),
+            conversationId: conversation.id.toString(),
+            contactId: conversation.contactId.toString(),
+            messageId: message.id.toString(),
+            channel: conversation.channel,
+            content: {
+              type: message.contentType,
+              text: message.content.text ?? '',
+            },
+          },
+          `messaging:sent:${message.id.toString()}`,
+        ),
+      );
+      this.structuredLog.emit({
+        level: 'info',
+        event: 'messaging.outbound.template_sent',
+        message: 'Template message sent via WhatsApp',
+        tenantId: conversation.tenantId.toString(),
+        attributes: {
+          queue_job_id: input.queueJobId ?? '',
+          message_id: message.id.toString(),
+          conversation_id: conversation.id.toString(),
+          template_name: meta.templateName,
+        },
+      });
+    } catch (err) {
+      message.updateStatus('FAILED');
+      await this.conversationRepository.save(conversation);
+      await this.eventBus.publish(
+        new MessageDeliveryFailedIntegrationEvent(
+          {
+            tenantId: conversation.tenantId.toString(),
+            conversationId: conversation.id.toString(),
+            contactId: conversation.contactId.toString(),
+            messageId: message.id.toString(),
+            channel: conversation.channel,
+            reason: 'TEMPLATE_SEND_FAILED',
+            attempts: 1,
+            lastError: (err as Error).message ?? 'unknown',
+            content: {
+              type: message.contentType,
+              text: message.content.text ?? '',
+            },
+          },
+          `messaging:delivery-failed:${message.id.toString()}`,
+        ),
+      );
+      throw err;
     }
   }
 

@@ -15,8 +15,6 @@ describe('MessagingFacade', () => {
   let contactFacade: { getContactById: jest.Mock };
   let messageQueue: { addJob: jest.Mock };
   let eventBus: { publish: jest.Mock };
-  let templateAdapter: { buildTemplateMessage: jest.Mock };
-
   beforeEach(() => {
     conversationRepository = {
       findById: jest.fn(),
@@ -33,16 +31,12 @@ describe('MessagingFacade', () => {
     eventBus = {
       publish: jest.fn(),
     };
-    templateAdapter = {
-      buildTemplateMessage: jest.fn(),
-    };
 
     sut = new MessagingFacade(
       conversationRepository as any,
       contactFacade as any,
       messageQueue as any,
       eventBus as any,
-      templateAdapter as any,
     );
   });
 
@@ -208,5 +202,42 @@ describe('MessagingFacade', () => {
     expect(contactFacade.getContactById).not.toHaveBeenCalled();
     const savedConversation = conversationRepository.save.mock.calls[0][0];
     expect(savedConversation.branchId).toBe('branch-explicit');
+  });
+
+  it('should persist a TEMPLATE message and queue a job (outbox pattern)', async () => {
+    conversationRepository.findLatestByContact.mockResolvedValue(null);
+
+    const result = await sut.queueTemplateMessage({
+      tenantId: 'tenant-1',
+      contactId: 'contact-1',
+      phone: '+5511999999999',
+      channel: 'WHATSAPP',
+      templateName: 'welcome',
+      languageCode: 'pt_BR',
+      components: [
+        { type: 'body', parameters: [{ type: 'text', text: 'Cliente' }] },
+      ],
+      renderedBody: 'Olá Cliente',
+    });
+
+    // Message persisted before any external send
+    expect(conversationRepository.save).toHaveBeenCalledTimes(1);
+    const savedConversation = conversationRepository.save.mock.calls[0][0];
+    expect(savedConversation.messages).toHaveLength(1);
+    expect(savedConversation.messages[0].contentType).toBe('TEMPLATE');
+
+    // Job queued with internal message id
+    expect(messageQueue.addJob).toHaveBeenCalledWith({
+      messageId: expect.any(String),
+    });
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      expect.any(MessageQueuedIntegrationEvent),
+    );
+    expect(result).toEqual({
+      conversationId: expect.any(String),
+      messageId: expect.any(String),
+    });
+    // Internal messageId, not provider id
+    expect(result.messageId).not.toBe('wa-123');
   });
 });

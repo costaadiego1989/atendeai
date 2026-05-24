@@ -59,6 +59,7 @@ export class GetWidgetSessionMessagesUseCase {
 
     const { data: messages } =
       await this.conversationRepo.findMessagesByConversation(
+        config.tenantId,
         session.conversationId,
         1,
         100,

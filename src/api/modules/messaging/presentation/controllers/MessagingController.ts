@@ -107,11 +107,13 @@ export class MessagingController {
 
   @Get(':id/messages')
   async history(
+    @Param('tenantId') tenantId: string,
     @Param('id') id: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
     return this.getHistoryUseCase.execute({
+      tenantId,
       conversationId: id,
       page: page ? parseInt(page) : undefined,
       limit: limit ? parseInt(limit) : undefined,

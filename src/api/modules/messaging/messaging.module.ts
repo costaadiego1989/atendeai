@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaConversationRepository } from './infrastructure/persistence/repositories/PrismaConversationRepository';
-import { CONVERSATION_REPOSITORY } from './domain/repositories/IConversationRepository';
+import { MessagingInfrastructureModule } from './infrastructure/messaging-infrastructure.module';
 import { ProcessInboundMessageUseCase } from './application/use-cases/ProcessInboundMessageUseCase';
 import { IProcessInboundMessageUseCase } from './application/use-cases/interfaces/IProcessInboundMessageUseCase';
 import { ListConversationsUseCase } from './application/use-cases/ListConversationsUseCase';
@@ -41,10 +40,6 @@ import { AuthModule } from '../auth/auth.module';
 import { AIModule } from '../ai/ai.module';
 import { AgentRulesModule } from '../agent-rules/agent-rules.module';
 import { BillingModule } from '../billing/billing.module';
-import { BubbleWhatsAdapter } from './infrastructure/acl/BubbleWhatsAdapter';
-import { Dialog360Adapter } from './infrastructure/acl/Dialog360Adapter';
-import { TwilioAdapter } from './infrastructure/acl/TwilioAdapter';
-import { MESSAGING_GATEWAY_REGISTRY } from './domain/ports/IMessagingGatewayRegistry';
 import { MESSAGE_QUEUE } from './domain/ports/IMessageQueue';
 import { BullMQMessageQueue } from './infrastructure/queue/BullMQMessageQueue';
 import { FollowUpService } from './application/services/FollowUpService';
@@ -59,12 +54,8 @@ import {
   InboundMessagePipeline,
 } from './application/services/inbound-pipeline';
 import { AIEscalationRequestedHandler } from './application/handlers/AIEscalationRequestedHandler';
-import { InstagramGraphAdapter } from './infrastructure/acl/InstagramGraphAdapter';
-import { WhatsAppTemplateMessageAdapter } from './infrastructure/acl/WhatsAppTemplateMessageAdapter';
-import { MessagingGatewayRegistry } from './infrastructure/acl/MessagingGatewayRegistry';
+import { INBOUND_MESSAGE_PERSISTER } from './application/ports/IInboundMessagePersister';
 import { PrismaMessagingWebhookReceiptStore } from './infrastructure/persistence/repositories/PrismaMessagingWebhookReceiptStore';
-import { PrismaConversationIntelligenceRepository } from './infrastructure/persistence/repositories/PrismaConversationIntelligenceRepository';
-import { CONVERSATION_INTELLIGENCE_REPOSITORY } from './domain/repositories/IConversationIntelligenceRepository';
 import { ConversationIntelligenceService } from './application/services/ConversationIntelligenceService';
 import {
   MESSAGING_FACADE,
@@ -80,7 +71,6 @@ import { SalesIntegrationHandlers } from './application/handlers/SalesIntegratio
 import { CommerceIntegrationHandlers } from './application/handlers/CommerceIntegrationHandlers';
 import { CommerceModule } from '@modules/commerce/commerce.module';
 import { OutboundMessageRetryService } from './application/services/OutboundMessageRetryService';
-import { WebChatWidgetAdapter } from './infrastructure/acl/WebChatWidgetAdapter';
 import { WidgetController } from './presentation/controllers/WidgetController';
 import { WidgetConfigController } from './presentation/controllers/WidgetConfigController';
 import { WidgetScriptController } from './presentation/controllers/WidgetScriptController';
@@ -100,6 +90,7 @@ import { WIDGET_SESSION_REPOSITORY } from './domain/repositories/IWidgetSessionR
 
 @Module({
   imports: [
+    MessagingInfrastructureModule,
     ContactModule,
     TenantModule,
     AuthModule,
@@ -116,13 +107,6 @@ import { WIDGET_SESSION_REPOSITORY } from './domain/repositories/IWidgetSessionR
     WidgetScriptController,
   ],
   providers: [
-    BubbleWhatsAdapter,
-    Dialog360Adapter,
-    TwilioAdapter,
-    InstagramGraphAdapter,
-    WebChatWidgetAdapter,
-    WhatsAppTemplateMessageAdapter,
-    MessagingGatewayRegistry,
     DeduplicateMessageStep,
     IdentifyContactStep,
     EnsureConversationStep,
@@ -135,23 +119,15 @@ import { WIDGET_SESSION_REPOSITORY } from './domain/repositories/IWidgetSessionR
     SchedulingIntegrationHandlers,
     CommerceIntegrationHandlers,
     {
-      provide: CONVERSATION_REPOSITORY,
-      useClass: PrismaConversationRepository,
-    },
-    {
-      provide: CONVERSATION_INTELLIGENCE_REPOSITORY,
-      useClass: PrismaConversationIntelligenceRepository,
-    },
-    {
-      provide: MESSAGING_GATEWAY_REGISTRY,
-      useExisting: MessagingGatewayRegistry,
-    },
-    {
       provide: MESSAGE_QUEUE,
       useClass: BullMQMessageQueue,
     },
     {
       provide: IProcessInboundMessageUseCase,
+      useExisting: ProcessInboundMessageUseCase,
+    },
+    {
+      provide: INBOUND_MESSAGE_PERSISTER,
       useExisting: ProcessInboundMessageUseCase,
     },
     {
@@ -248,8 +224,6 @@ import { WIDGET_SESSION_REPOSITORY } from './domain/repositories/IWidgetSessionR
     },
   ],
   exports: [
-    CONVERSATION_REPOSITORY,
-    CONVERSATION_INTELLIGENCE_REPOSITORY,
     MESSAGE_QUEUE,
     FollowUpService,
     FollowUpAuditService,

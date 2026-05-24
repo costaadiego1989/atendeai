@@ -19,9 +19,15 @@ import {
 } from '@modules/tenant/application/facades/TenantPDFResumeFacade';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 
-type PdfParseResult = { text: string; numpages: number; info: Record<string, unknown> };
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse: (dataBuffer: Buffer) => Promise<PdfParseResult> = require('pdf-parse');
+type PdfParseResult = {
+  text: string;
+  numpages: number;
+  info: Record<string, unknown>;
+};
+
+const pdfParse: (
+  dataBuffer: Buffer,
+) => Promise<PdfParseResult> = require('pdf-parse');
 
 export interface ProcessDocumentForRAGInput {
   tenantId: string;
