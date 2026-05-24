@@ -1,3 +1,8 @@
+import { DomainException } from '@shared/domain/exceptions/DomainExceptions';
+
+const CURRENT_PREFIX = 'sch';
+const LEGACY_PREFIX = 'scheduling';
+
 function compactUuid(value: string): string {
   return value.replace(/-/g, '');
 }
@@ -10,22 +15,36 @@ function expandUuid(value: string): string {
   return value;
 }
 
-export function buildSchedulingPaymentReference(input: {
+export interface SchedulingPaymentReferenceParts {
   tenantId: string;
   professionalId: string;
   date: string;
   slotId: string;
-}): string {
-  return `sch|${compactUuid(input.tenantId)}|${compactUuid(input.professionalId)}|${input.slotId}`;
 }
 
-export function parseSchedulingPaymentReference(rawReference?: string | null): {
-  tenantId: string;
-  professionalId: string;
-  date: string;
-  slotId: string;
-} | null {
-  if (!rawReference) {
+export function buildSchedulingPaymentReference(
+  input: SchedulingPaymentReferenceParts,
+): string {
+  return `${CURRENT_PREFIX}|${compactUuid(input.tenantId)}|${compactUuid(input.professionalId)}|${input.slotId}`;
+}
+
+function hasSchedulingPrefix(rawReference: string): boolean {
+  return (
+    rawReference.startsWith(`${CURRENT_PREFIX}|`) ||
+    rawReference.startsWith(`${LEGACY_PREFIX}|`)
+  );
+}
+
+/**
+ * Tolerant parse: returns null when the reference does not belong to scheduling
+ * (the payment subscriber sees references from every module). When the
+ * reference *claims* to be a scheduling reference but is structurally invalid,
+ * it is rejected with a domain exception rather than silently dropped.
+ */
+export function parseSchedulingPaymentReference(
+  rawReference?: string | null,
+): SchedulingPaymentReferenceParts | null {
+  if (!rawReference || !hasSchedulingPrefix(rawReference)) {
     return null;
   }
 
@@ -35,7 +54,10 @@ export function parseSchedulingPaymentReference(rawReference?: string | null): {
     const dateFromSlot = /^(\d{4}-\d{2}-\d{2})__/.exec(slotId)?.[1];
 
     if (!dateFromSlot) {
-      return null;
+      throw new DomainException(
+        'Malformed scheduling payment reference: slot id does not encode a date',
+        'SCHEDULING_PAYMENT_REFERENCE_MALFORMED',
+      );
     }
 
     return {
@@ -52,7 +74,10 @@ export function parseSchedulingPaymentReference(rawReference?: string | null): {
     );
 
   if (!match) {
-    return null;
+    throw new DomainException(
+      'Malformed scheduling payment reference',
+      'SCHEDULING_PAYMENT_REFERENCE_MALFORMED',
+    );
   }
 
   return {
