@@ -14,6 +14,16 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { SchedulingCategoryUnit } from '../../domain/ports/ISchedulingStore';
+import {
+  SCHEDULING_BILLING_TYPES,
+  SCHEDULING_RECURRENCE_FREQUENCIES,
+  SCHEDULING_SLOT_ACTIONS,
+  SCHEDULING_SLOT_STATUSES,
+  SchedulingBillingType,
+  SchedulingRecurrenceFrequency,
+  SchedulingSlotAction,
+  SchedulingSlotStatus,
+} from '../../domain/types/SchedulingEnums';
 
 const SCHEDULING_CATEGORY_UNITS = {
   PER_MINUTE: 'PER_MINUTE',
@@ -128,13 +138,8 @@ export class ReserveProfessionalSlotDTO {
   isRecurring?: boolean;
 
   @IsOptional()
-  @IsEnum({
-    DAILY: 'DAILY',
-    WEEKLY: 'WEEKLY',
-    BIWEEKLY: 'BIWEEKLY',
-    MONTHLY: 'MONTHLY',
-  })
-  recurrencePeriod?: 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY';
+  @IsEnum(SCHEDULING_RECURRENCE_FREQUENCIES)
+  recurrencePeriod?: SchedulingRecurrenceFrequency;
 
   @IsOptional()
   @Type(() => Number)
@@ -159,21 +164,8 @@ export class UpdateAvailabilitySlotDTO {
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   date!: string;
 
-  @IsEnum({
-    BLOCK: 'BLOCK',
-    UNBLOCK: 'UNBLOCK',
-    CANCEL_RESERVATION: 'CANCEL_RESERVATION',
-    UPDATE_RESERVATION: 'UPDATE_RESERVATION',
-    MARK_COMPLETED: 'MARK_COMPLETED',
-    MARK_NO_SHOW: 'MARK_NO_SHOW',
-  })
-  action!:
-    | 'BLOCK'
-    | 'UNBLOCK'
-    | 'CANCEL_RESERVATION'
-    | 'UPDATE_RESERVATION'
-    | 'MARK_COMPLETED'
-    | 'MARK_NO_SHOW';
+  @IsEnum(SCHEDULING_SLOT_ACTIONS)
+  action!: SchedulingSlotAction;
 
   @IsOptional()
   @IsString()
@@ -204,13 +196,8 @@ export class GenerateSchedulingPaymentLinkDTO {
   date!: string;
 
   @IsOptional()
-  @IsEnum({
-    UNDEFINED: 'UNDEFINED',
-    BOLETO: 'BOLETO',
-    CREDIT_CARD: 'CREDIT_CARD',
-    PIX: 'PIX',
-  })
-  billingType?: 'UNDEFINED' | 'BOLETO' | 'CREDIT_CARD' | 'PIX';
+  @IsEnum(SCHEDULING_BILLING_TYPES)
+  billingType?: SchedulingBillingType;
 }
 
 export class GenerateSchedulingReportDTO {
@@ -232,25 +219,8 @@ export class GenerateSchedulingReportDTO {
 
   @IsOptional()
   @IsArray()
-  @IsEnum(
-    {
-      AVAILABLE: 'AVAILABLE',
-      PRE_RESERVED: 'PRE_RESERVED',
-      RESERVED: 'RESERVED',
-      COMPLETED: 'COMPLETED',
-      NO_SHOW: 'NO_SHOW',
-      BLOCKED: 'BLOCKED',
-    },
-    { each: true },
-  )
-  statuses?: Array<
-    | 'AVAILABLE'
-    | 'PRE_RESERVED'
-    | 'RESERVED'
-    | 'COMPLETED'
-    | 'NO_SHOW'
-    | 'BLOCKED'
-  >;
+  @IsEnum(SCHEDULING_SLOT_STATUSES, { each: true })
+  statuses?: SchedulingSlotStatus[];
 }
 
 export class AssignProfessionalCategoriesDTO {
@@ -291,13 +261,8 @@ export class CreateSchedulingRecurrenceDTO {
   @Matches(/^\d{2}:\d{2}$/)
   endsAt!: string;
 
-  @IsEnum({
-    DAILY: 'DAILY',
-    WEEKLY: 'WEEKLY',
-    BIWEEKLY: 'BIWEEKLY',
-    MONTHLY: 'MONTHLY',
-  })
-  frequency!: 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY';
+  @IsEnum(SCHEDULING_RECURRENCE_FREQUENCIES)
+  frequency!: SchedulingRecurrenceFrequency;
 
   @IsOptional()
   @Type(() => Number)

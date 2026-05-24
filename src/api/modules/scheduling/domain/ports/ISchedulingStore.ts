@@ -4,6 +4,14 @@ import type { IPaymentStatusStore } from './IPaymentStatusStore';
 
 export type { IAvailabilityStore, IReservationStore, IPaymentStatusStore };
 
+import type {
+  SchedulingBillingType,
+  SchedulingMeetingProvider,
+  SchedulingPaymentStatus,
+  SchedulingSlotAction,
+  SchedulingSlotStatus,
+} from '../types/SchedulingEnums';
+
 export type SchedulingCategoryUnit =
   | 'PER_MINUTE'
   | 'PER_SESSION'
@@ -27,21 +35,15 @@ export type AvailabilitySlotRecord = {
   label?: string | null;
   customPrice?: number | null;
   isOnline?: boolean;
-  status:
-    | 'AVAILABLE'
-    | 'PRE_RESERVED'
-    | 'RESERVED'
-    | 'COMPLETED'
-    | 'NO_SHOW'
-    | 'BLOCKED';
+  status: SchedulingSlotStatus;
   reservedAt?: string;
   payment?: {
     reference: string;
     linkId: string;
     linkUrl: string;
     amount: number;
-    billingType: 'UNDEFINED' | 'BOLETO' | 'CREDIT_CARD' | 'PIX';
-    status: 'PENDING' | 'PAID';
+    billingType: SchedulingBillingType;
+    status: SchedulingPaymentStatus;
     expiresAt?: string;
     confirmedAt?: string;
   };
@@ -55,7 +57,7 @@ export type AvailabilitySlotRecord = {
     conversationId?: string;
     notes?: string;
     isOnline?: boolean;
-    meetingProvider?: 'GOOGLE_MEET';
+    meetingProvider?: SchedulingMeetingProvider;
     meetingUrl?: string;
   };
 };
@@ -89,7 +91,7 @@ export interface ReserveAvailabilitySlotInput {
   professionalId: string;
   date: string;
   slotId: string;
-  status?: 'PRE_RESERVED' | 'RESERVED';
+  status?: Extract<SchedulingSlotStatus, 'PRE_RESERVED' | 'RESERVED'>;
   contactId?: string;
   contactName?: string;
   contactPhone?: string;
@@ -107,13 +109,7 @@ export interface UpdateAvailabilitySlotInput {
   professionalId: string;
   date: string;
   slotId: string;
-  action:
-    | 'BLOCK'
-    | 'UNBLOCK'
-    | 'CANCEL_RESERVATION'
-    | 'UPDATE_RESERVATION'
-    | 'MARK_COMPLETED'
-    | 'MARK_NO_SHOW';
+  action: SchedulingSlotAction;
   contactId?: string;
   contactName?: string;
   contactPhone?: string;
@@ -123,7 +119,7 @@ export interface UpdateAvailabilitySlotInput {
   conversationId?: string;
   notes?: string;
   isOnline?: boolean;
-  meetingProvider?: 'GOOGLE_MEET';
+  meetingProvider?: SchedulingMeetingProvider;
   meetingUrl?: string;
 }
 

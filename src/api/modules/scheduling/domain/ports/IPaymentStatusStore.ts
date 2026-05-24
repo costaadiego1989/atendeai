@@ -2,6 +2,7 @@ import {
   AvailabilitySlotRecord,
   MarkSlotPaymentConfirmedResult,
 } from './ISchedulingStore';
+import type { SchedulingBillingType } from '../types/SchedulingEnums';
 
 export interface IPaymentStatusStore {
   attachPaymentLinkToReservedSlot(input: {
@@ -13,7 +14,7 @@ export interface IPaymentStatusStore {
     linkId: string;
     linkUrl: string;
     amount: number;
-    billingType: 'UNDEFINED' | 'BOLETO' | 'CREDIT_CARD' | 'PIX';
+    billingType: SchedulingBillingType;
     expiresAt?: string;
   }): Promise<AvailabilitySlotRecord | null>;
   markSlotPaymentConfirmedByReference(input: {

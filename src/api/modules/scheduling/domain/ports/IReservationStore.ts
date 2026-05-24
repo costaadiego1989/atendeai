@@ -3,6 +3,7 @@ import {
   ReserveAvailabilitySlotInput,
   UpdateAvailabilitySlotInput,
 } from './ISchedulingStore';
+import type { SchedulingMeetingProvider } from '../types/SchedulingEnums';
 
 export interface IReservationStore {
   reserveSlot(
@@ -27,7 +28,7 @@ export interface IReservationStore {
     professionalId: string;
     date: string;
     slotId: string;
-    meetingProvider: 'GOOGLE_MEET';
+    meetingProvider: SchedulingMeetingProvider;
     meetingUrl: string;
   }): Promise<AvailabilitySlotRecord | null>;
 }
