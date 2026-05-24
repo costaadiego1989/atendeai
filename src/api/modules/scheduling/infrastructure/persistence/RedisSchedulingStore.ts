@@ -5,16 +5,20 @@ import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import {
   AvailabilitySlotRecord,
   CategoryAvailabilityRecord,
-  ISchedulingStore,
   MarkSlotPaymentConfirmedResult,
   ReserveAvailabilitySlotInput,
   SchedulingCategoryRecord,
   SchedulingProfessionalRecord,
   UpdateAvailabilitySlotInput,
 } from '../../domain/ports/ISchedulingStore';
+import { IAvailabilityStore } from '../../domain/ports/IAvailabilityStore';
+import { IReservationStore } from '../../domain/ports/IReservationStore';
+import { IPaymentStatusStore } from '../../domain/ports/IPaymentStatusStore';
 
 @Injectable()
-export class RedisSchedulingStore implements ISchedulingStore {
+export class RedisSchedulingStore
+  implements IAvailabilityStore, IReservationStore, IPaymentStatusStore
+{
   constructor(
     @Inject(REDIS_CLIENT)
     private readonly redis: Redis,

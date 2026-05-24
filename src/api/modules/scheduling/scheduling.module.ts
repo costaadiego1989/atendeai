@@ -22,10 +22,10 @@ import { RescheduleSchedulingReservationUseCase } from './application/use-cases/
 import { SchedulingPaymentEventHandler } from './application/handlers/SchedulingPaymentEventHandler';
 import { ExpirePendingSchedulingReservationUseCase } from './application/use-cases/ExpirePendingSchedulingReservationUseCase';
 import { RedisSchedulingStore } from './infrastructure/persistence/RedisSchedulingStore';
-import {
-  ISchedulingStore,
-  SCHEDULING_STORE,
-} from './domain/ports/ISchedulingStore';
+import { SCHEDULING_STORE } from './domain/ports/ISchedulingStore';
+import { AVAILABILITY_STORE } from './domain/ports/IAvailabilityStore';
+import { RESERVATION_STORE } from './domain/ports/IReservationStore';
+import { PAYMENT_STATUS_STORE } from './domain/ports/IPaymentStatusStore';
 import { BullMQSchedulingReservationExpirationQueue } from './infrastructure/queue/BullMQSchedulingReservationExpirationQueue';
 import {
   ISchedulingReservationExpirationQueue,
@@ -137,9 +137,22 @@ import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedu
       provide: SCHEDULING_FACADE,
       useClass: SchedulingFacade,
     },
+    RedisSchedulingStore,
     {
       provide: SCHEDULING_STORE,
-      useClass: RedisSchedulingStore,
+      useExisting: RedisSchedulingStore,
+    },
+    {
+      provide: AVAILABILITY_STORE,
+      useExisting: RedisSchedulingStore,
+    },
+    {
+      provide: RESERVATION_STORE,
+      useExisting: RedisSchedulingStore,
+    },
+    {
+      provide: PAYMENT_STATUS_STORE,
+      useExisting: RedisSchedulingStore,
     },
     {
       provide: SCHEDULING_RESERVATION_EXPIRATION_QUEUE,

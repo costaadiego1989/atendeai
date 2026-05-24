@@ -1,3 +1,9 @@
+import type { IAvailabilityStore } from './IAvailabilityStore';
+import type { IReservationStore } from './IReservationStore';
+import type { IPaymentStatusStore } from './IPaymentStatusStore';
+
+export type { IAvailabilityStore, IReservationStore, IPaymentStatusStore };
+
 export type SchedulingCategoryUnit =
   | 'PER_MINUTE'
   | 'PER_SESSION'
@@ -121,114 +127,14 @@ export interface UpdateAvailabilitySlotInput {
   meetingUrl?: string;
 }
 
-export interface ISchedulingStore {
-  createProfessional(input: {
-    tenantId: string;
-    branchId?: string | null;
-    name: string;
-    phone?: string;
-    role?: string;
-  }): Promise<SchedulingProfessionalRecord>;
-  listProfessionals(
-    tenantId: string,
-    branchId?: string | null,
-  ): Promise<SchedulingProfessionalRecord[]>;
-  createCategory(input: {
-    tenantId: string;
-    branchId?: string | null;
-    name: string;
-    unit: SchedulingCategoryUnit;
-    durationMinutes?: number;
-    basePrice?: number;
-  }): Promise<SchedulingCategoryRecord>;
-  listCategories(
-    tenantId: string,
-    branchId?: string | null,
-  ): Promise<SchedulingCategoryRecord[]>;
-  assignCategoriesToProfessional(input: {
-    tenantId: string;
-    professionalId: string;
-    categoryIds: string[];
-  }): Promise<string[]>;
-  listProfessionalsByCategory(
-    tenantId: string,
-    categoryId: string,
-    branchId?: string | null,
-  ): Promise<SchedulingProfessionalRecord[]>;
-  saveAvailability(input: {
-    tenantId: string;
-    professionalId: string;
-    date: string;
-    slots: Array<{
-      startsAt: string;
-      endsAt: string;
-      label?: string;
-      customPrice?: number;
-      isOnline?: boolean;
-    }>;
-  }): Promise<AvailabilitySlotRecord[]>;
-  listAvailability(
-    tenantId: string,
-    professionalId: string,
-    date: string,
-  ): Promise<AvailabilitySlotRecord[]>;
-  getAvailabilitySlot(
-    tenantId: string,
-    professionalId: string,
-    date: string,
-    slotId: string,
-  ): Promise<AvailabilitySlotRecord | null>;
-  listAvailabilityByCategory(
-    tenantId: string,
-    categoryId: string,
-    date: string,
-    branchId?: string | null,
-  ): Promise<CategoryAvailabilityRecord[]>;
-  reserveSlot(
-    input: ReserveAvailabilitySlotInput,
-  ): Promise<AvailabilitySlotRecord | null>;
-  updateSlot(
-    input: UpdateAvailabilitySlotInput,
-  ): Promise<AvailabilitySlotRecord | null>;
-  rescheduleReservation(input: {
-    tenantId: string;
-    professionalId: string;
-    sourceDate: string;
-    sourceSlotId: string;
-    targetDate: string;
-    targetSlotId: string;
-  }): Promise<{
-    sourceSlot: AvailabilitySlotRecord;
-    targetSlot: AvailabilitySlotRecord;
-  } | null>;
-  attachPaymentLinkToReservedSlot(input: {
-    tenantId: string;
-    professionalId: string;
-    date: string;
-    slotId: string;
-    reference: string;
-    linkId: string;
-    linkUrl: string;
-    amount: number;
-    billingType: 'UNDEFINED' | 'BOLETO' | 'CREDIT_CARD' | 'PIX';
-    expiresAt?: string;
-  }): Promise<AvailabilitySlotRecord | null>;
-  markSlotPaymentConfirmedByReference(input: {
-    tenantId: string;
-    professionalId: string;
-    date: string;
-    slotId: string;
-    paymentReference: string;
-    confirmedAt: string;
-  }): Promise<MarkSlotPaymentConfirmedResult>;
-  attachMeetingLinkToReservedSlot(input: {
-    tenantId: string;
-    professionalId: string;
-    date: string;
-    slotId: string;
-    meetingProvider: 'GOOGLE_MEET';
-    meetingUrl: string;
-  }): Promise<AvailabilitySlotRecord | null>;
-}
+/**
+ * Aggregate port kept as a backward-compatible alias (SCHEDULING_STORE).
+ * Per ADR D-07 the surface is split into IAvailabilityStore,
+ * IReservationStore and IPaymentStatusStore; consumers should migrate to the
+ * narrow port slice they use. RedisSchedulingStore implements all three.
+ */
+export type ISchedulingStore = IAvailabilityStore &
+  IReservationStore &
+  IPaymentStatusStore;
 
 export const SCHEDULING_STORE = Symbol('SCHEDULING_STORE');
