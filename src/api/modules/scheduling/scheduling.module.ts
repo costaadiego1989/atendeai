@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { SchedulingController } from './presentation/controllers/SchedulingController';
 import { CreateSchedulingProfessionalUseCase } from './application/use-cases/CreateSchedulingProfessionalUseCase';
@@ -75,7 +75,7 @@ import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedu
     AuthModule,
     ContactModule,
     PaymentModule,
-    MessagingModule,
+    forwardRef(() => MessagingModule),
     BullModule.registerQueue({
       name: 'scheduling-async-jobs',
     }),
