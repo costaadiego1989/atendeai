@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { SchedulingController } from './presentation/controllers/SchedulingController';
 import { CreateSchedulingProfessionalUseCase } from './application/use-cases/CreateSchedulingProfessionalUseCase';
@@ -22,10 +22,10 @@ import { RescheduleSchedulingReservationUseCase } from './application/use-cases/
 import { SchedulingPaymentEventHandler } from './application/handlers/SchedulingPaymentEventHandler';
 import { ExpirePendingSchedulingReservationUseCase } from './application/use-cases/ExpirePendingSchedulingReservationUseCase';
 import { RedisSchedulingStore } from './infrastructure/persistence/RedisSchedulingStore';
-import {
-  ISchedulingStore,
-  SCHEDULING_STORE,
-} from './domain/ports/ISchedulingStore';
+import { SCHEDULING_STORE } from './domain/ports/ISchedulingStore';
+import { AVAILABILITY_STORE } from './domain/ports/IAvailabilityStore';
+import { RESERVATION_STORE } from './domain/ports/IReservationStore';
+import { PAYMENT_STATUS_STORE } from './domain/ports/IPaymentStatusStore';
 import { BullMQSchedulingReservationExpirationQueue } from './infrastructure/queue/BullMQSchedulingReservationExpirationQueue';
 import {
   ISchedulingReservationExpirationQueue,
@@ -34,15 +34,7 @@ import {
 import { AuthModule } from '../auth/auth.module';
 import { ContactModule } from '../contact/contact.module';
 import { PaymentModule } from '../payment/payment.module';
-import {
-  MessagingFacade,
-  MESSAGING_FACADE,
-} from '../messaging/application/facades/MessagingFacade';
-import { WhatsAppTemplateMessageAdapter } from '../messaging/infrastructure/acl/WhatsAppTemplateMessageAdapter';
-import { CONVERSATION_REPOSITORY } from '../messaging/domain/repositories/IConversationRepository';
-import { PrismaConversationRepository } from '../messaging/infrastructure/persistence/repositories/PrismaConversationRepository';
-import { MESSAGE_QUEUE } from '../messaging/domain/ports/IMessageQueue';
-import { BullMQMessageQueue } from '../messaging/infrastructure/queue/BullMQMessageQueue';
+import { MessagingModule } from '../messaging/messaging.module';
 import { SchedulingGoogleCalendarController } from './presentation/controllers/SchedulingGoogleCalendarController';
 import { SchedulingGoogleCalendarSchemaBootstrapService } from './application/services/SchedulingGoogleCalendarSchemaBootstrapService';
 import { GoogleCalendarOAuthService } from './infrastructure/services/GoogleCalendarOAuthService';
@@ -83,6 +75,7 @@ import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedu
     AuthModule,
     ContactModule,
     PaymentModule,
+    forwardRef(() => MessagingModule),
     BullModule.registerQueue({
       name: 'scheduling-async-jobs',
     }),
@@ -132,20 +125,6 @@ import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedu
     SchedulingRecurringReservationScheduler,
     JoinSchedulingMeetingUseCase,
     SchedulingPaymentEventHandler,
-    MessagingFacade,
-    WhatsAppTemplateMessageAdapter,
-    {
-      provide: MESSAGING_FACADE,
-      useExisting: MessagingFacade,
-    },
-    {
-      provide: CONVERSATION_REPOSITORY,
-      useClass: PrismaConversationRepository,
-    },
-    {
-      provide: MESSAGE_QUEUE,
-      useClass: BullMQMessageQueue,
-    },
     {
       provide: SCHEDULING_GOOGLE_CALENDAR_CONNECTION_REPOSITORY,
       useClass: PrismaSchedulingGoogleCalendarConnectionRepository,
@@ -158,9 +137,22 @@ import { JoinSchedulingMeetingUseCase } from './application/use-cases/JoinSchedu
       provide: SCHEDULING_FACADE,
       useClass: SchedulingFacade,
     },
+    RedisSchedulingStore,
     {
       provide: SCHEDULING_STORE,
-      useClass: RedisSchedulingStore,
+      useExisting: RedisSchedulingStore,
+    },
+    {
+      provide: AVAILABILITY_STORE,
+      useExisting: RedisSchedulingStore,
+    },
+    {
+      provide: RESERVATION_STORE,
+      useExisting: RedisSchedulingStore,
+    },
+    {
+      provide: PAYMENT_STATUS_STORE,
+      useExisting: RedisSchedulingStore,
     },
     {
       provide: SCHEDULING_RESERVATION_EXPIRATION_QUEUE,

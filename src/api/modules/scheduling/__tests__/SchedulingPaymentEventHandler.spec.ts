@@ -93,6 +93,17 @@ describe('SchedulingPaymentEventHandler', () => {
     );
 
     expect(
+      schedulingStore.markSlotPaymentConfirmedByReference,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        professionalId: 'professional-1',
+        date: '2030-07-20',
+        slotId: 'slot-1',
+        paymentReference: rawReference,
+      }),
+    );
+    expect(
       schedulingStore.attachMeetingLinkToReservedSlot,
     ).toHaveBeenCalledWith({
       tenantId: 'tenant-1',

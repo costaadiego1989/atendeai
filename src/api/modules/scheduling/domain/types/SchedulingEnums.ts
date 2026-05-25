@@ -1,0 +1,58 @@
+export const SCHEDULING_SLOT_STATUSES = {
+  AVAILABLE: 'AVAILABLE',
+  PRE_RESERVED: 'PRE_RESERVED',
+  RESERVED: 'RESERVED',
+  COMPLETED: 'COMPLETED',
+  NO_SHOW: 'NO_SHOW',
+  BLOCKED: 'BLOCKED',
+} as const;
+
+export type SchedulingSlotStatus =
+  (typeof SCHEDULING_SLOT_STATUSES)[keyof typeof SCHEDULING_SLOT_STATUSES];
+
+export const SCHEDULING_PAYMENT_STATUSES = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+} as const;
+
+export type SchedulingPaymentStatus =
+  (typeof SCHEDULING_PAYMENT_STATUSES)[keyof typeof SCHEDULING_PAYMENT_STATUSES];
+
+export const SCHEDULING_BILLING_TYPES = {
+  UNDEFINED: 'UNDEFINED',
+  BOLETO: 'BOLETO',
+  CREDIT_CARD: 'CREDIT_CARD',
+  PIX: 'PIX',
+} as const;
+
+export type SchedulingBillingType =
+  (typeof SCHEDULING_BILLING_TYPES)[keyof typeof SCHEDULING_BILLING_TYPES];
+
+export const SCHEDULING_SLOT_ACTIONS = {
+  BLOCK: 'BLOCK',
+  UNBLOCK: 'UNBLOCK',
+  CANCEL_RESERVATION: 'CANCEL_RESERVATION',
+  UPDATE_RESERVATION: 'UPDATE_RESERVATION',
+  MARK_COMPLETED: 'MARK_COMPLETED',
+  MARK_NO_SHOW: 'MARK_NO_SHOW',
+} as const;
+
+export type SchedulingSlotAction =
+  (typeof SCHEDULING_SLOT_ACTIONS)[keyof typeof SCHEDULING_SLOT_ACTIONS];
+
+export const SCHEDULING_RECURRENCE_FREQUENCIES = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  BIWEEKLY: 'BIWEEKLY',
+  MONTHLY: 'MONTHLY',
+} as const;
+
+export type SchedulingRecurrenceFrequency =
+  (typeof SCHEDULING_RECURRENCE_FREQUENCIES)[keyof typeof SCHEDULING_RECURRENCE_FREQUENCIES];
+
+export const SCHEDULING_MEETING_PROVIDERS = {
+  GOOGLE_MEET: 'GOOGLE_MEET',
+} as const;
+
+export type SchedulingMeetingProvider =
+  (typeof SCHEDULING_MEETING_PROVIDERS)[keyof typeof SCHEDULING_MEETING_PROVIDERS];

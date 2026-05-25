@@ -58,11 +58,14 @@ export class SchedulingPaymentEventHandler implements OnModuleInit {
         }
 
         const markResult =
-          await this.schedulingStore.markSlotPaymentConfirmedByReference(
-            payload.tenantId,
-            payload.rawReference!,
-            new Date(payload.confirmedAt).toISOString(),
-          );
+          await this.schedulingStore.markSlotPaymentConfirmedByReference({
+            tenantId: payload.tenantId,
+            professionalId: parsedReference.professionalId,
+            date: parsedReference.date,
+            slotId: parsedReference.slotId,
+            paymentReference: payload.rawReference!,
+            confirmedAt: new Date(payload.confirmedAt).toISOString(),
+          });
 
         if (!markResult.slot?.reservedFor?.contactId) {
           this.structuredLog.emit({

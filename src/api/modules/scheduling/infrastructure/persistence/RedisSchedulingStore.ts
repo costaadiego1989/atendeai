@@ -5,16 +5,20 @@ import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import {
   AvailabilitySlotRecord,
   CategoryAvailabilityRecord,
-  ISchedulingStore,
   MarkSlotPaymentConfirmedResult,
   ReserveAvailabilitySlotInput,
   SchedulingCategoryRecord,
   SchedulingProfessionalRecord,
   UpdateAvailabilitySlotInput,
 } from '../../domain/ports/ISchedulingStore';
+import { IAvailabilityStore } from '../../domain/ports/IAvailabilityStore';
+import { IReservationStore } from '../../domain/ports/IReservationStore';
+import { IPaymentStatusStore } from '../../domain/ports/IPaymentStatusStore';
 
 @Injectable()
-export class RedisSchedulingStore implements ISchedulingStore {
+export class RedisSchedulingStore
+  implements IAvailabilityStore, IReservationStore, IPaymentStatusStore
+{
   constructor(
     @Inject(REDIS_CLIENT)
     private readonly redis: Redis,
@@ -596,26 +600,42 @@ export class RedisSchedulingStore implements ISchedulingStore {
     }
   }
 
-  async markSlotPaymentConfirmedByReference(
-    tenantId: string,
-    paymentReference: string,
-    confirmedAt: string,
-  ): Promise<MarkSlotPaymentConfirmedResult> {
-    const availabilityKeys = await this.redis.keys(
-      `scheduling:tenant:${tenantId}:professional:*:availability:*`,
+  async markSlotPaymentConfirmedByReference(input: {
+    tenantId: string;
+    professionalId: string;
+    date: string;
+    slotId: string;
+    paymentReference: string;
+    confirmedAt: string;
+  }): Promise<MarkSlotPaymentConfirmedResult> {
+    const key = this.getAvailabilityKey(
+      input.tenantId,
+      input.professionalId,
+      input.date,
     );
 
-    for (const key of availabilityKeys) {
-      const rawSlots = await this.redis.hgetall(key);
+    const maxAttempts = 5;
 
-      for (const [slotId, rawSlot] of Object.entries(rawSlots)) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await this.redis.watch(key);
+
+      try {
+        const rawSlot = await this.redis.hget(key, input.slotId);
+
+        if (!rawSlot) {
+          await this.redis.unwatch();
+          return { slot: null, appliedChange: false };
+        }
+
         const slot = JSON.parse(rawSlot) as AvailabilitySlotRecord;
 
-        if (slot.payment?.reference !== paymentReference) {
-          continue;
+        if (slot.payment?.reference !== input.paymentReference) {
+          await this.redis.unwatch();
+          return { slot: null, appliedChange: false };
         }
 
         if (slot.payment?.status === 'PAID') {
+          await this.redis.unwatch();
           return { slot, appliedChange: false };
         }
 
@@ -625,12 +645,22 @@ export class RedisSchedulingStore implements ISchedulingStore {
           payment: {
             ...slot.payment,
             status: 'PAID',
-            confirmedAt,
+            confirmedAt: input.confirmedAt,
           },
         };
 
-        await this.redis.hset(key, slotId, JSON.stringify(nextSlot));
+        const execResult = await this.redis
+          .multi()
+          .hset(key, input.slotId, JSON.stringify(nextSlot))
+          .exec();
+
+        if (!execResult) {
+          continue;
+        }
+
         return { slot: nextSlot, appliedChange: true };
+      } finally {
+        await this.redis.unwatch();
       }
     }
 
