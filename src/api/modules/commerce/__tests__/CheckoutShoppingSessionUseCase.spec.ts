@@ -9,7 +9,7 @@ import { CommerceCheckoutCreatedIntegrationEvent } from '../application/integrat
 describe('CheckoutShoppingSessionUseCase', () => {
   let useCase: CheckoutShoppingSessionUseCase;
   let commerceRepo: jest.Mocked<ICommerceRepository>;
-  let paymentService: any;
+  let paymentFacade: any;
   let eventBus: jest.Mocked<IEventBus>;
 
   const tenantId = 'tenant-1';
@@ -63,12 +63,15 @@ describe('CheckoutShoppingSessionUseCase', () => {
     commerceRepo = {
       findSessionById: jest.fn(),
       createOrder: jest.fn(),
+      updateOrderPaymentLink: jest.fn(),
+      updateOrderStatus: jest.fn(),
       updateSessionState: jest.fn(),
       saveAuditLog: jest.fn(),
     } as any;
 
-    paymentService = {
+    paymentFacade = {
       createPaymentLink: jest.fn().mockResolvedValue(mockPaymentLink),
+      removePaymentLink: jest.fn().mockResolvedValue(undefined),
     };
 
     eventBus = {
@@ -77,14 +80,13 @@ describe('CheckoutShoppingSessionUseCase', () => {
 
     useCase = new CheckoutShoppingSessionUseCase(
       commerceRepo,
-      paymentService,
+      paymentFacade,
       eventBus,
     );
   });
 
   it('should checkout a valid session and create an order', async () => {
-    commerceRepo.findSessionById.mockResolvedValue(mockSession as any);
-    commerceRepo.createOrder.mockResolvedValue({
+    const createdOrder = {
       id: 'order-1',
       tenantId,
       sessionId,
@@ -96,10 +98,17 @@ describe('CheckoutShoppingSessionUseCase', () => {
       subtotalAmount: 200,
       freightAmount: 0,
       totalAmount: 200,
-      paymentReference: expect.any(String),
+      paymentReference: 'commerce|tenant-1|order-1',
+      paymentLinkId: null,
+      paymentLinkUrl: null,
+      paymentStatus: 'PENDING',
+    };
+    commerceRepo.findSessionById.mockResolvedValue(mockSession as any);
+    commerceRepo.createOrder.mockResolvedValue(createdOrder as any);
+    commerceRepo.updateOrderPaymentLink.mockResolvedValue({
+      ...createdOrder,
       paymentLinkId: mockPaymentLink.id,
       paymentLinkUrl: mockPaymentLink.url,
-      paymentStatus: 'PENDING',
     } as any);
     commerceRepo.updateSessionState.mockResolvedValue({
       ...mockSession,
@@ -110,12 +119,21 @@ describe('CheckoutShoppingSessionUseCase', () => {
     const result = await useCase.execute({ tenantId, sessionId });
 
     expect(result.order).toBeDefined();
+    expect(result.order.paymentLinkId).toBe(mockPaymentLink.id);
     expect(result.paymentLink).toEqual(mockPaymentLink);
     expect(commerceRepo.createOrder).toHaveBeenCalledWith(
       expect.objectContaining({
         tenantId,
         sessionId,
         status: 'AWAITING_PAYMENT',
+        paymentLinkId: null,
+      }),
+    );
+    expect(commerceRepo.updateOrderPaymentLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId,
+        orderId: 'order-1',
+        paymentLinkId: mockPaymentLink.id,
       }),
     );
   });
@@ -156,6 +174,9 @@ describe('CheckoutShoppingSessionUseCase', () => {
       sessionWithFreightAndDiscount as any,
     );
     commerceRepo.createOrder.mockResolvedValue({ id: 'order-1' } as any);
+    commerceRepo.updateOrderPaymentLink.mockResolvedValue({
+      id: 'order-1',
+    } as any);
     commerceRepo.updateSessionState.mockResolvedValue(
       sessionWithFreightAndDiscount as any,
     );
@@ -174,8 +195,7 @@ describe('CheckoutShoppingSessionUseCase', () => {
   });
 
   it('should publish CommerceCheckoutCreatedIntegrationEvent', async () => {
-    commerceRepo.findSessionById.mockResolvedValue(mockSession as any);
-    commerceRepo.createOrder.mockResolvedValue({
+    const checkoutOrder = {
       id: 'order-1',
       tenantId,
       sessionId,
@@ -189,7 +209,16 @@ describe('CheckoutShoppingSessionUseCase', () => {
       paymentReference: 'commerce|tenant-1|order-1',
       paymentLinkId: mockPaymentLink.id,
       paymentLinkUrl: mockPaymentLink.url,
+    };
+    commerceRepo.findSessionById.mockResolvedValue(mockSession as any);
+    commerceRepo.createOrder.mockResolvedValue({
+      ...checkoutOrder,
+      paymentLinkId: null,
+      paymentLinkUrl: null,
     } as any);
+    commerceRepo.updateOrderPaymentLink.mockResolvedValue(
+      checkoutOrder as any,
+    );
     commerceRepo.updateSessionState.mockResolvedValue(mockSession as any);
     commerceRepo.saveAuditLog.mockResolvedValue(undefined);
 
@@ -198,6 +227,31 @@ describe('CheckoutShoppingSessionUseCase', () => {
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(CommerceCheckoutCreatedIntegrationEvent),
     );
+  });
+
+  it('should cancel the order when payment link creation fails', async () => {
+    commerceRepo.findSessionById.mockResolvedValue(mockSession as any);
+    commerceRepo.createOrder.mockResolvedValue({
+      id: 'order-1',
+      tenantId,
+      sessionId,
+    } as any);
+    commerceRepo.updateOrderStatus.mockResolvedValue({ id: 'order-1' } as any);
+    commerceRepo.saveAuditLog.mockResolvedValue(undefined);
+    const failure = new Error('gateway down');
+    paymentFacade.createPaymentLink.mockRejectedValue(failure);
+
+    await expect(useCase.execute({ tenantId, sessionId })).rejects.toThrow(
+      failure,
+    );
+
+    expect(commerceRepo.createOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'AWAITING_PAYMENT' }),
+    );
+    expect(commerceRepo.updateOrderStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId, status: 'CANCELLED' }),
+    );
+    expect(commerceRepo.updateOrderPaymentLink).not.toHaveBeenCalled();
   });
 
   it('should throw BadRequestException when fulfillmentType is not set', async () => {

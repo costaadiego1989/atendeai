@@ -387,6 +387,12 @@ export interface ICommerceRepository {
     orderId: string;
     status: CommerceOrderStatus;
   }): Promise<CommerceOrderRecord>;
+  updateOrderPaymentLink(input: {
+    tenantId: string;
+    orderId: string;
+    paymentLinkId: string;
+    paymentLinkUrl: string;
+  }): Promise<CommerceOrderRecord>;
   markOrderPaidByPaymentReference(
     input: MarkCommerceOrderPaidInput,
   ): Promise<CommerceOrderRecord | null>;
