@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { IProspectingQueryPort } from '../../application/ports/IProspectingQueryPort';
@@ -10,6 +10,8 @@ import { IProspectingQueryPort } from '../../application/ports/IProspectingQuery
  */
 @Injectable()
 export class ProspectingQueryAdapter implements IProspectingQueryPort {
+  private readonly logger = new Logger(ProspectingQueryAdapter.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async countDailySearches(
@@ -30,7 +32,11 @@ export class ProspectingQueryAdapter implements IProspectingQueryPort {
       );
 
       return Number(row?.used ?? 0);
-    } catch {
+    } catch (error) {
+      this.logger.warn(
+        `Failed to query prospecting daily searches for tenant ${tenantId}; defaulting to 0`,
+        { tenantId, error: error instanceof Error ? error.message : error },
+      );
       return 0;
     }
   }

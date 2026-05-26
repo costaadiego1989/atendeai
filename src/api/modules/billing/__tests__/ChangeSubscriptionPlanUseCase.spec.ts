@@ -5,8 +5,8 @@ import { TenantId } from '../../../shared/domain/TenantId';
 describe('ChangeSubscriptionPlanUseCase', () => {
   let useCase: ChangeSubscriptionPlanUseCase;
   let billingRepository: any;
-  let tenantRepository: any;
-  let paymentService: any;
+  let paymentPort: any;
+  let ensureCustomerService: any;
   let configService: any;
   let planChangeQueue: any;
 
@@ -17,19 +17,15 @@ describe('ChangeSubscriptionPlanUseCase', () => {
       findPlanByCode: jest.fn(),
       listSubscriptionModules: jest.fn().mockResolvedValue([]),
     };
-    tenantRepository = {
-      findById: jest.fn(),
-    };
-    paymentService = {
+    paymentPort = {
       updateSubscription: jest.fn(),
       cancelSubscription: jest.fn(),
       createCustomer: jest.fn(),
-      createSubaccount: jest.fn(),
       createSubscription: jest.fn(),
-      createPayment: jest.fn(),
-      deletePayment: jest.fn(),
-      restorePayment: jest.fn(),
       createPaymentLink: jest.fn(),
+    };
+    ensureCustomerService = {
+      ensure: jest.fn(),
     };
     configService = {
       get: jest.fn().mockReturnValue('0'),
@@ -40,8 +36,8 @@ describe('ChangeSubscriptionPlanUseCase', () => {
 
     useCase = new ChangeSubscriptionPlanUseCase(
       billingRepository,
-      tenantRepository,
-      paymentService,
+      paymentPort,
+      ensureCustomerService,
       configService,
       planChangeQueue,
     );
@@ -54,23 +50,13 @@ describe('ChangeSubscriptionPlanUseCase', () => {
     );
 
     billingRepository.findSubscription.mockResolvedValue(subscription);
-    tenantRepository.findById.mockResolvedValue({
-      cnpj: { value: '11.444.777/0001-61' },
-      owner: {
-        name: 'Owner',
-        email: { value: 'owner@test.com' },
-        phone: { value: '11999999999' },
-      },
-    });
-    paymentService.createCustomer.mockResolvedValue({
-      id: 'cus_123',
-    });
+    ensureCustomerService.ensure.mockResolvedValue('cus_123');
     billingRepository.findPlanByCode.mockResolvedValue({
       code: 'PROFISSIONAL',
       displayName: 'Profissional',
       monthlyPrice: 297,
     });
-    paymentService.createPaymentLink.mockResolvedValue({
+    paymentPort.createPaymentLink.mockResolvedValue({
       id: 'plink_123',
       url: 'https://pay.asaas.com/link/plink_123',
     });
@@ -80,8 +66,8 @@ describe('ChangeSubscriptionPlanUseCase', () => {
       targetPlan: 'PROFISSIONAL',
     });
 
-    expect(paymentService.createCustomer).toHaveBeenCalled();
-    expect(paymentService.createPaymentLink).toHaveBeenCalledWith(
+    expect(ensureCustomerService.ensure).toHaveBeenCalled();
+    expect(paymentPort.createPaymentLink).toHaveBeenCalledWith(
       expect.objectContaining({
         externalReference: 'billing-upgrade|tenant-1|PROFISSIONAL|MONTHLY',
       }),
@@ -100,20 +86,14 @@ describe('ChangeSubscriptionPlanUseCase', () => {
     subscription.updateAsaasInfo('cus_123', 'sub_123');
 
     billingRepository.findSubscription.mockResolvedValue(subscription);
-    paymentService.cancelSubscription.mockResolvedValue({
-      id: 'sub_123',
-      status: 'REMOVED',
-      value: 99,
-      billingType: 'CREDIT_CARD',
-      nextDueDate: '2030-01-01',
-    });
+    paymentPort.cancelSubscription.mockResolvedValue(undefined);
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',
       targetPlan: 'ESSENCIAL',
     });
 
-    expect(paymentService.cancelSubscription).toHaveBeenCalledWith('sub_123');
+    expect(paymentPort.cancelSubscription).toHaveBeenCalledWith('sub_123');
     expect(planChangeQueue.add).toHaveBeenCalledWith(
       'apply-scheduled-plan-change',
       expect.objectContaining({
@@ -144,20 +124,14 @@ describe('ChangeSubscriptionPlanUseCase', () => {
       displayName: 'Profissional',
       monthlyPrice: 297,
     });
-    paymentService.updateSubscription.mockResolvedValue({
-      id: 'sub_123',
-      status: 'ACTIVE',
-      value: 199,
-      billingType: 'CREDIT_CARD',
-      nextDueDate: '2030-01-01',
-    });
+    paymentPort.updateSubscription.mockResolvedValue(undefined);
 
     const result = await useCase.execute({
       tenantId: 'tenant-1',
       targetPlan: 'PROFISSIONAL',
     });
 
-    expect(paymentService.updateSubscription).toHaveBeenCalledWith(
+    expect(paymentPort.updateSubscription).toHaveBeenCalledWith(
       'sub_123',
       expect.objectContaining({
         value: expect.any(Number),

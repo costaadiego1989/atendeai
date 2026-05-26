@@ -19,6 +19,12 @@ import { buildSubscriptionCommercialState } from '../support/BillingCommercialCo
 import { ADDON_PACKAGE_MODULE_CODE } from '../../domain/constants/AddonPackages';
 import { Subscription } from '../../domain/entities/Subscription';
 
+/**
+ * Transitional payload interfaces — defined locally to avoid importing
+ * payment module internals. These should be replaced by shared integration
+ * event contracts (e.g., @shared/integration-events/) once the payment
+ * module publishes typed event schemas.
+ */
 interface PaymentConfirmedPayload {
   tenantId: string;
   paymentId: string;

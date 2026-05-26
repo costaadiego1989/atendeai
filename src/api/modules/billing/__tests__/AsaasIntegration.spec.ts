@@ -12,7 +12,7 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
   let handlers: BillingPaymentHandlers;
   let eventBus: any;
   let billingRepo: any;
-  let paymentService: any;
+  let paymentPort: any;
   let provisioningQueue: any;
 
   beforeEach(() => {
@@ -27,17 +27,19 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
       findActiveSubscriptionModule: jest.fn().mockResolvedValue(null),
       updateSubscriptionModuleStatus: jest.fn(),
     };
-    paymentService = {
+    paymentPort = {
       updateSubscription: jest.fn(),
       createSubscription: jest.fn(),
       cancelSubscription: jest.fn(),
+      createCustomer: jest.fn(),
+      createPaymentLink: jest.fn(),
     };
     provisioningQueue = { add: jest.fn() };
 
     handlers = new BillingPaymentHandlers(
       eventBus,
       billingRepo,
-      paymentService,
+      paymentPort,
       provisioningQueue,
     );
     handlers.onModuleInit();
@@ -180,9 +182,8 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
         contactsQuota: 2500,
         config: {},
       });
-      paymentService.createSubscription.mockResolvedValue({
-        id: 'sub-new-upgrade',
-        status: 'ACTIVE',
+      paymentPort.createSubscription.mockResolvedValue({
+        subscriptionId: 'sub-new-upgrade',
       });
 
       await handler({
@@ -288,9 +289,8 @@ describe('Asaas Integration — BillingPaymentHandlers', () => {
         quotaImpact: { messages: 5000, aiTokens: 1000000, contacts: 0 },
         startedAt: new Date('2026-01-15T00:00:00.000Z'),
       });
-      paymentService.createSubscription.mockResolvedValue({
-        id: 'sub-new-2',
-        status: 'ACTIVE',
+      paymentPort.createSubscription.mockResolvedValue({
+        subscriptionId: 'sub-new-2',
       });
 
       await handler({

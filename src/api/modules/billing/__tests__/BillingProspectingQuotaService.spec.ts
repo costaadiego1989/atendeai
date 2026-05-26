@@ -4,19 +4,22 @@ import { BillingProspectingQuotaService } from '../application/services/BillingP
 describe('BillingProspectingQuotaService', () => {
   let service: BillingProspectingQuotaService;
   let prisma: any;
+  let prospectingQueryPort: any;
 
   beforeEach(() => {
     prisma = {
       $queryRaw: jest.fn(),
     };
-    service = new BillingProspectingQuotaService(prisma);
+    prospectingQueryPort = {
+      countDailySearches: jest.fn(),
+    };
+    service = new BillingProspectingQuotaService(prisma, prospectingQueryPort);
   });
 
   describe('assertCanConsume - quota available → returns true', () => {
     it('should return remaining quota when usage is within limits', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'PROFISSIONAL', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 50 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'PROFISSIONAL', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(50);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-1',
@@ -31,9 +34,8 @@ describe('BillingProspectingQuotaService', () => {
 
   describe('assertCanConsume - quota exceeded → throws ConflictException', () => {
     it('should throw ConflictException when usage exceeds limit', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 145 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(145);
 
       await expect(
         service.assertCanConsume({
@@ -46,9 +48,8 @@ describe('BillingProspectingQuotaService', () => {
 
   describe('get remaining quota', () => {
     it('should correctly calculate remaining quota', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'ESCALA', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 200 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'ESCALA', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(200);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-3',
@@ -61,9 +62,8 @@ describe('BillingProspectingQuotaService', () => {
 
   describe('different plan types have different limits', () => {
     it('should use ESSENCIAL default limit of 150', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 0 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(0);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-4',
@@ -74,9 +74,8 @@ describe('BillingProspectingQuotaService', () => {
     });
 
     it('should use PROFISSIONAL default limit of 300', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'PROFISSIONAL', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 0 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'PROFISSIONAL', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(0);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-5',
@@ -87,9 +86,8 @@ describe('BillingProspectingQuotaService', () => {
     });
 
     it('should use ESCALA default limit of 1000', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'ESCALA', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 0 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'ESCALA', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(0);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-6',
@@ -100,14 +98,13 @@ describe('BillingProspectingQuotaService', () => {
     });
 
     it('should use configured limit from planConfig when available', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([
-          {
-            plan: 'PROFISSIONAL',
-            planConfig: { limits: { prospectingDaily: 500 } },
-          },
-        ])
-        .mockResolvedValueOnce([{ used: 0 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([
+        {
+          plan: 'PROFISSIONAL',
+          planConfig: { limits: { prospectingDaily: 500 } },
+        },
+      ]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(0);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-7',
@@ -120,9 +117,8 @@ describe('BillingProspectingQuotaService', () => {
 
   describe('edge cases', () => {
     it('should default to ESSENCIAL limit when plan is unknown', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'UNKNOWN', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 0 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'UNKNOWN', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(0);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-8',
@@ -133,9 +129,8 @@ describe('BillingProspectingQuotaService', () => {
     });
 
     it('should default to ESSENCIAL limit when no subscription found', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ used: 0 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(0);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-9',
@@ -146,9 +141,8 @@ describe('BillingProspectingQuotaService', () => {
     });
 
     it('should treat requested < 1 as 1', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }])
-        .mockResolvedValueOnce([{ used: 150 }]);
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(150);
 
       await expect(
         service.assertCanConsume({
@@ -158,10 +152,9 @@ describe('BillingProspectingQuotaService', () => {
       ).rejects.toThrow(ConflictException);
     });
 
-    it('should handle DB error in getDailyUsage gracefully (returns 0)', async () => {
-      prisma.$queryRaw
-        .mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }])
-        .mockRejectedValueOnce(new Error('DB error'));
+    it('should handle port error in countDailySearches gracefully (returns 0)', async () => {
+      prisma.$queryRaw.mockResolvedValueOnce([{ plan: 'ESSENCIAL', planConfig: {} }]);
+      prospectingQueryPort.countDailySearches.mockResolvedValue(0);
 
       const result = await service.assertCanConsume({
         tenantId: 'tenant-11',

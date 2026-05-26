@@ -7,8 +7,8 @@ import { BillingSubscriptionProvisionedIntegrationEvent } from '../application/i
 describe('BillingProvisioningProcessor', () => {
   let processor: BillingProvisioningProcessor;
   let billingRepo: any;
-  let tenantRepository: any;
-  let paymentGateway: any;
+  let tenantQueryPort: any;
+  let paymentPort: any;
   let eventBus: jest.Mocked<IEventBus>;
 
   beforeEach(() => {
@@ -18,21 +18,17 @@ describe('BillingProvisioningProcessor', () => {
       findPlanByCode: jest.fn(),
       listSubscriptionModules: jest.fn().mockResolvedValue([]),
     };
-    tenantRepository = { findById: jest.fn() };
-    paymentGateway = {
+    tenantQueryPort = {
+      findTenantById: jest.fn(),
+      findTenantPlan: jest.fn(),
+      updateTenantPlan: jest.fn(),
+    };
+    paymentPort = {
       createCustomer: jest.fn(),
-      createSubaccount: jest.fn(),
       createSubscription: jest.fn(),
       updateSubscription: jest.fn(),
       cancelSubscription: jest.fn(),
-      getSubscription: jest.fn(),
-      createPayment: jest.fn(),
-      deletePayment: jest.fn(),
-      restorePayment: jest.fn(),
       createPaymentLink: jest.fn(),
-      removePaymentLink: jest.fn(),
-      restorePaymentLink: jest.fn(),
-      parseWebhook: jest.fn(),
     };
     eventBus = {
       publish: jest.fn(),
@@ -40,8 +36,8 @@ describe('BillingProvisioningProcessor', () => {
     } as any;
     processor = new BillingProvisioningProcessor(
       billingRepo,
-      tenantRepository,
-      paymentGateway,
+      tenantQueryPort,
+      paymentPort,
       eventBus,
     );
   });
@@ -49,7 +45,7 @@ describe('BillingProvisioningProcessor', () => {
   it('should provision only customer for ESSENCIAL plan', async () => {
     const sub = Subscription.create(TenantId.create('t1'), 'ESSENCIAL');
     billingRepo.findSubscription.mockResolvedValue(sub);
-    paymentGateway.createCustomer.mockResolvedValue({ id: 'cus_1' });
+    paymentPort.createCustomer.mockResolvedValue({ customerId: 'cus_1' });
 
     await processor.process({
       data: {
@@ -62,8 +58,8 @@ describe('BillingProvisioningProcessor', () => {
       },
     } as any);
 
-    expect(paymentGateway.createCustomer).toHaveBeenCalled();
-    expect(paymentGateway.createSubscription).not.toHaveBeenCalled();
+    expect(paymentPort.createCustomer).toHaveBeenCalled();
+    expect(paymentPort.createSubscription).not.toHaveBeenCalled();
     expect(sub.asaasCustomerId).toBe('cus_1');
   });
 
@@ -71,10 +67,9 @@ describe('BillingProvisioningProcessor', () => {
     const sub = Subscription.create(TenantId.create('t1'), 'PROFISSIONAL');
     billingRepo.findSubscription.mockResolvedValue(sub);
 
-    paymentGateway.createCustomer.mockResolvedValue({ id: 'cus_1' });
-    paymentGateway.createSubscription.mockResolvedValue({
-      id: 'sub_1',
-      status: 'ACTIVE',
+    paymentPort.createCustomer.mockResolvedValue({ customerId: 'cus_1' });
+    paymentPort.createSubscription.mockResolvedValue({
+      subscriptionId: 'sub_1',
     });
     billingRepo.findPlanByCode.mockResolvedValue({
       code: 'PROFISSIONAL',
@@ -93,8 +88,8 @@ describe('BillingProvisioningProcessor', () => {
       },
     } as any);
 
-    expect(paymentGateway.createCustomer).toHaveBeenCalled();
-    expect(paymentGateway.createSubscription).toHaveBeenCalled();
+    expect(paymentPort.createCustomer).toHaveBeenCalled();
+    expect(paymentPort.createSubscription).toHaveBeenCalled();
     expect(sub.asaasCustomerId).toBe('cus_1');
     expect(sub.asaasSubscriptionId).toBe('sub_1');
     expect(billingRepo.saveSubscription).toHaveBeenCalledTimes(2);
@@ -113,17 +108,16 @@ describe('BillingProvisioningProcessor', () => {
       monthlyPrice: 297,
     });
 
-    paymentGateway.createSubscription.mockResolvedValue({
-      id: 'sub_1',
-      status: 'ACTIVE',
+    paymentPort.createSubscription.mockResolvedValue({
+      subscriptionId: 'sub_1',
     });
 
     await processor.process({
       data: { tenantId: 't1', plan: 'PROFISSIONAL' },
     } as any);
 
-    expect(paymentGateway.createCustomer).not.toHaveBeenCalled();
-    expect(paymentGateway.createSubscription).toHaveBeenCalled();
+    expect(paymentPort.createCustomer).not.toHaveBeenCalled();
+    expect(paymentPort.createSubscription).toHaveBeenCalled();
     expect(sub.asaasCustomerId).toBe('cus_existing');
     expect(sub.asaasSubscriptionId).toBe('sub_1');
   });
@@ -131,18 +125,18 @@ describe('BillingProvisioningProcessor', () => {
   it('should load tenant data from repository when queue payload is partial', async () => {
     const sub = Subscription.create(TenantId.create('t1'), 'PROFISSIONAL');
     billingRepo.findSubscription.mockResolvedValue(sub);
-    tenantRepository.findById.mockResolvedValue({
-      cnpj: { value: '11.444.777/0001-61' },
+    tenantQueryPort.findTenantById.mockResolvedValue({
+      plan: 'PROFISSIONAL',
       owner: {
         name: 'Owner Repo',
-        email: { value: 'repo@test.com' },
-        phone: { value: '11999999999' },
+        email: 'repo@test.com',
+        phone: '11999999999',
       },
+      cnpj: '11.444.777/0001-61',
     });
-    paymentGateway.createCustomer.mockResolvedValue({ id: 'cus_1' });
-    paymentGateway.createSubscription.mockResolvedValue({
-      id: 'sub_1',
-      status: 'ACTIVE',
+    paymentPort.createCustomer.mockResolvedValue({ customerId: 'cus_1' });
+    paymentPort.createSubscription.mockResolvedValue({
+      subscriptionId: 'sub_1',
     });
     billingRepo.findPlanByCode.mockResolvedValue({
       code: 'PROFISSIONAL',
@@ -159,9 +153,9 @@ describe('BillingProvisioningProcessor', () => {
       data: { tenantId: 't1', plan: 'PROFISSIONAL' },
     } as any);
 
-    expect(tenantRepository.findById).toHaveBeenCalledWith('t1');
-    expect(paymentGateway.createCustomer).toHaveBeenCalled();
-    expect(paymentGateway.createSubscription).toHaveBeenCalled();
+    expect(tenantQueryPort.findTenantById).toHaveBeenCalledWith('t1');
+    expect(paymentPort.createCustomer).toHaveBeenCalled();
+    expect(paymentPort.createSubscription).toHaveBeenCalled();
   });
 
   it('should fall back to PROVISIONING_FAILED if max attempts reached', async () => {
@@ -173,7 +167,7 @@ describe('BillingProvisioningProcessor', () => {
       monthlyPrice: 297,
     });
 
-    paymentGateway.createCustomer.mockRejectedValue(new Error('Fatal'));
+    paymentPort.createCustomer.mockRejectedValue(new Error('Fatal'));
 
     // opts.attempts = 3, attemptsMade = 2 -> meaning it failed the 3rd attempt
     const job = {
@@ -212,8 +206,8 @@ describe('BillingProvisioningProcessor', () => {
       },
     } as any);
 
-    expect(paymentGateway.createCustomer).not.toHaveBeenCalled();
-    expect(paymentGateway.createSubscription).not.toHaveBeenCalled();
+    expect(paymentPort.createCustomer).not.toHaveBeenCalled();
+    expect(paymentPort.createSubscription).not.toHaveBeenCalled();
     expect(billingRepo.saveSubscription).not.toHaveBeenCalled();
   });
 
@@ -230,7 +224,7 @@ describe('BillingProvisioningProcessor', () => {
     // Simulate: subscription is ACTIVE but processor still runs (race condition)
     // The early return catches it, but if somehow it gets past (e.g., status changed mid-flight),
     // the error handler should NOT overwrite ACTIVE status
-    paymentGateway.createCustomer.mockRejectedValue(new Error('Conflict'));
+    paymentPort.createCustomer.mockRejectedValue(new Error('Conflict'));
 
     const job = {
       data: {

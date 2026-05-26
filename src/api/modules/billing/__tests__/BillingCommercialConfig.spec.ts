@@ -83,8 +83,8 @@ describe('BillingCommercialConfig', () => {
     it('should include plan modules in config', () => {
       const result = buildSubscriptionCommercialState(basePlanDefinition);
 
-      expect(result.config.modules.crm).toBe(true);
-      expect(result.config.modules.inbox).toBe(true);
+      expect(result.config.modules!.crm).toBe(true);
+      expect(result.config.modules!.inbox).toBe(true);
     });
 
     it('should merge addon modules into config', () => {
@@ -109,8 +109,8 @@ describe('BillingCommercialConfig', () => {
         modules,
       );
 
-      expect(result.config.modules.prospecting).toBe(true);
-      expect(result.config.modules.crm).toBe(true);
+      expect(result.config.modules!.prospecting).toBe(true);
+      expect(result.config.modules!.crm).toBe(true);
     });
 
     it('should preserve currentConfig fields', () => {

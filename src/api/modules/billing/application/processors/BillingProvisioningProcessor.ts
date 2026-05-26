@@ -93,15 +93,15 @@ export class BillingProvisioningProcessor extends WorkerHost {
 
           ownerName = tenant.owner.name;
           ownerEmail = tenant.owner.email;
-          cnpj = tenant.cnpj;
+          cnpj = tenant.cnpj ?? '';
           ownerPhone = tenant.owner.phone;
         }
 
         const customer = await this.paymentPort.createCustomer({
-          name: ownerName!,
-          email: ownerEmail!,
-          cpfCnpj: cnpj!,
-          phone: ownerPhone!,
+          name: ownerName,
+          email: ownerEmail,
+          cpfCnpj: cnpj,
+          phone: ownerPhone,
           externalReference: tenantId,
         });
         customerId = customer.customerId;

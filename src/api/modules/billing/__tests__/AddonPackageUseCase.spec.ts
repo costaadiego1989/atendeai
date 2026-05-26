@@ -9,8 +9,8 @@ import { PLAN_QUOTAS } from '../domain/constants/PlanQuotas';
 describe('PurchaseAddonPackageUseCase', () => {
   let useCase: PurchaseAddonPackageUseCase;
   let billingRepo: any;
-  let tenantRepo: any;
-  let paymentService: any;
+  let paymentPort: any;
+  let ensureCustomerService: any;
 
   beforeEach(() => {
     billingRepo = {
@@ -21,18 +21,23 @@ describe('PurchaseAddonPackageUseCase', () => {
       saveSubscriptionModule: jest.fn(),
       saveAuditLog: jest.fn(),
     };
-    tenantRepo = { findById: jest.fn() };
-    paymentService = {
+    paymentPort = {
       createPaymentLink: jest.fn().mockResolvedValue({
         id: 'link-1',
         url: 'https://checkout.example.com/addon',
       }),
       createCustomer: jest.fn(),
+      createSubscription: jest.fn(),
+      updateSubscription: jest.fn(),
+      cancelSubscription: jest.fn(),
+    };
+    ensureCustomerService = {
+      ensure: jest.fn().mockResolvedValue('cus_existing'),
     };
     useCase = new PurchaseAddonPackageUseCase(
       billingRepo,
-      tenantRepo,
-      paymentService,
+      paymentPort,
+      ensureCustomerService,
     );
   });
 

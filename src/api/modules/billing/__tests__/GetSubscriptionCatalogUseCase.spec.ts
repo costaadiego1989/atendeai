@@ -5,7 +5,7 @@ import { TenantId } from '@shared/domain/TenantId';
 describe('GetSubscriptionCatalogUseCase', () => {
   let useCase: GetSubscriptionCatalogUseCase;
   let billingRepo: any;
-  let prisma: any;
+  let tenantCatalogPort: any;
   let tenantModuleAccessService: any;
 
   const mockSubscription = Subscription.create(
@@ -86,10 +86,8 @@ describe('GetSubscriptionCatalogUseCase', () => {
       listModules: jest.fn().mockResolvedValue(mockModules),
       listNiches: jest.fn().mockResolvedValue(mockNiches),
     };
-    prisma = {
-      tenant: {
-        findUnique: jest.fn().mockResolvedValue({ businessType: 'BAKERY' }),
-      },
+    tenantCatalogPort = {
+      findTenantBusinessType: jest.fn().mockResolvedValue('BAKERY'),
     };
     tenantModuleAccessService = {
       getSummary: jest.fn().mockResolvedValue({
@@ -111,7 +109,7 @@ describe('GetSubscriptionCatalogUseCase', () => {
 
     useCase = new GetSubscriptionCatalogUseCase(
       billingRepo,
-      prisma,
+      tenantCatalogPort,
       tenantModuleAccessService,
     );
   });
@@ -172,7 +170,7 @@ describe('GetSubscriptionCatalogUseCase', () => {
     });
 
     it('should return null niche when businessType is not set', async () => {
-      prisma.tenant.findUnique.mockResolvedValue(null);
+      tenantCatalogPort.findTenantBusinessType.mockResolvedValue(null);
 
       const result = await useCase.execute({ tenantId: 'tenant-1' });
 
