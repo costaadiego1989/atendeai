@@ -132,8 +132,8 @@ describe('CheckoutShoppingSessionUseCase', () => {
     expect(commerceRepo.updateOrderPaymentLink).toHaveBeenCalledWith(
       expect.objectContaining({
         tenantId,
-        orderId: 'order-1',
         paymentLinkId: mockPaymentLink.id,
+        paymentLinkUrl: mockPaymentLink.url,
       }),
     );
   });

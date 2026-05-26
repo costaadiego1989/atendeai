@@ -2,13 +2,13 @@ import { IEventBus } from '@shared/application/ports/IEventBus';
 import { CommercePaymentEventHandler } from '../application/handlers/CommercePaymentEventHandler';
 import { ICommerceRepository } from '../domain/ports/ICommerceRepository';
 import { CommerceOrderPaidIntegrationEvent } from '../application/integration-events/CheckoutIntegrationEvents';
-import { ISalesCouponRepository } from '@modules/sales/domain/repositories/ISalesRepository';
+import { ISalesFacade } from '@modules/sales/application/facades/ISalesFacade';
 
 describe('CommercePaymentEventHandler', () => {
   let handler: CommercePaymentEventHandler;
   let eventBus: jest.Mocked<IEventBus>;
   let commerceRepository: jest.Mocked<ICommerceRepository>;
-  let salesRepository: jest.Mocked<ISalesCouponRepository>;
+  let salesFacade: jest.Mocked<ISalesFacade>;
 
   beforeEach(() => {
     eventBus = {
@@ -36,20 +36,15 @@ describe('CommercePaymentEventHandler', () => {
       countActiveCatalogItems: jest.fn().mockResolvedValue(0),
     } as unknown as jest.Mocked<ICommerceRepository>;
 
-    salesRepository = {
-      createCoupon: jest.fn(),
-      updateCoupon: jest.fn(),
-      deleteCoupon: jest.fn(),
-      findCouponById: jest.fn(),
+    salesFacade = {
       findCouponByCode: jest.fn(),
-      listCoupons: jest.fn(),
       incrementCouponUsage: jest.fn(),
-    } as unknown as jest.Mocked<ISalesCouponRepository>;
+    } as unknown as jest.Mocked<ISalesFacade>;
 
     handler = new CommercePaymentEventHandler(
       eventBus,
       commerceRepository,
-      salesRepository,
+      salesFacade,
     );
   });
 

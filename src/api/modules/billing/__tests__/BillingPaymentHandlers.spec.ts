@@ -119,8 +119,7 @@ describe('BillingPaymentHandlers', () => {
         config: {},
       });
       paymentService.createSubscription.mockResolvedValue({
-        id: 'sub-new',
-        status: 'ACTIVE',
+        subscriptionId: 'sub-new',
       });
 
       await handler({
@@ -257,8 +256,7 @@ describe('BillingPaymentHandlers', () => {
         config: {},
       });
       paymentService.createSubscription.mockResolvedValue({
-        id: 'sub-yearly',
-        status: 'ACTIVE',
+        subscriptionId: 'sub-yearly',
       });
 
       const confirmedAt = '2026-02-15T00:00:00.000Z';
