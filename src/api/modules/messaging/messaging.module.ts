@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MessagingInfrastructureModule } from './infrastructure/messaging-infrastructure.module';
 import { ProcessInboundMessageUseCase } from './application/use-cases/ProcessInboundMessageUseCase';
 import { IProcessInboundMessageUseCase } from './application/use-cases/interfaces/IProcessInboundMessageUseCase';
@@ -97,7 +97,7 @@ import { WIDGET_SESSION_REPOSITORY } from './domain/repositories/IWidgetSessionR
     AIModule,
     AgentRulesModule,
     BillingModule,
-    CommerceModule,
+    forwardRef(() => CommerceModule),
   ],
   controllers: [
     WebhookController,

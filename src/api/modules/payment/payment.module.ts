@@ -24,6 +24,8 @@ import { TENANT_FINANCIAL_ACCOUNT_REPOSITORY } from './domain/repositories/ITena
 import { CONTACT_FINANCIAL_PROFILE_REPOSITORY } from './domain/repositories/IContactFinancialProfileRepository';
 import { BILLING_REPOSITORY } from '@modules/billing/domain/repositories/IBillingRepository';
 import { PrismaBillingRepository } from '@modules/billing/infrastructure/persistence/repositories/PrismaBillingRepository';
+import { PAYMENT_FACADE } from './application/facades/IPaymentFacade';
+import { PaymentFacadeAdapter } from './infrastructure/adapters/PaymentFacadeAdapter';
 
 @Global()
 @Module({
@@ -56,6 +58,10 @@ import { PrismaBillingRepository } from '@modules/billing/infrastructure/persist
       useClass: PrismaBillingRepository,
     },
     PaymentService,
+    {
+      provide: PAYMENT_FACADE,
+      useClass: PaymentFacadeAdapter,
+    },
     PaymentWebhookSchedulingProjectionService,
     PaymentWebhookSalesProjectionService,
     TrialPaymentProjectionService,
@@ -68,6 +74,7 @@ import { PrismaBillingRepository } from '@modules/billing/infrastructure/persist
   exports: [
     IPAYMENT_GATEWAY,
     PaymentService,
+    PAYMENT_FACADE,
     ProcessWebhookUseCase,
     TENANT_FINANCIAL_ACCOUNT_REPOSITORY,
     CONTACT_FINANCIAL_PROFILE_REPOSITORY,

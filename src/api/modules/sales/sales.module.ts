@@ -38,6 +38,8 @@ import { UpdateCouponUseCase } from './application/use-cases/UpdateCouponUseCase
 import { DeleteCouponUseCase } from './application/use-cases/DeleteCouponUseCase';
 import { ListCouponsUseCase } from './application/use-cases/ListCouponsUseCase';
 import { RedeemCouponUseCase } from './application/use-cases/RedeemCouponUseCase';
+import { SALES_FACADE } from './application/facades/ISalesFacade';
+import { SalesFacadeAdapter } from './application/facades/SalesFacadeAdapter';
 
 @Module({
   imports: [
@@ -100,11 +102,17 @@ import { RedeemCouponUseCase } from './application/use-cases/RedeemCouponUseCase
       provide: SALES_COUPON_REPOSITORY,
       useExisting: PrismaSalesRepository,
     },
+    SalesFacadeAdapter,
+    {
+      provide: SALES_FACADE,
+      useClass: SalesFacadeAdapter,
+    },
   ],
   exports: [
     ICreatePaymentLinkUseCase,
     TrackSalesMetricUseCase,
     SALES_REPOSITORY,
+    SALES_FACADE,
     CreateSplitPaymentChargeUseCase,
   ],
 })
