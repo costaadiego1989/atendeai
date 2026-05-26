@@ -861,6 +861,34 @@ export class PrismaCommerceRepository implements ICommerceRepository {
     return order;
   }
 
+  async updateOrderPaymentLink(input: {
+    tenantId: string;
+    orderId: string;
+    paymentLinkId: string;
+    paymentLinkUrl: string;
+  }): Promise<CommerceOrderRecord> {
+    const rows = await this.prisma.$queryRaw<
+      Record<string, unknown>[]
+    >(Prisma.sql`
+      UPDATE commerce_schema.orders
+      SET
+        payment_link_id = ${input.paymentLinkId},
+        payment_link_url = ${input.paymentLinkUrl},
+        updated_at = now()
+      WHERE tenant_id = ${input.tenantId}::uuid
+        AND id = ${input.orderId}::uuid
+      RETURNING *
+    `);
+
+    if (!rows[0]) {
+      throw new Error(
+        `Order ${input.orderId} not found for tenant ${input.tenantId}`,
+      );
+    }
+
+    return this.mapOrder(rows[0]);
+  }
+
   async markOrderPaidByPaymentReference(
     input: MarkCommerceOrderPaidInput,
   ): Promise<CommerceOrderRecord | null> {

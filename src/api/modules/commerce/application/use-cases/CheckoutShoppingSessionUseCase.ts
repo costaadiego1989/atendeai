@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import {
@@ -11,7 +12,10 @@ import {
 } from '../../domain/ports/ICommerceRepository';
 import { ShoppingSessionNotFoundError } from '../../domain/errors/ShoppingSessionNotFoundError';
 import { InvalidSessionStateError } from '../../domain/errors/InvalidSessionStateError';
-import { PaymentService } from '@modules/payment/application/services/PaymentService';
+import {
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import { buildCommercePaymentReference } from '../services/CommercePaymentReference';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { CommerceCheckoutCreatedIntegrationEvent } from '../integration-events/CheckoutIntegrationEvents';
@@ -26,10 +30,13 @@ export interface CheckoutShoppingSessionInput {
 
 @Injectable()
 export class CheckoutShoppingSessionUseCase {
+  private readonly logger = new Logger(CheckoutShoppingSessionUseCase.name);
+
   constructor(
     @Inject(COMMERCE_REPOSITORY)
     private readonly commerceRepository: ICommerceRepository,
-    private readonly paymentService: PaymentService,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
   ) {}
@@ -84,20 +91,6 @@ export class CheckoutShoppingSessionUseCase {
       orderId,
     });
 
-    const paymentLink = await this.paymentService.createPaymentLink({
-      name:
-        input.paymentLinkName?.trim() ||
-        `Pedido ${orderId.slice(0, 8).toUpperCase()}`,
-      description:
-        input.paymentLinkDescription?.trim() ||
-        `Checkout conversacional da sessão ${session.id}`,
-      value: totalAmount,
-      externalReference: paymentReference,
-      billingType: input.billingType ?? 'PIX',
-      chargeType: 'DETACHED',
-      dueDateLimitDays: 1,
-    });
-
     const order = await this.commerceRepository.createOrder({
       id: orderId,
       tenantId: input.tenantId,
@@ -113,12 +106,62 @@ export class CheckoutShoppingSessionUseCase {
       totalAmount,
       deliveryAddress: session.deliveryAddress,
       paymentReference,
-      paymentLinkId: paymentLink.id,
-      paymentLinkUrl: paymentLink.url,
+      paymentLinkId: null,
+      paymentLinkUrl: null,
       paymentStatus: 'PENDING',
       couponCode: session.couponCode,
       discountAmount: session.discountAmount,
     });
+
+    let paymentLink: { id: string; url: string };
+    try {
+      paymentLink = await this.paymentFacade.createPaymentLink({
+        name:
+          input.paymentLinkName?.trim() ||
+          `Pedido ${orderId.slice(0, 8).toUpperCase()}`,
+        description:
+          input.paymentLinkDescription?.trim() ||
+          `Checkout conversacional da sessão ${session.id}`,
+        value: totalAmount,
+        externalReference: paymentReference,
+        billingType: input.billingType ?? 'PIX',
+        chargeType: 'DETACHED',
+        dueDateLimitDays: 1,
+      });
+    } catch (error) {
+      this.logger.error(
+        {
+          tenantId: input.tenantId,
+          orderId,
+          err: error instanceof Error ? error.message : String(error),
+        },
+        'Payment link creation failed — cancelling order',
+      );
+      await this.commerceRepository.updateOrderStatus({
+        tenantId: input.tenantId,
+        orderId,
+        status: 'CANCELLED',
+      });
+      await this.commerceRepository.saveAuditLog({
+        tenantId: input.tenantId,
+        event: 'CHECKOUT_PAYMENT_LINK_FAILED',
+        entityId: orderId,
+        entityType: 'ORDER',
+        metadata: {
+          sessionId: session.id,
+          total: totalAmount,
+        },
+      });
+      throw error;
+    }
+
+    const orderWithLink =
+      await this.commerceRepository.updateOrderPaymentLink({
+        tenantId: input.tenantId,
+        orderId,
+        paymentLinkId: paymentLink.id,
+        paymentLinkUrl: paymentLink.url,
+      });
 
     const updatedSession = await this.commerceRepository.updateSessionState({
       tenantId: input.tenantId,
@@ -138,7 +181,7 @@ export class CheckoutShoppingSessionUseCase {
     await this.commerceRepository.saveAuditLog({
       tenantId: input.tenantId,
       event: 'CHECKOUT_CREATED',
-      entityId: order.id,
+      entityId: orderWithLink.id,
       entityType: 'ORDER',
       metadata: {
         sessionId: session.id,
@@ -148,24 +191,24 @@ export class CheckoutShoppingSessionUseCase {
 
     await this.eventBus.publish(
       new CommerceCheckoutCreatedIntegrationEvent({
-        orderId: order.id,
-        tenantId: order.tenantId,
+        orderId: orderWithLink.id,
+        tenantId: orderWithLink.tenantId,
         sessionId: session.id,
-        conversationId: order.conversationId,
-        contactId: order.contactId,
-        paymentReference: order.paymentReference,
-        paymentLinkId: order.paymentLinkId,
-        paymentLinkUrl: order.paymentLinkUrl,
-        fulfillmentType: order.fulfillmentType,
-        shippingMode: order.shippingMode,
-        subtotalAmount: order.subtotalAmount,
-        freightAmount: order.freightAmount,
-        totalAmount: order.totalAmount,
+        conversationId: orderWithLink.conversationId,
+        contactId: orderWithLink.contactId,
+        paymentReference: orderWithLink.paymentReference,
+        paymentLinkId: orderWithLink.paymentLinkId,
+        paymentLinkUrl: orderWithLink.paymentLinkUrl,
+        fulfillmentType: orderWithLink.fulfillmentType,
+        shippingMode: orderWithLink.shippingMode,
+        subtotalAmount: orderWithLink.subtotalAmount,
+        freightAmount: orderWithLink.freightAmount,
+        totalAmount: orderWithLink.totalAmount,
       }),
     );
 
     return {
-      order,
+      order: orderWithLink,
       session: updatedSession,
       paymentLink,
     };

@@ -9,9 +9,9 @@ import { parseCommercePaymentReference } from '../services/CommercePaymentRefere
 import { CommerceOrderPaidIntegrationEvent } from '../integration-events/CheckoutIntegrationEvents';
 
 import {
-  SALES_REPOSITORY,
-  ISalesCouponRepository,
-} from '@modules/sales/domain/repositories/ISalesRepository';
+  SALES_FACADE,
+  ISalesFacade,
+} from '@modules/sales/application/facades/ISalesFacade';
 
 @Injectable()
 export class CommercePaymentEventHandler implements OnModuleInit {
@@ -20,8 +20,8 @@ export class CommercePaymentEventHandler implements OnModuleInit {
     private readonly eventBus: IEventBus,
     @Inject(COMMERCE_REPOSITORY)
     private readonly commerceRepository: ICommerceRepository,
-    @Inject(SALES_REPOSITORY)
-    private readonly salesRepository: ISalesCouponRepository,
+    @Inject(SALES_FACADE)
+    private readonly salesFacade: ISalesFacade,
   ) {}
 
   onModuleInit() {
@@ -77,12 +77,12 @@ export class CommercePaymentEventHandler implements OnModuleInit {
           );
 
           if (order.couponCode) {
-            const coupon = await this.salesRepository.findCouponByCode(
+            const coupon = await this.salesFacade.findCouponByCode(
               order.tenantId,
               order.couponCode,
             );
             if (coupon) {
-              await this.salesRepository.incrementCouponUsage(
+              await this.salesFacade.incrementCouponUsage(
                 order.tenantId,
                 coupon.id,
               );
