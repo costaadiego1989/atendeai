@@ -7,12 +7,7 @@ import {
   BILLING_REPOSITORY,
   IBillingRepository,
 } from '../../domain/repositories/IBillingRepository';
-import {
-  TENANT_REPOSITORY,
-  ITenantRepository,
-} from '../../../tenant/domain/repositories/ITenantRepository';
-import { PaymentService } from '../../../payment/application/services/PaymentService';
-import { Subscription } from '../../domain/entities/Subscription';
+import { IPaymentPort, BILLING_PAYMENT_PORT } from '../ports/IPaymentPort';
 import { PlanType } from '../../domain/value-objects/Quotas';
 import {
   BillingCycleType,
@@ -21,6 +16,7 @@ import {
   IChangeSubscriptionPlanUseCase,
 } from './interfaces/IChangeSubscriptionPlanUseCase';
 import { buildSubscriptionCommercialState } from '../support/BillingCommercialConfig';
+import { EnsureCustomerService } from '../services/EnsureCustomerService';
 
 const PLAN_RANK: Record<PlanType, number> = {
   TRIAL: -1,
@@ -34,9 +30,9 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
   constructor(
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepository: IBillingRepository,
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
-    private readonly paymentService: PaymentService,
+    @Inject(BILLING_PAYMENT_PORT)
+    private readonly paymentPort: IPaymentPort,
+    private readonly ensureCustomerService: EnsureCustomerService,
     private readonly configService: ConfigService,
     @InjectQueue('billing-plan-changes')
     private readonly planChangeQueue: Queue,
@@ -92,8 +88,8 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
         billingCycle,
       );
 
-      await this.ensureCustomer(input.tenantId, subscription);
-      const paymentLink = await this.paymentService.createPaymentLink({
+      await this.ensureCustomerService.ensure(input.tenantId, subscription);
+      const paymentLink = await this.paymentPort.createPaymentLink({
         name: `${billingCycle === 'YEARLY' ? 'Assinatura anual' : 'Upgrade para'} ${input.targetPlan}`,
         description:
           billingCycle === 'YEARLY'
@@ -124,7 +120,7 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
 
     if (input.targetPlan === 'ESSENCIAL') {
       if (subscription.asaasSubscriptionId) {
-        await this.paymentService.cancelSubscription(
+        await this.paymentPort.cancelSubscription(
           subscription.asaasSubscriptionId,
         );
         subscription.clearAsaasSubscription();
@@ -184,7 +180,7 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
             (1 - this.getPromoDiscountPercent(billingCycle) / 100) *
             100,
         ) / 100;
-      await this.paymentService.updateSubscription(
+      await this.paymentPort.updateSubscription(
         subscription.asaasSubscriptionId,
         {
           value: updatedMonthlyValue,
@@ -233,31 +229,5 @@ export class ChangeSubscriptionPlanUseCase implements IChangeSubscriptionPlanUse
     const parsed = Number(raw);
     if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) return 0;
     return parsed;
-  }
-
-  private async ensureCustomer(
-    tenantId: string,
-    subscription: Subscription,
-  ): Promise<string> {
-    if (subscription.asaasCustomerId) {
-      return subscription.asaasCustomerId;
-    }
-
-    const tenant = await this.tenantRepository.findById(tenantId);
-
-    if (!tenant || !tenant.owner) {
-      throw new EntityNotFoundException('Tenant', tenantId);
-    }
-
-    const customer = await this.paymentService.createCustomer({
-      name: tenant.owner.name,
-      email: tenant.owner.email.value,
-      cpfCnpj: tenant.cnpj.value,
-      phone: tenant.owner.phone.value,
-      externalReference: tenantId,
-    });
-
-    subscription.updateAsaasCustomer(customer.id);
-    return customer.id;
   }
 }

@@ -38,18 +38,27 @@ import { IGetAddonPackageInfoUseCase } from './application/use-cases/interfaces/
 import { TenantModuleAccessService } from '@shared/infrastructure/billing/TenantModuleAccessService';
 import { TenantManualSaleEligibilityService } from '@shared/infrastructure/billing/TenantManualSaleEligibilityService';
 import { BillingProspectingQuotaService } from './application/services/BillingProspectingQuotaService';
+import { EnsureCustomerService } from './application/services/EnsureCustomerService';
+
+// Port tokens
+import { BILLING_TENANT_QUERY_PORT } from './application/ports/ITenantQueryPort';
+import { BILLING_PAYMENT_PORT } from './application/ports/IPaymentPort';
+import { BILLING_PROSPECTING_QUERY_PORT } from './application/ports/IProspectingQueryPort';
+import { BILLING_TENANT_CATALOG_PORT } from './application/ports/ITenantCatalogQueryPort';
+
+// Port adapters
+import { TenantQueryAdapter } from './infrastructure/adapters/TenantQueryAdapter';
+import { PaymentPortAdapter } from './infrastructure/adapters/PaymentPortAdapter';
+import { ProspectingQueryAdapter } from './infrastructure/adapters/ProspectingQueryAdapter';
+import { TenantCatalogQueryAdapter } from './infrastructure/adapters/TenantCatalogQueryAdapter';
 
 @Module({
   imports: [
     AuthModule,
     PaymentModule,
     TenantModule,
-    BullModule.registerQueue({
-      name: 'billing-provisioning',
-    }),
-    BullModule.registerQueue({
-      name: 'billing-plan-changes',
-    }),
+    BullModule.registerQueue({ name: 'billing-provisioning' }),
+    BullModule.registerQueue({ name: 'billing-plan-changes' }),
   ],
   controllers: [
     UsageController,
@@ -65,22 +74,24 @@ import { BillingProspectingQuotaService } from './application/services/BillingPr
     TenantModuleAccessService,
     TenantManualSaleEligibilityService,
     BillingProspectingQuotaService,
+    EnsureCustomerService,
+    // Repository
+    { provide: BILLING_REPOSITORY, useClass: PrismaBillingRepository },
+    // Outbound ports → adapters
+    { provide: BILLING_TENANT_QUERY_PORT, useClass: TenantQueryAdapter },
+    { provide: BILLING_PAYMENT_PORT, useClass: PaymentPortAdapter },
     {
-      provide: BILLING_REPOSITORY,
-      useClass: PrismaBillingRepository,
+      provide: BILLING_PROSPECTING_QUERY_PORT,
+      useClass: ProspectingQueryAdapter,
     },
     {
-      provide: IGetUsageUseCase,
-      useClass: GetUsageUseCase,
+      provide: BILLING_TENANT_CATALOG_PORT,
+      useClass: TenantCatalogQueryAdapter,
     },
-    {
-      provide: IRecordUsageUseCase,
-      useClass: RecordUsageUseCase,
-    },
-    {
-      provide: ICheckQuotaUseCase,
-      useClass: CheckQuotaUseCase,
-    },
+    // Use cases
+    { provide: IGetUsageUseCase, useClass: GetUsageUseCase },
+    { provide: IRecordUsageUseCase, useClass: RecordUsageUseCase },
+    { provide: ICheckQuotaUseCase, useClass: CheckQuotaUseCase },
     {
       provide: IChangeSubscriptionPlanUseCase,
       useClass: ChangeSubscriptionPlanUseCase,
@@ -89,10 +100,7 @@ import { BillingProspectingQuotaService } from './application/services/BillingPr
       provide: ICancelSubscriptionUseCase,
       useClass: CancelSubscriptionUseCase,
     },
-    {
-      provide: IListBillingPlansUseCase,
-      useClass: ListBillingPlansUseCase,
-    },
+    { provide: IListBillingPlansUseCase, useClass: ListBillingPlansUseCase },
     {
       provide: IGetSubscriptionCatalogUseCase,
       useClass: GetSubscriptionCatalogUseCase,
