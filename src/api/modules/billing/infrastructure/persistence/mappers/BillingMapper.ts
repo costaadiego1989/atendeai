@@ -1,6 +1,9 @@
 import {
   Subscription,
   BillingCycleType,
+  SubscriptionStatus,
+  SubscriptionConfig,
+  PricingSnapshot,
 } from '@modules/billing/domain/entities/Subscription';
 import { UsageRecord } from '@modules/billing/domain/entities/UsageRecord';
 import { TenantId } from '@shared/domain/TenantId';
@@ -40,7 +43,7 @@ export class BillingMapper {
       {
         tenantId: TenantId.create(raw.tenantId ?? raw.tenant_id!),
         plan: (raw.plan ?? raw.plan) as PlanType,
-        status: raw.status ?? raw.status!,
+        status: (raw.status ?? raw.status!) as SubscriptionStatus,
         quotas: Quotas.reconstitute(
           raw.messagesQuota ?? raw.messages_quota!,
           raw.aiTokensQuota ?? raw.ai_tokens_quota!,
@@ -64,8 +67,8 @@ export class BillingMapper {
         addonsMonthlyPrice: Number(raw.addons_monthly_price ?? 0),
         totalMonthlyPrice: Number(raw.total_monthly_price ?? 0),
         pricingVersion: raw.pricing_version ?? undefined,
-        pricingSnapshot: raw.pricing_snapshot ?? {},
-        config: raw.config ?? {},
+        pricingSnapshot: (raw.pricing_snapshot ?? {}) as PricingSnapshot,
+        config: (raw.config ?? {}) as SubscriptionConfig,
         createdAt: raw.createdAt ?? raw.created_at!,
       },
       new UniqueEntityID(raw.id ?? raw.id),

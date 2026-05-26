@@ -6,10 +6,31 @@ import { ValidationErrorException } from '../../../../shared/domain/exceptions/D
 
 export type BillingCycleType = 'MONTHLY' | 'YEARLY';
 
+export type SubscriptionStatus =
+  | 'ACTIVE'
+  | 'PENDING'
+  | 'OVERDUE'
+  | 'CANCELED'
+  | 'PROVISIONING_FAILED';
+
+export interface SubscriptionConfig {
+  modules?: Record<string, boolean>;
+  limits?: Record<string, number>;
+  [key: string]: unknown;
+}
+
+export interface PricingSnapshot {
+  basePrice?: number;
+  addonsPrice?: number;
+  planCode?: string;
+  modules?: Array<{ code: string; price: number }>;
+  [key: string]: unknown;
+}
+
 interface SubscriptionProps {
   tenantId: TenantId;
   plan: PlanType;
-  status: string;
+  status: SubscriptionStatus;
   quotas: Quotas;
   billingCycleStart: Date;
   billingCycleEnd: Date;
@@ -22,8 +43,8 @@ interface SubscriptionProps {
   addonsMonthlyPrice: number;
   totalMonthlyPrice: number;
   pricingVersion?: string;
-  pricingSnapshot: any;
-  config: any;
+  pricingSnapshot: PricingSnapshot;
+  config: SubscriptionConfig;
   createdAt: Date;
 }
 
@@ -38,7 +59,7 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
   get plan(): PlanType {
     return this.props.plan;
   }
-  get status(): string {
+  get status(): SubscriptionStatus {
     return this.props.status;
   }
   get quotas(): Quotas {
@@ -77,10 +98,10 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
   get pricingVersion(): string | undefined {
     return this.props.pricingVersion;
   }
-  get pricingSnapshot(): any {
+  get pricingSnapshot(): PricingSnapshot {
     return this.props.pricingSnapshot;
   }
-  get config(): any {
+  get config(): SubscriptionConfig {
     return this.props.config;
   }
 
@@ -116,7 +137,7 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
     this.props.status = 'CANCELED';
   }
 
-  public updateStatus(status: string): void {
+  public updateStatus(status: SubscriptionStatus): void {
     this.props.status = status;
   }
 
@@ -148,8 +169,8 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
       addonsMonthlyPrice?: number;
       totalMonthlyPrice?: number;
       pricingVersion?: string;
-      pricingSnapshot?: any;
-      config?: any;
+      pricingSnapshot?: PricingSnapshot;
+      config?: SubscriptionConfig;
       billingCycleType?: BillingCycleType;
     },
   ): void {
@@ -221,7 +242,7 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
     addonsMonthlyPrice: number;
     totalMonthlyPrice?: number;
     pricingVersion?: string;
-    pricingSnapshot?: any;
+    pricingSnapshot?: PricingSnapshot;
   }): void {
     this.props.baseMonthlyPrice = options.baseMonthlyPrice;
     this.props.addonsMonthlyPrice = options.addonsMonthlyPrice;
@@ -249,8 +270,8 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
       addonsMonthlyPrice?: number;
       totalMonthlyPrice?: number;
       pricingVersion?: string;
-      pricingSnapshot?: any;
-      config?: any;
+      pricingSnapshot?: PricingSnapshot;
+      config?: SubscriptionConfig;
       billingCycleType?: BillingCycleType;
     },
   ): Subscription {
@@ -267,7 +288,7 @@ export class Subscription extends AggregateRoot<SubscriptionProps> {
       cycleEnd.setMonth(now.getMonth() + 1);
     }
 
-    const status =
+    const status: SubscriptionStatus =
       plan === 'ESSENCIAL' || plan === 'TRIAL' ? 'ACTIVE' : 'PENDING';
 
     return new Subscription({
