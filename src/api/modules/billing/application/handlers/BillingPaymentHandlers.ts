@@ -7,14 +7,9 @@ import {
 import { UsageRecord } from '../../domain/entities/UsageRecord';
 import { TenantId } from '../../../../shared/domain/TenantId';
 import { PlanType } from '../../domain/value-objects/Quotas';
-import {
-  PaymentConfirmedIntegrationEvent,
-  PaymentOverdueIntegrationEvent,
-  PaymentRefundedIntegrationEvent,
-} from '../../../payment/application/integration-events/PaymentIntegrationEvents';
+import { IPaymentPort, BILLING_PAYMENT_PORT } from '../ports/IPaymentPort';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { PaymentService } from '../../../payment/application/services/PaymentService';
 import {
   BillingCycleRenewedIntegrationEvent,
   BillingSubscriptionActivatedIntegrationEvent,
@@ -23,6 +18,29 @@ import {
 import { buildSubscriptionCommercialState } from '../support/BillingCommercialConfig';
 import { ADDON_PACKAGE_MODULE_CODE } from '../../domain/constants/AddonPackages';
 import { Subscription } from '../../domain/entities/Subscription';
+
+interface PaymentConfirmedPayload {
+  tenantId: string;
+  paymentId: string;
+  amount: number;
+  confirmedAt: Date;
+  rawReference?: string;
+}
+
+interface PaymentOverduePayload {
+  tenantId: string;
+  paymentId: string;
+  overdueAt: Date;
+  amount?: number;
+}
+
+interface PaymentRefundedPayload {
+  tenantId: string;
+  paymentId: string;
+  refundedAt: Date;
+  amount?: number;
+  rawReference?: string;
+}
 
 @Injectable()
 export class BillingPaymentHandlers implements OnModuleInit {
@@ -33,7 +51,8 @@ export class BillingPaymentHandlers implements OnModuleInit {
     private readonly eventBus: IEventBus,
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepository: IBillingRepository,
-    private readonly paymentService: PaymentService,
+    @Inject(BILLING_PAYMENT_PORT)
+    private readonly paymentPort: IPaymentPort,
     @InjectQueue('billing-provisioning')
     private readonly provisioningQueue: Queue,
   ) {}
@@ -42,8 +61,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
     this.eventBus.subscribe(
       'payment.confirmed',
       async (event) => {
-        const payload =
-          event.payload as PaymentConfirmedIntegrationEvent['payload'];
+        const payload = event.payload as unknown as PaymentConfirmedPayload;
         const tenantId = payload.tenantId;
         const confirmedAt = new Date(payload.confirmedAt);
 
@@ -225,8 +243,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
     this.eventBus.subscribe(
       'payment.overdue',
       async (event) => {
-        const payload =
-          event.payload as PaymentOverdueIntegrationEvent['payload'];
+        const payload = event.payload as unknown as PaymentOverduePayload;
         const tenantId = payload.tenantId;
         const subscription =
           await this.billingRepository.findSubscription(tenantId);
@@ -257,8 +274,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
     this.eventBus.subscribe(
       'payment.refunded',
       async (event) => {
-        const payload =
-          event.payload as PaymentRefundedIntegrationEvent['payload'];
+        const payload = event.payload as unknown as PaymentRefundedPayload;
         const tenantId = payload.tenantId;
         const subscription =
           await this.billingRepository.findSubscription(tenantId);
@@ -460,7 +476,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
     const nextDueDateIso = nextDueDate.toISOString().split('T')[0];
 
     if (asaasSubscriptionId) {
-      await this.paymentService.updateSubscription(asaasSubscriptionId, {
+      await this.paymentPort.updateSubscription(asaasSubscriptionId, {
         value: commercialState.totalMonthlyPrice,
         description: `Plano ${targetPlan} - AtendeAi`,
         nextDueDate: nextDueDateIso,
@@ -491,7 +507,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
       return {};
     }
 
-    const remoteSubscription = await this.paymentService.createSubscription({
+    const remoteSubscription = await this.paymentPort.createSubscription({
       customer: customerId,
       billingType: 'CREDIT_CARD',
       value: commercialState.totalMonthlyPrice,
@@ -503,7 +519,7 @@ export class BillingPaymentHandlers implements OnModuleInit {
 
     return {
       customerId,
-      subscriptionId: remoteSubscription.id,
+      subscriptionId: remoteSubscription.subscriptionId,
     };
   }
 

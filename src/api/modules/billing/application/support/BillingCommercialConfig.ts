@@ -3,6 +3,10 @@ import {
   SubscriptionModuleRecord,
 } from '../../domain/repositories/IBillingRepository';
 import { Quotas } from '../../domain/value-objects/Quotas';
+import {
+  SubscriptionConfig,
+  PricingSnapshot,
+} from '../../domain/entities/Subscription';
 
 export interface SubscriptionCommercialState {
   quotas: Quotas;
@@ -10,14 +14,14 @@ export interface SubscriptionCommercialState {
   addonsMonthlyPrice: number;
   totalMonthlyPrice: number;
   pricingVersion?: string;
-  pricingSnapshot: any;
-  config: any;
+  pricingSnapshot: PricingSnapshot;
+  config: SubscriptionConfig;
 }
 
 export function buildSubscriptionCommercialState(
   planDefinition: BillingPlanCatalogRecord,
   modules: SubscriptionModuleRecord[] = [],
-  currentConfig: any = {},
+  currentConfig: SubscriptionConfig = {},
 ): SubscriptionCommercialState {
   const addonsMonthlyPrice = modules
     .filter((module) => module.status === 'ACTIVE')

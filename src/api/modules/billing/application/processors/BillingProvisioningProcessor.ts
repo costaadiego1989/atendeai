@@ -5,16 +5,13 @@ import {
   IBillingRepository,
   BILLING_REPOSITORY,
 } from '../../domain/repositories/IBillingRepository';
+import { IPaymentPort, BILLING_PAYMENT_PORT } from '../ports/IPaymentPort';
 import {
-  IPaymentGateway,
-  IPAYMENT_GATEWAY,
-} from '../../../payment/domain/ports/IPaymentGateway';
+  ITenantQueryPort,
+  BILLING_TENANT_QUERY_PORT,
+} from '../ports/ITenantQueryPort';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { BillingSubscriptionProvisionedIntegrationEvent } from '../integration-events/BillingIntegrationEvents';
-import {
-  TENANT_REPOSITORY,
-  ITenantRepository,
-} from '../../../tenant/domain/repositories/ITenantRepository';
 import { buildSubscriptionCommercialState } from '../support/BillingCommercialConfig';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 
@@ -35,10 +32,10 @@ export class BillingProvisioningProcessor extends WorkerHost {
   constructor(
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepo: IBillingRepository,
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
-    @Inject(IPAYMENT_GATEWAY)
-    private readonly paymentGateway: IPaymentGateway,
+    @Inject(BILLING_TENANT_QUERY_PORT)
+    private readonly tenantQueryPort: ITenantQueryPort,
+    @Inject(BILLING_PAYMENT_PORT)
+    private readonly paymentPort: IPaymentPort,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
   ) {
@@ -87,7 +84,7 @@ export class BillingProvisioningProcessor extends WorkerHost {
 
       if (!customerId) {
         if (!ownerName || !ownerEmail || !cnpj || !ownerPhone) {
-          const tenant = await this.tenantRepository.findById(tenantId);
+          const tenant = await this.tenantQueryPort.findTenantById(tenantId);
           if (!tenant || !tenant.owner) {
             throw new Error(
               `Tenant or owner data not found for billing provisioning ${tenantId}`,
@@ -95,19 +92,19 @@ export class BillingProvisioningProcessor extends WorkerHost {
           }
 
           ownerName = tenant.owner.name;
-          ownerEmail = tenant.owner.email.value;
-          cnpj = tenant.cnpj.value;
-          ownerPhone = tenant.owner.phone.value;
+          ownerEmail = tenant.owner.email;
+          cnpj = tenant.cnpj;
+          ownerPhone = tenant.owner.phone;
         }
 
-        const customer = await this.paymentGateway.createCustomer({
-          name: ownerName,
-          email: ownerEmail,
-          cpfCnpj: cnpj,
-          phone: ownerPhone,
+        const customer = await this.paymentPort.createCustomer({
+          name: ownerName!,
+          email: ownerEmail!,
+          cpfCnpj: cnpj!,
+          phone: ownerPhone!,
           externalReference: tenantId,
         });
-        customerId = customer.id;
+        customerId = customer.customerId;
 
         subscription.updateAsaasCustomer(customerId);
         await this.billingRepo.saveSubscription(subscription);
@@ -148,7 +145,7 @@ export class BillingProvisioningProcessor extends WorkerHost {
           .toISOString()
           .split('T')[0];
 
-        const asaasSub = await this.paymentGateway.createSubscription({
+        const asaasSub = await this.paymentPort.createSubscription({
           customer: customerId,
           billingType: 'CREDIT_CARD',
           value: commercialState.totalMonthlyPrice,
@@ -158,7 +155,7 @@ export class BillingProvisioningProcessor extends WorkerHost {
           externalReference: tenantId,
         });
 
-        subscription.updateAsaasInfo(customerId, asaasSub.id);
+        subscription.updateAsaasInfo(customerId, asaasSub.subscriptionId);
         await this.billingRepo.saveSubscription(subscription);
         await this.eventBus.publish(
           new BillingSubscriptionProvisionedIntegrationEvent({

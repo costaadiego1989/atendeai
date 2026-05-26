@@ -1,15 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
-import { PaymentService } from '../../../payment/application/services/PaymentService';
 import {
   BILLING_REPOSITORY,
   IBillingRepository,
 } from '../../domain/repositories/IBillingRepository';
 import {
-  TENANT_REPOSITORY,
-  ITenantRepository,
-} from '../../../tenant/domain/repositories/ITenantRepository';
-import { Plan } from '../../../tenant/domain/value-objects/Plan';
+  ITenantQueryPort,
+  BILLING_TENANT_QUERY_PORT,
+} from '../ports/ITenantQueryPort';
+import { IPaymentPort, BILLING_PAYMENT_PORT } from '../ports/IPaymentPort';
 import {
   CancelSubscriptionInput,
   CancelSubscriptionOutput,
@@ -22,9 +21,10 @@ export class CancelSubscriptionUseCase implements ICancelSubscriptionUseCase {
   constructor(
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepository: IBillingRepository,
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
-    private readonly paymentService: PaymentService,
+    @Inject(BILLING_TENANT_QUERY_PORT)
+    private readonly tenantQueryPort: ITenantQueryPort,
+    @Inject(BILLING_PAYMENT_PORT)
+    private readonly paymentPort: IPaymentPort,
   ) {}
 
   async execute(
@@ -39,7 +39,7 @@ export class CancelSubscriptionUseCase implements ICancelSubscriptionUseCase {
     }
 
     if (subscription.asaasSubscriptionId) {
-      await this.paymentService.cancelSubscription(
+      await this.paymentPort.cancelSubscription(
         subscription.asaasSubscriptionId,
       );
       subscription.clearAsaasSubscription();
@@ -67,22 +67,11 @@ export class CancelSubscriptionUseCase implements ICancelSubscriptionUseCase {
     subscription.activate();
 
     await this.billingRepository.saveSubscription(subscription);
-    await this.syncTenantPlanToDefault(input.tenantId);
+    await this.tenantQueryPort.updateTenantPlan(input.tenantId, 'ESSENCIAL');
 
     return {
       tenantId: input.tenantId,
       status: subscription.status,
     };
-  }
-
-  private async syncTenantPlanToDefault(tenantId: string): Promise<void> {
-    const tenant = await this.tenantRepository.findById(tenantId);
-
-    if (!tenant || tenant.plan.isEssencial()) {
-      return;
-    }
-
-    tenant.changePlan(Plan.essencial());
-    await this.tenantRepository.save(tenant);
   }
 }

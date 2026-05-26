@@ -1,6 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import {
+  IProspectingQueryPort,
+  BILLING_PROSPECTING_QUERY_PORT,
+} from '../ports/IProspectingQueryPort';
 
 const DEFAULT_DAILY_PROSPECTING_LIMITS: Record<string, number> = {
   ESSENCIAL: 150,
@@ -10,7 +14,11 @@ const DEFAULT_DAILY_PROSPECTING_LIMITS: Record<string, number> = {
 
 @Injectable()
 export class BillingProspectingQuotaService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(BILLING_PROSPECTING_QUERY_PORT)
+    private readonly prospectingQueryPort: IProspectingQueryPort,
+  ) {}
 
   async assertCanConsume(input: {
     tenantId: string;
@@ -18,9 +26,13 @@ export class BillingProspectingQuotaService {
     now?: Date;
   }): Promise<{ used: number; quota: number; remaining: number }> {
     const quota = await this.resolveDailyQuota(input.tenantId);
-    const used = await this.getDailyUsage(
-      input.tenantId,
+    const { dayStart, dayEnd } = this.getSaoPauloDayWindow(
       input.now ?? new Date(),
+    );
+    const used = await this.prospectingQueryPort.countDailySearches(
+      input.tenantId,
+      dayStart,
+      dayEnd,
     );
     const requested = Math.max(1, input.requested);
 
@@ -57,27 +69,6 @@ export class BillingProspectingQuotaService {
       ? configuredLimit
       : (DEFAULT_DAILY_PROSPECTING_LIMITS[plan] ??
           DEFAULT_DAILY_PROSPECTING_LIMITS.ESSENCIAL);
-  }
-
-  private async getDailyUsage(tenantId: string, now: Date): Promise<number> {
-    const { dayStart, dayEnd } = this.getSaoPauloDayWindow(now);
-
-    try {
-      const [row] = await this.prisma.$queryRaw<
-        Array<{ used: number }>
-      >(Prisma.sql`
-        SELECT COALESCE(SUM(max_results), 0)::int AS used
-        FROM prospecting_schema.prospect_searches
-        WHERE tenant_id = ${tenantId}::uuid
-          AND created_at >= ${dayStart}::timestamptz
-          AND created_at < ${dayEnd}::timestamptz
-          AND status IN ('RUNNING', 'COMPLETED')
-      `);
-
-      return Number(row?.used ?? 0);
-    } catch {
-      return 0;
-    }
   }
 
   private getSaoPauloDayWindow(now: Date): { dayStart: Date; dayEnd: Date } {

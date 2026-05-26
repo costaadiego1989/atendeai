@@ -90,6 +90,12 @@ export interface CommercePendingOptionRecord {
   optionGroups?: Array<Record<string, unknown>>;
 }
 
+export interface CommerceSessionWarning {
+  type: 'COUPON_APPLICATION_FAILED';
+  code: string;
+  message: string;
+}
+
 export interface CommerceSessionRecord {
   id: string;
   tenantId: string;
@@ -124,6 +130,7 @@ export interface CommerceSessionRecord {
   items: CommerceSessionItemRecord[];
   couponCode: string | null;
   discountAmount: number | null;
+  warning?: CommerceSessionWarning;
 }
 
 export interface CommerceOrderRecord {

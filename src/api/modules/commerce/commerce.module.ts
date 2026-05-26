@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthModule } from '@modules/auth/auth.module';
+import { MessagingModule } from '@modules/messaging/messaging.module';
 import { CatalogModule } from '@modules/catalog/catalog.module';
 import { ContactModule } from '@modules/contact/contact.module';
 import { InventoryModule } from '@modules/inventory/inventory.module';
@@ -45,15 +46,6 @@ import { AwaitingFulfillmentStepHandler } from './application/services/conversat
 import { AwaitingDeliveryAddressStepHandler } from './application/services/conversation/AwaitingDeliveryAddressStepHandler';
 import { AwaitingOrderNoteStepHandler } from './application/services/conversation/AwaitingOrderNoteStepHandler';
 import { ReadyForCheckoutStepHandler } from './application/services/conversation/ReadyForCheckoutStepHandler';
-import {
-  MessagingFacade,
-  MESSAGING_FACADE,
-} from '@modules/messaging/application/facades/MessagingFacade';
-import { WhatsAppTemplateMessageAdapter } from '@modules/messaging/infrastructure/acl/WhatsAppTemplateMessageAdapter';
-import { CONVERSATION_REPOSITORY } from '@modules/messaging/domain/repositories/IConversationRepository';
-import { PrismaConversationRepository } from '@modules/messaging/infrastructure/persistence/repositories/PrismaConversationRepository';
-import { MESSAGE_QUEUE } from '@modules/messaging/domain/ports/IMessageQueue';
-import { BullMQMessageQueue } from '@modules/messaging/infrastructure/queue/BullMQMessageQueue';
 
 @Module({
   imports: [
@@ -63,6 +55,7 @@ import { BullMQMessageQueue } from '@modules/messaging/infrastructure/queue/Bull
     InventoryModule,
     PaymentModule,
     SalesModule,
+    forwardRef(() => MessagingModule),
   ],
   controllers: [
     CommerceController,
@@ -109,20 +102,6 @@ import { BullMQMessageQueue } from '@modules/messaging/infrastructure/queue/Bull
     OrderTrackingNotificationHandler,
     SetOrderTrackingCodeUseCase,
     RepeatLastOrderUseCase,
-    MessagingFacade,
-    WhatsAppTemplateMessageAdapter,
-    {
-      provide: MESSAGING_FACADE,
-      useExisting: MessagingFacade,
-    },
-    {
-      provide: CONVERSATION_REPOSITORY,
-      useClass: PrismaConversationRepository,
-    },
-    {
-      provide: MESSAGE_QUEUE,
-      useClass: BullMQMessageQueue,
-    },
   ],
   exports: [
     COMMERCE_REPOSITORY,
