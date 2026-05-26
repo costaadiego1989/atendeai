@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   COMMERCE_REPOSITORY,
   ICommerceRepository,
@@ -27,6 +27,8 @@ export interface AdvanceCommerceConversationInput {
 
 @Injectable()
 export class AdvanceCommerceConversationUseCase {
+  private readonly logger = new Logger(AdvanceCommerceConversationUseCase.name);
+
   constructor(
     @Inject(COMMERCE_REPOSITORY)
     private readonly commerceRepository: ICommerceRepository,
@@ -95,8 +97,26 @@ export class AdvanceCommerceConversationUseCase {
             code: couponCode,
           });
         } catch (error) {
-          // If coupon fails, we just continue. The AI will handle the feedback based on its context.
-          // Or we could attach a warning to the session, but for now just continue.
+          const message =
+            error instanceof Error ? error.message : String(error);
+
+          this.logger.warn(
+            `Coupon application failed; continuing conversation flow: ${message}`,
+            {
+              tenantId: input.tenantId,
+              sessionId: session.id,
+              code: couponCode,
+            },
+          );
+
+          session = {
+            ...session,
+            warning: {
+              type: 'COUPON_APPLICATION_FAILED',
+              code: couponCode,
+              message,
+            },
+          };
         }
       }
     }

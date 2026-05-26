@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { AdvanceCommerceConversationUseCase } from '../application/use-cases/AdvanceCommerceConversationUseCase';
 import { ICommerceRepository } from '../domain/ports/ICommerceRepository';
 
@@ -160,6 +161,56 @@ describe('AdvanceCommerceConversationUseCase', () => {
     expect(awaitingQuantityStepHandler.handle).toHaveBeenCalled();
     expect(identifyNeedStepHandler.handle).not.toHaveBeenCalled();
     expect(selectingItemStepHandler.handle).not.toHaveBeenCalled();
+  });
+
+  it('should log a warning and attach a structured warning when coupon application fails', async () => {
+    conversationFlowRules.isTransactionalBusiness.mockReturnValue(true);
+    const buildingSession = {
+      ...mockSession,
+      currentStep: 'SELECTING_ITEM' as const,
+    };
+    commerceRepo.findActiveSessionByConversation.mockResolvedValue(
+      buildingSession as any,
+    );
+    applyCouponUseCase.execute.mockRejectedValue(
+      new Error('Coupon has expired'),
+    );
+    selectingItemStepHandler.handle.mockImplementation(
+      (ctx: any) => ctx.session,
+    );
+
+    const warnSpy = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+
+    const result: any = await useCase.execute({
+      tenantId,
+      conversationId,
+      contactId,
+      businessType: 'food',
+      userMessage: 'cupom: PROMO10',
+    });
+
+    expect(applyCouponUseCase.execute).toHaveBeenCalledWith({
+      tenantId,
+      sessionId: buildingSession.id,
+      code: 'PROMO10',
+    });
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Coupon application failed'),
+      expect.objectContaining({
+        tenantId,
+        sessionId: buildingSession.id,
+        code: 'PROMO10',
+      }),
+    );
+    expect(result.warning).toEqual({
+      type: 'COUPON_APPLICATION_FAILED',
+      code: 'PROMO10',
+      message: 'Coupon has expired',
+    });
+
+    warnSpy.mockRestore();
   });
 
   it('should return session as-is for terminal steps (AWAITING_PAYMENT, PAID, CANCELLED)', async () => {

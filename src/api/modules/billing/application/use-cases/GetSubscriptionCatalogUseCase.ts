@@ -1,11 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { TenantModuleAccessService } from '@shared/infrastructure/billing/TenantModuleAccessService';
 import {
   BILLING_REPOSITORY,
   BusinessNicheRecord,
   IBillingRepository,
 } from '../../domain/repositories/IBillingRepository';
+import {
+  ITenantCatalogQueryPort,
+  BILLING_TENANT_CATALOG_PORT,
+} from '../ports/ITenantCatalogQueryPort';
 import {
   GetSubscriptionCatalogInput,
   GetSubscriptionCatalogOutput,
@@ -18,27 +21,25 @@ export class GetSubscriptionCatalogUseCase implements IGetSubscriptionCatalogUse
   constructor(
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepository: IBillingRepository,
-    private readonly prisma: PrismaService,
+    @Inject(BILLING_TENANT_CATALOG_PORT)
+    private readonly tenantCatalogPort: ITenantCatalogQueryPort,
     private readonly tenantModuleAccessService: TenantModuleAccessService,
   ) {}
 
   async execute(
     input: GetSubscriptionCatalogInput,
   ): Promise<GetSubscriptionCatalogOutput> {
-    const [subscription, tenant, modules, niches, billingAccess] =
+    const [subscription, businessType, modules, niches, billingAccess] =
       await Promise.all([
         this.billingRepository.findSubscription(input.tenantId),
-        this.prisma.tenant.findUnique({
-          where: { id: input.tenantId },
-          select: { businessType: true },
-        }),
+        this.tenantCatalogPort.findTenantBusinessType(input.tenantId),
         this.billingRepository.listModules(),
         this.billingRepository.listNiches(),
         this.tenantModuleAccessService.getSummary(input.tenantId),
       ]);
 
     if (!subscription) {
-      const niche = this.resolveNiche(tenant?.businessType, niches);
+      const niche = this.resolveNiche(businessType, niches);
       const recommendations = new Map(
         (niche?.recommendations ?? []).map((recommendation) => [
           recommendation.moduleCode,
@@ -81,7 +82,7 @@ export class GetSubscriptionCatalogUseCase implements IGetSubscriptionCatalogUse
 
       return {
         tenantId: input.tenantId,
-        businessType: tenant?.businessType ?? null,
+        businessType: businessType ?? null,
         niche: niche
           ? {
               code: niche.code,
@@ -95,7 +96,7 @@ export class GetSubscriptionCatalogUseCase implements IGetSubscriptionCatalogUse
       };
     }
 
-    const niche = this.resolveNiche(tenant?.businessType, niches);
+    const niche = this.resolveNiche(businessType, niches);
     const recommendations = new Map(
       (niche?.recommendations ?? []).map((recommendation) => [
         recommendation.moduleCode,
@@ -146,7 +147,7 @@ export class GetSubscriptionCatalogUseCase implements IGetSubscriptionCatalogUse
 
     return {
       tenantId: input.tenantId,
-      businessType: tenant?.businessType ?? null,
+      businessType: businessType ?? null,
       niche: niche
         ? {
             code: niche.code,

@@ -7,12 +7,7 @@ import {
   BILLING_REPOSITORY,
   IBillingRepository,
 } from '../../domain/repositories/IBillingRepository';
-import {
-  TENANT_REPOSITORY,
-  ITenantRepository,
-} from '../../../tenant/domain/repositories/ITenantRepository';
-import { PaymentService } from '../../../payment/application/services/PaymentService';
-import { Subscription } from '../../domain/entities/Subscription';
+import { IPaymentPort, BILLING_PAYMENT_PORT } from '../ports/IPaymentPort';
 import {
   IPurchaseAddonPackageUseCase,
   PurchaseAddonPackageInput,
@@ -22,15 +17,16 @@ import {
   getAddonPackageForPlan,
   ADDON_PACKAGE_MODULE_CODE,
 } from '../../domain/constants/AddonPackages';
+import { EnsureCustomerService } from '../services/EnsureCustomerService';
 
 @Injectable()
 export class PurchaseAddonPackageUseCase implements IPurchaseAddonPackageUseCase {
   constructor(
     @Inject(BILLING_REPOSITORY)
     private readonly billingRepository: IBillingRepository,
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
-    private readonly paymentService: PaymentService,
+    @Inject(BILLING_PAYMENT_PORT)
+    private readonly paymentPort: IPaymentPort,
+    private readonly ensureCustomerService: EnsureCustomerService,
   ) {}
 
   async execute(
@@ -125,9 +121,9 @@ export class PurchaseAddonPackageUseCase implements IPurchaseAddonPackageUseCase
       },
     );
 
-    // Create payment link via Asaas
-    await this.ensureCustomer(input.tenantId, subscription);
-    const paymentLink = await this.paymentService.createPaymentLink({
+    // Create payment link via port
+    await this.ensureCustomerService.ensure(input.tenantId, subscription);
+    const paymentLink = await this.paymentPort.createPaymentLink({
       name: `Pacote Adicional de Quota - ${subscription.plan}`,
       description: `Pacote adicional (+${packageDef.messages.toLocaleString()} msgs, +${packageDef.contacts.toLocaleString()} contatos) para o ciclo atual`,
       value: packagePrice,
@@ -163,32 +159,5 @@ export class PurchaseAddonPackageUseCase implements IPurchaseAddonPackageUseCase
       mode: 'CHECKOUT_REQUIRED',
       checkoutUrl: paymentLink.url,
     };
-  }
-
-  private async ensureCustomer(
-    tenantId: string,
-    subscription: Subscription,
-  ): Promise<string> {
-    if (subscription.asaasCustomerId) {
-      return subscription.asaasCustomerId;
-    }
-
-    const tenant = await this.tenantRepository.findById(tenantId);
-
-    if (!tenant || !tenant.owner) {
-      throw new EntityNotFoundException('Tenant', tenantId);
-    }
-
-    const customer = await this.paymentService.createCustomer({
-      name: tenant.owner.name,
-      email: tenant.owner.email.value,
-      cpfCnpj: tenant.cnpj.value,
-      phone: tenant.owner.phone.value,
-      externalReference: tenantId,
-    });
-
-    subscription.updateAsaasCustomer(customer.id);
-    await this.billingRepository.saveSubscription(subscription);
-    return customer.id;
   }
 }
