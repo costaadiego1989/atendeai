@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   IUserRepository,
   USER_REPOSITORY,
@@ -15,7 +16,10 @@ export interface TeamMemberOutput {
 }
 
 @Injectable()
-export class GetUsersByTenantUseCase {
+export class GetUsersByTenantUseCase implements IUseCase<
+  string,
+  TeamMemberOutput[]
+> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepo: IUserRepository,

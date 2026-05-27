@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import { ITenantPDFResumeRepository } from '../../../domain/repositories/ITenantPDFResumeRepository';
 
 export interface TenantPDFResumeRecord {
   id: string;
@@ -35,7 +36,7 @@ export interface UpsertTenantPDFResumeRecordInput {
 }
 
 @Injectable()
-export class TenantPDFResumeRepository {
+export class TenantPDFResumeRepository implements ITenantPDFResumeRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async upsert(
@@ -178,11 +179,15 @@ export class TenantPDFResumeRepository {
     `);
   }
 
-  async findById(documentId: string): Promise<TenantPDFResumeRecord | null> {
+  async findById(
+    documentId: string,
+    tenantId: string,
+  ): Promise<TenantPDFResumeRecord | null> {
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       SELECT *
       FROM tenant_schema.tenant_pdf_resumes
       WHERE id = ${documentId}::uuid
+        AND tenant_id = ${tenantId}::uuid
       LIMIT 1
     `);
 
@@ -205,10 +210,11 @@ export class TenantPDFResumeRepository {
     return this.map(rows[0]);
   }
 
-  async deleteById(documentId: string): Promise<void> {
+  async deleteById(documentId: string, tenantId: string): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
       DELETE FROM tenant_schema.tenant_pdf_resumes
       WHERE id = ${documentId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
   }
 }

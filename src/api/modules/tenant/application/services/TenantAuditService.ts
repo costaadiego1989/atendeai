@@ -3,7 +3,7 @@ import {
   ITenantAuditLogRepository,
   TENANT_AUDIT_LOG_REPOSITORY,
   TenantAuditLogInput,
-} from '../ports/ITenantAuditLogRepository';
+} from '../../domain/repositories/ITenantAuditLogRepository';
 
 @Injectable()
 export class TenantAuditService {

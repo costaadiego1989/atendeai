@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   ITenantRepository,
   TENANT_REPOSITORY,
@@ -11,8 +12,24 @@ import { TwilioManagementAcl } from '../../infrastructure/acl/TwilioManagementAc
 import { WhatsAppConfig } from '../../domain/entities/WhatsAppConfig';
 import { TenantDomainEventPublisher } from '../services/TenantDomainEventPublisher';
 
+export interface RefreshTwilioWhatsAppSenderStatusInput {
+  tenantId: string;
+  branchId?: string;
+}
+
+export interface RefreshTwilioWhatsAppSenderStatusOutput {
+  provider: 'TWILIO';
+  senderSid: string;
+  senderId: string;
+  status: string;
+  verificationRequired: boolean;
+}
+
 @Injectable()
-export class RefreshTwilioWhatsAppSenderStatusUseCase {
+export class RefreshTwilioWhatsAppSenderStatusUseCase implements IUseCase<
+  RefreshTwilioWhatsAppSenderStatusInput,
+  RefreshTwilioWhatsAppSenderStatusOutput
+> {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
@@ -20,7 +37,10 @@ export class RefreshTwilioWhatsAppSenderStatusUseCase {
     private readonly tenantDomainEventPublisher: TenantDomainEventPublisher,
   ) {}
 
-  async execute(tenantId: string, branchId?: string) {
+  async execute(
+    input: RefreshTwilioWhatsAppSenderStatusInput,
+  ): Promise<RefreshTwilioWhatsAppSenderStatusOutput> {
+    const { tenantId, branchId } = input;
     const tenant = await this.tenantRepository.findById(tenantId);
     if (!tenant) {
       throw new EntityNotFoundException('Tenant', tenantId);

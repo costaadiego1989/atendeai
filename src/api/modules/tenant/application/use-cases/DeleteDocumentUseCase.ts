@@ -1,21 +1,37 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
-import { TenantPDFResumeRepository } from '../../infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import {
+  ITenantPDFResumeRepository,
+  TENANT_PDF_RESUME_REPOSITORY,
+} from '../../domain/repositories/ITenantPDFResumeRepository';
+
+export interface DeleteDocumentInput {
+  tenantId: string;
+  documentId: string;
+}
 
 @Injectable()
-export class DeleteDocumentUseCase {
+export class DeleteDocumentUseCase implements IUseCase<
+  DeleteDocumentInput,
+  void
+> {
   constructor(
     @Inject(FILE_STORAGE_SERVICE) private readonly storage: FileStorageService,
-    private readonly repository: TenantPDFResumeRepository,
+    @Inject(TENANT_PDF_RESUME_REPOSITORY)
+    private readonly repository: ITenantPDFResumeRepository,
   ) {}
 
-  async execute(tenantId: string, documentId: string): Promise<void> {
-    const record = await this.repository.findById(documentId);
+  async execute(input: DeleteDocumentInput): Promise<void> {
+    const record = await this.repository.findById(
+      input.documentId,
+      input.tenantId,
+    );
 
-    if (!record || record.tenantId !== tenantId) {
+    if (!record) {
       throw new NotFoundException('Documento não encontrado');
     }
 
@@ -27,6 +43,6 @@ export class DeleteDocumentUseCase {
       }
     }
 
-    await this.repository.deleteById(documentId);
+    await this.repository.deleteById(input.documentId, input.tenantId);
   }
 }

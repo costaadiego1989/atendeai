@@ -83,7 +83,7 @@ describe('RefreshTwilioWhatsAppSenderStatusUseCase', () => {
       configuration: { wabaId: 'waba-123' },
     } as any);
 
-    const result = await useCase.execute(tenantId);
+    const result = await useCase.execute({ tenantId });
 
     expect(result.status).toBe('ONLINE');
     expect(tenant.whatsAppConfig?.status).toBe('ACTIVE');
@@ -94,7 +94,7 @@ describe('RefreshTwilioWhatsAppSenderStatusUseCase', () => {
   it('should throw EntityNotFoundException if tenant has no WhatsApp config', async () => {
     tenantRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('none')).rejects.toThrow(
+    await expect(useCase.execute({ tenantId: 'none' })).rejects.toThrow(
       EntityNotFoundException,
     );
   });
@@ -132,7 +132,7 @@ describe('RefreshTwilioWhatsAppSenderStatusUseCase', () => {
 
     tenantRepository.findById.mockResolvedValue(tenant);
 
-    await expect(useCase.execute('t1')).rejects.toThrow(
+    await expect(useCase.execute({ tenantId: 't1' })).rejects.toThrow(
       'Tenant WhatsApp provider is not Twilio',
     );
   });
@@ -198,7 +198,7 @@ describe('RefreshTwilioWhatsAppSenderStatusUseCase', () => {
       configuration: { wabaId: 'waba-branch' },
     } as any);
 
-    const result = await useCase.execute(tenantId, branch.id.toValue());
+    const result = await useCase.execute({ tenantId, branchId: branch.id.toValue() });
 
     expect(result.status).toBe('ACTIVE');
     expect(tenantRepository.updateBranch).toHaveBeenCalledWith(

@@ -5,7 +5,7 @@ import {
   ITenantAuditLogRepository,
   TenantAuditLogEntry,
   TenantAuditLogInput,
-} from '../../../application/ports/ITenantAuditLogRepository';
+} from '../../../domain/repositories/ITenantAuditLogRepository';
 
 @Injectable()
 export class PrismaTenantAuditLogRepository implements ITenantAuditLogRepository {

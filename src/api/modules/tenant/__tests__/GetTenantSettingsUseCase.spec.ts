@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { GetTenantSettingsUseCase } from '../application/use-cases/GetTenantSettingsUseCase';
 import { ITenantRepository } from '../domain/repositories/ITenantRepository';
-import { ITenantAuditLogRepository } from '../application/ports/ITenantAuditLogRepository';
+import { ITenantAuditLogRepository } from '../domain/repositories/ITenantAuditLogRepository';
 import { TenantModuleAccessService } from '@shared/infrastructure/billing/TenantModuleAccessService';
 import { Tenant } from '../domain/entities/Tenant';
 import { CompanyName } from '../domain/value-objects/CompanyName';

@@ -4,6 +4,7 @@ import {
   Inject,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
@@ -21,15 +22,28 @@ export interface UploadDocumentInput {
   title?: string;
 }
 
+export interface UploadDocumentOutput {
+  id: string;
+  title: string;
+  status: string;
+  chunksCount: number;
+  fileUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 @Injectable()
-export class UploadDocumentUseCase {
+export class UploadDocumentUseCase implements IUseCase<
+  UploadDocumentInput,
+  UploadDocumentOutput
+> {
   constructor(
     @Inject(FILE_STORAGE_SERVICE) private readonly storage: FileStorageService,
     private readonly repository: TenantPDFResumeRepository,
     private readonly upsertUseCase: UpsertTenantPDFResumeUseCase,
   ) {}
 
-  async execute(input: UploadDocumentInput) {
+  async execute(input: UploadDocumentInput): Promise<UploadDocumentOutput> {
     if (!ALLOWED_MIME_TYPES.includes(input.mimeType)) {
       throw new UnprocessableEntityException(
         'Tipo de arquivo não suportado. Use PDF ou TXT.',
@@ -65,7 +79,7 @@ export class UploadDocumentUseCase {
     return this.toDTO(record, 0);
   }
 
-  private toDTO(record: any, chunksCount: number) {
+  private toDTO(record: any, chunksCount: number): UploadDocumentOutput {
     return {
       id: record.id,
       title: record.fileName,

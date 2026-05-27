@@ -45,7 +45,10 @@ export class TenantWhatsAppController {
     @Param('id') id: string,
     @Query('branchId') branchId?: string,
   ) {
-    return this.getWhatsAppConnectionUseCase.execute(id, branchId);
+    return this.getWhatsAppConnectionUseCase.execute({
+      tenantId: id,
+      branchId,
+    });
   }
 
   @Put(':id/whatsapp-config')
@@ -98,6 +101,9 @@ export class TenantWhatsAppController {
     @Param('id') id: string,
     @Query('branchId') branchId?: string,
   ) {
-    return this.refreshTwilioWhatsAppSenderStatusUseCase.execute(id, branchId);
+    return this.refreshTwilioWhatsAppSenderStatusUseCase.execute({
+      tenantId: id,
+      branchId,
+    });
   }
 }

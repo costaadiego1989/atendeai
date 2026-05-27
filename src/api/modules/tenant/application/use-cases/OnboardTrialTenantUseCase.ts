@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import { ICreateTenantUseCase } from './interfaces/ICreateTenantUseCase';
 
 export interface OnboardTrialTenantInput {
@@ -10,7 +11,10 @@ export interface OnboardTrialTenantInput {
 }
 
 @Injectable()
-export class OnboardTrialTenantUseCase {
+export class OnboardTrialTenantUseCase implements IUseCase<
+  OnboardTrialTenantInput,
+  void
+> {
   private readonly logger = new Logger(OnboardTrialTenantUseCase.name);
 
   constructor(

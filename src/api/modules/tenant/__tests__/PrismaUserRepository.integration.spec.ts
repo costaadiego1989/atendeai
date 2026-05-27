@@ -115,7 +115,15 @@ describe('PrismaUserRepository (integration)', () => {
     expect(updated?.phone.value).toBe('+5511977776666');
     expect(updated?.role.value).toBe('ADMIN');
 
-    await repository.delete(user.id.toValue());
+    await repository.delete(
+      user.id.toValue(),
+      '00000000-0000-0000-0000-000000000000',
+    );
+    await expect(
+      repository.findById(user.id.toValue()),
+    ).resolves.not.toBeNull();
+
+    await repository.delete(user.id.toValue(), tenantId);
 
     await expect(repository.findById(user.id.toValue())).resolves.toBeNull();
   });

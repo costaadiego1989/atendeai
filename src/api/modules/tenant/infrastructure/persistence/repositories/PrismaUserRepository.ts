@@ -169,10 +169,11 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, tenantId: string): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
         DELETE FROM tenant_schema.users
         WHERE id = ${id}::uuid
+          AND tenant_id = ${tenantId}::uuid
       `);
   }
 }

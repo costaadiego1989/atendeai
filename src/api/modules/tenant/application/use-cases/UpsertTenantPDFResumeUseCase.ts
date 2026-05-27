@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { TenantPDFResumeRepository } from '../../infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import { IUseCase } from '@shared/application/IUseCase';
+import {
+  TenantPDFResumeRecord,
+  TenantPDFResumeRepository,
+} from '../../infrastructure/persistence/repositories/TenantPDFResumeRepository';
 
 export interface UpsertTenantPDFResumeInput {
   tenantId: string;
@@ -14,7 +18,10 @@ export interface UpsertTenantPDFResumeInput {
 }
 
 @Injectable()
-export class UpsertTenantPDFResumeUseCase {
+export class UpsertTenantPDFResumeUseCase implements IUseCase<
+  UpsertTenantPDFResumeInput,
+  TenantPDFResumeRecord
+> {
   private readonly logger = new Logger(UpsertTenantPDFResumeUseCase.name);
 
   constructor(
@@ -22,7 +29,9 @@ export class UpsertTenantPDFResumeUseCase {
     @InjectQueue('pdf-processing') private readonly pdfProcessingQueue: Queue,
   ) {}
 
-  async execute(input: UpsertTenantPDFResumeInput) {
+  async execute(
+    input: UpsertTenantPDFResumeInput,
+  ): Promise<TenantPDFResumeRecord> {
     const summaries = this.buildSummaries(input);
 
     const record = await this.repository.upsert({

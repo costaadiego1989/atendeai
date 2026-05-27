@@ -1,4 +1,5 @@
 import { Injectable, Inject, ConflictException } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   ITenantRepository,
   TENANT_REPOSITORY,
@@ -21,7 +22,10 @@ export interface CreateExternalTenantInput {
 }
 
 @Injectable()
-export class CreateExternalTenantUseCase {
+export class CreateExternalTenantUseCase implements IUseCase<
+  CreateExternalTenantInput,
+  { apiKey: string }
+> {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,

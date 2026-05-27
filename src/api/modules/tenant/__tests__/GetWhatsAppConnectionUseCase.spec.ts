@@ -74,7 +74,7 @@ describe('GetWhatsAppConnectionUseCase', () => {
       return null;
     });
 
-    const result = await useCase.execute(tenantId);
+    const result = await useCase.execute({ tenantId });
 
     expect(result.connection).toEqual({
       provider: 'TWILIO',
@@ -118,7 +118,7 @@ describe('GetWhatsAppConnectionUseCase', () => {
     tenantRepository.findById.mockResolvedValue(tenant);
     configService.get.mockReturnValue(null);
 
-    const result = await useCase.execute(tenantId);
+    const result = await useCase.execute({ tenantId });
 
     expect(result.connection).toBeNull();
     expect(result.embeddedSignupReady).toBe(false);
@@ -127,7 +127,7 @@ describe('GetWhatsAppConnectionUseCase', () => {
   it('should throw NotFoundException if tenant is not found', async () => {
     tenantRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('invalid-id')).rejects.toThrow(
+    await expect(useCase.execute({ tenantId: 'invalid-id' })).rejects.toThrow(
       NotFoundException,
     );
   });

@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   IUserRepository,
   USER_REPOSITORY,
@@ -20,7 +21,7 @@ export interface UpdateUserInput {
 }
 
 @Injectable()
-export class UpdateUserUseCase {
+export class UpdateUserUseCase implements IUseCase<UpdateUserInput, void> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepo: IUserRepository,

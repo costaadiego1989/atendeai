@@ -38,7 +38,7 @@ describe('DeleteUserUseCase', () => {
 
     await useCase.execute({ userId: 'user-1', tenantId: 'tenant-1' });
 
-    expect(userRepo.delete).toHaveBeenCalledWith('user-1');
+    expect(userRepo.delete).toHaveBeenCalledWith('user-1', 'tenant-1');
   });
 
   it('should throw when user is not found within the tenant', async () => {
