@@ -95,6 +95,11 @@ module "elasticache" {
   })
 }
 
+import {
+  to = module.secrets.aws_ssm_parameter.inventory_config_encryption_key
+  id = "/atendeai/prod/INVENTORY_CONFIG_ENCRYPTION_KEY"
+}
+
 module "secrets" {
   source = "./modules/secrets"
 
