@@ -26,6 +26,11 @@ export default function LoginPage() {
   const [clearingSession, setClearingSession] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const loginMutation = useLoginViewModel();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
   const sessionExpired = searchParams.get('reason') === 'session-expired';
   const isFreshLogin = searchParams.get('fresh') === '1';
 
