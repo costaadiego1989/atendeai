@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import {
@@ -9,10 +9,24 @@ import {
   ListInventoryItemsFilters,
   SyncInventoryItemInput,
 } from '../../../domain/ports/IInventoryRepository';
+import {
+  ICredentialCipher,
+  INVENTORY_CREDENTIAL_CIPHER,
+} from '../../../application/ports/ICredentialCipher';
+import { getProviderSecretKeys } from '../../../application/providers/provider-secret-keys';
+import { InventoryCredentialDecryptionError } from '../../../domain/errors/InventoryCredentialDecryptionError';
+
+const ENCRYPTED_PREFIX = 'v1:';
 
 @Injectable()
 export class PrismaInventoryRepository implements IInventoryRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(PrismaInventoryRepository.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(INVENTORY_CREDENTIAL_CIPHER)
+    private readonly credentialCipher: ICredentialCipher,
+  ) {}
 
   async syncItem(input: SyncInventoryItemInput): Promise<InventoryItemRecord> {
     const item = await this.prisma.inventoryItem.upsert({
@@ -115,16 +129,53 @@ export class PrismaInventoryRepository implements IInventoryRepository {
   async createConnection(
     input: CreateInventoryConnectionInput,
   ): Promise<InventoryConnectionRecord> {
+    const encryptedConfig = this.encryptSecrets(
+      input.sourceType,
+      input.config || {},
+    );
+
     const connection = await this.prisma.inventoryConnection.create({
       data: {
         tenantId: input.tenantId,
         sourceType: input.sourceType,
         providerName: input.providerName,
-        config: (input.config || {}) as Prisma.InputJsonValue,
+        status: input.status ?? 'ACTIVE',
+        config: encryptedConfig as Prisma.InputJsonValue,
       },
     });
 
     return this.mapConnection(connection);
+  }
+
+  private encryptSecrets(
+    sourceType: string,
+    config: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const secretKeys = getProviderSecretKeys(sourceType);
+    if (secretKeys.length === 0) {
+      return config;
+    }
+
+    const result: Record<string, unknown> = { ...config };
+    for (const key of secretKeys) {
+      const value = result[key];
+      if (typeof value === 'string' && !value.startsWith(ENCRYPTED_PREFIX)) {
+        result[key] = this.credentialCipher.encrypt(value);
+      }
+    }
+
+    return result;
+  }
+
+  async getConnection(
+    tenantId: string,
+    id: string,
+  ): Promise<InventoryConnectionRecord | null> {
+    const connection = await this.prisma.inventoryConnection.findFirst({
+      where: { id, tenantId },
+    });
+
+    return connection ? this.mapConnection(connection) : null;
   }
 
   async listConnections(
@@ -164,11 +215,12 @@ export class PrismaInventoryRepository implements IInventoryRepository {
   }
 
   async markConnectionSyncedAt(
+    tenantId: string,
     connectionId: string,
     syncedAt: Date,
   ): Promise<void> {
-    await this.prisma.inventoryConnection.update({
-      where: { id: connectionId },
+    await this.prisma.inventoryConnection.updateMany({
+      where: { id: connectionId, tenantId },
       data: { lastSyncedAt: syncedAt },
     });
   }
@@ -223,10 +275,18 @@ export class PrismaInventoryRepository implements IInventoryRepository {
     createdAt: Date;
     updatedAt: Date;
   }): InventoryConnectionRecord {
-    const configObj =
+    const storedConfig =
       connection.config && typeof connection.config === 'object'
         ? (connection.config as Record<string, unknown>)
         : {};
+
+    const secretKeys = getProviderSecretKeys(connection.sourceType);
+    const configObj = this.decryptSecrets(
+      connection.id,
+      connection.sourceType,
+      storedConfig,
+      secretKeys,
+    );
 
     return {
       id: connection.id,
@@ -235,11 +295,54 @@ export class PrismaInventoryRepository implements IInventoryRepository {
       providerName: connection.providerName,
       status: connection.status,
       config: configObj,
-      configSummary:
-        typeof configObj.summary === 'string' ? configObj.summary : undefined,
+      configSummary: this.buildConfigSummary(configObj, secretKeys),
       lastSyncedAt: connection.lastSyncedAt,
       createdAt: connection.createdAt,
       updatedAt: connection.updatedAt,
     };
+  }
+
+  private decryptSecrets(
+    connectionId: string,
+    sourceType: string,
+    config: Record<string, unknown>,
+    secretKeys: string[],
+  ): Record<string, unknown> {
+    if (secretKeys.length === 0) {
+      return config;
+    }
+
+    const result: Record<string, unknown> = { ...config };
+    for (const key of secretKeys) {
+      const value = result[key];
+      if (typeof value === 'string' && value.startsWith(ENCRYPTED_PREFIX)) {
+        try {
+          result[key] = this.credentialCipher.decrypt(value);
+        } catch {
+          this.logger.error(
+            `Failed to decrypt inventory credential (connectionId=${connectionId}, sourceType=${sourceType})`,
+          );
+          throw new InventoryCredentialDecryptionError(connectionId);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private buildConfigSummary(
+    config: Record<string, unknown>,
+    secretKeys: string[],
+  ): string | undefined {
+    const secretKeySet = new Set(secretKeys);
+    const nonSecretEntries = Object.entries(config).filter(
+      ([key]) => !secretKeySet.has(key),
+    );
+
+    const summaryEntry = nonSecretEntries.find(
+      ([key, value]) => key === 'summary' && typeof value === 'string',
+    );
+
+    return summaryEntry ? (summaryEntry[1] as string) : undefined;
   }
 }

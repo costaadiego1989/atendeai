@@ -2,6 +2,7 @@ import {
   IInventoryProvider,
   InventoryItemSnapshot,
 } from '../ports/IInventoryProvider';
+import { providerFetch } from './provider-http';
 
 export class NuvemshopProvider implements IInventoryProvider {
   async testConnection(config: Record<string, unknown>): Promise<boolean> {
@@ -11,7 +12,7 @@ export class NuvemshopProvider implements IInventoryProvider {
     }
 
     const domain = `https://api.nuvemshop.com.br/v1/${storeId}`;
-    const response = await fetch(`${domain}/store`, {
+    const response = await providerFetch('NUVEMSHOP', `${domain}/store`, {
       method: 'GET',
       headers: {
         Authentication: `bearer ${accessToken}`,
@@ -42,7 +43,8 @@ export class NuvemshopProvider implements IInventoryProvider {
     let hasMoreData = true;
 
     while (hasMoreData) {
-      const response = await fetch(
+      const response = await providerFetch(
+        'NUVEMSHOP',
         `${domain}/products?page=${page}&per_page=50`,
         {
           method: 'GET',

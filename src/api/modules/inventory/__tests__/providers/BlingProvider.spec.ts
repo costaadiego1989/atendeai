@@ -1,4 +1,5 @@
 import { BlingProvider } from '../../application/providers/BlingProvider';
+import { InventoryProviderTimeoutError } from '../../domain/errors/InventoryProviderTimeoutError';
 
 describe('BlingProvider (extended)', () => {
   const provider = new BlingProvider();
@@ -147,5 +148,37 @@ describe('BlingProvider (extended)', () => {
 
     expect(batches[0][0].availabilityStatus).toBe('AVAILABLE');
     expect(batches[0][0].availableQuantity).toBe(7);
+  });
+
+  // ─── timeout ───────────────────────────────────────────────────────────────
+
+  it('INV-T-061g: testConnection aborta por timeout e lança InventoryProviderTimeoutError', async () => {
+    global.fetch = jest
+      .fn()
+      .mockRejectedValue(
+        new DOMException('The operation timed out.', 'TimeoutError'),
+      ) as unknown as typeof fetch;
+
+    await expect(provider.testConnection(config)).rejects.toBeInstanceOf(
+      InventoryProviderTimeoutError,
+    );
+  });
+
+  it('INV-T-061h: fetchStock aborta por timeout e lança InventoryProviderTimeoutError', async () => {
+    global.fetch = jest
+      .fn()
+      .mockRejectedValue(
+        new DOMException('The operation was aborted.', 'AbortError'),
+      ) as unknown as typeof fetch;
+
+    const iterate = async () => {
+      for await (const _ of provider.fetchStock(config)) {
+        void _;
+      }
+    };
+
+    await expect(iterate()).rejects.toBeInstanceOf(
+      InventoryProviderTimeoutError,
+    );
   });
 });

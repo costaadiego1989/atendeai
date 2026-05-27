@@ -392,6 +392,34 @@ model InventoryConnection {
   @@schema("inventory_schema")
 }
 
+model InventoryAsyncJob {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
+  type                 String    @db.VarChar(50)
+  status               String    @default("QUEUED") @db.VarChar(20)
+  requestedByUserId    String?   @map("requested_by_user_id") @db.Uuid
+  requestedByUserEmail String?   @map("requested_by_user_email") @db.VarChar(255)
+  payload              Json      @default("{}")
+  progress             Int       @default(0)
+  totalItems           Int       @default(0) @map("total_items")
+  processedItems       Int       @default(0) @map("processed_items")
+  resultSummary        Json      @default("{}") @map("result_summary")
+  fileName             String?   @map("file_name") @db.VarChar(255)
+  fileMimeType         String?   @map("file_mime_type") @db.VarChar(120)
+  fileUrl              String?   @map("file_url")
+  fileContent          String?   @map("file_content")
+  errorMessage         String?   @map("error_message")
+  queueJobId           String?   @map("queue_job_id") @db.VarChar(120)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  completedAt          DateTime? @map("completed_at") @db.Timestamptz
+  failedAt             DateTime? @map("failed_at") @db.Timestamptz
+
+  @@index([tenantId, createdAt], name: "idx_inventory_async_jobs_tenant_created")
+  @@map("inventory_async_jobs")
+  @@schema("inventory_schema")
+}
+
 model RecoveryCase {
   id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId                    String    @map("tenant_id") @db.Uuid

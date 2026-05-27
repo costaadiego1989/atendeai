@@ -3,6 +3,7 @@ import {
   IInventoryProvider,
   InventoryItemSnapshot,
 } from '../ports/IInventoryProvider';
+import { providerFetch } from './provider-http';
 
 export class ShopeeProvider implements IInventoryProvider {
   private generateSignature(
@@ -38,7 +39,7 @@ export class ShopeeProvider implements IInventoryProvider {
 
     const url = `https://partner.shopeemobile.com${apiPath}?partner_id=${partnerId}&timestamp=${timestamp}&access_token=${accessToken}&shop_id=${shopId}&sign=${sign}`;
 
-    const response = await fetch(url, { method: 'GET' });
+    const response = await providerFetch('SHOPEE', url, { method: 'GET' });
     const data = await response.json();
 
     if (data.error) {
@@ -73,7 +74,7 @@ export class ShopeeProvider implements IInventoryProvider {
 
       const url = `https://partner.shopeemobile.com${apiPath}?partner_id=${partnerId}&timestamp=${timestamp}&access_token=${accessToken}&shop_id=${shopId}&sign=${sign}&offset=${offset}&page_size=${pageSize}&item_status=NORMAL`;
 
-      const response = await fetch(url, { method: 'GET' });
+      const response = await providerFetch('SHOPEE', url, { method: 'GET' });
       const data = await response.json();
 
       if (data.error) {
@@ -99,7 +100,9 @@ export class ShopeeProvider implements IInventoryProvider {
       );
 
       const infoUrl = `https://partner.shopeemobile.com${infoPath}?partner_id=${partnerId}&timestamp=${infoTimestamp}&access_token=${accessToken}&shop_id=${shopId}&sign=${infoSign}&item_id_list=${itemIds}`;
-      const infoResponse = await fetch(infoUrl, { method: 'GET' });
+      const infoResponse = await providerFetch('SHOPEE', infoUrl, {
+        method: 'GET',
+      });
       const infoData = await infoResponse.json();
       const snapshots: InventoryItemSnapshot[] = [];
       const detailedItems = infoData.response?.item_list || [];

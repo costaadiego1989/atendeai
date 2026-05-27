@@ -31,6 +31,7 @@ describe('ListInventoryConnectionsUseCase', () => {
       findItemBySku: jest.fn(),
       createConnection: jest.fn(),
       listConnections: jest.fn(),
+      getConnection: jest.fn(),
       findConnectionByProvider: jest.fn(),
       markConnectionSyncedAt: jest.fn(),
     };

@@ -33,6 +33,7 @@ describe('CreateInventoryConnectionUseCase', () => {
       findItemBySku: jest.fn(),
       createConnection: jest.fn(),
       listConnections: jest.fn(),
+      getConnection: jest.fn(),
       findConnectionByProvider: jest.fn(),
       markConnectionSyncedAt: jest.fn(),
     };
@@ -76,6 +77,13 @@ describe('CreateInventoryConnectionUseCase', () => {
     const created = savedConnection();
     inventoryRepository.createConnection.mockResolvedValue(created);
 
+    providerFactory.getProvider.mockReturnValue({
+      testConnection: jest.fn().mockResolvedValue(true),
+      async *fetchStock() {
+        yield [];
+      },
+    });
+
     const result = await useCase.execute({
       tenantId: 'tenant-1',
       sourceType: 'ERP_SYNC',
@@ -88,6 +96,7 @@ describe('CreateInventoryConnectionUseCase', () => {
       tenantId: 'tenant-1',
       sourceType: 'ERP_SYNC',
       providerName: 'Bling Loja',
+      status: 'ACTIVE',
       config: { accessToken: 'x' },
     });
 
@@ -104,9 +113,12 @@ describe('CreateInventoryConnectionUseCase', () => {
     });
   });
 
-  it('INV-CONN-003: falha em testConnection não impede criação (comportamento atual)', async () => {
+  it('INV-CONN-003: falha em testConnection cria conexão com status FAILED', async () => {
     inventoryRepository.findConnectionByProvider.mockResolvedValue(null);
-    inventoryRepository.createConnection.mockResolvedValue(savedConnection());
+    inventoryRepository.createConnection.mockResolvedValue({
+      ...savedConnection(),
+      status: 'FAILED',
+    });
 
     providerFactory.getProvider.mockReturnValue({
       testConnection: jest
@@ -127,10 +139,12 @@ describe('CreateInventoryConnectionUseCase', () => {
     ).resolves.toBeDefined();
 
     expect(providerFactory.getProvider).toHaveBeenCalledWith('ERP_SYNC');
-    expect(inventoryRepository.createConnection).toHaveBeenCalled();
+    expect(inventoryRepository.createConnection).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'FAILED' }),
+    );
   });
 
-  it('INV-CONN-004: não tenta validar MANUAL_SNAPSHOT nem CSV_IMPORT mesmo com config', async () => {
+  it('INV-CONN-004: não tenta validar MANUAL_SNAPSHOT nem CSV_IMPORT e cria como ACTIVE', async () => {
     inventoryRepository.findConnectionByProvider.mockResolvedValue(null);
     inventoryRepository.createConnection.mockResolvedValue({
       ...savedConnection(),
@@ -145,5 +159,31 @@ describe('CreateInventoryConnectionUseCase', () => {
     });
 
     expect(providerFactory.getProvider).not.toHaveBeenCalled();
+    expect(inventoryRepository.createConnection).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'ACTIVE' }),
+    );
+  });
+
+  it('INV-CONN-005: credenciais válidas criam conexão com status ACTIVE', async () => {
+    inventoryRepository.findConnectionByProvider.mockResolvedValue(null);
+    inventoryRepository.createConnection.mockResolvedValue(savedConnection());
+
+    providerFactory.getProvider.mockReturnValue({
+      testConnection: jest.fn().mockResolvedValue(true),
+      async *fetchStock() {
+        yield [];
+      },
+    });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      sourceType: 'ERP_SYNC',
+      providerName: 'Bling',
+      config: { accessToken: 'good' },
+    });
+
+    expect(inventoryRepository.createConnection).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'ACTIVE' }),
+    );
   });
 });

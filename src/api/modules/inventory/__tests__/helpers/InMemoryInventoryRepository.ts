@@ -77,7 +77,7 @@ export class InMemoryInventoryRepository implements IInventoryRepository {
       tenantId: input.tenantId,
       sourceType: input.sourceType,
       providerName: input.providerName,
-      status: 'ACTIVE',
+      status: input.status ?? 'ACTIVE',
       config: input.config ?? {},
       lastSyncedAt: null,
       createdAt: now,
@@ -93,6 +93,14 @@ export class InMemoryInventoryRepository implements IInventoryRepository {
     return Array.from(this.connections.values()).filter(
       (c) => c.tenantId === tenantId,
     );
+  }
+
+  async getConnection(
+    tenantId: string,
+    id: string,
+  ): Promise<InventoryConnectionRecord | null> {
+    const conn = this.connections.get(id);
+    return conn && conn.tenantId === tenantId ? conn : null;
   }
 
   async findConnectionByProvider(
@@ -111,11 +119,12 @@ export class InMemoryInventoryRepository implements IInventoryRepository {
   }
 
   async markConnectionSyncedAt(
+    tenantId: string,
     connectionId: string,
     syncedAt: Date,
   ): Promise<void> {
     const conn = this.connections.get(connectionId);
-    if (conn) {
+    if (conn && conn.tenantId === tenantId) {
       this.connections.set(connectionId, { ...conn, lastSyncedAt: syncedAt });
     }
   }

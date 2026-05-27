@@ -2,6 +2,7 @@ import {
   IInventoryProvider,
   InventoryItemSnapshot,
 } from '../ports/IInventoryProvider';
+import { providerFetch } from './provider-http';
 
 export class MercadoLivreProvider implements IInventoryProvider {
   async testConnection(config: Record<string, unknown>): Promise<boolean> {
@@ -12,7 +13,8 @@ export class MercadoLivreProvider implements IInventoryProvider {
       );
     }
 
-    const response = await fetch(
+    const response = await providerFetch(
+      'MERCADOLIVRE',
       `https://api.mercadolibre.com/users/${userId}`,
       {
         method: 'GET',
@@ -40,7 +42,8 @@ export class MercadoLivreProvider implements IInventoryProvider {
     let hasMoreData = true;
 
     while (hasMoreData) {
-      const searchRes = await fetch(
+      const searchRes = await providerFetch(
+        'MERCADOLIVRE',
         `https://api.mercadolibre.com/users/${userId}/items/search?offset=${offset}&limit=${limit}`,
         { method: 'GET', headers },
       );
@@ -60,7 +63,8 @@ export class MercadoLivreProvider implements IInventoryProvider {
       }
 
       const idsParam = itemIds.join(',');
-      const detailRes = await fetch(
+      const detailRes = await providerFetch(
+        'MERCADOLIVRE',
         `https://api.mercadolibre.com/items?ids=${idsParam}&attributes=id,title,available_quantity,price,currency_id,seller_custom_field`,
         { method: 'GET', headers },
       );

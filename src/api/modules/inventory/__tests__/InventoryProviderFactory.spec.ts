@@ -1,11 +1,15 @@
 import { InventoryProviderFactory } from '../application/providers/InventoryProviderFactory';
+import { InventoryProviderNotSupportedError } from '../domain/errors/InventoryProviderNotSupportedError';
 
 describe('InventoryProviderFactory', () => {
   const factory = new InventoryProviderFactory();
 
-  it('INV-FAC-001: sourceType desconhecido lança erro explícito', () => {
+  it('INV-FAC-001: sourceType desconhecido lança InventoryProviderNotSupportedError', () => {
     expect(() => factory.getProvider('UNKNOWN_INTEGRATION')).toThrow(
-      /Nenhum provedor implementado/,
+      InventoryProviderNotSupportedError,
+    );
+    expect(() => factory.getProvider('UNKNOWN_INTEGRATION')).toThrow(
+      /Inventory provider not supported: UNKNOWN_INTEGRATION/,
     );
   });
 

@@ -104,7 +104,7 @@ export class InventoryAsyncJobProcessor extends WorkerHost {
         fileName: csv.fileName,
         fileMimeType: csv.mimeType,
         fileUrl,
-        fileContent,
+        fileContent: fileUrl ? undefined : fileContent,
       });
     } catch (error) {
       const message =

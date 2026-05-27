@@ -2,6 +2,7 @@ import {
   IInventoryProvider,
   InventoryItemSnapshot,
 } from '../ports/IInventoryProvider';
+import { providerFetch } from './provider-http';
 
 export class TinyProvider implements IInventoryProvider {
   async testConnection(config: Record<string, unknown>): Promise<boolean> {
@@ -10,11 +11,15 @@ export class TinyProvider implements IInventoryProvider {
       throw new Error('A conexão com o Tiny requer um Token de API.');
     }
 
-    const response = await fetch('https://api.tiny.com.br/api2/info.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ token: String(token), formato: 'JSON' }),
-    });
+    const response = await providerFetch(
+      'TINY',
+      'https://api.tiny.com.br/api2/info.php',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ token: String(token), formato: 'JSON' }),
+      },
+    );
 
     const data = await response.json();
     if (data.retorno?.status === 'Erro') {
@@ -34,7 +39,8 @@ export class TinyProvider implements IInventoryProvider {
     let totalPages = 1;
 
     while (page <= totalPages) {
-      const response = await fetch(
+      const response = await providerFetch(
+        'TINY',
         'https://api.tiny.com.br/api2/produtos.pesquisa.php',
         {
           method: 'POST',

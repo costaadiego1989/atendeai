@@ -20,6 +20,8 @@ import { GenerateInventoryReportUseCase } from './application/use-cases/Generate
 import { InventoryReportCsvBuilder } from './application/services/InventoryReportCsvBuilder';
 import { InventoryAsyncJobsService } from './application/services/InventoryAsyncJobsService';
 import { InventoryAsyncJobProcessor } from './infrastructure/queue/InventoryAsyncJobProcessor';
+import { INVENTORY_CREDENTIAL_CIPHER } from './application/ports/ICredentialCipher';
+import { AesGcmCredentialCipher } from './infrastructure/security/AesGcmCredentialCipher';
 
 @Module({
   imports: [
@@ -40,6 +42,10 @@ import { InventoryAsyncJobProcessor } from './infrastructure/queue/InventoryAsyn
     InventoryReportCsvBuilder,
     InventoryAsyncJobsService,
     InventoryAsyncJobProcessor,
+    {
+      provide: INVENTORY_CREDENTIAL_CIPHER,
+      useClass: AesGcmCredentialCipher,
+    },
     {
       provide: INVENTORY_REPOSITORY,
       useClass: PrismaInventoryRepository,

@@ -2,6 +2,7 @@ import {
   IInventoryProvider,
   InventoryItemSnapshot,
 } from '../ports/IInventoryProvider';
+import { providerFetch } from './provider-http';
 
 export class ShopifyProvider implements IInventoryProvider {
   async testConnection(config: Record<string, unknown>): Promise<boolean> {
@@ -13,13 +14,17 @@ export class ShopifyProvider implements IInventoryProvider {
     }
 
     const domain = String(shopUrl).replace(/\/$/, '');
-    const response = await fetch(`${domain}/admin/api/2024-01/shop.json`, {
-      method: 'GET',
-      headers: {
-        'X-Shopify-Access-Token': String(accessToken),
-        'Content-Type': 'application/json',
+    const response = await providerFetch(
+      'SHOPIFY',
+      `${domain}/admin/api/2024-01/shop.json`,
+      {
+        method: 'GET',
+        headers: {
+          'X-Shopify-Access-Token': String(accessToken),
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Falha ao conectar no Shopify: ${response.statusText}`);
@@ -42,7 +47,10 @@ export class ShopifyProvider implements IInventoryProvider {
       `${domain}/admin/api/2024-01/products.json?limit=50`;
 
     while (url) {
-      const response: Response = await fetch(url, { method: 'GET', headers });
+      const response: Response = await providerFetch('SHOPIFY', url, {
+        method: 'GET',
+        headers,
+      });
       if (!response.ok) {
         throw new Error(
           `Erro buscando produtos no Shopify: ${response.statusText}`,

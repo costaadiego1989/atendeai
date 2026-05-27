@@ -3,6 +3,30 @@ import { Prisma } from '@prisma/client';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 
+type InventoryAsyncJobRecord = {
+  id: string;
+  tenantId: string;
+  type: string;
+  status: string;
+  requestedByUserId: string | null;
+  requestedByUserEmail: string | null;
+  payload: Prisma.JsonValue;
+  progress: number;
+  totalItems: number;
+  processedItems: number;
+  resultSummary: Prisma.JsonValue;
+  fileName: string | null;
+  fileMimeType: string | null;
+  fileUrl: string | null;
+  fileContent: string | null;
+  errorMessage: string | null;
+  queueJobId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  completedAt: Date | null;
+  failedAt: Date | null;
+};
+
 export type InventoryAsyncJobType =
   | 'EXPORT_INVENTORY_REPORT_CSV'
   | 'SYNC_INVENTORY_CONNECTION';
@@ -11,30 +35,6 @@ export type InventoryAsyncJobStatus =
   | 'PROCESSING'
   | 'COMPLETED'
   | 'FAILED';
-
-interface InventoryAsyncJobRow {
-  id: string;
-  tenant_id: string;
-  type: InventoryAsyncJobType;
-  status: InventoryAsyncJobStatus;
-  requested_by_user_id: string | null;
-  requested_by_user_email: string | null;
-  payload: unknown;
-  progress: number;
-  total_items: number;
-  processed_items: number;
-  result_summary: unknown;
-  file_name: string | null;
-  file_mime_type: string | null;
-  file_url: string | null;
-  file_content: string | null;
-  error_message: string | null;
-  queue_job_id: string | null;
-  created_at: Date;
-  updated_at: Date;
-  completed_at: Date | null;
-  failed_at: Date | null;
-}
 
 export interface InventoryAsyncJobView {
   id: string;
@@ -69,60 +69,47 @@ export class InventoryAsyncJobsService {
     payload: Record<string, unknown>;
     totalItems?: number;
   }): Promise<InventoryAsyncJobView> {
-    const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
-      INSERT INTO inventory_schema.inventory_async_jobs (
-        tenant_id,
-        type,
-        status,
-        requested_by_user_id,
-        requested_by_user_email,
-        payload,
-        progress,
-        total_items,
-        processed_items,
-        result_summary
-      )
-      VALUES (
-        ${input.tenantId}::uuid,
-        ${input.type},
-        'QUEUED',
-        ${input.requestedByUserId ?? null}::uuid,
-        ${input.requestedByUserEmail ?? null},
-        ${JSON.stringify(input.payload)}::jsonb,
-        0,
-        ${input.totalItems ?? 0},
-        0,
-        '{}'::jsonb
-      )
-      RETURNING *
-    `);
+    const job = await this.prisma.inventoryAsyncJob.create({
+      data: {
+        tenantId: input.tenantId,
+        type: input.type,
+        status: 'QUEUED',
+        requestedByUserId: input.requestedByUserId ?? null,
+        requestedByUserEmail: input.requestedByUserEmail ?? null,
+        payload: (input.payload ?? {}) as Prisma.InputJsonValue,
+        progress: 0,
+        totalItems: input.totalItems ?? 0,
+        processedItems: 0,
+        resultSummary: {} as Prisma.InputJsonValue,
+      },
+    });
 
-    return this.toView(rows[0]);
+    return this.toView(job);
   }
 
   async attachQueueJobId(jobId: string, queueJobId: string): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      UPDATE inventory_schema.inventory_async_jobs
-      SET queue_job_id = ${queueJobId},
-          updated_at = NOW()
-      WHERE id = ${jobId}::uuid
-    `);
+    // tenant-safe: queue worker updates its own job by UUID PK; no cross-tenant exposure possible
+    await this.prisma.inventoryAsyncJob.update({
+      where: { id: jobId },
+      data: { queueJobId },
+    });
   }
 
   async markProcessing(
     jobId: string,
     input?: { progress?: number; totalItems?: number },
   ): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      UPDATE inventory_schema.inventory_async_jobs
-      SET status = 'PROCESSING',
-          progress = ${input?.progress ?? 20},
-          total_items = COALESCE(${input?.totalItems ?? null}, total_items),
-          updated_at = NOW(),
-          failed_at = NULL,
-          error_message = NULL
-      WHERE id = ${jobId}::uuid
-    `);
+    // tenant-safe: queue worker updates its own job by UUID PK; no cross-tenant exposure possible
+    await this.prisma.inventoryAsyncJob.update({
+      where: { id: jobId },
+      data: {
+        status: 'PROCESSING',
+        progress: input?.progress ?? 20,
+        ...(input?.totalItems != null ? { totalItems: input.totalItems } : {}),
+        failedAt: null,
+        errorMessage: null,
+      },
+    });
   }
 
   async completeJob(
@@ -137,68 +124,66 @@ export class InventoryAsyncJobsService {
       fileContent?: string;
     },
   ): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      UPDATE inventory_schema.inventory_async_jobs
-      SET status = 'COMPLETED',
-          progress = 100,
-          processed_items = COALESCE(${input.processedItems ?? null}, processed_items),
-          total_items = COALESCE(${input.totalItems ?? null}, total_items),
-          result_summary = ${JSON.stringify(input.resultSummary ?? {})}::jsonb,
-          file_name = ${input.fileName ?? null},
-          file_mime_type = ${input.fileMimeType ?? null},
-          file_url = ${input.fileUrl ?? null},
-          file_content = ${input.fileContent ?? null},
-          error_message = NULL,
-          completed_at = NOW(),
-          failed_at = NULL,
-          updated_at = NOW()
-      WHERE id = ${jobId}::uuid
-    `);
+    // tenant-safe: queue worker updates its own job by UUID PK; no cross-tenant exposure possible
+    await this.prisma.inventoryAsyncJob.update({
+      where: { id: jobId },
+      data: {
+        status: 'COMPLETED',
+        progress: 100,
+        ...(input.processedItems != null
+          ? { processedItems: input.processedItems }
+          : {}),
+        ...(input.totalItems != null ? { totalItems: input.totalItems } : {}),
+        resultSummary: (input.resultSummary ?? {}) as Prisma.InputJsonValue,
+        fileName: input.fileName ?? null,
+        fileMimeType: input.fileMimeType ?? null,
+        fileUrl: input.fileUrl ?? null,
+        fileContent: input.fileContent ?? null,
+        errorMessage: null,
+        completedAt: new Date(),
+        failedAt: null,
+      },
+    });
   }
 
   async failJob(jobId: string, errorMessage: string): Promise<void> {
-    await this.prisma.$executeRaw(Prisma.sql`
-      UPDATE inventory_schema.inventory_async_jobs
-      SET status = 'FAILED',
-          error_message = ${errorMessage},
-          failed_at = NOW(),
-          updated_at = NOW()
-      WHERE id = ${jobId}::uuid
-    `);
+    // tenant-safe: queue worker updates its own job by UUID PK; no cross-tenant exposure possible
+    await this.prisma.inventoryAsyncJob.update({
+      where: { id: jobId },
+      data: {
+        status: 'FAILED',
+        errorMessage,
+        failedAt: new Date(),
+      },
+    });
   }
 
   async listJobs(
     tenantId: string,
     limit = 15,
   ): Promise<InventoryAsyncJobView[]> {
-    const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
-      SELECT *
-      FROM inventory_schema.inventory_async_jobs
-      WHERE tenant_id = ${tenantId}::uuid
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-    `);
+    const jobs = await this.prisma.inventoryAsyncJob.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
 
-    return rows.map((row) => this.toView(row));
+    return jobs.map((job) => this.toView(job));
   }
 
   async getJob(
     tenantId: string,
     jobId: string,
   ): Promise<InventoryAsyncJobView> {
-    const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
-      SELECT *
-      FROM inventory_schema.inventory_async_jobs
-      WHERE tenant_id = ${tenantId}::uuid
-        AND id = ${jobId}::uuid
-      LIMIT 1
-    `);
+    const job = await this.prisma.inventoryAsyncJob.findFirst({
+      where: { id: jobId, tenantId },
+    });
 
-    if (!rows[0]) {
+    if (!job) {
       throw new EntityNotFoundException('InventoryAsyncJob', jobId);
     }
 
-    return this.toView(rows[0]);
+    return this.toView(job);
   }
 
   async getDownloadPayload(
@@ -210,51 +195,50 @@ export class InventoryAsyncJobsService {
     fileContent?: string | null;
     fileUrl?: string | null;
   }> {
-    const rows = await this.prisma.$queryRaw<InventoryAsyncJobRow[]>(Prisma.sql`
-      SELECT *
-      FROM inventory_schema.inventory_async_jobs
-      WHERE tenant_id = ${tenantId}::uuid
-        AND id = ${jobId}::uuid
-        AND type = 'EXPORT_INVENTORY_REPORT_CSV'
-        AND status = 'COMPLETED'
-      LIMIT 1
-    `);
+    const job = await this.prisma.inventoryAsyncJob.findFirst({
+      where: {
+        id: jobId,
+        tenantId,
+        type: 'EXPORT_INVENTORY_REPORT_CSV',
+        status: 'COMPLETED',
+      },
+    });
 
-    if (!rows[0]) {
+    if (!job) {
       throw new EntityNotFoundException('InventoryAsyncJob', jobId);
     }
 
     return {
-      fileName: rows[0].file_name ?? `relatorio-estoque-${jobId}.csv`,
-      fileMimeType: rows[0].file_mime_type ?? 'text/csv;charset=utf-8',
-      fileContent: rows[0].file_content,
-      fileUrl: rows[0].file_url,
+      fileName: job.fileName ?? `relatorio-estoque-${jobId}.csv`,
+      fileMimeType: job.fileMimeType ?? 'text/csv;charset=utf-8',
+      fileContent: job.fileContent,
+      fileUrl: job.fileUrl,
     };
   }
 
-  private toView(row: InventoryAsyncJobRow): InventoryAsyncJobView {
+  private toView(row: InventoryAsyncJobRecord): InventoryAsyncJobView {
     return {
       id: row.id,
-      tenantId: row.tenant_id,
-      type: row.type,
-      status: row.status,
-      requestedByUserId: row.requested_by_user_id,
-      requestedByUserEmail: row.requested_by_user_email,
+      tenantId: row.tenantId,
+      type: row.type as InventoryAsyncJobType,
+      status: row.status as InventoryAsyncJobStatus,
+      requestedByUserId: row.requestedByUserId,
+      requestedByUserEmail: row.requestedByUserEmail,
       progress: row.progress,
-      totalItems: row.total_items,
-      processedItems: row.processed_items,
+      totalItems: row.totalItems,
+      processedItems: row.processedItems,
       resultSummary:
-        row.result_summary && typeof row.result_summary === 'object'
-          ? (row.result_summary as Record<string, unknown>)
+        row.resultSummary && typeof row.resultSummary === 'object'
+          ? (row.resultSummary as Record<string, unknown>)
           : undefined,
-      fileName: row.file_name,
-      fileMimeType: row.file_mime_type,
-      fileUrl: row.file_url,
-      errorMessage: row.error_message,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      completedAt: row.completed_at,
-      failedAt: row.failed_at,
+      fileName: row.fileName,
+      fileMimeType: row.fileMimeType,
+      fileUrl: row.fileUrl,
+      errorMessage: row.errorMessage,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      completedAt: row.completedAt,
+      failedAt: row.failedAt,
     };
   }
 }
