@@ -6,7 +6,11 @@ import {
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { CatalogCategoryNotFoundError } from '../../domain/errors/CatalogCategoryNotFoundError';
 import { CatalogItemCreatedIntegrationEvent } from '../integration-events/CatalogIntegrationEvents';
-import { SyncInventoryItemUseCase } from '../../../inventory/application/use-cases/SyncInventoryItemUseCase';
+import {
+  INVENTORY_SYNC_PORT,
+  IInventorySyncPort,
+} from '../ports/IInventorySyncPort';
+import { SkuResolver } from '../../domain/services/SkuResolver';
 
 export interface CreateCatalogItemCommand {
   tenantId: string;
@@ -37,7 +41,8 @@ export class CreateCatalogItemUseCase {
     private readonly catalogRepository: ICatalogRepository,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
-    private readonly syncInventoryItemUseCase: SyncInventoryItemUseCase,
+    @Inject(INVENTORY_SYNC_PORT)
+    private readonly inventorySyncPort: IInventorySyncPort,
   ) {}
 
   async execute(command: CreateCatalogItemCommand) {
@@ -125,13 +130,12 @@ export class CreateCatalogItemUseCase {
     const variants = item.variants ?? [];
 
     if (variants.length === 0) {
-      const sku = this.resolveSku(
-        item.externalReference ?? undefined,
-        item.name,
-      );
+      const sku = SkuResolver.resolve(item.name, {
+        externalReference: item.externalReference ?? undefined,
+      });
       if (!sku) return;
 
-      await this.syncInventoryItemUseCase.execute({
+      await this.inventorySyncPort.syncItem({
         tenantId: item.tenantId,
         catalogItemId: item.id,
         sku,
@@ -156,12 +160,14 @@ export class CreateCatalogItemUseCase {
         this.stringifyValue(variant.sku);
       const externalReference =
         reference || item.externalReference || undefined;
-      const sku = this.resolveSku(externalReference, variantName);
+      const sku = SkuResolver.resolve(variantName, {
+        externalReference,
+      });
 
       if (!sku) continue;
 
       const availableQuantity = this.parseQuantity(variant.stock);
-      await this.syncInventoryItemUseCase.execute({
+      await this.inventorySyncPort.syncItem({
         tenantId: item.tenantId,
         catalogItemId: item.id,
         sku,
@@ -175,26 +181,6 @@ export class CreateCatalogItemUseCase {
         source: 'MANUAL_SNAPSHOT',
       });
     }
-  }
-
-  private resolveSku(
-    reference: string | undefined,
-    name: string,
-  ): string | undefined {
-    const candidate = reference?.trim();
-    if (candidate) {
-      return candidate.toUpperCase();
-    }
-
-    const normalized = name
-      .trim()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .toUpperCase();
-
-    return normalized || undefined;
   }
 
   private stringifyValue(value: unknown): string | undefined {
