@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import {
   backfillEncryptCredentials,
   BackfillConnectionStore,
-} from '../scripts/backfill-encrypt-credentials';
+} from '../../../scripts/backfill-inventory-credentials';
 import { AesGcmCredentialCipher } from '../infrastructure/security/AesGcmCredentialCipher';
 
 describe('backfillEncryptCredentials', () => {
