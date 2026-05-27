@@ -3,6 +3,7 @@ import { PrismaBillingRepository } from './infrastructure/persistence/repositori
 import { UsageController } from './presentation/controllers/UsageController';
 import { SubscriptionController } from './presentation/controllers/SubscriptionController';
 import { PublicBillingController } from './presentation/controllers/PublicBillingController';
+import { TrialSignupController } from './presentation/controllers/TrialSignupController';
 import { GetUsageUseCase } from './application/use-cases/GetUsageUseCase';
 import { BILLING_REPOSITORY } from './domain/repositories/IBillingRepository';
 import { IGetUsageUseCase } from './application/use-cases/interfaces/IGetUsageUseCase';
@@ -39,6 +40,8 @@ import { TenantModuleAccessService } from '@shared/infrastructure/billing/Tenant
 import { TenantManualSaleEligibilityService } from '@shared/infrastructure/billing/TenantManualSaleEligibilityService';
 import { BillingProspectingQuotaService } from './application/services/BillingProspectingQuotaService';
 import { EnsureCustomerService } from './application/services/EnsureCustomerService';
+import { InitiateTrialSubscriptionUseCase } from './application/use-cases/InitiateTrialSubscriptionUseCase';
+import { TrialExpirationProcessor } from './application/workers/TrialExpirationProcessor';
 
 // Port tokens
 import { BILLING_TENANT_QUERY_PORT } from './application/ports/ITenantQueryPort';
@@ -59,11 +62,13 @@ import { TenantCatalogQueryAdapter } from './infrastructure/adapters/TenantCatal
     TenantModule,
     BullModule.registerQueue({ name: 'billing-provisioning' }),
     BullModule.registerQueue({ name: 'billing-plan-changes' }),
+    BullModule.registerQueue({ name: 'BILLING_QUEUE' }),
   ],
   controllers: [
     UsageController,
     SubscriptionController,
     PublicBillingController,
+    TrialSignupController,
   ],
   providers: [
     BillingTenantHandlers,
@@ -71,10 +76,12 @@ import { TenantCatalogQueryAdapter } from './infrastructure/adapters/TenantCatal
     BillingPaymentHandlers,
     BillingProvisioningProcessor,
     BillingPlanChangeProcessor,
+    TrialExpirationProcessor,
     TenantModuleAccessService,
     TenantManualSaleEligibilityService,
     BillingProspectingQuotaService,
     EnsureCustomerService,
+    InitiateTrialSubscriptionUseCase,
     // Repository
     { provide: BILLING_REPOSITORY, useClass: PrismaBillingRepository },
     // Outbound ports → adapters

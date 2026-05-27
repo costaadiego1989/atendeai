@@ -124,6 +124,11 @@ export interface ISalesPaymentLinksRepository {
     externalReference: string,
     status: Extract<SalesPaymentLinkStatus, 'PAID' | 'OVERDUE' | 'REFUNDED'>,
   ): Promise<SalesPaymentLinkRecord | null>;
+
+  findContactNameById(
+    tenantId: string,
+    contactId: string,
+  ): Promise<string | null>;
 }
 
 export interface SalesPromotionRecord {

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
-  IPaymentGateway,
-  IPAYMENT_GATEWAY,
-} from '../../../payment/domain/ports/IPaymentGateway';
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '../../../payment/application/facades/IPaymentFacade';
 import {
   IPaymentPort,
   CreateCustomerInput,
@@ -18,14 +18,14 @@ import {
 @Injectable()
 export class PaymentPortAdapter implements IPaymentPort {
   constructor(
-    @Inject(IPAYMENT_GATEWAY)
-    private readonly paymentGateway: IPaymentGateway,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
   ) {}
 
   async createCustomer(
     input: CreateCustomerInput,
   ): Promise<{ customerId: string }> {
-    const result = await this.paymentGateway.createCustomer({
+    const result = await this.paymentFacade.createCustomer({
       name: input.name,
       email: input.email,
       cpfCnpj: input.cpfCnpj,
@@ -39,7 +39,7 @@ export class PaymentPortAdapter implements IPaymentPort {
   async createSubscription(
     input: CreateSubscriptionInput,
   ): Promise<{ subscriptionId: string }> {
-    const result = await this.paymentGateway.createSubscription({
+    const result = await this.paymentFacade.createSubscription({
       customer: input.customer,
       billingType: input.billingType,
       value: input.value,
@@ -56,7 +56,7 @@ export class PaymentPortAdapter implements IPaymentPort {
     subscriptionId: string,
     input: UpdateSubscriptionInput,
   ): Promise<void> {
-    await this.paymentGateway.updateSubscription(subscriptionId, {
+    await this.paymentFacade.updateSubscription(subscriptionId, {
       billingType: input.billingType,
       value: input.value,
       nextDueDate: input.nextDueDate,
@@ -68,13 +68,13 @@ export class PaymentPortAdapter implements IPaymentPort {
   }
 
   async cancelSubscription(subscriptionId: string): Promise<void> {
-    await this.paymentGateway.cancelSubscription(subscriptionId);
+    await this.paymentFacade.cancelSubscription(subscriptionId);
   }
 
   async createPaymentLink(
     input: CreatePaymentLinkInput,
   ): Promise<{ url: string; id: string }> {
-    const result = await this.paymentGateway.createPaymentLink({
+    const result = await this.paymentFacade.createPaymentLink({
       name: input.name,
       description: input.description,
       value: input.value,

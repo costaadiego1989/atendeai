@@ -3,19 +3,19 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import {
-  IPaymentGateway,
-  IPAYMENT_GATEWAY,
-} from '../../domain/ports/IPaymentGateway';
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
-import { TrialSubscriptionInitiatedIntegrationEvent } from '../integration-events/PaymentIntegrationEvents';
+import { TrialSubscriptionInitiatedIntegrationEvent } from '@modules/payment/application/integration-events/PaymentIntegrationEvents';
 import {
   IBillingRepository,
   BILLING_REPOSITORY,
-} from '@modules/billing/domain/repositories/IBillingRepository';
-import { Subscription } from '@modules/billing/domain/entities/Subscription';
-import { UsageRecord } from '@modules/billing/domain/entities/UsageRecord';
+} from '../../domain/repositories/IBillingRepository';
+import { Subscription } from '../../domain/entities/Subscription';
+import { UsageRecord } from '../../domain/entities/UsageRecord';
 import { TenantId } from '@shared/domain/TenantId';
-import { PlanType } from '@modules/billing/domain/value-objects/Quotas';
+import { PlanType } from '../../domain/value-objects/Quotas';
 
 export interface InitiateTrialSubscriptionInput {
   tenantId: string;
@@ -35,8 +35,8 @@ export interface InitiateTrialSubscriptionOutput {
 @Injectable()
 export class InitiateTrialSubscriptionUseCase {
   constructor(
-    @Inject(IPAYMENT_GATEWAY)
-    private readonly paymentGateway: IPaymentGateway,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
     @InjectQueue('BILLING_QUEUE')
@@ -49,7 +49,7 @@ export class InitiateTrialSubscriptionUseCase {
   async execute(
     input: InitiateTrialSubscriptionInput,
   ): Promise<InitiateTrialSubscriptionOutput> {
-    const customer = await this.paymentGateway.createCustomer({
+    const customer = await this.paymentFacade.createCustomer({
       name: input.name,
       email: input.email,
       phone: input.phone,

@@ -1,7 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import axiosRetry from 'axios-retry';
+import {
+  PaymentGatewayConflictException,
+  PaymentGatewayNotFoundException,
+  PaymentGatewayUnavailableException,
+  PaymentGatewayValidationException,
+  PaymentGatewayAuthenticationException,
+} from '../../domain/exceptions/PaymentGatewayExceptions';
 import {
   IPaymentGateway,
   CreateCustomerData,
@@ -22,6 +29,7 @@ import {
 
 @Injectable()
 export class AsaasAdapter implements IPaymentGateway {
+  private readonly logger = new Logger(AsaasAdapter.name);
   private readonly httpClient: AxiosInstance;
 
   constructor(private readonly configService: ConfigService) {
@@ -470,12 +478,50 @@ export class AsaasAdapter implements IPaymentGateway {
     const status = error.response?.status;
     const details = JSON.stringify(error.response?.data || {});
 
-    console.error(
+    this.logger.error(
       `AsaasAdapter.${method} failed [${status}]: ${message}`,
       details,
     );
 
-    throw new Error(`Asaas API Error: ${message}`);
+    if (!status) {
+      throw new PaymentGatewayUnavailableException(
+        `Payment gateway unreachable: ${message}`,
+        details,
+      );
+    }
+
+    if (status === 404) {
+      throw new PaymentGatewayNotFoundException(
+        `Payment gateway resource not found: ${message}`,
+        details,
+      );
+    }
+
+    if (status === 409) {
+      throw new PaymentGatewayConflictException(
+        `Payment gateway conflict: ${message}`,
+        details,
+      );
+    }
+
+    if (status >= 500) {
+      throw new PaymentGatewayUnavailableException(
+        `Payment gateway unavailable [${status}]: ${message}`,
+        details,
+      );
+    }
+
+    if (status === 401) {
+      throw new PaymentGatewayAuthenticationException(
+        `Payment gateway authentication failed: ${message}`,
+        details,
+      );
+    }
+
+    throw new PaymentGatewayValidationException(
+      `Payment gateway validation error [${status}]: ${message}`,
+      details,
+    );
   }
 
   private normalizePhone(phone?: string): string | undefined {

@@ -29,7 +29,13 @@ export class AsaasWebhookGuard implements CanActivate {
       throw new ForbiddenException('Invalid signature');
     }
 
-    const body = JSON.stringify(request.body);
+    const rawBody: Buffer | string | undefined = request.rawBody;
+    const body = rawBody
+      ? typeof rawBody === 'string'
+        ? rawBody
+        : rawBody.toString('utf8')
+      : JSON.stringify(request.body);
+
     const hash = crypto.createHmac('sha256', secret).update(body).digest('hex');
 
     if (signature !== hash) {

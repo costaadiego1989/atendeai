@@ -3,7 +3,10 @@ import {
   EntityNotFoundException,
   ValidationErrorException,
 } from '@shared/domain/exceptions/DomainExceptions';
-import { PaymentService } from '@modules/payment/application/services/PaymentService';
+import {
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import {
   IRecoveryRepository,
   RECOVERY_REPOSITORY,
@@ -23,7 +26,8 @@ export class GenerateRecoveryPaymentLinkUseCase {
   constructor(
     @Inject(RECOVERY_REPOSITORY)
     private readonly recoveryRepository: IRecoveryRepository,
-    private readonly paymentService: PaymentService,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     private readonly recoveryCaseMessagingService: RecoveryCaseMessagingService,
   ) {}
 
@@ -55,7 +59,7 @@ export class GenerateRecoveryPaymentLinkUseCase {
       });
     }
 
-    const paymentLink = await this.paymentService.createPaymentLink({
+    const paymentLink = await this.paymentFacade.createPaymentLink({
       name: `Regularização - ${recoveryCase.debtorName}`,
       description: `Recovery case ${recoveryCase.id}`,
       value: Number(recoveryCase.amountDue),

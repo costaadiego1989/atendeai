@@ -80,4 +80,12 @@ export class PaymentService {
   async restorePayment(paymentId: string) {
     return this.provider.restorePayment(paymentId);
   }
+
+  async getCustomer(id: string): Promise<CustomerResult> {
+    return this.provider.getCustomer(id);
+  }
+
+  async getSubscription(subscriptionId: string): Promise<SubscriptionResult> {
+    return this.provider.getSubscription(subscriptionId);
+  }
 }

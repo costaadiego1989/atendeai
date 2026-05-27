@@ -1,12 +1,12 @@
 import { IntegrationEvent } from '@shared/application/ports/IntegrationEvent';
 
 export class TrialPaymentConfirmedIntegrationEvent extends IntegrationEvent {
-  readonly queue = 'payment.trial-confirmed';
-  readonly sourceModule = 'payment';
+  readonly queue = 'billing.trial-confirmed';
+  readonly sourceModule = 'billing';
   readonly payload: Record<string, unknown>;
 
   get eventName(): string {
-    return 'payment.trial.confirmed.v1';
+    return 'billing.trial.confirmed.v1';
   }
 
   get aggregateId(): string | undefined {

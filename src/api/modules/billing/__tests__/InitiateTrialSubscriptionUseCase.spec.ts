@@ -1,24 +1,33 @@
 import { InitiateTrialSubscriptionUseCase } from '../application/use-cases/InitiateTrialSubscriptionUseCase';
-import { IPaymentGateway } from '../domain/ports/IPaymentGateway';
+import { IPaymentFacade } from '../../payment/application/facades/IPaymentFacade';
 import { Queue } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 
 describe('InitiateTrialSubscriptionUseCase', () => {
   let useCase: InitiateTrialSubscriptionUseCase;
-  let paymentGateway: jest.Mocked<IPaymentGateway>;
+  let paymentFacade: jest.Mocked<IPaymentFacade>;
   let eventBus: any;
   let billingQueue: jest.Mocked<Queue>;
   let configService: jest.Mocked<ConfigService>;
   let billingRepository: any;
 
   beforeEach(() => {
-    paymentGateway = {
+    paymentFacade = {
       createCustomer: jest.fn(),
-      createSubscription: jest.fn(),
       getCustomer: jest.fn(),
-      getSubscription: jest.fn(),
+      createSubscription: jest.fn(),
+      updateSubscription: jest.fn(),
       cancelSubscription: jest.fn(),
-    } as unknown as jest.Mocked<IPaymentGateway>;
+      getSubscription: jest.fn(),
+      createPayment: jest.fn(),
+      deletePayment: jest.fn(),
+      restorePayment: jest.fn(),
+      createPaymentLink: jest.fn(),
+      removePaymentLink: jest.fn(),
+      restorePaymentLink: jest.fn(),
+      createSubaccount: jest.fn(),
+      listSubaccounts: jest.fn(),
+    } as unknown as jest.Mocked<IPaymentFacade>;
 
     eventBus = {
       publish: jest.fn(),
@@ -46,7 +55,7 @@ describe('InitiateTrialSubscriptionUseCase', () => {
     };
 
     useCase = new InitiateTrialSubscriptionUseCase(
-      paymentGateway,
+      paymentFacade,
       eventBus,
       billingQueue,
       configService,
@@ -56,7 +65,7 @@ describe('InitiateTrialSubscriptionUseCase', () => {
 
   it('should create an Asaas customer (without subscription) and enqueue trial jobs', async () => {
     // Arrange
-    paymentGateway.createCustomer.mockResolvedValue({ id: 'cus_123' } as any);
+    paymentFacade.createCustomer.mockResolvedValue({ id: 'cus_123' } as any);
 
     const input = {
       tenantId: 'uuid-tenant-123',
@@ -72,14 +81,14 @@ describe('InitiateTrialSubscriptionUseCase', () => {
     const result = await useCase.execute(input);
 
     // Assert — customer is created in Asaas
-    expect(paymentGateway.createCustomer).toHaveBeenCalledWith(
+    expect(paymentFacade.createCustomer).toHaveBeenCalledWith(
       expect.objectContaining({
         email: input.email,
       }),
     );
 
     // Assert — NO subscription is created in Asaas during trial
-    expect(paymentGateway.createSubscription).not.toHaveBeenCalled();
+    expect(paymentFacade.createSubscription).not.toHaveBeenCalled();
 
     // Assert — local subscription is saved
     expect(billingRepository.saveSubscription).toHaveBeenCalled();

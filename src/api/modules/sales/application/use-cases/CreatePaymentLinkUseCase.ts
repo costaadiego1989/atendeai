@@ -11,9 +11,9 @@ import {
   CreatePaymentLinkOutput,
 } from './interfaces/ICreatePaymentLinkUseCase';
 import {
-  IPAYMENT_GATEWAY,
-  IPaymentGateway,
-} from '../../../payment/domain/ports/IPaymentGateway';
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import {
   ITenantRepository,
   TENANT_REPOSITORY,
@@ -24,8 +24,8 @@ import { StructuredLogEmitter } from '@shared/infrastructure/observability/Struc
 @Injectable()
 export class CreatePaymentLinkUseCase implements ICreatePaymentLinkUseCase {
   constructor(
-    @Inject(IPAYMENT_GATEWAY)
-    private readonly paymentProvider: IPaymentGateway,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
     private readonly paymentLinkLifecycleService: SalesPaymentLinkLifecycleService,
@@ -47,7 +47,7 @@ export class CreatePaymentLinkUseCase implements ICreatePaymentLinkUseCase {
 
     let result: { id: string; url: string };
     try {
-      result = await this.paymentProvider.createPaymentLink({
+      result = await this.paymentFacade.createPaymentLink({
         name: input.name,
         description: input.description,
         value: input.value,

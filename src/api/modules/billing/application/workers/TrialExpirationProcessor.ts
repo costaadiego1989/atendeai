@@ -2,20 +2,20 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import {
-  IPaymentGateway,
-  IPAYMENT_GATEWAY,
-} from '../../domain/ports/IPaymentGateway';
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { TrialExpiringIntegrationEvent } from '../integration-events/TrialExpiringIntegrationEvent';
-import { TrialExpiredIntegrationEvent } from '../integration-events/PaymentIntegrationEvents';
+import { TrialExpiredIntegrationEvent } from '@modules/payment/application/integration-events/PaymentIntegrationEvents';
 
 @Processor('BILLING_QUEUE')
 export class TrialExpirationProcessor extends WorkerHost {
   private readonly logger = new Logger(TrialExpirationProcessor.name);
 
   constructor(
-    @Inject(IPAYMENT_GATEWAY)
-    private readonly paymentGateway: IPaymentGateway,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
   ) {
@@ -42,7 +42,7 @@ export class TrialExpirationProcessor extends WorkerHost {
 
     try {
       const subscription =
-        await this.paymentGateway.getSubscription(subscriptionId);
+        await this.paymentFacade.getSubscription(subscriptionId);
 
       if (!subscription || subscription.status !== 'ACTIVE') {
         this.logger.log(

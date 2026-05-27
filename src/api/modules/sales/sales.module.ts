@@ -3,6 +3,7 @@ import { CreatePaymentLinkUseCase } from './application/use-cases/CreatePaymentL
 import { ICreatePaymentLinkUseCase } from './application/use-cases/interfaces/ICreatePaymentLinkUseCase';
 import { TrackSalesMetricUseCase } from './application/use-cases/TrackSalesMetricUseCase';
 import { SalesAnalyticsHandler } from './application/handlers/SalesAnalyticsHandler';
+import { SalesPaymentEventHandler } from './application/handlers/SalesPaymentEventHandler';
 import { PrismaSalesRepository } from './infrastructure/persistence/repositories/PrismaSalesRepository';
 import {
   SALES_METRICS_REPOSITORY,
@@ -74,6 +75,7 @@ import { SalesFacadeAdapter } from './application/facades/SalesFacadeAdapter';
     SalesPaymentLinksReportCsvBuilder,
     TrackSalesMetricUseCase,
     SalesAnalyticsHandler,
+    SalesPaymentEventHandler,
     {
       provide: ICreatePaymentLinkUseCase,
       useClass: CreatePaymentLinkUseCase,

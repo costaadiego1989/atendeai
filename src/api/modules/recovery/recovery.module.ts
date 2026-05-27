@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AIModule } from '../ai/ai.module';
 import { ContactModule } from '../contact/contact.module';
 import { MessagingModule } from '../messaging/messaging.module';
+import { PaymentModule } from '../payment/payment.module';
 import { RecoveryMessageReceivedHandler } from './application/handlers/RecoveryMessageReceivedHandler';
 import { RECOVERY_GUIDANCE_GENERATOR } from './application/ports/IRecoveryGuidanceGenerator';
 import { RECOVERY_OUTREACH_GENERATOR } from './application/ports/IRecoveryOutreachGenerator';
@@ -50,6 +51,7 @@ import { ActivateRecoveryPlaybookUseCase } from './application/use-cases/Activat
     ContactModule,
     MessagingModule,
     AIModule,
+    PaymentModule,
     BullModule.registerQueue({
       name: 'recovery-async-jobs',
     }),

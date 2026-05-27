@@ -5,7 +5,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PaymentService } from '@modules/payment/application/services/PaymentService';
+import {
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import {
   ISchedulingStore,
   SCHEDULING_STORE,
@@ -25,7 +28,8 @@ export class GenerateSchedulingPaymentLinkUseCase {
     private readonly schedulingStore: ISchedulingStore,
     @Inject(SCHEDULING_FACADE)
     private readonly schedulingFacade: ISchedulingFacade,
-    private readonly paymentService: PaymentService,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
   ) {}
 
   async execute(input: {
@@ -84,7 +88,7 @@ export class GenerateSchedulingPaymentLinkUseCase {
       'cliente';
     const billingType = input.billingType || 'PIX';
 
-    const paymentLink = await this.paymentService.createPaymentLink({
+    const paymentLink = await this.paymentFacade.createPaymentLink({
       name: serviceName,
       description: `${serviceName} agendado para ${customerName} em ${input.date}`,
       value: amount,

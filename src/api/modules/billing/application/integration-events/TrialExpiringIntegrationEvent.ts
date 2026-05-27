@@ -7,8 +7,8 @@ export interface TrialExpiringEventPayload {
 }
 
 export class TrialExpiringIntegrationEvent extends IntegrationEvent {
-  readonly queue = 'payment.trial-expiring';
-  readonly sourceModule = 'payment';
+  readonly queue = 'billing.trial-expiring';
+  readonly sourceModule = 'billing';
   readonly payload: Record<string, unknown>;
 
   constructor(public readonly eventData: TrialExpiringEventPayload) {
