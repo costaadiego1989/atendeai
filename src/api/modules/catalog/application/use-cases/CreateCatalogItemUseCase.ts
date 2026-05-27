@@ -2,8 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   CATALOG_REPOSITORY,
   ICatalogRepository,
+  CatalogItemRecord,
 } from '../../domain/ports/ICatalogRepository';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
+import { IUseCase } from '@shared/application/IUseCase';
 import { CatalogCategoryNotFoundError } from '../../domain/errors/CatalogCategoryNotFoundError';
 import { CatalogItemCreatedIntegrationEvent } from '../integration-events/CatalogIntegrationEvents';
 import {
@@ -35,7 +37,10 @@ export interface CreateCatalogItemCommand {
 }
 
 @Injectable()
-export class CreateCatalogItemUseCase {
+export class CreateCatalogItemUseCase implements IUseCase<
+  CreateCatalogItemCommand,
+  CatalogItemRecord
+> {
   constructor(
     @Inject(CATALOG_REPOSITORY)
     private readonly catalogRepository: ICatalogRepository,
@@ -45,7 +50,7 @@ export class CreateCatalogItemUseCase {
     private readonly inventorySyncPort: IInventorySyncPort,
   ) {}
 
-  async execute(command: CreateCatalogItemCommand) {
+  async execute(command: CreateCatalogItemCommand): Promise<CatalogItemRecord> {
     if (command.categoryId) {
       const category = await this.catalogRepository.findCategoryById(
         command.tenantId,

@@ -13,6 +13,7 @@ import {
   IInventorySyncPort,
 } from '../ports/IInventorySyncPort';
 import { SkuResolver } from '../../domain/services/SkuResolver';
+import { IUseCase } from '@shared/application/IUseCase';
 
 export interface ImportCatalogItemsInput {
   tenantId: string;
@@ -46,7 +47,10 @@ export interface ImportCatalogItemsOutput {
 }
 
 @Injectable()
-export class ImportCatalogItemsUseCase {
+export class ImportCatalogItemsUseCase implements IUseCase<
+  ImportCatalogItemsInput,
+  ImportCatalogItemsOutput
+> {
   constructor(
     @Inject(CATALOG_REPOSITORY)
     private readonly catalogRepository: ICatalogRepository,

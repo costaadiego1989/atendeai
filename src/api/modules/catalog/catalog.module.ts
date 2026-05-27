@@ -26,7 +26,11 @@ import { CatalogAsyncJobProcessor } from './infrastructure/queue/CatalogAsyncJob
 import { CATALOG_REPOSITORY } from './domain/ports/ICatalogRepository';
 import { PrismaCatalogRepository } from './infrastructure/persistence/repositories/PrismaCatalogRepository';
 import { INVENTORY_SYNC_PORT } from './application/ports/IInventorySyncPort';
-import { InventorySyncAdapter } from './infrastructure/adapters/InventorySyncAdapter';
+import {
+  InventorySyncAdapter,
+  SYNC_INVENTORY_ITEM_USE_CASE,
+} from './infrastructure/adapters/InventorySyncAdapter';
+import { SyncInventoryItemUseCase } from '../inventory/application/use-cases/SyncInventoryItemUseCase';
 import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule';
 
 @Module({
@@ -63,6 +67,10 @@ import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule'
     {
       provide: CATALOG_QUERY_PORT,
       useClass: CatalogFacade,
+    },
+    {
+      provide: SYNC_INVENTORY_ITEM_USE_CASE,
+      useExisting: SyncInventoryItemUseCase,
     },
     {
       provide: INVENTORY_SYNC_PORT,

@@ -19,7 +19,16 @@ export class CatalogItemType {
     return new CatalogItemType(upper);
   }
 
+  /**
+   * Reconstitutes from persistence. Validates the stored value to guard
+   * against data corruption.
+   */
   static fromRaw(type: string): CatalogItemType {
+    if (!VALID_TYPES.includes(type as CatalogItemTypeValue)) {
+      throw new Error(
+        `Tipo de item inválido na persistência: "${type}". Valores aceitos: ${VALID_TYPES.join(', ')}.`,
+      );
+    }
     return new CatalogItemType(type as CatalogItemTypeValue);
   }
 

@@ -1,5 +1,6 @@
 import { CatalogItemType } from '../value-objects/CatalogItemType';
 import { Money } from '../value-objects/Money';
+import { SkuResolver } from '../services/SkuResolver';
 
 export interface CatalogItemProps {
   id: string;
@@ -35,7 +36,7 @@ export class CatalogItem {
   private constructor(private readonly props: CatalogItemProps) {}
 
   static create(props: CatalogItemProps): CatalogItem {
-    CatalogItemType.create(props.type);
+    const validatedType = CatalogItemType.create(props.type);
 
     if (!props.name || !props.name.trim()) {
       throw new Error('O nome do item é obrigatório.');
@@ -47,6 +48,7 @@ export class CatalogItem {
 
     return new CatalogItem({
       ...props,
+      type: validatedType.value,
       name: props.name.trim(),
       description: props.description?.trim() || null,
     });
@@ -169,23 +171,12 @@ export class CatalogItem {
   }
 
   /**
-   * Resolves a SKU for this item based on external reference or name.
+   * Resolves a SKU for this item. Delegates to SkuResolver domain service.
    */
   resolveSku(reference?: string): string | undefined {
-    const candidate = (reference ?? this.props.externalReference)?.trim();
-    if (candidate) {
-      return candidate.toUpperCase();
-    }
-
-    const normalized = this.props.name
-      .trim()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .toUpperCase();
-
-    return normalized || undefined;
+    return SkuResolver.resolve(this.props.name, {
+      externalReference: reference ?? this.props.externalReference ?? undefined,
+    });
   }
 
   /**
