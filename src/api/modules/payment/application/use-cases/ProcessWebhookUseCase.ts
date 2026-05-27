@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   IPaymentGateway,
   IPAYMENT_GATEWAY,
@@ -8,22 +8,18 @@ import {
   PaymentOverdueIntegrationEvent,
   PaymentRefundedIntegrationEvent,
 } from '../integration-events/PaymentIntegrationEvents';
-import { PaymentWebhookSalesProjectionService } from '../services/PaymentWebhookSalesProjectionService';
-import { PaymentWebhookSchedulingProjectionService } from '../services/PaymentWebhookSchedulingProjectionService';
-import { TrialPaymentProjectionService } from '../services/TrialPaymentProjectionService';
 import { PrismaPaymentWebhookReceiptStore } from '../../infrastructure/persistence/PrismaPaymentWebhookReceiptStore';
 import { PrismaTransactionalEventPublisher } from '@shared/infrastructure/event-bus/PrismaTransactionalEventPublisher';
 
 @Injectable()
 export class ProcessWebhookUseCase {
+  private readonly logger = new Logger(ProcessWebhookUseCase.name);
+
   constructor(
     @Inject(IPAYMENT_GATEWAY)
     private readonly paymentGateway: IPaymentGateway,
     private readonly webhookReceiptStore: PrismaPaymentWebhookReceiptStore,
     private readonly transactionalEventPublisher: PrismaTransactionalEventPublisher,
-    private readonly schedulingProjection: PaymentWebhookSchedulingProjectionService,
-    private readonly salesProjection: PaymentWebhookSalesProjectionService,
-    private readonly trialProjection: TrialPaymentProjectionService,
   ) {}
 
   async execute(rawPayload: any, signature?: string): Promise<void> {
@@ -44,6 +40,14 @@ export class ProcessWebhookUseCase {
     } = parsedEvent;
     const eventId = `payment:${provider}:${eventType}:${paymentId}`;
     const effectiveOccurredAt = occurredAt ?? new Date();
+
+    this.logger.log({
+      message: 'Processing webhook event',
+      paymentId,
+      eventType,
+      tenantId,
+      provider,
+    });
 
     await this.transactionalEventPublisher.execute(async (tx) => {
       const receipt = await this.webhookReceiptStore.registerReceived(
@@ -132,19 +136,5 @@ export class ProcessWebhookUseCase {
           return { result: undefined, events: [] };
       }
     });
-
-    await this.trialProjection.project({
-      eventType,
-      rawReference,
-    });
-
-    const projectionInput = {
-      eventType,
-      tenantId,
-      rawReference,
-      occurredAt: effectiveOccurredAt,
-    };
-    await this.schedulingProjection.project(projectionInput);
-    await this.salesProjection.project(projectionInput);
   }
 }

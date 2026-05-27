@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { CreatePaymentLinkUseCase } from '../application/use-cases/CreatePaymentLinkUseCase';
-import { IPaymentGateway } from '../../payment/domain/ports/IPaymentGateway';
+import { IPaymentFacade } from '../../payment/application/facades/IPaymentFacade';
 import { ITenantRepository } from '../../tenant/domain/repositories/ITenantRepository';
 import { IEventBus } from '@shared/application/ports/IEventBus';
 import { SalesPaymentLinkCreatedIntegrationEvent } from '../application/integration-events/SalesIntegrationEvents';
@@ -8,7 +8,7 @@ import { SalesPaymentLinkLifecycleService } from '../application/services/SalesP
 
 describe('CreatePaymentLinkUseCase', () => {
   let useCase: CreatePaymentLinkUseCase;
-  let paymentGateway: jest.Mocked<IPaymentGateway>;
+  let paymentFacade: jest.Mocked<IPaymentFacade>;
   let tenantRepository: jest.Mocked<ITenantRepository>;
   let salesRepository: any;
   let eventBus: jest.Mocked<IEventBus>;
@@ -16,22 +16,21 @@ describe('CreatePaymentLinkUseCase', () => {
   let structuredLog: { emit: jest.Mock };
 
   beforeEach(() => {
-    paymentGateway = {
+    paymentFacade = {
       createCustomer: jest.fn(),
+      getCustomer: jest.fn(),
       createSubaccount: jest.fn(),
       listSubaccounts: jest.fn(),
       createSubscription: jest.fn(),
+      updateSubscription: jest.fn(),
       cancelSubscription: jest.fn(),
       getSubscription: jest.fn(),
-      updateSubscription: jest.fn(),
       createPayment: jest.fn(),
       deletePayment: jest.fn(),
       restorePayment: jest.fn(),
       createPaymentLink: jest.fn(),
       removePaymentLink: jest.fn(),
       restorePaymentLink: jest.fn(),
-      parseWebhook: jest.fn(),
-      getCustomer: jest.fn(),
     };
 
     tenantRepository = {
@@ -71,7 +70,7 @@ describe('CreatePaymentLinkUseCase', () => {
     );
 
     useCase = new CreatePaymentLinkUseCase(
-      paymentGateway,
+      paymentFacade,
       tenantRepository,
       paymentLinkLifecycleService,
       structuredLog as any,
@@ -91,13 +90,13 @@ describe('CreatePaymentLinkUseCase', () => {
       }),
     ).rejects.toThrow(NotFoundException);
 
-    expect(paymentGateway.createPaymentLink).not.toHaveBeenCalled();
+    expect(paymentFacade.createPaymentLink).not.toHaveBeenCalled();
     expect(salesRepository.incrementMetric).not.toHaveBeenCalled();
   });
 
   it('should create the payment link and increment LINK revenue', async () => {
     tenantRepository.findById.mockResolvedValue({ id: 'tenant-1' } as any);
-    paymentGateway.createPaymentLink.mockResolvedValue({
+    paymentFacade.createPaymentLink.mockResolvedValue({
       id: 'link-123',
       url: 'https://pay.example/link-123',
     });
@@ -118,7 +117,7 @@ describe('CreatePaymentLinkUseCase', () => {
       billingType: 'PIX',
     });
 
-    expect(paymentGateway.createPaymentLink).toHaveBeenCalledWith(
+    expect(paymentFacade.createPaymentLink).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Plano Premium',
         description: 'Assinatura mensal',
@@ -165,7 +164,7 @@ describe('CreatePaymentLinkUseCase', () => {
 
   it('should preserve UNDEFINED billing type when creating the link', async () => {
     tenantRepository.findById.mockResolvedValue({ id: 'tenant-1' } as any);
-    paymentGateway.createPaymentLink.mockResolvedValue({
+    paymentFacade.createPaymentLink.mockResolvedValue({
       id: 'link-undefined',
       url: 'https://pay.example/link-undefined',
     });
@@ -186,7 +185,7 @@ describe('CreatePaymentLinkUseCase', () => {
       billingType: 'UNDEFINED',
     });
 
-    expect(paymentGateway.createPaymentLink).toHaveBeenCalledWith(
+    expect(paymentFacade.createPaymentLink).toHaveBeenCalledWith(
       expect.objectContaining({
         billingType: 'UNDEFINED',
         dueDateLimitDays: 3,
@@ -196,7 +195,7 @@ describe('CreatePaymentLinkUseCase', () => {
 
   it('should calculate dueDateLimitDays from the chosen expiration date', async () => {
     tenantRepository.findById.mockResolvedValue({ id: 'tenant-1' } as any);
-    paymentGateway.createPaymentLink.mockResolvedValue({
+    paymentFacade.createPaymentLink.mockResolvedValue({
       id: 'link-expiration',
       url: 'https://pay.example/link-expiration',
     });
@@ -239,7 +238,7 @@ describe('CreatePaymentLinkUseCase', () => {
       global.Date = RealDate;
     }
 
-    expect(paymentGateway.createPaymentLink).toHaveBeenCalledWith(
+    expect(paymentFacade.createPaymentLink).toHaveBeenCalledWith(
       expect.objectContaining({
         dueDateLimitDays: 5,
       }),
@@ -248,7 +247,7 @@ describe('CreatePaymentLinkUseCase', () => {
 
   it('should persist branchId when the link is created from a branch scope', async () => {
     tenantRepository.findById.mockResolvedValue({ id: 'tenant-1' } as any);
-    paymentGateway.createPaymentLink.mockResolvedValue({
+    paymentFacade.createPaymentLink.mockResolvedValue({
       id: 'link-branch',
       url: 'https://pay.example/link-branch',
     });
@@ -278,7 +277,7 @@ describe('CreatePaymentLinkUseCase', () => {
 
   it('should create and persist a recurrent payment link contract', async () => {
     tenantRepository.findById.mockResolvedValue({ id: 'tenant-1' } as any);
-    paymentGateway.createPaymentLink.mockResolvedValue({
+    paymentFacade.createPaymentLink.mockResolvedValue({
       id: 'link-recurring',
       url: 'https://pay.example/link-recurring',
     });
@@ -303,7 +302,7 @@ describe('CreatePaymentLinkUseCase', () => {
       },
     });
 
-    expect(paymentGateway.createPaymentLink).toHaveBeenCalledWith(
+    expect(paymentFacade.createPaymentLink).toHaveBeenCalledWith(
       expect.objectContaining({
         chargeType: 'RECURRENT',
       }),

@@ -1,8 +1,8 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
-  Param,
   Post,
   Req,
   UseGuards,
@@ -25,24 +25,26 @@ export class PaymentManagementController {
 
   @Get('account/status')
   @Roles('OWNER', 'ADMIN', 'AGENT')
-  async getTenantAccountStatus(
-    @Param('tenantId') tenantId: string,
-    @Req() req: any,
-  ) {
-    return this.getTenantFinancialAccountStatusUseCase.execute(
-      req.user?.tenantId || tenantId,
-    );
+  async getTenantAccountStatus(@Req() req: any) {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      throw new ForbiddenException('Tenant context required');
+    }
+    return this.getTenantFinancialAccountStatusUseCase.execute(tenantId);
   }
 
   @Post('account/bootstrap')
   @Roles('OWNER', 'ADMIN')
   async bootstrapTenantAccount(
-    @Param('tenantId') tenantId: string,
     @Req() req: any,
     @Body() body: BootstrapTenantFinancialAccountDTO,
   ) {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      throw new ForbiddenException('Tenant context required');
+    }
     return this.bootstrapTenantFinancialAccountUseCase.execute({
-      tenantId: req.user?.tenantId || tenantId,
+      tenantId,
       companyType: body.companyType,
       addressNumber: body.addressNumber,
       complement: body.complement,

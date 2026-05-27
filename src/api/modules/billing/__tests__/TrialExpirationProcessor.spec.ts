@@ -1,34 +1,43 @@
 import { TrialExpirationProcessor } from '../application/workers/TrialExpirationProcessor';
-import { IPaymentGateway } from '../domain/ports/IPaymentGateway';
+import { IPaymentFacade } from '../../payment/application/facades/IPaymentFacade';
 import { IEventBus } from '@shared/application/ports/IEventBus';
 import { Job } from 'bullmq';
 import { TrialExpiringIntegrationEvent } from '../application/integration-events/TrialExpiringIntegrationEvent';
 
 describe('TrialExpirationProcessor', () => {
   let processor: TrialExpirationProcessor;
-  let paymentGateway: jest.Mocked<IPaymentGateway>;
+  let paymentFacade: jest.Mocked<IPaymentFacade>;
   let eventBus: jest.Mocked<IEventBus>;
 
   beforeEach(() => {
-    paymentGateway = {
+    paymentFacade = {
       getSubscription: jest.fn(),
       createCustomer: jest.fn(),
-      createSubscription: jest.fn(),
       getCustomer: jest.fn(),
+      createSubscription: jest.fn(),
+      updateSubscription: jest.fn(),
       cancelSubscription: jest.fn(),
-    } as unknown as jest.Mocked<IPaymentGateway>;
+      createPayment: jest.fn(),
+      deletePayment: jest.fn(),
+      restorePayment: jest.fn(),
+      createPaymentLink: jest.fn(),
+      removePaymentLink: jest.fn(),
+      restorePaymentLink: jest.fn(),
+      createSubaccount: jest.fn(),
+      listSubaccounts: jest.fn(),
+    } as unknown as jest.Mocked<IPaymentFacade>;
 
     eventBus = {
       publish: jest.fn(),
       subscribe: jest.fn(),
     } as unknown as jest.Mocked<IEventBus>;
 
-    processor = new TrialExpirationProcessor(paymentGateway, eventBus);
+    processor = new TrialExpirationProcessor(paymentFacade, eventBus);
   });
 
   it('should ignore if subscription is inactive', async () => {
     // Arrange
-    paymentGateway.getSubscription.mockResolvedValue({
+    paymentFacade.getSubscription.mockResolvedValue({
       id: 'sub_123',
       status: 'INACTIVE',
     } as any);
@@ -41,13 +50,13 @@ describe('TrialExpirationProcessor', () => {
     await processor.process(job);
 
     // Assert
-    expect(paymentGateway.getSubscription).toHaveBeenCalledWith('sub_123');
+    expect(paymentFacade.getSubscription).toHaveBeenCalledWith('sub_123');
     expect(eventBus.publish).not.toHaveBeenCalled();
   });
 
   it('should ignore if invoiceUrl is not available', async () => {
     // Arrange
-    paymentGateway.getSubscription.mockResolvedValue({
+    paymentFacade.getSubscription.mockResolvedValue({
       id: 'sub_123',
       status: 'ACTIVE',
       invoiceUrl: null,
@@ -66,7 +75,7 @@ describe('TrialExpirationProcessor', () => {
 
   it('should publish TrialExpiringIntegrationEvent if active and has invoiceUrl', async () => {
     // Arrange
-    paymentGateway.getSubscription.mockResolvedValue({
+    paymentFacade.getSubscription.mockResolvedValue({
       id: 'sub_123',
       status: 'ACTIVE',
       invoiceUrl: 'http://invoice.url',

@@ -10,7 +10,10 @@ import {
   CONTACT_FACADE,
   IContactFacade,
 } from '@modules/contact/application/facades/ContactFacade';
-import { PaymentService } from '@modules/payment/application/services/PaymentService';
+import {
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import {
   ISchedulingFacade,
   SCHEDULING_FACADE,
@@ -55,7 +58,8 @@ export class ReserveProfessionalSlotUseCase {
     private readonly eventBus: IEventBus,
     @Inject(SCHEDULING_FACADE)
     private readonly schedulingFacade: ISchedulingFacade,
-    private readonly paymentService: PaymentService,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     @Inject(SCHEDULING_RESERVATION_EXPIRATION_QUEUE)
     private readonly schedulingReservationExpirationQueue: ISchedulingReservationExpirationQueue,
     @Inject(SCHEDULING_REMINDER_QUEUE)
@@ -405,7 +409,7 @@ export class ReserveProfessionalSlotUseCase {
     let paymentLinkId: string | null = null;
 
     try {
-      const paymentLink = await this.paymentService.createPaymentLink({
+      const paymentLink = await this.paymentFacade.createPaymentLink({
         name: serviceName,
         description: `${serviceName} pre-agendado para ${input.contact.name} em ${input.input.date}`,
         value: amount,
@@ -481,7 +485,7 @@ export class ReserveProfessionalSlotUseCase {
     } catch (error) {
       if (paymentLinkId) {
         try {
-          await this.paymentService.removePaymentLink(paymentLinkId);
+          await this.paymentFacade.removePaymentLink(paymentLinkId);
         } catch {
           // Keep rollback resilient even if the provider link cleanup fails.
         }

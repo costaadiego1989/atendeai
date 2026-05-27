@@ -6,7 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { PaymentService } from '@modules/payment/application/services/PaymentService';
+import {
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import {
   TENANT_FINANCIAL_ACCOUNT_REPOSITORY,
   ITenantFinancialAccountRepository,
@@ -46,7 +49,8 @@ interface CreateSplitPaymentChargeInput {
 @Injectable()
 export class CreateSplitPaymentChargeUseCase {
   constructor(
-    private readonly paymentService: PaymentService,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     @Inject(TENANT_FINANCIAL_ACCOUNT_REPOSITORY)
     private readonly tenantFinancialAccountRepository: ITenantFinancialAccountRepository,
     @Inject(CONTACT_FINANCIAL_PROFILE_REPOSITORY)
@@ -98,7 +102,7 @@ export class CreateSplitPaymentChargeUseCase {
       .slice(0, 10);
     const tenantPercentualValue = input.value < 100 ? 98 : 98.5;
 
-    const payment = await this.paymentService.createPayment({
+    const payment = await this.paymentFacade.createPayment({
       customer: customerId,
       billingType: input.billingType,
       value: input.value,
@@ -284,7 +288,7 @@ export class CreateSplitPaymentChargeUseCase {
       );
     }
 
-    const customer = await this.paymentService.createCustomer({
+    const customer = await this.paymentFacade.createCustomer({
       name: contact.name,
       cpfCnpj: normalizedDocument,
       email: contact.email,

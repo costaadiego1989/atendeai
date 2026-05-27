@@ -4,17 +4,17 @@ import {
   SALES_PAYMENT_LINKS_REPOSITORY,
 } from '../../domain/repositories/ISalesRepository';
 import {
-  IPAYMENT_GATEWAY,
-  IPaymentGateway,
-} from '../../../payment/domain/ports/IPaymentGateway';
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 
 @Injectable()
 export class PausePaymentLinkUseCase {
   constructor(
     @Inject(SALES_PAYMENT_LINKS_REPOSITORY)
     private readonly salesRepository: ISalesPaymentLinksRepository,
-    @Inject(IPAYMENT_GATEWAY)
-    private readonly paymentGateway: IPaymentGateway,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
   ) {}
 
   async execute(input: { tenantId: string; paymentLinkId: string }) {
@@ -28,9 +28,9 @@ export class PausePaymentLinkUseCase {
     }
 
     if (paymentLink.resourceType === 'PAYMENT') {
-      await this.paymentGateway.deletePayment(paymentLink.providerLinkId);
+      await this.paymentFacade.deletePayment(paymentLink.providerLinkId);
     } else {
-      await this.paymentGateway.removePaymentLink(paymentLink.providerLinkId);
+      await this.paymentFacade.removePaymentLink(paymentLink.providerLinkId);
     }
 
     const updated = await this.salesRepository.updatePaymentLinkStatus(

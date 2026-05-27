@@ -4,7 +4,6 @@ import {
   PaymentOverdueIntegrationEvent,
   PaymentRefundedIntegrationEvent,
 } from '@modules/payment/application/integration-events/PaymentIntegrationEvents';
-import { PaymentWebhookSalesProjectionService } from '@modules/payment/application/services/PaymentWebhookSalesProjectionService';
 import { PrismaTransactionalEventPublisher } from '@shared/infrastructure/event-bus/PrismaTransactionalEventPublisher';
 
 describe('Payment ProcessWebhookUseCase', () => {
@@ -12,9 +11,6 @@ describe('Payment ProcessWebhookUseCase', () => {
   let paymentGateway: any;
   let webhookReceiptStore: any;
   let transactionalEventPublisher: jest.Mocked<PrismaTransactionalEventPublisher>;
-  let schedulingProjection: any;
-  let salesProjection: any;
-  let trialProjection: any;
   let executionOutcomes: Array<{ result: void; events: any[] }>;
 
   beforeEach(() => {
@@ -46,23 +42,11 @@ describe('Payment ProcessWebhookUseCase', () => {
         return outcome.result;
       }),
     } as any;
-    schedulingProjection = {
-      project: jest.fn().mockResolvedValue(undefined),
-    };
-    salesProjection = {
-      project: jest.fn().mockResolvedValue(undefined),
-    };
-    trialProjection = {
-      project: jest.fn().mockResolvedValue(undefined),
-    };
 
     sut = new ProcessWebhookUseCase(
       paymentGateway,
       webhookReceiptStore,
       transactionalEventPublisher,
-      schedulingProjection,
-      salesProjection,
-      trialProjection,
     );
   });
 
@@ -281,81 +265,5 @@ describe('Payment ProcessWebhookUseCase', () => {
       'receipt-5',
       expect.any(Object),
     );
-  });
-
-  it('should delegate post-processing projections after a payment webhook', async () => {
-    const occurredAt = new Date('2026-03-31T21:00:00.000Z');
-    paymentGateway.parseWebhook.mockReturnValue({
-      provider: 'ASAAS',
-      eventType: 'PAYMENT_CONFIRMED',
-      paymentId: 'pay-sales-1',
-      tenantId: 'tenant-sales',
-      amount: 230,
-      occurredAt,
-      rawReference: 'sales-link|tenant-sales|local-link-1',
-      rawPayload: {},
-    });
-    webhookReceiptStore.registerReceived.mockResolvedValue({
-      id: 'receipt-sales',
-      isNew: true,
-    });
-
-    await sut.execute({ event: 'PAYMENT_CONFIRMED' });
-
-    const projectionInput = {
-      eventType: 'PAYMENT_CONFIRMED',
-      tenantId: 'tenant-sales',
-      rawReference: 'sales-link|tenant-sales|local-link-1',
-      occurredAt,
-    };
-    expect(trialProjection.project).toHaveBeenCalledWith({
-      eventType: 'PAYMENT_CONFIRMED',
-      rawReference: 'sales-link|tenant-sales|local-link-1',
-    });
-    expect(schedulingProjection.project).toHaveBeenCalledWith(projectionInput);
-    expect(salesProjection.project).toHaveBeenCalledWith(projectionInput);
-  });
-
-  it('should project a sales payment link as PAID using the sales projection service', async () => {
-    const prisma = {
-      $executeRaw: jest.fn().mockResolvedValue(undefined),
-      $queryRaw: jest
-        .fn()
-        .mockResolvedValueOnce([
-          {
-            id: 'link-1',
-            tenant_id: '123e4567-e89b-12d3-a456-426614174000',
-            branch_id: 'branch-1',
-            contact_id: 'contact-1',
-            conversation_id: 'conversation-1',
-            url: 'https://pay.test/link-1',
-            name: 'Proposta aceita',
-            value: 230,
-            external_id:
-              'sales-link|123e4567-e89b-12d3-a456-426614174000|local-link-1',
-            status: 'PAID',
-          },
-        ])
-        .mockResolvedValueOnce([{ name: 'Cliente Teste' }]),
-    };
-    const eventBus = {
-      publish: jest.fn().mockResolvedValue(undefined),
-    };
-    const projection = new PaymentWebhookSalesProjectionService(
-      prisma as any,
-      eventBus as any,
-    );
-
-    await projection.project({
-      eventType: 'PAYMENT_CONFIRMED',
-      tenantId: '123e4567-e89b-12d3-a456-426614174000',
-      rawReference:
-        'sales-link|123e4567-e89b-12d3-a456-426614174000|local-link-1',
-      occurredAt: new Date('2026-03-31T21:00:00.000Z'),
-    });
-
-    expect(prisma.$executeRaw).not.toHaveBeenCalled();
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
-    expect(eventBus.publish).toHaveBeenCalledTimes(1);
   });
 });

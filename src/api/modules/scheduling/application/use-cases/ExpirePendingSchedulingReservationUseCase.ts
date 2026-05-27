@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PaymentService } from '@modules/payment/application/services/PaymentService';
+import {
+  IPaymentFacade,
+  PAYMENT_FACADE,
+} from '@modules/payment/application/facades/IPaymentFacade';
 import {
   ISchedulingStore,
   SCHEDULING_STORE,
@@ -12,7 +15,8 @@ export class ExpirePendingSchedulingReservationUseCase {
   constructor(
     @Inject(SCHEDULING_STORE)
     private readonly schedulingStore: ISchedulingStore,
-    private readonly paymentService: PaymentService,
+    @Inject(PAYMENT_FACADE)
+    private readonly paymentFacade: IPaymentFacade,
     private readonly googleCalendarSyncService: SchedulingGoogleCalendarSyncService,
     private readonly structuredLog: StructuredLogEmitter,
   ) {}
@@ -97,7 +101,7 @@ export class ExpirePendingSchedulingReservationUseCase {
 
     if (slot.payment?.linkId) {
       try {
-        await this.paymentService.removePaymentLink(slot.payment.linkId);
+        await this.paymentFacade.removePaymentLink(slot.payment.linkId);
       } catch {
         // Keep the expiration flow resilient even if the gateway link cleanup fails.
       }
