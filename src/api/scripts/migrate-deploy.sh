@@ -8,13 +8,14 @@ OUTPUT=$(npx prisma migrate deploy 2>&1) && echo "$OUTPUT" && echo "=== Migratio
 echo "$OUTPUT"
 
 # P3009 = migration recorded as failed (process was killed before Prisma could mark it as applied).
+# P3018 = migration failed to apply (SQL error during execution).
 # Use --rolled-back so Prisma re-runs the SQL on next deploy.
 # Safe because all migrations use IF NOT EXISTS (idempotent).
-if echo "$OUTPUT" | grep -q "P3009"; then
+if echo "$OUTPUT" | grep -qE "P3009|P3018"; then
   echo ""
-  echo "=== P3009 detected: rolling back failed migrations so they re-run ==="
+  echo "=== P3009/P3018 detected: rolling back failed migrations so they re-run ==="
 
-  FAILED=$(echo "$OUTPUT" | grep -oP 'The `\K[^`]+')
+  FAILED=$(echo "$OUTPUT" | grep -oP '(The `|Migration name: )\K[^`\n]+' | head -5)
 
   if [ -z "$FAILED" ]; then
     echo "Could not extract migration name from error. Aborting."
