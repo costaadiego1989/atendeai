@@ -10,6 +10,7 @@ import {
   Query,
   UseGuards,
   Req,
+  Logger,
 } from '@nestjs/common';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
@@ -27,6 +28,7 @@ import {
   ISocialPlatformAdapter,
   SOCIAL_PLATFORM_ADAPTER,
 } from '../../domain/ports/ISocialPlatformAdapter';
+import { MetaTokenExchangeService } from '../../infrastructure/services/MetaTokenExchangeService';
 import {
   ListCommentsQueryDTO,
   ReplyToCommentDTO,
@@ -40,10 +42,13 @@ import { Inject } from '@nestjs/common';
 @Controller('tenants/:tenantId/social')
 @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
 export class SocialController {
+  private readonly logger = new Logger(SocialController.name);
+
   constructor(
     private readonly listCommentsUseCase: ListSocialCommentsUseCase,
     private readonly replyToCommentUseCase: ReplyToCommentUseCase,
     private readonly configureRulesUseCase: ConfigureAutoReplyRulesUseCase,
+    private readonly tokenExchangeService: MetaTokenExchangeService,
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
     @Inject(SOCIAL_PLATFORM_ADAPTER)
     private readonly adapter: ISocialPlatformAdapter,
@@ -70,6 +75,22 @@ export class SocialController {
     @Param('tenantId') tenantId: string,
     @Body() body: ConnectInstagramDTO,
   ) {
+    let accessToken = body.accessToken;
+    let tokenExpiresAt: Date | null = null;
+
+    try {
+      const longLived =
+        await this.tokenExchangeService.exchangeForLongLivedToken(
+          body.accessToken,
+        );
+      accessToken = longLived.accessToken;
+      tokenExpiresAt = new Date(Date.now() + longLived.expiresInSeconds * 1000);
+    } catch (err: any) {
+      this.logger.warn(
+        `Long-lived token exchange failed for tenant ${tenantId}: ${err.message}. Using short-lived token.`,
+      );
+    }
+
     const account = SocialAccount.create({
       tenantId,
       platform: 'INSTAGRAM',
@@ -77,10 +98,10 @@ export class SocialController {
       username: body.username || null,
       displayName: body.displayName || null,
       profilePictureUrl: body.profilePictureUrl || null,
-      accessToken: body.code,
+      accessToken,
       refreshToken: null,
-      tokenExpiresAt: null,
-      pageId: body.pageId || null,
+      tokenExpiresAt,
+      pageId: body.pageId,
       webhookSecret: null,
     });
 
@@ -209,6 +230,7 @@ export class SocialController {
         linkUrl: body.linkUrl,
         linkTitle: body.linkTitle,
       },
+      account.pageId || '',
     );
 
     if (result.success) {

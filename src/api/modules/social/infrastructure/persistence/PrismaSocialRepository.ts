@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { ISocialRepository } from '../../domain/ports/ISocialRepository';
 import { SocialAccount } from '../../domain/entities/SocialAccount';
 import { SocialComment } from '../../domain/entities/SocialComment';
 import { SocialAutoReplyRule } from '../../domain/entities/SocialAutoReplyRule';
 import { UniqueEntityID } from '../../../../shared/domain/UniqueEntityID';
 
-const prisma = new PrismaClient();
-
 @Injectable()
 export class PrismaSocialRepository implements ISocialRepository {
+  constructor(private readonly prisma: PrismaService) {}
   async saveAccount(account: SocialAccount): Promise<void> {
-    await prisma.$executeRawUnsafe(
+    await this.prisma.$executeRawUnsafe(
       `INSERT INTO social_schema.social_accounts
         (id, tenant_id, platform, external_account_id, username, display_name, profile_picture_url,
          access_token, refresh_token, token_expires_at, page_id, webhook_secret, status, connected_at, updated_at)
@@ -47,7 +46,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     tenantId: string,
     id: string,
   ): Promise<SocialAccount | null> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT * FROM social_schema.social_accounts WHERE id = $1 AND tenant_id = $2`,
       id,
       tenantId,
@@ -60,7 +59,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     platform: string,
     externalAccountId: string,
   ): Promise<SocialAccount | null> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT * FROM social_schema.social_accounts WHERE tenant_id = $1 AND platform = $2 AND external_account_id = $3`,
       tenantId,
       platform,
@@ -73,7 +72,9 @@ export class PrismaSocialRepository implements ISocialRepository {
     platform: string,
     externalAccountId: string,
   ): Promise<Array<{ tenantId: string }>> {
-    const rows = await prisma.$queryRawUnsafe<Array<{ tenant_id: string }>>(
+    const rows = await this.prisma.$queryRawUnsafe<
+      Array<{ tenant_id: string }>
+    >(
       `SELECT tenant_id FROM social_schema.social_accounts WHERE platform = $1 AND external_account_id = $2`,
       platform,
       externalAccountId,
@@ -82,7 +83,7 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async listAccounts(tenantId: string): Promise<SocialAccount[]> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT * FROM social_schema.social_accounts WHERE tenant_id = $1 ORDER BY connected_at DESC`,
       tenantId,
     );
@@ -90,7 +91,7 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async deleteAccount(tenantId: string, id: string): Promise<void> {
-    await prisma.$executeRawUnsafe(
+    await this.prisma.$executeRawUnsafe(
       `DELETE FROM social_schema.social_accounts WHERE id = $1 AND tenant_id = $2`,
       id,
       tenantId,
@@ -110,7 +111,7 @@ export class PrismaSocialRepository implements ISocialRepository {
       postedAt?: Date;
     },
   ): Promise<string> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `INSERT INTO social_schema.social_posts
         (id, tenant_id, social_account_id, platform, external_post_id, post_type, caption, media_url, permalink, posted_at, discovered_at)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
@@ -132,7 +133,7 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async saveComment(comment: SocialComment): Promise<void> {
-    await prisma.$executeRawUnsafe(
+    await this.prisma.$executeRawUnsafe(
       `INSERT INTO social_schema.social_comments
         (id, tenant_id, social_account_id, post_id, platform, external_comment_id, parent_comment_id,
          author_external_id, author_username, author_name, text, sentiment, status, is_hidden, received_at, replied_at)
@@ -161,7 +162,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     tenantId: string,
     id: string,
   ): Promise<SocialComment | null> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT * FROM social_schema.social_comments WHERE id = $1 AND tenant_id = $2`,
       id,
       tenantId,
@@ -173,7 +174,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     tenantId: string,
     externalCommentId: string,
   ): Promise<SocialComment | null> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT * FROM social_schema.social_comments WHERE tenant_id = $1 AND external_comment_id = $2`,
       tenantId,
       externalCommentId,
@@ -216,11 +217,11 @@ export class PrismaSocialRepository implements ISocialRepository {
     const offset = ((filters.page || 1) - 1) * limit;
 
     const [rows, countRows] = await Promise.all([
-      prisma.$queryRawUnsafe<any[]>(
+      this.prisma.$queryRawUnsafe<any[]>(
         `SELECT * FROM social_schema.social_comments WHERE ${where} ORDER BY received_at DESC LIMIT ${limit} OFFSET ${offset}`,
         ...params,
       ),
-      prisma.$queryRawUnsafe<any[]>(
+      this.prisma.$queryRawUnsafe<any[]>(
         `SELECT COUNT(*)::int as count FROM social_schema.social_comments WHERE ${where}`,
         ...params,
       ),
@@ -239,7 +240,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     repliedAt?: Date,
   ): Promise<void> {
     if (repliedAt) {
-      await prisma.$executeRawUnsafe(
+      await this.prisma.$executeRawUnsafe(
         `UPDATE social_schema.social_comments SET status = $1, replied_at = $2 WHERE id = $3 AND tenant_id = $4`,
         status,
         repliedAt,
@@ -247,7 +248,7 @@ export class PrismaSocialRepository implements ISocialRepository {
         tenantId,
       );
     } else {
-      await prisma.$executeRawUnsafe(
+      await this.prisma.$executeRawUnsafe(
         `UPDATE social_schema.social_comments SET status = $1 WHERE id = $2 AND tenant_id = $3`,
         status,
         commentId,
@@ -269,7 +270,7 @@ export class PrismaSocialRepository implements ISocialRepository {
       errorMessage?: string;
     },
   ): Promise<string> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `INSERT INTO social_schema.social_comment_replies
         (id, tenant_id, comment_id, external_reply_id, text, replied_by, rule_id, user_id, status, error_message, created_at)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
@@ -300,7 +301,7 @@ export class PrismaSocialRepository implements ISocialRepository {
       createdAt: Date;
     }>
   > {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT id, text, replied_by, rule_id, status, created_at FROM social_schema.social_comment_replies
        WHERE tenant_id = $1 AND comment_id = $2 ORDER BY created_at ASC`,
       tenantId,
@@ -317,7 +318,7 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async saveRule(rule: SocialAutoReplyRule): Promise<void> {
-    await prisma.$executeRawUnsafe(
+    await this.prisma.$executeRawUnsafe(
       `INSERT INTO social_schema.social_auto_reply_rules
         (id, tenant_id, name, is_active, priority, platform, conditions, actions, limits, total_fired, last_fired_at, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW(),NOW())
@@ -348,7 +349,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     tenantId: string,
     id: string,
   ): Promise<SocialAutoReplyRule | null> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT * FROM social_schema.social_auto_reply_rules WHERE id = $1 AND tenant_id = $2`,
       id,
       tenantId,
@@ -365,14 +366,14 @@ export class PrismaSocialRepository implements ISocialRepository {
       : `SELECT * FROM social_schema.social_auto_reply_rules WHERE tenant_id = $1 AND is_active = true ORDER BY priority DESC`;
 
     const rows = platform
-      ? await prisma.$queryRawUnsafe<any[]>(query, tenantId, platform)
-      : await prisma.$queryRawUnsafe<any[]>(query, tenantId);
+      ? await this.prisma.$queryRawUnsafe<any[]>(query, tenantId, platform)
+      : await this.prisma.$queryRawUnsafe<any[]>(query, tenantId);
 
     return rows.map((r) => this.mapRule(r));
   }
 
   async listAllRules(tenantId: string): Promise<SocialAutoReplyRule[]> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT * FROM social_schema.social_auto_reply_rules WHERE tenant_id = $1 ORDER BY priority DESC, created_at DESC`,
       tenantId,
     );
@@ -380,7 +381,7 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async deleteRule(tenantId: string, id: string): Promise<void> {
-    await prisma.$executeRawUnsafe(
+    await this.prisma.$executeRawUnsafe(
       `DELETE FROM social_schema.social_auto_reply_rules WHERE id = $1 AND tenant_id = $2`,
       id,
       tenantId,
@@ -388,7 +389,7 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async incrementRuleFired(tenantId: string, ruleId: string): Promise<void> {
-    await prisma.$executeRawUnsafe(
+    await this.prisma.$executeRawUnsafe(
       `UPDATE social_schema.social_auto_reply_rules SET total_fired = total_fired + 1, last_fired_at = NOW() WHERE id = $1 AND tenant_id = $2`,
       ruleId,
       tenantId,
@@ -399,7 +400,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     tenantId: string,
     ruleId: string,
   ): Promise<number> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT COUNT(*)::int as count FROM social_schema.social_comment_replies
        WHERE tenant_id = $1 AND rule_id = $2 AND created_at > NOW() - INTERVAL '1 hour'`,
       tenantId,
@@ -413,7 +414,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     ruleId: string,
     postId: string,
   ): Promise<number> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT COUNT(*)::int as count FROM social_schema.social_comment_replies r
        JOIN social_schema.social_comments c ON r.comment_id = c.id
        WHERE r.tenant_id = $1 AND r.rule_id = $2 AND c.post_id = $3`,
@@ -429,7 +430,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     ruleId: string,
     authorExternalId: string,
   ): Promise<Date | null> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `SELECT r.created_at FROM social_schema.social_comment_replies r
        JOIN social_schema.social_comments c ON r.comment_id = c.id
        WHERE r.tenant_id = $1 AND r.rule_id = $2 AND c.author_external_id = $3
@@ -452,7 +453,7 @@ export class PrismaSocialRepository implements ISocialRepository {
       lastMessageText: string;
     },
   ): Promise<string> {
-    const rows = await prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
       `INSERT INTO social_schema.social_inbox_threads
         (id, tenant_id, social_account_id, platform, recipient_external_id, recipient_username,
          origin_comment_id, last_message_text, last_message_at, message_count, status, created_at, updated_at)
@@ -485,7 +486,7 @@ export class PrismaSocialRepository implements ISocialRepository {
       metadata?: Record<string, unknown>;
     },
   ): Promise<void> {
-    await prisma.$executeRawUnsafe(
+    await this.prisma.$executeRawUnsafe(
       `INSERT INTO social_schema.social_audit_log
         (id, tenant_id, event, entity_id, entity_type, platform, rule_id, metadata, created_at)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, NOW())`,
@@ -508,7 +509,7 @@ export class PrismaSocialRepository implements ISocialRepository {
     connectedAccounts: number;
   }> {
     const [comments, rules, accounts] = await Promise.all([
-      prisma.$queryRawUnsafe<any[]>(
+      this.prisma.$queryRawUnsafe<any[]>(
         `SELECT
           COUNT(*)::int as total,
           COUNT(*) FILTER (WHERE status = 'PENDING')::int as pending,
@@ -517,11 +518,11 @@ export class PrismaSocialRepository implements ISocialRepository {
          FROM social_schema.social_comments WHERE tenant_id = $1`,
         tenantId,
       ),
-      prisma.$queryRawUnsafe<any[]>(
+      this.prisma.$queryRawUnsafe<any[]>(
         `SELECT COUNT(*)::int as count FROM social_schema.social_auto_reply_rules WHERE tenant_id = $1 AND is_active = true`,
         tenantId,
       ),
-      prisma.$queryRawUnsafe<any[]>(
+      this.prisma.$queryRawUnsafe<any[]>(
         `SELECT COUNT(*)::int as count FROM social_schema.social_accounts WHERE tenant_id = $1 AND status = 'ACTIVE'`,
         tenantId,
       ),
@@ -535,6 +536,36 @@ export class PrismaSocialRepository implements ISocialRepository {
       activeRules: rules[0]?.count || 0,
       connectedAccounts: accounts[0]?.count || 0,
     };
+  }
+
+  async listAccountsWithExpiringTokens(
+    daysUntilExpiry: number,
+  ): Promise<SocialAccount[]> {
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
+      `SELECT * FROM social_schema.social_accounts
+       WHERE status = 'ACTIVE'
+         AND token_expires_at IS NOT NULL
+         AND token_expires_at < NOW() + INTERVAL '${daysUntilExpiry} days'
+         AND token_expires_at > NOW()`,
+    );
+    return rows.map((r) => this.mapAccount(r));
+  }
+
+  async updateAccountToken(
+    tenantId: string,
+    accountId: string,
+    accessToken: string,
+    tokenExpiresAt: Date,
+  ): Promise<void> {
+    await this.prisma.$executeRawUnsafe(
+      `UPDATE social_schema.social_accounts
+       SET access_token = $1, token_expires_at = $2, status = 'ACTIVE', updated_at = NOW()
+       WHERE id = $3 AND tenant_id = $4`,
+      accessToken,
+      tokenExpiresAt,
+      accountId,
+      tenantId,
+    );
   }
 
   private mapAccount(raw: any): SocialAccount {

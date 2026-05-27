@@ -25,6 +25,7 @@ export class LinkedInAdapter implements ISocialPlatformAdapter {
     _accessToken: string,
     _recipientId: string,
     _content: InboxMessageContent,
+    _pageId: string,
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     return {
       success: false,

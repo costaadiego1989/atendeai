@@ -41,6 +41,7 @@ describe('AutoReplyEngine', () => {
       countRepliesByRuleInLastHour: jest.fn().mockResolvedValue(0),
       countRepliesForPostByRule: jest.fn().mockResolvedValue(0),
       findLastReplyToUser: jest.fn().mockResolvedValue(null),
+      findAccountById: jest.fn().mockResolvedValue({ pageId: 'page-123' }),
       saveReply: jest.fn().mockResolvedValue('reply-1'),
       updateCommentStatus: jest.fn().mockResolvedValue(undefined),
       incrementRuleFired: jest.fn().mockResolvedValue(undefined),

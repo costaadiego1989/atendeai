@@ -6,11 +6,15 @@ import { SocialWebhookController } from './presentation/controllers/SocialWebhoo
 import { SOCIAL_REPOSITORY } from './domain/ports/ISocialRepository';
 import { SOCIAL_PLATFORM_ADAPTER } from './domain/ports/ISocialPlatformAdapter';
 import { SOCIAL_DELAYED_JOB_QUEUE } from './domain/ports/ISocialDelayedJobQueue';
+import { SOCIAL_ACCOUNT_FACADE } from './application/ports/ISocialAccountFacade';
 import { PrismaSocialRepository } from './infrastructure/persistence/PrismaSocialRepository';
 import { InstagramGraphCommentAdapter } from './infrastructure/adapters/InstagramGraphCommentAdapter';
 import { LinkedInAdapter } from './infrastructure/adapters/LinkedInAdapter';
 import { BullMQSocialDelayedJobQueue } from './infrastructure/queue/BullMQSocialDelayedJobQueue';
 import { SocialDelayedJobProcessor } from './infrastructure/queue/SocialDelayedJobProcessor';
+import { MetaTokenExchangeService } from './infrastructure/services/MetaTokenExchangeService';
+import { TokenRefreshScheduler } from './infrastructure/services/TokenRefreshScheduler';
+import { SocialAccountFacade } from './infrastructure/services/SocialAccountFacade';
 import { AutoReplyEngine } from './application/services/AutoReplyEngine';
 import { ProcessIncomingCommentUseCase } from './application/use-cases/ProcessIncomingCommentUseCase';
 import { ReplyToCommentUseCase } from './application/use-cases/ReplyToCommentUseCase';
@@ -36,6 +40,13 @@ import { ConfigureAutoReplyRulesUseCase } from './application/use-cases/Configur
       useClass: BullMQSocialDelayedJobQueue,
     },
     SocialDelayedJobProcessor,
+    MetaTokenExchangeService,
+    TokenRefreshScheduler,
+    SocialAccountFacade,
+    {
+      provide: SOCIAL_ACCOUNT_FACADE,
+      useExisting: SocialAccountFacade,
+    },
     AutoReplyEngine,
     ProcessIncomingCommentUseCase,
     ReplyToCommentUseCase,
@@ -45,6 +56,7 @@ import { ConfigureAutoReplyRulesUseCase } from './application/use-cases/Configur
   exports: [
     SOCIAL_REPOSITORY,
     SOCIAL_PLATFORM_ADAPTER,
+    SOCIAL_ACCOUNT_FACADE,
     ProcessIncomingCommentUseCase,
     AutoReplyEngine,
   ],

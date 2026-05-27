@@ -49,7 +49,9 @@ async function bootstrap() {
   try {
     assertProductionDatastoreEnv();
 
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+      rawBody: true,
+    });
     app.use(cookieParser());
 
     app.useGlobalPipes(

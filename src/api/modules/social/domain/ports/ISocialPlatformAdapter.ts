@@ -11,6 +11,7 @@ export interface ISocialPlatformAdapter {
     accessToken: string,
     recipientId: string,
     content: InboxMessageContent,
+    pageId: string,
   ): Promise<{ success: boolean; messageId?: string; error?: string }>;
 
   deleteComment(

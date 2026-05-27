@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import {
@@ -7,10 +7,15 @@ import {
   ExternalComment,
   ExternalPost,
 } from '../../domain/ports/ISocialPlatformAdapter';
+import {
+  classifyMetaApiError,
+  ClassifiedMetaError,
+} from './MetaApiErrorClassifier';
 
 @Injectable()
 export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
   readonly platform = 'INSTAGRAM';
+  private readonly logger = new Logger(InstagramGraphCommentAdapter.name);
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -34,12 +39,10 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
         { params: { access_token: accessToken } },
       );
       return { success: true, replyId: response.data?.id };
-    } catch (err: any) {
-      const msg = err?.response?.data?.error?.message || err.message;
-      console.error(
-        `[InstagramGraphCommentAdapter] replyToComment failed: ${msg}`,
-      );
-      return { success: false, error: msg };
+    } catch (err: unknown) {
+      const classified = classifyMetaApiError(err);
+      this.logClassifiedError('replyToComment', classified);
+      return { success: false, error: classified.message };
     }
   }
 
@@ -47,9 +50,12 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
     accessToken: string,
     recipientId: string,
     content: InboxMessageContent,
+    pageId: string,
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
-      const pageId = this.configService.get<string>('META_PAGE_ID') || '';
+      if (!pageId) {
+        return { success: false, error: 'pageId is required for sending DMs' };
+      }
 
       let message: Record<string, unknown>;
 
@@ -93,12 +99,10 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
       );
 
       return { success: true, messageId: response.data?.message_id };
-    } catch (err: any) {
-      const msg = err?.response?.data?.error?.message || err.message;
-      console.error(
-        `[InstagramGraphCommentAdapter] sendInboxMessage failed: ${msg}`,
-      );
-      return { success: false, error: msg };
+    } catch (err: unknown) {
+      const classified = classifyMetaApiError(err);
+      this.logClassifiedError('sendInboxMessage', classified);
+      return { success: false, error: classified.message };
     }
   }
 
@@ -111,11 +115,10 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
         params: { access_token: accessToken },
       });
       return { success: true };
-    } catch (err: any) {
-      return {
-        success: false,
-        error: err?.response?.data?.error?.message || err.message,
-      };
+    } catch (err: unknown) {
+      const classified = classifyMetaApiError(err);
+      this.logClassifiedError('deleteComment', classified);
+      return { success: false, error: classified.message };
     }
   }
 
@@ -131,11 +134,10 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
         { params: { access_token: accessToken } },
       );
       return { success: true };
-    } catch (err: any) {
-      return {
-        success: false,
-        error: err?.response?.data?.error?.message || err.message,
-      };
+    } catch (err: unknown) {
+      const classified = classifyMetaApiError(err);
+      this.logClassifiedError('hideComment', classified);
+      return { success: false, error: classified.message };
     }
   }
 
@@ -169,10 +171,9 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
 
       const nextCursor = response.data?.paging?.cursors?.after;
       return { comments, nextCursor };
-    } catch (err: any) {
-      console.error(
-        `[InstagramGraphCommentAdapter] fetchComments failed: ${err.message}`,
-      );
+    } catch (err: unknown) {
+      const classified = classifyMetaApiError(err);
+      this.logClassifiedError('fetchComments', classified);
       return { comments: [] };
     }
   }
@@ -198,11 +199,27 @@ export class InstagramGraphCommentAdapter implements ISocialPlatformAdapter {
         permalink: d.permalink,
         timestamp: d.timestamp ? new Date(d.timestamp) : undefined,
       };
-    } catch (err: any) {
-      console.error(
-        `[InstagramGraphCommentAdapter] fetchPostDetails failed: ${err.message}`,
-      );
+    } catch (err: unknown) {
+      const classified = classifyMetaApiError(err);
+      this.logClassifiedError('fetchPostDetails', classified);
       return null;
+    }
+  }
+
+  private logClassifiedError(
+    method: string,
+    classified: ClassifiedMetaError,
+  ): void {
+    const context = `[${method}] type=${classified.type} code=${classified.code ?? 'n/a'} subcode=${classified.subcode ?? 'n/a'} http=${classified.httpStatus ?? 'n/a'}`;
+
+    if (classified.type === 'TOKEN_EXPIRED') {
+      this.logger.warn(`${context}: ${classified.message}`);
+    } else if (classified.type === 'RATE_LIMITED') {
+      this.logger.warn(
+        `${context}: ${classified.message} (retry after ${classified.retryAfterMs}ms)`,
+      );
+    } else {
+      this.logger.error(`${context}: ${classified.message}`);
     }
   }
 }
