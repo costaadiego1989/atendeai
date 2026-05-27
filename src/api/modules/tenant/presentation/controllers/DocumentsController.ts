@@ -71,6 +71,6 @@ export class DocumentsController {
     @Param('tenantId') tenantId: string,
     @Param('docId') docId: string,
   ) {
-    await this.deleteDocument.execute(tenantId, docId);
+    await this.deleteDocument.execute({ tenantId, documentId: docId });
   }
 }

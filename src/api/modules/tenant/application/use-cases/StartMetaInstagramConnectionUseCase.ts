@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
   ITenantRepository,
@@ -13,7 +14,10 @@ interface Input {
 }
 
 @Injectable()
-export class StartMetaInstagramConnectionUseCase {
+export class StartMetaInstagramConnectionUseCase implements IUseCase<
+  Input,
+  { authorizationUrl: string }
+> {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,

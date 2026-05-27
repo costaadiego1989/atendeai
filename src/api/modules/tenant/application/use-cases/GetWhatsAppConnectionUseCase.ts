@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   ITenantRepository,
   TENANT_REPOSITORY,
@@ -7,15 +8,52 @@ import {
 import { TenantBranch } from '../../domain/entities/TenantBranch';
 import { WhatsAppConfigStatus } from '../../domain/entities/WhatsAppConfig';
 
+export interface GetWhatsAppConnectionInput {
+  tenantId: string;
+  branchId?: string;
+}
+
+interface WhatsAppConnectionConfig {
+  provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+  status: WhatsAppConfigStatus;
+  whatsappNumber: string | null;
+  senderId: string | null;
+  senderSid: string | null;
+  wabaId: string | null;
+}
+
+export interface GetWhatsAppConnectionOutput {
+  scope: {
+    type: 'TENANT' | 'BRANCH';
+    branchId: string | null;
+    label: string;
+  };
+  provider: 'TWILIO';
+  mode: 'EMBEDDED_SIGNUP';
+  embeddedSignupReady: boolean;
+  embeddedSignup: {
+    appId: string | null;
+    configurationId: string | null;
+    solutionId: string | null;
+  };
+  connection: WhatsAppConnectionConfig | null;
+}
+
 @Injectable()
-export class GetWhatsAppConnectionUseCase {
+export class GetWhatsAppConnectionUseCase implements IUseCase<
+  GetWhatsAppConnectionInput,
+  GetWhatsAppConnectionOutput
+> {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
     private readonly configService: ConfigService,
   ) {}
 
-  async execute(tenantId: string, branchId?: string) {
+  async execute(
+    input: GetWhatsAppConnectionInput,
+  ): Promise<GetWhatsAppConnectionOutput> {
+    const { tenantId, branchId } = input;
     const tenant = await this.tenantRepository.findById(tenantId);
     if (!tenant) {
       throw new NotFoundException(`Tenant with ID ${tenantId} not found`);
@@ -23,14 +61,7 @@ export class GetWhatsAppConnectionUseCase {
 
     let scopeLabel = 'Matriz';
     let scopeType: 'TENANT' | 'BRANCH' = 'TENANT';
-    let config: {
-      provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
-      status: WhatsAppConfigStatus;
-      whatsappNumber: string | null;
-      senderId: string | null;
-      senderSid: string | null;
-      wabaId: string | null;
-    } | null = tenant.whatsAppConfig
+    let config: WhatsAppConnectionConfig | null = tenant.whatsAppConfig
       ? {
           provider: tenant.whatsAppConfig.provider,
           status: tenant.whatsAppConfig.status,
@@ -86,7 +117,9 @@ export class GetWhatsAppConnectionUseCase {
     };
   }
 
-  private mapBranchConnection(branch: TenantBranch) {
+  private mapBranchConnection(
+    branch: TenantBranch,
+  ): WhatsAppConnectionConfig | null {
     if (!branch.whatsAppConfigOverride) {
       return null;
     }

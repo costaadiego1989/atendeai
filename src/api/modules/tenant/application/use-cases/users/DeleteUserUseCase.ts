@@ -4,13 +4,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   IUserRepository,
   USER_REPOSITORY,
 } from '../../../domain/repositories/IUserRepository';
 
 @Injectable()
-export class DeleteUserUseCase {
+export class DeleteUserUseCase implements IUseCase<
+  { userId: string; tenantId: string },
+  void
+> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepo: IUserRepository,
@@ -29,6 +33,6 @@ export class DeleteUserUseCase {
       throw new ConflictException('The tenant owner cannot be deleted.');
     }
 
-    await this.userRepo.delete(input.userId);
+    await this.userRepo.delete(input.userId, input.tenantId);
   }
 }

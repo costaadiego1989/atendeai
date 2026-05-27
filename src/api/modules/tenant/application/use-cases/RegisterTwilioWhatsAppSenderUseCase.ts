@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   ITenantRepository,
   TENANT_REPOSITORY,
@@ -24,8 +25,20 @@ export interface RegisterTwilioWhatsAppSenderInput {
   logoUrl?: string;
 }
 
+export interface RegisterTwilioWhatsAppSenderOutput {
+  provider: 'TWILIO';
+  senderSid: string;
+  senderId: string;
+  status: string;
+  whatsappNumber: string;
+  verificationRequired: boolean;
+}
+
 @Injectable()
-export class RegisterTwilioWhatsAppSenderUseCase {
+export class RegisterTwilioWhatsAppSenderUseCase implements IUseCase<
+  RegisterTwilioWhatsAppSenderInput,
+  RegisterTwilioWhatsAppSenderOutput
+> {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
@@ -36,7 +49,9 @@ export class RegisterTwilioWhatsAppSenderUseCase {
     private readonly billingCapacityService: TenantBillingCapacityService,
   ) {}
 
-  async execute(input: RegisterTwilioWhatsAppSenderInput) {
+  async execute(
+    input: RegisterTwilioWhatsAppSenderInput,
+  ): Promise<RegisterTwilioWhatsAppSenderOutput> {
     const tenant = await this.tenantRepository.findById(input.tenantId);
     if (!tenant) {
       throw new EntityNotFoundException('Tenant', input.tenantId);

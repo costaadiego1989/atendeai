@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   ITenantRepository,
   TENANT_REPOSITORY,
@@ -13,7 +14,10 @@ interface DeleteTenantBranchInput {
 }
 
 @Injectable()
-export class DeleteTenantBranchUseCase {
+export class DeleteTenantBranchUseCase implements IUseCase<
+  DeleteTenantBranchInput,
+  { success: boolean }
+> {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,

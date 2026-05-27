@@ -89,6 +89,7 @@ describe('GetTenantOnboardingChecklistUseCase', () => {
         summaries: ['s1'],
         status: 'READY',
         error: null,
+        canSendIt: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

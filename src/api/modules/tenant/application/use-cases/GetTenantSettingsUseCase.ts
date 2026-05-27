@@ -6,7 +6,7 @@ import {
 import {
   ITenantAuditLogRepository,
   TENANT_AUDIT_LOG_REPOSITORY,
-} from '../ports/ITenantAuditLogRepository';
+} from '../../domain/repositories/ITenantAuditLogRepository';
 import {
   GetTenantSettingsOutput,
   IGetTenantSettingsUseCase,

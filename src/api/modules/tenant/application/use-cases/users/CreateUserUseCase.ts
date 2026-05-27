@@ -5,6 +5,7 @@ import {
   Optional,
   Logger,
 } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   IUserRepository,
   USER_REPOSITORY,
@@ -46,7 +47,10 @@ export interface CreateUserInput {
 }
 
 @Injectable()
-export class CreateUserUseCase {
+export class CreateUserUseCase implements IUseCase<
+  CreateUserInput,
+  { id: string }
+> {
   private readonly logger = new Logger(CreateUserUseCase.name);
 
   constructor(

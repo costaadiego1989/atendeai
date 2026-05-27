@@ -1,4 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   ITenantRepository,
   TENANT_REPOSITORY,
@@ -13,7 +14,10 @@ export interface DeletePromotionInput {
 }
 
 @Injectable()
-export class DeletePromotionUseCase {
+export class DeletePromotionUseCase implements IUseCase<
+  DeletePromotionInput,
+  void
+> {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepository: ITenantRepository,
