@@ -2,7 +2,7 @@ import { TenantAuditService } from '../application/services/TenantAuditService.j
 import {
   ITenantAuditLogRepository,
   TenantAuditLogInput,
-} from '../application/ports/ITenantAuditLogRepository.js';
+} from '../domain/repositories/ITenantAuditLogRepository.js';
 
 describe('TenantAuditService', () => {
   let service: TenantAuditService;

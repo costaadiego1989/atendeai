@@ -15,5 +15,5 @@ export interface IUserRepository {
     email: string;
     phone: string;
   } | null>;
-  delete(id: string): Promise<void>;
+  delete(id: string, tenantId: string): Promise<void>;
 }
