@@ -27,6 +27,9 @@ interface MelhorEnvioQuoteResponse {
  * - MELHOR_ENVIO_TOKEN: API bearer token
  * - MELHOR_ENVIO_SANDBOX: 'true' for sandbox, 'false' for production
  */
+/** Request timeout for Melhor Envio API calls (10 seconds) */
+const REQUEST_TIMEOUT_MS = 10_000;
+
 @Injectable()
 export class MelhorEnvioCarrierShippingAdapter implements ICarrierShippingAdapter {
   private readonly logger = new Logger(MelhorEnvioCarrierShippingAdapter.name);
@@ -68,6 +71,7 @@ export class MelhorEnvioCarrierShippingAdapter implements ICarrierShippingAdapte
           'User-Agent': 'AtendeAi/1.0',
         },
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
 
       if (!response.ok) {

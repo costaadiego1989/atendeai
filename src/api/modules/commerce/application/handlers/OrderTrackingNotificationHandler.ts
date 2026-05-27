@@ -7,6 +7,7 @@ import {
 import {
   COMMERCE_REPOSITORY,
   ICommerceRepository,
+  CommerceCarrier,
 } from '../../domain/ports/ICommerceRepository';
 import { getCarrierLabel } from '../../domain/value-objects/TrackingUrl';
 
@@ -88,7 +89,9 @@ export class OrderTrackingNotificationHandler implements OnModuleInit {
     trackingUrl: string | null,
     carrier?: string | null,
   ): string {
-    const carrierLabel = getCarrierLabel(carrier as any);
+    const carrierLabel = getCarrierLabel(
+      carrier as CommerceCarrier | null | undefined,
+    );
     let message =
       `Seu pedido foi enviado! 📦\n\n` +
       `Transportadora: ${carrierLabel}\n` +
