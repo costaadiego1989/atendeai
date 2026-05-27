@@ -4,16 +4,19 @@ import {
   ICommerceRepository,
   CommerceOrderRecord,
   CommerceOrderStatus,
+  CommerceCarrier,
 } from '../../domain/ports/ICommerceRepository';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { OrderNotFoundError } from '../../domain/errors/OrderNotFoundError';
 import { CommerceOrderTrackingSetIntegrationEvent } from '../integration-events/CheckoutIntegrationEvents';
+import { buildTrackingUrl } from '../../domain/value-objects/TrackingUrl';
 
 export interface SetOrderTrackingCodeCommand {
   tenantId: string;
   orderId: string;
   trackingCode: string;
   trackingUrl?: string;
+  carrier?: CommerceCarrier;
   userId?: string;
   userName?: string;
 }
@@ -53,11 +56,17 @@ export class SetOrderTrackingCodeUseCase {
       );
     }
 
+    // Auto-generate trackingUrl from carrier if not explicitly provided
+    const trackingUrl =
+      command.trackingUrl ??
+      buildTrackingUrl(command.carrier, command.trackingCode);
+
     const updatedOrder = await this.commerceRepository.updateOrderTracking({
       tenantId: command.tenantId,
       orderId: command.orderId,
       trackingCode: command.trackingCode,
-      trackingUrl: command.trackingUrl,
+      trackingUrl,
+      carrier: command.carrier ?? null,
     });
 
     await this.commerceRepository.saveAuditLog({
@@ -69,7 +78,8 @@ export class SetOrderTrackingCodeUseCase {
       entityType: 'ORDER',
       metadata: {
         trackingCode: command.trackingCode,
-        trackingUrl: command.trackingUrl ?? null,
+        trackingUrl: trackingUrl ?? null,
+        carrier: command.carrier ?? null,
       },
     });
 
@@ -79,7 +89,8 @@ export class SetOrderTrackingCodeUseCase {
         tenantId: order.tenantId,
         contactId: order.contactId,
         trackingCode: command.trackingCode,
-        trackingUrl: command.trackingUrl ?? null,
+        trackingUrl: trackingUrl ?? null,
+        carrier: command.carrier ?? null,
       }),
     );
 

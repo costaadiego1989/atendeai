@@ -11,11 +11,12 @@ import {
 } from '../../domain/ports/ICommerceRepository';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { CommerceSessionItemAddedIntegrationEvent } from '../integration-events/CheckoutIntegrationEvents';
-
 import {
-  SALES_REPOSITORY,
-  ISalesCouponRepository,
-} from '@modules/sales/domain/repositories/ISalesRepository';
+  SALES_FACADE,
+  ISalesFacade,
+} from '@modules/sales/application/facades/ISalesFacade';
+import { ShoppingSession } from '../../domain/entities/ShoppingSession';
+import { Money } from '../../domain/value-objects/Money';
 
 export interface AddItemToShoppingSessionInput {
   tenantId: string;
@@ -30,8 +31,8 @@ export class AddItemToShoppingSessionUseCase {
   constructor(
     @Inject(COMMERCE_REPOSITORY)
     private readonly commerceRepository: ICommerceRepository,
-    @Inject(SALES_REPOSITORY)
-    private readonly salesRepository: ISalesCouponRepository,
+    @Inject(SALES_FACADE)
+    private readonly salesFacade: ISalesFacade,
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
   ) {}
@@ -103,6 +104,12 @@ export class AddItemToShoppingSessionUseCase {
       throw new ConflictException('Selected item has no valid price');
     }
 
+    const lineTotal = ShoppingSession.computeLineTotal(
+      price,
+      input.quantity,
+      currency,
+    );
+
     const addedItem = await this.commerceRepository.addSessionItem({
       sessionId: input.sessionId,
       tenantId: input.tenantId,
@@ -112,6 +119,7 @@ export class AddItemToShoppingSessionUseCase {
       name,
       quantity: input.quantity,
       unitPrice: price,
+      lineTotal: lineTotal.amount,
       currency,
     });
 
@@ -124,38 +132,68 @@ export class AddItemToShoppingSessionUseCase {
       throw new NotFoundException('Shopping session not found after item add');
     }
 
-    const subtotalAmount = refreshedSession.items.reduce(
-      (total, item) => total + Number(item.lineTotal),
-      0,
-    );
+    const sessionAggregate = ShoppingSession.reconstruct({
+      id: refreshedSession.id,
+      tenantId: refreshedSession.tenantId,
+      branchId: refreshedSession.branchId,
+      conversationId: refreshedSession.conversationId,
+      contactId: refreshedSession.contactId,
+      status: refreshedSession.status,
+      fulfillmentType: refreshedSession.fulfillmentType,
+      deliveryAddress: refreshedSession.deliveryAddress,
+      couponCode: refreshedSession.couponCode,
+      subtotalAmount: refreshedSession.subtotalAmount ?? 0,
+      freightAmount: refreshedSession.freightAmount ?? 0,
+      discountAmount: refreshedSession.discountAmount ?? 0,
+      totalAmount: refreshedSession.totalAmount ?? 0,
+      currency,
+      items: refreshedSession.items.map((item) => ({
+        id: item.id,
+        sessionId: item.sessionId,
+        tenantId: item.tenantId,
+        source: item.source,
+        inventoryItemId: item.inventoryItemId,
+        catalogItemId: item.catalogItemId,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice ?? 0),
+        lineTotal: Number(item.lineTotal),
+        currency: item.currency,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      })),
+    });
 
-    let discountAmount = refreshedSession.discountAmount ?? 0;
+    // Recalculate subtotal from items first (DB value may be stale)
+    sessionAggregate.recalculateTotals();
+
+    let discountOverride: Money | undefined;
     if (refreshedSession.couponCode) {
-      const coupon = await this.salesRepository.findCouponByCode(
+      const coupon = await this.salesFacade.findCouponByCode(
         input.tenantId,
         refreshedSession.couponCode,
       );
       if (coupon && coupon.active) {
         if (coupon.discountType === 'FIXED_AMOUNT') {
-          discountAmount = coupon.discountValue;
+          discountOverride = Money.create(coupon.discountValue, currency);
         } else if (coupon.discountType === 'PERCENTAGE') {
-          discountAmount = (subtotalAmount * coupon.discountValue) / 100;
+          const subtotal = sessionAggregate.subtotalAmount;
+          discountOverride = subtotal.multiply(coupon.discountValue / 100);
         }
       }
     }
 
-    const totalAmount =
-      subtotalAmount +
-      Number(refreshedSession.freightAmount ?? 0) -
-      discountAmount;
+    if (discountOverride) {
+      sessionAggregate.recalculateTotals(discountOverride);
+    }
 
     const updatedSession = await this.commerceRepository.updateSessionState({
       tenantId: input.tenantId,
       sessionId: input.sessionId,
       status: 'BUILDING_CART',
-      subtotalAmount,
-      discountAmount,
-      totalAmount,
+      subtotalAmount: sessionAggregate.subtotalAmount.amount,
+      discountAmount: sessionAggregate.discountAmount.amount,
+      totalAmount: sessionAggregate.totalAmount.amount,
     });
 
     await this.eventBus.publish(

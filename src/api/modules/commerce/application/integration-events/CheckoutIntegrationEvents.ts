@@ -256,6 +256,7 @@ export class CommerceOrderTrackingSetIntegrationEvent extends IntegrationEvent {
     contactId: string | null;
     trackingCode: string;
     trackingUrl: string | null;
+    carrier: string | null;
   }) {
     super();
     this.payload = data;

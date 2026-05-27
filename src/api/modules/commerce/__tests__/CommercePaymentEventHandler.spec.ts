@@ -89,6 +89,8 @@ describe('CommercePaymentEventHandler', () => {
       trackingCode: null,
       trackingUrl: null,
       trackingNotifiedAt: null,
+      carrier: null,
+      carrierServiceName: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -116,6 +118,8 @@ describe('CommercePaymentEventHandler', () => {
       trackingCode: null,
       trackingUrl: null,
       trackingNotifiedAt: null,
+      carrier: null,
+      carrierServiceName: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

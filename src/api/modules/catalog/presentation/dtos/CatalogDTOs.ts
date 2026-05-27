@@ -90,6 +90,30 @@ export class CreateCatalogItemDTO {
   initialStock?: number;
 
   @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  weightGrams?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  heightCm?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  widthCm?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  lengthCm?: number;
+
+  @IsOptional()
   @IsObject()
   attributes?: Record<string, unknown>;
 
@@ -140,6 +164,30 @@ export class UpdateCatalogItemDTO {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  weightGrams?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  heightCm?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  widthCm?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value == null ? undefined : Number(value)))
+  @IsInt()
+  @Min(0)
+  lengthCm?: number;
 
   @IsOptional()
   @IsObject()

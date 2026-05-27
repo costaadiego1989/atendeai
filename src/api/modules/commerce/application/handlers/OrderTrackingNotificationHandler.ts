@@ -8,6 +8,7 @@ import {
   COMMERCE_REPOSITORY,
   ICommerceRepository,
 } from '../../domain/ports/ICommerceRepository';
+import { getCarrierLabel } from '../../domain/value-objects/TrackingUrl';
 
 @Injectable()
 export class OrderTrackingNotificationHandler implements OnModuleInit {
@@ -34,7 +35,8 @@ export class OrderTrackingNotificationHandler implements OnModuleInit {
 
   private async handle(event: any): Promise<void> {
     const payload = event.payload || event;
-    const { orderId, tenantId, contactId, trackingCode, trackingUrl } = payload;
+    const { orderId, tenantId, contactId, trackingCode, trackingUrl, carrier } =
+      payload;
 
     if (!contactId) {
       this.logger.warn(
@@ -56,7 +58,11 @@ export class OrderTrackingNotificationHandler implements OnModuleInit {
         return;
       }
 
-      const message = this.buildTrackingMessage(trackingCode, trackingUrl);
+      const message = this.buildTrackingMessage(
+        trackingCode,
+        trackingUrl,
+        carrier,
+      );
 
       await this.messagingFacade.queueSystemMessage({
         tenantId,
@@ -80,9 +86,13 @@ export class OrderTrackingNotificationHandler implements OnModuleInit {
   private buildTrackingMessage(
     trackingCode: string,
     trackingUrl: string | null,
+    carrier?: string | null,
   ): string {
+    const carrierLabel = getCarrierLabel(carrier as any);
     let message =
-      `Seu pedido foi enviado! 📦\n\n` + `Código de rastreio: ${trackingCode}`;
+      `Seu pedido foi enviado! 📦\n\n` +
+      `Transportadora: ${carrierLabel}\n` +
+      `Código de rastreio: ${trackingCode}`;
 
     if (trackingUrl) {
       message += `\nAcompanhe aqui: ${trackingUrl}`;

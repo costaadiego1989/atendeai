@@ -75,6 +75,10 @@ export class ConfigureCommerceShippingPolicyDTO {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  carrierShippingEnabled?: boolean;
 }
 
 export class StartShoppingSessionDTO {
@@ -223,6 +227,11 @@ export class SetOrderTrackingCodeDTO {
   @IsOptional()
   @IsString()
   trackingUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['CORREIOS', 'JADLOG', 'MELHOR_ENVIO', 'OTHER'])
+  carrier?: string;
 }
 
 export class ApplyCouponDTO {
