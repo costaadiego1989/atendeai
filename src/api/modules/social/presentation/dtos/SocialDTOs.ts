@@ -133,7 +133,7 @@ export class SendInboxMessageDTO {
 
 export class ConnectInstagramDTO {
   @IsString()
-  code!: string;
+  accessToken!: string;
 
   @IsString()
   instagramAccountId!: string;
@@ -150,7 +150,6 @@ export class ConnectInstagramDTO {
   @IsString()
   profilePictureUrl?: string;
 
-  @IsOptional()
   @IsString()
-  pageId?: string;
+  pageId!: string;
 }

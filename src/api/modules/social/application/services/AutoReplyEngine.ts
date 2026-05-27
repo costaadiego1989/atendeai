@@ -119,6 +119,12 @@ export class AutoReplyEngine {
     const { actions } = rule;
     let didReply = false;
 
+    const account = await this.repo.findAccountById(
+      comment.tenantId,
+      comment.socialAccountId,
+    );
+    const pageId = account?.pageId || '';
+
     if (actions.replyToComment?.enabled) {
       const replyText = await this.resolveReplyText(
         actions.replyToComment,
@@ -182,6 +188,7 @@ export class AutoReplyEngine {
           commentId: comment.id.toValue(),
           ruleId: rule.id.toValue(),
           recipientUsername: comment.authorUsername || undefined,
+          pageId,
         });
       } else {
         await this.adapter.sendInboxMessage(
@@ -190,6 +197,7 @@ export class AutoReplyEngine {
           {
             text: inboxText,
           },
+          pageId,
         );
 
         for (const media of mediaAttachments) {
@@ -206,6 +214,7 @@ export class AutoReplyEngine {
             accessToken,
             comment.authorExternalId,
             content,
+            pageId,
           );
         }
 

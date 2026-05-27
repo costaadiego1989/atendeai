@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import request from 'supertest';
 import { SocialWebhookController } from '../presentation/controllers/SocialWebhookController';
 import { ProcessIncomingCommentUseCase } from '../application/use-cases/ProcessIncomingCommentUseCase';
@@ -109,6 +110,9 @@ describe('SocialWebhookController', () => {
     async findAccountByPlatform() {
       return account;
     },
+    async findAccountById() {
+      return account;
+    },
   };
 
   const adapter = {
@@ -126,6 +130,16 @@ describe('SocialWebhookController', () => {
       providers: [
         ProcessIncomingCommentUseCase,
         AutoReplyEngine,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'META_WEBHOOK_VERIFY_TOKEN') return 'test-verify-token';
+              if (key === 'META_APP_SECRET') return undefined;
+              return undefined;
+            }),
+          },
+        },
         { provide: SOCIAL_REPOSITORY, useValue: repo },
         { provide: SOCIAL_PLATFORM_ADAPTER, useValue: adapter },
         {

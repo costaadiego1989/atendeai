@@ -29,6 +29,7 @@ export interface DelayedInboxMessageJobData {
   commentId: string;
   ruleId: string;
   recipientUsername?: string;
+  pageId: string;
 }
 
 @Processor('social-delayed')
@@ -55,9 +56,14 @@ export class SocialDelayedJobProcessor extends WorkerHost {
     );
 
     try {
-      await this.adapter.sendInboxMessage(data.accessToken, data.recipientId, {
-        text: data.text,
-      });
+      await this.adapter.sendInboxMessage(
+        data.accessToken,
+        data.recipientId,
+        {
+          text: data.text,
+        },
+        data.pageId,
+      );
 
       if (data.mediaAttachments?.length) {
         for (const media of data.mediaAttachments) {
@@ -74,6 +80,7 @@ export class SocialDelayedJobProcessor extends WorkerHost {
             data.accessToken,
             data.recipientId,
             content,
+            data.pageId,
           );
         }
       }

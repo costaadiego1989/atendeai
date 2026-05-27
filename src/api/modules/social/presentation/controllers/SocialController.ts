@@ -22,11 +22,14 @@ import {
   ISocialRepository,
   SOCIAL_REPOSITORY,
 } from '../../domain/ports/ISocialRepository';
-import { SocialAccount } from '../../domain/entities/SocialAccount';
 import {
   ISocialPlatformAdapter,
   SOCIAL_PLATFORM_ADAPTER,
 } from '../../domain/ports/ISocialPlatformAdapter';
+import {
+  ISocialAccountFacade,
+  SOCIAL_ACCOUNT_FACADE,
+} from '../../application/ports/ISocialAccountFacade';
 import {
   ListCommentsQueryDTO,
   ReplyToCommentDTO,
@@ -44,6 +47,8 @@ export class SocialController {
     private readonly listCommentsUseCase: ListSocialCommentsUseCase,
     private readonly replyToCommentUseCase: ReplyToCommentUseCase,
     private readonly configureRulesUseCase: ConfigureAutoReplyRulesUseCase,
+    @Inject(SOCIAL_ACCOUNT_FACADE)
+    private readonly socialAccountFacade: ISocialAccountFacade,
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
     @Inject(SOCIAL_PLATFORM_ADAPTER)
     private readonly adapter: ISocialPlatformAdapter,
@@ -70,30 +75,18 @@ export class SocialController {
     @Param('tenantId') tenantId: string,
     @Body() body: ConnectInstagramDTO,
   ) {
-    const account = SocialAccount.create({
+    const result = await this.socialAccountFacade.connectAccount({
       tenantId,
       platform: 'INSTAGRAM',
       externalAccountId: body.instagramAccountId,
-      username: body.username || null,
-      displayName: body.displayName || null,
-      profilePictureUrl: body.profilePictureUrl || null,
-      accessToken: body.code,
-      refreshToken: null,
-      tokenExpiresAt: null,
-      pageId: body.pageId || null,
-      webhookSecret: null,
+      accessToken: body.accessToken,
+      pageId: body.pageId,
+      username: body.username,
+      displayName: body.displayName,
+      profilePictureUrl: body.profilePictureUrl,
     });
 
-    await this.repo.saveAccount(account);
-    await this.repo.logAudit(tenantId, {
-      event: 'ACCOUNT_CONNECTED',
-      entityId: account.id.toValue(),
-      entityType: 'ACCOUNT',
-      platform: 'INSTAGRAM',
-      metadata: { username: body.username },
-    });
-
-    return { id: account.id.toValue(), status: 'ACTIVE' };
+    return { id: result.id, status: 'ACTIVE' };
   }
 
   @Delete('accounts/:id')
@@ -209,6 +202,7 @@ export class SocialController {
         linkUrl: body.linkUrl,
         linkTitle: body.linkTitle,
       },
+      account.pageId || '',
     );
 
     if (result.success) {

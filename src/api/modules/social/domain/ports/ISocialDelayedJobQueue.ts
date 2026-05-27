@@ -19,6 +19,8 @@ export interface DelayedInboxMessagePayload {
   commentId: string;
   ruleId: string;
   recipientUsername?: string;
+  /** Page ID for sending DMs */
+  pageId: string;
 }
 
 export interface ISocialDelayedJobQueue {

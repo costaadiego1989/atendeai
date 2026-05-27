@@ -133,6 +133,15 @@ export interface ISocialRepository {
     activeRules: number;
     connectedAccounts: number;
   }>;
+  listAccountsWithExpiringTokens(
+    daysUntilExpiry: number,
+  ): Promise<SocialAccount[]>;
+  updateAccountToken(
+    tenantId: string,
+    accountId: string,
+    accessToken: string,
+    tokenExpiresAt: Date,
+  ): Promise<void>;
 }
 
 export const SOCIAL_REPOSITORY = Symbol('ISocialRepository');
