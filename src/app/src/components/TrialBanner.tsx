@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowRight, Clock } from 'lucide-react';
+import { Sparkles, ArrowRight, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { cn } from '@/lib/utils';
@@ -22,19 +22,50 @@ export function TrialBanner() {
       const diffTime = expirationDate.getTime() - now.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      // If trial has expired, we might handle it differently but for now just show 0 or hide
       setDaysLeft(diffDays > 0 ? diffDays : 0);
     };
 
     updateCountdown();
-    const interval = setInterval(updateCountdown, 1000 * 60 * 60); // Update every hour
+    const interval = setInterval(updateCountdown, 1000 * 60 * 60);
 
     return () => clearInterval(interval);
   }, [tenant?.createdAt]);
 
   const isTrial = tenant?.plan === 'TRIAL';
+  const isExpired = daysLeft === 0;
 
   if (!isTrial || daysLeft === null) return null;
+
+  if (isExpired) {
+    return (
+      <div className="relative isolate overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 px-6 py-3 sm:px-3.5">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,rgba(255,0,0,0.2),transparent)] opacity-40" />
+        
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2 text-sm leading-6 text-white">
+            <AlertTriangle className="h-5 w-5 text-yellow-300 animate-pulse" />
+            <p>
+              <strong className="font-bold text-white">Seu período de teste expirou!</strong>
+              <svg viewBox="0 0 2 2" className="mx-2 inline h-0.5 w-0.5 fill-current" aria-hidden="true">
+                <circle cx="1" cy="1" r="1" />
+              </svg>
+              Assine um plano para continuar usando a plataforma.
+            </p>
+          </div>
+          
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={() => navigate('/app/billing/usage')}
+            className="group h-8 rounded-full bg-white px-4 text-xs font-bold text-red-700 hover:bg-white/90 border-none transition-all hover:scale-105 active:scale-95"
+          >
+            Assinar agora
+            <ArrowRight className="ml-2 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative isolate overflow-hidden bg-gradient-to-r from-[#0E6477] via-[#107B8F] to-[#159BB5] px-6 py-2.5 sm:px-3.5 sm:before:flex-1">

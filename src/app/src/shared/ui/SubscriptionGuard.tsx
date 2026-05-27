@@ -7,6 +7,16 @@ interface SubscriptionGuardProps {
   children: ReactNode;
 }
 
+function isTrialExpired(tenant: { plan?: string; createdAt?: string } | null): boolean {
+  if (!tenant || tenant.plan !== 'TRIAL' || !tenant.createdAt) return false;
+
+  const creationDate = new Date(tenant.createdAt);
+  const expirationDate = new Date(creationDate);
+  expirationDate.setDate(creationDate.getDate() + 7);
+
+  return new Date() >= expirationDate;
+}
+
 export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   const { tenant, isLoading, isAuthenticated } = useAuthStore();
   const location = useLocation();
@@ -16,7 +26,12 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
 
   const isBillingPage = location.pathname.includes('/app/billing');
 
-  if ((tenant?.planStatus === 'EXPIRED' || tenant?.planStatus === 'CANCELED') && !isBillingPage) {
+  const shouldBlock =
+    tenant?.planStatus === 'EXPIRED' ||
+    tenant?.planStatus === 'CANCELED' ||
+    isTrialExpired(tenant);
+
+  if (shouldBlock && !isBillingPage) {
     return <Navigate to="/app/billing/usage" replace state={{ from: location }} />;
   }
 

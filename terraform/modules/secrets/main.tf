@@ -163,6 +163,16 @@ resource "aws_ssm_parameter" "google_calendar_state_secret" {
   tags = var.tags
 }
 
+# --- Inventory ---
+resource "aws_ssm_parameter" "inventory_config_encryption_key" {
+  name        = "${local.name_prefix}/INVENTORY_CONFIG_ENCRYPTION_KEY"
+  description = "Encryption key for inventory provider credentials (32-byte hex)"
+  type        = "SecureString"
+  value       = "CHANGE_ME_MANUALLY"
+  lifecycle { ignore_changes = [value] }
+  tags = var.tags
+}
+
 # --- Meta / Instagram ---
 resource "aws_ssm_parameter" "meta_app_id" {
   name        = "${local.name_prefix}/META_APP_ID"

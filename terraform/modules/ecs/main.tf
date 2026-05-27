@@ -274,6 +274,10 @@ locals {
       valueFrom = "${var.ssm_parameter_prefix}/META_APP_ID"
     },
     {
+      name      = "INVENTORY_CONFIG_ENCRYPTION_KEY"
+      valueFrom = "${var.ssm_parameter_prefix}/INVENTORY_CONFIG_ENCRYPTION_KEY"
+    },
+    {
       name      = "META_APP_SECRET"
       valueFrom = "${var.ssm_parameter_prefix}/META_APP_SECRET"
     },
