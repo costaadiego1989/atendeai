@@ -44,6 +44,7 @@ import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { useUIStore } from '@/shared/stores/ui-store';
 import { filterNavByNiche } from '@/app/helpers/niche-nav-filter';
+import { getTenantEnabledModules } from '@/shared/lib/tenant-module-access';
 
 interface NavItem {
   label: string;
@@ -155,9 +156,19 @@ export function AppLayout({ children }: { children?: ReactNode }) {
   const filteredProspectingNav = filterNavByNiche(prospectingNav, businessType);
 
   const tenantPlan = tenant?.billingAccess?.plan?.toUpperCase();
+  const enabledModules = getTenantEnabledModules(tenant);
+  const hasRecoveryModule = enabledModules.some((m) =>
+    ['Cobrança_AUTO', 'COBRANCA_AUTO', 'RECUPERACAO_LEADS'].includes(m),
+  );
+  const isAboveEssencial = tenantPlan === 'PROFISSIONAL' || tenantPlan === 'ESCALA';
+
   const filteredSettingsNav = settingsNav.filter((item) => {
     // Hide "Integrações" for TRIAL plan — requires at least Essencial
     if (item.path === '/app/settings/integrations' && tenantPlan === 'TRIAL') {
+      return false;
+    }
+    // Hide "Agente de Voz" — requires plan above Essencial AND recovery module enabled
+    if (item.path === '/app/settings/voice' && (!isAboveEssencial || !hasRecoveryModule)) {
       return false;
     }
     // Hide team management for AGENT role
