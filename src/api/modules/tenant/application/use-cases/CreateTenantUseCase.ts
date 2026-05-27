@@ -15,6 +15,10 @@ import {
   ITenantRepository,
   TENANT_REPOSITORY,
 } from '../../domain/repositories/ITenantRepository';
+import {
+  IUserRepository,
+  USER_REPOSITORY,
+} from '../../domain/repositories/IUserRepository';
 import { ValidationErrorException } from '../../../../shared/domain/exceptions/DomainExceptions';
 import { CPF } from '../../../../shared/domain/CPF';
 import {
@@ -29,6 +33,8 @@ export class CreateTenantUseCase implements ICreateTenantUseCase {
   constructor(
     @Inject(TENANT_REPOSITORY)
     private readonly tenantRepo: ITenantRepository,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: IUserRepository,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: IPasswordHasher,
     private readonly tenantDomainEventPublisher: TenantDomainEventPublisher,
@@ -41,8 +47,13 @@ export class CreateTenantUseCase implements ICreateTenantUseCase {
       throw new ValidationErrorException('CNPJ already registered');
     }
 
+    const emailVO = Email.create(input.ownerEmail);
+    const existingUser = await this.userRepo.findByEmail(emailVO.value);
+    if (existingUser) {
+      throw new ValidationErrorException('Email already registered');
+    }
+
     const companyName = CompanyName.create(input.companyName);
-    const email = Email.create(input.ownerEmail);
     const cpf = input.ownerCpf ? CPF.create(input.ownerCpf) : null;
     const phone = Phone.create(input.ownerPhone);
     const plan = Plan.create(input.plan ?? 'TRIAL');
@@ -50,7 +61,7 @@ export class CreateTenantUseCase implements ICreateTenantUseCase {
 
     const ownerUser = User.create({
       name: input.ownerName,
-      email,
+      email: emailVO,
       cpf,
       phone,
       passwordHash,

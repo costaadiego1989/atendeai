@@ -157,7 +157,6 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
         await handler(job.data as T);
       },
       {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         connection: this.connection as any,
         concurrency: options?.concurrency ?? 5,
       },
@@ -205,7 +204,6 @@ export class BullMQEventBus implements IEventBus, OnModuleDestroy {
     let queue = this.queues.get(queueName);
     if (!queue) {
       queue = new Queue(queueName, {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         connection: this.connection as any,
       });
       this.queues.set(queueName, queue);

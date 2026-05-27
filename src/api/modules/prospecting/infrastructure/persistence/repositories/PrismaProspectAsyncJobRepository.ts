@@ -75,7 +75,9 @@ export class PrismaProspectAsyncJobRepository implements IProspectAsyncJobReposi
     `);
 
     if (!rows[0]) {
-      throw new Error('INSERT RETURNING returned no rows — unexpected DB state');
+      throw new Error(
+        'INSERT RETURNING returned no rows — unexpected DB state',
+      );
     }
 
     return this.toView(rows[0]);
