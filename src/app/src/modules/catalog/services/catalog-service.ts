@@ -29,6 +29,10 @@ interface CatalogItemApiResponse {
   source: 'MANUAL' | 'IMPORT' | 'ERP_SNAPSHOT';
   externalReference?: string | null;
   imageUrl?: string | null;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown> | null;
   variants?: Array<Record<string, unknown>> | null;
   optionGroups?: Array<Record<string, unknown>> | null;
@@ -60,6 +64,10 @@ export interface CreateCatalogItemInput {
   externalReference?: string;
   imageUrl?: string;
   initialStock?: number;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown>;
   variants?: Array<Record<string, unknown>>;
   optionGroups?: Array<Record<string, unknown>>;
@@ -75,6 +83,10 @@ export interface UpdateCatalogItemInput {
   tags?: string[];
   externalReference?: string;
   imageUrl?: string;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown>;
   variants?: Array<Record<string, unknown>>;
   optionGroups?: Array<Record<string, unknown>>;
@@ -150,6 +162,10 @@ function mapItem(input: CatalogItemApiResponse): CatalogItem {
     source: input.source,
     externalReference: input.externalReference ?? undefined,
     imageUrl: input.imageUrl ?? undefined,
+    weightGrams: input.weightGrams ?? null,
+    heightCm: input.heightCm ?? null,
+    widthCm: input.widthCm ?? null,
+    lengthCm: input.lengthCm ?? null,
     attributes: input.attributes ?? {},
     variants: input.variants ?? [],
     optionGroups: input.optionGroups ?? [],

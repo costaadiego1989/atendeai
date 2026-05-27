@@ -151,6 +151,7 @@ export function useCheckoutPageViewModel() {
     servicedNeighborhoods: '',
     deliverySchedule: buildDefaultDeliverySchedule(),
     notes: '',
+    carrierShippingEnabled: false,
   });
   const [abandonmentConfigForm, setAbandonmentConfigForm] = useState<AbandonmentConfig>({
     active: true,
@@ -279,6 +280,7 @@ export function useCheckoutPageViewModel() {
       servicedNeighborhoods: (policy.servicedNeighborhoods ?? []).join(', '),
       deliverySchedule: normalizeDeliverySchedule(policy.deliverySchedule),
       notes: policy.notes ?? '',
+      carrierShippingEnabled: policy.carrierShippingEnabled ?? false,
     });
   }, [shippingPolicyQuery.data]);
 
@@ -298,6 +300,7 @@ export function useCheckoutPageViewModel() {
         servicedNeighborhoods: (policy.servicedNeighborhoods ?? []).join(', '),
         deliverySchedule: normalizeDeliverySchedule(policy.deliverySchedule),
         notes: policy.notes ?? '',
+        carrierShippingEnabled: policy.carrierShippingEnabled ?? false,
       });
       return;
     }
@@ -311,6 +314,7 @@ export function useCheckoutPageViewModel() {
       servicedNeighborhoods: '',
       deliverySchedule: buildDefaultDeliverySchedule(),
       notes: '',
+      carrierShippingEnabled: false,
     });
     setMapLocation(null);
   }, [shippingPolicyQuery.data, shippingPolicySheetOpen]);
@@ -389,6 +393,7 @@ export function useCheckoutPageViewModel() {
           endTime: slot.enabled ? slot.endTime ?? null : null,
         })),
         notes: shippingPolicyForm.notes.trim() || null,
+        carrierShippingEnabled: shippingPolicyForm.carrierShippingEnabled,
       });
     },
     onSuccess: async () => {

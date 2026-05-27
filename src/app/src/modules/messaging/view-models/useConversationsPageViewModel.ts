@@ -662,6 +662,55 @@ export function useConversationsPageViewModel() {
     },
   });
 
+  const sendTrackingToChatMutation = useMutation({
+    mutationFn: async () => {
+      if (!tenant?.id || !selectedCheckoutOrder?.id) {
+        throw new Error('Pedido não encontrado.');
+      }
+      const tracking = await checkoutService.getOrderTracking(
+        tenant.id,
+        selectedCheckoutOrder.id,
+      );
+      if (!tracking.trackingCode) {
+        throw new Error('Nenhum código de rastreio cadastrado neste pedido.');
+      }
+      return tracking;
+    },
+    onSuccess: (tracking) => {
+      if (!selectedConversation) return;
+
+      const carrierLabels: Record<string, string> = {
+        CORREIOS: 'Correios',
+        JADLOG: 'Jadlog',
+        MELHOR_ENVIO: 'Melhor Envio',
+        OTHER: 'Transportadora',
+      };
+      const carrierLabel = tracking.carrier
+        ? (carrierLabels[tracking.carrier] ?? 'Transportadora')
+        : 'Transportadora';
+
+      let text = `Seu pedido foi enviado! 📦\n\nTransportadora: ${carrierLabel}\nCódigo de rastreio: ${tracking.trackingCode}`;
+      if (tracking.trackingUrl) {
+        text += `\nAcompanhe aqui: ${tracking.trackingUrl}`;
+      }
+
+      sendMessageMutation.mutate({ text, file: null });
+      toast({
+        title: 'Rastreio enviado',
+        description: 'A mensagem com o código de rastreio foi enviada no chat.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao enviar rastreio',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível enviar o rastreio agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
   const createConversationChargeMutation = useMutation({
     mutationFn: () => {
       if (!selectedConversation?.contactId) {
@@ -844,6 +893,7 @@ export function useConversationsPageViewModel() {
     sendAssistantReplyMutation,
     updateCheckoutAbandonmentStateMutation,
     triggerCheckoutAbandonmentTouchMutation,
+    sendTrackingToChatMutation,
     chargeDialogOpen,
     setChargeDialogOpen,
     chargeForm,

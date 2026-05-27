@@ -45,7 +45,7 @@ export type BusinessType =
   | 'RENTAL'
   | 'OTHER';
 
-export type CommerceShippingMode = 'FIXED' | 'PER_KM';
+export type CommerceShippingMode = 'FIXED' | 'PER_KM' | 'CARRIER';
 export type CommerceFulfillmentType = 'PICKUP' | 'DELIVERY';
 export type CommerceDeliveryWeekday =
   | 'MONDAY'
@@ -83,6 +83,8 @@ export type CommerceOrderStatus =
   | 'DELIVERED'
   | 'CANCELLED';
 
+export type CommerceCarrier = 'CORREIOS' | 'JADLOG' | 'MELHOR_ENVIO' | 'OTHER';
+
 export interface CommerceDeliverySchedule {
   weekday: CommerceDeliveryWeekday;
   enabled: boolean;
@@ -100,6 +102,7 @@ export interface CommerceShippingPolicy {
   servicedNeighborhoods?: string[];
   deliverySchedule?: CommerceDeliverySchedule[];
   notes?: string | null;
+  carrierShippingEnabled?: boolean;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -176,6 +179,10 @@ export interface CommerceOrder {
   paymentLinkUrl?: string | null;
   paymentStatus?: 'PENDING' | 'PAID' | null;
   paidAt?: string | null;
+  trackingCode?: string | null;
+  trackingUrl?: string | null;
+  trackingNotifiedAt?: string | null;
+  carrier?: CommerceCarrier | null;
   abandonmentTouchesCount?: number;
   lastAbandonmentInterval?: string | null;
   lastAbandonmentAt?: string | null;
@@ -335,6 +342,10 @@ export interface CatalogItem {
   tags?: string[];
   externalReference?: string;
   imageUrl?: string;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown>;
   variants?: Array<Record<string, unknown>>;
   optionGroups?: Array<Record<string, unknown>>;

@@ -42,6 +42,7 @@ export class CommerceShippingController {
         endTime: slot.endTime ?? null,
       })),
       notes: body.notes,
+      carrierShippingEnabled: body.carrierShippingEnabled,
       active: true,
     });
   }

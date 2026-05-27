@@ -16,6 +16,7 @@ export interface ConfigureShippingPolicyInput {
   deliverySchedule?: CommerceDeliveryScheduleRecord[] | null;
   notes?: string | null;
   active?: boolean;
+  carrierShippingEnabled?: boolean;
 }
 
 @Injectable()
@@ -61,6 +62,7 @@ export class ConfigureShippingPolicyUseCase {
       deliverySchedule: normalizedSchedule,
       notes: input.notes ?? null,
       active: input.active ?? true,
+      carrierShippingEnabled: input.carrierShippingEnabled,
     });
   }
 }

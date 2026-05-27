@@ -33,6 +33,8 @@ describe('SetOrderTrackingCodeUseCase', () => {
     trackingCode: null,
     trackingUrl: null,
     trackingNotifiedAt: null,
+    carrier: null,
+    carrierServiceName: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -49,7 +51,7 @@ describe('SetOrderTrackingCodeUseCase', () => {
     useCase = new SetOrderTrackingCodeUseCase(repository, eventBus);
   });
 
-  it('should set tracking code and publish event', async () => {
+  it('should set tracking code with explicit URL and publish event', async () => {
     repository.findOrderById.mockResolvedValue(baseOrder);
     const updatedOrder = { ...baseOrder, trackingCode: 'BR123456789', trackingUrl: 'https://track.com/BR123456789' };
     repository.updateOrderTracking.mockResolvedValue(updatedOrder);
@@ -69,6 +71,7 @@ describe('SetOrderTrackingCodeUseCase', () => {
       orderId: 'order-1',
       trackingCode: 'BR123456789',
       trackingUrl: 'https://track.com/BR123456789',
+      carrier: null,
     });
     expect(repository.saveAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -81,6 +84,131 @@ describe('SetOrderTrackingCodeUseCase', () => {
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(CommerceOrderTrackingSetIntegrationEvent),
     );
+  });
+
+  it('should auto-generate trackingUrl from CORREIOS carrier', async () => {
+    repository.findOrderById.mockResolvedValue(baseOrder);
+    repository.updateOrderTracking.mockResolvedValue({
+      ...baseOrder,
+      trackingCode: 'BR123456789BR',
+      trackingUrl: 'https://rastreio.correios.com.br/app/index.php?objetos=BR123456789BR',
+      carrier: 'CORREIOS',
+    });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'BR123456789BR',
+      carrier: 'CORREIOS',
+    });
+
+    expect(repository.updateOrderTracking).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'BR123456789BR',
+      trackingUrl: 'https://rastreio.correios.com.br/app/index.php?objetos=BR123456789BR',
+      carrier: 'CORREIOS',
+    });
+  });
+
+  it('should auto-generate trackingUrl from JADLOG carrier', async () => {
+    repository.findOrderById.mockResolvedValue(baseOrder);
+    repository.updateOrderTracking.mockResolvedValue({
+      ...baseOrder,
+      trackingCode: 'JDL123',
+      trackingUrl: 'https://www.jadlog.com.br/tracking?code=JDL123',
+      carrier: 'JADLOG',
+    });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'JDL123',
+      carrier: 'JADLOG',
+    });
+
+    expect(repository.updateOrderTracking).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'JDL123',
+      trackingUrl: 'https://www.jadlog.com.br/tracking?code=JDL123',
+      carrier: 'JADLOG',
+    });
+  });
+
+  it('should auto-generate trackingUrl from MELHOR_ENVIO carrier', async () => {
+    repository.findOrderById.mockResolvedValue(baseOrder);
+    repository.updateOrderTracking.mockResolvedValue({
+      ...baseOrder,
+      trackingCode: 'ME123',
+      trackingUrl: 'https://app.melhorenvio.com.br/shipment/tracking/ME123',
+      carrier: 'MELHOR_ENVIO',
+    });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'ME123',
+      carrier: 'MELHOR_ENVIO',
+    });
+
+    expect(repository.updateOrderTracking).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'ME123',
+      trackingUrl: 'https://app.melhorenvio.com.br/shipment/tracking/ME123',
+      carrier: 'MELHOR_ENVIO',
+    });
+  });
+
+  it('should not auto-generate trackingUrl for OTHER carrier', async () => {
+    repository.findOrderById.mockResolvedValue(baseOrder);
+    repository.updateOrderTracking.mockResolvedValue({
+      ...baseOrder,
+      trackingCode: 'XYZ123',
+      carrier: 'OTHER',
+    });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'XYZ123',
+      carrier: 'OTHER',
+    });
+
+    expect(repository.updateOrderTracking).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'XYZ123',
+      trackingUrl: null,
+      carrier: 'OTHER',
+    });
+  });
+
+  it('should prefer explicit trackingUrl over auto-generated', async () => {
+    repository.findOrderById.mockResolvedValue(baseOrder);
+    repository.updateOrderTracking.mockResolvedValue({
+      ...baseOrder,
+      trackingCode: 'BR123',
+      trackingUrl: 'https://custom.com/BR123',
+      carrier: 'CORREIOS',
+    });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'BR123',
+      trackingUrl: 'https://custom.com/BR123',
+      carrier: 'CORREIOS',
+    });
+
+    expect(repository.updateOrderTracking).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      trackingCode: 'BR123',
+      trackingUrl: 'https://custom.com/BR123',
+      carrier: 'CORREIOS',
+    });
   });
 
   it('should throw OrderNotFoundError when order does not exist', async () => {
@@ -145,7 +273,7 @@ describe('SetOrderTrackingCodeUseCase', () => {
     expect(result.trackingCode).toBe('BR123');
   });
 
-  it('should work without trackingUrl', async () => {
+  it('should work without trackingUrl and without carrier', async () => {
     repository.findOrderById.mockResolvedValue(baseOrder);
     repository.updateOrderTracking.mockResolvedValue({ ...baseOrder, trackingCode: 'BR123' });
 
@@ -159,7 +287,8 @@ describe('SetOrderTrackingCodeUseCase', () => {
       tenantId: 'tenant-1',
       orderId: 'order-1',
       trackingCode: 'BR123',
-      trackingUrl: undefined,
+      trackingUrl: null,
+      carrier: null,
     });
   });
 });

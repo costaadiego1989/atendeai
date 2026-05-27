@@ -108,6 +108,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
               ) as CommerceShippingPolicyRecord['deliverySchedule']),
       notes: (row.notes as string | null | undefined) ?? null,
       active: Boolean(row.active),
+      carrierShippingEnabled: Boolean(row.carrier_shipping_enabled ?? false),
       createdAt: new Date(String(row.created_at)),
       updatedAt: new Date(String(row.updated_at)),
     };
@@ -228,6 +229,15 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         (row.selected_catalog_item_id as string | null | undefined) ?? null,
       selectedItemName:
         (row.selected_item_name as string | null | undefined) ?? null,
+      carrierCep: (row.carrier_cep as string | null | undefined) ?? null,
+      carrierServiceCode:
+        (row.carrier_service_code as string | null | undefined) ?? null,
+      carrierServiceName:
+        (row.carrier_service_name as string | null | undefined) ?? null,
+      carrierDeliveryDays:
+        row.carrier_delivery_days == null
+          ? null
+          : Number(row.carrier_delivery_days),
       checkedOutAt: row.checked_out_at
         ? new Date(String(row.checked_out_at))
         : null,
@@ -272,6 +282,10 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       trackingNotifiedAt: row.tracking_notified_at
         ? new Date(String(row.tracking_notified_at))
         : null,
+      carrier:
+        (row.carrier as CommerceOrderRecord['carrier'] | undefined) ?? null,
+      carrierServiceName:
+        (row.carrier_service_name as string | null | undefined) ?? null,
       createdAt: new Date(String(row.created_at)),
       updatedAt: new Date(String(row.updated_at)),
     };
@@ -323,6 +337,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         delivery_schedule,
         notes,
         active,
+        carrier_shipping_enabled,
         created_at,
         updated_at
       ) VALUES (
@@ -336,6 +351,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         ${JSON.stringify(input.deliverySchedule ?? [])}::jsonb,
         ${input.notes ?? null},
         ${input.active},
+        ${input.carrierShippingEnabled ?? false},
         now(),
         now()
       )
@@ -349,6 +365,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         delivery_schedule = EXCLUDED.delivery_schedule,
         notes = EXCLUDED.notes,
         active = EXCLUDED.active,
+        carrier_shipping_enabled = EXCLUDED.carrier_shipping_enabled,
         updated_at = now()
       RETURNING *
     `);
@@ -533,7 +550,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         ${input.quantity},
         ${input.unitPrice},
         ${input.currency ?? 'BRL'},
-        ${Number(input.unitPrice) * Number(input.quantity)},
+        ${input.lineTotal},
         now(),
         now()
       )
@@ -648,6 +665,24 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         Prisma.sql`selected_item_name = ${input.selectedItemName ?? null}`,
       );
     }
+    if ('carrierCep' in input) {
+      assignments.push(Prisma.sql`carrier_cep = ${input.carrierCep ?? null}`);
+    }
+    if ('carrierServiceCode' in input) {
+      assignments.push(
+        Prisma.sql`carrier_service_code = ${input.carrierServiceCode ?? null}`,
+      );
+    }
+    if ('carrierServiceName' in input) {
+      assignments.push(
+        Prisma.sql`carrier_service_name = ${input.carrierServiceName ?? null}`,
+      );
+    }
+    if ('carrierDeliveryDays' in input) {
+      assignments.push(
+        Prisma.sql`carrier_delivery_days = ${input.carrierDeliveryDays ?? null}`,
+      );
+    }
     if ('checkedOutAt' in input) {
       assignments.push(
         Prisma.sql`checked_out_at = ${input.checkedOutAt ?? null}`,
@@ -701,6 +736,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         payment_link_id,
         payment_link_url,
         payment_status,
+        carrier_service_name,
         created_at,
         updated_at
       ) VALUES (
@@ -721,6 +757,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         ${input.paymentLinkId || null},
         ${input.paymentLinkUrl || null},
         ${input.paymentStatus || null},
+        ${input.carrierServiceName || null},
         now(),
         now()
       )
@@ -934,6 +971,7 @@ export class PrismaCommerceRepository implements ICommerceRepository {
       SET
         tracking_code = ${input.trackingCode},
         tracking_url = ${input.trackingUrl ?? null},
+        carrier = ${input.carrier ?? null},
         updated_at = now()
       WHERE tenant_id = ${input.tenantId}::uuid
         AND id = ${input.orderId}::uuid

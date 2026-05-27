@@ -12,6 +12,9 @@ export interface CouponRecord {
 }
 
 export interface ISalesFacade {
-  findCouponByCode(tenantId: string, code: string): Promise<CouponRecord | null>;
+  findCouponByCode(
+    tenantId: string,
+    code: string,
+  ): Promise<CouponRecord | null>;
   incrementCouponUsage(tenantId: string, couponId: string): Promise<void>;
 }

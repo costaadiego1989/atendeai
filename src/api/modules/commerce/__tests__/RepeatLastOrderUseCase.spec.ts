@@ -40,6 +40,8 @@ describe('RepeatLastOrderUseCase', () => {
     trackingCode: null,
     trackingUrl: null,
     trackingNotifiedAt: null,
+    carrier: null,
+    carrierServiceName: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -72,6 +74,10 @@ describe('RepeatLastOrderUseCase', () => {
     selectedInventoryItemId: null,
     selectedCatalogItemId: null,
     selectedItemName: null,
+    carrierCep: null,
+    carrierServiceCode: null,
+    carrierServiceName: null,
+    carrierDeliveryDays: null,
     checkedOutAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -139,6 +145,10 @@ describe('RepeatLastOrderUseCase', () => {
     selectedInventoryItemId: null,
     selectedCatalogItemId: null,
     selectedItemName: null,
+    carrierCep: null,
+    carrierServiceCode: null,
+    carrierServiceName: null,
+    carrierDeliveryDays: null,
     checkedOutAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -231,6 +241,7 @@ describe('RepeatLastOrderUseCase', () => {
       name: 'Pizza Margherita',
       quantity: 2,
       unitPrice: 15,
+      lineTotal: 30,
       currency: 'BRL',
     });
     expect(commerceRepository.addSessionItem).toHaveBeenCalledWith({
@@ -242,6 +253,7 @@ describe('RepeatLastOrderUseCase', () => {
       name: 'Refrigerante 2L',
       quantity: 1,
       unitPrice: 20,
+      lineTotal: 20,
       currency: 'BRL',
     });
     expect(commerceRepository.updateSessionState).toHaveBeenCalledWith({

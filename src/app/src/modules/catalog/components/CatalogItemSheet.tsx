@@ -42,6 +42,10 @@ interface CatalogItemSheetProps {
     tags: string;
     description: string;
     imageUrl?: string;
+    weightGrams: string;
+    heightCm: string;
+    widthCm: string;
+    lengthCm: string;
     customFields: Array<{ id: string; key: string; value: string }>;
     variants: Array<{
       id: string;
@@ -406,6 +410,61 @@ export function CatalogItemSheet({
                   </SelectContent>
                 </Select>
               </div>
+
+              {requiresInventoryControl(form.type) ? (
+                <div className="space-y-3 sm:col-span-2">
+                  <Label className="text-sm font-medium">Peso e dimensões (para frete por transportadora)</Label>
+                  <div className="grid gap-3 sm:grid-cols-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Peso (g)</Label>
+                      <Input
+                        value={form.weightGrams}
+                        onChange={(event) =>
+                          onFormChange({ ...form, weightGrams: event.target.value.replace(/\D/g, '') })
+                        }
+                        inputMode="numeric"
+                        placeholder="Ex: 300"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Altura (cm)</Label>
+                      <Input
+                        value={form.heightCm}
+                        onChange={(event) =>
+                          onFormChange({ ...form, heightCm: event.target.value.replace(/\D/g, '') })
+                        }
+                        inputMode="numeric"
+                        placeholder="Ex: 5"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Largura (cm)</Label>
+                      <Input
+                        value={form.widthCm}
+                        onChange={(event) =>
+                          onFormChange({ ...form, widthCm: event.target.value.replace(/\D/g, '') })
+                        }
+                        inputMode="numeric"
+                        placeholder="Ex: 15"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Comprimento (cm)</Label>
+                      <Input
+                        value={form.lengthCm}
+                        onChange={(event) =>
+                          onFormChange({ ...form, lengthCm: event.target.value.replace(/\D/g, '') })
+                        }
+                        inputMode="numeric"
+                        placeholder="Ex: 20"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Usado para cotação de frete via Melhor Envio. Se vazio, usamos padrão (300g, 5x15x20cm).
+                  </p>
+                </div>
+              ) : null}
 
               <div className="space-y-2">
                 <Label>Tags</Label>

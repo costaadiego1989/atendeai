@@ -20,6 +20,10 @@ export interface UpdateCatalogItemCommand {
   tags?: string[];
   externalReference?: string;
   imageUrl?: string;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown>;
   variants?: Array<Record<string, unknown>>;
   optionGroups?: Array<Record<string, unknown>>;
@@ -67,6 +71,10 @@ export class UpdateCatalogItemUseCase {
       tags: command.tags || [],
       externalReference: command.externalReference,
       imageUrl: command.imageUrl,
+      weightGrams: command.weightGrams,
+      heightCm: command.heightCm,
+      widthCm: command.widthCm,
+      lengthCm: command.lengthCm,
       attributes: command.attributes,
       variants: command.variants,
       optionGroups: command.optionGroups,

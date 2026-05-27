@@ -36,6 +36,7 @@ interface ShippingPolicyForm {
     endTime?: string | null;
   }>;
   notes: string;
+  carrierShippingEnabled: boolean;
 }
 
 interface ShippingPolicySheetProps {
@@ -276,6 +277,26 @@ export const ShippingPolicySheet: React.FC<ShippingPolicySheetProps> = ({
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-4 rounded-2xl border border-border/60 bg-muted/5 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-foreground">Frete por Transportadora</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Quando ativo, o cliente pode escolher envio via transportadora (Melhor Envio) durante o checkout conversacional. Requer peso e dimensões cadastrados nos produtos.
+                </p>
+              </div>
+              <Switch
+                checked={form.carrierShippingEnabled}
+                onCheckedChange={(checked) =>
+                  onFormChange((current) => ({
+                    ...current,
+                    carrierShippingEnabled: checked,
+                  }))
+                }
+              />
             </div>
           </div>
 

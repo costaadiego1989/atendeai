@@ -11,6 +11,9 @@ import { SelectingItemStepHandler } from '../services/conversation/SelectingItem
 import { AwaitingQuantityStepHandler } from '../services/conversation/AwaitingQuantityStepHandler';
 import { AskingMoreItemsStepHandler } from '../services/conversation/AskingMoreItemsStepHandler';
 import { AwaitingFulfillmentStepHandler } from '../services/conversation/AwaitingFulfillmentStepHandler';
+import { AwaitingShippingMethodStepHandler } from '../services/conversation/AwaitingShippingMethodStepHandler';
+import { AwaitingCarrierCepStepHandler } from '../services/conversation/AwaitingCarrierCepStepHandler';
+import { AwaitingCarrierOptionStepHandler } from '../services/conversation/AwaitingCarrierOptionStepHandler';
 import { AwaitingDeliveryAddressStepHandler } from '../services/conversation/AwaitingDeliveryAddressStepHandler';
 import { AwaitingOrderNoteStepHandler } from '../services/conversation/AwaitingOrderNoteStepHandler';
 import { ReadyForCheckoutStepHandler } from '../services/conversation/ReadyForCheckoutStepHandler';
@@ -41,6 +44,9 @@ export class AdvanceCommerceConversationUseCase {
     private readonly awaitingQuantityStepHandler: AwaitingQuantityStepHandler,
     private readonly askingMoreItemsStepHandler: AskingMoreItemsStepHandler,
     private readonly awaitingFulfillmentStepHandler: AwaitingFulfillmentStepHandler,
+    private readonly awaitingShippingMethodStepHandler: AwaitingShippingMethodStepHandler,
+    private readonly awaitingCarrierCepStepHandler: AwaitingCarrierCepStepHandler,
+    private readonly awaitingCarrierOptionStepHandler: AwaitingCarrierOptionStepHandler,
     private readonly awaitingDeliveryAddressStepHandler: AwaitingDeliveryAddressStepHandler,
     private readonly awaitingOrderNoteStepHandler: AwaitingOrderNoteStepHandler,
     private readonly readyForCheckoutStepHandler: ReadyForCheckoutStepHandler,
@@ -139,6 +145,12 @@ export class AdvanceCommerceConversationUseCase {
         return this.askingMoreItemsStepHandler.handle(context);
       case 'AWAITING_FULFILLMENT':
         return this.awaitingFulfillmentStepHandler.handle(context);
+      case 'AWAITING_SHIPPING_METHOD':
+        return this.awaitingShippingMethodStepHandler.handle(context);
+      case 'AWAITING_CARRIER_CEP':
+        return this.awaitingCarrierCepStepHandler.handle(context);
+      case 'AWAITING_CARRIER_OPTION':
+        return this.awaitingCarrierOptionStepHandler.handle(context);
       case 'AWAITING_DELIVERY_ADDRESS':
         return this.awaitingDeliveryAddressStepHandler.handle(context);
       case 'AWAITING_ORDER_NOTE':

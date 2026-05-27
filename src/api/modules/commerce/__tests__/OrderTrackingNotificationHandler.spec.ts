@@ -34,6 +34,8 @@ describe('OrderTrackingNotificationHandler', () => {
     trackingCode: 'BR123456789',
     trackingUrl: 'https://track.com/BR123456789',
     trackingNotifiedAt: null,
+    carrier: null,
+    carrierServiceName: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -187,5 +189,44 @@ describe('OrderTrackingNotificationHandler', () => {
         },
       }),
     ).resolves.not.toThrow();
+  });
+
+  it('should include carrier label in notification message', async () => {
+    commerceRepository.findOrderById.mockResolvedValue(baseOrder);
+
+    await subscribedCallback({
+      payload: {
+        orderId: 'order-1',
+        tenantId: 'tenant-1',
+        contactId: 'contact-1',
+        trackingCode: 'BR123456789',
+        trackingUrl: 'https://rastreio.correios.com.br/app/index.php?objetos=BR123456789',
+        carrier: 'CORREIOS',
+      },
+    });
+
+    const callText = (messagingFacade.queueSystemMessage.mock.calls[0][0] as any).text;
+    expect(callText).toContain('Correios');
+    expect(callText).toContain('BR123456789');
+    expect(callText).toContain('rastreio.correios.com.br');
+  });
+
+  it('should show generic carrier label when carrier is OTHER', async () => {
+    commerceRepository.findOrderById.mockResolvedValue(baseOrder);
+
+    await subscribedCallback({
+      payload: {
+        orderId: 'order-1',
+        tenantId: 'tenant-1',
+        contactId: 'contact-1',
+        trackingCode: 'XYZ123',
+        trackingUrl: null,
+        carrier: 'OTHER',
+      },
+    });
+
+    const callText = (messagingFacade.queueSystemMessage.mock.calls[0][0] as any).text;
+    expect(callText).toContain('Transportadora');
+    expect(callText).toContain('XYZ123');
   });
 });

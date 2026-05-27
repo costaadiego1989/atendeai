@@ -43,6 +43,16 @@ export class AwaitingFulfillmentStepHandler {
           input.tenantId,
         );
 
+      // If tenant supports carrier shipping, route to shipping method selection
+      if (shippingPolicy?.carrierShippingEnabled) {
+        return this.commerceRepository.updateSessionState({
+          tenantId: input.tenantId,
+          sessionId: session.id,
+          currentStep: 'AWAITING_SHIPPING_METHOD',
+          fulfillmentType: 'DELIVERY',
+        });
+      }
+
       if (
         shippingPolicy?.mode === 'FIXED' &&
         this.conversationFlowRules.looksLikeAddress(userMessage)
