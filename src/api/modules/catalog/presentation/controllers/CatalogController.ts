@@ -14,8 +14,6 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
@@ -29,6 +27,8 @@ import { DeactivateCatalogItemUseCase } from '../../application/use-cases/Deacti
 import { UpdateCatalogCategoryUseCase } from '../../application/use-cases/UpdateCatalogCategoryUseCase';
 import { DeactivateCatalogCategoryUseCase } from '../../application/use-cases/DeactivateCatalogCategoryUseCase';
 import { UpdateCatalogItemUseCase } from '../../application/use-cases/UpdateCatalogItemUseCase';
+import { EnqueueCatalogReportJobUseCase } from '../../application/use-cases/EnqueueCatalogReportJobUseCase';
+import { EnqueueCatalogImportJobUseCase } from '../../application/use-cases/EnqueueCatalogImportJobUseCase';
 import {
   CreateCatalogCategoryDTO,
   CreateCatalogItemDTO,
@@ -45,7 +45,6 @@ import {
 } from '@shared/domain/services/FileStorageService';
 import { GenerateCatalogReportUseCase } from '../../application/use-cases/GenerateCatalogReportUseCase';
 import { CatalogAsyncJobsService } from '../../application/services/CatalogAsyncJobsService';
-import { CatalogImportParser } from '../../application/services/CatalogImportParser';
 
 @Controller('tenants/:tenantId/catalog')
 @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
@@ -60,12 +59,11 @@ export class CatalogController {
     private readonly deactivateCatalogCategoryUseCase: DeactivateCatalogCategoryUseCase,
     private readonly updateCatalogItemUseCase: UpdateCatalogItemUseCase,
     private readonly generateCatalogReportUseCase: GenerateCatalogReportUseCase,
+    private readonly enqueueCatalogReportJobUseCase: EnqueueCatalogReportJobUseCase,
+    private readonly enqueueCatalogImportJobUseCase: EnqueueCatalogImportJobUseCase,
     private readonly catalogAsyncJobsService: CatalogAsyncJobsService,
-    private readonly catalogImportParser: CatalogImportParser,
     @Inject(FILE_STORAGE_SERVICE)
     private readonly storageService: FileStorageService,
-    @InjectQueue('catalog-async-jobs')
-    private readonly catalogAsyncQueue: Queue,
   ) {}
 
   @Post('categories')
@@ -190,43 +188,15 @@ export class CatalogController {
     @Body() body: GenerateCatalogReportDTO,
     @Req() req: any,
   ) {
-    const asyncJob = await this.catalogAsyncJobsService.createJob({
+    return this.enqueueCatalogReportJobUseCase.execute({
       tenantId,
-      type: 'EXPORT_CATALOG_REPORT_CSV',
-      requestedByUserId: req.user?.sub,
-      requestedByUserEmail: req.user?.email,
-      payload: {
-        types: body.types ?? [],
-        categoryIds: body.categoryIds ?? [],
-        query: body.query,
-        includeInactive: body.includeInactive ?? false,
-      },
+      userId: req.user?.sub,
+      userEmail: req.user?.email,
+      types: body.types,
+      categoryIds: body.categoryIds,
+      query: body.query,
+      includeInactive: body.includeInactive,
     });
-
-    const queueJob = await this.catalogAsyncQueue.add(
-      'export-catalog-report-csv',
-      {
-        asyncJobId: asyncJob.id,
-        type: 'EXPORT_CATALOG_REPORT_CSV',
-        tenantId,
-        types: body.types ?? [],
-        categoryIds: body.categoryIds ?? [],
-        query: body.query,
-        includeInactive: body.includeInactive ?? false,
-      },
-      {
-        jobId: asyncJob.id,
-        attempts: 2,
-        removeOnComplete: 50,
-        removeOnFail: 200,
-      },
-    );
-
-    await this.catalogAsyncJobsService.attachQueueJobId(
-      asyncJob.id,
-      String(queueJob.id),
-    );
-    return this.catalogAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
   @Post('import-jobs')
@@ -237,55 +207,17 @@ export class CatalogController {
     @Body() body: ImportCatalogItemsDTO,
     @Req() req: any,
   ) {
-    const totalItems = this.catalogImportParser.countRows(body.rawText, {
+    return this.enqueueCatalogImportJobUseCase.execute({
+      tenantId,
+      userId: req.user?.sub,
+      userEmail: req.user?.email,
+      rawText: body.rawText,
       defaultType: body.defaultType,
       defaultCategoryName: body.defaultCategoryName,
       defaultSource: body.defaultSource,
-      defaultTags: body.defaultTags ?? [],
+      defaultTags: body.defaultTags,
+      syncInventory: body.syncInventory,
     });
-
-    const asyncJob = await this.catalogAsyncJobsService.createJob({
-      tenantId,
-      type: 'IMPORT_CATALOG_ITEMS',
-      requestedByUserId: req.user?.sub,
-      requestedByUserEmail: req.user?.email,
-      totalItems,
-      payload: {
-        rawText: body.rawText,
-        defaultType: body.defaultType,
-        defaultCategoryName: body.defaultCategoryName,
-        defaultSource: body.defaultSource,
-        defaultTags: body.defaultTags ?? [],
-        syncInventory: body.syncInventory ?? false,
-      },
-    });
-
-    const queueJob = await this.catalogAsyncQueue.add(
-      'import-catalog-items',
-      {
-        asyncJobId: asyncJob.id,
-        type: 'IMPORT_CATALOG_ITEMS',
-        tenantId,
-        rawText: body.rawText,
-        defaultType: body.defaultType,
-        defaultCategoryName: body.defaultCategoryName,
-        defaultSource: body.defaultSource,
-        defaultTags: body.defaultTags ?? [],
-        syncInventory: body.syncInventory ?? false,
-      },
-      {
-        jobId: asyncJob.id,
-        attempts: 2,
-        removeOnComplete: 50,
-        removeOnFail: 200,
-      },
-    );
-
-    await this.catalogAsyncJobsService.attachQueueJobId(
-      asyncJob.id,
-      String(queueJob.id),
-    );
-    return this.catalogAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
   @Get('jobs')
