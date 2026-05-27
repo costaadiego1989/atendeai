@@ -43,7 +43,7 @@ export class PrismaProspectAsyncJobRepository implements IProspectAsyncJobReposi
   async create(
     input: CreateProspectingAsyncJobInput,
   ): Promise<ProspectingAsyncJobView> {
-    // tenant-safe: tenantId is a required first-class param written as the first column in the INSERT
+    // tenant-safe: INSERT writes input.tenantId as the tenant_id column value
     const rows = await this.prisma.$queryRaw<
       ProspectingAsyncJobRow[]
     >(Prisma.sql`
@@ -74,24 +74,34 @@ export class PrismaProspectAsyncJobRepository implements IProspectAsyncJobReposi
       RETURNING *
     `);
 
+    if (!rows[0]) {
+      throw new Error('INSERT RETURNING returned no rows — unexpected DB state');
+    }
+
     return this.toView(rows[0]);
   }
 
-  async attachQueueJobId(jobId: string, queueJobId: string): Promise<void> {
-    // tenant-safe: jobId is an opaque UUID issued at creation (which is tenant-scoped); only called by internal queue workers
+  async attachQueueJobId(
+    tenantId: string,
+    jobId: string,
+    queueJobId: string,
+  ): Promise<void> {
+    // tenant-safe: WHERE clause includes AND tenant_id = ${tenantId}::uuid
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET queue_job_id = ${queueJobId},
           updated_at = NOW()
       WHERE id = ${jobId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
   }
 
   async markProcessing(
+    tenantId: string,
     jobId: string,
     input?: MarkProcessingProspectingAsyncJobInput,
   ): Promise<void> {
-    // tenant-safe: jobId is an opaque UUID issued at creation (which is tenant-scoped); only called by internal queue workers
+    // tenant-safe: WHERE clause includes AND tenant_id = ${tenantId}::uuid
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET status = 'PROCESSING',
@@ -101,14 +111,16 @@ export class PrismaProspectAsyncJobRepository implements IProspectAsyncJobReposi
           failed_at = NULL,
           error_message = NULL
       WHERE id = ${jobId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
   }
 
   async complete(
+    tenantId: string,
     jobId: string,
     input: CompleteProspectingAsyncJobInput,
   ): Promise<void> {
-    // tenant-safe: jobId is an opaque UUID issued at creation (which is tenant-scoped); only called by internal queue workers
+    // tenant-safe: WHERE clause includes AND tenant_id = ${tenantId}::uuid
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET status = 'COMPLETED',
@@ -125,11 +137,16 @@ export class PrismaProspectAsyncJobRepository implements IProspectAsyncJobReposi
           failed_at = NULL,
           updated_at = NOW()
       WHERE id = ${jobId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
   }
 
-  async fail(jobId: string, errorMessage: string): Promise<void> {
-    // tenant-safe: jobId is an opaque UUID issued at creation (which is tenant-scoped); only called by internal queue workers
+  async fail(
+    tenantId: string,
+    jobId: string,
+    errorMessage: string,
+  ): Promise<void> {
+    // tenant-safe: WHERE clause includes AND tenant_id = ${tenantId}::uuid
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE prospecting_schema.prospecting_async_jobs
       SET status = 'FAILED',
@@ -137,6 +154,7 @@ export class PrismaProspectAsyncJobRepository implements IProspectAsyncJobReposi
           failed_at = NOW(),
           updated_at = NOW()
       WHERE id = ${jobId}::uuid
+        AND tenant_id = ${tenantId}::uuid
     `);
   }
 

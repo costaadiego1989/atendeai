@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 import {
+  CompleteProspectingAsyncJobInput,
   IProspectAsyncJobRepository,
   PROSPECT_ASYNC_JOB_REPOSITORY,
   ProspectingAsyncJobStatus,
@@ -32,34 +33,32 @@ export class ProspectingAsyncJobsService {
     return this.repo.create(input);
   }
 
-  async attachQueueJobId(jobId: string, queueJobId: string): Promise<void> {
-    await this.repo.attachQueueJobId(jobId, queueJobId);
+  async attachQueueJobId(
+    tenantId: string,
+    jobId: string,
+    queueJobId: string,
+  ): Promise<void> {
+    await this.repo.attachQueueJobId(tenantId, jobId, queueJobId);
   }
 
   async markProcessing(
+    tenantId: string,
     jobId: string,
     input?: { progress?: number; totalItems?: number },
   ) {
-    await this.repo.markProcessing(jobId, input);
+    await this.repo.markProcessing(tenantId, jobId, input);
   }
 
   async completeJob(
+    tenantId: string,
     jobId: string,
-    input: {
-      processedItems?: number;
-      totalItems?: number;
-      resultSummary?: Record<string, unknown>;
-      fileName?: string;
-      fileMimeType?: string;
-      fileUrl?: string;
-      fileContent?: string;
-    },
+    input: CompleteProspectingAsyncJobInput,
   ) {
-    await this.repo.complete(jobId, input);
+    await this.repo.complete(tenantId, jobId, input);
   }
 
-  async failJob(jobId: string, errorMessage: string) {
-    await this.repo.fail(jobId, errorMessage);
+  async failJob(tenantId: string, jobId: string, errorMessage: string) {
+    await this.repo.fail(tenantId, jobId, errorMessage);
   }
 
   async listJobs(

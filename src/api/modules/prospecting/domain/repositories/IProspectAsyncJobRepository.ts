@@ -63,16 +63,22 @@ export interface IProspectAsyncJobRepository {
   create(
     input: CreateProspectingAsyncJobInput,
   ): Promise<ProspectingAsyncJobView>;
-  attachQueueJobId(jobId: string, queueJobId: string): Promise<void>;
+  attachQueueJobId(
+    tenantId: string,
+    jobId: string,
+    queueJobId: string,
+  ): Promise<void>;
   markProcessing(
+    tenantId: string,
     jobId: string,
     input?: MarkProcessingProspectingAsyncJobInput,
   ): Promise<void>;
   complete(
+    tenantId: string,
     jobId: string,
     input: CompleteProspectingAsyncJobInput,
   ): Promise<void>;
-  fail(jobId: string, errorMessage: string): Promise<void>;
+  fail(tenantId: string, jobId: string, errorMessage: string): Promise<void>;
   findByTenant(
     tenantId: string,
     limit?: number,

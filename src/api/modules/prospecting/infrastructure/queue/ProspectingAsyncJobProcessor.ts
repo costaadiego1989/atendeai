@@ -71,9 +71,11 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
       },
     });
 
-    await this.prospectingAsyncJobsService.markProcessing(job.data.asyncJobId, {
-      progress: 30,
-    });
+    await this.prospectingAsyncJobsService.markProcessing(
+      job.data.tenantId,
+      job.data.asyncJobId,
+      { progress: 30 },
+    );
 
     try {
       if (
@@ -101,6 +103,7 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
         );
 
         await this.prospectingAsyncJobsService.completeJob(
+          job.data.tenantId,
           job.data.asyncJobId,
           {
             processedItems: report.rows.length,
@@ -155,6 +158,7 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
         );
 
         await this.prospectingAsyncJobsService.completeJob(
+          job.data.tenantId,
           job.data.asyncJobId,
           {
             processedItems: report.rows.length,
@@ -196,6 +200,7 @@ export class ProspectingAsyncJobProcessor extends WorkerHost {
         },
       });
       await this.prospectingAsyncJobsService.failJob(
+        job.data.tenantId,
         job.data.asyncJobId,
         message,
       );

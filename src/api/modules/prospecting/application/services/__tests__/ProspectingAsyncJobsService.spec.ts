@@ -49,25 +49,31 @@ describe('ProspectingAsyncJobsService', () => {
     expect(result).toBe(view);
   });
 
-  it('delegates attachQueueJobId to the repository', async () => {
-    await service.attachQueueJobId('job-1', 'queue-1');
-    expect(repo.attachQueueJobId).toHaveBeenCalledWith('job-1', 'queue-1');
+  it('delegates attachQueueJobId to the repository with tenantId scope', async () => {
+    await service.attachQueueJobId('tenant-1', 'job-1', 'queue-1');
+    expect(repo.attachQueueJobId).toHaveBeenCalledWith(
+      'tenant-1',
+      'job-1',
+      'queue-1',
+    );
   });
 
-  it('delegates markProcessing to the repository', async () => {
-    await service.markProcessing('job-1', { progress: 50 });
-    expect(repo.markProcessing).toHaveBeenCalledWith('job-1', { progress: 50 });
+  it('delegates markProcessing to the repository with tenantId scope', async () => {
+    await service.markProcessing('tenant-1', 'job-1', { progress: 50 });
+    expect(repo.markProcessing).toHaveBeenCalledWith('tenant-1', 'job-1', {
+      progress: 50,
+    });
   });
 
-  it('delegates completeJob to the repository', async () => {
+  it('delegates completeJob to the repository with tenantId scope', async () => {
     const input = { processedItems: 10, fileName: 'report.csv' };
-    await service.completeJob('job-1', input);
-    expect(repo.complete).toHaveBeenCalledWith('job-1', input);
+    await service.completeJob('tenant-1', 'job-1', input);
+    expect(repo.complete).toHaveBeenCalledWith('tenant-1', 'job-1', input);
   });
 
-  it('delegates failJob to the repository', async () => {
-    await service.failJob('job-1', 'boom');
-    expect(repo.fail).toHaveBeenCalledWith('job-1', 'boom');
+  it('delegates failJob to the repository with tenantId scope', async () => {
+    await service.failJob('tenant-1', 'job-1', 'boom');
+    expect(repo.fail).toHaveBeenCalledWith('tenant-1', 'job-1', 'boom');
   });
 
   it('delegates listJobs to the repository with the tenant scope', async () => {
