@@ -1,10 +1,12 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { IEventBus, EVENT_BUS } from '@shared/application/ports/IEventBus';
-import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { PaymentConfirmedIntegrationEvent } from '@modules/payment/application/integration-events/PaymentIntegrationEvents';
 import { PaymentOverdueIntegrationEvent } from '@modules/payment/application/integration-events/PaymentIntegrationEvents';
 import { PaymentRefundedIntegrationEvent } from '@modules/payment/application/integration-events/PaymentIntegrationEvents';
+import {
+  ISalesPaymentLinksRepository,
+  SALES_PAYMENT_LINKS_REPOSITORY,
+} from '../../domain/repositories/ISalesRepository';
 import {
   SalesPaymentConfirmedConversationIntegrationEvent,
   SalesPaymentLinkOverdueRemarketingIntegrationEvent,
@@ -17,7 +19,8 @@ export class SalesPaymentEventHandler implements OnModuleInit {
   constructor(
     @Inject(EVENT_BUS)
     private readonly eventBus: IEventBus,
-    private readonly prisma: PrismaService,
+    @Inject(SALES_PAYMENT_LINKS_REPOSITORY)
+    private readonly salesPaymentLinksRepository: ISalesPaymentLinksRepository,
   ) {}
 
   onModuleInit() {
@@ -81,17 +84,13 @@ export class SalesPaymentEventHandler implements OnModuleInit {
 
     const resourceType = salesResourceMatch[1];
 
-    const rows = await this.prisma.$queryRaw<
-      Record<string, unknown>[]
-    >(Prisma.sql`
-      UPDATE sales_schema.payment_links
-      SET status = ${status}, updated_at = now()
-      WHERE tenant_id = ${tenantId}::uuid
-        AND external_id = ${rawReference}
-      RETURNING id, tenant_id, branch_id, contact_id, conversation_id, url, name, value, external_id, status
-    `);
+    const updated =
+      await this.salesPaymentLinksRepository.updatePaymentLinkStatusByExternalReference(
+        tenantId,
+        rawReference,
+        status,
+      );
 
-    const updated = rows[0];
     if (!updated) {
       this.logger.warn(
         `Sales payment link not found for reference: ${rawReference}`,
@@ -99,33 +98,26 @@ export class SalesPaymentEventHandler implements OnModuleInit {
       return;
     }
 
-    const contactId = updated.contact_id as string | null | undefined;
+    const contactId = updated.contactId;
     if (!contactId) {
       return;
     }
 
-    let contactName = 'Cliente';
-    const contactRows = await this.prisma.$queryRaw<
-      { name: string }[]
-    >(Prisma.sql`
-      SELECT name FROM contact_schema.contacts
-      WHERE tenant_id = ${tenantId}::uuid AND id = ${contactId}::uuid
-      LIMIT 1
-    `);
-    if (contactRows[0]?.name) {
-      contactName = String(contactRows[0].name);
-    }
+    const contactName =
+      (await this.salesPaymentLinksRepository.findContactNameById(
+        tenantId,
+        contactId,
+      )) ?? 'Cliente';
 
     const payload = {
       tenantId,
       contactId,
       contactName,
-      branchId: (updated.branch_id as string | null | undefined) ?? null,
-      conversationId:
-        (updated.conversation_id as string | null | undefined) ?? null,
-      paymentLinkUrl: String(updated.url ?? ''),
-      linkTitle: String(updated.name ?? ''),
-      value: Number(updated.value ?? 0),
+      branchId: updated.branchId ?? null,
+      conversationId: updated.conversationId ?? null,
+      paymentLinkUrl: updated.url ?? '',
+      linkTitle: updated.name ?? '',
+      value: updated.value ?? 0,
     };
 
     if (status === 'PAID') {

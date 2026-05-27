@@ -436,6 +436,21 @@ export class PrismaSalesRepository implements ISalesRepository {
     return rows[0] ? this.mapPaymentLink(rows[0]) : null;
   }
 
+  async findContactNameById(
+    tenantId: string,
+    contactId: string,
+  ): Promise<string | null> {
+    const rows = await this.prisma.$queryRaw<{ name: string }[]>(
+      Prisma.sql`
+        SELECT name FROM contact_schema.contacts
+        WHERE tenant_id = ${tenantId}::uuid AND id = ${contactId}::uuid
+        LIMIT 1
+      `,
+    );
+
+    return rows[0]?.name ?? null;
+  }
+
   private escapeLike(value: string): string {
     return value.replace(/[\\%_]/g, '\\$&');
   }
