@@ -545,8 +545,9 @@ export class PrismaSocialRepository implements ISocialRepository {
       `SELECT * FROM social_schema.social_accounts
        WHERE status = 'ACTIVE'
          AND token_expires_at IS NOT NULL
-         AND token_expires_at < NOW() + INTERVAL '${daysUntilExpiry} days'
+         AND token_expires_at < NOW() + make_interval(days => $1)
          AND token_expires_at > NOW()`,
+      daysUntilExpiry,
     );
     return rows.map((r) => this.mapAccount(r));
   }

@@ -10,7 +10,6 @@ import {
   Query,
   UseGuards,
   Req,
-  Logger,
 } from '@nestjs/common';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
@@ -23,12 +22,14 @@ import {
   ISocialRepository,
   SOCIAL_REPOSITORY,
 } from '../../domain/ports/ISocialRepository';
-import { SocialAccount } from '../../domain/entities/SocialAccount';
 import {
   ISocialPlatformAdapter,
   SOCIAL_PLATFORM_ADAPTER,
 } from '../../domain/ports/ISocialPlatformAdapter';
-import { MetaTokenExchangeService } from '../../infrastructure/services/MetaTokenExchangeService';
+import {
+  ISocialAccountFacade,
+  SOCIAL_ACCOUNT_FACADE,
+} from '../../application/ports/ISocialAccountFacade';
 import {
   ListCommentsQueryDTO,
   ReplyToCommentDTO,
@@ -42,13 +43,12 @@ import { Inject } from '@nestjs/common';
 @Controller('tenants/:tenantId/social')
 @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
 export class SocialController {
-  private readonly logger = new Logger(SocialController.name);
-
   constructor(
     private readonly listCommentsUseCase: ListSocialCommentsUseCase,
     private readonly replyToCommentUseCase: ReplyToCommentUseCase,
     private readonly configureRulesUseCase: ConfigureAutoReplyRulesUseCase,
-    private readonly tokenExchangeService: MetaTokenExchangeService,
+    @Inject(SOCIAL_ACCOUNT_FACADE)
+    private readonly socialAccountFacade: ISocialAccountFacade,
     @Inject(SOCIAL_REPOSITORY) private readonly repo: ISocialRepository,
     @Inject(SOCIAL_PLATFORM_ADAPTER)
     private readonly adapter: ISocialPlatformAdapter,
@@ -75,46 +75,18 @@ export class SocialController {
     @Param('tenantId') tenantId: string,
     @Body() body: ConnectInstagramDTO,
   ) {
-    let accessToken = body.accessToken;
-    let tokenExpiresAt: Date | null = null;
-
-    try {
-      const longLived =
-        await this.tokenExchangeService.exchangeForLongLivedToken(
-          body.accessToken,
-        );
-      accessToken = longLived.accessToken;
-      tokenExpiresAt = new Date(Date.now() + longLived.expiresInSeconds * 1000);
-    } catch (err: any) {
-      this.logger.warn(
-        `Long-lived token exchange failed for tenant ${tenantId}: ${err.message}. Using short-lived token.`,
-      );
-    }
-
-    const account = SocialAccount.create({
+    const result = await this.socialAccountFacade.connectAccount({
       tenantId,
       platform: 'INSTAGRAM',
       externalAccountId: body.instagramAccountId,
-      username: body.username || null,
-      displayName: body.displayName || null,
-      profilePictureUrl: body.profilePictureUrl || null,
-      accessToken,
-      refreshToken: null,
-      tokenExpiresAt,
+      accessToken: body.accessToken,
       pageId: body.pageId,
-      webhookSecret: null,
+      username: body.username,
+      displayName: body.displayName,
+      profilePictureUrl: body.profilePictureUrl,
     });
 
-    await this.repo.saveAccount(account);
-    await this.repo.logAudit(tenantId, {
-      event: 'ACCOUNT_CONNECTED',
-      entityId: account.id.toValue(),
-      entityType: 'ACCOUNT',
-      platform: 'INSTAGRAM',
-      metadata: { username: body.username },
-    });
-
-    return { id: account.id.toValue(), status: 'ACTIVE' };
+    return { id: result.id, status: 'ACTIVE' };
   }
 
   @Delete('accounts/:id')

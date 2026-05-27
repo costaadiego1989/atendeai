@@ -75,6 +75,9 @@ export class SocialWebhookController {
 
       return { status: 'ok' };
     } catch (err: any) {
+      if (err instanceof ForbiddenException) {
+        throw err;
+      }
       this.logger.error(
         `Error processing Meta webhook: ${err.message}`,
         err.stack,
@@ -108,11 +111,12 @@ export class SocialWebhookController {
       'sha256=' +
       crypto.createHmac('sha256', appSecret).update(rawBody).digest('hex');
 
+    const sigBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+
     if (
-      !crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature),
-      )
+      sigBuffer.length !== expectedBuffer.length ||
+      !crypto.timingSafeEqual(sigBuffer, expectedBuffer)
     ) {
       this.logger.warn('Meta webhook signature verification failed');
       throw new ForbiddenException('Invalid webhook signature');
