@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   COMMERCE_REPOSITORY,
   ICommerceRepository,
@@ -13,6 +13,10 @@ import {
   CommerceOrderReadyForPickupIntegrationEvent,
   CommerceOrderShippedIntegrationEvent,
 } from '../integration-events/CheckoutIntegrationEvents';
+import {
+  OrderStatus,
+  InvalidOrderTransitionError,
+} from '../../domain/value-objects/OrderStatus';
 
 export interface UpdateCommerceOrderStatusCommand {
   tenantId: string;
@@ -41,12 +45,12 @@ export class UpdateCommerceOrderStatusUseCase {
       throw new OrderNotFoundError(command.orderId);
     }
 
-    // Business Logic: Only update if status is different
     if (order.status === command.status) {
       return order;
     }
 
-    this.assertValidTransition(order.status, command.status);
+    const currentStatus = OrderStatus.create(order.status);
+    currentStatus.transitionTo(command.status, command.orderId);
 
     const updatedOrder = await this.commerceRepository.updateOrderStatus({
       tenantId: command.tenantId,
@@ -54,7 +58,6 @@ export class UpdateCommerceOrderStatusUseCase {
       status: command.status,
     });
 
-    // Save Audit Log
     await this.commerceRepository.saveAuditLog({
       tenantId: command.tenantId,
       userId: command.userId,
@@ -106,37 +109,5 @@ export class UpdateCommerceOrderStatusUseCase {
     }
 
     return updatedOrder;
-  }
-
-  private assertValidTransition(
-    currentStatus: CommerceOrderStatus,
-    nextStatus: CommerceOrderStatus,
-  ) {
-    const transitions: Record<CommerceOrderStatus, CommerceOrderStatus[]> = {
-      AWAITING_PAYMENT: ['CANCELLED'],
-      PAID: [
-        'PREPARING',
-        'READY_FOR_PICKUP',
-        'OUT_FOR_DELIVERY',
-        'DELIVERED',
-        'CANCELLED',
-      ],
-      PREPARING: [
-        'READY_FOR_PICKUP',
-        'OUT_FOR_DELIVERY',
-        'DELIVERED',
-        'CANCELLED',
-      ],
-      READY_FOR_PICKUP: ['DELIVERED', 'CANCELLED'],
-      OUT_FOR_DELIVERY: ['DELIVERED', 'CANCELLED'],
-      DELIVERED: [],
-      CANCELLED: [],
-    };
-
-    if (!transitions[currentStatus].includes(nextStatus)) {
-      throw new ConflictException(
-        `Cannot change order status from ${currentStatus} to ${nextStatus}`,
-      );
-    }
   }
 }

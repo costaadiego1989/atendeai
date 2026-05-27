@@ -127,6 +127,7 @@ export class CommerceOrdersController {
       orderId,
       trackingCode: body.trackingCode,
       trackingUrl: body.trackingUrl,
+      carrier: body.carrier as any,
     });
   }
 
@@ -146,6 +147,7 @@ export class CommerceOrdersController {
       trackingCode: result.order.trackingCode,
       trackingUrl: result.order.trackingUrl,
       trackingNotifiedAt: result.order.trackingNotifiedAt,
+      carrier: result.order.carrier,
     };
   }
 

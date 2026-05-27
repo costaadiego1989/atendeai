@@ -35,6 +35,8 @@ describe('CommerceOrdersReportCsvBuilder', () => {
       trackingCode: null,
       trackingUrl: null,
       trackingNotifiedAt: null,
+      carrier: null,
+      carrierServiceName: null,
     };
 
     const csv = builder.build([order], {

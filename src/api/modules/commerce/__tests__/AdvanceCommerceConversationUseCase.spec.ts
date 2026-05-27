@@ -14,6 +14,9 @@ describe('AdvanceCommerceConversationUseCase', () => {
   let awaitingQuantityStepHandler: any;
   let askingMoreItemsStepHandler: any;
   let awaitingFulfillmentStepHandler: any;
+  let awaitingShippingMethodStepHandler: any;
+  let awaitingCarrierCepStepHandler: any;
+  let awaitingCarrierOptionStepHandler: any;
   let awaitingDeliveryAddressStepHandler: any;
   let awaitingOrderNoteStepHandler: any;
   let readyForCheckoutStepHandler: any;
@@ -56,6 +59,9 @@ describe('AdvanceCommerceConversationUseCase', () => {
     awaitingQuantityStepHandler = { handle: jest.fn() };
     askingMoreItemsStepHandler = { handle: jest.fn() };
     awaitingFulfillmentStepHandler = { handle: jest.fn() };
+    awaitingShippingMethodStepHandler = { handle: jest.fn() };
+    awaitingCarrierCepStepHandler = { handle: jest.fn() };
+    awaitingCarrierOptionStepHandler = { handle: jest.fn() };
     awaitingDeliveryAddressStepHandler = { handle: jest.fn() };
     awaitingOrderNoteStepHandler = { handle: jest.fn() };
     readyForCheckoutStepHandler = { handle: jest.fn() };
@@ -71,6 +77,9 @@ describe('AdvanceCommerceConversationUseCase', () => {
       awaitingQuantityStepHandler,
       askingMoreItemsStepHandler,
       awaitingFulfillmentStepHandler,
+      awaitingShippingMethodStepHandler,
+      awaitingCarrierCepStepHandler,
+      awaitingCarrierOptionStepHandler,
       awaitingDeliveryAddressStepHandler,
       awaitingOrderNoteStepHandler,
       readyForCheckoutStepHandler,

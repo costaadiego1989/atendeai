@@ -19,6 +19,7 @@ import {
 import { buildCommercePaymentReference } from '../services/CommercePaymentReference';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { CommerceCheckoutCreatedIntegrationEvent } from '../integration-events/CheckoutIntegrationEvents';
+import { ShoppingSession } from '../../domain/entities/ShoppingSession';
 
 export interface CheckoutShoppingSessionInput {
   tenantId: string;
@@ -51,6 +52,37 @@ export class CheckoutShoppingSessionUseCase {
       throw new ShoppingSessionNotFoundError(input.sessionId);
     }
 
+    const sessionAggregate = ShoppingSession.reconstruct({
+      id: session.id,
+      tenantId: session.tenantId,
+      branchId: session.branchId,
+      conversationId: session.conversationId,
+      contactId: session.contactId,
+      status: session.status,
+      fulfillmentType: session.fulfillmentType,
+      deliveryAddress: session.deliveryAddress,
+      couponCode: session.couponCode,
+      subtotalAmount: session.subtotalAmount ?? 0,
+      freightAmount: session.freightAmount ?? 0,
+      discountAmount: session.discountAmount ?? 0,
+      totalAmount: session.totalAmount ?? 0,
+      items: session.items.map((item) => ({
+        id: item.id,
+        sessionId: item.sessionId,
+        tenantId: item.tenantId,
+        source: item.source,
+        inventoryItemId: item.inventoryItemId,
+        catalogItemId: item.catalogItemId,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice ?? 0),
+        lineTotal: Number(item.lineTotal),
+        currency: item.currency,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      })),
+    });
+
     if (session.items.length === 0) {
       throw new ConflictException('Add at least one item before checkout');
     }
@@ -78,13 +110,9 @@ export class CheckoutShoppingSessionUseCase {
       );
     }
 
-    const subtotalAmount = session.items.reduce(
-      (acc, item) => acc + Number(item.lineTotal),
-      0,
-    );
-    const freightAmount = Number(session.freightAmount ?? 0);
-    const discountAmount = Number(session.discountAmount ?? 0);
-    const totalAmount = subtotalAmount + freightAmount - discountAmount;
+    const { subtotal, freight, discount, total } =
+      sessionAggregate.computeCheckoutTotals();
+
     const orderId = randomUUID();
     const paymentReference = buildCommercePaymentReference({
       tenantId: input.tenantId,
@@ -101,16 +129,17 @@ export class CheckoutShoppingSessionUseCase {
       status: 'AWAITING_PAYMENT',
       fulfillmentType: session.fulfillmentType,
       shippingMode: session.shippingMode,
-      subtotalAmount,
-      freightAmount,
-      totalAmount,
+      subtotalAmount: subtotal.amount,
+      freightAmount: freight.amount,
+      totalAmount: total.amount,
       deliveryAddress: session.deliveryAddress,
       paymentReference,
       paymentLinkId: null,
       paymentLinkUrl: null,
       paymentStatus: 'PENDING',
       couponCode: session.couponCode,
-      discountAmount: session.discountAmount,
+      discountAmount: discount.amount,
+      carrierServiceName: session.carrierServiceName,
     });
 
     let paymentLink: { id: string; url: string };
@@ -122,7 +151,7 @@ export class CheckoutShoppingSessionUseCase {
         description:
           input.paymentLinkDescription?.trim() ||
           `Checkout conversacional da sessão ${session.id}`,
-        value: totalAmount,
+        value: total.amount,
         externalReference: paymentReference,
         billingType: input.billingType ?? 'PIX',
         chargeType: 'DETACHED',
@@ -149,28 +178,27 @@ export class CheckoutShoppingSessionUseCase {
         entityType: 'ORDER',
         metadata: {
           sessionId: session.id,
-          total: totalAmount,
+          total: total.amount,
         },
       });
       throw error;
     }
 
-    const orderWithLink =
-      await this.commerceRepository.updateOrderPaymentLink({
-        tenantId: input.tenantId,
-        orderId,
-        paymentLinkId: paymentLink.id,
-        paymentLinkUrl: paymentLink.url,
-      });
+    const orderWithLink = await this.commerceRepository.updateOrderPaymentLink({
+      tenantId: input.tenantId,
+      orderId,
+      paymentLinkId: paymentLink.id,
+      paymentLinkUrl: paymentLink.url,
+    });
 
     const updatedSession = await this.commerceRepository.updateSessionState({
       tenantId: input.tenantId,
       sessionId: session.id,
       status: 'AWAITING_PAYMENT',
       currentStep: 'AWAITING_PAYMENT',
-      subtotalAmount,
-      discountAmount,
-      totalAmount,
+      subtotalAmount: subtotal.amount,
+      discountAmount: discount.amount,
+      totalAmount: total.amount,
       paymentReference,
       paymentLinkId: paymentLink.id,
       paymentLinkUrl: paymentLink.url,
@@ -185,7 +213,7 @@ export class CheckoutShoppingSessionUseCase {
       entityType: 'ORDER',
       metadata: {
         sessionId: session.id,
-        total: totalAmount,
+        total: total.amount,
       },
     });
 

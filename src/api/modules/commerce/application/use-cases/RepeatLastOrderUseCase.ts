@@ -6,6 +6,7 @@ import {
 } from '../../domain/ports/ICommerceRepository';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import { CommerceSessionStartedIntegrationEvent } from '../integration-events/CheckoutIntegrationEvents';
+import { ShoppingSession } from '../../domain/entities/ShoppingSession';
 
 export interface RepeatLastOrderCommand {
   tenantId: string;
@@ -49,6 +50,11 @@ export class RepeatLastOrderUseCase {
     const { session, isNew } = await this.getOrCreateSession(input);
 
     for (const item of oldSession.items) {
+      const lineTotal = ShoppingSession.computeLineTotal(
+        Number(item.unitPrice ?? 0),
+        item.quantity,
+        item.currency,
+      );
       await this.commerceRepository.addSessionItem({
         sessionId: session.id,
         tenantId: input.tenantId,
@@ -58,6 +64,7 @@ export class RepeatLastOrderUseCase {
         name: item.name,
         quantity: item.quantity,
         unitPrice: Number(item.unitPrice ?? 0),
+        lineTotal: lineTotal.amount,
         currency: item.currency,
       });
     }

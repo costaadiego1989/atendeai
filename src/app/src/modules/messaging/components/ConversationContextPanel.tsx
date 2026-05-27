@@ -7,6 +7,7 @@ import {
   CreditCard,
   GitBranch,
   Loader2,
+  Package,
   ShoppingBag,
   UserRound,
 } from 'lucide-react';
@@ -128,6 +129,22 @@ export function ConversationContextPanel({
                   >
                     <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
                     {saleDialogCopy.title}
+                  </Button>
+                ) : null}
+                {vm.selectedCheckoutOrder?.trackingCode ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={QUICK_ACTION_BUTTON_CLASS_NAME}
+                    disabled={vm.sendTrackingToChatMutation.isPending}
+                    onClick={() => vm.sendTrackingToChatMutation.mutate()}
+                  >
+                    {vm.sendTrackingToChatMutation.isPending ? (
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Package className="mr-1.5 h-3.5 w-3.5" />
+                    )}
+                    Enviar rastreio
                   </Button>
                 ) : null}
               </div>

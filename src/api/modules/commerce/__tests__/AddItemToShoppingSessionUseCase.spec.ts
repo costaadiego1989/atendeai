@@ -1,12 +1,12 @@
 import { AddItemToShoppingSessionUseCase } from '../application/use-cases/AddItemToShoppingSessionUseCase';
 import { ICommerceRepository } from '../domain/ports/ICommerceRepository';
 import { IEventBus } from '@shared/application/ports/IEventBus';
-import { ISalesCouponRepository } from '@modules/sales/domain/repositories/ISalesRepository';
+import { ISalesFacade } from '@modules/sales/application/facades/ISalesFacade';
 
 describe('AddItemToShoppingSessionUseCase', () => {
   let useCase: AddItemToShoppingSessionUseCase;
   let commerceRepo: jest.Mocked<ICommerceRepository>;
-  let salesRepo: jest.Mocked<ISalesCouponRepository>;
+  let salesFacade: jest.Mocked<ISalesFacade>;
   let eventBus: jest.Mocked<IEventBus>;
 
   const tenantId = 'tenant-1';
@@ -20,8 +20,9 @@ describe('AddItemToShoppingSessionUseCase', () => {
       updateSessionState: jest.fn(),
     } as any;
 
-    salesRepo = {
+    salesFacade = {
       findCouponByCode: jest.fn(),
+      incrementCouponUsage: jest.fn(),
     } as any;
 
     eventBus = {
@@ -30,31 +31,49 @@ describe('AddItemToShoppingSessionUseCase', () => {
 
     useCase = new AddItemToShoppingSessionUseCase(
       commerceRepo,
-      salesRepo,
+      salesFacade,
       eventBus,
     );
   });
 
   it('should recalculate percentage discount when a new item is added', async () => {
-    // 1. Session specifically has a 10% coupon already applied
     const sessionWithCoupon = {
       id: sessionId,
       tenantId,
+      branchId: null,
+      conversationId: 'conv-1',
+      contactId: 'contact-1',
+      status: 'BUILDING_CART' as const,
+      fulfillmentType: 'PICKUP' as const,
+      deliveryAddress: null,
       subtotalAmount: 100,
       freightAmount: 0,
       couponCode: 'PCT10',
       discountAmount: 10,
       totalAmount: 90,
-      conversationId: 'conv-1',
-      contactId: 'contact-1',
-      items: [{ lineTotal: 100 }],
+      items: [
+        {
+          id: 'item-1',
+          sessionId,
+          tenantId,
+          source: 'CATALOG' as const,
+          inventoryItemId: null,
+          catalogItemId: 'cat-1',
+          name: 'Existing Item',
+          quantity: 1,
+          unitPrice: 100,
+          lineTotal: 100,
+          currency: 'BRL',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
     };
 
     commerceRepo.findSessionById.mockResolvedValueOnce(
       sessionWithCoupon as any,
     );
 
-    // Mock item finding
     commerceRepo.findCatalogItemById.mockResolvedValue({
       id: 'item-2',
       name: 'New Item',
@@ -67,22 +86,44 @@ describe('AddItemToShoppingSessionUseCase', () => {
       quantity: 1,
       unitPrice: 50,
       lineTotal: 50,
+      source: 'CATALOG',
+      inventoryItemId: null,
+      catalogItemId: 'item-2',
     } as any);
 
-    // After adding item, refreshed session has new subtotal
     const refreshedSession = {
       ...sessionWithCoupon,
-      items: [{ lineTotal: 100 }, { lineTotal: 50 }],
+      items: [
+        ...sessionWithCoupon.items,
+        {
+          id: 'item-2',
+          sessionId,
+          tenantId,
+          source: 'CATALOG' as const,
+          inventoryItemId: null,
+          catalogItemId: 'item-2',
+          name: 'New Item',
+          quantity: 1,
+          unitPrice: 50,
+          lineTotal: 50,
+          currency: 'BRL',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
     };
     commerceRepo.findSessionById.mockResolvedValueOnce(refreshedSession as any);
 
-    salesRepo.findCouponByCode.mockResolvedValue({
+    salesFacade.findCouponByCode.mockResolvedValue({
+      id: 'coupon-1',
+      tenantId,
       code: 'PCT10',
       discountType: 'PERCENTAGE',
       discountValue: 10,
+      maxUses: null,
+      currentUses: 0,
       active: true,
-      startsAt: new Date(2000, 1, 1),
-    } as any);
+    });
 
     const updatedSession = {
       ...refreshedSession,

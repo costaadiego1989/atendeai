@@ -1,4 +1,4 @@
-export type CommerceShippingMode = 'FIXED' | 'PER_KM';
+export type CommerceShippingMode = 'FIXED' | 'PER_KM' | 'CARRIER';
 export type CommerceFulfillmentType = 'PICKUP' | 'DELIVERY';
 export type CommerceDeliveryWeekday =
   | 'MONDAY'
@@ -14,6 +14,9 @@ export type CommerceConversationStep =
   | 'AWAITING_QUANTITY'
   | 'ASKING_MORE_ITEMS'
   | 'AWAITING_FULFILLMENT'
+  | 'AWAITING_SHIPPING_METHOD'
+  | 'AWAITING_CARRIER_CEP'
+  | 'AWAITING_CARRIER_OPTION'
   | 'AWAITING_DELIVERY_ADDRESS'
   | 'AWAITING_FREIGHT_REVIEW'
   | 'AWAITING_ORDER_NOTE'
@@ -36,6 +39,8 @@ export type CommerceOrderStatus =
   | 'DELIVERED'
   | 'CANCELLED';
 
+export type CommerceCarrier = 'CORREIOS' | 'JADLOG' | 'MELHOR_ENVIO' | 'OTHER';
+
 export interface CommerceShippingPolicyRecord {
   tenantId: string;
   mode: CommerceShippingMode;
@@ -47,6 +52,7 @@ export interface CommerceShippingPolicyRecord {
   deliverySchedule: CommerceDeliveryScheduleRecord[];
   notes: string | null;
   active: boolean;
+  carrierShippingEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -124,6 +130,10 @@ export interface CommerceSessionRecord {
   selectedInventoryItemId: string | null;
   selectedCatalogItemId: string | null;
   selectedItemName: string | null;
+  carrierCep: string | null;
+  carrierServiceCode: string | null;
+  carrierServiceName: string | null;
+  carrierDeliveryDays: number | null;
   checkedOutAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -157,6 +167,8 @@ export interface CommerceOrderRecord {
   trackingCode: string | null;
   trackingUrl: string | null;
   trackingNotifiedAt: Date | null;
+  carrier: CommerceCarrier | null;
+  carrierServiceName: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -222,6 +234,7 @@ export interface UpsertCommerceShippingPolicyInput {
   deliverySchedule?: CommerceDeliveryScheduleRecord[] | null;
   notes?: string | null;
   active: boolean;
+  carrierShippingEnabled?: boolean;
 }
 
 export interface UpsertCommerceAbandonmentConfigInput {
@@ -250,6 +263,7 @@ export interface AddCommerceSessionItemInput {
   name: string;
   quantity: number;
   unitPrice: number;
+  lineTotal: number;
   currency?: string;
 }
 
@@ -278,6 +292,10 @@ export interface UpdateCommerceSessionStateInput {
   selectedInventoryItemId?: string | null;
   selectedCatalogItemId?: string | null;
   selectedItemName?: string | null;
+  carrierCep?: string | null;
+  carrierServiceCode?: string | null;
+  carrierServiceName?: string | null;
+  carrierDeliveryDays?: number | null;
   checkedOutAt?: Date | null;
   couponCode?: string | null;
   discountAmount?: number | null;
@@ -303,6 +321,7 @@ export interface CreateCommerceOrderInput {
   paymentStatus?: 'PENDING' | 'PAID' | null;
   couponCode?: string | null;
   discountAmount?: number | null;
+  carrierServiceName?: string | null;
 }
 
 export interface CommerceAuditLogInput {
@@ -326,6 +345,7 @@ export interface UpdateOrderTrackingInput {
   orderId: string;
   trackingCode: string;
   trackingUrl?: string | null;
+  carrier?: CommerceCarrier | null;
 }
 
 export interface ListAbandonedCommerceSessionsInput {

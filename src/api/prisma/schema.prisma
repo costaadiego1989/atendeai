@@ -317,6 +317,10 @@ model CatalogItem {
   attributes        Json             @default("{}")
   variants          Json             @default("[]")
   optionGroups      Json             @default("[]") @map("option_groups")
+  weightGrams       Int?             @map("weight_grams")
+  heightCm          Int?             @map("height_cm")
+  widthCm           Int?             @map("width_cm")
+  lengthCm          Int?             @map("length_cm")
   createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   category          CatalogCategory? @relation(fields: [categoryId], references: [id])
@@ -357,6 +361,10 @@ model InventoryItem {
   currentPrice       Decimal? @map("current_price") @db.Decimal(12, 2)
   currency           String   @default("BRL") @db.VarChar(10)
   source             String   @default("MANUAL_SNAPSHOT") @db.VarChar(30)
+  weightGrams        Int?     @map("weight_grams")
+  heightCm           Int?     @map("height_cm")
+  widthCm            Int?     @map("width_cm")
+  lengthCm           Int?     @map("length_cm")
   lastSyncedAt       DateTime @default(now()) @map("last_synced_at") @db.Timestamptz
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz

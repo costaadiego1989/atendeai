@@ -27,6 +27,10 @@ export interface CatalogItemRecord {
   source: string;
   externalReference?: string | null;
   imageUrl?: string | null;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes: Record<string, unknown>;
   variants: Array<Record<string, unknown>>;
   optionGroups: Array<Record<string, unknown>>;
@@ -69,6 +73,10 @@ export interface CreateCatalogItemInput {
   source?: string;
   externalReference?: string;
   imageUrl?: string;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown>;
   variants?: Array<Record<string, unknown>>;
   optionGroups?: Array<Record<string, unknown>>;
@@ -86,6 +94,10 @@ export interface UpdateCatalogItemInput {
   tags?: string[];
   externalReference?: string;
   imageUrl?: string;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown>;
   variants?: Array<Record<string, unknown>>;
   optionGroups?: Array<Record<string, unknown>>;

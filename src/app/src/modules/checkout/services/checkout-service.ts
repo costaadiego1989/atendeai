@@ -1,6 +1,7 @@
 import { apiClient, BASE_URL } from '@/shared/api/client';
 import type {
   CommerceAbandonmentTouch,
+  CommerceCarrier,
   CommerceDeliverySchedule,
   CommerceOrder,
   CommerceOrderStatus,
@@ -28,6 +29,7 @@ export interface UpdateCheckoutShippingPolicyInput {
   servicedNeighborhoods?: string[];
   deliverySchedule?: CommerceDeliverySchedule[];
   notes?: string | null;
+  carrierShippingEnabled?: boolean;
 }
 
 export interface UpdateCheckoutAbandonmentStateInput {
@@ -277,4 +279,34 @@ export const checkoutService = {
   generateAbandonmentMessage(tenantId: string): Promise<{ message: string }> {
     return apiClient.post(`/tenants/${tenantId}/commerce/abandonment-config/generate-message`, {});
   },
+
+  getOrderTracking(
+    tenantId: string,
+    orderId: string,
+  ): Promise<OrderTrackingInfo> {
+    return apiClient.get(`/tenants/${tenantId}/commerce/orders/${orderId}/tracking`);
+  },
+
+  setOrderTracking(
+    tenantId: string,
+    orderId: string,
+    input: SetOrderTrackingInput,
+  ): Promise<CommerceOrder> {
+    return apiClient.put(`/tenants/${tenantId}/commerce/orders/${orderId}/tracking`, input);
+  },
 };
+
+export interface OrderTrackingInfo {
+  orderId: string;
+  status: CommerceOrderStatus;
+  trackingCode: string | null;
+  trackingUrl: string | null;
+  trackingNotifiedAt: string | null;
+  carrier: CommerceCarrier | null;
+}
+
+export interface SetOrderTrackingInput {
+  trackingCode: string;
+  trackingUrl?: string;
+  carrier?: CommerceCarrier;
+}

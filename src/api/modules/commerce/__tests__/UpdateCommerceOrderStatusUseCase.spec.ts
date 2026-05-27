@@ -1,7 +1,7 @@
-import { ConflictException } from '@nestjs/common';
 import { IEventBus } from '@shared/application/ports/IEventBus';
 import { ICommerceRepository } from '../domain/ports/ICommerceRepository';
 import { UpdateCommerceOrderStatusUseCase } from '../application/use-cases/UpdateCommerceOrderStatusUseCase';
+import { InvalidOrderTransitionError } from '../domain/value-objects/OrderStatus';
 import {
   CommerceOrderCancelledIntegrationEvent,
   CommerceOrderDeliveredIntegrationEvent,
@@ -39,6 +39,8 @@ describe('UpdateCommerceOrderStatusUseCase', () => {
     trackingCode: null,
     trackingUrl: null,
     trackingNotifiedAt: null,
+    carrier: null,
+    carrierServiceName: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -124,7 +126,7 @@ describe('UpdateCommerceOrderStatusUseCase', () => {
         orderId: 'order-1',
         status: 'PREPARING',
       }),
-    ).rejects.toBeInstanceOf(ConflictException);
+    ).rejects.toBeInstanceOf(InvalidOrderTransitionError);
 
     expect(commerceRepository.updateOrderStatus).not.toHaveBeenCalled();
     expect(eventBus.publish).not.toHaveBeenCalled();

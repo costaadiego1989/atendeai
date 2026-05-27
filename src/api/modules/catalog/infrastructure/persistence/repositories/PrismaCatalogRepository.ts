@@ -203,7 +203,8 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO catalog_schema.catalog_items (
         tenant_id, category_id, type, name, description, base_price, currency, tags,
-        source, external_reference, image_url, attributes, variants, option_groups
+        source, external_reference, image_url, weight_grams, height_cm, width_cm, length_cm,
+        attributes, variants, option_groups
       ) VALUES (
         ${input.tenantId}::uuid,
         ${input.categoryId ?? null}::uuid,
@@ -216,6 +217,10 @@ export class PrismaCatalogRepository implements ICatalogRepository {
         ${input.source || 'MANUAL'},
         ${input.externalReference ?? null},
         ${input.imageUrl ?? null},
+        ${input.weightGrams ?? null}::int,
+        ${input.heightCm ?? null}::int,
+        ${input.widthCm ?? null}::int,
+        ${input.lengthCm ?? null}::int,
         ${JSON.stringify(input.attributes ?? {})}::jsonb,
         ${JSON.stringify(input.variants ?? [])}::jsonb,
         ${JSON.stringify(input.optionGroups ?? [])}::jsonb
@@ -250,6 +255,10 @@ export class PrismaCatalogRepository implements ICatalogRepository {
         tags = ${JSON.stringify(input.tags || [])}::jsonb,
         external_reference = ${input.externalReference ?? null},
         image_url = ${input.imageUrl ?? null},
+        weight_grams = ${input.weightGrams ?? null}::int,
+        height_cm = ${input.heightCm ?? null}::int,
+        width_cm = ${input.widthCm ?? null}::int,
+        length_cm = ${input.lengthCm ?? null}::int,
         attributes = ${JSON.stringify(input.attributes ?? {})}::jsonb,
         variants = ${JSON.stringify(input.variants ?? [])}::jsonb,
         option_groups = ${JSON.stringify(input.optionGroups ?? [])}::jsonb,
@@ -431,6 +440,10 @@ export class PrismaCatalogRepository implements ICatalogRepository {
     source: string;
     externalReference: string | null;
     imageUrl: string | null;
+    weightGrams?: number | null;
+    heightCm?: number | null;
+    widthCm?: number | null;
+    lengthCm?: number | null;
     attributes?: unknown;
     variants?: unknown;
     optionGroups?: unknown;
@@ -460,6 +473,10 @@ export class PrismaCatalogRepository implements ICatalogRepository {
       source: item.source,
       externalReference: item.externalReference,
       imageUrl: item.imageUrl,
+      weightGrams: item.weightGrams ?? null,
+      heightCm: item.heightCm ?? null,
+      widthCm: item.widthCm ?? null,
+      lengthCm: item.lengthCm ?? null,
       attributes:
         item.attributes &&
         typeof item.attributes === 'object' &&
@@ -496,6 +513,10 @@ export class PrismaCatalogRepository implements ICatalogRepository {
       source: item.source,
       externalReference: item.external_reference,
       imageUrl: item.image_url,
+      weightGrams: item.weight_grams ?? null,
+      heightCm: item.height_cm ?? null,
+      widthCm: item.width_cm ?? null,
+      lengthCm: item.length_cm ?? null,
       attributes: item.attributes,
       variants: item.variants,
       optionGroups: item.option_groups,
@@ -520,6 +541,10 @@ export class PrismaCatalogRepository implements ICatalogRepository {
       source: item.source,
       externalReference: item.external_reference,
       imageUrl: item.image_url,
+      weightGrams: item.weight_grams ?? null,
+      heightCm: item.height_cm ?? null,
+      widthCm: item.width_cm ?? null,
+      lengthCm: item.length_cm ?? null,
       attributes: item.attributes,
       variants: item.variants,
       optionGroups: item.option_groups,

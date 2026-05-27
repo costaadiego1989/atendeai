@@ -21,6 +21,10 @@ export interface CreateCatalogItemCommand {
   externalReference?: string;
   imageUrl?: string;
   initialStock?: number;
+  weightGrams?: number | null;
+  heightCm?: number | null;
+  widthCm?: number | null;
+  lengthCm?: number | null;
   attributes?: Record<string, unknown>;
   variants?: Array<Record<string, unknown>>;
   optionGroups?: Array<Record<string, unknown>>;
@@ -60,6 +64,10 @@ export class CreateCatalogItemUseCase {
       source: command.source,
       externalReference: command.externalReference,
       imageUrl: command.imageUrl,
+      weightGrams: command.weightGrams,
+      heightCm: command.heightCm,
+      widthCm: command.widthCm,
+      lengthCm: command.lengthCm,
       attributes: command.attributes,
       variants: command.variants,
       optionGroups: command.optionGroups,
