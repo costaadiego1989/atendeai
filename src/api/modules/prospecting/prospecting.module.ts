@@ -83,6 +83,8 @@ import { PROSPECT_ADS_INSIGHT_RESULT_REPOSITORY } from './domain/repositories/IP
 import { PrismaProspectAdsInsightResultRepository } from './infrastructure/persistence/repositories/PrismaProspectAdsInsightResultRepository';
 import { PROSPECT_LEAD_CAPTURE_REPOSITORY } from './domain/repositories/IProspectLeadCaptureRepository';
 import { PrismaProspectLeadCaptureRepository } from './infrastructure/persistence/repositories/PrismaProspectLeadCaptureRepository';
+import { PROSPECT_ASYNC_JOB_REPOSITORY } from './domain/repositories/IProspectAsyncJobRepository';
+import { PrismaProspectAsyncJobRepository } from './infrastructure/persistence/repositories/PrismaProspectAsyncJobRepository';
 import { GOOGLE_ADS_INSIGHTS_SOURCE } from './domain/ports/IGoogleAdsInsightsSource';
 import { GoogleAdsInsightsSource } from './infrastructure/acl/GoogleAdsInsightsSource';
 import { GOOGLE_ADS_LEAD_SOURCE } from './domain/ports/IGoogleAdsLeadSource';
@@ -276,6 +278,10 @@ const PROSPECTING_REPOSITORY_PROVIDERS = [
   {
     provide: GOOGLE_ADS_CONNECTION_REPOSITORY,
     useClass: PrismaGoogleAdsConnectionRepository,
+  },
+  {
+    provide: PROSPECT_ASYNC_JOB_REPOSITORY,
+    useClass: PrismaProspectAsyncJobRepository,
   },
 ];
 
