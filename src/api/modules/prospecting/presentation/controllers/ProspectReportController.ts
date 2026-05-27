@@ -74,6 +74,7 @@ export class ProspectReportController {
     );
 
     await this.prospectingAsyncJobsService.attachQueueJobId(
+      tenantId,
       asyncJob.id,
       String(queueJob.id),
     );
@@ -125,6 +126,7 @@ export class ProspectReportController {
     );
 
     await this.prospectingAsyncJobsService.attachQueueJobId(
+      tenantId,
       asyncJob.id,
       String(queueJob.id),
     );
