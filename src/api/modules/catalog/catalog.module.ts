@@ -11,6 +11,8 @@ import { DeactivateCatalogItemUseCase } from './application/use-cases/Deactivate
 import { UpdateCatalogCategoryUseCase } from './application/use-cases/UpdateCatalogCategoryUseCase';
 import { DeactivateCatalogCategoryUseCase } from './application/use-cases/DeactivateCatalogCategoryUseCase';
 import { UpdateCatalogItemUseCase } from './application/use-cases/UpdateCatalogItemUseCase';
+import { EnqueueCatalogReportJobUseCase } from './application/use-cases/EnqueueCatalogReportJobUseCase';
+import { EnqueueCatalogImportJobUseCase } from './application/use-cases/EnqueueCatalogImportJobUseCase';
 import {
   CATALOG_QUERY_PORT,
   CatalogFacade,
@@ -23,6 +25,8 @@ import { CatalogImportParser } from './application/services/CatalogImportParser'
 import { CatalogAsyncJobProcessor } from './infrastructure/queue/CatalogAsyncJobProcessor';
 import { CATALOG_REPOSITORY } from './domain/ports/ICatalogRepository';
 import { PrismaCatalogRepository } from './infrastructure/persistence/repositories/PrismaCatalogRepository';
+import { INVENTORY_SYNC_PORT } from './application/ports/IInventorySyncPort';
+import { InventorySyncAdapter } from './infrastructure/adapters/InventorySyncAdapter';
 import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule';
 
 @Module({
@@ -46,6 +50,8 @@ import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule'
     UpdateCatalogItemUseCase,
     GenerateCatalogReportUseCase,
     ImportCatalogItemsUseCase,
+    EnqueueCatalogReportJobUseCase,
+    EnqueueCatalogImportJobUseCase,
     CatalogReportCsvBuilder,
     CatalogImportParser,
     CatalogAsyncJobsService,
@@ -57,6 +63,10 @@ import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule'
     {
       provide: CATALOG_QUERY_PORT,
       useClass: CatalogFacade,
+    },
+    {
+      provide: INVENTORY_SYNC_PORT,
+      useClass: InventorySyncAdapter,
     },
   ],
   exports: [

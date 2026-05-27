@@ -5,7 +5,7 @@ import {
 } from '../domain/ports/ICatalogRepository';
 import { CatalogCategoryNotFoundError } from '../domain/errors/CatalogCategoryNotFoundError';
 import { CatalogItemCreatedIntegrationEvent } from '../application/integration-events/CatalogIntegrationEvents';
-import { SyncInventoryItemUseCase } from '../../inventory/application/use-cases/SyncInventoryItemUseCase';
+import { IInventorySyncPort } from '../application/ports/IInventorySyncPort';
 import { IEventBus } from '@shared/application/ports/IEventBus';
 
 describe('CreateCatalogItemUseCase', () => {
@@ -13,9 +13,7 @@ describe('CreateCatalogItemUseCase', () => {
     Pick<ICatalogRepository, 'findCategoryById' | 'createItem' | 'saveAuditLog'>
   >;
   let eventBus: jest.Mocked<IEventBus>;
-  let syncInventoryItemUseCase: jest.Mocked<
-    Pick<SyncInventoryItemUseCase, 'execute'>
-  >;
+  let inventorySyncPort: jest.Mocked<IInventorySyncPort>;
   let useCase: CreateCatalogItemUseCase;
 
   const itemRecord = (
@@ -53,14 +51,14 @@ describe('CreateCatalogItemUseCase', () => {
       publish: jest.fn().mockResolvedValue(undefined),
       subscribe: jest.fn(),
     };
-    syncInventoryItemUseCase = {
-      execute: jest.fn().mockResolvedValue(undefined),
+    inventorySyncPort = {
+      syncItem: jest.fn().mockResolvedValue(undefined),
     };
 
     useCase = new CreateCatalogItemUseCase(
       catalogRepository as unknown as ICatalogRepository,
       eventBus,
-      syncInventoryItemUseCase as unknown as SyncInventoryItemUseCase,
+      inventorySyncPort,
     );
   });
 
@@ -77,10 +75,10 @@ describe('CreateCatalogItemUseCase', () => {
     ).rejects.toBeInstanceOf(CatalogCategoryNotFoundError);
 
     expect(catalogRepository.createItem).not.toHaveBeenCalled();
-    expect(syncInventoryItemUseCase.execute).not.toHaveBeenCalled();
+    expect(inventorySyncPort.syncItem).not.toHaveBeenCalled();
   });
 
-  it('CAT-T-040: item físico com stock inicial invoca SyncInventoryItemUseCase', async () => {
+  it('CAT-T-040: item físico com stock inicial invoca inventorySyncPort', async () => {
     catalogRepository.createItem.mockResolvedValue(itemRecord());
 
     await useCase.execute({
@@ -95,7 +93,7 @@ describe('CreateCatalogItemUseCase', () => {
     expect(eventBus.publish.mock.calls[0][0]).toBeInstanceOf(
       CatalogItemCreatedIntegrationEvent,
     );
-    expect(syncInventoryItemUseCase.execute).toHaveBeenCalledWith(
+    expect(inventorySyncPort.syncItem).toHaveBeenCalledWith(
       expect.objectContaining({
         tenantId: 'tenant-1',
         catalogItemId: 'catalog-item-1',
@@ -121,6 +119,6 @@ describe('CreateCatalogItemUseCase', () => {
       name: 'Instalação',
     });
 
-    expect(syncInventoryItemUseCase.execute).not.toHaveBeenCalled();
+    expect(inventorySyncPort.syncItem).not.toHaveBeenCalled();
   });
 });
