@@ -179,7 +179,7 @@ describe('PrismaProspectAsyncJobRepository (integration)', () => {
       payload: {},
     });
 
-    await repository.complete(created.id, {
+    await repository.complete(tenantId, created.id, {
       processedItems: 1,
       totalItems: 1,
       fileName: 'report.csv',
