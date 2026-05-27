@@ -10,31 +10,33 @@ import { WooCommerceProvider } from './WooCommerceProvider';
 import { NuvemshopProvider } from './NuvemshopProvider';
 import { MercadoLivreProvider } from './MercadoLivreProvider';
 import { ShopeeProvider } from './ShopeeProvider';
+import { InventoryProviderNotSupportedError } from '../../domain/errors/InventoryProviderNotSupportedError';
+
+const LEGACY_SOURCE_TYPE_ALIASES: Record<string, string> = {
+  ERP_SYNC: 'BLING',
+  ECOMMERCE_SYNC: 'SHOPIFY',
+};
 
 @Injectable()
 export class InventoryProviderFactory implements IInventoryProviderFactory {
+  private readonly providers: Record<string, () => IInventoryProvider> = {
+    BLING: () => new BlingProvider(),
+    TINY: () => new TinyProvider(),
+    SHOPIFY: () => new ShopifyProvider(),
+    WOOCOMMERCE: () => new WooCommerceProvider(),
+    NUVEMSHOP: () => new NuvemshopProvider(),
+    MERCADOLIVRE: () => new MercadoLivreProvider(),
+    SHOPEE: () => new ShopeeProvider(),
+  };
+
   getProvider(sourceType: string): IInventoryProvider {
-    switch (sourceType) {
-      case 'ERP_SYNC':
-      case 'BLING':
-        return new BlingProvider();
-      case 'TINY':
-        return new TinyProvider();
-      case 'ECOMMERCE_SYNC':
-      case 'SHOPIFY':
-        return new ShopifyProvider();
-      case 'WOOCOMMERCE':
-        return new WooCommerceProvider();
-      case 'NUVEMSHOP':
-        return new NuvemshopProvider();
-      case 'MERCADOLIVRE':
-        return new MercadoLivreProvider();
-      case 'SHOPEE':
-        return new ShopeeProvider();
-      default:
-        throw new Error(
-          `Nenhum provedor implementado para sourceType: ${sourceType}`,
-        );
+    const resolvedType = LEGACY_SOURCE_TYPE_ALIASES[sourceType] ?? sourceType;
+    const factory = this.providers[resolvedType];
+
+    if (!factory) {
+      throw new InventoryProviderNotSupportedError(sourceType);
     }
+
+    return factory();
   }
 }

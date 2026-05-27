@@ -143,6 +143,9 @@ describe('InventoryAsyncJobProcessor', () => {
         totalItems: 1,
       }),
     );
+    const completeArg = (asyncJobsService.completeJob as jest.Mock).mock
+      .calls[0][1];
+    expect(completeArg.fileContent).toBeUndefined();
     expect(asyncJobsService.failJob).not.toHaveBeenCalled();
   });
 

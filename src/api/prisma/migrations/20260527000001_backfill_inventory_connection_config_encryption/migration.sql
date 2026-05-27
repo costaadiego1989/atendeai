@@ -1,0 +1,4 @@
+-- Backfill migration: encrypt existing plaintext inventory connection credentials
+-- This is a data-only migration (no schema changes).
+-- Run the backfill script: npx ts-node src/api/modules/inventory/scripts/backfill-encrypt-credentials.ts
+-- The script is idempotent: rows already prefixed with "v1:" are skipped.

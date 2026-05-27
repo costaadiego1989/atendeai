@@ -2,6 +2,7 @@ import {
   IInventoryProvider,
   InventoryItemSnapshot,
 } from '../ports/IInventoryProvider';
+import { providerFetch } from './provider-http';
 
 export class WooCommerceProvider implements IInventoryProvider {
   async testConnection(config: Record<string, unknown>): Promise<boolean> {
@@ -14,13 +15,17 @@ export class WooCommerceProvider implements IInventoryProvider {
 
     const domain = String(storeUrl).replace(/\/$/, '');
     const authHeader = `Basic ${Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64')}`;
-    const response = await fetch(`${domain}/wp-json/wc/v3/system_status`, {
-      method: 'GET',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
+    const response = await providerFetch(
+      'WOOCOMMERCE',
+      `${domain}/wp-json/wc/v3/system_status`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -46,7 +51,8 @@ export class WooCommerceProvider implements IInventoryProvider {
     let hasMoreData = true;
 
     while (hasMoreData) {
-      const response = await fetch(
+      const response = await providerFetch(
+        'WOOCOMMERCE',
         `${domain}/wp-json/wc/v3/products?page=${page}&per_page=50`,
         { method: 'GET', headers },
       );

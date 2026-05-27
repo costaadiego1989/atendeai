@@ -6,6 +6,7 @@ import { WooCommerceProvider } from '../application/providers/WooCommerceProvide
 import { NuvemshopProvider } from '../application/providers/NuvemshopProvider';
 import { MercadoLivreProvider } from '../application/providers/MercadoLivreProvider';
 import { ShopeeProvider } from '../application/providers/ShopeeProvider';
+import { InventoryProviderNotSupportedError } from '../domain/errors/InventoryProviderNotSupportedError';
 
 describe('InventoryProviderFactory (extended)', () => {
   const factory = new InventoryProviderFactory();
@@ -28,9 +29,12 @@ describe('InventoryProviderFactory (extended)', () => {
     expect(ecommerceProvider).toBeInstanceOf(ShopifyProvider);
   });
 
-  it('should throw error for unknown provider type', () => {
+  it('should throw InventoryProviderNotSupportedError for unknown provider type', () => {
     expect(() => factory.getProvider('UNKNOWN_PROVIDER')).toThrow(
-      /Nenhum provedor implementado para sourceType: UNKNOWN_PROVIDER/,
+      InventoryProviderNotSupportedError,
+    );
+    expect(() => factory.getProvider('UNKNOWN_PROVIDER')).toThrow(
+      /Inventory provider not supported: UNKNOWN_PROVIDER/,
     );
   });
 

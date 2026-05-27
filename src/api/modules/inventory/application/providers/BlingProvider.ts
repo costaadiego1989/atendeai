@@ -2,6 +2,7 @@ import {
   IInventoryProvider,
   InventoryItemSnapshot,
 } from '../ports/IInventoryProvider';
+import { providerFetch } from './provider-http';
 
 export class BlingProvider implements IInventoryProvider {
   async testConnection(config: Record<string, unknown>): Promise<boolean> {
@@ -10,7 +11,8 @@ export class BlingProvider implements IInventoryProvider {
       throw new Error('A conexão com o Bling requer um accessToken (OAuth2).');
     }
 
-    const response = await fetch(
+    const response = await providerFetch(
+      'BLING',
       'https://api.bling.com.br/Api/v3/usuarios/me',
       {
         method: 'GET',
@@ -43,7 +45,8 @@ export class BlingProvider implements IInventoryProvider {
     let hasMoreData = true;
 
     while (hasMoreData) {
-      const response = await fetch(
+      const response = await providerFetch(
+        'BLING',
         `https://api.bling.com.br/Api/v3/produtos?pagina=${page}&limite=100`,
         { method: 'GET', headers },
       );

@@ -55,6 +55,7 @@ describe('SyncInventoryConnectionUseCase', () => {
       findItemBySku: jest.fn(),
       createConnection: jest.fn(),
       listConnections: jest.fn(),
+      getConnection: jest.fn(),
       findConnectionByProvider: jest.fn(),
       markConnectionSyncedAt: jest.fn(),
     };
@@ -75,7 +76,7 @@ describe('SyncInventoryConnectionUseCase', () => {
   });
 
   it('INV-SYNC-001: lança InventoryConnectionNotFoundError quando a conexão não existe no tenant', async () => {
-    inventoryRepository.listConnections.mockResolvedValue([]);
+    inventoryRepository.getConnection.mockResolvedValue(null);
 
     await expect(
       useCase.execute({
@@ -90,7 +91,7 @@ describe('SyncInventoryConnectionUseCase', () => {
 
   it('INV-SYNC-002: sincroniza lotes, tolera falha por SKU e marca lastSyncedAt na conexão ao concluir', async () => {
     const conn = baseConnection();
-    inventoryRepository.listConnections.mockResolvedValue([conn]);
+    inventoryRepository.getConnection.mockResolvedValue(conn);
 
     const snap: InventoryItemSnapshot = {
       sku: 'SKU-1',
@@ -122,6 +123,7 @@ describe('SyncInventoryConnectionUseCase', () => {
     expect(syncInventoryItemUseCase.execute).toHaveBeenCalledTimes(2);
     expect(inventoryRepository.markConnectionSyncedAt).toHaveBeenCalledTimes(1);
     expect(inventoryRepository.markConnectionSyncedAt).toHaveBeenCalledWith(
+      conn.tenantId,
       conn.id,
       expect.any(Date),
     );
@@ -129,7 +131,7 @@ describe('SyncInventoryConnectionUseCase', () => {
 
   it('INV-SYNC-003: erro global em fetchStock não marca conexão e propaga', async () => {
     const conn = baseConnection();
-    inventoryRepository.listConnections.mockResolvedValue([conn]);
+    inventoryRepository.getConnection.mockResolvedValue(conn);
 
     providerFactory.getProvider.mockReturnValue({
       testConnection: jest.fn(),
@@ -152,7 +154,7 @@ describe('SyncInventoryConnectionUseCase', () => {
   it('INV-SYNC-004: repassa lastSyncedAt da conexão ao provider quando definido', async () => {
     const syncedAt = new Date('2024-01-15T12:00:00Z');
     const conn = { ...baseConnection(), lastSyncedAt: syncedAt };
-    inventoryRepository.listConnections.mockResolvedValue([conn]);
+    inventoryRepository.getConnection.mockResolvedValue(conn);
 
     const fetchStock = jest
       .fn()

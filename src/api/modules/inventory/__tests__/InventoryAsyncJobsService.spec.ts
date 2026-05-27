@@ -4,44 +4,51 @@ import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExcepti
 
 describe('InventoryAsyncJobsService', () => {
   let service: InventoryAsyncJobsService;
-  let prisma: jest.Mocked<PrismaService>;
+  let inventoryAsyncJob: {
+    create: jest.Mock;
+    update: jest.Mock;
+    findMany: jest.Mock;
+    findFirst: jest.Mock;
+  };
 
-  const mockJobRow = (overrides: Record<string, unknown> = {}) => ({
+  const mockJob = (overrides: Record<string, unknown> = {}) => ({
     id: 'job-1',
-    tenant_id: 'tenant-1',
+    tenantId: 'tenant-1',
     type: 'EXPORT_INVENTORY_REPORT_CSV',
     status: 'QUEUED',
-    requested_by_user_id: 'user-1',
-    requested_by_user_email: 'user@test.com',
+    requestedByUserId: 'user-1',
+    requestedByUserEmail: 'user@test.com',
     payload: { filters: {} },
     progress: 0,
-    total_items: 0,
-    processed_items: 0,
-    result_summary: {},
-    file_name: null,
-    file_mime_type: null,
-    file_url: null,
-    file_content: null,
-    error_message: null,
-    queue_job_id: null,
-    created_at: new Date('2024-01-01'),
-    updated_at: new Date('2024-01-01'),
-    completed_at: null,
-    failed_at: null,
+    totalItems: 0,
+    processedItems: 0,
+    resultSummary: {},
+    fileName: null,
+    fileMimeType: null,
+    fileUrl: null,
+    fileContent: null,
+    errorMessage: null,
+    queueJobId: null,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    completedAt: null,
+    failedAt: null,
     ...overrides,
   });
 
   beforeEach(() => {
-    prisma = {
-      $queryRaw: jest.fn(),
-      $executeRaw: jest.fn(),
-    } as unknown as jest.Mocked<PrismaService>;
+    inventoryAsyncJob = {
+      create: jest.fn(),
+      update: jest.fn().mockResolvedValue(mockJob()),
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
+    };
+    const prisma = { inventoryAsyncJob } as unknown as PrismaService;
     service = new InventoryAsyncJobsService(prisma);
   });
 
-  it('should create a job record with QUEUED status', async () => {
-    const row = mockJobRow();
-    prisma.$queryRaw.mockResolvedValue([row]);
+  it('should create a job record with QUEUED status (view shape parity)', async () => {
+    inventoryAsyncJob.create.mockResolvedValue(mockJob());
 
     const result = await service.createJob({
       tenantId: 'tenant-1',
@@ -51,24 +58,32 @@ describe('InventoryAsyncJobsService', () => {
       payload: { filters: {} },
     });
 
-    expect(result.id).toBe('job-1');
-    expect(result.status).toBe('QUEUED');
-    expect(result.tenantId).toBe('tenant-1');
-    expect(result.type).toBe('EXPORT_INVENTORY_REPORT_CSV');
-    expect(prisma.$queryRaw).toHaveBeenCalled();
+    expect(result).toMatchObject({
+      id: 'job-1',
+      tenantId: 'tenant-1',
+      type: 'EXPORT_INVENTORY_REPORT_CSV',
+      status: 'QUEUED',
+      requestedByUserId: 'user-1',
+      requestedByUserEmail: 'user@test.com',
+      progress: 0,
+      totalItems: 0,
+      processedItems: 0,
+    });
+    expect(inventoryAsyncJob.create).toHaveBeenCalled();
   });
 
-  it('should markProcessing update status via raw query', async () => {
-    prisma.$executeRaw.mockResolvedValue(1);
-
+  it('should markProcessing via typed model', async () => {
     await service.markProcessing('job-1', { progress: 50 });
 
-    expect(prisma.$executeRaw).toHaveBeenCalled();
+    expect(inventoryAsyncJob.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'job-1' },
+        data: expect.objectContaining({ status: 'PROCESSING', progress: 50 }),
+      }),
+    );
   });
 
-  it('should completeJob update status via raw query', async () => {
-    prisma.$executeRaw.mockResolvedValue(1);
-
+  it('should completeJob via typed model', async () => {
     await service.completeJob('job-1', {
       processedItems: 100,
       totalItems: 100,
@@ -78,26 +93,64 @@ describe('InventoryAsyncJobsService', () => {
       fileContent: 'csv-content',
     });
 
-    expect(prisma.$executeRaw).toHaveBeenCalled();
+    expect(inventoryAsyncJob.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'job-1' },
+        data: expect.objectContaining({
+          status: 'COMPLETED',
+          progress: 100,
+          fileContent: 'csv-content',
+        }),
+      }),
+    );
   });
 
-  it('should failJob update status via raw query', async () => {
-    prisma.$executeRaw.mockResolvedValue(1);
-
+  it('should failJob via typed model', async () => {
     await service.failJob('job-1', 'Something went wrong');
 
-    expect(prisma.$executeRaw).toHaveBeenCalled();
+    expect(inventoryAsyncJob.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'job-1' },
+        data: expect.objectContaining({
+          status: 'FAILED',
+          errorMessage: 'Something went wrong',
+        }),
+      }),
+    );
+  });
+
+  it('should listJobs scoped by tenant', async () => {
+    inventoryAsyncJob.findMany.mockResolvedValue([mockJob()]);
+
+    const result = await service.listJobs('tenant-1');
+
+    expect(inventoryAsyncJob.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { tenantId: 'tenant-1' } }),
+    );
+    expect(result).toHaveLength(1);
+  });
+
+  it('should getJob throw when not found in tenant', async () => {
+    inventoryAsyncJob.findFirst.mockResolvedValue(null);
+
+    await expect(service.getJob('tenant-1', 'job-999')).rejects.toThrow(
+      EntityNotFoundException,
+    );
+    expect(inventoryAsyncJob.findFirst).toHaveBeenCalledWith({
+      where: { id: 'job-999', tenantId: 'tenant-1' },
+    });
   });
 
   it('should getDownloadPayload return file data for completed job', async () => {
-    const row = mockJobRow({
-      status: 'COMPLETED',
-      file_name: 'relatorio-estoque-2024-01-01.csv',
-      file_mime_type: 'text/csv;charset=utf-8',
-      file_content: 'csv-data-here',
-      file_url: null,
-    });
-    prisma.$queryRaw.mockResolvedValue([row]);
+    inventoryAsyncJob.findFirst.mockResolvedValue(
+      mockJob({
+        status: 'COMPLETED',
+        fileName: 'relatorio-estoque-2024-01-01.csv',
+        fileMimeType: 'text/csv;charset=utf-8',
+        fileContent: 'csv-data-here',
+        fileUrl: null,
+      }),
+    );
 
     const result = await service.getDownloadPayload('tenant-1', 'job-1');
 
@@ -107,7 +160,7 @@ describe('InventoryAsyncJobsService', () => {
   });
 
   it('should getDownloadPayload throw EntityNotFoundException when job not found or not completed', async () => {
-    prisma.$queryRaw.mockResolvedValue([]);
+    inventoryAsyncJob.findFirst.mockResolvedValue(null);
 
     await expect(
       service.getDownloadPayload('tenant-1', 'job-999'),

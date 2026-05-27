@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   INVENTORY_REPOSITORY,
   IInventoryRepository,
@@ -18,8 +18,12 @@ export interface CreateInventoryConnectionCommand {
   config?: Record<string, unknown>;
 }
 
+type ConnectionValidationStatus = 'ACTIVE' | 'FAILED';
+
 @Injectable()
 export class CreateInventoryConnectionUseCase {
+  private readonly logger = new Logger(CreateInventoryConnectionUseCase.name);
+
   constructor(
     @Inject(INVENTORY_REPOSITORY)
     private readonly inventoryRepository: IInventoryRepository,
@@ -44,12 +48,16 @@ export class CreateInventoryConnectionUseCase {
       );
     }
 
-    await this.tryValidateConnection(command.sourceType, command.config || {});
+    const status = await this.tryValidateConnection(
+      command.sourceType,
+      command.config || {},
+    );
 
     const connection = await this.inventoryRepository.createConnection({
       tenantId: command.tenantId,
       sourceType: command.sourceType,
       providerName,
+      status,
       config: command.config || {},
     });
 
@@ -68,16 +76,22 @@ export class CreateInventoryConnectionUseCase {
   private async tryValidateConnection(
     sourceType: string,
     config: Record<string, unknown>,
-  ): Promise<void> {
+  ): Promise<ConnectionValidationStatus> {
     if (!this.shouldAttemptValidation(sourceType, config)) {
-      return;
+      return 'ACTIVE';
     }
 
     try {
       const provider = this.providerFactory.getProvider(sourceType);
       await provider.testConnection(config);
-    } catch {
-      // Ignore
+      return 'ACTIVE';
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'unknown validation error';
+      this.logger.warn(
+        `Inventory connection validation failed (sourceType=${sourceType}): ${message}`,
+      );
+      return 'FAILED';
     }
   }
 

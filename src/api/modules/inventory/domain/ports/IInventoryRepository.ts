@@ -51,6 +51,7 @@ export interface CreateInventoryConnectionInput {
   tenantId: string;
   sourceType: string;
   providerName: string;
+  status?: string;
   config?: Record<string, unknown>;
 }
 
@@ -65,12 +66,20 @@ export interface IInventoryRepository {
     input: CreateInventoryConnectionInput,
   ): Promise<InventoryConnectionRecord>;
   listConnections(tenantId: string): Promise<InventoryConnectionRecord[]>;
+  getConnection(
+    tenantId: string,
+    id: string,
+  ): Promise<InventoryConnectionRecord | null>;
   findConnectionByProvider(
     tenantId: string,
     sourceType: string,
     providerName: string,
   ): Promise<InventoryConnectionRecord | null>;
-  markConnectionSyncedAt(connectionId: string, syncedAt: Date): Promise<void>;
+  markConnectionSyncedAt(
+    tenantId: string,
+    connectionId: string,
+    syncedAt: Date,
+  ): Promise<void>;
 }
 
 export const INVENTORY_REPOSITORY = Symbol('INVENTORY_REPOSITORY');

@@ -8,7 +8,12 @@ import { CatalogImportParser } from '../services/CatalogImportParser';
 import { CreateCatalogCategoryUseCase } from './CreateCatalogCategoryUseCase';
 import { CreateCatalogItemUseCase } from './CreateCatalogItemUseCase';
 import { UpdateCatalogItemUseCase } from './UpdateCatalogItemUseCase';
-import { SyncInventoryItemUseCase } from '../../../inventory/application/use-cases/SyncInventoryItemUseCase';
+import {
+  INVENTORY_SYNC_PORT,
+  IInventorySyncPort,
+} from '../ports/IInventorySyncPort';
+import { SkuResolver } from '../../domain/services/SkuResolver';
+import { IUseCase } from '@shared/application/IUseCase';
 
 export interface ImportCatalogItemsInput {
   tenantId: string;
@@ -42,7 +47,10 @@ export interface ImportCatalogItemsOutput {
 }
 
 @Injectable()
-export class ImportCatalogItemsUseCase {
+export class ImportCatalogItemsUseCase implements IUseCase<
+  ImportCatalogItemsInput,
+  ImportCatalogItemsOutput
+> {
   constructor(
     @Inject(CATALOG_REPOSITORY)
     private readonly catalogRepository: ICatalogRepository,
@@ -50,7 +58,8 @@ export class ImportCatalogItemsUseCase {
     private readonly createCatalogCategoryUseCase: CreateCatalogCategoryUseCase,
     private readonly createCatalogItemUseCase: CreateCatalogItemUseCase,
     private readonly updateCatalogItemUseCase: UpdateCatalogItemUseCase,
-    private readonly syncInventoryItemUseCase: SyncInventoryItemUseCase,
+    @Inject(INVENTORY_SYNC_PORT)
+    private readonly inventorySyncPort: IInventorySyncPort,
   ) {}
 
   async execute(
@@ -267,7 +276,10 @@ export class ImportCatalogItemsUseCase {
       return false;
     }
 
-    const sku = this.resolveSku(row.sku, externalReference, itemName);
+    const sku = SkuResolver.resolve(itemName, {
+      sku: row.sku,
+      externalReference,
+    });
     if (!sku) {
       return false;
     }
@@ -277,7 +289,7 @@ export class ImportCatalogItemsUseCase {
       row.availabilityStatus ??
       (availableQuantity > 0 ? 'AVAILABLE' : 'UNAVAILABLE');
 
-    await this.syncInventoryItemUseCase.execute({
+    await this.inventorySyncPort.syncItem({
       tenantId: input.tenantId,
       catalogItemId,
       sku,
@@ -290,27 +302,6 @@ export class ImportCatalogItemsUseCase {
     });
 
     return true;
-  }
-
-  private resolveSku(
-    sku: string | undefined,
-    externalReference: string | undefined,
-    name: string,
-  ): string | undefined {
-    const candidate = sku?.trim() || externalReference?.trim();
-    if (candidate) {
-      return candidate.toUpperCase();
-    }
-
-    const normalized = name
-      .trim()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .toUpperCase();
-
-    return normalized || undefined;
   }
 
   private normalizeKey(value: string): string {

@@ -28,10 +28,10 @@ export class SyncInventoryConnectionUseCase {
   ) {}
 
   async execute(command: SyncInventoryConnectionCommand): Promise<void> {
-    const connections = await this.inventoryRepository.listConnections(
+    const connection = await this.inventoryRepository.getConnection(
       command.tenantId,
+      command.connectionId,
     );
-    const connection = connections.find((c) => c.id === command.connectionId);
 
     if (!connection) {
       throw new InventoryConnectionNotFoundError(command.connectionId);
@@ -74,6 +74,7 @@ export class SyncInventoryConnectionUseCase {
       }
 
       await this.inventoryRepository.markConnectionSyncedAt(
+        connection.tenantId,
         connection.id,
         new Date(),
       );
