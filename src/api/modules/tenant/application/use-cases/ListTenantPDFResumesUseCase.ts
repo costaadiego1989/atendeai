@@ -1,24 +1,28 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
+import { IUseCase } from '@shared/application/IUseCase';
 import {
   TenantPDFResumeRepository,
   TenantPDFResumeRecord,
 } from '../../infrastructure/persistence/repositories/TenantPDFResumeRepository';
 import {
-  IDocumentChunkRepository,
-  DOCUMENT_CHUNK_REPOSITORY,
-} from '@modules/ai/application/ports/IDocumentChunkRepository';
+  IDocumentChunkWriter,
+  DOCUMENT_CHUNK_WRITER,
+} from '../ports/IDocumentChunkWriter';
 
 export interface TenantPDFResumeWithChunks extends TenantPDFResumeRecord {
   chunkCount: number;
 }
 
 @Injectable()
-export class ListTenantPDFResumesUseCase {
+export class ListTenantPDFResumesUseCase implements IUseCase<
+  string,
+  TenantPDFResumeWithChunks[]
+> {
   constructor(
     private readonly repository: TenantPDFResumeRepository,
     @Optional()
-    @Inject(DOCUMENT_CHUNK_REPOSITORY)
-    private readonly chunkRepository?: IDocumentChunkRepository,
+    @Inject(DOCUMENT_CHUNK_WRITER)
+    private readonly chunkRepository?: IDocumentChunkWriter,
   ) {}
 
   async execute(tenantId: string): Promise<TenantPDFResumeWithChunks[]> {

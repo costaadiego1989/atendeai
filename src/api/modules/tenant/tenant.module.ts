@@ -64,7 +64,7 @@ import { OnboardTrialTenantUseCase } from './application/use-cases/OnboardTrialT
 import { TrialPaymentConfirmedHandler } from './application/handlers/TrialPaymentConfirmedHandler';
 import { UpdateTenantPlanStatusUseCase } from './application/use-cases/UpdateTenantPlanStatusUseCase';
 import { TenantSubscriptionStatusHandler } from './application/handlers/TenantSubscriptionStatusHandler';
-import { TENANT_AUDIT_LOG_REPOSITORY } from './application/ports/ITenantAuditLogRepository';
+import { TENANT_AUDIT_LOG_REPOSITORY } from './domain/repositories/ITenantAuditLogRepository';
 import { PrismaTenantAuditLogRepository } from './infrastructure/persistence/repositories/PrismaTenantAuditLogRepository';
 import { TenantAuditService } from './application/services/TenantAuditService';
 import { TenantSchemaBootstrapService } from './application/services/TenantSchemaBootstrapService';
@@ -78,8 +78,11 @@ import { CompleteMetaInstagramConnectionUseCase } from './application/use-cases/
 import { TenantModuleAccessService } from '@shared/infrastructure/billing/TenantModuleAccessService';
 import { TenantBillingCapacityService } from '@shared/infrastructure/billing/TenantBillingCapacityService';
 import { TenantTwilioAccountService } from './application/services/TenantTwilioAccountService';
+import { TENANT_TWILIO_ACCOUNT_REPOSITORY } from './domain/repositories/ITenantTwilioAccountRepository';
+import { PrismaTenantTwilioAccountRepository } from './infrastructure/persistence/repositories/PrismaTenantTwilioAccountRepository';
 import { TenantTwilioProvisioningHandler } from './application/handlers/TenantTwilioProvisioningHandler';
 import { TenantPDFResumeRepository } from './infrastructure/persistence/repositories/TenantPDFResumeRepository';
+import { TENANT_PDF_RESUME_REPOSITORY } from './domain/repositories/ITenantPDFResumeRepository';
 import {
   TenantPDFResumeFacade,
   TENANT_PDF_RESUME_QUERY_PORT,
@@ -89,8 +92,8 @@ import { ListTenantPDFResumesUseCase } from './application/use-cases/ListTenantP
 import { UploadDocumentUseCase } from './application/use-cases/UploadDocumentUseCase';
 import { DeleteDocumentUseCase } from './application/use-cases/DeleteDocumentUseCase';
 import { DocumentsController } from './presentation/controllers/DocumentsController';
-import { DOCUMENT_CHUNK_REPOSITORY } from '@modules/ai/application/ports/IDocumentChunkRepository';
-import { PrismaDocumentChunkRepository } from '@modules/ai/infrastructure/persistence/PrismaDocumentChunkRepository';
+import { DOCUMENT_CHUNK_WRITER } from './application/ports/IDocumentChunkWriter';
+import { PrismaDocumentChunkCounter } from './infrastructure/persistence/repositories/PrismaDocumentChunkCounter';
 
 const TENANT_REPOSITORY_PROVIDERS = [
   {
@@ -110,10 +113,14 @@ const TENANT_REPOSITORY_PROVIDERS = [
     useClass: PrismaTenantAuditLogRepository,
   },
   {
-    provide: DOCUMENT_CHUNK_REPOSITORY,
-    useClass: PrismaDocumentChunkRepository,
+    provide: DOCUMENT_CHUNK_WRITER,
+    useClass: PrismaDocumentChunkCounter,
   },
   TenantPDFResumeRepository,
+  {
+    provide: TENANT_PDF_RESUME_REPOSITORY,
+    useExisting: TenantPDFResumeRepository,
+  },
   {
     provide: TENANT_PDF_RESUME_QUERY_PORT,
     useClass: TenantPDFResumeFacade,
@@ -227,6 +234,10 @@ const TENANT_BILLING_PROVIDERS = [
   TenantModuleAccessService,
   TenantBillingCapacityService,
   TenantTwilioAccountService,
+  {
+    provide: TENANT_TWILIO_ACCOUNT_REPOSITORY,
+    useClass: PrismaTenantTwilioAccountRepository,
+  },
 ];
 
 @Module({
