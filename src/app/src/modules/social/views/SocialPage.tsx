@@ -1,7 +1,7 @@
 import { Tabs } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PageTabsList } from '@/components/PageTabs';
-import { MessageSquare, Zap, Link, Bot, MessageCircle, Clock, Plus, Settings2, Sparkles, AlertCircle, Share2, Search, ExternalLink } from 'lucide-react';
+import { MessageSquare, Zap, Link, Bot, MessageCircle, Clock, Plus, Settings2, Sparkles, AlertCircle, Share2, Search, ExternalLink, Loader2 } from 'lucide-react';
 import { Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -346,8 +346,19 @@ export function SocialPage() {
                 <CardTitle className="text-lg">Canais Sociais de Escuta</CardTitle>
                 <CardDescription>Contas ativas associadas ao seu respectivo Tenant.</CardDescription>
               </div>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Plus className="w-4 h-4" /> Adicionar Conta
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={vm.actions.connectInstagramOAuth}
+                disabled={vm.state.isConnecting}
+              >
+                {vm.state.isConnecting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4" />
+                )}
+                {vm.state.isConnecting ? 'Conectando...' : 'Adicionar Conta'}
               </Button>
             </CardHeader>
             <CardContent className="p-0">

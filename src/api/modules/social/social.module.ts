@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AuthModule } from '@modules/auth/auth.module';
 import { SocialController } from './presentation/controllers/SocialController';
+import { SocialOAuthController } from './presentation/controllers/SocialOAuthController';
 import { SocialWebhookController } from './presentation/controllers/SocialWebhookController';
 import { SOCIAL_REPOSITORY } from './domain/ports/ISocialRepository';
 import { SOCIAL_PLATFORM_ADAPTER } from './domain/ports/ISocialPlatformAdapter';
@@ -13,6 +14,7 @@ import { LinkedInAdapter } from './infrastructure/adapters/LinkedInAdapter';
 import { BullMQSocialDelayedJobQueue } from './infrastructure/queue/BullMQSocialDelayedJobQueue';
 import { SocialDelayedJobProcessor } from './infrastructure/queue/SocialDelayedJobProcessor';
 import { MetaTokenExchangeService } from './infrastructure/services/MetaTokenExchangeService';
+import { SocialOAuthService } from './infrastructure/services/SocialOAuthService';
 import { TokenRefreshScheduler } from './infrastructure/services/TokenRefreshScheduler';
 import { SocialAccountFacade } from './infrastructure/services/SocialAccountFacade';
 import { AutoReplyEngine } from './application/services/AutoReplyEngine';
@@ -23,7 +25,11 @@ import { ConfigureAutoReplyRulesUseCase } from './application/use-cases/Configur
 
 @Module({
   imports: [AuthModule, BullModule.registerQueue({ name: 'social-delayed' })],
-  controllers: [SocialController, SocialWebhookController],
+  controllers: [
+    SocialController,
+    SocialOAuthController,
+    SocialWebhookController,
+  ],
   providers: [
     {
       provide: SOCIAL_REPOSITORY,
@@ -41,6 +47,7 @@ import { ConfigureAutoReplyRulesUseCase } from './application/use-cases/Configur
     },
     SocialDelayedJobProcessor,
     MetaTokenExchangeService,
+    SocialOAuthService,
     TokenRefreshScheduler,
     SocialAccountFacade,
     {

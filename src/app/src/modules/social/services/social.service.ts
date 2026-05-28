@@ -92,6 +92,12 @@ export const socialService = {
     return apiClient.delete<{ success: boolean }>(`/tenants/${tenantId}/social/rules/${ruleId}`);
   },
 
+  async getInstagramOAuthUrl(tenantId: string): Promise<{ authUrl: string }> {
+    return apiClient.get<{ authUrl: string }>(
+      `/tenants/${tenantId}/social/oauth/instagram/initiate`,
+    );
+  },
+
   async getStats(tenantId: string): Promise<{
     totalComments: number;
     pendingComments: number;

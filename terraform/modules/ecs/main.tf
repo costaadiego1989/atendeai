@@ -75,6 +75,14 @@ locals {
       value = "https://api.atende-ai.tech/api/v1/channels/instagram/meta/callback"
     },
     {
+      name  = "META_OAUTH_REDIRECT_URI"
+      value = "https://api.atende-ai.tech/api/v1/social/oauth/instagram/callback"
+    },
+    {
+      name  = "META_OAUTH_SUCCESS_URL"
+      value = "https://app.atende-ai.tech/app/social"
+    },
+    {
       name  = "META_PAGE_ID"
       value = ""
     },
