@@ -25,7 +25,11 @@ import { ConfigureAutoReplyRulesUseCase } from './application/use-cases/Configur
 
 @Module({
   imports: [AuthModule, BullModule.registerQueue({ name: 'social-delayed' })],
-  controllers: [SocialController, SocialOAuthController, SocialWebhookController],
+  controllers: [
+    SocialController,
+    SocialOAuthController,
+    SocialWebhookController,
+  ],
   providers: [
     {
       provide: SOCIAL_REPOSITORY,

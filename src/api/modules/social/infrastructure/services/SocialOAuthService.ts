@@ -59,9 +59,7 @@ export class SocialOAuthService {
   }
 
   private get graphVersion(): string {
-    return (
-      this.configService.get<string>('META_GRAPH_API_VERSION') || 'v21.0'
-    );
+    return this.configService.get<string>('META_GRAPH_API_VERSION') || 'v21.0';
   }
 
   private get graphBaseUrl(): string {
