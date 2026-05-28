@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/components/ui/use-toast';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
@@ -36,7 +37,9 @@ const DEFAULT_RULE_FORM: CreateSocialRuleInput = {
 export function useSocialPageViewModel() {
   const queryClient = useQueryClient();
   const tenant = useAuthStore((state) => state.tenant);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'comments' | 'rules' | 'agent' | 'accounts'>('comments');
+  const [isConnecting, setIsConnecting] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newRuleOpen, setNewRuleOpen] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
@@ -44,6 +47,35 @@ export function useSocialPageViewModel() {
   const [newRuleForm, setNewRuleForm] = useState<CreateSocialRuleInput>(DEFAULT_RULE_FORM);
   const [keywordInput, setKeywordInput] = useState('');
   const [excludeKeywordInput, setExcludeKeywordInput] = useState('');
+
+  useEffect(() => {
+    const connected = searchParams.get('instagram_connected');
+    const error = searchParams.get('instagram_error');
+
+    if (connected === 'true') {
+      toast({ title: 'Instagram conectado', description: 'Conta Instagram Business vinculada com sucesso.' });
+      queryClient.invalidateQueries({ queryKey: ['social-accounts', tenant?.id] });
+      queryClient.invalidateQueries({ queryKey: ['social-stats', tenant?.id] });
+      setActiveTab('accounts');
+      setSearchParams({}, { replace: true });
+    } else if (error) {
+      const messages: Record<string, string> = {
+        no_instagram_account: 'Nenhuma conta Instagram Business encontrada. Verifique se a página do Facebook está vinculada a uma conta comercial do Instagram.',
+        access_denied: 'Permissão negada pelo usuário.',
+        token_exchange_failed: 'Falha ao obter token de acesso. Tente novamente.',
+        pages_fetch_failed: 'Não foi possível buscar as páginas do Facebook.',
+        account_info_failed: 'Não foi possível obter os dados da conta Instagram.',
+        connect_failed: 'Falha ao conectar a conta. Tente novamente.',
+      };
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao conectar Instagram',
+        description: messages[error] ?? 'Ocorreu um erro inesperado. Tente novamente.',
+      });
+      setSearchParams({}, { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const statsQuery = useQuery({
     queryKey: ['social-stats', tenant?.id],
@@ -209,6 +241,7 @@ export function useSocialPageViewModel() {
       keywordInput,
       excludeKeywordInput,
       connectionStatus,
+      isConnecting,
       createRuleMutation,
       replyMutation,
       canSubmitRule: Boolean(newRuleForm.name.trim() && newRuleForm.conditions.keywords?.length),
@@ -277,6 +310,21 @@ export function useSocialPageViewModel() {
       submitReply() {
         if (!selectedCommentId || !replyDraft.trim()) return;
         replyMutation.mutate({ commentId: selectedCommentId, text: replyDraft.trim() });
+      },
+      async connectInstagramOAuth() {
+        if (!tenant?.id) return;
+        setIsConnecting(true);
+        try {
+          const { authUrl } = await socialService.getInstagramOAuthUrl(tenant.id);
+          window.location.href = authUrl;
+        } catch (err) {
+          setIsConnecting(false);
+          toast({
+            variant: 'destructive',
+            title: 'Erro ao iniciar conexão',
+            description: getFriendlyErrorMessage(err),
+          });
+        }
       },
     },
   };
