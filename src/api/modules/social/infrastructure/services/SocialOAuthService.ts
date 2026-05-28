@@ -219,15 +219,18 @@ export class SocialOAuthService {
       .update(payload)
       .digest('hex');
 
+    const sigBuf = Buffer.from(sig, 'hex');
+    const expectedBuf = Buffer.from(expectedSig, 'hex');
     if (
-      sig.length !== expectedSig.length ||
-      !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))
+      sigBuf.length !== expectedBuf.length ||
+      !crypto.timingSafeEqual(sigBuf, expectedBuf)
     ) {
       throw new BadRequestException('Invalid OAuth state signature');
     }
 
-    const age = Date.now() - parseInt(timestamp, 10);
-    if (age > 10 * 60 * 1000) {
+    const ts = parseInt(timestamp, 10);
+    const age = Date.now() - ts;
+    if (!Number.isFinite(age) || age < 0 || age > 10 * 60 * 1000) {
       throw new BadRequestException('OAuth state expired');
     }
 
