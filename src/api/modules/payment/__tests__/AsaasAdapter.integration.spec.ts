@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import { AsaasAdapter } from '../infrastructure/acl/AsaasAdapter';
+import { buildRecoveryPaymentReference } from '@shared/contracts/payment-references';
 
 jest.mock('axios', () => ({
   __esModule: true,
@@ -97,7 +98,7 @@ describe('AsaasAdapter', () => {
       dateCreated: '2026-03-20T10:00:00.000Z',
       payment: {
         id: 'pay-recovery-1',
-        externalReference: 'recovery|tenant-123|case-456',
+        externalReference: buildRecoveryPaymentReference('tenant-123', 'case-456'),
         value: 89.9,
         confirmedDate: '2026-03-20T10:05:00.000Z',
       },
@@ -110,7 +111,7 @@ describe('AsaasAdapter', () => {
       tenantId: 'tenant-123',
       amount: 89.9,
       occurredAt: new Date('2026-03-20T10:05:00.000Z'),
-      rawReference: 'recovery|tenant-123|case-456',
+      rawReference: buildRecoveryPaymentReference('tenant-123', 'case-456'),
       rawPayload: expect.any(Object),
     });
   });
@@ -301,7 +302,7 @@ describe('AsaasAdapter', () => {
       value: 145.8,
       billingType: 'PIX',
       chargeType: 'DETACHED',
-      externalReference: 'recovery|tenant-123|case-456',
+      externalReference: buildRecoveryPaymentReference('tenant-123', 'case-456'),
     });
 
     expect(httpClient.post).toHaveBeenCalledWith('/paymentLinks', {
@@ -309,7 +310,7 @@ describe('AsaasAdapter', () => {
       value: 145.8,
       billingType: 'PIX',
       chargeType: 'DETACHED',
-      externalReference: 'recovery|tenant-123|case-456',
+      externalReference: buildRecoveryPaymentReference('tenant-123', 'case-456'),
     });
   });
 

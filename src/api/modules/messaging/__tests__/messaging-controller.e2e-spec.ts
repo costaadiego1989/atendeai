@@ -6,6 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
+import { buildRecoveryPaymentReference } from '@shared/contracts/payment-references';
 
 describe('MessagingController (e2e)', () => {
   jest.setTimeout(60000);
@@ -504,7 +505,7 @@ describe('MessagingController (e2e)', () => {
       data: {
         tenantId,
         providerLinkId: 'provider-recovery-1',
-        externalId: `recovery|${tenantId}|paid-link-${Date.now()}`,
+        externalId: buildRecoveryPaymentReference(tenantId, `paid-link-${Date.now()}`),
         name: 'Cobrança em aberto',
         label: 'Recovery',
         value: 199,

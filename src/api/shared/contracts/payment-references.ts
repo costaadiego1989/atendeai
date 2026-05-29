@@ -1,6 +1,8 @@
 export const RECOVERY_PAYMENT_REFERENCE_PREFIX = 'recovery';
 
-const RECOVERY_PAYMENT_REFERENCE_REGEX = /^recovery\|([^|]+)\|([^|]+)$/;
+const RECOVERY_PAYMENT_REFERENCE_REGEX = new RegExp(
+  `^${RECOVERY_PAYMENT_REFERENCE_PREFIX}\\|([^|]+)\\|([^|]+)$`,
+);
 
 export interface RecoveryPaymentReferenceParts {
   tenantId: string;

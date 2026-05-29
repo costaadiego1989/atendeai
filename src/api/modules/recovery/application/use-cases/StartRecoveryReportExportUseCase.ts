@@ -55,31 +55,38 @@ export class StartRecoveryReportExportUseCase implements IUseCase<
       },
     });
 
-    const queueJob = await this.recoveryAsyncQueue.add(
-      'export-recovery-report-csv',
-      {
-        asyncJobId: asyncJob.id,
-        type: 'EXPORT_RECOVERY_REPORT_CSV',
-        tenantId: input.tenantId,
-        branchId: input.branchId,
-        statuses,
-        sources,
-        search: normalizedSearch,
-        dateFrom: input.dateFrom,
-        dateTo: input.dateTo,
-      },
-      {
-        jobId: asyncJob.id,
-        attempts: 2,
-        removeOnComplete: 50,
-        removeOnFail: 200,
-      },
-    );
+    try {
+      const queueJob = await this.recoveryAsyncQueue.add(
+        'export-recovery-report-csv',
+        {
+          asyncJobId: asyncJob.id,
+          type: 'EXPORT_RECOVERY_REPORT_CSV',
+          tenantId: input.tenantId,
+          branchId: input.branchId,
+          statuses,
+          sources,
+          search: normalizedSearch,
+          dateFrom: input.dateFrom,
+          dateTo: input.dateTo,
+        },
+        {
+          jobId: asyncJob.id,
+          attempts: 2,
+          removeOnComplete: 50,
+          removeOnFail: 200,
+        },
+      );
 
-    await this.recoveryAsyncJobsService.attachQueueJobId(
-      asyncJob.id,
-      String(queueJob.id),
-    );
+      await this.recoveryAsyncJobsService.attachQueueJobId(
+        asyncJob.id,
+        String(queueJob.id),
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to enqueue job';
+      await this.recoveryAsyncJobsService.failJob(asyncJob.id, message);
+      throw error;
+    }
 
     return this.recoveryAsyncJobsService.getJob(input.tenantId, asyncJob.id);
   }
