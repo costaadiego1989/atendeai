@@ -288,82 +288,44 @@ export class PrismaRecoveryRepository implements IRecoveryRepository {
   private mapCase(recoveryCase: any): RecoveryCaseRecord {
     return {
       id: recoveryCase.id,
-      tenantId: recoveryCase.tenantId ?? recoveryCase.tenant_id,
-      branchId: recoveryCase.branchId ?? recoveryCase.branch_id ?? null,
-      contactId: recoveryCase.contactId ?? recoveryCase.contact_id ?? null,
-      debtorName: recoveryCase.debtorName ?? recoveryCase.debtor_name,
-      debtorCompanyName:
-        recoveryCase.debtorCompanyName ??
-        recoveryCase.debtor_company_name ??
-        null,
-      debtorDocument:
-        recoveryCase.debtorDocument ?? recoveryCase.debtor_document ?? null,
+      tenantId: recoveryCase.tenant_id,
+      branchId: recoveryCase.branch_id ?? null,
+      contactId: recoveryCase.contact_id ?? null,
+      debtorName: recoveryCase.debtor_name,
+      debtorCompanyName: recoveryCase.debtor_company_name ?? null,
+      debtorDocument: recoveryCase.debtor_document ?? null,
       phone: recoveryCase.phone,
-      externalReference:
-        recoveryCase.externalReference ??
-        recoveryCase.external_reference ??
-        null,
-      paymentReference:
-        recoveryCase.paymentReference ?? recoveryCase.payment_reference ?? null,
+      externalReference: recoveryCase.external_reference ?? null,
+      paymentReference: recoveryCase.payment_reference ?? null,
       source: recoveryCase.source,
-      chargeType: recoveryCase.chargeType ?? recoveryCase.charge_type ?? null,
-      chargeTitle:
-        recoveryCase.chargeTitle ?? recoveryCase.charge_title ?? null,
-      chargeDescription:
-        recoveryCase.chargeDescription ??
-        recoveryCase.charge_description ??
-        null,
-      referencePeriod:
-        recoveryCase.referencePeriod ?? recoveryCase.reference_period ?? null,
-      relatedEntityType:
-        recoveryCase.relatedEntityType ??
-        recoveryCase.related_entity_type ??
-        null,
-      relatedEntityId:
-        recoveryCase.relatedEntityId ?? recoveryCase.related_entity_id ?? null,
-      relatedEntityLabel:
-        recoveryCase.relatedEntityLabel ??
-        recoveryCase.related_entity_label ??
-        null,
+      chargeType: recoveryCase.charge_type ?? null,
+      chargeTitle: recoveryCase.charge_title ?? null,
+      chargeDescription: recoveryCase.charge_description ?? null,
+      referencePeriod: recoveryCase.reference_period ?? null,
+      relatedEntityType: recoveryCase.related_entity_type ?? null,
+      relatedEntityId: recoveryCase.related_entity_id ?? null,
+      relatedEntityLabel: recoveryCase.related_entity_label ?? null,
       amountDue:
-        recoveryCase.amountDue == null
-          ? recoveryCase.amount_due == null
-            ? null
-            : Number(recoveryCase.amount_due.toString()).toFixed(2)
-          : Number(recoveryCase.amountDue.toString()).toFixed(2),
-      dueDate: recoveryCase.dueDate ?? recoveryCase.due_date ?? null,
+        recoveryCase.amount_due == null
+          ? null
+          : Number(recoveryCase.amount_due.toString()).toFixed(2),
+      dueDate: recoveryCase.due_date ?? null,
       status: recoveryCase.status,
-      assignedTags: Array.isArray(recoveryCase.assignedTags)
-        ? (recoveryCase.assignedTags as string[])
-        : Array.isArray(recoveryCase.assigned_tags)
-          ? (recoveryCase.assigned_tags as string[])
-          : [],
-      lastContactedAt:
-        recoveryCase.lastContactedAt ?? recoveryCase.last_contacted_at ?? null,
-      nextActionAt:
-        recoveryCase.nextActionAt ?? recoveryCase.next_action_at ?? null,
-      paidAt: recoveryCase.paidAt ?? recoveryCase.paid_at ?? null,
-      suggestedReply:
-        recoveryCase.suggestedReply ?? recoveryCase.suggested_reply ?? null,
-      suggestedNextAction:
-        recoveryCase.suggestedNextAction ??
-        recoveryCase.suggested_next_action ??
-        null,
-      guidanceGeneratedAt:
-        recoveryCase.guidanceGeneratedAt ??
-        recoveryCase.guidance_generated_at ??
-        null,
-      playbookId: recoveryCase.playbookId ?? recoveryCase.playbook_id ?? null,
-      playbookPhaseIndex:
-        recoveryCase.playbookPhaseIndex ??
-        recoveryCase.playbook_phase_index ??
-        0,
+      assignedTags: Array.isArray(recoveryCase.assigned_tags)
+        ? (recoveryCase.assigned_tags as string[])
+        : [],
+      lastContactedAt: recoveryCase.last_contacted_at ?? null,
+      nextActionAt: recoveryCase.next_action_at ?? null,
+      paidAt: recoveryCase.paid_at ?? null,
+      suggestedReply: recoveryCase.suggested_reply ?? null,
+      suggestedNextAction: recoveryCase.suggested_next_action ?? null,
+      guidanceGeneratedAt: recoveryCase.guidance_generated_at ?? null,
+      playbookId: recoveryCase.playbook_id ?? null,
+      playbookPhaseIndex: recoveryCase.playbook_phase_index ?? 0,
       lastPlaybookPhaseExecutedAt:
-        recoveryCase.lastPlaybookPhaseExecutedAt ??
-        recoveryCase.last_playbook_phase_executed_at ??
-        null,
-      createdAt: recoveryCase.createdAt ?? recoveryCase.created_at,
-      updatedAt: recoveryCase.updatedAt ?? recoveryCase.updated_at,
+        recoveryCase.last_playbook_phase_executed_at ?? null,
+      createdAt: recoveryCase.created_at,
+      updatedAt: recoveryCase.updated_at,
     };
   }
 

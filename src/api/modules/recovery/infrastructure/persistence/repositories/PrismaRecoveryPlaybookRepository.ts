@@ -275,34 +275,30 @@ export class PrismaRecoveryPlaybookRepository implements IRecoveryPlaybookReposi
   private mapPlaybook(row: Record<string, unknown>): RecoveryPlaybookRecord {
     return {
       id: String(row.id),
-      tenantId: String(row.tenant_id ?? row.tenantId),
+      tenantId: String(row.tenant_id),
       branchId: row.branch_id != null ? String(row.branch_id) : null,
       name: String(row.name),
       version: Number(row.version ?? 1),
       active: Boolean(row.active),
-      isSystem: Boolean(row.is_system ?? row.isSystem ?? false),
-      createdAt: new Date(String(row.created_at ?? row.createdAt)),
-      updatedAt: new Date(String(row.updated_at ?? row.updatedAt)),
+      isSystem: Boolean(row.is_system ?? false),
+      createdAt: new Date(String(row.created_at)),
+      updatedAt: new Date(String(row.updated_at)),
     };
   }
 
   private mapPhase(row: Record<string, unknown>): RecoveryPlaybookPhaseRecord {
     return {
       id: String(row.id),
-      playbookId: String(row.playbook_id ?? row.playbookId),
-      sortOrder: Number(row.sort_order ?? row.sortOrder),
+      playbookId: String(row.playbook_id),
+      sortOrder: Number(row.sort_order),
       channel: String(row.channel ?? 'WHATSAPP'),
       minDelayHoursSincePrevious: Number(
-        row.min_delay_hours_since_previous ??
-          row.minDelayHoursSincePrevious ??
-          0,
+        row.min_delay_hours_since_previous ?? 0,
       ),
-      minDaysOverdue: Number(row.min_days_overdue ?? row.minDaysOverdue ?? 0),
+      minDaysOverdue: Number(row.min_days_overdue ?? 0),
       mode: String(row.mode) as RecoveryPlaybookPhaseRecord['mode'],
       templateBody:
-        row.template_body != null || row.templateBody != null
-          ? String(row.template_body ?? row.templateBody)
-          : null,
+        row.template_body != null ? String(row.template_body) : null,
     };
   }
 }
