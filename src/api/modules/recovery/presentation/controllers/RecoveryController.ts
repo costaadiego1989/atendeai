@@ -12,8 +12,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { Response } from 'express';
 import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
@@ -27,6 +25,7 @@ import { GetRecoveryCaseUseCase } from '../../application/use-cases/GetRecoveryC
 import { ListRecoveryCasesUseCase } from '../../application/use-cases/ListRecoveryCasesUseCase';
 import { RegenerateRecoveryGuidanceUseCase } from '../../application/use-cases/RegenerateRecoveryGuidanceUseCase';
 import { SendRecoveryGuidanceUseCase } from '../../application/use-cases/SendRecoveryGuidanceUseCase';
+import { StartRecoveryReportExportUseCase } from '../../application/use-cases/StartRecoveryReportExportUseCase';
 import { TriggerRecoveryOutreachUseCase } from '../../application/use-cases/TriggerRecoveryOutreachUseCase';
 import { UpdateRecoveryCaseStatusUseCase } from '../../application/use-cases/UpdateRecoveryCaseStatusUseCase';
 import {
@@ -69,8 +68,7 @@ export class RecoveryController {
     private readonly activateRecoveryPlaybookUseCase: ActivateRecoveryPlaybookUseCase,
     private readonly triggerRecoveryOutreachUseCase: TriggerRecoveryOutreachUseCase,
     private readonly updateRecoveryCaseStatusUseCase: UpdateRecoveryCaseStatusUseCase,
-    @InjectQueue('recovery-async-jobs')
-    private readonly recoveryAsyncQueue: Queue,
+    private readonly startRecoveryReportExportUseCase: StartRecoveryReportExportUseCase,
   ) {}
 
   @Get('playbooks')
@@ -178,48 +176,17 @@ export class RecoveryController {
     @Body() body: GenerateRecoveryReportDTO,
     @Req() req: any,
   ) {
-    const asyncJob = await this.recoveryAsyncJobsService.createJob({
+    return this.startRecoveryReportExportUseCase.execute({
       tenantId,
       branchId,
-      type: 'EXPORT_RECOVERY_REPORT_CSV',
+      statuses: body.statuses,
+      sources: body.sources,
+      search: body.search,
+      dateFrom: body.dateFrom,
+      dateTo: body.dateTo,
       requestedByUserId: req.user?.sub,
       requestedByUserEmail: req.user?.email,
-      payload: {
-        branchId,
-        statuses: body.statuses ?? [],
-        sources: body.sources ?? [],
-        search: body.search?.trim() || undefined,
-        dateFrom: body.dateFrom,
-        dateTo: body.dateTo,
-      },
     });
-
-    const queueJob = await this.recoveryAsyncQueue.add(
-      'export-recovery-report-csv',
-      {
-        asyncJobId: asyncJob.id,
-        type: 'EXPORT_RECOVERY_REPORT_CSV',
-        tenantId,
-        branchId,
-        statuses: body.statuses ?? [],
-        sources: body.sources ?? [],
-        search: body.search?.trim() || undefined,
-        dateFrom: body.dateFrom,
-        dateTo: body.dateTo,
-      },
-      {
-        jobId: asyncJob.id,
-        attempts: 2,
-        removeOnComplete: 50,
-        removeOnFail: 200,
-      },
-    );
-
-    await this.recoveryAsyncJobsService.attachQueueJobId(
-      asyncJob.id,
-      String(queueJob.id),
-    );
-    return this.recoveryAsyncJobsService.getJob(tenantId, asyncJob.id);
   }
 
   @Get('jobs')
