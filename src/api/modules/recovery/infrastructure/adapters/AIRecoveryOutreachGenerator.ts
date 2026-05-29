@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AI_ENGINE, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
 import {
   IRecoveryOutreachGenerator,
@@ -7,6 +7,8 @@ import {
 
 @Injectable()
 export class AIRecoveryOutreachGenerator implements IRecoveryOutreachGenerator {
+  private readonly logger = new Logger(AIRecoveryOutreachGenerator.name);
+
   constructor(
     @Inject(AI_ENGINE)
     private readonly aiEngine: IAIEngine,
@@ -48,8 +50,19 @@ Regras:
       if (normalizedText) {
         return normalizedText;
       }
-    } catch {
-      // Falls back to deterministic outreach below.
+
+      this.logger.warn({
+        message: 'AI recovery outreach fallback triggered',
+        adapter: AIRecoveryOutreachGenerator.name,
+        reason: 'empty_ai_response',
+      });
+    } catch (error) {
+      this.logger.warn({
+        message: 'AI recovery outreach fallback triggered',
+        adapter: AIRecoveryOutreachGenerator.name,
+        reason: 'ai_engine_error',
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     return this.buildFallback(input);

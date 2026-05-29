@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AI_ENGINE, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
 import {
   IRecoveryGuidanceGenerator,
@@ -8,6 +8,8 @@ import {
 
 @Injectable()
 export class AIRecoveryGuidanceGenerator implements IRecoveryGuidanceGenerator {
+  private readonly logger = new Logger(AIRecoveryGuidanceGenerator.name);
+
   constructor(
     @Inject(AI_ENGINE)
     private readonly aiEngine: IAIEngine,
@@ -54,8 +56,21 @@ Regras:
       if (parsed) {
         return parsed;
       }
-    } catch {
-      // Falls back to deterministic guidance below.
+
+      this.logger.warn({
+        message: 'AI recovery guidance fallback triggered',
+        adapter: AIRecoveryGuidanceGenerator.name,
+        reason: 'invalid_ai_response_format',
+        status: input.status,
+      });
+    } catch (error) {
+      this.logger.warn({
+        message: 'AI recovery guidance fallback triggered',
+        adapter: AIRecoveryGuidanceGenerator.name,
+        reason: 'ai_engine_error',
+        status: input.status,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     return this.buildFallbackGuidance(input);
