@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import { isRecoveryPaymentReference } from '@shared/contracts/payment-references';
 import {
   CommercialKind,
   CommercialModule,
@@ -50,7 +51,7 @@ export class ConversationSaleEvidenceService {
 
     const externalId = String(link.externalId ?? '');
     const label = String(link.label ?? '').toLowerCase();
-    const isRecovery = externalId.startsWith('recovery|');
+    const isRecovery = isRecoveryPaymentReference(externalId);
     const module: CommercialModule = isRecovery
       ? 'RECOVERY'
       : label.includes('proposta')

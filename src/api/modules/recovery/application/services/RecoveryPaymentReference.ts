@@ -1,26 +1,7 @@
-export function buildRecoveryPaymentReference(
-  tenantId: string,
-  caseId: string,
-): string {
-  return `recovery|${tenantId}|${caseId}`;
-}
-
-export function parseRecoveryPaymentReference(rawReference?: string | null): {
-  tenantId: string;
-  caseId: string;
-} | null {
-  if (!rawReference) {
-    return null;
-  }
-
-  const match = /^recovery\|([^|]+)\|([^|]+)$/.exec(rawReference);
-
-  if (!match) {
-    return null;
-  }
-
-  return {
-    tenantId: match[1],
-    caseId: match[2],
-  };
-}
+export {
+  buildRecoveryPaymentReference,
+  parseRecoveryPaymentReference,
+  isRecoveryPaymentReference,
+  RECOVERY_PAYMENT_REFERENCE_PREFIX,
+} from '@shared/contracts/payment-references';
+export type { RecoveryPaymentReferenceParts } from '@shared/contracts/payment-references';
