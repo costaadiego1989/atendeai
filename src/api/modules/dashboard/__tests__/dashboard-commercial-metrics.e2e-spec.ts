@@ -8,6 +8,10 @@ import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
 import { SuccessResponseInterceptor } from '@shared/infrastructure/http/interceptors/SuccessResponseInterceptor';
+import {
+  RECOVERY_PAYMENT_REFERENCE_PREFIX,
+  buildRecoveryPaymentReference,
+} from '@shared/contracts/payment-references';
 
 describe('Dashboard Commercial Metrics Flow (e2e)', () => {
   jest.setTimeout(60000);
@@ -99,7 +103,7 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
         {
           tenantId,
           providerLinkId: `provider-recovery-${Date.now()}`,
-          externalId: `recovery|${tenantId}|1`,
+          externalId: buildRecoveryPaymentReference(tenantId, '1'),
           name: 'Cobranca recuperada',
           label: 'Recovery',
           value: 120,
@@ -216,7 +220,7 @@ describe('Dashboard Commercial Metrics Flow (e2e)', () => {
           externalId: expect.stringContaining('sales-charge|'),
         }),
         expect.objectContaining({
-          externalId: expect.stringContaining('recovery|'),
+          externalId: expect.stringContaining(`${RECOVERY_PAYMENT_REFERENCE_PREFIX}|`),
         }),
       ]),
     );

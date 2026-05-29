@@ -9,6 +9,7 @@ import * as cookieParser from 'cookie-parser';
 import * as request from 'supertest';
 import { randomUUID } from 'crypto';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
+import { buildRecoveryPaymentReference } from '@shared/contracts/payment-references';
 
 describe('Contact timeline endpoint (e2e)', () => {
   jest.setTimeout(60000);
@@ -177,7 +178,7 @@ describe('Contact timeline endpoint (e2e)', () => {
         status: 'NEGOTIATING',
         chargeTitle: 'Parcela em aberto',
         amountDue: '189.90',
-        paymentReference: `recovery|${tenantId}|timeline-e2e-case`,
+        paymentReference: buildRecoveryPaymentReference(tenantId, 'timeline-e2e-case'),
       },
     });
 
@@ -188,7 +189,7 @@ describe('Contact timeline endpoint (e2e)', () => {
         eventType: 'PAYMENT_CONFIRMED',
         paymentId: 'pay-e2e-1',
         tenantId,
-        rawReference: `recovery|${tenantId}|timeline-e2e-case`,
+        rawReference: buildRecoveryPaymentReference(tenantId, 'timeline-e2e-case'),
         payload: { payment: { id: 'pay-e2e-1' } },
         status: 'PROCESSED',
         processedAt: new Date('2026-01-01T12:15:00.000Z'),

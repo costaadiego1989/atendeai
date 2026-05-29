@@ -270,48 +270,45 @@ export class PrismaRecoveryRecurringChargeRepository implements IRecoveryRecurri
   private mapRecurringCharge(row: any): RecoveryRecurringChargeRecord {
     return {
       id: row.id,
-      tenantId: row.tenantId ?? row.tenant_id,
-      branchId: row.branchId ?? row.branch_id ?? null,
-      caseId: row.caseId ?? row.case_id,
+      tenantId: row.tenant_id,
+      branchId: row.branch_id ?? null,
+      caseId: row.case_id,
       status: row.status,
-      billingType: row.billingType ?? row.billing_type,
-      intervalDays: Number(row.intervalDays ?? row.interval_days),
+      billingType: row.billing_type,
+      intervalDays: Number(row.interval_days),
       maxOccurrences:
-        (row.maxOccurrences ?? row.max_occurrences) == null
-          ? null
-          : Number(row.maxOccurrences ?? row.max_occurrences),
-      occurrencesSent: Number(row.occurrencesSent ?? row.occurrences_sent ?? 0),
-      firstRunAt: row.firstRunAt ?? row.first_run_at,
-      nextRunAt: row.nextRunAt ?? row.next_run_at ?? null,
-      lastRunAt: row.lastRunAt ?? row.last_run_at ?? null,
-      messageTemplate: row.messageTemplate ?? row.message_template ?? null,
-      lastError: row.lastError ?? row.last_error ?? null,
-      leaseUntil: row.leaseUntil ?? row.lease_until ?? null,
-      createdByUserId: row.createdByUserId ?? row.created_by_user_id ?? null,
-      createdByUserEmail:
-        row.createdByUserEmail ?? row.created_by_user_email ?? null,
-      cancelledAt: row.cancelledAt ?? row.cancelled_at ?? null,
-      completedAt: row.completedAt ?? row.completed_at ?? null,
-      createdAt: row.createdAt ?? row.created_at,
-      updatedAt: row.updatedAt ?? row.updated_at,
+        row.max_occurrences == null ? null : Number(row.max_occurrences),
+      occurrencesSent: Number(row.occurrences_sent ?? 0),
+      firstRunAt: row.first_run_at,
+      nextRunAt: row.next_run_at ?? null,
+      lastRunAt: row.last_run_at ?? null,
+      messageTemplate: row.message_template ?? null,
+      lastError: row.last_error ?? null,
+      leaseUntil: row.lease_until ?? null,
+      createdByUserId: row.created_by_user_id ?? null,
+      createdByUserEmail: row.created_by_user_email ?? null,
+      cancelledAt: row.cancelled_at ?? null,
+      completedAt: row.completed_at ?? null,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     };
   }
 
   private mapRun(row: any): RecoveryRecurringChargeRunRecord {
     return {
       id: row.id,
-      recurrenceId: row.recurrenceId ?? row.recurrence_id,
-      tenantId: row.tenantId ?? row.tenant_id,
-      caseId: row.caseId ?? row.case_id,
-      occurrenceNumber: Number(row.occurrenceNumber ?? row.occurrence_number),
-      scheduledFor: row.scheduledFor ?? row.scheduled_for,
+      recurrenceId: row.recurrence_id,
+      tenantId: row.tenant_id,
+      caseId: row.case_id,
+      occurrenceNumber: Number(row.occurrence_number),
+      scheduledFor: row.scheduled_for,
       status: row.status,
-      paymentLinkId: row.paymentLinkId ?? row.payment_link_id ?? null,
-      conversationId: row.conversationId ?? row.conversation_id ?? null,
-      messageId: row.messageId ?? row.message_id ?? null,
-      errorMessage: row.errorMessage ?? row.error_message ?? null,
-      createdAt: row.createdAt ?? row.created_at,
-      completedAt: row.completedAt ?? row.completed_at ?? null,
+      paymentLinkId: row.payment_link_id ?? null,
+      conversationId: row.conversation_id ?? null,
+      messageId: row.message_id ?? null,
+      errorMessage: row.error_message ?? null,
+      createdAt: row.created_at,
+      completedAt: row.completed_at ?? null,
     };
   }
 }

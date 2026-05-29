@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import axiosRetry from 'axios-retry';
+import { parseRecoveryPaymentReference } from '@shared/contracts/payment-references';
 import {
   PaymentGatewayConflictException,
   PaymentGatewayNotFoundException,
@@ -417,9 +418,9 @@ export class AsaasAdapter implements IPaymentGateway {
       return undefined;
     }
 
-    const recoveryMatch = /^recovery\|([^|]+)\|([^|]+)$/.exec(rawReference);
-    if (recoveryMatch) {
-      return recoveryMatch[1];
+    const recoveryParts = parseRecoveryPaymentReference(rawReference);
+    if (recoveryParts) {
+      return recoveryParts.tenantId;
     }
 
     const billingUpgradeMatch =

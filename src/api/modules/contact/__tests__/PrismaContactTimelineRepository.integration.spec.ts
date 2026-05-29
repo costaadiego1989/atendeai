@@ -9,6 +9,7 @@ import {
 import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
+import { buildRecoveryPaymentReference } from '@shared/contracts/payment-references';
 
 describe('PrismaContactTimelineRepository (integration)', () => {
   jest.setTimeout(60000);
@@ -123,7 +124,7 @@ describe('PrismaContactTimelineRepository (integration)', () => {
         status: 'PROMISE_TO_PAY',
         chargeTitle: 'Mensalidade de janeiro',
         amountDue: '249.90',
-        paymentReference: `recovery|${tenantId}|timeline-case`,
+        paymentReference: buildRecoveryPaymentReference(tenantId, 'timeline-case'),
         paidAt: new Date('2026-01-01T13:30:00.000Z'),
       },
     });
@@ -135,7 +136,7 @@ describe('PrismaContactTimelineRepository (integration)', () => {
         eventType: 'PAYMENT_CONFIRMED',
         paymentId: 'pay_timeline_1',
         tenantId,
-        rawReference: `recovery|${tenantId}|timeline-case`,
+        rawReference: buildRecoveryPaymentReference(tenantId, 'timeline-case'),
         payload: {
           payment: {
             id: 'pay_timeline_1',
@@ -279,7 +280,7 @@ describe('PrismaContactTimelineRepository (integration)', () => {
     expect(paymentEntry?.details).toEqual(
       expect.objectContaining({
         paymentId: 'pay_timeline_1',
-        paymentReference: `recovery|${tenantId}|timeline-case`,
+        paymentReference: buildRecoveryPaymentReference(tenantId, 'timeline-case'),
       }),
     );
 

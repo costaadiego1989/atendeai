@@ -12,6 +12,7 @@ import { GenerateRecoveryPaymentLinkUseCase } from './application/use-cases/Gene
 import { GetRecoveryCaseUseCase } from './application/use-cases/GetRecoveryCaseUseCase';
 import { RegenerateRecoveryGuidanceUseCase } from './application/use-cases/RegenerateRecoveryGuidanceUseCase';
 import { SendRecoveryGuidanceUseCase } from './application/use-cases/SendRecoveryGuidanceUseCase';
+import { StartRecoveryReportExportUseCase } from './application/use-cases/StartRecoveryReportExportUseCase';
 import { RecoveryPaymentEventHandler } from './application/handlers/RecoveryPaymentEventHandler';
 import { RecoveryRecurringChargeDueHandler } from './application/handlers/RecoveryRecurringChargeDueHandler';
 import { RecoveryController } from './presentation/controllers/RecoveryController';
@@ -69,6 +70,7 @@ import { ActivateRecoveryPlaybookUseCase } from './application/use-cases/Activat
     CancelRecoveryRecurringChargeUseCase,
     ProcessRecoveryRecurringChargeUseCase,
     SendRecoveryGuidanceUseCase,
+    StartRecoveryReportExportUseCase,
     RegisterRecoveryReplyUseCase,
     RecoveryCaseMessagingService,
     RecoveryReplyPolicy,
