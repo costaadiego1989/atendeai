@@ -80,12 +80,22 @@ export function MessageBubble({
         {content ? <p className="whitespace-pre-wrap text-sm leading-6">{content}</p> : null}
         <div
           className={cn(
-            'mt-2 flex items-center justify-end gap-2 text-[11px]',
+            'mt-2 flex items-center justify-end gap-1.5 text-[11px]',
             isOutbound ? 'text-primary-foreground/75' : 'text-muted-foreground',
           )}
         >
           <span>{formatConversationClock(timestamp)}</span>
-          {status ? <span className="uppercase">{status}</span> : null}
+          {isOutbound && status ? (
+            <span
+              className={cn(
+                'font-medium tracking-tight',
+                status === 'READ' ? 'text-sky-300' : 'text-primary-foreground/60',
+              )}
+              title={status}
+            >
+              {status === 'READ' || status === 'DELIVERED' ? '✓✓' : '✓'}
+            </span>
+          ) : null}
         </div>
       </div>
     </div>

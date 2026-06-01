@@ -819,6 +819,7 @@ export function useConversationsPageViewModel() {
       ownedItems: conversations.filter(
         (c) => c.status === 'PENDING_HUMAN' && c.assignedToUserId === (user?.id ?? null),
       ).length,
+      pendingHumanItems: conversations.filter((c) => c.status === 'PENDING_HUMAN').length,
       waitingItems: conversations.filter(
         (c) =>
           c.status === 'ACTIVE' &&

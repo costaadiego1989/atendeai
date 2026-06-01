@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Users, Clock, ArrowRight } from 'lucide-react';
+import { Clock, Headphones, MessageSquare, Users } from 'lucide-react';
 import { KPICard } from '@/shared/ui/KPICard';
 
 interface MessagingKPIsProps {
@@ -7,6 +7,7 @@ interface MessagingKPIsProps {
     newItems: number;
     ownedItems: number;
     waitingItems: number;
+    pendingHumanItems: number;
   };
 }
 
@@ -24,6 +25,12 @@ export const MessagingKPIs: React.FC<MessagingKPIsProps> = ({ stats }) => {
         value={stats.ownedItems}
         subtitle="Conversas assumidas por você"
         icon={Users}
+      />
+      <KPICard
+        title="Atendimento Humano"
+        value={stats.pendingHumanItems}
+        subtitle="Fila total da equipe"
+        icon={Headphones}
       />
       <KPICard
         title="Aguardando Retorno"
