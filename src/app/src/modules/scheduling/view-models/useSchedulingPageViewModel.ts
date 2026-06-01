@@ -18,7 +18,7 @@ import {
   pickDefaultProfessionalCategoryId,
   sortSlots,
   timeToMinutes,
-} from './scheduling-view-model-helpers';
+} from './scheduling-date-utils';
 import { useSchedulingPageState } from './useSchedulingPageState';
 import { useSchedulingReportsViewModel } from './useSchedulingReportsViewModel';
 import { useSchedulingReservationViewModel } from './useSchedulingReservationViewModel';
@@ -837,6 +837,7 @@ export function useSchedulingPageViewModel() {
     setRescheduleReservationForm,
     reportFilters: reportsVm.reportFilters,
     setReportFilters: reportsVm.setReportFilters,
+    activeReportPeriodDays: reportsVm.activeReportPeriodDays,
     reportsOpen: reportsVm.reportsOpen,
     setReportsOpen: reportsVm.setReportsOpen,
     recurrenceOpen,
@@ -892,6 +893,7 @@ export function useSchedulingPageViewModel() {
     deleteRecurrenceMutation,
     saveAvailabilityMutation: rosterVm.saveAvailabilityMutation,
     generateBulkSlotsMutation: rosterVm.generateBulkSlotsMutation,
+    bulkProgress: rosterVm.bulkProgress,
     assignCategoriesMutation: rosterVm.assignCategoriesMutation,
     reserveSlotMutation: reservationVm.reserveSlotMutation,
     updateSlotMutation,

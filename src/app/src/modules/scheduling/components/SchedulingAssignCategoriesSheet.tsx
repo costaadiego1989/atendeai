@@ -10,7 +10,7 @@ import {
 import type { SchedulingPageViewModel } from '@/modules/scheduling/view-models/useSchedulingPageViewModel';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ScissorsSquare } from 'lucide-react';
-import { formatCategoryMeta } from './scheduling-view-helpers';
+import { formatCategoryMeta } from '../view-models/scheduling-formatters';
 
 type Props = {
   vm: SchedulingPageViewModel;

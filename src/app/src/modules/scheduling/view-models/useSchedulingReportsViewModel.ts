@@ -40,6 +40,20 @@ export function useSchedulingReportsViewModel({
   const [currentExportJobId, setCurrentExportJobId] = useState<string | null>(null);
   const handledJobsRef = useRef<Record<string, string>>({});
 
+  const activeReportPeriodDays = useMemo<0 | 7 | 30 | null>(() => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    if (reportFilters.startDate === today && reportFilters.endDate === today) {
+      return 0;
+    }
+
+    const startMs = new Date(`${reportFilters.startDate}T00:00:00`).getTime();
+    const endMs = new Date(`${reportFilters.endDate}T00:00:00`).getTime();
+    const diff = Math.round((endMs - startMs) / 86_400_000);
+
+    return diff === 7 || diff === 30 ? diff : null;
+  }, [reportFilters]);
+
   const jobsQuery = useQuery({
     queryKey: ['scheduling-async-jobs', tenantId],
     queryFn: () => schedulingService.listAsyncJobs(tenantId!),
@@ -222,6 +236,7 @@ export function useSchedulingReportsViewModel({
     setReportsOpen,
     reportFilters,
     setReportFilters,
+    activeReportPeriodDays,
     jobsQuery,
     activeJobItems,
     activeReportJob,

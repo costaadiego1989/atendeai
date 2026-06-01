@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 
 interface KPICardProps {
   title: string;
-  value: string | number;
+  value: ReactNode;
   subtitle?: string;
   icon?: LucideIcon;
   trend?: { value: number; positive: boolean };

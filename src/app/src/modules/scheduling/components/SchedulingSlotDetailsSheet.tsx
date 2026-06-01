@@ -28,7 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { SchedulingSlotBillingType } from '@/modules/scheduling/services/scheduling-service';
 import { schedulingService } from '@/modules/scheduling/services/scheduling-service';
 import type { SchedulingPageViewModel } from '@/modules/scheduling/view-models/useSchedulingPageViewModel';
-import { formatCurrency, formatScheduleDate } from './scheduling-view-helpers';
+import { formatCurrency, formatScheduleDate } from '../view-models/scheduling-formatters';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from '@/hooks/use-toast';
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/components/ui/use-toast';
@@ -10,7 +10,7 @@ import {
   minutesToTime,
   sortSlots,
   timeToMinutes,
-} from './scheduling-view-model-helpers';
+} from './scheduling-date-utils';
 
 type TenantOperatingHours = Record<
   string,
@@ -113,6 +113,9 @@ export function useSchedulingRosterViewModel({
   setBulkSlotGeneratorForm,
 }: Args) {
   const queryClient = useQueryClient();
+  const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number } | null>(
+    null,
+  );
 
   const saveAvailabilityMutation = useMutation({
     mutationFn: () =>
@@ -168,7 +171,11 @@ export function useSchedulingRosterViewModel({
       let generatedSlots = 0;
       let skippedDays = 0;
 
-      for (const date of dates) {
+      setBulkProgress({ current: 0, total: dates.length });
+
+      for (let dateIndex = 0; dateIndex < dates.length; dateIndex += 1) {
+        const date = dates[dateIndex];
+        setBulkProgress({ current: dateIndex + 1, total: dates.length });
         const operatingDayKey = getOperatingDayKey(date);
         const operatingDay = tenantOperatingHours?.[operatingDayKey];
 
@@ -268,6 +275,7 @@ export function useSchedulingRosterViewModel({
       return { generatedDays, generatedSlots, skippedDays };
     },
     onSuccess: async (result) => {
+      setBulkProgress(null);
       setSelectedProfessionalId(bulkSlotGeneratorForm.professionalId);
       setSelectedDate(bulkSlotGeneratorForm.startDate);
       setCalendarView('day');
@@ -306,12 +314,21 @@ export function useSchedulingRosterViewModel({
       });
     },
     onError: (error) => {
-      toast({
-        title: 'Falha ao gerar slots',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível gerar os slots em lote agora.',
-        }),
-        variant: 'destructive',
+      setBulkProgress((current) => {
+        const completedDays = current ? Math.max(current.current - 1, 0) : 0;
+
+        toast({
+          title: 'Falha ao gerar slots',
+          description: getFriendlyErrorMessage(error, {
+            fallbackMessage:
+              completedDays > 0
+                ? `Geramos ${completedDays} dia(s) antes da falha. não foi possível concluir o restante agora.`
+                : 'não foi possível gerar os slots em lote agora.',
+          }),
+          variant: 'destructive',
+        });
+
+        return null;
       });
     },
   });
@@ -564,6 +581,7 @@ export function useSchedulingRosterViewModel({
     saveAvailabilityMutation,
     generateBulkSlotsMutation,
     assignCategoriesMutation,
+    bulkProgress,
     bulkGenerationProfessionalCategories,
     selectedBulkGenerationProfessional,
     selectedBulkGenerationCategory,

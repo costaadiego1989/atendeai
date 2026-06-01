@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/shared/lib/formatters';
 import { CalendarDays, ExternalLink, Lock, Unlock } from 'lucide-react';
-import { formatCurrency, formatSlotTime, getSlotTone } from './scheduling-view-helpers';
+import { formatCurrency, formatSlotTime, getSlotTone } from '../view-models/scheduling-formatters';
 
 type SchedulingSlotCard = {
   id: string;
