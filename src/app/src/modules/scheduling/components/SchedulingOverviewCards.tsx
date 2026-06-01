@@ -14,10 +14,6 @@ export function SchedulingOverviewCards({ vm }: Props) {
   const categoriesLoading = vm.categoriesQuery.isLoading;
   const availabilityLoading = vm.availabilityQuery.isLoading;
 
-  const reservationsCount = vm.availabilitySlots.filter(
-    (slot) => slot.status === 'RESERVED' || slot.status === 'PRE_RESERVED',
-  ).length;
-
   return (
     <div className="card-grid">
       <KPICard
@@ -40,7 +36,7 @@ export function SchedulingOverviewCards({ vm }: Props) {
       />
       <KPICard
         title="Reservas"
-        value={availabilityLoading ? valueSkeleton : reservationsCount}
+        value={availabilityLoading ? valueSkeleton : vm.reservationsCount}
         subtitle="Horários ocupados no dia"
         icon={CalendarDays}
       />

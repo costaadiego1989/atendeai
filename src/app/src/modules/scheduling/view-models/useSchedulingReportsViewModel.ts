@@ -4,6 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { schedulingService } from '@/modules/scheduling/services/scheduling-service';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
 import { formatCurrency } from '@/shared/lib/formatters';
+import { isoToday } from '@/modules/scheduling/view-models/scheduling-date-utils';
 import type { AsyncOperationItem } from '@/shared/ui/AsyncOperationsPanel';
 import type { SchedulingAsyncJob } from '@/shared/types';
 
@@ -41,7 +42,7 @@ export function useSchedulingReportsViewModel({
   const handledJobsRef = useRef<Record<string, string>>({});
 
   const activeReportPeriodDays = useMemo<0 | 7 | 30 | null>(() => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = isoToday();
 
     if (reportFilters.startDate === today && reportFilters.endDate === today) {
       return 0;

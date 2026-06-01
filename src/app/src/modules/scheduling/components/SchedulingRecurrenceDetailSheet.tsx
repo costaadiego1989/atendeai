@@ -10,7 +10,7 @@ import { Trash2, XCircle } from 'lucide-react';
 import type { SchedulingPageViewModel } from '@/modules/scheduling/view-models/useSchedulingPageViewModel';
 import type { useSchedulingProfessionalsTabViewModel } from '@/modules/scheduling/view-models/useSchedulingProfessionalsTabViewModel';
 import { formatPhone } from '@/shared/lib/masks';
-import { formatRecurrenceDateRange } from '../view-models/scheduling-formatters';
+import { formatRecurrenceDateRange, frequencyLabels } from '../view-models/scheduling-formatters';
 
 type TabViewModel = ReturnType<typeof useSchedulingProfessionalsTabViewModel>;
 
@@ -18,13 +18,6 @@ type Props = {
   vm: SchedulingPageViewModel;
   tab: TabViewModel;
 };
-
-const frequencyLabels = {
-  DAILY: 'Diaria',
-  WEEKLY: 'Semanal',
-  BIWEEKLY: 'Quinzenal',
-  MONTHLY: 'Mensal',
-} as const;
 
 export function SchedulingRecurrenceDetailSheet({ vm, tab }: Props) {
   const { selectedRecurrence } = tab;

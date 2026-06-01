@@ -638,6 +638,9 @@ export function useSchedulingPageViewModel() {
   const categories = categoriesQuery.data ?? [];
   const contacts = contactsQuery.data?.data ?? [];
   const availabilitySlots = sortSlots(availabilityQuery.data ?? []);
+  const reservationsCount = availabilitySlots.filter(
+    (slot) => slot.status === 'RESERVED' || slot.status === 'PRE_RESERVED',
+  ).length;
   const recurrences = recurrencesQuery.data ?? [];
   const categoryProfessionals = categoryProfessionalsQuery.data ?? [];
   const categoryAvailability = categoryAvailabilityQuery.data ?? [];
@@ -862,6 +865,7 @@ export function useSchedulingPageViewModel() {
     contacts,
     filteredContacts,
     availabilitySlots,
+    reservationsCount,
     recurrences,
     calendarRange,
     categoryProfessionals,

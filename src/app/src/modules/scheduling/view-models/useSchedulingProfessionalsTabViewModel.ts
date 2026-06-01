@@ -95,9 +95,7 @@ export function useSchedulingProfessionalsTabViewModel(vm: SchedulingPageViewMod
     for (const entry of vm.calendarRange) {
       breakdown[entry.date] = {
         available: entry.slots.filter((slot) => slot.status === 'AVAILABLE').length,
-        reserved: entry.slots.filter(
-          (slot) => slot.status === 'RESERVED' || slot.status === 'PRE_RESERVED',
-        ).length,
+        reserved: entry.slots.filter((slot) => isReservedSlot(slot)).length,
         blocked: entry.slots.filter((slot) => slot.status === 'BLOCKED').length,
       };
     }

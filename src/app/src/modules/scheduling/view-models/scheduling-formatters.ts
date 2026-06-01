@@ -52,6 +52,13 @@ export function getRecurrenceStatusLabel(
   return labels[status];
 }
 
+export const frequencyLabels = {
+  DAILY: 'Diaria',
+  WEEKLY: 'Semanal',
+  BIWEEKLY: 'Quinzenal',
+  MONTHLY: 'Mensal',
+} as const;
+
 export function getCategoryUnitLabel(
   unit?: 'PER_MINUTE' | 'PER_SESSION' | 'PER_CONSULTATION',
 ) {
