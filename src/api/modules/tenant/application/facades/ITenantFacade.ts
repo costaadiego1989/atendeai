@@ -35,6 +35,8 @@ export interface MessagingChannelConfig {
 }
 
 export interface ITenantFacade {
+  tenantExists(tenantId: string): Promise<boolean>;
+  getTenantName(tenantId: string): Promise<string | null>;
   getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfig | null>;
   getInstagramConfig(tenantId: string): Promise<InstagramConfig | null>;
   getWhatsAppConfigByNumber(

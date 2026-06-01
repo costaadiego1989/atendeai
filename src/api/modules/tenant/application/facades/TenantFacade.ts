@@ -18,6 +18,16 @@ export class TenantFacade implements ITenantFacade {
     private readonly tenantRepository: ITenantRepository,
   ) {}
 
+  async tenantExists(tenantId: string): Promise<boolean> {
+    const tenant = await this.tenantRepository.findById(tenantId);
+    return tenant !== null;
+  }
+
+  async getTenantName(tenantId: string): Promise<string | null> {
+    const tenant = await this.tenantRepository.findById(tenantId);
+    return tenant?.companyName.value ?? null;
+  }
+
   async getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfig | null> {
     const tenant = await this.tenantRepository.findById(tenantId);
     if (!tenant || !tenant.whatsAppConfig) return null;

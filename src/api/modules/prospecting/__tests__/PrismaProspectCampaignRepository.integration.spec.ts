@@ -13,6 +13,7 @@ import { TenantId } from '@shared/domain/TenantId';
 import { ProspectAudienceTypeVO } from '../domain/value-objects/ProspectAudienceType';
 import { ProspectChannelVO } from '../domain/value-objects/ProspectChannel';
 import { PrismaProspectCampaignRepository } from '../infrastructure/persistence/repositories/PrismaProspectCampaignRepository';
+import { ProspectCampaignMapper } from '../infrastructure/persistence/mappers/ProspectCampaignMapper';
 
 describe('PrismaProspectCampaignRepository (integration)', () => {
   jest.setTimeout(60000);
@@ -228,5 +229,28 @@ describe('PrismaProspectCampaignRepository (integration)', () => {
     expect(
       result.some((campaign) => campaign.name === 'Campanha Outro Tenant'),
     ).toBe(false);
+  });
+
+  it('should not overwrite a campaign from another tenant when id collides on save', async () => {
+    const campaignB = makeCampaign(otherTenantId, 'Protected Campaign B', 'REENGAGEMENT');
+    await repository.save(campaignB);
+    const campaignBId = campaignB.id.toString();
+
+    // Read raw DB record to obtain the exact persisted shape
+    const rawB = await prisma.prospectCampaign.findUnique({
+      where: { tenantId_id: { tenantId: otherTenantId, id: campaignBId } },
+    });
+    expect(rawB).not.toBeNull();
+
+    // Craft a tenantA entity reusing tenantB's id — simulates cross-tenant id collision
+    const attackerEntity = ProspectCampaignMapper.toDomain({ ...rawB!, tenantId });
+
+    // With composite-key upsert this creates a new row for tenantA, NOT updating tenantB
+    await repository.save(attackerEntity);
+
+    const tenantBResult = await repository.findById(otherTenantId, campaignBId);
+    expect(tenantBResult).not.toBeNull();
+    expect(tenantBResult?.name).toBe('Protected Campaign B');
+    expect(tenantBResult?.tenantId.toString()).toBe(otherTenantId);
   });
 });

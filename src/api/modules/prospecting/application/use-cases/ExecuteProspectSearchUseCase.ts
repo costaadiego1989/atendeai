@@ -30,7 +30,10 @@ import {
   ExecuteProspectSearchOutput,
   IExecuteProspectSearchUseCase,
 } from './interfaces/IExecuteProspectSearchUseCase';
-import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
+import {
+  IProspectingDailyQuotaPort,
+  PROSPECTING_DAILY_QUOTA_PORT,
+} from '../ports/IProspectingDailyQuotaPort';
 
 @Injectable()
 export class ExecuteProspectSearchUseCase implements IExecuteProspectSearchUseCase {
@@ -47,7 +50,8 @@ export class ExecuteProspectSearchUseCase implements IExecuteProspectSearchUseCa
     private readonly checkQuotaUseCase: ICheckQuotaUseCase,
     @Inject(IRecordUsageUseCase)
     private readonly recordUsageUseCase: IRecordUsageUseCase,
-    private readonly prospectingQuotaService: BillingProspectingQuotaService,
+    @Inject(PROSPECTING_DAILY_QUOTA_PORT)
+    private readonly prospectingQuotaPort: IProspectingDailyQuotaPort,
   ) {}
 
   async execute(
@@ -76,7 +80,7 @@ export class ExecuteProspectSearchUseCase implements IExecuteProspectSearchUseCa
     }
 
     try {
-      await this.prospectingQuotaService.assertCanConsume({
+      await this.prospectingQuotaPort.assertCanConsume({
         tenantId: search.tenantId.toString(),
         requested: search.maxResults,
       });

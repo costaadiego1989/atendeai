@@ -10,11 +10,12 @@ export class PrismaProspectCampaignRepository implements IProspectCampaignReposi
 
   async save(campaign: ProspectCampaign): Promise<void> {
     const data = ProspectCampaignMapper.toPersistence(campaign);
+    const { id, tenantId, ...updateData } = data;
 
     await this.prisma.prospectCampaign.upsert({
-      where: { id: data.id },
+      where: { tenantId_id: { tenantId, id } },
       create: data,
-      update: data,
+      update: updateData,
     });
   }
 

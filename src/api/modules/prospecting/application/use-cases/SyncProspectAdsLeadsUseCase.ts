@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ITenantRepository,
-  TENANT_REPOSITORY,
-} from '@modules/tenant/domain/repositories/ITenantRepository';
+  ITenantFacade,
+  TENANT_FACADE,
+} from '@modules/tenant/application/facades/ITenantFacade';
 import { TenantId } from '@shared/domain/TenantId';
 import {
   GOOGLE_ADS_LEAD_SOURCE,
@@ -22,8 +22,8 @@ import {
 @Injectable()
 export class SyncProspectAdsLeadsUseCase implements ISyncProspectAdsLeadsUseCase {
   constructor(
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
+    @Inject(TENANT_FACADE)
+    private readonly tenantFacade: ITenantFacade,
     @Inject(GOOGLE_ADS_LEAD_SOURCE)
     private readonly googleAdsLeadSource: IGoogleAdsLeadSource,
     @Inject(PROSPECT_LEAD_CAPTURE_REPOSITORY)
@@ -33,8 +33,8 @@ export class SyncProspectAdsLeadsUseCase implements ISyncProspectAdsLeadsUseCase
   async execute(
     input: SyncProspectAdsLeadsInput,
   ): Promise<SyncProspectAdsLeadsOutput> {
-    const tenant = await this.tenantRepository.findById(input.tenantId);
-    if (!tenant) {
+    const exists = await this.tenantFacade.tenantExists(input.tenantId);
+    if (!exists) {
       throw new NotFoundException(`Tenant ${input.tenantId} not found`);
     }
 

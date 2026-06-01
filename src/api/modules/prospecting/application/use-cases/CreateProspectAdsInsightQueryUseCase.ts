@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ITenantRepository,
-  TENANT_REPOSITORY,
-} from '@modules/tenant/domain/repositories/ITenantRepository';
+  ITenantFacade,
+  TENANT_FACADE,
+} from '@modules/tenant/application/facades/ITenantFacade';
 import { TenantId } from '@shared/domain/TenantId';
 import {
   CreateProspectAdsInsightQueryInput,
@@ -27,8 +27,8 @@ import { ProspectAdsInsightResult } from '../../domain/entities/ProspectAdsInsig
 @Injectable()
 export class CreateProspectAdsInsightQueryUseCase implements ICreateProspectAdsInsightQueryUseCase {
   constructor(
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
+    @Inject(TENANT_FACADE)
+    private readonly tenantFacade: ITenantFacade,
     @Inject(PROSPECT_ADS_INSIGHT_QUERY_REPOSITORY)
     private readonly queryRepository: IProspectAdsInsightQueryRepository,
     @Inject(PROSPECT_ADS_INSIGHT_RESULT_REPOSITORY)
@@ -40,8 +40,8 @@ export class CreateProspectAdsInsightQueryUseCase implements ICreateProspectAdsI
   async execute(
     input: CreateProspectAdsInsightQueryInput,
   ): Promise<CreateProspectAdsInsightQueryOutput> {
-    const tenant = await this.tenantRepository.findById(input.tenantId);
-    if (!tenant) {
+    const exists = await this.tenantFacade.tenantExists(input.tenantId);
+    if (!exists) {
       throw new NotFoundException(`Tenant ${input.tenantId} not found`);
     }
 
