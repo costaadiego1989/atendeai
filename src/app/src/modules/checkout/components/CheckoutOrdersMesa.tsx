@@ -20,6 +20,14 @@ import {
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { formatCurrency, formatDateTime } from '@/shared/lib/formatters';
 import { formatPhone } from '@/shared/lib/masks';
+import {
+  getFulfillmentLabel,
+  getOrderLabel,
+  getOrderTone,
+  getPaymentLabel,
+  getPaymentTone,
+  getShippingLabel,
+} from '@/modules/checkout/view-models/checkout-ui-utils';
 import type { CommerceOrderStatus } from '@/shared/types';
 
 interface Order {
@@ -47,13 +55,6 @@ interface CheckoutOrdersMesaProps {
   onSelectOrder: (id: string) => void;
   onMoveOrderStatus: (orderId: string, status: CommerceOrderStatus) => void;
   movingOrderId?: string | null;
-  getOrderTone: (status: string) => string;
-  getOrderLabel: (status: string) => string;
-  getPaymentTone: (status?: string | null) => string;
-  getPaymentLabel: (status?: string | null) => string;
-  getFulfillmentLabel: (type?: string | null) => string;
-  getShippingLabel: (mode?: string | null) => string;
-  getCheckoutStageLabel: (step?: string | null) => string;
 }
 
 const KANBAN_COLUMNS: Array<{
@@ -148,12 +149,6 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
   onSelectOrder,
   onMoveOrderStatus,
   movingOrderId,
-  getOrderTone,
-  getOrderLabel,
-  getPaymentTone,
-  getPaymentLabel,
-  getFulfillmentLabel,
-  getShippingLabel,
 }) => {
   const getAbandonmentLabel = (interval?: string | null) => {
     switch (interval) {
@@ -297,6 +292,7 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
 
         <Tabs value={activeTab} onValueChange={onTabChange}>
           <PageTabsList
+            containerClassName="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             tabs={[
               { value: 'open', label: 'Todos', icon: Clock },
               { value: 'new', label: 'Novo', icon: CreditCard },

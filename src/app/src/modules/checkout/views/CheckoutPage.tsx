@@ -1,105 +1,24 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useCheckoutPageViewModel, type CheckoutTab } from '@/modules/checkout/view-models/useCheckoutPageViewModel';
+import {
+  useCheckoutPageViewModel,
+  type CheckoutTab,
+} from '@/modules/checkout/view-models/useCheckoutPageViewModel';
+import { getShippingLabel, getWeekdayLabel } from '@/modules/checkout/view-models/checkout-ui-utils';
 import { CheckoutHeader } from '../components/CheckoutHeader';
 import { CheckoutKPIs } from '../components/CheckoutKPIs';
 import { CheckoutOrdersMesa } from '../components/CheckoutOrdersMesa';
 import { CheckoutDetailsSheet } from '../components/CheckoutDetailsSheet';
 import { CheckoutAnalyticsTabs } from '../components/CheckoutAnalyticsTabs';
+import { CheckoutRevenueChart } from '../components/CheckoutRevenueChart';
+import { CheckoutPeriodPicker } from '../components/CheckoutPeriodPicker';
 import { AbandonmentConfigSheet } from '../components/AbandonmentConfigSheet';
 import { ShippingPolicySheet } from '../components/ShippingPolicySheet';
 import { CheckoutReportsSheet } from '../components/CheckoutReportsSheet';
 import { formatCurrency } from '@/shared/lib/formatters';
 import { DynamicFunnel } from '@/shared/ui/DynamicFunnel';
-import {
-  getPaymentStatusClassName,
-  getPaymentStatusLabel,
-} from '@/shared/payment/payment-ui';
 import { CalendarDays, Download } from 'lucide-react';
-
-// --- Theme/Style Helpers (Maturidade: Padronização de Cores e Labels Executivos) ---
-
-function getOrderTone(status: string) {
-  switch (status) {
-    case 'PAID':
-      return 'bg-success/10 text-success border-success/20';
-    case 'CANCELLED':
-      return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-    case 'AWAITING_PAYMENT':
-      return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-    default:
-      return 'bg-primary/10 text-primary border-primary/20';
-  }
-}
-
-function getOrderLabel(status: string) {
-  const labels: Record<string, string> = {
-    'AWAITING_PAYMENT': 'Aguardando Pagamento',
-    'PAID': 'Pedido Pago',
-    'PREPARING': 'Em Preparação',
-    'READY_FOR_PICKUP': 'Pronto para Retirada',
-    'OUT_FOR_DELIVERY': 'Em Rota de Entrega',
-    'DELIVERED': 'Pedido Entregue',
-    'CANCELLED': 'Cancelado',
-  };
-  return labels[status] || status;
-}
-
-function getPaymentTone(status?: string | null) {
-  return getPaymentStatusClassName(status);
-}
-
-function getPaymentLabel(status?: string | null) {
-  return status === 'PAID'
-    ? 'Confirmado'
-    : getPaymentStatusLabel(status, 'Pendente');
-}
-
-function getShippingLabel(mode?: string | null) {
-  return mode === 'PER_KM' ? 'Frete por KM' : mode === 'FIXED' ? 'Taxa Fixa' : 'Retirada Local';
-}
-
-function getFulfillmentLabel(type?: string | null) {
-  return type === 'DELIVERY' ? 'Entrega em Casa' : 'Retirada Presencial';
-}
-
-function getWeekdayLabel(value: string) {
-  const labels: Record<string, string> = {
-    'MONDAY': 'Segunda', 'TUESDAY': 'Terça', 'WEDNESDAY': 'Quarta',
-    'THURSDAY': 'Quinta', 'FRIDAY': 'Sexta', 'SATURDAY': 'Sábado', 'SUNDAY': 'Domingo'
-  };
-  return labels[value] || value;
-}
-
-function getCheckoutStageLabel(step?: string | null) {
-  const labels: Record<string, string> = {
-    'IDENTIFYING_NEED': 'Qualificação',
-    'SELECTING_ITEM': 'Escolha de Itens',
-    'AWAITING_QUANTITY': 'Definição de Qtd',
-    'ASKING_MORE_ITEMS': 'Adicionais',
-    'AWAITING_FULFILLMENT': 'Logística',
-    'AWAITING_DELIVERY_ADDRESS': 'Endereço',
-    'AWAITING_FREIGHT_REVIEW': 'Cálculo Frete',
-    'AWAITING_ORDER_NOTE': 'Detalhes Finais',
-    'READY_FOR_CHECKOUT': 'Pronto para Faturar',
-    'AWAITING_PAYMENT': 'Pagamento',
-    'PAID': 'Venda Concluída',
-    'CANCELLED': 'Abandono/Cancelado',
-  };
-  return labels[step || ''] || 'Em Negociação';
-}
-
-function getCheckoutStageOrder(step?: string | null): number {
-  const stages: Record<string, number> = {
-    'IDENTIFYING_NEED': 1, 'SELECTING_ITEM': 1, 'AWAITING_QUANTITY': 1, 'ASKING_MORE_ITEMS': 1,
-    'AWAITING_FULFILLMENT': 2, 'AWAITING_DELIVERY_ADDRESS': 2, 'AWAITING_FREIGHT_REVIEW': 2,
-    'AWAITING_ORDER_NOTE': 3,
-    'READY_FOR_CHECKOUT': 4, 'AWAITING_PAYMENT': 4,
-    'PAID': 5,
-  };
-  return stages[step || ''] || 1;
-}
 
 export default function CheckoutPage() {
   const vm = useCheckoutPageViewModel();
@@ -124,20 +43,13 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="grid grid-cols-3 rounded-xl border border-border/60 bg-background/60 p-1">
-              {vm.periodOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  type="button"
-                  variant={vm.periodFilter === option.value ? 'default' : 'ghost'}
-                  className="h-9 rounded-lg px-3 text-xs font-bold"
-                  onClick={() => vm.setPeriodFilter(option.value)}
-                  title={option.description}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
+            <CheckoutPeriodPicker
+              periodFilter={vm.periodFilter}
+              customRange={vm.customRange}
+              periodOptions={vm.periodOptions}
+              onSelectPreset={vm.applyPeriodPreset}
+              onSelectRange={vm.applyCustomRange}
+            />
 
             <Button
               type="button"
@@ -146,7 +58,7 @@ export default function CheckoutPage() {
               onClick={vm.downloadReport}
             >
               <Download className="h-4 w-4" />
-              Gerar relatorio
+              Gerar Relatório
             </Button>
           </div>
         </CardContent>
@@ -213,43 +125,44 @@ export default function CheckoutPage() {
         </Card>
       )}
 
-      <CheckoutKPIs summary={vm.summary} />
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr] lg:items-start">
+        <div className="space-y-6">
+          <CheckoutKPIs summary={vm.summary} deltas={vm.summaryDeltas} />
 
-      <DynamicFunnel
-        title="Funil do checkout"
-        description="Veja onde os pedidos estão acumulando entre pagamento, preparo, expedição e entrega."
-        steps={vm.operationalFunnel.map((step) => ({
-          id: step.id,
-          label: step.label,
-          count: step.count,
-          helper: step.helper,
-          amountLabel: formatCurrency(step.amount) ?? undefined,
-        }))}
-        emptyMessage="Assim que houver pedidos circulando pelo checkout, o funil operacional aparece aqui."
-      />
+          <DynamicFunnel
+            title="Funil do checkout"
+            description="Veja onde os pedidos estão acumulando entre pagamento, preparo, expedição e entrega."
+            steps={vm.operationalFunnel.map((step) => ({
+              id: step.id,
+              label: step.label,
+              count: step.count,
+              helper: step.helper,
+              amountLabel: formatCurrency(step.amount) ?? undefined,
+            }))}
+            emptyMessage="Assim que houver pedidos circulando pelo checkout, o funil operacional aparece aqui."
+          />
+        </div>
 
-      <CheckoutOrdersMesa
-        activeTab={vm.activeTab}
-        onTabChange={(v) => vm.setActiveTab(v as CheckoutTab)}
-        isLoading={vm.ordersQuery.isLoading}
-        orders={vm.filteredOrders}
-        onSelectOrder={vm.setSelectedOrderId}
-        onMoveOrderStatus={(orderId, status) =>
-          vm.updateOrderStatusMutation.mutate({ orderId, status })
-        }
-        movingOrderId={vm.updateOrderStatusMutation.variables?.orderId ?? null}
-        getOrderTone={getOrderTone}
-        getOrderLabel={getOrderLabel}
-        getPaymentTone={getPaymentTone}
-        getPaymentLabel={getPaymentLabel}
-        getFulfillmentLabel={getFulfillmentLabel}
-        getShippingLabel={getShippingLabel}
-        getCheckoutStageLabel={getCheckoutStageLabel}
-      />
+        <CheckoutOrdersMesa
+          activeTab={vm.activeTab}
+          onTabChange={(v) => vm.setActiveTab(v as CheckoutTab)}
+          isLoading={vm.ordersQuery.isLoading}
+          orders={vm.filteredOrders}
+          onSelectOrder={vm.setSelectedOrderId}
+          onMoveOrderStatus={(orderId, status) =>
+            vm.updateOrderStatusMutation.mutate({ orderId, status })
+          }
+          movingOrderId={vm.updateOrderStatusMutation.variables?.orderId ?? null}
+        />
+      </div>
+
+      <CheckoutRevenueChart data={vm.dailyRevenueSeries} />
 
       <CheckoutAnalyticsTabs
         productRanking={vm.productRanking}
         customerRanking={vm.customerRanking}
+        activeTab={vm.analyticsTab}
+        onTabChange={vm.setAnalyticsTab}
       />
 
       <CheckoutReportsSheet vm={vm} />
@@ -261,7 +174,6 @@ export default function CheckoutPage() {
         onFormChange={vm.setShippingPolicyForm}
         onSave={() => vm.updateShippingPolicyMutation.mutate()}
         isSaving={vm.updateShippingPolicyMutation.isPending}
-        getWeekdayLabel={getWeekdayLabel}
         requestBrowserLocation={vm.requestBrowserLocation}
         mapLoading={vm.mapLoading}
         companyAddress={vm.companyAddress}
@@ -293,12 +205,6 @@ export default function CheckoutPage() {
         onTriggerManualTouch={() => vm.triggerAbandonmentTouchMutation.mutate()}
         abandonmentBusy={vm.updateAbandonmentStateMutation.isPending}
         manualTouchBusy={vm.triggerAbandonmentTouchMutation.isPending}
-        getOrderTone={getOrderTone}
-        getOrderLabel={getOrderLabel}
-        getPaymentTone={getPaymentTone}
-        getPaymentLabel={getPaymentLabel}
-        getCheckoutStageLabel={getCheckoutStageLabel}
-        getCheckoutStageOrder={getCheckoutStageOrder}
       />
     </div>
   );
