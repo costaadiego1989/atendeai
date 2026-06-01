@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Megaphone } from 'lucide-react';
+import { Instagram, Megaphone, MessageCircle } from 'lucide-react';
 import type { useConversationsPageViewModel } from '../view-models/useConversationsPageViewModel';
 import {
   formatConversationClock,
@@ -48,15 +48,17 @@ export function ConversationListItem({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">
-                {conversation.contactName}
-              </p>
-              {isProspectConversation(conversation) ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/25 px-2.5 py-1 text-[11px] font-semibold text-amber-400">
-                  <Megaphone className="h-3 w-3" />
-                  Prospect
-                </span>
-              ) : null}
+              <div className="flex min-w-0 items-center gap-1.5">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {conversation.contactName}
+                </p>
+                {isProspectConversation(conversation) ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/25 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400">
+                    <Megaphone className="h-2.5 w-2.5" />
+                    Prospect
+                  </span>
+                ) : null}
+              </div>
               <p className="truncate text-xs text-muted-foreground">
                 {formatConversationPhone(conversation.contactPhone)}
               </p>
@@ -81,9 +83,17 @@ export function ConversationListItem({
 
           <div className="mt-2 flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground shrink-0">
-                {conversation.channel ?? 'WHATSAPP'}
-              </span>
+              {conversation.channel === 'INSTAGRAM' ? (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-400">
+                  <Instagram className="h-2.5 w-2.5" />
+                  IG
+                </span>
+              ) : (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                  <MessageCircle className="h-2.5 w-2.5" />
+                  WA
+                </span>
+              )}
               <span
                 className={cn(
                   'inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-medium',
