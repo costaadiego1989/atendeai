@@ -38,7 +38,7 @@ import { CalendarRange, Check, ChevronsUpDown, Plus, Repeat2, UserRound, XCircle
 import {
   formatRecurrenceDateRange,
   getRecurrenceStatusLabel,
-} from './scheduling-view-helpers';
+} from '../view-models/scheduling-formatters';
 
 type Props = {
   vm: SchedulingPageViewModel;

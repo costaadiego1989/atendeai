@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
 import type { SchedulingPageViewModel } from '@/modules/scheduling/view-models/useSchedulingPageViewModel';
 import { formatPhone } from '@/shared/lib/masks';
 import { CalendarDays, Check, ChevronsUpDown, Clock, Video } from 'lucide-react';
-import { formatCurrency } from './scheduling-view-helpers';
+import { formatCurrency } from '../view-models/scheduling-formatters';
 
 function formatSlotDate(dateStr?: string): string {
   if (!dateStr) return '';

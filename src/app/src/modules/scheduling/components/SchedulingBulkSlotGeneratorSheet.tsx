@@ -16,7 +16,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import type { SchedulingPageViewModel } from '@/modules/scheduling/view-models/useSchedulingPageViewModel';
-import { formatCurrency } from './scheduling-view-helpers';
+import { formatCurrency } from '../view-models/scheduling-formatters';
 
 type Props = {
   vm: SchedulingPageViewModel;

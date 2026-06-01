@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
 import { schedulingService } from '@/modules/scheduling/services/scheduling-service';
-import { pickDefaultProfessionalCategoryId } from './scheduling-view-model-helpers';
+import { pickDefaultProfessionalCategoryId } from './scheduling-date-utils';
 
 type ReserveForm = {
   contactId: string;

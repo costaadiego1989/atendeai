@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   getDefaultProfessionalPhone,
   isoToday,
-} from './scheduling-view-model-helpers';
+} from './scheduling-date-utils';
 
 export type SchedulingSelectedSlot = {
   id: string;

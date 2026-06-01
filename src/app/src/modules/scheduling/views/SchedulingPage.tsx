@@ -14,16 +14,6 @@ import { CalendarDays, Download, ScissorsSquare, Users } from 'lucide-react';
 
 export default function SchedulingPage() {
   const vm = useSchedulingPageViewModel();
-  const today = new Date().toISOString().slice(0, 10);
-  const activeReportPeriod =
-    vm.reportFilters.startDate === today && vm.reportFilters.endDate === today
-      ? 0
-      : (() => {
-          const start = new Date(`${vm.reportFilters.startDate}T00:00:00`);
-          const end = new Date(`${vm.reportFilters.endDate}T00:00:00`);
-          const diffDays = Math.round((end.getTime() - start.getTime()) / 86_400_000);
-          return diffDays === 7 || diffDays === 30 ? diffDays : null;
-        })();
 
   return (
     <div className="page-container animate-fade-in">
@@ -55,7 +45,7 @@ export default function SchedulingPage() {
                 <Button
                   key={option.label}
                   type="button"
-                  variant={activeReportPeriod === option.days ? 'default' : 'ghost'}
+                  variant={vm.activeReportPeriodDays === option.days ? 'default' : 'ghost'}
                   className="h-9 rounded-lg px-3 text-xs font-bold"
                   onClick={() => {
                     const start = new Date();

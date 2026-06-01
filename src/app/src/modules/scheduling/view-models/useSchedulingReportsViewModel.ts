@@ -4,6 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { schedulingService } from '@/modules/scheduling/services/scheduling-service';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
 import { formatCurrency } from '@/shared/lib/formatters';
+import { isoToday } from '@/modules/scheduling/view-models/scheduling-date-utils';
 import type { AsyncOperationItem } from '@/shared/ui/AsyncOperationsPanel';
 import type { SchedulingAsyncJob } from '@/shared/types';
 
@@ -39,6 +40,20 @@ export function useSchedulingReportsViewModel({
   const queryClient = useQueryClient();
   const [currentExportJobId, setCurrentExportJobId] = useState<string | null>(null);
   const handledJobsRef = useRef<Record<string, string>>({});
+
+  const activeReportPeriodDays = useMemo<0 | 7 | 30 | null>(() => {
+    const today = isoToday();
+
+    if (reportFilters.startDate === today && reportFilters.endDate === today) {
+      return 0;
+    }
+
+    const startMs = new Date(`${reportFilters.startDate}T00:00:00`).getTime();
+    const endMs = new Date(`${reportFilters.endDate}T00:00:00`).getTime();
+    const diff = Math.round((endMs - startMs) / 86_400_000);
+
+    return diff === 7 || diff === 30 ? diff : null;
+  }, [reportFilters]);
 
   const jobsQuery = useQuery({
     queryKey: ['scheduling-async-jobs', tenantId],
@@ -222,6 +237,7 @@ export function useSchedulingReportsViewModel({
     setReportsOpen,
     reportFilters,
     setReportFilters,
+    activeReportPeriodDays,
     jobsQuery,
     activeJobItems,
     activeReportJob,

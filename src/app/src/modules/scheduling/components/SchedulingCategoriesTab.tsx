@@ -11,7 +11,7 @@ import {
   formatCategoryMeta,
   formatCurrency,
   formatSlotTime,
-} from './scheduling-view-helpers';
+} from '../view-models/scheduling-formatters';
 
 type Props = {
   vm: SchedulingPageViewModel;

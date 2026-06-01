@@ -18,7 +18,7 @@ import {
   pickDefaultProfessionalCategoryId,
   sortSlots,
   timeToMinutes,
-} from './scheduling-view-model-helpers';
+} from './scheduling-date-utils';
 import { useSchedulingPageState } from './useSchedulingPageState';
 import { useSchedulingReportsViewModel } from './useSchedulingReportsViewModel';
 import { useSchedulingReservationViewModel } from './useSchedulingReservationViewModel';
@@ -638,6 +638,9 @@ export function useSchedulingPageViewModel() {
   const categories = categoriesQuery.data ?? [];
   const contacts = contactsQuery.data?.data ?? [];
   const availabilitySlots = sortSlots(availabilityQuery.data ?? []);
+  const reservationsCount = availabilitySlots.filter(
+    (slot) => slot.status === 'RESERVED' || slot.status === 'PRE_RESERVED',
+  ).length;
   const recurrences = recurrencesQuery.data ?? [];
   const categoryProfessionals = categoryProfessionalsQuery.data ?? [];
   const categoryAvailability = categoryAvailabilityQuery.data ?? [];
@@ -837,6 +840,7 @@ export function useSchedulingPageViewModel() {
     setRescheduleReservationForm,
     reportFilters: reportsVm.reportFilters,
     setReportFilters: reportsVm.setReportFilters,
+    activeReportPeriodDays: reportsVm.activeReportPeriodDays,
     reportsOpen: reportsVm.reportsOpen,
     setReportsOpen: reportsVm.setReportsOpen,
     recurrenceOpen,
@@ -861,6 +865,7 @@ export function useSchedulingPageViewModel() {
     contacts,
     filteredContacts,
     availabilitySlots,
+    reservationsCount,
     recurrences,
     calendarRange,
     categoryProfessionals,
@@ -892,6 +897,7 @@ export function useSchedulingPageViewModel() {
     deleteRecurrenceMutation,
     saveAvailabilityMutation: rosterVm.saveAvailabilityMutation,
     generateBulkSlotsMutation: rosterVm.generateBulkSlotsMutation,
+    bulkProgress: rosterVm.bulkProgress,
     assignCategoriesMutation: rosterVm.assignCategoriesMutation,
     reserveSlotMutation: reservationVm.reserveSlotMutation,
     updateSlotMutation,
