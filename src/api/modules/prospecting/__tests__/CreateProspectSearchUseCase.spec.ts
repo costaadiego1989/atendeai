@@ -1,59 +1,22 @@
 import { NotFoundException } from '@nestjs/common';
-import { ITenantRepository } from '@modules/tenant/domain/repositories/ITenantRepository';
-import { Tenant } from '@modules/tenant/domain/entities/Tenant';
-import { User } from '@modules/tenant/domain/entities/User';
-import { CompanyName } from '@modules/tenant/domain/value-objects/CompanyName';
-import { CNPJ } from '@modules/tenant/domain/value-objects/CNPJ';
-import { Plan } from '@modules/tenant/domain/value-objects/Plan';
-import { Email } from '@modules/tenant/domain/value-objects/Email';
-import { Phone } from '@modules/tenant/domain/value-objects/Phone';
-import { Role } from '@modules/tenant/domain/value-objects/Role';
+import { ITenantFacade } from '@modules/tenant/application/facades/ITenantFacade';
 import { CreateProspectSearchUseCase } from '../application/use-cases/CreateProspectSearchUseCase';
 import { IProspectSearchRepository } from '../domain/repositories/IProspectSearchRepository';
 import { IProspectSearchQueue } from '../domain/ports/IProspectSearchQueue';
-import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
+import { IProspectingDailyQuotaPort } from '../application/ports/IProspectingDailyQuotaPort';
 
-function makeTenant() {
-  const tenant = Tenant.create({
-    companyName: CompanyName.create('Prospect Search Store'),
-    cnpj: CNPJ.create('60.701.190/0001-04'),
-    plan: Plan.create('PROFISSIONAL'),
-    users: [
-      User.create({
-        name: 'Owner Prospect Search',
-        email: Email.create('owner@prospect-search.test'),
-        phone: Phone.create('11999998888'),
-        passwordHash: 'hash',
-        role: Role.create('OWNER'),
-      }),
-    ],
-  });
-  tenant.clearEvents();
-  return tenant;
-}
+const TENANT_ID = 'f0e9c8b0-4f78-4a1c-bb62-1d67ad55a111';
 
 describe('CreateProspectSearchUseCase', () => {
   let useCase: CreateProspectSearchUseCase;
-  let tenantRepository: jest.Mocked<ITenantRepository>;
+  let tenantFacade: jest.Mocked<Pick<ITenantFacade, 'tenantExists'>>;
   let searchRepository: jest.Mocked<IProspectSearchRepository>;
   let searchQueue: jest.Mocked<IProspectSearchQueue>;
-  let prospectingQuotaService: jest.Mocked<
-    Pick<BillingProspectingQuotaService, 'assertCanConsume'>
-  >;
+  let prospectingQuotaPort: jest.Mocked<IProspectingDailyQuotaPort>;
 
   beforeEach(() => {
-    tenantRepository = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findByCnpj: jest.fn(),
-      findByWhatsAppNumber: jest.fn(),
-      findByApiKey: jest.fn(),
-      findAll: jest.fn(),
-      exists: jest.fn(),
-      listBranches: jest.fn(),
-      createBranch: jest.fn(),
-      updateBranch: jest.fn(),
-      deleteBranch: jest.fn(),
+    tenantFacade = {
+      tenantExists: jest.fn().mockResolvedValue(true),
     };
 
     searchRepository = {
@@ -66,7 +29,7 @@ describe('CreateProspectSearchUseCase', () => {
     searchQueue = {
       addJob: jest.fn(),
     };
-    prospectingQuotaService = {
+    prospectingQuotaPort = {
       assertCanConsume: jest.fn().mockResolvedValue({
         used: 0,
         quota: 150,
@@ -75,15 +38,15 @@ describe('CreateProspectSearchUseCase', () => {
     };
 
     useCase = new CreateProspectSearchUseCase(
-      tenantRepository,
+      tenantFacade as any,
       searchRepository,
       searchQueue,
-      prospectingQuotaService as any,
+      prospectingQuotaPort,
     );
   });
 
   it('should throw when the tenant does not exist', async () => {
-    tenantRepository.findById.mockResolvedValue(null);
+    tenantFacade.tenantExists.mockResolvedValue(false);
 
     await expect(
       useCase.execute({
@@ -95,11 +58,8 @@ describe('CreateProspectSearchUseCase', () => {
   });
 
   it('should create a pending prospect search and enqueue it', async () => {
-    const tenant = makeTenant();
-    tenantRepository.findById.mockResolvedValue(tenant);
-
     const result = await useCase.execute({
-      tenantId: tenant.id.toString(),
+      tenantId: TENANT_ID,
       businessTypeQuery: 'Clinica odontologica',
       city: 'Campinas',
       state: 'SP',
@@ -118,13 +78,13 @@ describe('CreateProspectSearchUseCase', () => {
     expect(searchQueue.addJob).toHaveBeenCalledWith({
       searchId: result.id,
     });
-    expect(prospectingQuotaService.assertCanConsume).toHaveBeenCalledWith({
-      tenantId: tenant.id.toString(),
+    expect(prospectingQuotaPort.assertCanConsume).toHaveBeenCalledWith({
+      tenantId: TENANT_ID,
       requested: 80,
     });
     expect(result).toEqual(
       expect.objectContaining({
-        tenantId: tenant.id.toString(),
+        tenantId: TENANT_ID,
         businessTypeQuery: 'Clinica odontologica',
         city: 'Campinas',
         state: 'SP',
@@ -137,11 +97,8 @@ describe('CreateProspectSearchUseCase', () => {
   });
 
   it('should apply defaults when optional fields are omitted', async () => {
-    const tenant = makeTenant();
-    tenantRepository.findById.mockResolvedValue(tenant);
-
     const result = await useCase.execute({
-      tenantId: tenant.id.toString(),
+      tenantId: TENANT_ID,
       businessTypeQuery: 'Academia',
       city: 'Sao Paulo',
     });
@@ -152,9 +109,7 @@ describe('CreateProspectSearchUseCase', () => {
   });
 
   it('should return the quota error before saving or enqueueing when daily prospecting limit is exceeded', async () => {
-    const tenant = makeTenant();
-    tenantRepository.findById.mockResolvedValue(tenant);
-    prospectingQuotaService.assertCanConsume.mockRejectedValue(
+    prospectingQuotaPort.assertCanConsume.mockRejectedValue(
       new Error(
         'Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.',
       ),
@@ -162,7 +117,7 @@ describe('CreateProspectSearchUseCase', () => {
 
     await expect(
       useCase.execute({
-        tenantId: tenant.id.toString(),
+        tenantId: TENANT_ID,
         businessTypeQuery: 'Clinica odontologica',
         city: 'Campinas',
         maxResults: 80,

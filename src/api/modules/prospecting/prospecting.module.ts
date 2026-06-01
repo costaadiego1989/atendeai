@@ -108,6 +108,8 @@ import { MetaWebhookController } from './presentation/controllers/MetaWebhookCon
 import { IHandleMetaQualityEventUseCase } from './application/use-cases/interfaces/IHandleMetaQualityEventUseCase';
 import { HandleMetaQualityEventUseCase } from './application/use-cases/HandleMetaQualityEventUseCase';
 import { CONTACT_REPOSITORY } from '@modules/contact/domain/repositories/IContactRepository';
+import { PROSPECTING_DAILY_QUOTA_PORT } from './application/ports/IProspectingDailyQuotaPort';
+import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
 import { PROSPECT_DISPATCH_QUEUE } from './domain/ports/IProspectDispatchQueue';
 import { BullMQProspectDispatchQueue } from './infrastructure/queue/BullMQProspectDispatchQueue';
 import { ProspectDispatchProcessor } from './infrastructure/queue/ProspectDispatchProcessor';
@@ -171,6 +173,10 @@ const PROSPECTING_CAMPAIGN_PROVIDERS = [
 ];
 
 const PROSPECTING_SEARCH_PROVIDERS = [
+  {
+    provide: PROSPECTING_DAILY_QUOTA_PORT,
+    useExisting: BillingProspectingQuotaService,
+  },
   {
     provide: ICreateProspectSearchUseCase,
     useClass: CreateProspectSearchUseCase,

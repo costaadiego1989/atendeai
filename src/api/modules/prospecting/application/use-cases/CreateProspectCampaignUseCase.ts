@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ITenantRepository,
-  TENANT_REPOSITORY,
-} from '@modules/tenant/domain/repositories/ITenantRepository';
+  ITenantFacade,
+  TENANT_FACADE,
+} from '@modules/tenant/application/facades/ITenantFacade';
 import {
   ICreateProspectCampaignUseCase,
   CreateProspectCampaignInput,
@@ -21,8 +21,8 @@ import { ProspectDispatchPolicy } from '../services/ProspectDispatchPolicy';
 @Injectable()
 export class CreateProspectCampaignUseCase implements ICreateProspectCampaignUseCase {
   constructor(
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
+    @Inject(TENANT_FACADE)
+    private readonly tenantFacade: ITenantFacade,
     @Inject(PROSPECT_CAMPAIGN_REPOSITORY)
     private readonly campaignRepository: IProspectCampaignRepository,
     private readonly dispatchPolicy: ProspectDispatchPolicy,
@@ -31,9 +31,9 @@ export class CreateProspectCampaignUseCase implements ICreateProspectCampaignUse
   async execute(
     input: CreateProspectCampaignInput,
   ): Promise<CreateProspectCampaignOutput> {
-    const tenant = await this.tenantRepository.findById(input.tenantId);
+    const exists = await this.tenantFacade.tenantExists(input.tenantId);
 
-    if (!tenant) {
+    if (!exists) {
       throw new NotFoundException(`Tenant ${input.tenantId} not found`);
     }
 

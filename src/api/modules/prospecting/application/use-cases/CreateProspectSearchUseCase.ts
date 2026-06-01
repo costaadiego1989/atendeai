@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ITenantRepository,
-  TENANT_REPOSITORY,
-} from '@modules/tenant/domain/repositories/ITenantRepository';
+  ITenantFacade,
+  TENANT_FACADE,
+} from '@modules/tenant/application/facades/ITenantFacade';
 import { TenantId } from '@shared/domain/TenantId';
 import { ProspectSearch } from '../../domain/entities/ProspectSearch';
 import {
@@ -19,26 +19,30 @@ import {
   CreateProspectSearchOutput,
   ICreateProspectSearchUseCase,
 } from './interfaces/ICreateProspectSearchUseCase';
-import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
+import {
+  IProspectingDailyQuotaPort,
+  PROSPECTING_DAILY_QUOTA_PORT,
+} from '../ports/IProspectingDailyQuotaPort';
 
 @Injectable()
 export class CreateProspectSearchUseCase implements ICreateProspectSearchUseCase {
   constructor(
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
+    @Inject(TENANT_FACADE)
+    private readonly tenantFacade: ITenantFacade,
     @Inject(PROSPECT_SEARCH_REPOSITORY)
     private readonly searchRepository: IProspectSearchRepository,
     @Inject(PROSPECT_SEARCH_QUEUE)
     private readonly searchQueue: IProspectSearchQueue,
-    private readonly prospectingQuotaService: BillingProspectingQuotaService,
+    @Inject(PROSPECTING_DAILY_QUOTA_PORT)
+    private readonly prospectingQuotaPort: IProspectingDailyQuotaPort,
   ) {}
 
   async execute(
     input: CreateProspectSearchInput,
   ): Promise<CreateProspectSearchOutput> {
-    const tenant = await this.tenantRepository.findById(input.tenantId);
+    const exists = await this.tenantFacade.tenantExists(input.tenantId);
 
-    if (!tenant) {
+    if (!exists) {
       throw new NotFoundException(`Tenant ${input.tenantId} not found`);
     }
 
@@ -52,7 +56,7 @@ export class CreateProspectSearchUseCase implements ICreateProspectSearchUseCase
       maxResults: input.maxResults,
     });
 
-    await this.prospectingQuotaService.assertCanConsume({
+    await this.prospectingQuotaPort.assertCanConsume({
       tenantId: input.tenantId,
       requested: search.maxResults,
     });

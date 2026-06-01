@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AI_ENGINE, IAIEngine } from '@modules/ai/application/ports/IAIEngine';
 import {
-  ITenantRepository,
-  TENANT_REPOSITORY,
-} from '@modules/tenant/domain/repositories/ITenantRepository';
+  ITenantFacade,
+  TENANT_FACADE,
+} from '@modules/tenant/application/facades/ITenantFacade';
 import {
   ISuggestProspectCampaignMessageUseCase,
   SuggestProspectCampaignMessageInput,
@@ -16,8 +16,8 @@ export class SuggestProspectCampaignMessageUseCase implements ISuggestProspectCa
   constructor(
     @Inject(AI_ENGINE)
     private readonly aiEngine: IAIEngine,
-    @Inject(TENANT_REPOSITORY)
-    private readonly tenantRepository: ITenantRepository,
+    @Inject(TENANT_FACADE)
+    private readonly tenantFacade: ITenantFacade,
     private readonly tenantAgentRuleService: TenantAgentRuleService,
   ) {}
 
@@ -27,8 +27,8 @@ export class SuggestProspectCampaignMessageUseCase implements ISuggestProspectCa
     let tenantName: string | undefined;
 
     try {
-      const tenant = await this.tenantRepository.findById(input.tenantId);
-      tenantName = tenant?.companyName.value;
+      tenantName =
+        (await this.tenantFacade.getTenantName(input.tenantId)) ?? undefined;
     } catch {
       tenantName = undefined;
     }

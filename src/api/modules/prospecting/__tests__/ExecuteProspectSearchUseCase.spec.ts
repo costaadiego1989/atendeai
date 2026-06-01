@@ -12,6 +12,7 @@ import {
   IRecordUsageUseCase,
   UsageType,
 } from '@modules/billing/application/use-cases/interfaces/IRecordUsageUseCase';
+import { IProspectingDailyQuotaPort } from '../application/ports/IProspectingDailyQuotaPort';
 
 function makePendingSearch() {
   return ProspectSearch.create({
@@ -32,7 +33,7 @@ describe('ExecuteProspectSearchUseCase', () => {
   let websiteEnricher: jest.Mocked<IProspectWebsiteEnricher>;
   let checkQuotaUseCase: jest.Mocked<ICheckQuotaUseCase>;
   let recordUsageUseCase: jest.Mocked<IRecordUsageUseCase>;
-  let prospectingQuotaService: { assertCanConsume: jest.Mock };
+  let prospectingQuotaPort: jest.Mocked<IProspectingDailyQuotaPort>;
 
   beforeEach(() => {
     searchRepository = {
@@ -68,7 +69,7 @@ describe('ExecuteProspectSearchUseCase', () => {
     recordUsageUseCase = {
       execute: jest.fn(),
     };
-    prospectingQuotaService = {
+    prospectingQuotaPort = {
       assertCanConsume: jest.fn().mockResolvedValue({
         used: 0,
         quota: 150,
@@ -83,7 +84,7 @@ describe('ExecuteProspectSearchUseCase', () => {
       websiteEnricher,
       checkQuotaUseCase,
       recordUsageUseCase,
-      prospectingQuotaService as any,
+      prospectingQuotaPort,
     );
   });
 
@@ -141,7 +142,7 @@ describe('ExecuteProspectSearchUseCase', () => {
       type: UsageType.AI_TOKEN,
       amount: 2,
     });
-    expect(prospectingQuotaService.assertCanConsume).toHaveBeenCalledWith({
+    expect(prospectingQuotaPort.assertCanConsume).toHaveBeenCalledWith({
       tenantId: search.tenantId.toString(),
       requested: 80,
     });
@@ -242,7 +243,7 @@ describe('ExecuteProspectSearchUseCase', () => {
     });
 
     expect(sourceRegistry.resolve).not.toHaveBeenCalled();
-    expect(prospectingQuotaService.assertCanConsume).not.toHaveBeenCalled();
+    expect(prospectingQuotaPort.assertCanConsume).not.toHaveBeenCalled();
     expect(searchResultRepository.saveMany).not.toHaveBeenCalled();
     expect(recordUsageUseCase.execute).not.toHaveBeenCalled();
     expect(output).toEqual({
@@ -258,7 +259,7 @@ describe('ExecuteProspectSearchUseCase', () => {
   it('should fail before hitting the source when the daily prospecting quota is exceeded', async () => {
     const search = makePendingSearch();
     searchRepository.findBySearchId.mockResolvedValue(search);
-    prospectingQuotaService.assertCanConsume.mockRejectedValue(
+    prospectingQuotaPort.assertCanConsume.mockRejectedValue(
       new Error(
         'Limite diario de prospeccao atingido. Usado hoje: 150. Limite: 150.',
       ),
