@@ -151,9 +151,9 @@ export function AppLayout({ children }: { children?: ReactNode }) {
   const content = children ?? <Outlet />;
   const businessType = tenant?.businessType;
 
-  const filteredMainNav = filterNavByNiche(mainNav, businessType);
-  const filteredSalesNav = filterNavByNiche(salesNav, businessType);
-  const filteredProspectingNav = filterNavByNiche(prospectingNav, businessType);
+  const filteredMainNav = filterNavByNiche(mainNav, businessType, user?.role);
+  const filteredSalesNav = filterNavByNiche(salesNav, businessType, user?.role);
+  const filteredProspectingNav = filterNavByNiche(prospectingNav, businessType, user?.role);
 
   const tenantPlan = tenant?.billingAccess?.plan?.toUpperCase();
   const enabledModules = getTenantEnabledModules(tenant);

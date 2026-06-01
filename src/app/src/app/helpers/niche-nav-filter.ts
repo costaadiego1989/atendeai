@@ -27,17 +27,19 @@ const nicheRoutes: Record<NicheCode, string[]> = {
   HEALTH: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
   GYM: ['/app/scheduling', '/app/recovery', '/app/sales'],
   PET: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
-  HOME_SERV: ['/app/scheduling', '/app/prospecting', '/app/sales', '/app/recovery'],
-  HOSPITALITY: ['/app/scheduling', '/app/checkout', '/app/sales'],
-  LEGAL: ['/app/scheduling', '/app/proposals', '/app/recovery', '/app/sales'],
+  HOME_SERV: ['/app/scheduling', '/app/prospecting', '/app/proposals', '/app/sales', '/app/recovery'],
+  HOSPITALITY: ['/app/scheduling', '/app/catalog', '/app/checkout', '/app/recovery', '/app/sales'],
+  LEGAL: ['/app/scheduling', '/app/prospecting', '/app/proposals', '/app/recovery', '/app/sales'],
   CLINIC: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
   SCHEDULING: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
 
   // Service/consultive niches
-  AGENCY: ['/app/prospecting', '/app/proposals', '/app/sales', '/app/social'],
-  REALESTATE: ['/app/prospecting', '/app/proposals', '/app/scheduling', '/app/sales'],
-  EDUCATION: ['/app/scheduling', '/app/recovery', '/app/sales', '/app/proposals'],
-  AUTOMOTIVE: ['/app/scheduling', '/app/catalog', '/app/checkout', '/app/sales', '/app/prospecting'],
+  AGENCY: ['/app/prospecting', '/app/proposals', '/app/recovery', '/app/sales', '/app/social'],
+  REALESTATE: ['/app/catalog', '/app/prospecting', '/app/proposals', '/app/scheduling', '/app/recovery', '/app/sales'],
+  RENTAL: ['/app/catalog', '/app/prospecting', '/app/proposals', '/app/scheduling', '/app/recovery', '/app/sales'],
+  EDUCATION: ['/app/catalog', '/app/scheduling', '/app/prospecting', '/app/recovery', '/app/proposals', '/app/sales'],
+  AUTOMOTIVE: ['/app/scheduling', '/app/catalog', '/app/inventory', '/app/checkout', '/app/proposals', '/app/sales', '/app/prospecting'],
+  SIMPLE_SERVICE: ['/app/prospecting', '/app/proposals', '/app/recovery', '/app/sales'],
 
   // Recovery-focused
   RECOVERY: ['/app/recovery', '/app/sales', '/app/prospecting'],
@@ -64,7 +66,7 @@ export interface NavItem {
  * Returns whether niche-based module filtering is enabled.
  */
 export function isNicheFilterEnabled(): boolean {
-  return import.meta.env.VITE_FILTER_MODULES_BY_NICHE === 'true';
+  return import.meta.env.VITE_FILTER_MODULES_BY_NICHE !== 'false';
 }
 
 /**
