@@ -12,6 +12,14 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2, PauseCircle, PlayCircle, ShoppingCart } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/shared/lib/formatters';
 import { formatPhone } from '@/shared/lib/masks';
+import {
+  getCheckoutStageLabel,
+  getCheckoutStageOrder,
+  getOrderLabel,
+  getOrderTone,
+  getPaymentLabel,
+  getPaymentTone,
+} from '@/modules/checkout/view-models/checkout-ui-utils';
 import type { CommerceAbandonmentTouch } from '@/shared/types';
 
 interface OrderDetail {
@@ -37,8 +45,8 @@ interface SessionDetail {
     id: string;
     name: string;
     quantity: number;
-    unitPrice: number;
-    lineTotal: number;
+    unitPrice?: number;
+    lineTotal?: number;
   }>;
 }
 
@@ -58,12 +66,6 @@ interface CheckoutDetailsSheetProps {
   onTriggerManualTouch?: () => void;
   abandonmentBusy?: boolean;
   manualTouchBusy?: boolean;
-  getOrderTone: (status: string) => string;
-  getOrderLabel: (status: string) => string;
-  getPaymentTone: (status?: string | null) => string;
-  getPaymentLabel: (status?: string | null) => string;
-  getCheckoutStageLabel: (step?: string | null) => string;
-  getCheckoutStageOrder: (step?: string | null) => number;
 }
 
 export const CheckoutDetailsSheet: React.FC<CheckoutDetailsSheetProps> = ({
@@ -77,12 +79,6 @@ export const CheckoutDetailsSheet: React.FC<CheckoutDetailsSheetProps> = ({
   onTriggerManualTouch,
   abandonmentBusy,
   manualTouchBusy,
-  getOrderTone,
-  getOrderLabel,
-  getPaymentTone,
-  getPaymentLabel,
-  getCheckoutStageLabel,
-  getCheckoutStageOrder,
 }) => {
   const getAbandonmentLabel = (interval?: string | null) => {
     switch (interval) {

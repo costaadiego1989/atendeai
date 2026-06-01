@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MapPin } from 'lucide-react';
+import { getWeekdayLabel } from '@/modules/checkout/view-models/checkout-ui-utils';
 import type { CommerceDeliveryWeekday } from '@/shared/types';
 
 interface ShippingPolicyForm {
@@ -46,7 +47,6 @@ interface ShippingPolicySheetProps {
   onFormChange: (update: (prev: ShippingPolicyForm) => ShippingPolicyForm) => void;
   onSave: () => void;
   isSaving: boolean;
-  getWeekdayLabel: (value: string) => string;
   requestBrowserLocation: () => void;
   mapLoading: boolean;
   companyAddress?: string | null;
@@ -61,7 +61,6 @@ export const ShippingPolicySheet: React.FC<ShippingPolicySheetProps> = ({
   onFormChange,
   onSave,
   isSaving,
-  getWeekdayLabel,
   requestBrowserLocation,
   mapLoading,
   companyAddress,
