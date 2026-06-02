@@ -14,6 +14,8 @@ import { PROSPECT_WEBSITE_ENRICHER } from '@modules/prospecting/domain/ports/IPr
 import { HttpProspectWebsiteEnricher } from '@modules/prospecting/infrastructure/services/HttpProspectWebsiteEnricher';
 import { ProspectSearchProcessor } from '@modules/prospecting/infrastructure/queue/ProspectSearchProcessor';
 import { BillingModule } from '@modules/billing/billing.module';
+import { BillingProspectingQuotaService } from '@modules/billing/application/services/BillingProspectingQuotaService';
+import { PROSPECTING_DAILY_QUOTA_PORT } from '@modules/prospecting/application/ports/IProspectingDailyQuotaPort';
 import { BullModule } from '@nestjs/bullmq';
 import { RedisModule } from '@shared/infrastructure/redis/RedisModule';
 import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule';
@@ -58,6 +60,10 @@ import { parseRedisConnectionFromEnv } from '@shared/infrastructure/redis/redis-
     },
     GooglePlacesProspectSearchSource,
     ProspectSearchProcessor,
+    {
+      provide: PROSPECTING_DAILY_QUOTA_PORT,
+      useExisting: BillingProspectingQuotaService,
+    },
   ],
 })
 export class ProspectSearchWorkerModule {}

@@ -103,7 +103,7 @@ import { CommerceCatalogSearchAdapter } from './infrastructure/adapters/Commerce
     TenantModule,
     forwardRef(() => SalesModule),
     BillingModule,
-    SchedulingModule,
+    forwardRef(() => SchedulingModule),
     CatalogModule,
     InventoryModule,
     CommerceModule,
