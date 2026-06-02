@@ -1,7 +1,6 @@
-﻿/**
+/**
  * Maps business niche to allowed navigation routes.
- * When VITE_FILTER_MODULES_BY_NICHE=true, only routes relevant to the
- * tenant's niche are shown in the sidebar. When false, all routes are visible.
+ * Filtering is active by default. Set VITE_FILTER_MODULES_BY_NICHE=false to disable.
  */
 
 type NicheCode = string;
@@ -45,6 +44,22 @@ const nicheRoutes: Record<NicheCode, string[]> = {
   RECOVERY: ['/app/recovery', '/app/sales', '/app/prospecting'],
 };
 
+/**
+ * Portuguese/accented business type strings → canonical niche codes.
+ * Defined at module scope to avoid per-call allocation.
+ */
+const nicheAliases: Record<string, string> = {
+  CLINICA: 'CLINIC',
+  CLINICA_E_SAUDE: 'CLINIC',
+  SAUDE: 'HEALTH',
+  BELEZA: 'BEAUTY',
+  ACADEMIA: 'GYM',
+  JURIDICO: 'LEGAL',
+  IMOBILIARIA: 'REALESTATE',
+  EDUCACAO: 'EDUCATION',
+  AUTOMOTIVO: 'AUTOMOTIVE',
+};
+
 /** Routes that are always visible regardless of niche */
 const alwaysVisiblePrefixes = [
   '/app/dashboard',
@@ -64,6 +79,7 @@ export interface NavItem {
 
 /**
  * Returns whether niche-based module filtering is enabled.
+ * Active by default; set VITE_FILTER_MODULES_BY_NICHE=false to disable.
  */
 export function isNicheFilterEnabled(): boolean {
   return import.meta.env.VITE_FILTER_MODULES_BY_NICHE !== 'false';
@@ -88,8 +104,15 @@ export function filterNavByNiche(items: NavItem[], businessType?: string | null,
     return items;
   }
 
-  const niche = businessType.trim().toUpperCase();
-  const allowedRoutes = nicheRoutes[niche];
+  const niche = businessType
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '_');
+
+  const resolvedNiche = nicheAliases[niche] ?? niche;
+  const allowedRoutes = nicheRoutes[resolvedNiche];
 
   // If niche is not mapped, show everything (safe fallback)
   if (!allowedRoutes) {

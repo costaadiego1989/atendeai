@@ -19,6 +19,7 @@ import {
   ISocialRepository,
   SOCIAL_REPOSITORY,
 } from '../../domain/ports/ISocialRepository';
+import { SkipSuccessEnvelope } from '@shared/infrastructure/http/decorators/skip-success-envelope.decorator';
 
 @Controller('social/webhook')
 export class SocialWebhookController {
@@ -32,6 +33,7 @@ export class SocialWebhookController {
 
   @Get('meta')
   @HttpCode(200)
+  @SkipSuccessEnvelope()
   verifyMetaWebhook(
     @Query('hub.mode') mode: string,
     @Query('hub.verify_token') verifyToken: string,
