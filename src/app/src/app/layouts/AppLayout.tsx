@@ -233,7 +233,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
           )}
           {filteredProspectingNav.length > 0 && (
             <NavSection
-              title="ProspecÃ§Ã£o"
+              title="Prospecção"
               items={filteredProspectingNav}
               collapsed={sidebarCollapsed}
               currentPath={location.pathname}
@@ -241,7 +241,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
           )}
           <Separator className="my-2 bg-sidebar-border" />
           <NavSection
-            title="Configuracoes"
+            title="Configurações"
             items={filteredSettingsNav}
             collapsed={sidebarCollapsed}
             currentPath={location.pathname}

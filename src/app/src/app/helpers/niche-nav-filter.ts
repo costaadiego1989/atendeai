@@ -88,8 +88,27 @@ export function filterNavByNiche(items: NavItem[], businessType?: string | null,
     return items;
   }
 
-  const niche = businessType.trim().toUpperCase();
-  const allowedRoutes = nicheRoutes[niche];
+  const niche = businessType
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, '_');
+
+  const nicheAliases: Record<string, string> = {
+    CLINICA: 'CLINIC',
+    CLINICA_E_SAUDE: 'CLINIC',
+    SAUDE: 'HEALTH',
+    BELEZA: 'BEAUTY',
+    ACADEMIA: 'GYM',
+    JURIDICO: 'LEGAL',
+    IMOBILIARIA: 'REALESTATE',
+    EDUCACAO: 'EDUCATION',
+    AUTOMOTIVO: 'AUTOMOTIVE',
+  };
+
+  const resolvedNiche = nicheAliases[niche] ?? niche;
+  const allowedRoutes = nicheRoutes[resolvedNiche];
 
   // If niche is not mapped, show everything (safe fallback)
   if (!allowedRoutes) {
