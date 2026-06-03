@@ -20,7 +20,7 @@ export class GoogleCalendarOAuthService {
       access_type: 'offline',
       prompt: 'consent',
       scope: [
-        'https://www.googleapis.com/auth/calendar.events',
+        'https://www.googleapis.com/auth/calendar.app.created',
         'https://www.googleapis.com/auth/userinfo.email',
       ].join(' '),
       state,
@@ -168,6 +168,25 @@ export class GoogleCalendarOAuthService {
       id,
       meetingUrl: response.data?.hangoutLink,
     };
+  }
+
+  async createCalendar(
+    refreshToken: string,
+    summary: string,
+  ): Promise<string> {
+    const accessToken = await this.getAccessToken(refreshToken);
+    const response = await axios.post(
+      `${this.apiBaseUrl}/calendars`,
+      { summary },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    const calendarId = response.data?.id;
+    if (!calendarId) {
+      throw new ValidationErrorException(
+        'Google Calendar could not be created',
+      );
+    }
+    return calendarId;
   }
 
   async listCalendars(
