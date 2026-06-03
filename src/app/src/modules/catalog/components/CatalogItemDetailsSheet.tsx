@@ -58,7 +58,7 @@ export function CatalogItemDetailsSheet({
         <SheetHeader>
           <SheetTitle>{item.name}</SheetTitle>
           <SheetDescription>
-            Detalhe operacional do item dentro do catalogo atual.
+            Detalhe operacional do item dentro do catálogo atual.
           </SheetDescription>
         </SheetHeader>
         <div className="mt-6 space-y-6">
@@ -115,7 +115,7 @@ export function CatalogItemDetailsSheet({
 
           {variants.length > 0 ? (
             <div className="space-y-3">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Variacoes</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Variações</p>
               <div className="space-y-3">
                 {variants.map((variant: Record<string, unknown>, index: number) => {
                   const variantAttributes = getVariantAttributes(variant);
@@ -132,7 +132,7 @@ export function CatalogItemDetailsSheet({
                           </p>
                           {variant.reference ? (
                             <p className="mt-1 text-xs text-muted-foreground">
-                              Referencia:{' '}
+                              Referência:{' '}
                               <span className="font-medium text-foreground">
                                 {String(variant.reference)}
                               </span>
@@ -142,7 +142,7 @@ export function CatalogItemDetailsSheet({
 
                         <div className="grid grid-cols-2 gap-2 sm:min-w-[180px]">
                           <div className="rounded-md border border-border/60 bg-background/50 px-3 py-2">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Preco</p>
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Preço</p>
                             <p className="mt-1 text-sm font-semibold text-foreground">
                               {variant.price ? formatCurrency(Number(variant.price)) : '-'}
                             </p>
@@ -167,7 +167,7 @@ export function CatalogItemDetailsSheet({
                         </div>
                       ) : (
                         <p className="mt-3 text-xs text-muted-foreground">
-                          Sem caracteristicas adicionais.
+                          Sem características adicionais.
                         </p>
                       )}
                     </div>
