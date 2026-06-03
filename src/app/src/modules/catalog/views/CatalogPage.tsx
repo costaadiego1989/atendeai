@@ -8,11 +8,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { PageTabsList } from '@/components/PageTabs';
-import { Download, Filter, Layers, Package, ShieldCheck } from 'lucide-react';
+import { Layers, Package, ShieldCheck } from 'lucide-react';
 import { AsyncOperationsPanel } from '@/shared/ui/AsyncOperationsPanel';
 import { useCatalogPageViewModel } from '@/modules/catalog/view-models/useCatalogPageViewModel';
 import { CatalogHeader } from '../components/CatalogHeader';
@@ -40,6 +38,7 @@ export default function CatalogPage() {
     <div className="page-container animate-fade-in">
       <CatalogHeader
         onOpenImport={() => vm.setImportOpen(true)}
+        onOpenReports={() => vm.setReportsOpen(true)}
         onNewCategory={() => vm.setCreateCategoryOpen(true)}
         onNewItem={() => vm.setCreateItemOpen(true)}
       />
@@ -49,52 +48,6 @@ export default function CatalogPage() {
         description="Processando em segundo plano — você pode continuar usando normalmente."
         items={vm.activeJobItems}
       />
-
-      <Card className="glass-card border-border/40 bg-background/30 mb-6">
-        <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/70">
-              <Filter className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground">Relatório do catalogo</p>
-              <p className="text-xs text-muted-foreground">
-                A lista e o CSV usam busca, tipo e status ativo/inativo selecionados.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="grid grid-cols-4 rounded-xl border border-border/60 bg-background/60 p-1">
-              {[
-                { value: 'ALL', label: 'Todos' },
-                { value: 'PRODUCT', label: 'Produtos' },
-                { value: 'SERVICE', label: 'Serviços' },
-                { value: 'RENTAL', label: 'Locações' },
-              ].map((option) => (
-                <Button
-                  key={option.value}
-                  type="button"
-                  variant={vm.typeFilter === option.value ? 'default' : 'ghost'}
-                  className="h-9 rounded-lg px-3 text-xs font-bold"
-                  onClick={() => vm.setTypeFilter(option.value as typeof vm.typeFilter)}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-11 gap-2 rounded-xl px-4"
-              onClick={() => vm.setReportsOpen(true)}
-            >
-              <Download className="h-4 w-4" />
-              Relatórios
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <CatalogKPIs
         activeItemsCount={activeItemsCount}
@@ -218,7 +171,7 @@ export default function CatalogPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remover categoria?</AlertDialogTitle>
             <AlertDialogDescription>
-              A categoria saira da operação ativa. Se houver itens ativos vinculados, a remoção sera bloqueada.
+              A categoria sairá da operação ativa. Se houver itens ativos vinculados, a remoção será bloqueada.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -240,7 +193,7 @@ export default function CatalogPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remover item?</AlertDialogTitle>
             <AlertDialogDescription>
-              O item sera retirado do catalogo ativo e deixara de aparecer para a operação.
+              O item será retirado do catálogo ativo e deixará de aparecer para a operação.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -19,7 +19,7 @@ export function CatalogReadinessTab() {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       {blocks.map((block) => (
-        <Card key={block.title} className="glass-card">
+        <Card key={block.title} className="bg-card border border-border/60">
           <CardHeader>
             <CardTitle className="text-base">{block.title}</CardTitle>
           </CardHeader>
