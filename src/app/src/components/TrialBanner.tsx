@@ -20,7 +20,7 @@ export function TrialBanner() {
     const updateCountdown = () => {
       const now = new Date();
       const diffTime = expirationDate.getTime() - now.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
       setDaysLeft(diffDays > 0 ? diffDays : 0);
     };

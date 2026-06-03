@@ -20,6 +20,12 @@ export class CompleteGoogleCalendarConnectionUseCase {
     const oauth = await this.oauthService.exchangeCodeForRefreshToken(
       input.code,
     );
+
+    const calendarId = await this.oauthService.createCalendar(
+      oauth.refreshToken,
+      'AtendeAi',
+    );
+
     const now = new Date().toISOString();
 
     await this.repository.save({
@@ -27,7 +33,7 @@ export class CompleteGoogleCalendarConnectionUseCase {
       branchId: payload.branchId ?? null,
       googleEmail: oauth.email,
       refreshToken: oauth.refreshToken,
-      calendarId: 'primary',
+      calendarId,
       status: 'CONNECTED',
       connectedAt: now,
       updatedAt: now,
