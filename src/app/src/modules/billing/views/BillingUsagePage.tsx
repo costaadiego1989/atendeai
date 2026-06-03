@@ -499,9 +499,8 @@ export default function BillingUsagePage() {
         <PricingComparisonTable
           plans={billingPlans}
           currentPlanCode={usage.plan}
-          onSelectPlan={(plan, cycle) => {
+          onSelectPlan={(plan) => {
             vm.setSelectedPlan(plan);
-            setSelectedCycle(cycle);
           }}
           isLoading={vm.changePlanMutation.isPending}
           recommendedPlanCode={recommendation?.recommendedPlan?.code ?? null}

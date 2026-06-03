@@ -19,7 +19,7 @@ export function KPICard({ title, value, subtitle, icon: Icon, trend, className =
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
             <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
-            {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+            {subtitle && <div className="mt-1 text-xs text-muted-foreground">{subtitle}</div>}
             {trend && (
               <p className={`mt-1 text-xs font-medium ${trend.positive ? 'text-success' : 'text-destructive'}`}>
                 {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}%
