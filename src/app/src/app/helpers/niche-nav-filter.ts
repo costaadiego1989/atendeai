@@ -10,38 +10,45 @@ type NicheCode = string;
  * Routes not listed here will be hidden when filtering is active.
  * Core routes (dashboard, conversations, contacts, settings) are always visible.
  */
-const nicheRoutes: Record<NicheCode, string[]> = {
-  // Commerce-oriented niches — recovery is not part of the commerce flow
-  FOOD: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
-  RETAIL: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
-  ECOMMERCE: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales', '/app/prospecting'],
-  MARKET: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
-  GROCERY: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
-  BAKERY: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
-  CAFETERIA: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
-  SUPERMARKET: ['/app/catalog', '/app/inventory', '/app/checkout', '/app/sales'],
+// Sales sub-routes — used to grant specific sales features per niche
+// instead of '/app/sales' (too broad — catches all /app/sales/* sub-routes)
+const SALES_METRICS = '/app/sales/metrics';
+const SALES_PAYMENT_LINKS = '/app/sales/payment-links';
+const SALES_PROMOTIONS = '/app/sales/promotions';
+const SALES_ALL = [SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS];
 
-  // Scheduling-oriented niches
-  BEAUTY: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
-  HEALTH: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
-  GYM: ['/app/scheduling', '/app/recovery', '/app/sales'],
-  PET: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
-  HOME_SERV: ['/app/scheduling', '/app/prospecting', '/app/proposals', '/app/sales', '/app/recovery'],
-  HOSPITALITY: ['/app/scheduling', '/app/catalog', '/app/checkout', '/app/recovery', '/app/sales'],
-  LEGAL: ['/app/scheduling', '/app/prospecting', '/app/proposals', '/app/recovery', '/app/sales'],
-  CLINIC: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
-  SCHEDULING: ['/app/scheduling', '/app/catalog', '/app/sales', '/app/recovery'],
+const nicheRoutes: Record<NicheCode, string[]> = {
+  // Commerce-oriented niches — full sales suite
+  FOOD: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
+  RETAIL: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
+  ECOMMERCE: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL, '/app/prospecting'],
+  MARKET: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
+  GROCERY: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
+  BAKERY: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
+  CAFETERIA: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
+  SUPERMARKET: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
+
+  // Scheduling-oriented niches — no checkout, no inventory, no proposals
+  BEAUTY: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS, '/app/recovery'],
+  HEALTH: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  GYM: ['/app/scheduling', SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS, '/app/recovery'],
+  PET: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  HOME_SERV: ['/app/scheduling', '/app/prospecting', '/app/proposals', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  HOSPITALITY: ['/app/scheduling', '/app/catalog', '/app/checkout', SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS, '/app/recovery'],
+  LEGAL: ['/app/scheduling', '/app/prospecting', '/app/proposals', SALES_METRICS, '/app/recovery'],
+  CLINIC: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  SCHEDULING: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
 
   // Service/consultive niches
-  AGENCY: ['/app/prospecting', '/app/proposals', '/app/recovery', '/app/sales', '/app/social'],
-  REALESTATE: ['/app/catalog', '/app/prospecting', '/app/proposals', '/app/scheduling', '/app/recovery', '/app/sales'],
-  RENTAL: ['/app/catalog', '/app/prospecting', '/app/proposals', '/app/scheduling', '/app/recovery', '/app/sales'],
-  EDUCATION: ['/app/catalog', '/app/scheduling', '/app/prospecting', '/app/recovery', '/app/proposals', '/app/sales'],
-  AUTOMOTIVE: ['/app/scheduling', '/app/catalog', '/app/inventory', '/app/checkout', '/app/proposals', '/app/sales', '/app/prospecting'],
-  SIMPLE_SERVICE: ['/app/prospecting', '/app/proposals', '/app/recovery', '/app/sales'],
+  AGENCY: ['/app/prospecting', '/app/proposals', SALES_METRICS, '/app/recovery', '/app/social'],
+  REALESTATE: ['/app/catalog', '/app/prospecting', '/app/proposals', '/app/scheduling', SALES_METRICS, '/app/recovery'],
+  RENTAL: ['/app/catalog', '/app/prospecting', '/app/proposals', '/app/scheduling', SALES_METRICS, '/app/recovery'],
+  EDUCATION: ['/app/catalog', '/app/scheduling', '/app/prospecting', '/app/proposals', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  AUTOMOTIVE: ['/app/scheduling', '/app/catalog', '/app/inventory', '/app/checkout', '/app/proposals', ...SALES_ALL, '/app/prospecting'],
+  SIMPLE_SERVICE: ['/app/prospecting', '/app/proposals', SALES_METRICS, '/app/recovery'],
 
   // Recovery-focused
-  RECOVERY: ['/app/recovery', '/app/sales', '/app/prospecting'],
+  RECOVERY: ['/app/recovery', SALES_METRICS, '/app/prospecting'],
 };
 
 /**
@@ -90,13 +97,8 @@ export function isNicheFilterEnabled(): boolean {
  * If filtering is disabled, no businessType is set, or user is OWNER, returns all items.
  * OWNER role bypasses filtering to allow validation of all modules.
  */
-export function filterNavByNiche(items: NavItem[], businessType?: string | null, userRole?: string | null): NavItem[] {
+export function filterNavByNiche(items: NavItem[], businessType?: string | null, _userRole?: string | null): NavItem[] {
   if (!isNicheFilterEnabled()) {
-    return items;
-  }
-
-  // OWNER bypasses niche filtering to validate all modules
-  if (userRole === 'OWNER') {
     return items;
   }
 
