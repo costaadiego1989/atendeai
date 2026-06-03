@@ -85,13 +85,13 @@ export function CatalogItemDetailsSheet({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Card className="glass-card">
+            <Card className="bg-card border border-border/60">
               <CardContent className="p-4">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">Categoria</p>
                 <p className="mt-2 text-sm font-medium text-foreground">{categoryLabel}</p>
               </CardContent>
             </Card>
-            <Card className="glass-card">
+            <Card className="bg-card border border-border/60">
               <CardContent className="p-4">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">Preço base</p>
                 <p className="mt-2 text-sm font-medium text-foreground">{formatCurrency(item.basePrice)}</p>

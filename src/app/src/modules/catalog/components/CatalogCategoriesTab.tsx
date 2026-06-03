@@ -1,6 +1,7 @@
 import { FolderKanban, PencilLine, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
 
@@ -23,11 +24,25 @@ export function CatalogCategoriesTab({
 }: CatalogCategoriesTabProps) {
   if (isLoading) {
     return (
-      <Card className="glass-card">
-        <CardContent className="p-8 text-sm text-muted-foreground">
-          Carregando categorias...
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <Card key={index} className="bg-card border border-border/60">
+            <CardContent className="space-y-4 p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32 rounded-md" />
+                  <Skeleton className="h-3 w-40 rounded-md" />
+                </div>
+                <Skeleton className="h-6 w-16 rounded-md" />
+              </div>
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-3 w-24 rounded-md" />
+                <Skeleton className="h-3 w-8 rounded-md" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     );
   }
 
@@ -48,7 +63,7 @@ export function CatalogCategoriesTab({
       {categories.map((category) => {
         const itemsCount = items.filter((item) => item.categoryId === category.id).length;
         return (
-          <Card key={category.id} className="glass-card">
+          <Card key={category.id} className="bg-card border border-border/60">
             <CardContent className="space-y-4 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>

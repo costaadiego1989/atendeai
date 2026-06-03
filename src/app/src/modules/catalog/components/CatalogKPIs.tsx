@@ -25,11 +25,11 @@ export function CatalogKPIs({
       <KPICard
         title="Categorias"
         value={categoriesCount}
-        subtitle="Estrutura base do catalogo"
+        subtitle="Estrutura base do catálogo"
         icon={FolderKanban}
       />
       <KPICard
-        title="serviços"
+        title="Serviços"
         value={servicesCount}
         subtitle="Itens usados por agenda e IA"
         icon={Tag}
