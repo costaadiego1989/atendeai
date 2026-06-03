@@ -77,7 +77,6 @@ export class SocialOAuthService {
         'instagram_manage_messages',
         'pages_show_list',
         'pages_read_engagement',
-        'business_management',
       ].join(','),
       response_type: 'code',
       state,
