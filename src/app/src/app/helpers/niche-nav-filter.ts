@@ -29,14 +29,14 @@ const nicheRoutes: Record<NicheCode, string[]> = {
   SUPERMARKET: ['/app/catalog', '/app/inventory', '/app/checkout', ...SALES_ALL],
 
   // Scheduling-oriented niches — no checkout, no inventory, no proposals
-  BEAUTY: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS, '/app/recovery'],
-  HEALTH: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  BEAUTY: ['/app/scheduling', SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS, '/app/recovery'],
+  HEALTH: ['/app/scheduling', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
   GYM: ['/app/scheduling', SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS, '/app/recovery'],
-  PET: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  PET: ['/app/scheduling', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
   HOME_SERV: ['/app/scheduling', '/app/prospecting', '/app/proposals', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
   HOSPITALITY: ['/app/scheduling', '/app/catalog', '/app/checkout', SALES_METRICS, SALES_PAYMENT_LINKS, SALES_PROMOTIONS, '/app/recovery'],
   LEGAL: ['/app/scheduling', '/app/prospecting', '/app/proposals', SALES_METRICS, '/app/recovery'],
-  CLINIC: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
+  CLINIC: ['/app/scheduling', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
   SCHEDULING: ['/app/scheduling', '/app/catalog', SALES_METRICS, SALES_PAYMENT_LINKS, '/app/recovery'],
 
   // Service/consultive niches

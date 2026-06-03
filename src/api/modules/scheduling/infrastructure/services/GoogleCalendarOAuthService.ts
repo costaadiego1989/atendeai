@@ -170,10 +170,7 @@ export class GoogleCalendarOAuthService {
     };
   }
 
-  async createCalendar(
-    refreshToken: string,
-    summary: string,
-  ): Promise<string> {
+  async createCalendar(refreshToken: string, summary: string): Promise<string> {
     const accessToken = await this.getAccessToken(refreshToken);
     const response = await axios.post(
       `${this.apiBaseUrl}/calendars`,
