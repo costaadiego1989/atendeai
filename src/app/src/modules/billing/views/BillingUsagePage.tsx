@@ -53,7 +53,7 @@ interface AdvisorQuestionRowProps {
 
 function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/60 p-4">
+    <div className="rounded-xl border border-border/60 bg-card/60 p-4">
       <div className="mb-3">
         <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
           {question.label}
@@ -118,8 +118,17 @@ export default function BillingUsagePage() {
         <EmptyState
           icon={CreditCard}
           title="Erro no carregamento"
-          description="Não foi possível recuperar os dados de faturamento. Verifique sua conexão ou contate o suporte."
+          description="Não foi possível recuperar os dados de faturamento. Verifique sua conexão e tente novamente."
+          actionLabel="Tentar novamente"
+          onAction={vm.refreshBillingStatus}
         />
+        <p className="text-center text-sm text-muted-foreground">
+          Se o problema persistir,{' '}
+          <a className="font-medium text-primary underline" href="mailto:suporte@atendeai.com.br">
+            fale com o suporte
+          </a>
+          .
+        </p>
       </div>
     );
   }
@@ -165,14 +174,14 @@ export default function BillingUsagePage() {
               <div>
                 <p className="font-bold text-amber-900">Transição de plano agendada</p>
                 <p className="max-w-xl text-sm text-amber-800/80">
-                  Seu plano sera alterado para <span className="font-bold">{usage.scheduledPlan}</span>{' '}
+                  Seu plano será alterado para <span className="font-bold">{usage.scheduledPlan}</span>{' '}
                   automaticamente em{' '}
                   {new Date(usage.billingCycle.end).toLocaleDateString('pt-BR')}.
                 </p>
               </div>
             </div>
             <Badge className="border-amber-200 bg-amber-100 text-amber-700 hover:bg-amber-100">
-              Proximo ciclo
+              Próximo ciclo
             </Badge>
           </CardContent>
         </Card>
@@ -373,7 +382,7 @@ export default function BillingUsagePage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="rounded-2xl border border-primary/20 bg-background/40 p-5">
+              <div className="rounded-xl border border-primary/20 bg-background/40 p-5">
                 <div className="mb-4 flex items-center gap-1.5 rounded-full bg-muted/50 p-1 w-fit">
                   {(['monthly', 'annual'] as BillingCycle[]).map((cycle) => (
                     <button
@@ -389,7 +398,7 @@ export default function BillingUsagePage() {
                     >
                       {cycle === 'monthly' ? 'Mensal' : 'Anual'}
                       {isPromoActive() && getPromoDiscountPercent(cycle) > 0 && (
-                        <span className="ml-1.5 rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                        <span className="ml-1.5 rounded-full bg-success/20 px-1.5 py-0.5 text-[10px] font-bold text-success">
                           -{getPromoDiscountPercent(cycle)}%
                         </span>
                       )}
@@ -428,7 +437,7 @@ export default function BillingUsagePage() {
                 {recommendation.quotaBenefits.map((benefit) => (
                   <div
                     key={benefit}
-                    className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/[0.04] px-4 py-3"
+                    className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] px-4 py-3"
                   >
                     <ShieldCheck className="mt-0.5 h-4 w-4 text-primary" />
                     <p className="text-sm leading-relaxed text-muted-foreground">{benefit}</p>
@@ -437,7 +446,7 @@ export default function BillingUsagePage() {
                 {recommendation.reasons.map((reason) => (
                   <div
                     key={reason}
-                    className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card/80 px-4 py-3"
+                    className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/80 px-4 py-3"
                   >
                     <Gauge className="mt-0.5 h-4 w-4 text-primary" />
                     <p className="text-sm leading-relaxed text-muted-foreground">{reason}</p>
@@ -446,7 +455,7 @@ export default function BillingUsagePage() {
                 {recommendation.nicheBenefits.map((benefit) => (
                   <div
                     key={benefit}
-                    className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card/80 px-4 py-3"
+                    className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/80 px-4 py-3"
                   >
                     <Sparkles className="mt-0.5 h-4 w-4 text-primary" />
                     <p className="text-sm leading-relaxed text-muted-foreground">{benefit}</p>
@@ -454,7 +463,7 @@ export default function BillingUsagePage() {
                 ))}
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
+              <div className="rounded-xl border border-border/60 bg-card/80 p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
                   Módulos extras do nicho
                 </p>
@@ -481,7 +490,7 @@ export default function BillingUsagePage() {
             </p>
           </div>
           {recommendation?.recommendedPlan && (
-            <Badge className="w-fit border-none bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20">
+            <Badge className="w-fit border-none bg-success/10 text-success hover:bg-success/20">
               Plano indicado hoje: {recommendation.recommendedPlan.displayName}
             </Badge>
           )}
@@ -490,12 +499,13 @@ export default function BillingUsagePage() {
         <PricingComparisonTable
           plans={billingPlans}
           currentPlanCode={usage.plan}
-          onSelectPlan={(plan, cycle) => {
+          onSelectPlan={(plan) => {
             vm.setSelectedPlan(plan);
-            setSelectedCycle(cycle);
           }}
           isLoading={vm.changePlanMutation.isPending}
           recommendedPlanCode={recommendation?.recommendedPlan?.code ?? null}
+          billingCycle={selectedCycle}
+          onBillingCycleChange={setSelectedCycle}
         />
       </div>
 
@@ -570,7 +580,7 @@ export default function BillingUsagePage() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-border/60 bg-card/70 p-4">
+            <div className="rounded-xl border border-border/60 bg-card/70 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
                 Importante
               </p>
@@ -648,7 +658,7 @@ export default function BillingUsagePage() {
             </SheetDescription>
           </SheetHeader>
 
-          <div className="flex flex-col items-center gap-6 rounded-2xl border border-primary/20 bg-primary/[0.02] px-6 py-12 text-center">
+          <div className="flex flex-col items-center gap-6 rounded-xl border border-primary/20 bg-primary/[0.02] px-6 py-12 text-center">
             <div className="relative">
               <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
               <div className="relative rounded-full bg-primary/10 p-5">

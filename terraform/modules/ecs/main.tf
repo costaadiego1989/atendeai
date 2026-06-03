@@ -306,6 +306,14 @@ locals {
       valueFrom = "${var.ssm_parameter_prefix}/META_WEBHOOK_SECRET"
     },
     {
+      name      = "TWILIO_EMBEDDED_SIGNUP_APP_ID"
+      valueFrom = "${var.ssm_parameter_prefix}/TWILIO_EMBEDDED_SIGNUP_APP_ID"
+    },
+    {
+      name      = "TWILIO_EMBEDDED_SIGNUP_CONFIGURATION_ID"
+      valueFrom = "${var.ssm_parameter_prefix}/TWILIO_EMBEDDED_SIGNUP_CONFIGURATION_ID"
+    },
+    {
       name      = "TWILIO_ACCOUNT_SID"
       valueFrom = "${var.ssm_parameter_prefix}/TWILIO_ACCOUNT_SID"
     },
