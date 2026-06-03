@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Check, Info, Minus } from 'lucide-react';
 import {
   Table,
@@ -34,6 +33,8 @@ interface PricingComparisonTableProps {
   onSelectPlan: (plan: BillingPlan, cycle: BillingCycle) => void;
   isLoading?: boolean;
   recommendedPlanCode?: BillingPlan['code'] | null;
+  billingCycle: BillingCycle;
+  onBillingCycleChange: (cycle: BillingCycle) => void;
 }
 
 export function PricingComparisonTable({
@@ -42,8 +43,9 @@ export function PricingComparisonTable({
   onSelectPlan,
   isLoading,
   recommendedPlanCode,
+  billingCycle,
+  onBillingCycleChange,
 }: PricingComparisonTableProps) {
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const promoActive = isPromoActive();
   const promoPercentMonthly = getPromoDiscountPercent('monthly');
   const promoPercentAnnual = getPromoDiscountPercentAnnual();
@@ -111,7 +113,7 @@ export function PricingComparisonTable({
       <div className="mb-4 flex items-center justify-center gap-2">
         <button
           type="button"
-          onClick={() => setBillingCycle('monthly')}
+          onClick={() => onBillingCycleChange('monthly')}
           className={cn(
             'rounded-full px-5 py-2 text-sm font-medium transition-all',
             billingCycle === 'monthly'
@@ -128,7 +130,7 @@ export function PricingComparisonTable({
         </button>
         <button
           type="button"
-          onClick={() => setBillingCycle('annual')}
+          onClick={() => onBillingCycleChange('annual')}
           className={cn(
             'rounded-full px-5 py-2 text-sm font-medium transition-all',
             billingCycle === 'annual'

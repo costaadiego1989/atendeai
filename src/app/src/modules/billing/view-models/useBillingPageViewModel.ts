@@ -183,7 +183,7 @@ export function useBillingPageViewModel() {
         toast({
           title: 'Checkout aberto',
           description:
-            'A cobrança foi aberta em outra aba. Assim que o pagamento for confirmado, o plano sera atualizado aqui.',
+            'A cobrança foi aberta em outra aba. Assim que o pagamento for confirmado, o plano será atualizado aqui.',
         });
         checkoutToastShownRef.current = true;
       }

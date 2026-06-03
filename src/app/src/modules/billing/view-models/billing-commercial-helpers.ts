@@ -490,7 +490,7 @@ export function buildBillingRecommendation(
   if (answers.conversationsBand === 'HIGH') {
     reasons.push('O volume informado pede teto alto de conversas para evitar gargalo operacional.');
   } else if (answers.conversationsBand === 'MEDIUM') {
-    reasons.push('A rotina comercial ja pede folga acima da entrada inicial.');
+    reasons.push('A rotina comercial já pede folga acima da entrada inicial.');
   } else {
     reasons.push('O volume ainda cabe em uma validação controlada.');
   }
@@ -498,7 +498,7 @@ export function buildBillingRecommendation(
   if (answers.contactsBand === 'HIGH') {
     reasons.push('A base projetada pede capacidade robusta de CRM e histórico.');
   } else if (answers.contactsBand === 'MEDIUM') {
-    reasons.push('A carteira já precisa de mais espaco para relacionamento e retorno.');
+    reasons.push('A carteira já precisa de mais espaço para relacionamento e retorno.');
   } else {
     reasons.push('A base está adequada para organizar os primeiros relacionamentos.');
   }
@@ -506,9 +506,9 @@ export function buildBillingRecommendation(
   if (answers.operationMode === 'GOVERNED') {
     reasons.push('O modo escolhido pede governança, integrações e indicadores mais fortes.');
   } else if (answers.operationMode === 'AUTOMATED') {
-    reasons.push('Automacoes ja entram como rotina, entao o plano precisa absorver IA e processos.');
+    reasons.push('Automações já entram como rotina, então o plano precisa absorver IA e processos.');
   } else {
-    reasons.push('Faz sentido iniciar enxuto e ativar modulos conforme a tração cresce.');
+    reasons.push('Faz sentido iniciar enxuto e ativar módulos conforme a tração cresce.');
   }
 
   const nicheBenefits = recommendedPlan
@@ -522,8 +522,8 @@ export function buildBillingRecommendation(
   return {
     recommendedPlan,
     headline: subscriptionCatalog?.niche
-      ? `Para ${subscriptionCatalog.niche.displayName}, o plano base indicado e ${recommendedPlan?.displayName ?? 'o plano disponivel'}.`
-      : `O plano base indicado e ${recommendedPlan?.displayName ?? 'o plano disponível'}.`,
+      ? `Para ${subscriptionCatalog.niche.displayName}, o plano base indicado é ${recommendedPlan?.displayName ?? 'o plano disponível'}.`
+      : `O plano base indicado é ${recommendedPlan?.displayName ?? 'o plano disponível'}.`,
     summary: nicheProfile.summary,
     reasons,
     primaryAddons,
