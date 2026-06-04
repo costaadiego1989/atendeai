@@ -31,14 +31,14 @@ export default function CheckoutPage() {
         onOpenAbandonmentConfig={() => vm.setAbandonmentConfigOpen(true)}
       />
 
-      <Card className="glass-card border-border/40 bg-background/30">
+      <Card className="border-border bg-card">
         <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/70">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background">
               <CalendarDays className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">Relatório do checkout</p>
+              <p className="text-sm font-semibold text-foreground">Relatório do checkout</p>
             </div>
           </div>
 
@@ -54,7 +54,7 @@ export default function CheckoutPage() {
             <Button
               type="button"
               variant="outline"
-              className="h-11 gap-2 rounded-xl px-4"
+              className="h-11 gap-2 rounded-lg px-4"
               onClick={vm.downloadReport}
             >
               <Download className="h-4 w-4" />
@@ -64,20 +64,20 @@ export default function CheckoutPage() {
         </CardContent>
       </Card>
 
-      <Card className="glass-card shadow-sm border-border/40">
+      <Card className="border-border bg-card shadow-sm">
         <CardContent className="grid gap-6 p-6 lg:grid-cols-[1.2fr_0.9fr_0.9fr]">
           <div className="space-y-2">
-            <p className="text-sm font-bold text-foreground">Estratégia de Logística</p>
+            <p className="text-sm font-semibold text-foreground">Estratégia de Logística</p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Define como a IA orienta o cliente sobre frete, áreas de cobertura e horários operacionais.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-background/40 p-4 transition-colors hover:bg-background/60">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70">
+          <div className="rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/30">
+            <p className="text-xs font-medium text-muted-foreground">
               Modelo de Frete
             </p>
-            <p className="mt-2 text-sm font-bold text-foreground">
+            <p className="mt-2 text-sm font-semibold text-foreground">
               {shippingPolicy ? getShippingLabel(shippingPolicy.mode) : 'Não configurado'}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -89,11 +89,11 @@ export default function CheckoutPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-background/40 p-4 transition-colors hover:bg-background/60">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70">
+          <div className="rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/30">
+            <p className="text-xs font-medium text-muted-foreground">
               Disponibilidade
             </p>
-            <p className="mt-2 text-sm font-bold text-foreground">
+            <p className="mt-2 text-sm font-semibold text-foreground">
               {shippingPolicy?.maxRadiusKm != null ? `${shippingPolicy.maxRadiusKm}km de cobertura` : 'Raio global'}
             </p>
             <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
@@ -106,17 +106,17 @@ export default function CheckoutPage() {
       </Card>
 
       {shippingPolicy?.deliverySchedule?.some((slot) => slot.enabled) && (
-        <Card className="glass-card border-border/40 bg-background/20">
+        <Card className="border-border bg-card">
           <CardContent className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Horários de Entrega Ativos</p>
+              <div className="h-2 w-2 rounded-full bg-success" />
+              <p className="text-xs font-medium text-muted-foreground">Horários de entrega ativos</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {shippingPolicy.deliverySchedule
                 .filter((slot) => slot.enabled)
                 .map((slot) => (
-                  <Badge key={slot.weekday} variant="secondary" className="rounded-lg bg-background/60 border-border/40 px-3 py-1 text-[10px] font-bold">
+                  <Badge key={slot.weekday} variant="secondary" className="rounded-lg border-border bg-background px-3 py-1 text-xs font-medium">
                     {getWeekdayLabel(slot.weekday)} {slot.startTime} - {slot.endTime}
                   </Badge>
                 ))}

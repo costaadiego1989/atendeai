@@ -31,7 +31,7 @@ export default function ContactsListPage() {
         items={vm.activeJobItems}
       />
 
-      <Card className="glass-card border-border/40 bg-background/30 mb-6">
+      <Card className="border-border/40 bg-background/30 mb-6">
         <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/70">
@@ -76,7 +76,7 @@ export default function ContactsListPage() {
       />
 
       <div className="space-y-4">
-        <div className="glass-card p-4">
+        <div className="p-4">
           <ContactsFilters
             search={vm.search}
             onSearchChange={vm.updateSearch}
@@ -84,6 +84,11 @@ export default function ContactsListPage() {
             onStageFilterChange={vm.updateStageFilter}
             stageOptions={vm.stageFilterOptions}
             totalCount={vm.totalFiltered}
+            periodFilter={vm.periodFilter}
+            periodOptions={vm.periodOptions}
+            onPeriodFilterChange={vm.setPeriodFilter}
+            onClearFilters={vm.clearFilters}
+            hasActiveFilters={vm.hasActiveFilters}
           />
         </div>
 

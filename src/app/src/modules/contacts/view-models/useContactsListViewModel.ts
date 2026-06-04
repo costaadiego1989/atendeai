@@ -891,5 +891,15 @@ export function useContactsListViewModel() {
 
       bulkDeleteMutation.mutate();
     },
+    hasActiveFilters: search !== '' || stageFilter !== 'ALL' || periodFilter !== 'today',
+    clearFilters() {
+      setSearch('');
+      setStageFilter('ALL');
+      setPeriodFilterState('today');
+      setReportFilters({
+        dateFrom: new Date().toISOString().slice(0, 10),
+        dateTo: new Date().toISOString().slice(0, 10),
+      });
+    },
   };
 }

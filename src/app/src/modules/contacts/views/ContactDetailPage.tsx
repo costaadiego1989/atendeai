@@ -9,10 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { PageTabsList } from '@/components/PageTabs';
-import { CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ArrowLeft, UserRound, History, GitMerge } from 'lucide-react';
 import { useContactDetailViewModel } from '@/modules/contacts/view-models/useContactDetailViewModel';
@@ -58,43 +56,43 @@ export default function ContactDetailPage() {
             />
           </div>
 
-          <Card className="glass-card overflow-hidden">
-            <CardHeader className="space-y-4">
-              <div>
-                <CardTitle className="text-base">Relacionamento comercial</CardTitle>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Alterne entre histórico completo e a visão de funil do contato.
-                </p>
-              </div>
-              <Tabs defaultValue="timeline" className="space-y-0">
-                <PageTabsList
-                  tabs={[
-                    { value: 'timeline', label: 'Timeline', icon: History },
-                    { value: 'pipeline', label: 'Funil', icon: GitMerge },
-                  ]}
-                  className="mb-5"
-                />
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold">Relacionamento comercial</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Alterne entre histórico completo e a visão de funil do contato.
+              </p>
+            </div>
+            <Tabs defaultValue="timeline" className="space-y-0">
+              <PageTabsList
+                tabs={[
+                  { value: 'timeline', label: 'Timeline', icon: History },
+                  { value: 'pipeline', label: 'Funil', icon: GitMerge },
+                ]}
+                className="mb-5"
+              />
 
-                <TabsContent value="timeline" className="mt-5">
-                  <CardContent className="px-0 pb-0">
-                    <ContactTimeline entries={vm.timeline} />
-                  </CardContent>
-                </TabsContent>
+              <TabsContent value="timeline" className="mt-5">
+                <ContactTimeline entries={vm.timeline} />
+              </TabsContent>
 
-                <TabsContent value="pipeline" className="mt-5">
-                  <CardContent className="space-y-4 px-0 pb-0">
+              <TabsContent value="pipeline" className="mt-5">
                     <ContactStageBoard
                       contact={vm.contact}
-                      stageOptions={vm.stageOptions}
+                      stageOptions={[
+                        { value: 'LEAD', label: 'Lead', description: 'Contato inicial com potencial' },
+                        { value: 'PROSPECT', label: 'Prospect', description: 'Interesse demonstrado' },
+                        { value: 'OPPORTUNITY', label: 'Oportunidade', description: 'Proposta em negociação' },
+                        { value: 'CUSTOMER', label: 'Cliente', description: 'Negócio fechado' },
+                        { value: 'INACTIVE', label: 'Inativo', description: 'Sem interesse atual' },
+                      ]}
                       draggingStage={vm.draggingStage}
                       onDraggingStageChange={vm.setDraggingStage}
                       onStageChange={vm.updateStage}
                     />
-                  </CardContent>
-                </TabsContent>
-              </Tabs>
-            </CardHeader>
-          </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       ) : null}
 

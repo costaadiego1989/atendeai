@@ -91,7 +91,7 @@ export function ContactsTable({
               <div className="flex flex-wrap gap-1.5">
                 {(contact.tags ?? []).length ? (
                   (contact.tags ?? []).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="rounded-full px-2.5 py-1 text-[11px]">
+                    <Badge key={tag} variant="secondary" className="rounded-full px-2.5 py-1 text-xs">
                       {tag.charAt(0).toUpperCase() + tag.slice(1)}
                     </Badge>
                   ))
