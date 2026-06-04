@@ -76,6 +76,40 @@ export function getCheckoutStageLabel(step?: string | null) {
   return labels[step || ''] || 'Em Negociação';
 }
 
+export function getAbandonmentBadgeLabel(interval?: string | null) {
+  switch (interval) {
+    case '1h':
+      return 'Retomada 1h';
+    case '1d':
+      return 'Retomada 1d';
+    case '7d':
+      return 'Retomada 7d';
+    default:
+      return 'Carrinho retomado';
+  }
+}
+
+export function getAbandonmentTouchLabel(interval?: string | null) {
+  switch (interval) {
+    case '1h':
+      return 'Primeira retomada';
+    case '1d':
+      return 'Retomada de 1 dia';
+    case '7d':
+      return 'Retomada de 7 dias';
+    default:
+      return 'Retomada comercial';
+  }
+}
+
+export const CHECKOUT_DETAIL_STAGES: Array<{ index: number; label: string }> = [
+  { index: 1, label: 'Carrinho' },
+  { index: 2, label: 'Entrega' },
+  { index: 3, label: 'Ajustes' },
+  { index: 4, label: 'Cobrança' },
+  { index: 5, label: 'Pago' },
+];
+
 export function getCheckoutStageOrder(step?: string | null): number {
   const stages: Record<string, number> = {
     IDENTIFYING_NEED: 1,

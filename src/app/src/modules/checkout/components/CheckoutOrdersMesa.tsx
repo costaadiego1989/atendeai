@@ -4,6 +4,17 @@ import { Tabs } from '@/components/ui/tabs';
 import { PageTabsList } from '@/components/PageTabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   ArrowRight,
   Ban,
@@ -21,6 +32,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { formatCurrency, formatDateTime } from '@/shared/lib/formatters';
 import { formatPhone } from '@/shared/lib/masks';
 import {
+  getAbandonmentBadgeLabel,
   getFulfillmentLabel,
   getOrderLabel,
   getOrderTone,
@@ -75,8 +87,8 @@ const KANBAN_COLUMNS: Array<{
     id: 'preparing',
     statuses: ['PREPARING'],
     targetStatus: 'PREPARING',
-    title: 'Em preparacao',
-    description: 'Pedidos pagos em producao ou separacao.',
+    title: 'Em preparação',
+    description: 'Pedidos pagos em produção ou separação.',
   },
   {
     id: 'ready',
@@ -97,7 +109,7 @@ const KANBAN_COLUMNS: Array<{
     statuses: ['DELIVERED'],
     targetStatus: 'DELIVERED',
     title: 'Entregue',
-    description: 'Fluxo concluido.',
+    description: 'Fluxo concluído.',
   },
   {
     id: 'cancelled',
@@ -150,17 +162,23 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
   onMoveOrderStatus,
   movingOrderId,
 }) => {
-  const getAbandonmentLabel = (interval?: string | null) => {
-    switch (interval) {
-      case '1h':
-        return 'Retomada 1h';
-      case '1d':
-        return 'Retomada 1d';
-      case '7d':
-        return 'Retomada 7d';
-      default:
-        return 'Carrinho retomado';
+  const [pendingCancel, setPendingCancel] = React.useState<{
+    orderId: string;
+    contactName: string;
+  } | null>(null);
+
+  // Destructive transitions (cancellation) require confirmation; forward moves go straight
+  // through (they get an undo toast from the view-model).
+  const requestStatusChange = (
+    orderId: string,
+    status: CommerceOrderStatus,
+    contactName?: string | null,
+  ) => {
+    if (status === 'CANCELLED') {
+      setPendingCancel({ orderId, contactName: contactName || 'Contato não identificado' });
+      return;
     }
+    onMoveOrderStatus(orderId, status);
   };
 
   const renderOrderCard = (order: Order, draggable: boolean) => {
@@ -177,7 +195,7 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
           event.dataTransfer.setData('text/plain', order.id);
           event.dataTransfer.setData('application/x-order-status', order.status);
         }}
-        className="group rounded-lg border border-border/60 border-l-4 border-l-primary/50 bg-background p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md data-[drag=true]:cursor-grab data-[drag=true]:active:cursor-grabbing"
+        className="group rounded-lg border border-border bg-background p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md data-[drag=true]:cursor-grab data-[drag=true]:active:cursor-grabbing"
         data-drag={draggable}
       >
         <button type="button" onClick={() => onSelectOrder(order.id)} className="block w-full text-left">
@@ -187,7 +205,7 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
                 {order.contactName || 'Contato não identificado'}
               </p>
               <Badge
-                className={`shrink-0 border px-2 py-0.5 text-[10px] font-bold uppercase ${getOrderTone(order.status)}`}
+                className={`shrink-0 border px-2 py-0.5 text-[10px] font-semibold ${getOrderTone(order.status)}`}
               >
                 {getOrderLabel(order.status)}
               </Badge>
