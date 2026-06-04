@@ -26,7 +26,10 @@ import {
   CheckCircle, 
   Clock, 
   Zap, 
+  Users, 
   MessageSquare, 
+  Tag,
+  AlertCircle,
   Lightbulb,
   BookOpen,
   ArrowRight,
@@ -585,6 +588,7 @@ export function AutomationWizard({
       setCurrentStep(currentStep + 1);
     } else {
       const validSteps = (wizardData.steps || []).filter((step) => step.type) as Omit<AutomationStep, 'id'>[];
+      // Converter para CreateAutomationInput
       const automationInput: CreateAutomationInput = {
         name: wizardData.name || '',
         description: wizardData.description,
