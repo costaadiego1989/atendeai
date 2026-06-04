@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -26,17 +26,18 @@ import {
   CheckCircle, 
   Clock, 
   Zap, 
-  Users, 
   MessageSquare, 
-  Tag,
-  AlertCircle,
   Lightbulb,
   BookOpen,
   ArrowRight,
   X,
+  ShoppingCart,
+  Plus,
+  FileText,
 } from 'lucide-react';
 import { TriggerType, StepType, TRIGGER_LABELS, STEP_LABELS } from '../types';
 import type { Automation, CreateAutomationInput, AutomationStep } from '../types';
+import { z } from 'zod';
 
 interface WizardStep {
   id: string;
@@ -561,19 +562,20 @@ export function AutomationWizard({
   // Carregar template se fornecido
   useEffect(() => {
     if (template && open) {
+      const filteredSteps = (template.automation.steps || []).filter((step) => step.type);
       setWizardData({
         name: template.automation.name || '',
         description: template.automation.description || '',
         triggerType: template.automation.trigger?.type || TriggerType.MESSAGE_RECEIVED,
         triggerConfig: template.automation.trigger?.config || {},
-        steps: template.automation.steps || [],
+        steps: filteredSteps as Omit<AutomationStep, 'id'>[],
       });
       form.reset({
         name: template.automation.name || '',
         description: template.automation.description || '',
         triggerType: template.automation.trigger?.type || TriggerType.MESSAGE_RECEIVED,
         triggerConfig: template.automation.trigger?.config || {},
-        steps: template.automation.steps || [],
+        steps: filteredSteps as Omit<AutomationStep, 'id'>[],
       });
     }
   }, [template, open, form]);
@@ -582,7 +584,7 @@ export function AutomationWizard({
     if (currentStep < wizardSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Converter para CreateAutomationInput
+      const validSteps = (wizardData.steps || []).filter((step) => step.type) as Omit<AutomationStep, 'id'>[];
       const automationInput: CreateAutomationInput = {
         name: wizardData.name || '',
         description: wizardData.description,
@@ -590,7 +592,7 @@ export function AutomationWizard({
           type: wizardData.triggerType!,
           config: wizardData.triggerConfig!,
         },
-        steps: wizardData.steps || [],
+        steps: validSteps,
       };
       onComplete(automationInput);
       onOpenChange(false);
@@ -701,11 +703,15 @@ export function AutomationWizard({
 
         {/* Step content */}
         <ScrollArea className="max-h-96 mb-6">
-          <wizardSteps[currentStep].component
-            data={wizardData}
-            onChange={setWizardData}
-            errors={form.formState.errors}
-          />
+          {wizardSteps[currentStep]?.component && (
+            <div className="p-4">
+              {React.createElement(wizardSteps[currentStep].component, {
+                data: wizardData,
+                onChange: setWizardData,
+                errors: form.formState.errors,
+              })}
+            </div>
+          )}
         </ScrollArea>
 
         {/* Help section */}
