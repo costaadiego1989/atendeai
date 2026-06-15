@@ -294,7 +294,7 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
   };
 
   return (
-    <Card className="border-border/60 bg-background/70 shadow-sm">
+    <Card className="glass-card">
       <CardHeader className="space-y-4 border-b border-border/60 bg-muted/10">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
