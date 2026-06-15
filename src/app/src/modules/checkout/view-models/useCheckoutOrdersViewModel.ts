@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { createElement, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { checkoutService } from '@/modules/checkout/services/checkout-service';
 import { messagingRealtimeService } from '@/modules/messaging/services/messaging-realtime-service';
 import { toast } from '@/components/ui/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
+import { getOrderLabel } from '@/modules/checkout/view-models/checkout-ui-utils';
 import type { CommerceOrderStatus } from '@/shared/types';
 
 export type CheckoutTab =
@@ -243,6 +245,16 @@ export function useCheckoutOrdersViewModel() {
         exact: false,
       });
 
+      let previousStatus: CommerceOrderStatus | undefined;
+      previousQueries.forEach(([, data]) => {
+        if (!Array.isArray(data)) return;
+        const found = data.find(
+          (order) =>
+            typeof order === 'object' && order !== null && 'id' in order && order.id === orderId,
+        ) as { status?: CommerceOrderStatus } | undefined;
+        if (found?.status) previousStatus = found.status;
+      });
+
       previousQueries.forEach(([queryKey, data]) => {
         if (!Array.isArray(data)) return;
 
@@ -256,9 +268,9 @@ export function useCheckoutOrdersViewModel() {
         );
       });
 
-      return { previousQueries };
+      return { previousQueries, previousStatus };
     },
-    onSuccess: async (updatedOrder) => {
+    onSuccess: async (updatedOrder, variables, context) => {
       if (!tenant?.id) return;
 
       await Promise.all([
@@ -271,9 +283,30 @@ export function useCheckoutOrdersViewModel() {
         }),
       ]);
 
+      const previousStatus = context?.previousStatus;
+      // Undo only forward moves; cancellations are already gated by a confirm dialog.
+      const canUndo =
+        previousStatus != null &&
+        previousStatus !== variables.status &&
+        variables.status !== 'CANCELLED';
+
       toast({
         title: 'Pedido movimentado',
         description: 'O status do pedido foi atualizado no checkout.',
+        action: canUndo
+          ? createElement(
+              ToastAction,
+              {
+                altText: 'Desfazer movimentação do pedido',
+                onClick: () =>
+                  updateOrderStatusMutation.mutate({
+                    orderId: variables.orderId,
+                    status: previousStatus as CommerceOrderStatus,
+                  }),
+              },
+              `Desfazer (${getOrderLabel(previousStatus as CommerceOrderStatus)})`,
+            )
+          : undefined,
       });
     },
     onError: (error, _variables, context) => {

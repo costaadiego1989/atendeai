@@ -12,7 +12,7 @@ import { PerformanceOptimizer } from '../components/PerformanceOptimizer';
 import { AutomationFilterProps, AutomationWizardProps } from '../components/types';
 
 // Mock dependencies
-vi.mock('lodash-es', () => ({
+vi.mock('../utils/debounce', () => ({
   debounce: vi.fn((fn) => fn),
 }));
 

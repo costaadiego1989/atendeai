@@ -1,17 +1,5 @@
-/**
- * Maps business niche to allowed navigation routes.
- * Filtering is active by default. Set VITE_FILTER_MODULES_BY_NICHE=false to disable.
- */
-
 type NicheCode = string;
 
-/**
- * Each niche maps to a set of route prefixes that should be visible.
- * Routes not listed here will be hidden when filtering is active.
- * Core routes (dashboard, conversations, contacts, settings) are always visible.
- */
-// Sales sub-routes — used to grant specific sales features per niche
-// instead of '/app/sales' (too broad — catches all /app/sales/* sub-routes)
 const SALES_METRICS = '/app/sales/metrics';
 const SALES_PAYMENT_LINKS = '/app/sales/payment-links';
 const SALES_PROMOTIONS = '/app/sales/promotions';
@@ -51,10 +39,6 @@ const nicheRoutes: Record<NicheCode, string[]> = {
   RECOVERY: ['/app/recovery', SALES_METRICS, '/app/prospecting'],
 };
 
-/**
- * Portuguese/accented business type strings → canonical niche codes.
- * Defined at module scope to avoid per-call allocation.
- */
 const nicheAliases: Record<string, string> = {
   CLINICA: 'CLINIC',
   CLINICA_E_SAUDE: 'CLINIC',
@@ -67,7 +51,6 @@ const nicheAliases: Record<string, string> = {
   AUTOMOTIVO: 'AUTOMOTIVE',
 };
 
-/** Routes that are always visible regardless of niche */
 const alwaysVisiblePrefixes = [
   '/app/dashboard',
   '/app/conversations',
@@ -76,6 +59,7 @@ const alwaysVisiblePrefixes = [
   '/app/settings',
   '/app/billing',
   '/app/team',
+  '/app/automations',
 ];
 
 export interface NavItem {
@@ -84,19 +68,10 @@ export interface NavItem {
   icon: any;
 }
 
-/**
- * Returns whether niche-based module filtering is enabled.
- * Active by default; set VITE_FILTER_MODULES_BY_NICHE=false to disable.
- */
 export function isNicheFilterEnabled(): boolean {
   return import.meta.env.VITE_FILTER_MODULES_BY_NICHE !== 'false';
 }
 
-/**
- * Filters navigation items based on the tenant's business type.
- * If filtering is disabled, no businessType is set, or user is OWNER, returns all items.
- * OWNER role bypasses filtering to allow validation of all modules.
- */
 export function filterNavByNiche(items: NavItem[], businessType?: string | null, _userRole?: string | null): NavItem[] {
   if (!isNicheFilterEnabled()) {
     return items;
@@ -116,18 +91,15 @@ export function filterNavByNiche(items: NavItem[], businessType?: string | null,
   const resolvedNiche = nicheAliases[niche] ?? niche;
   const allowedRoutes = nicheRoutes[resolvedNiche];
 
-  // If niche is not mapped, show everything (safe fallback)
   if (!allowedRoutes) {
     return items;
   }
 
   return items.filter((item) => {
-    // Always-visible routes pass through
     if (alwaysVisiblePrefixes.some((prefix) => item.path.startsWith(prefix))) {
       return true;
     }
 
-    // Check if the item's route matches any allowed route for this niche
     return allowedRoutes.some((route) => item.path.startsWith(route));
   });
 }

@@ -6,6 +6,7 @@ import type { ContactDetail, ContactStage } from '@/shared/types';
 interface StageOption {
   value: ContactStage;
   label: string;
+  description: string;
 }
 
 interface ContactStageBoardProps {
@@ -23,16 +24,36 @@ export function ContactStageBoard({
   onDraggingStageChange,
   onStageChange,
 }: ContactStageBoardProps) {
+  const handleKeyDown = (event: React.KeyboardEvent, stage: ContactStage) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      if (contact.stage !== stage) {
+        onStageChange(stage);
+      }
+    }
+  };
+
+  const getTabIndex = (stage: ContactStage) => {
+    return contact.stage === stage ? 0 : -1;
+  };
+
+  const stageOptionsWithDescriptions: StageOption[] = [
+    { value: 'LEAD', label: 'Lead', description: 'Contato inicial com potencial' },
+    { value: 'PROSPECT', label: 'Prospect', description: 'Interesse demonstrado' },
+    { value: 'OPPORTUNITY', label: 'Oportunidade', description: 'Proposta em negociação' },
+    { value: 'CUSTOMER', label: 'Cliente', description: 'Negócio fechado' },
+    { value: 'INACTIVE', label: 'Inativo', description: 'Sem interesse atual' },
+  ];
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
         <p className="text-sm text-muted-foreground">
-          Arraste o contato para outra coluna do funil para atualizar o estágio
-          comercial.
+          Arraste o contato para outra coluna do funil ou pressione Enter/Space em uma coluna para atualizar o estágio comercial.
         </p>
       </div>
       <div className="grid gap-4 xl:grid-cols-5">
-        {stageOptions.map((option) => {
+        {stageOptionsWithDescriptions.map((option) => {
           const isActive = contact.stage === option.value;
           const tone = stageToneMap[option.value] ?? stageToneMap.LEAD;
           const isDragging = draggingStage === option.value;
@@ -50,28 +71,40 @@ export function ContactStageBoard({
                   onStageChange(option.value);
                 }
               }}
+              onKeyDown={(event) => handleKeyDown(event, option.value)}
+              tabIndex={getTabIndex(option.value)}
+              role="button"
+              aria-label={`Mover contato para ${option.label}: ${option.description}`}
+              aria-pressed={isActive}
               className={`min-h-[240px] rounded-3xl border p-4 transition-all ${
                 isActive
                   ? `${tone.surface} ${tone.ring} ring-2`
                   : 'border-border/60 bg-background'
-              } ${isDragging && !isActive ? 'border-primary/40 bg-primary/[0.04]' : ''}`}
+              } ${isDragging && !isActive ? 'border-primary/40 bg-primary/[0.04]' : ''} focus:outline-none focus:ring-2 focus:ring-primary/50`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                    Etapa
+                <div className="flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                        Etapa
+                      </p>
+                      <h3 className="mt-2 text-base font-semibold text-foreground">
+                        {option.label}
+                      </h3>
+                    </div>
+                    {isActive && (
+                      <span
+                        className={`text-xs font-semibold uppercase tracking-widest ${tone.text}`}
+                      >
+                        Atual
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {option.description}
                   </p>
-                  <h3 className="mt-2 text-base font-semibold text-foreground">
-                    {option.label}
-                  </h3>
                 </div>
-                {isActive ? (
-                  <span
-                    className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${tone.text}`}
-                  >
-                    Atual
-                  </span>
-                ) : null}
               </div>
 
               <div className="mt-4">
@@ -101,7 +134,7 @@ export function ContactStageBoard({
                   </div>
                 ) : (
                   <div className="flex min-h-[132px] items-center justify-center rounded-2xl border border-dashed border-border/60 bg-muted/10 px-4 text-center text-sm text-muted-foreground">
-                    Solte aqui para mover para {option.label.toLowerCase()}.
+                    Solte aqui ou pressione Enter/Space para mover para {option.label.toLowerCase()}.
                   </div>
                 )}
               </div>
