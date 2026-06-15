@@ -76,21 +76,16 @@ export default function ContactsListPage() {
       />
 
       <div className="space-y-4">
-        <div className="p-4">
-          <ContactsFilters
-            search={vm.search}
-            onSearchChange={vm.updateSearch}
-            stageFilter={vm.stageFilter}
-            onStageFilterChange={vm.updateStageFilter}
-            stageOptions={vm.stageFilterOptions}
-            totalCount={vm.totalFiltered}
-            periodFilter={vm.periodFilter}
-            periodOptions={vm.periodOptions}
-            onPeriodFilterChange={vm.setPeriodFilter}
-            onClearFilters={vm.clearFilters}
-            hasActiveFilters={vm.hasActiveFilters}
-          />
-        </div>
+        <ContactsFilters
+          search={vm.search}
+          onSearchChange={vm.updateSearch}
+          stageFilter={vm.stageFilter}
+          onStageFilterChange={vm.updateStageFilter}
+          stageOptions={vm.stageFilterOptions}
+          totalCount={vm.totalFiltered}
+          onClearFilters={vm.clearFilters}
+          hasActiveFilters={vm.hasActiveFilters}
+        />
 
         <Card className="glass-card overflow-hidden">
           <div className="p-4 border-b border-border/40 bg-muted/20">
