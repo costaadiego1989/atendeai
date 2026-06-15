@@ -1,5 +1,25 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useState, useRef, useCallback } from 'react';
+import { Search, Settings, Calendar as CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { MultiSelectFilter } from '@/shared/ui/MultiSelectFilter';
+import { TriggerType, TRIGGER_LABELS } from '../types';
 
 // Native debounce implementation
 function debounce<T extends (...args: any[]) => any>(
@@ -71,41 +91,42 @@ export function AutomationFilter({
   }));
 
   return (
-    <div className="glass-card mb-4 p-4 space-y-4">
-      {/* Quick search and status */}
+    <div className="bg-card border border-border/60 rounded-xl p-4 mb-4 space-y-4">
+      {/* Quick search and status — matches catalog/inventory toolbar */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        {totalCount && (
-          <Badge variant="secondary">
-            <span className="font-bold text-foreground">{totalCount}</span>
-            <span className="font-normal text-muted-foreground">
-              {totalCount === 1 ? 'resultado' : 'resultados'}
-            </span>
-          </Badge>
-        )}
-        
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome, descrição, tags..."
-            className="pl-9"
-            value={currentFilter.search}
-            onChange={(e) => updateFilter({ search: e.target.value })}
-            aria-label="Buscar automações"
-          />
+        <div className="flex flex-1 items-center gap-3">
+          {totalCount > 0 && (
+            <Badge
+              variant="secondary"
+              className="hidden lg:inline-flex items-center whitespace-nowrap h-9 px-3.5 rounded-md border-border/60 bg-muted/30"
+            >
+              <span className="font-semibold text-foreground mr-1.5">{totalCount}</span>
+              <span className="font-normal text-muted-foreground">
+                {totalCount === 1 ? 'resultado' : 'resultados'}
+              </span>
+            </Badge>
+          )}
+          <div className="relative flex-1 lg:max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, descrição, tags..."
+              className="pl-9"
+              value={currentFilter.search}
+              onChange={(e) => updateFilter({ search: e.target.value })}
+              aria-label="Buscar automações"
+            />
+          </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Select
             value={currentFilter.status}
-            onValueChange={(value: 'all' | 'active' | 'inactive') => 
+            onValueChange={(value: 'all' | 'active' | 'inactive') =>
               updateFilter({ status: value })
             }
           >
-            <SelectTrigger className="w-[140px]">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <SelectValue />
-              </div>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos status</SelectItem>
@@ -115,7 +136,7 @@ export function AutomationFilter({
           </Select>
 
           <Button
-            variant="ghost"
+            variant={isExpanded ? 'default' : 'outline'}
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
             className="gap-1.5"
@@ -141,7 +162,7 @@ export function AutomationFilter({
               <MultiSelectFilter
                 value={currentFilter.triggerTypes}
                 options={triggerOptions}
-                onChange={(values) => updateFilter({ triggerTypes: values })}
+                onChange={(values) => updateFilter({ triggerTypes: values as TriggerType[] })}
                 placeholder="Selecione os tipos de gatilho"
                 allLabel="Todos os tipos"
               />
@@ -169,7 +190,7 @@ export function AutomationFilter({
                       variant="outline"
                       className="flex-1 justify-start text-left font-normal"
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4" />
                       {currentFilter.dateRange.start ? 
                         format(currentFilter.dateRange.start, 'dd/MM/yyyy') : 
                         'Data inicial'
@@ -196,7 +217,7 @@ export function AutomationFilter({
                       variant="outline"
                       className="flex-1 justify-start text-left font-normal"
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4" />
                       {currentFilter.dateRange.end ? 
                         format(currentFilter.dateRange.end, 'dd/MM/yyyy') : 
                         'Data final'

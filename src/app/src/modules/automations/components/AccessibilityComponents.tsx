@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { KeyboardEvent, FocusEvent } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ResponsiveContainerProps {
   children: React.ReactNode;

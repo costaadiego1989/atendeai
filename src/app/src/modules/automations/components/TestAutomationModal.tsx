@@ -24,6 +24,7 @@ import {
   Phone,
   Mail,
   Tag,
+  X,
 } from 'lucide-react';
 import { Automation, StepType } from '../types';
 import { STEP_LABELS } from '../types';
