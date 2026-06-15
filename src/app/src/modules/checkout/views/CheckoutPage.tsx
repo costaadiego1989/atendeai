@@ -1,4 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { PageTabsList } from '@/components/PageTabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +20,7 @@ import { ShippingPolicySheet } from '../components/ShippingPolicySheet';
 import { CheckoutReportsSheet } from '../components/CheckoutReportsSheet';
 import { formatCurrency } from '@/shared/lib/formatters';
 import { DynamicFunnel } from '@/shared/ui/DynamicFunnel';
-import { CalendarDays, Download } from 'lucide-react';
+import { BarChart3, CalendarDays, Download, ShoppingCart, TrendingDown, Truck } from 'lucide-react';
 
 export default function CheckoutPage() {
   const vm = useCheckoutPageViewModel();
@@ -64,71 +66,33 @@ export default function CheckoutPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-border bg-card shadow-sm">
-        <CardContent className="grid gap-6 p-6 lg:grid-cols-[1.2fr_0.9fr_0.9fr]">
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-foreground">Estratégia de Logística</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Define como a IA orienta o cliente sobre frete, áreas de cobertura e horários operacionais.
-            </p>
-          </div>
+      <CheckoutKPIs summary={vm.summary} deltas={vm.summaryDeltas} />
 
-          <div className="rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground">
-              Modelo de Frete
-            </p>
-            <p className="mt-2 text-sm font-semibold text-foreground">
-              {shippingPolicy ? getShippingLabel(shippingPolicy.mode) : 'Não configurado'}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {shippingPolicy?.mode === 'FIXED'
-                ? `Custo padrão: ${formatCurrency(shippingPolicy.fixedAmount ?? 0)}`
-                : shippingPolicy?.mode === 'PER_KM'
-                  ? `Base: ${formatCurrency(shippingPolicy.pricePerKm ?? 0)}/km`
-                  : 'Ajuste as regras base do checkout.'}
-            </p>
-          </div>
+      <Tabs defaultValue="operacao" className="space-y-5">
+        <PageTabsList
+          tabs={[
+            { value: 'operacao', label: 'Operação', icon: ShoppingCart },
+            { value: 'funil', label: 'Funil', icon: TrendingDown },
+            { value: 'logistica', label: 'Logística', icon: Truck },
+            { value: 'inteligencia', label: 'Inteligência', icon: BarChart3 },
+          ]}
+        />
 
-          <div className="rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground">
-              Disponibilidade
-            </p>
-            <p className="mt-2 text-sm font-semibold text-foreground">
-              {shippingPolicy?.maxRadiusKm != null ? `${shippingPolicy.maxRadiusKm}km de cobertura` : 'Raio global'}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-              {shippingPolicy?.mode === 'FIXED' && shippingPolicy?.servicedNeighborhoods?.length
-                ? shippingPolicy.servicedNeighborhoods.join(', ')
-                : 'Operando dentro do raio geográfico definido.'}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="operacao">
+          <CheckoutOrdersMesa
+            activeTab={vm.activeTab}
+            onTabChange={(v) => vm.setActiveTab(v as CheckoutTab)}
+            isLoading={vm.ordersQuery.isLoading}
+            orders={vm.filteredOrders}
+            onSelectOrder={vm.setSelectedOrderId}
+            onMoveOrderStatus={(orderId, status) =>
+              vm.updateOrderStatusMutation.mutate({ orderId, status })
+            }
+            movingOrderId={vm.updateOrderStatusMutation.variables?.orderId ?? null}
+          />
+        </TabsContent>
 
-      {shippingPolicy?.deliverySchedule?.some((slot) => slot.enabled) && (
-        <Card className="border-border bg-card">
-          <CardContent className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-success" />
-              <p className="text-xs font-medium text-muted-foreground">Horários de entrega ativos</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {shippingPolicy.deliverySchedule
-                .filter((slot) => slot.enabled)
-                .map((slot) => (
-                  <Badge key={slot.weekday} variant="secondary" className="rounded-lg border-border bg-background px-3 py-1 text-xs font-medium">
-                    {getWeekdayLabel(slot.weekday)} {slot.startTime} - {slot.endTime}
-                  </Badge>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr] lg:items-start">
-        <div className="space-y-6">
-          <CheckoutKPIs summary={vm.summary} deltas={vm.summaryDeltas} />
-
+        <TabsContent value="funil">
           <DynamicFunnel
             title="Funil do checkout"
             description="Veja onde os pedidos estão acumulando entre pagamento, preparo, expedição e entrega."
@@ -141,29 +105,82 @@ export default function CheckoutPage() {
             }))}
             emptyMessage="Assim que houver pedidos circulando pelo checkout, o funil operacional aparece aqui."
           />
-        </div>
+        </TabsContent>
 
-        <CheckoutOrdersMesa
-          activeTab={vm.activeTab}
-          onTabChange={(v) => vm.setActiveTab(v as CheckoutTab)}
-          isLoading={vm.ordersQuery.isLoading}
-          orders={vm.filteredOrders}
-          onSelectOrder={vm.setSelectedOrderId}
-          onMoveOrderStatus={(orderId, status) =>
-            vm.updateOrderStatusMutation.mutate({ orderId, status })
-          }
-          movingOrderId={vm.updateOrderStatusMutation.variables?.orderId ?? null}
-        />
-      </div>
+        <TabsContent value="logistica" className="space-y-6">
+          <Card className="glass-card">
+            <CardContent className="grid gap-6 p-6 lg:grid-cols-[1.2fr_0.9fr_0.9fr]">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground">Estratégia de Logística</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Define como a IA orienta o cliente sobre frete, áreas de cobertura e horários operacionais.
+                </p>
+              </div>
 
-      <CheckoutRevenueChart data={vm.dailyRevenueSeries} />
+              <div className="rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/30">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Modelo de Frete
+                </p>
+                <p className="mt-2 text-sm font-semibold text-foreground">
+                  {shippingPolicy ? getShippingLabel(shippingPolicy.mode) : 'Não configurado'}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {shippingPolicy?.mode === 'FIXED'
+                    ? `Custo padrão: ${formatCurrency(shippingPolicy.fixedAmount ?? 0)}`
+                    : shippingPolicy?.mode === 'PER_KM'
+                      ? `Base: ${formatCurrency(shippingPolicy.pricePerKm ?? 0)}/km`
+                      : 'Ajuste as regras base do checkout.'}
+                </p>
+              </div>
 
-      <CheckoutAnalyticsTabs
-        productRanking={vm.productRanking}
-        customerRanking={vm.customerRanking}
-        activeTab={vm.analyticsTab}
-        onTabChange={vm.setAnalyticsTab}
-      />
+              <div className="rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/30">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Disponibilidade
+                </p>
+                <p className="mt-2 text-sm font-semibold text-foreground">
+                  {shippingPolicy?.maxRadiusKm != null ? `${shippingPolicy.maxRadiusKm}km de cobertura` : 'Raio global'}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                  {shippingPolicy?.mode === 'FIXED' && shippingPolicy?.servicedNeighborhoods?.length
+                    ? shippingPolicy.servicedNeighborhoods.join(', ')
+                    : 'Operando dentro do raio geográfico definido.'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {shippingPolicy?.deliverySchedule?.some((slot) => slot.enabled) && (
+            <Card className="glass-card">
+              <CardContent className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-success" />
+                  <p className="text-xs font-medium text-muted-foreground">Horários de entrega ativos</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {shippingPolicy.deliverySchedule
+                    .filter((slot) => slot.enabled)
+                    .map((slot) => (
+                      <Badge key={slot.weekday} variant="secondary" className="rounded-lg border-border bg-background px-3 py-1 text-xs font-medium">
+                        {getWeekdayLabel(slot.weekday)} {slot.startTime} - {slot.endTime}
+                      </Badge>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="inteligencia" className="space-y-6">
+          <CheckoutRevenueChart data={vm.dailyRevenueSeries} />
+
+          <CheckoutAnalyticsTabs
+            productRanking={vm.productRanking}
+            customerRanking={vm.customerRanking}
+            activeTab={vm.analyticsTab}
+            onTabChange={vm.setAnalyticsTab}
+          />
+        </TabsContent>
+      </Tabs>
 
       <CheckoutReportsSheet vm={vm} />
 
