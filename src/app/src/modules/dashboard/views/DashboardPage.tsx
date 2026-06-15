@@ -427,6 +427,34 @@ export default function DashboardPage() {
             icon={kpi.icon}
           />
         ))}
+        <KPICard
+          title="Conversas ativas"
+          value={vm.activeConversationCount}
+          subtitle="Hoje exigem acompanhamento do time ou da IA."
+          icon={MessageSquareText}
+        />
+        <KPICard
+          title="Novos contatos"
+          value={vm.totalContacts.toLocaleString('pt-BR')}
+          subtitle="Leads e clientes que entraram no CRM neste período."
+          icon={UserPlus}
+        />
+        <KPICard
+          title="Oportunidades abertas"
+          value={vm.salesSummary.totalIntents}
+          subtitle={
+            profile.key === 'commerce'
+              ? 'Pedidos, checkouts e oportunidades que ainda podem gerar receita.'
+              : 'Casos, negociações ou cobranças que ainda podem gerar receita.'
+          }
+          icon={Activity}
+        />
+        <KPICard
+          title="Taxa de pagamento"
+          value={`${vm.operationReports.checkoutPaidRate}%`}
+          subtitle="Checkouts e cobranças do período já confirmados."
+          icon={CheckCircle2}
+        />
       </div>
 
       <div className="grid gap-6 2xl:grid-cols-[1.5fr_1fr]">
@@ -451,67 +479,6 @@ export default function DashboardPage() {
           recoveryPriorities={vm.recoveryPriorities}
           recentCharges={vm.recentCharges}
         />
-      </div>
-
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <Card className="glass-card">
-          <CardContent className="flex h-full items-start justify-between gap-4 p-5">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] font-semibold text-foreground">
-                Conversas ativas
-              </p>
-              <p className="mt-2 text-2xl font-bold text-foreground">
-                {vm.activeConversationCount}
-              </p>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground max-w-[200px]">
-                Hoje exigem acompanhamento do time ou da IA.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-primary/10 p-3 shrink-0">
-              <MessageSquareText className="h-5 w-5 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardContent className="flex h-full items-start justify-between gap-4 p-5">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] font-semibold text-foreground">
-                Novos contatos
-              </p>
-              <p className="mt-2 text-2xl font-bold text-foreground">
-                {vm.totalContacts.toLocaleString('pt-BR')}
-              </p>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground max-w-[200px]">
-                Leads e clientes que entraram no CRM neste período.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-primary/10 p-3 shrink-0">
-              <CalendarDays className="h-5 w-5 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardContent className="flex h-full items-start justify-between gap-4 p-5">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] font-semibold text-foreground">
-                Oportunidades abertas
-              </p>
-              <p className="mt-2 text-2xl font-bold text-foreground">
-                {vm.salesSummary.totalIntents}
-              </p>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground max-w-[220px]">
-                {profile.key === 'commerce'
-                  ? 'Pedidos, checkouts e oportunidades que ainda podem gerar receita.'
-                  : 'Casos, negociações ou cobranças que ainda podem gerar receita.'}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-primary/10 p-3 shrink-0">
-              <Activity className="h-5 w-5 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
