@@ -53,7 +53,7 @@ interface CloudApiValue {
 @Injectable()
 export class WhatsAppCloudApiAdapter implements IMessagingGateway {
   readonly channel = 'WHATSAPP' as const;
-  readonly provider = 'META_GRAPH' as const;
+  readonly provider = 'META_CLOUD' as const;
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -89,10 +89,10 @@ export class WhatsAppCloudApiAdapter implements IMessagingGateway {
       .update(rawBody)
       .digest('hex');
 
-    const provided = Buffer.from(normalizedSignature, 'utf8');
-    const computed = Buffer.from(expected, 'utf8');
+    const provided = Buffer.from(normalizedSignature, 'hex');
+    const computed = Buffer.from(expected, 'hex');
 
-    if (provided.length !== computed.length) {
+    if (provided.length === 0 || provided.length !== computed.length) {
       return false;
     }
 
@@ -203,13 +203,15 @@ export class WhatsAppCloudApiAdapter implements IMessagingGateway {
     const recipient = to.replace(/\D/g, '');
 
     if (content.type === 'template') {
-      const template = (content as MessagingContent & {
-        template?: {
-          name: string;
-          languageCode: string;
-          components?: unknown[];
-        };
-      }).template;
+      const template = (
+        content as MessagingContent & {
+          template?: {
+            name: string;
+            languageCode: string;
+            components?: unknown[];
+          };
+        }
+      ).template;
 
       return {
         messaging_product: 'whatsapp',
@@ -245,9 +247,7 @@ export class WhatsAppCloudApiAdapter implements IMessagingGateway {
     return null;
   }
 
-  private mapMessageType(
-    type?: string,
-  ): WhatsAppCloudInboundData['type'] {
+  private mapMessageType(type?: string): WhatsAppCloudInboundData['type'] {
     switch (type) {
       case 'image':
       case 'audio':

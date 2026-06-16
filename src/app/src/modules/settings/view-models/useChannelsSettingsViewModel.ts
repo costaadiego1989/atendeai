@@ -9,6 +9,7 @@ import {
   type InstagramMetaDiscoveredAccount,
   type RegisterTwilioSenderInput,
 } from '@/modules/settings/services/channels-service';
+import { startMetaWhatsAppEmbeddedSignup } from '@/modules/settings/services/meta-whatsapp-embedded-signup';
 import { startTwilioEmbeddedSignup } from '@/modules/settings/services/twilio-embedded-signup';
 import { useCompanySettingsQuery } from '@/modules/settings/view-models/useCompanySettingsQuery';
 
@@ -79,10 +80,14 @@ export function useChannelsSettingsViewModel() {
       instagramAccountId: branch.instagramAccountId ?? null,
       whatsappProvider: branch.whatsAppConfigOverride?.provider ?? null,
       whatsappStatus:
-        branch.whatsAppConfigOverride?.credentials?.senderStatus ?? null,
+        branch.whatsAppConfigOverride?.credentials?.senderStatus ??
+        branch.whatsAppConfigOverride?.credentials?.status ??
+        null,
       whatsappConnected:
-        branch.whatsAppConfigOverride?.provider === 'TWILIO' &&
-        branch.whatsAppConfigOverride?.credentials?.senderStatus === 'ACTIVE',
+        (branch.whatsAppConfigOverride?.provider === 'META_CLOUD' &&
+          branch.whatsAppConfigOverride?.credentials?.status === 'ACTIVE') ||
+        (branch.whatsAppConfigOverride?.provider === 'TWILIO' &&
+          branch.whatsAppConfigOverride?.credentials?.senderStatus === 'ACTIVE'),
       instagramConnected: Boolean(branch.instagramAccountId),
     }));
 
@@ -136,6 +141,74 @@ export function useChannelsSettingsViewModel() {
     ]);
   };
 
+  const connectMetaWhatsAppMutation = useMutation({
+    mutationFn: async () => {
+      const embeddedSignup = connectionQuery.data?.embeddedSignup;
+      if (!embeddedSignup?.appId || !embeddedSignup.configurationId) {
+        throw new Error(
+          'O Embedded Signup da Meta ainda não foi configurado no workspace.',
+        );
+      }
+
+      const signupResult = await startMetaWhatsAppEmbeddedSignup({
+        appId: embeddedSignup.appId,
+        configurationId: embeddedSignup.configurationId,
+      });
+
+      return channelsService.connectMetaWhatsApp(tenantId as string, {
+        code: signupResult.code,
+        phoneNumberId: signupResult.phoneNumberId,
+        wabaId: signupResult.wabaId,
+        whatsappNumber: normalizedPhoneNumber,
+        branchId: selectedBranchId,
+      });
+    },
+    onSuccess: async (result) => {
+      await invalidateChannelsData();
+      setPhoneNumber(formatPhone(result.whatsappNumber));
+      toast({
+        title: 'WhatsApp conectado',
+        description:
+          result.status === 'ACTIVE'
+            ? 'Número ativado com sucesso via Meta Cloud API.'
+            : 'Conexão iniciada. Aguarde a ativação do número.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao conectar WhatsApp',
+        description:
+          error instanceof Error && error.message
+            ? error.message
+            : getFriendlyErrorMessage(error, {
+                fallbackMessage: 'Não foi possível iniciar a conexão do WhatsApp agora.',
+              }),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const refreshMetaWhatsAppStatusMutation = useMutation({
+    mutationFn: () =>
+      channelsService.refreshMetaWhatsAppStatus(tenantId as string, selectedBranchId),
+    onSuccess: async () => {
+      await invalidateChannelsData();
+      toast({
+        title: 'Status atualizado',
+        description: 'Estado da conexão WhatsApp atualizado.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao atualizar status',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível consultar o status do WhatsApp agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
   const registerMutation = useMutation({
     mutationFn: (input: RegisterTwilioSenderInput) =>
       channelsService.registerTwilioSender(tenantId as string, input),
@@ -153,7 +226,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao iniciar onboarding',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível iniciar a conexão do WhatsApp agora.',
+          fallbackMessage: 'Não foi possível iniciar a conexão do WhatsApp agora.',
         }),
         variant: 'destructive',
       });
@@ -204,8 +277,8 @@ export function useChannelsSettingsViewModel() {
           error instanceof Error && error.message
             ? error.message
             : getFriendlyErrorMessage(error, {
-              fallbackMessage: 'não foi possível iniciar a conexão do WhatsApp agora.',
-            }),
+                fallbackMessage: 'Não foi possível iniciar a conexão do WhatsApp agora.',
+              }),
         variant: 'destructive',
       });
     },
@@ -233,7 +306,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao verificar codigo',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível validar o codigo OTP agora.',
+          fallbackMessage: 'Não foi possível validar o codigo OTP agora.',
         }),
         variant: 'destructive',
       });
@@ -257,12 +330,14 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao atualizar status',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível consultar o status do sender agora.',
+          fallbackMessage: 'Não foi possível consultar o status do sender agora.',
         }),
         variant: 'destructive',
       });
     },
   });
+
+  // ── Instagram ─────────────────────────────────────────────────────────────
 
   const configureInstagramMutation = useMutation({
     mutationFn: (accountId: string) =>
@@ -281,7 +356,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao configurar Instagram',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível salvar a configuração do Instagram agora.',
+          fallbackMessage: 'Não foi possível salvar a configuração do Instagram agora.',
         }),
         variant: 'destructive',
       });
@@ -311,7 +386,7 @@ export function useChannelsSettingsViewModel() {
       toast({
         title: 'Falha ao iniciar Meta',
         description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível iniciar a conexão com Meta agora.',
+          fallbackMessage: 'Não foi possível iniciar a conexão com Meta agora.',
         }),
         variant: 'destructive',
       });
@@ -339,7 +414,7 @@ export function useChannelsSettingsViewModel() {
         toast({
           title: 'Falha ao conectar Instagram',
           description:
-            data.message || 'não foi possível concluir a autorização na Meta.',
+            data.message || 'Não foi possível concluir a autorização na Meta.',
           variant: 'destructive',
         });
         return;
@@ -381,15 +456,22 @@ export function useChannelsSettingsViewModel() {
     return () => window.removeEventListener('message', handleMessage);
   }, [configureInstagramMutation, selectedBranchId]);
 
+  // ── Derived state ─────────────────────────────────────────────────────────
+
   const connection = connectionQuery.data?.connection;
+  const activeProvider = connectionQuery.data?.provider ?? 'META_CLOUD';
+  const isMetaCloud = activeProvider === 'META_CLOUD';
+
   const embeddedSignupReady =
     connectionQuery.data?.embeddedSignupReady &&
     !!connectionQuery.data?.embeddedSignup?.appId &&
-    !!connectionQuery.data?.embeddedSignup?.configurationId &&
-    !!connectionQuery.data?.embeddedSignup?.solutionId;
+    !!connectionQuery.data?.embeddedSignup?.configurationId;
+
   const requiresVerification =
+    !isMetaCloud &&
     connection?.provider === 'TWILIO' &&
     connection?.status === 'PENDING_VERIFICATION';
+
   const stats = {
     totalScopes: scopes.length,
     whatsappConnectedCount: scopes.filter((scope) => scope.whatsappConnected).length,
@@ -405,10 +487,17 @@ export function useChannelsSettingsViewModel() {
     selectedScopeId,
     setSelectedScopeId,
     selectedBranchId,
+    activeProvider,
+    isMetaCloud,
+    // Meta Cloud API (primary)
+    connectMetaWhatsAppMutation,
+    refreshMetaWhatsAppStatusMutation,
+    // Twilio (coexistence — Phase C removes)
     registerMutation,
     startEmbeddedSignupMutation,
     verifyMutation,
     refreshMutation,
+    // Instagram
     configureInstagramMutation,
     startInstagramMetaConnectionMutation,
     phoneNumber,

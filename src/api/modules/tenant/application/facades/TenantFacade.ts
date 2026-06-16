@@ -112,6 +112,12 @@ export class TenantFacade implements ITenantFacade {
     const webhookSecret =
       branchOverride?.webhookSecret ?? tenant.whatsAppConfig.webhookSecret;
 
+    const status =
+      branchOverride?.provider === 'META_CLOUD' &&
+      branchOverride.credentials?.status
+        ? branchOverride.credentials.status
+        : tenant.whatsAppConfig.status;
+
     return {
       tenantId: tenant.id.toString(),
       branchId,
@@ -127,7 +133,7 @@ export class TenantFacade implements ITenantFacade {
         webhookSecret,
         whatsappNumber:
           branch?.whatsappNumber || tenant.whatsAppConfig.whatsappNumber,
-        status: tenant.whatsAppConfig.status,
+        status,
         branchId,
       },
     };
@@ -160,6 +166,12 @@ export class TenantFacade implements ITenantFacade {
       const webhookSecret =
         branchOverride?.webhookSecret ?? config.webhookSecret;
 
+      const channelStatus =
+        branchOverride?.provider === 'META_CLOUD' &&
+        branchOverride.credentials?.status
+          ? branchOverride.credentials.status
+          : config.status;
+
       return {
         channel: 'WHATSAPP',
         provider,
@@ -172,7 +184,7 @@ export class TenantFacade implements ITenantFacade {
             : credentials,
         webhookSecret,
         externalAccountId: branch?.whatsappNumber || config.whatsappNumber,
-        status: config.status,
+        status: channelStatus,
         branchId: branch?.id.toValue() ?? null,
       };
     }

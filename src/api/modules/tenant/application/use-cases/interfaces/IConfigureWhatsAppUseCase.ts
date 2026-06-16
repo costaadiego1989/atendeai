@@ -4,7 +4,7 @@ export interface ConfigureWhatsAppInput {
   tenantId: string;
   requestingUserId?: string;
   requestingUserEmail?: string;
-  provider?: 'BUBBLEWHATS' | 'D360';
+  provider?: 'BUBBLEWHATS' | 'D360' | 'META_CLOUD';
   whatsappNumber: string;
   bubbleWhatsId?: string;
   bubbleWhatsToken?: string;
@@ -12,11 +12,16 @@ export interface ConfigureWhatsAppInput {
   d360ApiKey?: string;
   d360WebhookUrl?: string;
   webhookSecret?: string;
+  metaAccessToken?: string;
+  metaPhoneNumberId?: string;
+  metaWabaId?: string;
+  metaBusinessId?: string;
+  metaActivate?: boolean;
 }
 
 export interface ConfigureWhatsAppOutput {
   id: string;
-  provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+  provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360' | 'META_CLOUD';
   whatsappNumber: string;
   status: string;
   configuredAt: Date;
