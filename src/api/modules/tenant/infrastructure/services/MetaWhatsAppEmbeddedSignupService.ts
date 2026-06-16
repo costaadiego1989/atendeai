@@ -19,6 +19,8 @@ export interface MetaWhatsAppSignupResult {
  * Reuses the shared META_APP_ID / META_APP_SECRET / META_GRAPH_API_VERSION
  * configuration (env reuse only — no cross-module code dependency).
  */
+const META_API_TIMEOUT_MS = 15_000;
+
 @Injectable()
 export class MetaWhatsAppEmbeddedSignupService {
   private readonly logger = new Logger(MetaWhatsAppEmbeddedSignupService.name);
@@ -43,6 +45,7 @@ export class MetaWhatsAppEmbeddedSignupService {
       const response = await axios.get(
         `${this.graphBaseUrl}/${this.getGraphApiVersion()}/oauth/access_token`,
         {
+          timeout: META_API_TIMEOUT_MS,
           params: {
             client_id: this.getClientId(),
             client_secret: this.getClientSecret(),
@@ -93,6 +96,7 @@ export class MetaWhatsAppEmbeddedSignupService {
         `${this.graphBaseUrl}/${this.getGraphApiVersion()}/${trimmedWabaId}/subscribed_apps`,
         undefined,
         {
+          timeout: META_API_TIMEOUT_MS,
           headers: { Authorization: `Bearer ${accessToken}` },
         },
       );

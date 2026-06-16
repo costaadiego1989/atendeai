@@ -19,7 +19,10 @@ export interface ConnectMetaWhatsAppInput {
   webhookSecret?: string;
 }
 
-export type ConnectMetaWhatsAppOutput = ConfigureWhatsAppOutput;
+export interface ConnectMetaWhatsAppOutput extends ConfigureWhatsAppOutput {
+  /** True when the WABA app subscription step failed (code was already consumed — credentials saved anyway). */
+  wabaSubscriptionFailed?: boolean;
+}
 
 export interface IConnectMetaWhatsAppUseCase extends IUseCase<
   ConnectMetaWhatsAppInput,

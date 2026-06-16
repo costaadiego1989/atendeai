@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WhatsAppConfig } from '../../../domain/entities/WhatsAppConfig';
 import { ConfigureWhatsAppInput } from '../../use-cases/interfaces/IConfigureWhatsAppUseCase';
 import { IWhatsAppConfigurationStrategy } from './IWhatsAppConfigurationStrategy';
+import { ValidationErrorException } from '../../../../../shared/domain/exceptions/DomainExceptions';
 
 @Injectable()
 export class MetaCloudConfigurationStrategy implements IWhatsAppConfigurationStrategy {
@@ -10,12 +11,16 @@ export class MetaCloudConfigurationStrategy implements IWhatsAppConfigurationStr
   async configure(input: ConfigureWhatsAppInput): Promise<WhatsAppConfig> {
     const accessToken = input.metaAccessToken?.trim();
     if (!accessToken) {
-      throw new Error('Meta WhatsApp access token is required');
+      throw new ValidationErrorException(
+        'Meta WhatsApp access token is required',
+      );
     }
 
     const phoneNumberId = input.metaPhoneNumberId?.trim();
     if (!phoneNumberId) {
-      throw new Error('Meta WhatsApp phone number id is required');
+      throw new ValidationErrorException(
+        'Meta WhatsApp phone number id is required',
+      );
     }
 
     const activating = !!input.metaActivate;

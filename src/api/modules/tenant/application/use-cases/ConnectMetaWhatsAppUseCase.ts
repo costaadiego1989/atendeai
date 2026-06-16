@@ -36,6 +36,7 @@ export class ConnectMetaWhatsAppUseCase implements IConnectMetaWhatsAppUseCase {
         input.tenantId,
       );
 
+    let wabaSubscriptionFailed = false;
     try {
       await this.embeddedSignupService.subscribeAppToWaba(
         input.wabaId,
@@ -43,13 +44,14 @@ export class ConnectMetaWhatsAppUseCase implements IConnectMetaWhatsAppUseCase {
         input.tenantId,
       );
     } catch (subscriptionError) {
+      wabaSubscriptionFailed = true;
       this.logger.warn(
         `connect_meta.waba_subscribe_failed: tenant=${input.tenantId} — credentials will still be saved. ` +
           'Inbound webhooks may not arrive until WABA subscription is restored. Retry by re-running the connect flow.',
       );
     }
 
-    return this.configureWhatsAppUseCase.execute({
+    const result = await this.configureWhatsAppUseCase.execute({
       tenantId: input.tenantId,
       requestingUserId: input.requestingUserId,
       requestingUserEmail: input.requestingUserEmail,
@@ -62,5 +64,9 @@ export class ConnectMetaWhatsAppUseCase implements IConnectMetaWhatsAppUseCase {
       metaBusinessId: input.businessId,
       metaActivate: true,
     });
+    return {
+      ...result,
+      ...(wabaSubscriptionFailed ? { wabaSubscriptionFailed: true } : {}),
+    };
   }
 }

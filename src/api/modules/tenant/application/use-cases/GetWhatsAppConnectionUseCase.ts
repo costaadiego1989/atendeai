@@ -101,8 +101,13 @@ export class GetWhatsAppConnectionUseCase implements IUseCase<
 
     const activeProvider: 'META_CLOUD' | 'TWILIO' =
       config?.provider === 'META_CLOUD' ? 'META_CLOUD' : 'TWILIO';
-    const appId = metaAppId ?? twilioAppId;
-    const configurationId = metaConfigId ?? twilioConfigId;
+    const appId = activeProvider === 'META_CLOUD' ? metaAppId : twilioAppId;
+    const configurationId =
+      activeProvider === 'META_CLOUD' ? metaConfigId : twilioConfigId;
+    const embeddedSignupReady =
+      activeProvider === 'META_CLOUD'
+        ? !!appId && !!configurationId
+        : !!appId && !!configurationId && !!twilioSolutionId;
 
     return {
       scope: {
@@ -112,7 +117,7 @@ export class GetWhatsAppConnectionUseCase implements IUseCase<
       },
       provider: activeProvider,
       mode: 'EMBEDDED_SIGNUP',
-      embeddedSignupReady: !!appId && !!configurationId,
+      embeddedSignupReady,
       embeddedSignup: {
         appId,
         configurationId,
