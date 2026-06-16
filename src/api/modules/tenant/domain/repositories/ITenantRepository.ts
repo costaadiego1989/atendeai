@@ -11,7 +11,7 @@ export interface SaveTenantBranchInput {
   whatsappNumber?: string | null;
   instagramAccountId?: string | null;
   whatsAppConfigOverride?: {
-    provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+    provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360' | 'META_CLOUD';
     credentials: Record<string, string>;
     webhookSecret?: string | null;
   } | null;

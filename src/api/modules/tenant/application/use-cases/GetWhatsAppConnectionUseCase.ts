@@ -14,7 +14,7 @@ export interface GetWhatsAppConnectionInput {
 }
 
 interface WhatsAppConnectionConfig {
-  provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+  provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360' | 'META_CLOUD';
   status: WhatsAppConfigStatus;
   whatsappNumber: string | null;
   senderId: string | null;
@@ -28,7 +28,7 @@ export interface GetWhatsAppConnectionOutput {
     branchId: string | null;
     label: string;
   };
-  provider: 'TWILIO';
+  provider: 'TWILIO' | 'META_CLOUD';
   mode: 'EMBEDDED_SIGNUP';
   embeddedSignupReady: boolean;
   embeddedSignup: {
@@ -86,32 +86,42 @@ export class GetWhatsAppConnectionUseCase implements IUseCase<
       config = this.mapBranchConnection(branch);
     }
 
+    const metaAppId = this.configService.get<string>('META_APP_ID') || null;
+    const metaConfigId =
+      this.configService.get<string>('META_WHATSAPP_CONFIGURATION_ID') || null;
+    const twilioAppId =
+      this.configService.get<string>('TWILIO_EMBEDDED_SIGNUP_APP_ID') || null;
+    const twilioConfigId =
+      this.configService.get<string>(
+        'TWILIO_EMBEDDED_SIGNUP_CONFIGURATION_ID',
+      ) || null;
+    const twilioSolutionId =
+      this.configService.get<string>('TWILIO_EMBEDDED_SIGNUP_SOLUTION_ID') ||
+      null;
+
+    const activeProvider: 'META_CLOUD' | 'TWILIO' =
+      config?.provider === 'META_CLOUD' ? 'META_CLOUD' : 'TWILIO';
+    const appId = activeProvider === 'META_CLOUD' ? metaAppId : twilioAppId;
+    const configurationId =
+      activeProvider === 'META_CLOUD' ? metaConfigId : twilioConfigId;
+    const embeddedSignupReady =
+      activeProvider === 'META_CLOUD'
+        ? !!appId && !!configurationId
+        : !!appId && !!configurationId && !!twilioSolutionId;
+
     return {
       scope: {
         type: scopeType,
         branchId: branchId ?? null,
         label: scopeLabel,
       },
-      provider: 'TWILIO',
+      provider: activeProvider,
       mode: 'EMBEDDED_SIGNUP',
-      embeddedSignupReady:
-        !!this.configService.get<string>('TWILIO_EMBEDDED_SIGNUP_APP_ID') &&
-        !!this.configService.get<string>(
-          'TWILIO_EMBEDDED_SIGNUP_CONFIGURATION_ID',
-        ) &&
-        !!this.configService.get<string>('TWILIO_EMBEDDED_SIGNUP_SOLUTION_ID'),
+      embeddedSignupReady,
       embeddedSignup: {
-        appId:
-          this.configService.get<string>('TWILIO_EMBEDDED_SIGNUP_APP_ID') ||
-          null,
-        configurationId:
-          this.configService.get<string>(
-            'TWILIO_EMBEDDED_SIGNUP_CONFIGURATION_ID',
-          ) || null,
-        solutionId:
-          this.configService.get<string>(
-            'TWILIO_EMBEDDED_SIGNUP_SOLUTION_ID',
-          ) || null,
+        appId,
+        configurationId,
+        solutionId: twilioSolutionId,
       },
       connection: config,
     };
@@ -124,19 +134,30 @@ export class GetWhatsAppConnectionUseCase implements IUseCase<
       return null;
     }
 
+    const { provider } = branch.whatsAppConfigOverride;
     const credentials = branch.whatsAppConfigOverride.credentials ?? {};
-    const senderStatus: WhatsAppConfigStatus =
-      credentials.senderStatus === 'ONLINE'
-        ? 'ACTIVE'
-        : credentials.senderStatus === 'ACTIVE' ||
-            credentials.senderStatus === 'INACTIVE' ||
-            credentials.senderStatus === 'PENDING_VERIFICATION'
-          ? credentials.senderStatus
-          : 'INACTIVE';
+
+    let status: WhatsAppConfigStatus;
+    if (provider === 'META_CLOUD') {
+      const raw = credentials.status;
+      status =
+        raw === 'ACTIVE' || raw === 'INACTIVE' || raw === 'PENDING_VERIFICATION'
+          ? (raw as WhatsAppConfigStatus)
+          : 'ACTIVE';
+    } else {
+      status =
+        credentials.senderStatus === 'ONLINE'
+          ? 'ACTIVE'
+          : credentials.senderStatus === 'ACTIVE' ||
+              credentials.senderStatus === 'INACTIVE' ||
+              credentials.senderStatus === 'PENDING_VERIFICATION'
+            ? (credentials.senderStatus as WhatsAppConfigStatus)
+            : 'INACTIVE';
+    }
 
     return {
-      provider: branch.whatsAppConfigOverride.provider,
-      status: senderStatus,
+      provider,
+      status,
       whatsappNumber: branch.whatsappNumber ?? null,
       senderId: credentials.senderId ?? null,
       senderSid: credentials.senderSid ?? null,

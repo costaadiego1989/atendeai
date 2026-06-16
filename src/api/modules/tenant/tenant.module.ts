@@ -7,6 +7,11 @@ import { CreateTenantUseCase } from './application/use-cases/CreateTenantUseCase
 import { ICreateTenantUseCase } from './application/use-cases/interfaces/ICreateTenantUseCase';
 import { ConfigureWhatsAppUseCase } from './application/use-cases/ConfigureWhatsAppUseCase';
 import { IConfigureWhatsAppUseCase } from './application/use-cases/interfaces/IConfigureWhatsAppUseCase';
+import { ConnectMetaWhatsAppUseCase } from './application/use-cases/ConnectMetaWhatsAppUseCase';
+import { IConnectMetaWhatsAppUseCase } from './application/use-cases/interfaces/IConnectMetaWhatsAppUseCase';
+import { RefreshMetaWhatsAppStatusUseCase } from './application/use-cases/RefreshMetaWhatsAppStatusUseCase';
+import { IRefreshMetaWhatsAppStatusUseCase } from './application/use-cases/interfaces/IRefreshMetaWhatsAppStatusUseCase';
+import { MetaWhatsAppEmbeddedSignupService } from './infrastructure/services/MetaWhatsAppEmbeddedSignupService';
 import { ConfigureInstagramUseCase } from './application/use-cases/ConfigureInstagramUseCase';
 import { IConfigureInstagramUseCase } from './application/use-cases/interfaces/IConfigureInstagramUseCase';
 import { ConfigureAIUseCase } from './application/use-cases/ConfigureAIUseCase';
@@ -53,6 +58,7 @@ import { ConsoleTeamMemberCredentialsEmailSender } from './infrastructure/servic
 import { BrevoTeamMemberCredentialsEmailSender } from './infrastructure/services/BrevoTeamMemberCredentialsEmailSender';
 import { BubbleWhatsConfigurationStrategy } from './application/strategies/whatsapp/BubbleWhatsConfigurationStrategy';
 import { Dialog360ConfigurationStrategy } from './application/strategies/whatsapp/Dialog360ConfigurationStrategy';
+import { MetaCloudConfigurationStrategy } from './application/strategies/whatsapp/MetaCloudConfigurationStrategy';
 import { WhatsAppConfigurationStrategyRegistry } from './application/strategies/whatsapp/WhatsAppConfigurationStrategyRegistry';
 import { Dialog360ManagementAcl } from './infrastructure/acl/Dialog360ManagementAcl';
 import { TwilioManagementAcl } from './infrastructure/acl/TwilioManagementAcl';
@@ -137,6 +143,14 @@ const TENANT_USE_CASE_PROVIDERS = [
     useClass: ConfigureWhatsAppUseCase,
   },
   {
+    provide: IConnectMetaWhatsAppUseCase,
+    useClass: ConnectMetaWhatsAppUseCase,
+  },
+  {
+    provide: IRefreshMetaWhatsAppStatusUseCase,
+    useClass: RefreshMetaWhatsAppStatusUseCase,
+  },
+  {
     provide: IConfigureInstagramUseCase,
     useClass: ConfigureInstagramUseCase,
   },
@@ -212,6 +226,8 @@ const TENANT_INTEGRATION_PROVIDERS = [
   CompleteMetaInstagramConnectionUseCase,
   BubbleWhatsConfigurationStrategy,
   Dialog360ConfigurationStrategy,
+  MetaCloudConfigurationStrategy,
+  MetaWhatsAppEmbeddedSignupService,
   WhatsAppConfigurationStrategyRegistry,
   Dialog360ManagementAcl,
   TwilioManagementAcl,

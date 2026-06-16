@@ -14,9 +14,12 @@ import { IConfigureWhatsAppUseCase } from '../../application/use-cases/interface
 import { Inject } from '@nestjs/common';
 import {
   ConfigureWhatsAppDTO,
+  ConnectMetaWhatsAppDTO,
   RegisterTwilioWhatsAppSenderDTO,
   VerifyTwilioWhatsAppSenderDTO,
 } from '../dtos/TenantDTOs';
+import { IConnectMetaWhatsAppUseCase } from '../../application/use-cases/interfaces/IConnectMetaWhatsAppUseCase';
+import { IRefreshMetaWhatsAppStatusUseCase } from '../../application/use-cases/interfaces/IRefreshMetaWhatsAppStatusUseCase';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
@@ -33,6 +36,10 @@ export class TenantWhatsAppController {
   constructor(
     @Inject(IConfigureWhatsAppUseCase)
     private readonly configureWhatsAppUseCase: IConfigureWhatsAppUseCase,
+    @Inject(IConnectMetaWhatsAppUseCase)
+    private readonly connectMetaWhatsAppUseCase: IConnectMetaWhatsAppUseCase,
+    @Inject(IRefreshMetaWhatsAppStatusUseCase)
+    private readonly refreshMetaWhatsAppStatusUseCase: IRefreshMetaWhatsAppStatusUseCase,
     private readonly getWhatsAppConnectionUseCase: GetWhatsAppConnectionUseCase,
     private readonly registerTwilioWhatsAppSenderUseCase: RegisterTwilioWhatsAppSenderUseCase,
     private readonly verifyTwilioWhatsAppSenderUseCase: VerifyTwilioWhatsAppSenderUseCase,
@@ -63,6 +70,40 @@ export class TenantWhatsAppController {
     return this.configureWhatsAppUseCase.execute({
       ...body,
       tenantId: id,
+      requestingUserId: user?.sub,
+      requestingUserEmail: user?.email,
+    });
+  }
+
+  @Post(':id/whatsapp/meta/connect')
+  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
+  @Roles('OWNER', 'ADMIN')
+  async connectMetaWhatsApp(
+    @Param('id') id: string,
+    @Body() body: ConnectMetaWhatsAppDTO,
+    @Req() req: Request,
+  ) {
+    const user = (req as any).user;
+    return this.connectMetaWhatsAppUseCase.execute({
+      ...body,
+      tenantId: id,
+      requestingUserId: user?.sub,
+      requestingUserEmail: user?.email,
+    });
+  }
+
+  @Post(':id/whatsapp/meta/refresh-status')
+  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
+  @Roles('OWNER', 'ADMIN')
+  async refreshMetaWhatsAppStatus(
+    @Param('id') id: string,
+    @Req() req: Request,
+    @Query('branchId') branchId?: string,
+  ) {
+    const user = (req as any).user;
+    return this.refreshMetaWhatsAppStatusUseCase.execute({
+      tenantId: id,
+      branchId,
       requestingUserId: user?.sub,
       requestingUserEmail: user?.email,
     });

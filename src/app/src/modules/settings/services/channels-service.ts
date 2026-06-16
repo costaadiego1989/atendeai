@@ -94,4 +94,42 @@ export const channelsService = {
   ): Promise<{ authorizationUrl: string }> {
     return apiClient.post('/channels/instagram/meta/start', branchId ? { branchId } : {});
   },
+
+  async connectMetaWhatsApp(
+    tenantId: string,
+    input: {
+      code: string;
+      phoneNumberId: string;
+      wabaId: string;
+      whatsappNumber: string;
+      businessId?: string;
+      webhookSecret?: string;
+      branchId?: string | null;
+    },
+  ): Promise<{
+    id: string;
+    provider: 'META_CLOUD';
+    whatsappNumber: string;
+    status: string;
+    configuredAt: string;
+  }> {
+    return apiClient.post(`/tenants/${tenantId}/whatsapp/meta/connect`, input);
+  },
+
+  async refreshMetaWhatsAppStatus(
+    tenantId: string,
+    branchId?: string | null,
+  ): Promise<{
+    id: string;
+    provider: 'META_CLOUD';
+    whatsappNumber: string;
+    status: string;
+    configuredAt: string;
+  }> {
+    const query = branchId ? `?branchId=${encodeURIComponent(branchId)}` : '';
+    return apiClient.post(
+      `/tenants/${tenantId}/whatsapp/meta/refresh-status${query}`,
+      {},
+    );
+  },
 };

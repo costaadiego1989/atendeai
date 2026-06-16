@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WhatsAppProvider } from '../../../domain/entities/WhatsAppConfig';
 import { BubbleWhatsConfigurationStrategy } from './BubbleWhatsConfigurationStrategy';
 import { Dialog360ConfigurationStrategy } from './Dialog360ConfigurationStrategy';
+import { MetaCloudConfigurationStrategy } from './MetaCloudConfigurationStrategy';
 import { IWhatsAppConfigurationStrategy } from './IWhatsAppConfigurationStrategy';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class WhatsAppConfigurationStrategyRegistry {
   constructor(
     bubbleWhatsConfigurationStrategy: BubbleWhatsConfigurationStrategy,
     dialog360ConfigurationStrategy: Dialog360ConfigurationStrategy,
+    metaCloudConfigurationStrategy: MetaCloudConfigurationStrategy,
   ) {
     this.strategies.set(
       bubbleWhatsConfigurationStrategy.provider,
@@ -22,6 +24,10 @@ export class WhatsAppConfigurationStrategyRegistry {
     this.strategies.set(
       dialog360ConfigurationStrategy.provider,
       dialog360ConfigurationStrategy,
+    );
+    this.strategies.set(
+      metaCloudConfigurationStrategy.provider,
+      metaCloudConfigurationStrategy,
     );
   }
 
