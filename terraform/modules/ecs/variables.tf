@@ -85,9 +85,9 @@ variable "asg_desired_capacity" {
 }
 
 variable "asg_max_size" {
-  description = "Maximum size for the ECS Auto Scaling Group"
+  description = "Maximum size for the ECS Auto Scaling Group. 1 = single instance (no HA/scale-out)."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "api_image_uri" {
