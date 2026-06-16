@@ -271,6 +271,26 @@ export function ChannelsSettingsContent() {
                 />
               </div>
 
+              <div className="space-y-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  <p className="text-sm font-medium text-foreground">
+                    Antes de conectar — a conta precisa estar pronta
+                  </p>
+                </div>
+                <ul className="ml-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                  <li>
+                    A conta do Instagram precisa ser Profissional/Empresa (não pessoal).
+                  </li>
+                  <li>
+                    Ela precisa estar vinculada a uma Página do Facebook que você administra.
+                  </li>
+                  <li>
+                    No popup da Meta, marque a empresa, a Página e a conta do Instagram (opt-in de tudo) — senão a lista volta vazia ("Nenhuma conta encontrada").
+                  </li>
+                </ul>
+              </div>
+
               <div className="space-y-2">
                 <Label>Conectar conta com a Meta</Label>
                 <div className="flex flex-wrap gap-2">
