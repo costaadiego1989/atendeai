@@ -30,6 +30,31 @@ export class CommerceConversationFlowRules {
     return Number.isInteger(number) && number > 0 ? number : null;
   }
 
+  /**
+   * Global "escape hatch" intent: the customer wants to restart the flow or go
+   * back to the initial menu. Recognized from ANY step so a customer can never
+   * get stuck in the conversational state machine.
+   */
+  isResetIntent(value: string) {
+    const normalized = this.normalize(value);
+    return [
+      'menu',
+      'reiniciar',
+      'reinicio',
+      'recomecar',
+      'recomeco',
+      'comecar de novo',
+      'comecar denovo',
+      'voltar ao menu',
+      'voltar ao inicio',
+      'voltar pro menu',
+      'voltar',
+      'cancelar',
+      'cancela tudo',
+      'cancelar tudo',
+    ].some((token) => normalized.includes(token));
+  }
+
   isNegativeOrCheckout(value: string) {
     return [
       'não',

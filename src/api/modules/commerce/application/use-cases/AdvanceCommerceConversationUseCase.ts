@@ -92,6 +92,24 @@ export class AdvanceCommerceConversationUseCase {
       });
     }
 
+    // Global escape hatch: from ANY step the customer can restart / go back to
+    // the initial menu, so they can never get stuck in the flow. The active
+    // session is cancelled; the next message starts a fresh session.
+    if (session && this.conversationFlowRules.isResetIntent(normalizedMessage)) {
+      return this.commerceRepository.updateSessionState({
+        tenantId: input.tenantId,
+        sessionId: session.id,
+        status: 'CANCELLED',
+        currentStep: 'CANCELLED',
+        pendingOptions: [],
+        pendingQuery: null,
+        selectedSource: null,
+        selectedInventoryItemId: null,
+        selectedCatalogItemId: null,
+        selectedItemName: null,
+      });
+    }
+
     if (session) {
       const couponMatch = input.userMessage.match(/\bcupom[:\s]+(\w+)\b/i);
       if (couponMatch) {

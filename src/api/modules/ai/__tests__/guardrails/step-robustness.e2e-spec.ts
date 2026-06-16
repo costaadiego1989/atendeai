@@ -154,11 +154,12 @@ describe('GUARD-STEP (e2e)', () => {
     expect(s!.currentStep).toBe('AWAITING_QUANTITY');
   });
 
-  it('GUARD-STEP-11 "cancelar" at ASKING_MORE_ITEMS resets to identifying need', async () => {
+  it('GUARD-STEP-11 "cancelar" at ASKING_MORE_ITEMS escapes the flow', async () => {
     const conv = await atAskingMore();
     await sendMessage(h, conv, 'cancelar tudo');
+    // Global reset cancels the active session (see conversation-restart suite).
     const s = await getSession(h, tenantId, conv.conversationId);
-    expect(s!.currentStep).toBe('IDENTIFYING_NEED');
+    expect(s).toBeNull();
   });
 
   it('GUARD-STEP-12 checkout keyword at ASKING_MORE_ITEMS advances to fulfillment', async () => {
