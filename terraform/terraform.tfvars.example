@@ -12,7 +12,7 @@ image_tag = "latest"
 ec2_instance_type    = "t3.medium"
 asg_min_size         = 1
 asg_desired_capacity = 1
-asg_max_size         = 3
+asg_max_size         = 1
 
 # Optional: set these when using images outside the ECR repositories created here.
 api_image_uri = null

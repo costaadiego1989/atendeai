@@ -47,9 +47,9 @@ variable "asg_desired_capacity" {
 }
 
 variable "asg_max_size" {
-  description = "Capacidade maxima do Auto Scaling Group."
+  description = "Capacidade maxima do Auto Scaling Group. 1 = instancia unica (sem HA/scale-out)."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "api_image_uri" {
