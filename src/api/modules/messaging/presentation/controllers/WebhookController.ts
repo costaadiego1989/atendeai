@@ -17,6 +17,7 @@ import { ProcessWebhookUseCase } from '../../application/use-cases/ProcessWebhoo
 import { META_WHATSAPP_RAW_BODY_HEADER } from '../../infrastructure/acl/WhatsAppCloudApiAdapter';
 import { RawBodyRequest } from '@nestjs/common';
 import { Request } from 'express';
+import { SkipSuccessEnvelope } from '@shared/infrastructure/http/decorators/skip-success-envelope.decorator';
 
 @Controller('webhooks/whatsapp')
 export class WebhookController {
@@ -28,6 +29,7 @@ export class WebhookController {
   ) {}
 
   @Get()
+  @SkipSuccessEnvelope()
   verifyChallenge(
     @Query('hub.mode') mode?: string,
     @Query('hub.verify_token') verifyToken?: string,
