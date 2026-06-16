@@ -1,4 +1,4 @@
-import { Bot, ExternalLink, Linkedin, Link2, MessageSquare, RefreshCcw } from 'lucide-react';
+import { Bot, ExternalLink, Linkedin, Link2, MessageSquare, RefreshCcw, ShieldAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -159,6 +159,38 @@ export function ChannelsSettingsContent() {
                 </div>
               </div>
 
+              <div className="space-y-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  <p className="text-sm font-medium text-foreground">
+                    Antes de conectar — pré-requisitos da Meta
+                  </p>
+                </div>
+                <ul className="ml-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                  <li>
+                    Tenha um perfil empresarial completo no Meta Business (nome legal, endereço e site).
+                  </li>
+                  <li>
+                    Conclua a Verificação do Negócio em business.facebook.com → Configurações do Negócio → Central de Segurança.
+                  </li>
+                  <li>
+                    Se aparecer aviso de novo dispositivo/localização (erro #2859043), atualize a página e conclua a verificação de segurança antes de tentar de novo.
+                  </li>
+                  <li>
+                    Use a mesma conta Meta que administra o WhatsApp Business durante o popup.
+                  </li>
+                </ul>
+                <a
+                  href="https://business.facebook.com/settings/security"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                >
+                  Abrir Central de Segurança da Meta
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <Button
                   className="gap-2"
@@ -237,6 +269,26 @@ export function ChannelsSettingsContent() {
                 <StatusBadge
                   status={vm.selectedScope?.instagramConnected ? 'ACTIVE' : 'INACTIVE'}
                 />
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  <p className="text-sm font-medium text-foreground">
+                    Antes de conectar — a conta precisa estar pronta
+                  </p>
+                </div>
+                <ul className="ml-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                  <li>
+                    A conta do Instagram precisa ser Profissional/Empresa (não pessoal).
+                  </li>
+                  <li>
+                    Ela precisa estar vinculada a uma Página do Facebook que você administra.
+                  </li>
+                  <li>
+                    No popup da Meta, marque a empresa, a Página e a conta do Instagram (opt-in de tudo) — senão a lista volta vazia ("Nenhuma conta encontrada").
+                  </li>
+                </ul>
               </div>
 
               <div className="space-y-2">
