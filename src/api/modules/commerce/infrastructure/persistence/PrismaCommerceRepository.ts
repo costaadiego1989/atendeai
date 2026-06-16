@@ -737,6 +737,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         payment_link_url,
         payment_status,
         carrier_service_name,
+        coupon_code,
+        discount_amount,
         created_at,
         updated_at
       ) VALUES (
@@ -758,6 +760,8 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         ${input.paymentLinkUrl || null},
         ${input.paymentStatus || null},
         ${input.carrierServiceName || null},
+        ${input.couponCode || null},
+        ${input.discountAmount ?? null},
         now(),
         now()
       )
