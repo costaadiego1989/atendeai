@@ -18,7 +18,10 @@ export class CommerceConversationFlowRules {
   }
 
   extractPositiveInteger(value: string) {
-    const match = value.match(/\b(\d{1,2})\b/);
+    // Match a standalone 1-3 digit integer that is NOT part of a negative
+    // number ("-3") or a decimal ("2.5"/"2,5"). Rejects those instead of
+    // silently coercing them to a positive integer.
+    const match = value.match(/(?<![\d.,-])(\d{1,3})(?![\d.,])/);
     if (!match) {
       return null;
     }
