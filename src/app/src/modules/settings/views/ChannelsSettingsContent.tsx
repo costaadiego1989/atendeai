@@ -216,13 +216,6 @@ export function ChannelsSettingsContent() {
                 </Button>
               </div>
 
-              {!vm.embeddedSignupReady && (
-                <p className="text-xs text-muted-foreground">
-                  A tela já está pronta. Para concluir a conexão real, configure as envs{' '}
-                  <code>META_APP_ID</code> e <code>META_WHATSAPP_CONFIGURATION_ID</code> no backend.
-                </p>
-              )}
-
               {vm.requiresVerification && (
                 <div className="space-y-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
                   <div>
@@ -336,18 +329,6 @@ export function ChannelsSettingsContent() {
                   </Select>
                 </div>
               )}
-
-              <div className="space-y-2">
-                <Label>ID da conta do Instagram Business (modo avançado)</Label>
-                <Input
-                  placeholder="Ex: 17841400000000000"
-                  value={vm.instagramAccountId}
-                  onChange={(event) => vm.setInstagramAccountId(event.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Se preferir, você ainda pode colar o ID manualmente. Esse escopo ficará responsável pelas conversas deste canal.
-                </p>
-              </div>
 
               <div className="flex flex-wrap gap-2">
                 <Button
