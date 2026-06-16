@@ -95,6 +95,32 @@ export class ConfigureWhatsAppDTO {
   webhookSecret?: string;
 }
 
+export class ConnectMetaWhatsAppDTO {
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phoneNumberId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  wabaId: string;
+
+  @IsString()
+  @IsOptional()
+  businessId?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  whatsappNumber: string;
+
+  @IsString()
+  @IsOptional()
+  webhookSecret?: string;
+}
+
 export class ConfigureInstagramDTO {
   @IsString()
   @IsNotEmpty()

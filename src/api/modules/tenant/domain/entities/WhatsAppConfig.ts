@@ -5,7 +5,7 @@ export type WhatsAppConfigStatus =
   | 'PENDING_VERIFICATION'
   | 'ACTIVE'
   | 'INACTIVE';
-export type WhatsAppProvider = 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+export type WhatsAppProvider = 'BUBBLEWHATS' | 'TWILIO' | 'D360' | 'META_CLOUD';
 
 interface WhatsAppConfigProps {
   provider: WhatsAppProvider;
@@ -79,6 +79,15 @@ export class WhatsAppConfig extends Entity<WhatsAppConfigProps> {
     if (props.provider === 'D360') {
       if (!props.credentials.apiKey) {
         throw new Error('360dialog API key is required');
+      }
+    }
+
+    if (props.provider === 'META_CLOUD') {
+      if (!props.credentials.accessToken) {
+        throw new Error('Meta WhatsApp access token is required');
+      }
+      if (!props.credentials.phoneNumberId) {
+        throw new Error('Meta WhatsApp phone number id is required');
       }
     }
 

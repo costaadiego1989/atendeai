@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { KPICard } from '@/shared/ui/KPICard';
 import { useChannelsSettingsViewModel } from '@/modules/settings/view-models/useChannelsSettingsViewModel';
+
 export function ChannelsSettingsContent() {
   const vm = useChannelsSettingsViewModel();
   const connection = vm.connection;
@@ -24,7 +25,7 @@ export function ChannelsSettingsContent() {
         <div>
           <h1 className="page-title">Canais</h1>
           <p className="page-description">
-            Conecte múltiplos números por Matriz ou filial, acompanhe a ativação via Twilio e vincule contas do Instagram para cada Operação.
+            Conecte múltiplos números por Matriz ou filial via Meta Cloud API e vincule contas do Instagram para cada operação.
           </p>
         </div>
       </div>
@@ -38,7 +39,7 @@ export function ChannelsSettingsContent() {
         <KPICard
           title="WhatsApp ativo"
           value={vm.stats.whatsappConnectedCount}
-          subtitle="números prontos para operar na Twilio."
+          subtitle="Números prontos para operar via Meta Cloud API."
         />
         <KPICard
           title="Instagram ativo"
@@ -91,7 +92,7 @@ export function ChannelsSettingsContent() {
             <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4">
               <p className="text-sm font-medium text-foreground">Modelo operacional</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Cada escopo pode ter seu proprio número comercial e sua propria conta do Instagram. Isso permite operar Matriz e filiais com identidade separada.
+                Cada escopo pode ter seu próprio número comercial e sua própria conta do Instagram. Isso permite operar Matriz e filiais com identidade separada.
               </p>
             </div>
           </CardContent>
@@ -112,7 +113,7 @@ export function ChannelsSettingsContent() {
                     {vm.selectedScope?.label ?? 'Escopo'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Onboarding guiado por Embedded Signup da Meta dentro da Twilio.
+                    Onboarding via Meta Embedded Signup — WhatsApp Cloud API.
                   </p>
                 </div>
                 <StatusBadge
@@ -132,7 +133,7 @@ export function ChannelsSettingsContent() {
                   {[
                     '1. Escolha Matriz ou a filial que vai operar este número.',
                     '2. Digite o telefone comercial e conclua o popup oficial da Meta.',
-                    '3. Se houver OTP, valide aqui e acompanhe o status do sender.',
+                    '3. Aguarde a ativação e acompanhe o status da conexão.',
                   ].map((step) => (
                     <div
                       key={step}
@@ -153,7 +154,7 @@ export function ChannelsSettingsContent() {
                     onChange={(event) => vm.setPhoneNumber(event.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Não precisa digitar +55. Se você informar um numero brasileiro com DDD, completamos o codigo do pais automaticamente.
+                    Não precisa digitar +55. Se você informar um número brasileiro com DDD, completamos o código do país automaticamente.
                   </p>
                 </div>
               </div>
@@ -161,27 +162,22 @@ export function ChannelsSettingsContent() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   className="gap-2"
-                  onClick={() =>
-                    vm.startEmbeddedSignupMutation.mutate({
-                      phoneNumber: vm.normalizedPhoneNumber,
-                      branchId: vm.selectedBranchId ?? undefined,
-                    })
-                  }
+                  onClick={() => vm.connectMetaWhatsAppMutation.mutate()}
                   disabled={
-                    vm.startEmbeddedSignupMutation.isPending ||
+                    vm.connectMetaWhatsAppMutation.isPending ||
                     !vm.normalizedPhoneNumber.trim()
                   }
                 >
                   <ExternalLink className="h-4 w-4" />
-                  {vm.startEmbeddedSignupMutation.isPending
+                  {vm.connectMetaWhatsAppMutation.isPending
                     ? 'Conectando via Meta...'
                     : 'Conectar via Meta Business'}
                 </Button>
                 <Button
                   variant="outline"
                   className="gap-2"
-                  onClick={() => vm.refreshMutation.mutate()}
-                  disabled={vm.refreshMutation.isPending}
+                  onClick={() => vm.refreshMetaWhatsAppStatusMutation.mutate()}
+                  disabled={vm.refreshMetaWhatsAppStatusMutation.isPending}
                 >
                   <RefreshCcw className="h-4 w-4" />
                   Atualizar status
@@ -190,21 +186,22 @@ export function ChannelsSettingsContent() {
 
               {!vm.embeddedSignupReady && (
                 <p className="text-xs text-muted-foreground">
-                  A tela já está pronta. Para concluir a conexão real, faltam apenas as envs do Embedded Signup da Twilio/Meta no backend.
+                  A tela já está pronta. Para concluir a conexão real, configure as envs{' '}
+                  <code>META_APP_ID</code> e <code>META_WHATSAPP_CONFIGURATION_ID</code> no backend.
                 </p>
               )}
 
               {vm.requiresVerification && (
                 <div className="space-y-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
                   <div>
-                    <p className="text-sm font-medium text-foreground">Validar codigo OTP</p>
+                    <p className="text-sm font-medium text-foreground">Validar código OTP</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Se a Twilio enviar codigo por SMS ou voz, informe aqui para concluir a ativação do sender neste escopo.
+                      Se a Twilio enviar código por SMS ou voz, informe aqui para concluir a ativação do sender neste escopo.
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Codigo de verificação"
+                      placeholder="Código de verificação"
                       value={vm.verificationCode}
                       onChange={(event) => vm.setVerificationCode(event.target.value)}
                     />
@@ -234,7 +231,7 @@ export function ChannelsSettingsContent() {
                     Conta do escopo {vm.selectedScope?.label ?? 'selecionado'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Vincule o identificador da conta do Instagram que respondera por esta Operação.
+                    Vincule o identificador da conta do Instagram que responderá por esta operação.
                   </p>
                 </div>
                 <StatusBadge
@@ -289,7 +286,7 @@ export function ChannelsSettingsContent() {
               )}
 
               <div className="space-y-2">
-                <Label>ID da conta do Instagram Business (modo avancado)</Label>
+                <Label>ID da conta do Instagram Business (modo avançado)</Label>
                 <Input
                   placeholder="Ex: 17841400000000000"
                   value={vm.instagramAccountId}
@@ -348,8 +345,6 @@ export function ChannelsSettingsContent() {
               </Button>
             </CardContent>
           </Card>
-
-
         </div>
       </div>
     </div>

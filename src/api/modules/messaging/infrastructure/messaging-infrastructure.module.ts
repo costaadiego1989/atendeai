@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BubbleWhatsAdapter } from './acl/BubbleWhatsAdapter';
 import { Dialog360Adapter } from './acl/Dialog360Adapter';
 import { TwilioAdapter } from './acl/TwilioAdapter';
+import { WhatsAppCloudApiAdapter } from './acl/WhatsAppCloudApiAdapter';
 import { InstagramGraphAdapter } from './acl/InstagramGraphAdapter';
 import { WebChatWidgetAdapter } from './acl/WebChatWidgetAdapter';
 import { MessagingGatewayRegistry } from './acl/MessagingGatewayRegistry';
@@ -18,6 +19,7 @@ import { WHATSAPP_TEMPLATE_SENDER } from '../application/ports/IWhatsAppTemplate
     BubbleWhatsAdapter,
     Dialog360Adapter,
     TwilioAdapter,
+    WhatsAppCloudApiAdapter,
     InstagramGraphAdapter,
     WebChatWidgetAdapter,
     MessagingGatewayRegistry,
@@ -43,6 +45,7 @@ import { WHATSAPP_TEMPLATE_SENDER } from '../application/ports/IWhatsAppTemplate
     BubbleWhatsAdapter,
     Dialog360Adapter,
     TwilioAdapter,
+    WhatsAppCloudApiAdapter,
     InstagramGraphAdapter,
     WebChatWidgetAdapter,
     MessagingGatewayRegistry,

@@ -4,6 +4,7 @@ export type MessagingProvider =
   | 'TWILIO'
   | 'D360'
   | 'META_GRAPH'
+  | 'META_CLOUD'
   | 'WIDGET';
 
 export interface MessagingProviderConfig {

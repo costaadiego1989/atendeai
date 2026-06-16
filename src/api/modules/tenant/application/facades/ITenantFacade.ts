@@ -1,5 +1,5 @@
 export interface WhatsAppConfig {
-  provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360';
+  provider: 'BUBBLEWHATS' | 'TWILIO' | 'D360' | 'META_CLOUD';
   credentials: Record<string, string>;
   webhookSecret?: string | null;
   whatsappNumber: string;
@@ -20,6 +20,7 @@ export type MessagingProvider =
   | 'TWILIO'
   | 'D360'
   | 'META_GRAPH'
+  | 'META_CLOUD'
   | 'WIDGET';
 
 export type MessagingChannel = 'WHATSAPP' | 'INSTAGRAM' | 'WEB_CHAT';

@@ -12,6 +12,7 @@ import { Phone } from '../domain/value-objects/Phone';
 import { Role } from '../domain/value-objects/Role';
 import { BubbleWhatsConfigurationStrategy } from '../application/strategies/whatsapp/BubbleWhatsConfigurationStrategy';
 import { Dialog360ConfigurationStrategy } from '../application/strategies/whatsapp/Dialog360ConfigurationStrategy';
+import { MetaCloudConfigurationStrategy } from '../application/strategies/whatsapp/MetaCloudConfigurationStrategy';
 import { WhatsAppConfigurationStrategyRegistry } from '../application/strategies/whatsapp/WhatsAppConfigurationStrategyRegistry';
 import { Dialog360ManagementAcl } from '../infrastructure/acl/Dialog360ManagementAcl';
 import { TenantAuditService } from '../application/services/TenantAuditService';
@@ -68,9 +69,11 @@ describe('ConfigureWhatsAppUseCase', () => {
       } as any,
       dialog360ManagementAcl,
     );
+    const metaCloudStrategy = new MetaCloudConfigurationStrategy();
     const strategyRegistry = new WhatsAppConfigurationStrategyRegistry(
       bubbleStrategy,
       d360Strategy,
+      metaCloudStrategy,
     );
 
     useCase = new ConfigureWhatsAppUseCase(
