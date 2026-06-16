@@ -18,13 +18,59 @@ export class CommerceConversationFlowRules {
   }
 
   extractPositiveInteger(value: string) {
-    const match = value.match(/\b(\d{1,2})\b/);
+    // Match a standalone 1-3 digit integer that is NOT part of a negative
+    // number ("-3") or a decimal ("2.5"/"2,5"). Rejects those instead of
+    // silently coercing them to a positive integer.
+    const match = value.match(/(?<![\d.,-])(\d{1,3})(?![\d.,])/);
     if (!match) {
       return null;
     }
 
     const number = Number(match[1]);
     return Number.isInteger(number) && number > 0 ? number : null;
+  }
+
+  /**
+   * Global "escape hatch" intent: the customer wants to restart the flow or go
+   * back to the initial menu. Recognized from ANY step so a customer can never
+   * get stuck in the conversational state machine.
+   */
+  isResetIntent(value: string) {
+    const normalized = this.normalize(value);
+
+    // Unambiguous multi-word phrases match anywhere in the message.
+    const phrases = [
+      'voltar ao menu',
+      'voltar ao inicio',
+      'voltar pro menu',
+      'menu inicial',
+      'comecar de novo',
+      'comecar denovo',
+      'cancelar tudo',
+      'cancela tudo',
+    ];
+    if (phrases.some((p) => normalized.includes(p))) {
+      return true;
+    }
+
+    // Short, ambiguous keywords only count as a reset when they are the gist of
+    // a short message (whole word, <= 3 words). Avoids false positives like
+    // "vou voltar mais tarde para comprar" or "nao quero cancelar agora".
+    const words = normalized.split(/\s+/).filter(Boolean);
+    if (words.length > 3) {
+      return false;
+    }
+    const keywords = [
+      'menu',
+      'reiniciar',
+      'reinicio',
+      'recomecar',
+      'recomeco',
+      'voltar',
+      'cancelar',
+      'cancela',
+    ];
+    return words.some((w) => keywords.includes(w));
   }
 
   isNegativeOrCheckout(value: string) {

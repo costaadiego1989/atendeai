@@ -93,9 +93,16 @@ export class CheckoutShoppingSessionUseCase {
       );
     }
 
+    // Carrier shipping ships to the customer's CEP (postal code); a full street
+    // address is not collected in the conversational carrier flow, so a present
+    // carrierCep satisfies the delivery-target requirement.
+    const hasCarrierTarget =
+      session.shippingMode === 'CARRIER' && !!session.carrierCep?.trim();
+
     if (
       session.fulfillmentType === 'DELIVERY' &&
-      !session.deliveryAddress?.trim()
+      !session.deliveryAddress?.trim() &&
+      !hasCarrierTarget
     ) {
       throw new BadRequestException(
         'Delivery address is required before checkout',

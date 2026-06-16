@@ -180,41 +180,43 @@ export class ProcessAIResponseService {
 
     const resolvedBranchId = await this.resolveBranchId(input);
 
-    await this.advanceCommerceConversationUseCase.execute({
-      tenantId: input.tenantId,
-      branchId: resolvedBranchId,
-      conversationId: input.conversationId,
-      contactId: input.contactId,
-      businessType: tenant.businessType,
-      userMessage,
-    });
-
-    const { systemPrompt, diagnostics } =
-      await this.contextAggregator.aggregate(
-        tenant,
-        input.conversationId,
+    try {
+      // Commerce advancement runs INSIDE the try so any state-machine/checkout
+      // failure degrades to the friendly fallback instead of escaping unhandled.
+      await this.advanceCommerceConversationUseCase.execute({
+        tenantId: input.tenantId,
+        branchId: resolvedBranchId,
+        conversationId: input.conversationId,
+        contactId: input.contactId,
+        businessType: tenant.businessType,
         userMessage,
-        contextHistory.length === 0,
+      });
+
+      const { systemPrompt, diagnostics } =
+        await this.contextAggregator.aggregate(
+          tenant,
+          input.conversationId,
+          userMessage,
+          contextHistory.length === 0,
+        );
+
+      let promptWithAgentRule = await this.applyMessagingAgentRule(
+        input.tenantId,
+        systemPrompt,
+        input.moduleId || 'messaging',
+        resolvedBranchId,
       );
 
-    let promptWithAgentRule = await this.applyMessagingAgentRule(
-      input.tenantId,
-      systemPrompt,
-      input.moduleId || 'messaging',
-      resolvedBranchId,
-    );
+      if (input.contextHints?.length) {
+        promptWithAgentRule =
+          promptWithAgentRule +
+          '\n\n[OPÇÕES PRÉ-DEFINIDAS DO WIDGET — use como contexto de intenção do visitante]:\n' +
+          input.contextHints.map((h) => `- ${h}`).join('\n');
+      }
 
-    if (input.contextHints?.length) {
       promptWithAgentRule =
-        promptWithAgentRule +
-        '\n\n[OPÇÕES PRÉ-DEFINIDAS DO WIDGET — use como contexto de intenção do visitante]:\n' +
-        input.contextHints.map((h) => `- ${h}`).join('\n');
-    }
+        this.aiSafetyGate.appendPlatformLimits(promptWithAgentRule);
 
-    promptWithAgentRule =
-      this.aiSafetyGate.appendPlatformLimits(promptWithAgentRule);
-
-    try {
       // RAG cache check: only when PDF context was used
       const ragCacheEnabled =
         !!diagnostics.tenantPDFContextFound &&

@@ -61,6 +61,8 @@ export class AddItemToShoppingSessionUseCase {
     let source: 'INVENTORY' | 'CATALOG' = 'CATALOG';
     let catalogItemId = input.catalogItemId ?? null;
     const inventoryItemId = input.inventoryItemId ?? null;
+    // Effective quantity may be capped by available stock for inventory items.
+    let quantity = input.quantity;
 
     if (input.inventoryItemId) {
       const inventoryItem = await this.commerceRepository.findInventoryItemById(
@@ -77,6 +79,11 @@ export class AddItemToShoppingSessionUseCase {
         inventoryItem.availableQuantity <= 0
       ) {
         throw new ConflictException('Selected item is not available');
+      }
+
+      // Prevent oversell: never add more than the available stock.
+      if (quantity > inventoryItem.availableQuantity) {
+        quantity = inventoryItem.availableQuantity;
       }
 
       name = inventoryItem.name;
@@ -106,7 +113,7 @@ export class AddItemToShoppingSessionUseCase {
 
     const lineTotal = ShoppingSession.computeLineTotal(
       price,
-      input.quantity,
+      quantity,
       currency,
     );
 
@@ -117,7 +124,7 @@ export class AddItemToShoppingSessionUseCase {
       inventoryItemId,
       catalogItemId,
       name,
-      quantity: input.quantity,
+      quantity,
       unitPrice: price,
       lineTotal: lineTotal.amount,
       currency,
