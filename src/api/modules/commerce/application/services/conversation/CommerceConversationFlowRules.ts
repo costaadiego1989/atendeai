@@ -37,22 +37,40 @@ export class CommerceConversationFlowRules {
    */
   isResetIntent(value: string) {
     const normalized = this.normalize(value);
-    return [
+
+    // Unambiguous multi-word phrases match anywhere in the message.
+    const phrases = [
+      'voltar ao menu',
+      'voltar ao inicio',
+      'voltar pro menu',
+      'menu inicial',
+      'comecar de novo',
+      'comecar denovo',
+      'cancelar tudo',
+      'cancela tudo',
+    ];
+    if (phrases.some((p) => normalized.includes(p))) {
+      return true;
+    }
+
+    // Short, ambiguous keywords only count as a reset when they are the gist of
+    // a short message (whole word, <= 3 words). Avoids false positives like
+    // "vou voltar mais tarde para comprar" or "nao quero cancelar agora".
+    const words = normalized.split(/\s+/).filter(Boolean);
+    if (words.length > 3) {
+      return false;
+    }
+    const keywords = [
       'menu',
       'reiniciar',
       'reinicio',
       'recomecar',
       'recomeco',
-      'comecar de novo',
-      'comecar denovo',
-      'voltar ao menu',
-      'voltar ao inicio',
-      'voltar pro menu',
       'voltar',
       'cancelar',
-      'cancela tudo',
-      'cancelar tudo',
-    ].some((token) => normalized.includes(token));
+      'cancela',
+    ];
+    return words.some((w) => keywords.includes(w));
   }
 
   isNegativeOrCheckout(value: string) {

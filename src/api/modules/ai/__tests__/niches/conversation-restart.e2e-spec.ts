@@ -192,6 +192,22 @@ describe('FLOW-RESTART (e2e)', () => {
     expect(fresh!.items.length).toBe(0);
   });
 
+  it('FLOW-RESTART-13 long sentence mentioning "voltar" does NOT reset the cart', async () => {
+    const conv = await atQuantity();
+    await sendMessage(h, conv, 'vou voltar mais tarde para comprar com calma');
+    const s = await getSession(h, tenantId, conv.conversationId);
+    expect(s).not.toBeNull();
+    expect(s!.currentStep).toBe('AWAITING_QUANTITY');
+  });
+
+  it('FLOW-RESTART-14 negated "nao quero cancelar agora" does NOT reset', async () => {
+    const conv = await atQuantity();
+    await sendMessage(h, conv, 'nao quero cancelar agora obrigado');
+    const s = await getSession(h, tenantId, conv.conversationId);
+    expect(s).not.toBeNull();
+    expect(s!.currentStep).toBe('AWAITING_QUANTITY');
+  });
+
   it('FLOW-RESTART-12 customer can complete a SECOND order after the first', async () => {
     const conv = await atOrderNote();
     await sendMessage(h, conv, 'finalizar pedido');
