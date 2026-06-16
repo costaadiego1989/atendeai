@@ -369,7 +369,7 @@ describe('AutomationHistory', () => {
     await userEvent.click(exportButton);
     
     // Should trigger download
-    expect(vi.spyOn(global, 'URL')..createObjectURL).toHaveBeenCalled();
+    expect(vi.spyOn(global.URL, 'createObjectURL')).toHaveBeenCalled();
   });
 });
 
@@ -537,5 +537,4 @@ describe('E2E Tests', () => {
     await expect(page).toContainText('Automação criada com sucesso');
   });
 });
-*/
 */

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Zap, HelpCircle, BookOpen } from 'lucide-react';
+import { Plus, Zap, HelpCircle, BookOpen, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,8 +20,8 @@ import { AutomationFilter } from '../components/AutomationFilter';
 import { AutomationWizard } from '../components/AutomationWizard';
 import { useAutomationSearch } from '../services/automation-search-service';
 import { HelpDialog } from '../components/HelpDialog';
-import type { Automation, TriggerType } from '../types';
-import { TRIGGER_LABELS } from '../types';
+import type { Automation } from '../types';
+import { TriggerType, TRIGGER_LABELS } from '../types';
 
 export default function AutomationsPage() {
   const vm = useAutomationsViewModel();

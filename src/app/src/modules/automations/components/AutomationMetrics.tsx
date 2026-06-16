@@ -89,6 +89,8 @@ function MetricCard({
     stable: RefreshCw,
   };
 
+  const TrendIcon = trend ? trendIcons[trend] : null;
+
   const badgeVariants = {
     default: 'secondary',
     success: 'default',
@@ -111,7 +113,7 @@ function MetricCard({
             <Icon className="h-8 w-8 text-muted-foreground" />
             {trend && (
               <div className="flex items-center gap-1">
-                {trendIcons[trend] && <trendIcons[trend] className={`h-3 w-3 ${trendColors[trend]}`} />}
+                {TrendIcon && <TrendIcon className={`h-3 w-3 ${trendColors[trend]}`} />}
                 <span className={`text-xs ${trendColors[trend]}`}>
                   {trend === 'up' ? '+12%' : trend === 'down' ? '-8%' : '0%'}
                 </span>

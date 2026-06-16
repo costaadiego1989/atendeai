@@ -26,6 +26,7 @@ import {
   User,
   Calendar,
   MessageSquare,
+  X,
 } from 'lucide-react';
 import { Automation, CreateAutomationInput } from '../types';
 

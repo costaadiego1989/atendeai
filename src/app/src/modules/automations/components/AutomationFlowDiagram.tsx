@@ -34,6 +34,7 @@ import {
   ArrowRight,
   ArrowLeftRight,
   GitBranch,
+  Zap,
   AlertCircle,
   CheckCircle,
   Loader2,

@@ -38,7 +38,7 @@ export function AutomationsList({
       {automations.map((automation) => (
         <div
           key={automation.id}
-          className="glass-card flex flex-col gap-3 rounded-xl border border-border/60 p-5 transition-colors hover:bg-muted/30 lg:flex-row lg:items-center lg:justify-between"
+          className="bg-card flex flex-col gap-3 rounded-xl border border-border/60 p-5 transition-colors hover:bg-muted/30 lg:flex-row lg:items-center lg:justify-between"
         >
           <div className="flex-1 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
