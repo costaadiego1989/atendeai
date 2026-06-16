@@ -87,6 +87,14 @@ locals {
       value = ""
     },
     {
+      name  = "META_WHATSAPP_CONFIGURATION_ID"
+      value = "2347331535755786"
+    },
+    {
+      name  = "META_WHATSAPP_WEBHOOK_URL"
+      value = "https://api.atende-ai.tech/api/v1/webhooks/whatsapp"
+    },
+    {
       name  = "TWILIO_AUTO_PROVISION_TENANTS"
       value = "true"
     },
@@ -304,6 +312,10 @@ locals {
     {
       name      = "META_WEBHOOK_SECRET"
       valueFrom = "${var.ssm_parameter_prefix}/META_WEBHOOK_SECRET"
+    },
+    {
+      name      = "META_WHATSAPP_WEBHOOK_VERIFY_TOKEN"
+      valueFrom = "${var.ssm_parameter_prefix}/META_WHATSAPP_WEBHOOK_VERIFY_TOKEN"
     },
     {
       name      = "TWILIO_EMBEDDED_SIGNUP_APP_ID"
