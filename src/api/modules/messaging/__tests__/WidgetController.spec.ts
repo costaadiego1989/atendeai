@@ -90,6 +90,15 @@ describe('WidgetController', () => {
 
       await expect(controller.getConfig('invalid')).rejects.toThrow(NotFoundException);
     });
+
+    it('should not leak tenantId to the embedding site', async () => {
+      getPublicConfig.execute.mockResolvedValue({ ...mockConfig, tenantId: 'tenant-1' } as any);
+
+      const result = await controller.getConfig('pub-token-123');
+
+      expect(result).not.toHaveProperty('tenantId');
+      expect(result.name).toBe('Support Widget');
+    });
   });
 
   describe('initSession', () => {
