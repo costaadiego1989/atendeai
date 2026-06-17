@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useAutomationSearch } from '../services/automation-search-service';
+import {
+  useAutomationSearch,
+  filterAutomationsLocally,
+  AutomationSearchServiceImpl,
+} from '../services/automation-search-service';
 import { renderHook, act } from '@testing-library/react';
-import { Automation } from '../types';
+import { Automation, TriggerType, StepType } from '../types';
 
 // Mock API client
 vi.mock('@/shared/api/client', () => ({
@@ -217,8 +221,6 @@ describe('useAutomationSearch Hook', () => {
 
 describe('filterAutomationsLocally function', () => {
   it('filters by search term', () => {
-    const { filterAutomationsLocally } = require('../services/automation-search-service');
-    
     const result = filterAutomationsLocally(mockAutomations, {
       search: 'Boas-vindas',
       triggerTypes: [],
@@ -232,8 +234,6 @@ describe('filterAutomationsLocally function', () => {
   });
 
   it('filters by status', () => {
-    const { filterAutomationsLocally } = require('../services/automation-search-service');
-    
     const result = filterAutomationsLocally(mockAutomations, {
       search: '',
       triggerTypes: [],
@@ -247,8 +247,6 @@ describe('filterAutomationsLocally function', () => {
   });
 
   it('filters by trigger type', () => {
-    const { filterAutomationsLocally } = require('../services/automation-search-service');
-    
     const result = filterAutomationsLocally(mockAutomations, {
       search: '',
       triggerTypes: ['CONTACT_CREATED'],
@@ -262,8 +260,6 @@ describe('filterAutomationsLocally function', () => {
   });
 
   it('filters by date range', () => {
-    const { filterAutomationsLocally } = require('../services/automation-search-service');
-    
     const startDate = new Date('2024-01-01T00:00:00Z');
     const endDate = new Date('2024-01-01T23:59:59Z');
 
@@ -280,8 +276,6 @@ describe('filterAutomationsLocally function', () => {
   });
 
   it('returns all automations when no filters applied', () => {
-    const { filterAutomationsLocally } = require('../services/automation-search-service');
-    
     const result = filterAutomationsLocally(mockAutomations, {
       search: '',
       triggerTypes: [],
@@ -294,8 +288,6 @@ describe('filterAutomationsLocally function', () => {
   });
 
   it('handles empty automation list', () => {
-    const { filterAutomationsLocally } = require('../services/automation-search-service');
-    
     const result = filterAutomationsLocally([], {
       search: 'test',
       triggerTypes: [],
@@ -312,7 +304,6 @@ describe('AutomationSearchService class', () => {
   let service: any;
 
   beforeEach(() => {
-    const { AutomationSearchServiceImpl } = require('../services/automation-search-service');
     service = new AutomationSearchServiceImpl();
   });
 
@@ -395,8 +386,8 @@ describe('AutomationSearchService class', () => {
       inactive: 0,
       averageCreationTime: 0,
       successRate: 0,
-      mostUsedTriggerType: 'CONTACT_CREATED',
-      mostUsedStepType: 'SEND_MESSAGE',
+      mostUsedTriggerType: TriggerType.MESSAGE_RECEIVED,
+      mostUsedStepType: StepType.SEND_MESSAGE,
     });
   });
 

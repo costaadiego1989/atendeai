@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   CheckCircle, 
   Clock, 
@@ -218,11 +217,11 @@ function BasicInfoStep({ data, onChange, errors }: WizardStepProps) {
         />
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="bg-muted/50 border border-border/60 rounded-lg p-3">
         <div className="flex gap-2">
-          <Lightbulb className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-800">
-            <p className="font-medium">Dica de nomenclatura</p>
+          <Lightbulb className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">Dica de nomenclatura</p>
             <p>Use nomes claros e descritivos. Ex: "Boas-vindas novos clientes", "Lembrete pagamento vencido"</p>
           </div>
         </div>
@@ -275,11 +274,11 @@ function TriggerStep({ data, onChange, errors }: WizardStepProps) {
       </div>
 
       {data.triggerType && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div className="bg-muted/50 border border-border/60 rounded-lg p-3">
           <div className="flex gap-2">
-            <BookOpen className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-gray-700">
-              <p className="font-medium">Como funciona este gatilho?</p>
+            <BookOpen className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">Como funciona este gatilho?</p>
               <p>{getTriggerHelp(data.triggerType)}</p>
             </div>
           </div>
@@ -613,7 +612,7 @@ export function AutomationWizard({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-primary" />
@@ -624,6 +623,7 @@ export function AutomationWizard({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="flex-1 overflow-y-auto px-1 -mx-1 space-y-6">
         {/* Templates selection */}
         {!template && currentStep === 0 && (
           <div className="space-y-4">
@@ -676,15 +676,18 @@ export function AutomationWizard({
         )}
 
         {/* Wizard progress */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
           {wizardSteps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
+            <div
+              key={step.id}
+              className={`flex items-center ${index < wizardSteps.length - 1 ? 'flex-1' : ''}`}
+            >
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium ${
                   index === currentStep
                     ? 'bg-primary text-primary-foreground'
                     : index < currentStep
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-primary/20 text-primary'
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
@@ -696,8 +699,8 @@ export function AutomationWizard({
               </div>
               {index < wizardSteps.length - 1 && (
                 <div
-                  className={`w-16 h-0.5 ${
-                    index < currentStep ? 'bg-green-500' : 'bg-muted'
+                  className={`flex-1 h-0.5 mx-2 ${
+                    index < currentStep ? 'bg-primary' : 'bg-muted'
                   }`}
                 />
               )}
@@ -706,32 +709,31 @@ export function AutomationWizard({
         </div>
 
         {/* Step content */}
-        <ScrollArea className="max-h-96 mb-6">
-          {wizardSteps[currentStep]?.component && (
-            <div className="p-4">
-              {React.createElement(wizardSteps[currentStep].component, {
-                data: wizardData,
-                onChange: setWizardData,
-                errors: form.formState.errors,
-              })}
-            </div>
-          )}
-        </ScrollArea>
+        {wizardSteps[currentStep]?.component && (
+          <div className="py-1">
+            {React.createElement(wizardSteps[currentStep].component, {
+              data: wizardData,
+              onChange: setWizardData,
+              errors: form.formState.errors,
+            })}
+          </div>
+        )}
 
         {/* Help section */}
         {wizardSteps[currentStep].help && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+          <div className="bg-muted/50 border border-border/60 rounded-lg p-3">
             <div className="flex gap-2">
-              <BookOpen className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium">Dica</p>
+              <BookOpen className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">Dica</p>
                 <p>{wizardSteps[currentStep].help}</p>
               </div>
             </div>
           </div>
         )}
+        </div>
 
-        <DialogFooter className="flex justify-between">
+        <DialogFooter className="flex justify-between border-t border-border/60 pt-4">
           <div className="flex gap-2">
             <Button variant="outline" onClick={onCancel}>
               Cancelar
