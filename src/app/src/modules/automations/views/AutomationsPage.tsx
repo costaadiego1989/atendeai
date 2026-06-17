@@ -18,10 +18,12 @@ import { AutomationsList } from '../components/AutomationsList';
 import { AutomationFormSheet } from '../components/AutomationFormSheet';
 import { AutomationFilter } from '../components/AutomationFilter';
 import { AutomationWizard } from '../components/AutomationWizard';
+import { AutomationTemplatePicker } from '../components/AutomationTemplatePicker';
 import { useAutomationSearch } from '../services/automation-search-service';
 import { HelpDialog } from '../components/HelpDialog';
 import type { Automation } from '../types';
 import { TriggerType, TRIGGER_LABELS } from '../types';
+import type { AutomationTemplate } from '../templates/automation-templates';
 
 export default function AutomationsPage() {
   const vm = useAutomationsViewModel();
@@ -29,7 +31,18 @@ export default function AutomationsPage() {
   const [editingAutomation, setEditingAutomation] = useState<Automation | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardTemplate, setWizardTemplate] = useState<AutomationTemplate | undefined>(undefined);
   const [helpOpen, setHelpOpen] = useState(false);
+
+  const openBlankWizard = () => {
+    setWizardTemplate(undefined);
+    setWizardOpen(true);
+  };
+
+  const openWizardWithTemplate = (template: AutomationTemplate) => {
+    setWizardTemplate(template);
+    setWizardOpen(true);
+  };
 
   // Novo hook de busca e filtros
   const search = useAutomationSearch(vm.automations);
@@ -90,7 +103,7 @@ export default function AutomationsPage() {
             <Button
               size="sm"
               variant="default"
-              onClick={() => setWizardOpen(true)}
+              onClick={openBlankWizard}
               className="gap-1.5"
             >
               <Plus className="h-4 w-4" />
@@ -111,10 +124,11 @@ export default function AutomationsPage() {
 
       {/* Quick actions bar */}
       <div className="flex flex-wrap gap-2 mb-4">
+        <AutomationTemplatePicker onSelect={openWizardWithTemplate} />
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setWizardOpen(true)}
+          onClick={openBlankWizard}
           className="gap-1.5"
         >
           <Plus className="h-4 w-4" />
@@ -164,7 +178,7 @@ export default function AutomationsPage() {
                   : 'Automatize tarefas repetitivas para economizar tempo e garantir consistência nas interações com seus clientes.'
               }
               actionLabel={hasActiveFilters ? 'Criar automação' : 'Criar primeira automação'}
-              onAction={() => setWizardOpen(true)}
+              onAction={openBlankWizard}
             />
           );
         })()
@@ -180,8 +194,10 @@ export default function AutomationsPage() {
 
       {/* Wizard Dialog */}
       <AutomationWizard
+        key={wizardTemplate?.id ?? 'blank'}
         open={wizardOpen}
         onOpenChange={setWizardOpen}
+        template={wizardTemplate}
         onComplete={handleWizardComplete}
         onCancel={() => setWizardOpen(false)}
       />
