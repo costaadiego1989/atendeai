@@ -49,11 +49,18 @@ export class AiResponseStepHandler implements IStepHandler {
         ? (context.variables['message'] as string)
         : '';
 
-    const { text } = await this.aiReplyFacade.generateReply({
+    const { text, denied, reason } = await this.aiReplyFacade.generateReply({
       tenantId: context.tenantId,
       prompt,
       userMessage: lastMessage,
     });
+
+    if (denied) {
+      return {
+        success: false,
+        error: `ai_response: AI generation denied (${reason ?? 'quota'})`,
+      };
+    }
 
     if (!text) {
       return { success: false, error: 'ai_response: empty AI reply' };

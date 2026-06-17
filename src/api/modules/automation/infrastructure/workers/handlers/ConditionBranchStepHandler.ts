@@ -21,12 +21,17 @@ export class ConditionBranchStepHandler implements IStepHandler {
 
     let conditionMet = false;
 
+    // Config values arrive as JSON (often strings) while runtime variables may
+    // be numbers/booleans; compare by normalized string so "1" matches 1.
+    const eq = (a: unknown, b: unknown): boolean =>
+      a === b || (a != null && b != null && String(a) === String(b));
+
     switch (operator) {
       case 'equals':
-        conditionMet = actual === expected;
+        conditionMet = eq(actual, expected);
         break;
       case 'not_equals':
-        conditionMet = actual !== expected;
+        conditionMet = !eq(actual, expected);
         break;
       case 'contains':
         conditionMet =

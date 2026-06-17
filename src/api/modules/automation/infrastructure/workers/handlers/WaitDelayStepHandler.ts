@@ -16,8 +16,17 @@ export class WaitDelayStepHandler implements IStepHandler {
   ): Promise<StepExecutionResult> {
     const delayMs = Number(config['delayMs']) || 0;
 
-    // Max 5 min inline wait; longer delays should use scheduled jobs.
-    if (delayMs > 0 && delayMs <= 300_000) {
+    // Inline wait caps at 5 min. Don't silently "succeed" on longer delays —
+    // that would fire downstream steps immediately. Surface it so the flow
+    // can be reconfigured to use a scheduled delay.
+    if (delayMs > 300_000) {
+      return {
+        success: false,
+        error: `wait_delay ${delayMs}ms exceeds inline max (300000ms); use a scheduled delay`,
+      };
+    }
+
+    if (delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
 

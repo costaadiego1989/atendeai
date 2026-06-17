@@ -6,6 +6,9 @@ import {
 } from '../../../application/ports/IStepExecutor';
 import { StepType } from '../../../domain/value-objects/StepType';
 import { interpolate } from './interpolate';
+import { assertPublicUrl } from './assert-public-url';
+
+const HTTP_TIMEOUT_MS = 10_000;
 
 @Injectable()
 export class HttpRequestStepHandler implements IStepHandler {
@@ -24,10 +27,23 @@ export class HttpRequestStepHandler implements IStepHandler {
       return { success: false, error: 'HTTP request requires a url' };
     }
 
+    // SSRF guard: reject internal/metadata targets before any network call.
+    try {
+      await assertPublicUrl(url);
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `HTTP request blocked: ${error.message}`,
+      };
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), HTTP_TIMEOUT_MS);
     try {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', ...headers },
+        signal: controller.signal,
         ...(body && method !== 'GET' ? { body: JSON.stringify(body) } : {}),
       });
 
@@ -42,10 +58,16 @@ export class HttpRequestStepHandler implements IStepHandler {
         error: response.ok ? undefined : `HTTP ${response.status}`,
       };
     } catch (error: any) {
+      const reason =
+        error?.name === 'AbortError'
+          ? `timed out after ${HTTP_TIMEOUT_MS}ms`
+          : error.message;
       return {
         success: false,
-        error: `HTTP request failed: ${error.message}`,
+        error: `HTTP request failed: ${reason}`,
       };
+    } finally {
+      clearTimeout(timeout);
     }
   }
 }

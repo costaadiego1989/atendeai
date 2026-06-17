@@ -1,3 +1,9 @@
+jest.mock('node:dns/promises', () => ({
+  // Default: resolve every host to a public address so non-SSRF tests pass.
+  lookup: jest.fn().mockResolvedValue([{ address: '93.184.216.34', family: 4 }]),
+}));
+
+import { lookup } from 'node:dns/promises';
 import { StepExecutionContext } from '../application/ports/IStepExecutor';
 import { WaitDelayStepHandler } from '../infrastructure/workers/handlers/WaitDelayStepHandler';
 import { ConditionBranchStepHandler } from '../infrastructure/workers/handlers/ConditionBranchStepHandler';
@@ -38,6 +44,15 @@ describe('ConditionBranchStepHandler', () => {
     expect(r.nextStepId).toBe('b');
   });
 
+  it('equals matches across types (string config vs numeric variable)', async () => {
+    const r = await h.execute(
+      { field: 'amount', operator: 'equals', value: '150', trueStepId: 'a', falseStepId: 'b' },
+      ctx,
+    );
+    expect(r.output?.conditionMet).toBe(true);
+    expect(r.nextStepId).toBe('a');
+  });
+
   it('supports gt/lt/contains/exists', async () => {
     expect((await h.execute({ field: 'amount', operator: 'gt', value: 100 }, ctx)).output?.conditionMet).toBe(true);
     expect((await h.execute({ field: 'amount', operator: 'lt', value: 100 }, ctx)).output?.conditionMet).toBe(false);
@@ -50,6 +65,15 @@ describe('WaitDelayStepHandler', () => {
   it('returns waited=0 without delay', async () => {
     const r = await new WaitDelayStepHandler().execute({ delayMs: 0 }, ctx);
     expect(r).toEqual({ success: true, output: { waited: 0 } });
+  });
+
+  it('fails (does not silently proceed) when delay exceeds inline max', async () => {
+    const r = await new WaitDelayStepHandler().execute(
+      { delayMs: 3_600_000 },
+      ctx,
+    );
+    expect(r.success).toBe(false);
+    expect(r.error).toMatch(/exceeds inline max/);
   });
 });
 
@@ -82,6 +106,24 @@ describe('HttpRequestStepHandler', () => {
     const r = await h.execute({ url: 'https://x.test' }, ctx);
     expect(r.success).toBe(false);
     expect(r.error).toBe('HTTP 500');
+  });
+
+  it('blocks SSRF to a private/metadata address (no fetch)', async () => {
+    (lookup as jest.Mock).mockResolvedValueOnce([
+      { address: '169.254.169.254', family: 4 },
+    ]);
+    const fetchSpy = jest.spyOn(global, 'fetch');
+    const r = await h.execute({ url: 'https://metadata.evil.test' }, ctx);
+    expect(r.success).toBe(false);
+    expect(r.error).toMatch(/blocked/i);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('blocks non-http(s) schemes', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch');
+    const r = await h.execute({ url: 'file:///etc/passwd' }, ctx);
+    expect(r.success).toBe(false);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 
@@ -201,6 +243,18 @@ describe('AiResponseStepHandler', () => {
     ai.generateReply.mockResolvedValue({ text: '' });
     const r = await h.execute({ prompt: 'x' }, ctx);
     expect(r.success).toBe(false);
+  });
+
+  it('fails (no message sent) when AI generation is denied by quota', async () => {
+    ai.generateReply.mockResolvedValue({
+      text: '',
+      denied: true,
+      reason: 'NO_SUBSCRIPTION',
+    });
+    const r = await h.execute({ prompt: 'x', channel: 'whatsapp' }, ctx);
+    expect(r.success).toBe(false);
+    expect(r.error).toMatch(/denied/i);
+    expect(messaging.queueSystemMessage).not.toHaveBeenCalled();
   });
 });
 
