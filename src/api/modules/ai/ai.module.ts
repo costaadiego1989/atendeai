@@ -95,6 +95,10 @@ import { KNOWLEDGE_SOURCE_REPOSITORY } from './application/ports/IKnowledgeSourc
 import { PrismaKnowledgeSourceRepository } from './infrastructure/persistence/PrismaKnowledgeSourceRepository';
 import { COMMERCE_CATALOG_SEARCH } from './application/ports/ICommerceCatalogSearch';
 import { CommerceCatalogSearchAdapter } from './infrastructure/adapters/CommerceCatalogSearchAdapter';
+import {
+  AUTOMATION_AI_REPLY_FACADE,
+  AutomationAiReplyFacade,
+} from './application/facades/AutomationAiReplyFacade';
 
 @Module({
   imports: [
@@ -268,10 +272,15 @@ import { CommerceCatalogSearchAdapter } from './infrastructure/adapters/Commerce
       provide: REPEAT_LAST_ORDER,
       useExisting: RepeatLastOrderUseCase,
     },
+    {
+      provide: AUTOMATION_AI_REPLY_FACADE,
+      useClass: AutomationAiReplyFacade,
+    },
   ],
   controllers: [],
   exports: [
     AI_ENGINE,
+    AUTOMATION_AI_REPLY_FACADE,
     IProcessAIResponseUseCase,
     LeadScoringService,
     PromptBuilder,

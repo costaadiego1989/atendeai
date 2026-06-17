@@ -67,10 +67,13 @@ describe('Automation Execution Pipeline (integration)', () => {
         isActive: true,
         trigger: { type: TriggerType.CONTACT_CREATED, config: {} },
         conditions: [{ field: 'stage', operator: 'equals', value: 'LEAD' }],
+        // Pure steps keep this test focused on pipeline orchestration (execution
+        // record + step iteration + branching). Side-effecting handlers
+        // (send_message/add_tag/update_contact) are covered by StepHandlers.spec.ts.
         steps: [
-          { id: '', automationId: '', order: 0, type: 'send_message', config: { body: 'Welcome {{name}}!' }, nextStepId: null },
-          { id: '', automationId: '', order: 1, type: 'add_tag', config: { tag: 'welcomed' }, nextStepId: null },
-          { id: '', automationId: '', order: 2, type: 'update_contact', config: { fields: { notes: 'Auto-welcomed' } }, nextStepId: null },
+          { id: '', automationId: '', order: 0, type: 'wait_delay', config: { delayMs: 0 }, nextStepId: null },
+          { id: '', automationId: '', order: 1, type: 'condition_branch', config: { field: 'stage', operator: 'equals', value: 'LEAD' }, nextStepId: null },
+          { id: '', automationId: '', order: 2, type: 'wait_delay', config: { delayMs: 0 }, nextStepId: null },
         ],
       });
       automationId = automation.id;
@@ -139,7 +142,7 @@ describe('Automation Execution Pipeline (integration)', () => {
         trigger: { type: TriggerType.TAG_ADDED, config: {} },
         conditions: [],
         steps: [
-          { id: '', automationId: '', order: 0, type: 'send_message', config: { body: 'Tag added!' }, nextStepId: null },
+          { id: '', automationId: '', order: 0, type: 'wait_delay', config: { delayMs: 0 }, nextStepId: null },
         ],
       });
       autoId1 = auto1.id;
@@ -152,7 +155,7 @@ describe('Automation Execution Pipeline (integration)', () => {
         trigger: { type: TriggerType.TAG_ADDED, config: {} },
         conditions: [],
         steps: [
-          { id: '', automationId: '', order: 0, type: 'add_tag', config: { tag: 'processed' }, nextStepId: null },
+          { id: '', automationId: '', order: 0, type: 'condition_branch', config: { field: 'tag', operator: 'exists' }, nextStepId: null },
         ],
       });
       autoId2 = auto2.id;

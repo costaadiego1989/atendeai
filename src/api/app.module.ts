@@ -23,6 +23,7 @@ import { SocialModule } from './modules/social/social.module';
 import { ProposalModule } from './modules/proposal/proposal.module';
 import { VoiceModule } from './modules/voice/voice.module';
 import { AutomationModule } from './modules/automation/automation.module';
+import { TaskModule } from './modules/task/task.module';
 import { BullModule } from '@nestjs/bullmq';
 import { StorageModule } from './shared/infrastructure/storage/StorageModule';
 import { ConfigService } from '@nestjs/config';
@@ -76,6 +77,7 @@ import { parseRedisConnection } from './shared/infrastructure/redis/redis-connec
     ProposalModule,
     VoiceModule,
     AutomationModule,
+    TaskModule,
     PlatformAdminModule,
   ],
   providers: [
