@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Plus, Zap, HelpCircle, BookOpen, FileText } from 'lucide-react';
+import { Plus, Zap, HelpCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -100,43 +100,6 @@ export default function AutomationsPage() {
         </div>
       </div>
 
-      {/* Welcome card for new users */}
-      {vm.automations.length === 0 && (
-        <div className="glass-card mb-6 p-6 border border-blue-200 bg-blue-50">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-              <BookOpen className="h-6 w-6" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-blue-900">
-                Comece criando sua primeira automação
-              </h3>
-              <p className="text-sm text-blue-700 mt-1">
-                As automações ajudam a automatizar tarefas repetitivas, economizando tempo e 
-                garantindo consistência nas interações com seus clientes.
-              </p>
-              <div className="flex gap-2 mt-4">
-                <Button
-                  size="sm"
-                  onClick={() => setWizardOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar primeira automação
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setHelpOpen(true)}
-                >
-                  Ver exemplos
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Advanced Search and Filter */}
       <AutomationFilter
         onFilterChange={search.updateFilter}
@@ -185,25 +148,26 @@ export default function AutomationsPage() {
           <CardSkeleton />
         </div>
       ) : search.filteredAutomations.length === 0 ? (
-        <div className="text-center py-12">
-          <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            {search.currentFilter.search || search.currentFilter.status !== 'all' || 
-             search.currentFilter.triggerTypes.length > 0 || search.currentFilter.tags.length > 0
-              ? 'Nenhum resultado encontrado'
-              : 'Nenhuma automação criada'}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            {search.currentFilter.search || search.currentFilter.status !== 'all' || 
-             search.currentFilter.triggerTypes.length > 0 || search.currentFilter.tags.length > 0
-              ? 'Tente ajustar seus filtros ou criar uma nova automação'
-              : 'Crie sua primeira automação para começar a automatizar seus processos'}
-          </p>
-          <Button onClick={() => setWizardOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Criar automação
-          </Button>
-        </div>
+        (() => {
+          const hasActiveFilters =
+            !!search.currentFilter.search ||
+            search.currentFilter.status !== 'all' ||
+            search.currentFilter.triggerTypes.length > 0 ||
+            search.currentFilter.tags.length > 0;
+          return (
+            <EmptyState
+              icon={Zap}
+              title={hasActiveFilters ? 'Nenhum resultado encontrado' : 'Comece criando sua primeira automação'}
+              description={
+                hasActiveFilters
+                  ? 'Tente ajustar seus filtros ou crie uma nova automação.'
+                  : 'Automatize tarefas repetitivas para economizar tempo e garantir consistência nas interações com seus clientes.'
+              }
+              actionLabel={hasActiveFilters ? 'Criar automação' : 'Criar primeira automação'}
+              onAction={() => setWizardOpen(true)}
+            />
+          );
+        })()
       ) : (
         <AutomationsList
           automations={search.filteredAutomations}
