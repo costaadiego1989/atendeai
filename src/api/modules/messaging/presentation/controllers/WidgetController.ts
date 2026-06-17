@@ -51,7 +51,11 @@ export class WidgetController {
 
   @Get(':publicToken/config')
   async getConfig(@Param('publicToken') publicToken: string) {
-    return this.getPublicConfig.execute(publicToken);
+    // tenantId is needed internally (sendMessage) but must not leak to the
+    // embedding site — strip it from the public HTTP response.
+    const { tenantId: _tenantId, ...publicConfig } =
+      await this.getPublicConfig.execute(publicToken);
+    return publicConfig;
   }
 
   @Post(':publicToken/sessions')
