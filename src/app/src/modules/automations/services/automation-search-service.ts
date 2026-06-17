@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { TriggerType, StepType, TriggerConfig, AutomationStep } from '../types';
 
-// Native debounce implementation
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   delay: number
@@ -53,7 +53,7 @@ export interface AutomationSearchService {
   getAvailableTags: () => Promise<string[]>;
 }
 
-class AutomationSearchServiceImpl implements AutomationSearchService {
+export class AutomationSearchServiceImpl implements AutomationSearchService {
   private debounceTimer: NodeJS.Timeout | null = null;
 
   async searchAutomations(filter: AutomationFilter): Promise<Automation[]> {
@@ -62,7 +62,6 @@ class AutomationSearchServiceImpl implements AutomationSearchService {
       clearTimeout(this.debounceTimer);
     }
 
-    // Simular debounce
     return new Promise((resolve) => {
       this.debounceTimer = setTimeout(async () => {
         try {
@@ -123,13 +122,11 @@ class AutomationSearchServiceImpl implements AutomationSearchService {
   }
 }
 
-// Função utilitária para filtrar automações localmente (fallback)
 export function filterAutomationsLocally(
   automations: Automation[],
   filter: AutomationFilter
 ): Automation[] {
   return automations.filter((automation) => {
-    // Filtro de busca
     if (filter.search) {
       const searchLower = filter.search.toLowerCase();
       const searchableText = `${automation.name} ${automation.description || ''} ${automation.tags?.join(' ') || ''}`.toLowerCase();
@@ -138,7 +135,6 @@ export function filterAutomationsLocally(
       }
     }
 
-    // Filtro de status
     if (filter.status !== 'all') {
       const isActive = filter.status === 'active';
       if (automation.isActive !== isActive) {
@@ -146,21 +142,18 @@ export function filterAutomationsLocally(
       }
     }
 
-    // Filtro de tipo de gatilho
     if (filter.triggerTypes.length > 0) {
       if (!filter.triggerTypes.includes(automation.trigger.type)) {
         return false;
       }
     }
 
-    // Filtro de tags
     if (filter.tags.length > 0) {
       if (!filter.tags.some(tag => automation.tags?.includes(tag))) {
         return false;
       }
     }
 
-    // Filtro de data range
     if (filter.dateRange.start || filter.dateRange.end) {
       const createdDate = new Date(automation.createdAt);
       
@@ -177,7 +170,6 @@ export function filterAutomationsLocally(
   });
 }
 
-// Hook para gerenciar estado de busca e filtros
 export function useAutomationSearch(initialAutomations: Automation[] = []) {
   const [searchService] = useState(() => new AutomationSearchServiceImpl());
   const [automations, setAutomations] = useState<Automation[]>(initialAutomations);
@@ -193,13 +185,11 @@ export function useAutomationSearch(initialAutomations: Automation[] = []) {
     tags: [],
   });
 
-  // Aplicar filtros quando automações ou filtro mudam
   useEffect(() => {
     const filtered = filterAutomationsLocally(automations, currentFilter);
     setFilteredAutomations(filtered);
   }, [automations, currentFilter]);
 
-  // Carregar métricas
   useEffect(() => {
     const loadMetrics = async () => {
       try {
@@ -213,7 +203,6 @@ export function useAutomationSearch(initialAutomations: Automation[] = []) {
     loadMetrics();
   }, [searchService]);
 
-  // Carregar tags disponíveis
   useEffect(() => {
     const loadTags = async () => {
       try {
@@ -227,7 +216,6 @@ export function useAutomationSearch(initialAutomations: Automation[] = []) {
     loadTags();
   }, [searchService]);
 
-  // Buscar automações com filtro
   const searchAutomations = useCallback(
     debounce(async (filter: AutomationFilter) => {
       setIsLoading(true);
@@ -236,7 +224,6 @@ export function useAutomationSearch(initialAutomations: Automation[] = []) {
         setAutomations(results);
       } catch (error) {
         console.error('Search failed:', error);
-        // Fallback para busca local
         const filtered = filterAutomationsLocally(automations, filter);
         setAutomations(filtered);
       } finally {
@@ -246,14 +233,12 @@ export function useAutomationSearch(initialAutomations: Automation[] = []) {
     [searchService, automations]
   );
 
-  // Atualizar filtro
   const updateFilter = useCallback((filter: Partial<AutomationFilter>) => {
     const newFilter = { ...currentFilter, ...filter };
     setCurrentFilter(newFilter);
     searchAutomations(newFilter);
   }, [currentFilter, searchAutomations]);
 
-  // Limpar filtros
   const clearFilters = useCallback(() => {
     const defaultFilter: AutomationFilter = {
       search: '',
@@ -266,7 +251,6 @@ export function useAutomationSearch(initialAutomations: Automation[] = []) {
     searchAutomations(defaultFilter);
   }, [searchAutomations]);
 
-  // Recarregar dados
   const refetch = useCallback(async () => {
     setIsLoading(true);
     try {
