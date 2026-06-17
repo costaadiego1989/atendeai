@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -8,10 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { StepType, STEP_LABELS } from '../types';
 import type { AutomationStep } from '../types';
+import { StepConfigFields } from './StepConfigFields';
+import { getDefaultStepConfig } from '../utils/step-defaults';
 
 interface AutomationStepBuilderProps {
   steps: Omit<AutomationStep, 'id'>[];
@@ -23,157 +23,11 @@ const STEP_OPTIONS = Object.values(StepType).map((type) => ({
   label: STEP_LABELS[type],
 }));
 
-function getDefaultConfig(type: StepType): Record<string, unknown> {
-  switch (type) {
-    case StepType.SEND_MESSAGE:
-      return { channel: 'whatsapp', body: '' };
-    case StepType.WAIT_DELAY:
-      return { delayHuman: '1h', delayMs: 3600000 };
-    case StepType.CONDITION_BRANCH:
-      return { field: '', operator: 'equals', value: '' };
-    case StepType.HTTP_REQUEST:
-      return { method: 'POST', url: '', headers: {}, body: {} };
-    case StepType.UPDATE_CONTACT:
-      return { fields: {} };
-    case StepType.ADD_TAG:
-    case StepType.REMOVE_TAG:
-      return { tag: '' };
-    case StepType.ASSIGN_AGENT:
-      return { userId: '' };
-    case StepType.AI_RESPONSE:
-      return {};
-    case StepType.CREATE_TASK:
-      return { title: '', dueInHours: 24 };
-    default:
-      return {};
-  }
-}
-
-function StepConfigFields({
-  step,
-  onConfigChange,
-}: {
-  step: Omit<AutomationStep, 'id'>;
-  onConfigChange: (config: Record<string, unknown>) => void;
-}) {
-  const config = step.config;
-
-  switch (step.type) {
-    case StepType.SEND_MESSAGE:
-      return (
-        <div className="space-y-2">
-          <div className="space-y-1">
-            <Label className="text-xs">Canal</Label>
-            <Select
-              value={(config.channel as string) || 'whatsapp'}
-              onValueChange={(v) => onConfigChange({ ...config, channel: v })}
-            >
-              <SelectTrigger className="text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="web_chat">Web Chat</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Mensagem</Label>
-            <Textarea
-              rows={2}
-              className="text-xs"
-              placeholder="Olá {nome}, tudo bem?"
-              value={(config.body as string) || ''}
-              onChange={(e) => onConfigChange({ ...config, body: e.target.value })}
-            />
-          </div>
-        </div>
-      );
-
-    case StepType.WAIT_DELAY:
-      return (
-        <div className="space-y-1">
-          <Label className="text-xs">Tempo de espera</Label>
-          <Input
-            className="text-sm"
-            placeholder="Ex: 5m, 1h, 2d"
-            value={(config.delayHuman as string) || ''}
-            onChange={(e) => onConfigChange({ ...config, delayHuman: e.target.value })}
-          />
-          <p className="text-[10px] text-muted-foreground">
-            Use m (minutos), h (horas), d (dias)
-          </p>
-        </div>
-      );
-
-    case StepType.ADD_TAG:
-    case StepType.REMOVE_TAG:
-      return (
-        <div className="space-y-1">
-          <Label className="text-xs">Tag</Label>
-          <Input
-            className="text-sm"
-            placeholder="Nome da tag"
-            value={(config.tag as string) || ''}
-            onChange={(e) => onConfigChange({ ...config, tag: e.target.value })}
-          />
-        </div>
-      );
-
-    case StepType.ASSIGN_AGENT:
-      return (
-        <div className="space-y-1">
-          <Label className="text-xs">ID do agente</Label>
-          <Input
-            className="text-sm"
-            placeholder="UUID do usuário"
-            value={(config.userId as string) || ''}
-            onChange={(e) => onConfigChange({ ...config, userId: e.target.value })}
-          />
-        </div>
-      );
-
-    case StepType.CREATE_TASK:
-      return (
-        <div className="space-y-2">
-          <div className="space-y-1">
-            <Label className="text-xs">Título da tarefa</Label>
-            <Input
-              className="text-sm"
-              placeholder="Ligar para o contato"
-              value={(config.title as string) || ''}
-              onChange={(e) => onConfigChange({ ...config, title: e.target.value })}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Prazo (horas)</Label>
-            <Input
-              type="number"
-              className="text-sm"
-              value={(config.dueInHours as number) || 24}
-              onChange={(e) =>
-                onConfigChange({ ...config, dueInHours: Number(e.target.value) })
-              }
-            />
-          </div>
-        </div>
-      );
-
-    default:
-      return (
-        <p className="text-[10px] text-muted-foreground">
-          Configuração avançada disponível em breve.
-        </p>
-      );
-  }
-}
-
 export function AutomationStepBuilder({ steps, onChange }: AutomationStepBuilderProps) {
   const addStep = () => {
     onChange([
       ...steps,
-      { type: StepType.SEND_MESSAGE, config: getDefaultConfig(StepType.SEND_MESSAGE), order: steps.length },
+      { type: StepType.SEND_MESSAGE, config: getDefaultStepConfig(StepType.SEND_MESSAGE), order: steps.length },
     ]);
   };
 
@@ -184,7 +38,7 @@ export function AutomationStepBuilder({ steps, onChange }: AutomationStepBuilder
 
   const updateStepType = (index: number, type: StepType) => {
     const next = steps.map((s, i) =>
-      i === index ? { ...s, type, config: getDefaultConfig(type) } : s,
+      i === index ? { ...s, type, config: getDefaultStepConfig(type) } : s,
     );
     onChange(next);
   };

@@ -39,6 +39,8 @@ import {
 } from 'lucide-react';
 import { TriggerType, StepType, TRIGGER_LABELS, STEP_LABELS } from '../types';
 import type { Automation, CreateAutomationInput, AutomationStep } from '../types';
+import { StepConfigFields } from './StepConfigFields';
+import { getDefaultStepConfig } from '../utils/step-defaults';
 import { z } from 'zod';
 
 interface WizardStep {
@@ -389,72 +391,6 @@ function StepsStep({ data, onChange, errors }: WizardStepProps) {
       )}
     </div>
   );
-}
-
-function StepConfigFields({ step, onConfigChange }: { step: any; onConfigChange: (config: any) => void }) {
-  switch (step.type) {
-    case StepType.SEND_MESSAGE:
-      return (
-        <div className="space-y-2">
-          <div className="space-y-1">
-            <label className="text-xs">Mensagem</label>
-            <Textarea
-              rows={2}
-              placeholder="Ex: Olá {nome}, tudo bem?"
-              value={step.config.body || ''}
-              onChange={(e) => onConfigChange({ ...step.config, body: e.target.value })}
-            />
-          </div>
-        </div>
-      );
-
-    case StepType.WAIT_DELAY:
-      return (
-        <div className="space-y-1">
-          <label className="text-xs">Tempo de espera</label>
-          <Input
-            placeholder="Ex: 5m, 1h, 2d"
-            value={step.config.delayHuman || ''}
-            onChange={(e) => onConfigChange({ ...step.config, delayHuman: e.target.value })}
-          />
-          <p className="text-[10px] text-muted-foreground">Use m (minutos), h (horas), d (dias)</p>
-        </div>
-      );
-
-    case StepType.ADD_TAG:
-    case StepType.REMOVE_TAG:
-      return (
-        <div className="space-y-1">
-          <label className="text-xs">Tag</label>
-          <Input
-            placeholder="Nome da tag"
-            value={step.config.tag || ''}
-            onChange={(e) => onConfigChange({ ...step.config, tag: e.target.value })}
-          />
-        </div>
-      );
-
-    default:
-      return (
-        <p className="text-xs text-muted-foreground">
-          Configuração avançada disponível em breve.
-        </p>
-      );
-  }
-}
-
-function getDefaultStepConfig(type: StepType): Record<string, unknown> {
-  switch (type) {
-    case StepType.SEND_MESSAGE:
-      return { channel: 'whatsapp', body: '' };
-    case StepType.WAIT_DELAY:
-      return { delayHuman: '1h', delayMs: 3600000 };
-    case StepType.ADD_TAG:
-    case StepType.REMOVE_TAG:
-      return { tag: '' };
-    default:
-      return {};
-  }
 }
 
 function getTriggerDescription(type: TriggerType): string {
