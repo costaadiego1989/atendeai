@@ -29,11 +29,18 @@ export class MetaInstagramOAuthService {
       client_id: this.getClientId(),
       redirect_uri: this.getRedirectUri(),
       response_type: 'code',
-      scope: ['pages_show_list', 'business_management', 'instagram_basic'].join(
-        ',',
-      ),
       state,
     });
+
+    const loginConfigId = this.getLoginConfigId();
+    if (loginConfigId) {
+      params.set('config_id', loginConfigId);
+    } else {
+      params.set(
+        'scope',
+        ['pages_show_list', 'business_management', 'instagram_basic'].join(','),
+      );
+    }
 
     return `${this.authUrl}?${params.toString()}`;
   }
@@ -187,5 +194,11 @@ export class MetaInstagramOAuthService {
 
   getGraphApiVersion(): string {
     return this.configService.get<string>('META_GRAPH_API_VERSION') || 'v20.0';
+  }
+
+  getLoginConfigId(): string {
+    return (
+      this.configService.get<string>('META_INSTAGRAM_LOGIN_CONFIG_ID') || ''
+    );
   }
 }
