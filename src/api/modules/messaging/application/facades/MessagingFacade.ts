@@ -43,6 +43,13 @@ export interface IMessagingFacade {
   queueTemplateMessage(
     input: QueueTemplateMessageParams,
   ): Promise<{ conversationId: string; messageId: string }>;
+
+  assignConversationUser(input: {
+    tenantId: string;
+    contactId: string;
+    userId: string | null;
+    conversationId?: string | null;
+  }): Promise<{ conversationId: string } | null>;
 }
 
 export const MESSAGING_FACADE = 'MESSAGING_FACADE';
@@ -144,6 +151,40 @@ export class MessagingFacade implements IMessagingFacade {
       conversationId: conversation.id.toString(),
       messageId: message.id.toString(),
     };
+  }
+
+  async assignConversationUser(input: {
+    tenantId: string;
+    contactId: string;
+    userId: string | null;
+    conversationId?: string | null;
+  }): Promise<{ conversationId: string } | null> {
+    let conversation = input.conversationId
+      ? await this.conversationRepository.findById(input.conversationId)
+      : await this.conversationRepository.findLatestByContact(
+          input.tenantId,
+          input.contactId,
+        );
+
+    if (
+      conversation &&
+      (conversation.tenantId.toString() !== input.tenantId ||
+        conversation.contactId.toString() !== input.contactId)
+    ) {
+      conversation = null;
+    }
+
+    if (!conversation) {
+      return null;
+    }
+
+    await this.conversationRepository.setAssignedUser(
+      input.tenantId,
+      conversation.id.toString(),
+      input.userId,
+    );
+
+    return { conversationId: conversation.id.toString() };
   }
 
   async queueTemplateMessage(

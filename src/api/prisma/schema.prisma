@@ -1813,3 +1813,21 @@ model AutomationExecution {
   @@map("automation_executions")
   @@schema("tenant_schema")
 }
+
+model CrmTask {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  contactId   String?   @map("contact_id") @db.Uuid
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  status      String    @default("PENDING") @db.VarChar(20) // PENDING, DONE, CANCELLED
+  dueAt       DateTime? @map("due_at") @db.Timestamptz
+  source      String    @default("MANUAL") @db.VarChar(30) // MANUAL, AUTOMATION
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([tenantId, status], name: "idx_crm_tasks_tenant_status")
+  @@index([tenantId, contactId], name: "idx_crm_tasks_tenant_contact")
+  @@map("crm_tasks")
+  @@schema("tenant_schema")
+}

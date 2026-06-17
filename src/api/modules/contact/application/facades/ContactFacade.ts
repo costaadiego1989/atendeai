@@ -61,6 +61,22 @@ export interface IContactFacade {
   ): Promise<string[]>;
 
   markProspectingOptOut(tenantId: string, contactId: string): Promise<void>;
+
+  addTag(tenantId: string, contactId: string, tag: string): Promise<void>;
+
+  removeTag(tenantId: string, contactId: string, tag: string): Promise<void>;
+
+  updateContactFields(
+    tenantId: string,
+    contactId: string,
+    fields: {
+      name?: string;
+      document?: string;
+      email?: string;
+      notes?: string;
+      stage?: 'LEAD' | 'PROSPECT' | 'OPPORTUNITY' | 'CUSTOMER' | 'INACTIVE';
+    },
+  ): Promise<void>;
 }
 
 export const CONTACT_FACADE = 'CONTACT_FACADE';
@@ -185,6 +201,62 @@ export class ContactFacade implements IContactFacade {
     const contact = await this.contactRepository.findById(tenantId, contactId);
     if (!contact) return;
     contact.markProspectingOptOut();
+    await this.contactRepository.save(contact);
+  }
+
+  async addTag(
+    tenantId: string,
+    contactId: string,
+    tag: string,
+  ): Promise<void> {
+    const contact = await this.contactRepository.findById(tenantId, contactId);
+    if (!contact) {
+      throw new Error(`Contact ${contactId} not found`);
+    }
+    contact.addTag(tag);
+    await this.contactRepository.save(contact);
+  }
+
+  async removeTag(
+    tenantId: string,
+    contactId: string,
+    tag: string,
+  ): Promise<void> {
+    const contact = await this.contactRepository.findById(tenantId, contactId);
+    if (!contact) {
+      throw new Error(`Contact ${contactId} not found`);
+    }
+    contact.removeTag(tag);
+    await this.contactRepository.save(contact);
+  }
+
+  async updateContactFields(
+    tenantId: string,
+    contactId: string,
+    fields: {
+      name?: string;
+      document?: string;
+      email?: string;
+      notes?: string;
+      stage?: 'LEAD' | 'PROSPECT' | 'OPPORTUNITY' | 'CUSTOMER' | 'INACTIVE';
+    },
+  ): Promise<void> {
+    const contact = await this.contactRepository.findById(tenantId, contactId);
+    if (!contact) {
+      throw new Error(`Contact ${contactId} not found`);
+    }
+
+    contact.updateDetails({
+      name: fields.name ? ContactName.create(fields.name) : undefined,
+      document: fields.document,
+      email: fields.email,
+      notes: fields.notes,
+    });
+
+    if (fields.stage) {
+      contact.updateStage(ContactStageVO.create(fields.stage));
+    }
+
     await this.contactRepository.save(contact);
   }
 
