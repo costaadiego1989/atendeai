@@ -92,10 +92,10 @@ export class AdvanceCommerceConversationUseCase {
       });
     }
 
-    // Global escape hatch: from ANY step the customer can restart / go back to
-    // the initial menu, so they can never get stuck in the flow. The active
-    // session is cancelled; the next message starts a fresh session.
-    if (session && this.conversationFlowRules.isResetIntent(normalizedMessage)) {
+    if (
+      session &&
+      this.conversationFlowRules.isResetIntent(normalizedMessage)
+    ) {
       return this.commerceRepository.updateSessionState({
         tenantId: input.tenantId,
         sessionId: session.id,
