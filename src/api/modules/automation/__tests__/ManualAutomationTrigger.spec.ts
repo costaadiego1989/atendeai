@@ -1,22 +1,9 @@
-/**
- * Tests for the MANUAL trigger type and the trigger-automation endpoint.
- *
- * Coverage:
- *  1. TriggerAutomationUseCase handles MANUAL trigger correctly.
- *  2. MessagingController.triggerAutomation validates automation ownership,
- *     rejects non-MANUAL automations, and dispatches when valid.
- *  3. ProcessAIResponseService extracts [USE_AUTOMATION:id] markers and
- *     delegates to IManualAutomationFacade.
- */
-
 import { BadRequestException } from '@nestjs/common';
 import { TriggerAutomationUseCase } from '../application/use-cases/TriggerAutomationUseCase';
 import { ExecuteAutomationUseCase } from '../application/use-cases/ExecuteAutomationUseCase';
 import { IAutomationRepository } from '../application/ports/IAutomationRepository';
 import { AutomationEntity } from '../domain/entities/Automation';
 import { TriggerType } from '../domain/value-objects/TriggerType';
-
-// ─── Shared fixtures ────────────────────────────────────────────────────────
 
 function makeAutomation(
   id: string,
@@ -46,7 +33,6 @@ function makeAutomation(
   };
 }
 
-// ─── TriggerAutomationUseCase – MANUAL trigger ──────────────────────────────
 
 describe('TriggerAutomationUseCase – MANUAL trigger', () => {
   let useCase: TriggerAutomationUseCase;

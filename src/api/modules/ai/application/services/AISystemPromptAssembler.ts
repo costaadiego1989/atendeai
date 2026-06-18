@@ -39,12 +39,13 @@ export class AISystemPromptAssembler {
   ) {}
 
   async assemble(input: AssemblePromptInput): Promise<AssemblePromptResult> {
-    const { systemPrompt, diagnostics } = await this.contextAggregator.aggregate(
-      input.tenant,
-      input.conversationId,
-      input.userMessage,
-      input.isFirstInteraction,
-    );
+    const { systemPrompt, diagnostics } =
+      await this.contextAggregator.aggregate(
+        input.tenant,
+        input.conversationId,
+        input.userMessage,
+        input.isFirstInteraction,
+      );
 
     let prompt = await this.applyMessagingAgentRule(
       input.tenantId,

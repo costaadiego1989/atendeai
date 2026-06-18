@@ -287,7 +287,11 @@ export class ProcessAIResponseService {
       const finalText = cleanedText.trim() || processedText;
 
       // 11. RAG cache store
-      if (ragCacheEnabled && queryEmbedding && response.finishReason === 'stop') {
+      if (
+        ragCacheEnabled &&
+        queryEmbedding &&
+        response.finishReason === 'stop'
+      ) {
         await this.ragResponseCache!.cacheResponse(
           input.tenantId,
           queryEmbedding,

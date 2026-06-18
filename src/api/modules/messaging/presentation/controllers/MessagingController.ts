@@ -314,7 +314,9 @@ export class MessagingController {
     );
 
     if (!automation) {
-      throw new BadRequestException('Automation not found or does not belong to this tenant.');
+      throw new BadRequestException(
+        'Automation not found or does not belong to this tenant.',
+      );
     }
 
     if (automation.trigger.type !== TriggerType.MANUAL) {

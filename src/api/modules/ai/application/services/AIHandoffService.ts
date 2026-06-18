@@ -34,7 +34,8 @@ export class AIHandoffService {
   ) {}
 
   async execute(params: HandoffInput): Promise<ProcessAIResponseOutput> {
-    const { input, tenant, response, decision, sessionId, userMessage } = params;
+    const { input, tenant, response, decision, sessionId, userMessage } =
+      params;
 
     const escalationMessage =
       tenant.aiConfig?.escalationMessage || 'Encaminhando para um humano...';

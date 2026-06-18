@@ -35,7 +35,14 @@ export class AITurnPersistenceService {
   ) {}
 
   async persist(params: PersistTurnInput): Promise<void> {
-    const { input, sessionId, processedText, aiResponse, diagnostics, userMessage } = params;
+    const {
+      input,
+      sessionId,
+      processedText,
+      aiResponse,
+      diagnostics,
+      userMessage,
+    } = params;
 
     await this.chatHistoryRepository.saveMessage(input.conversationId, {
       role: 'user',
