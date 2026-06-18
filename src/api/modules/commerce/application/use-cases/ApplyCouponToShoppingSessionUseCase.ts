@@ -9,9 +9,9 @@ import {
   ICommerceRepository,
 } from '../../domain/ports/ICommerceRepository';
 import {
-  SALES_REPOSITORY,
-  ISalesCouponRepository,
-} from '@modules/sales/domain/repositories/ISalesRepository';
+  SALES_FACADE,
+  ISalesFacade,
+} from '@modules/sales/application/facades/ISalesFacade';
 import { CouponMaxUsesReachedException } from '../../domain/errors/CouponMaxUsesReachedException';
 
 export interface ApplyCouponToShoppingSessionInput {
@@ -25,8 +25,8 @@ export class ApplyCouponToShoppingSessionUseCase {
   constructor(
     @Inject(COMMERCE_REPOSITORY)
     private readonly commerceRepository: ICommerceRepository,
-    @Inject(SALES_REPOSITORY)
-    private readonly salesRepository: ISalesCouponRepository,
+    @Inject(SALES_FACADE)
+    private readonly salesFacade: ISalesFacade,
   ) {}
 
   async execute(input: ApplyCouponToShoppingSessionInput) {
@@ -38,7 +38,7 @@ export class ApplyCouponToShoppingSessionUseCase {
       throw new NotFoundException('Shopping session not found');
     }
 
-    const coupon = await this.salesRepository.findCouponByCode(
+    const coupon = await this.salesFacade.findCouponByCode(
       input.tenantId,
       input.code,
     );
@@ -60,11 +60,18 @@ export class ApplyCouponToShoppingSessionUseCase {
 
     // Fast-fail pre-check (non-authoritative — still racy but avoids unnecessary
     // DB round-trips for clearly exhausted coupons)
-    if (coupon.maxUses > 0 && coupon.usedCount >= coupon.maxUses) {
+    if (
+      coupon.maxUses != null &&
+      coupon.maxUses > 0 &&
+      coupon.currentUses >= coupon.maxUses
+    ) {
       throw new BadRequestException('Coupon usage limit reached');
     }
 
-    if (coupon.minimumOrder && session.subtotalAmount < coupon.minimumOrder) {
+    if (
+      coupon.minimumOrder != null &&
+      session.subtotalAmount < coupon.minimumOrder
+    ) {
       throw new BadRequestException(
         `Minimum order amount of BRL ${coupon.minimumOrder} not met`,
       );
@@ -72,8 +79,8 @@ export class ApplyCouponToShoppingSessionUseCase {
 
     // COM1 fix: atomically increment only when used_count < max_uses AND active.
     // Returns null if the race was lost (coupon exhausted between pre-check and here).
-    if (coupon.maxUses > 0) {
-      const incremented = await this.salesRepository.atomicIncrementCouponUsage(
+    if (coupon.maxUses != null && coupon.maxUses > 0) {
+      const incremented = await this.salesFacade.atomicIncrementCouponUsage(
         input.tenantId,
         coupon.id,
       );
