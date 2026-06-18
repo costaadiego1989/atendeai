@@ -5,7 +5,7 @@ import { getFriendlyErrorMessage } from '@/shared/api/error-message';
 import { parseCurrencyInput } from '@/shared/lib/masks';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { contactsService } from '@/modules/contacts/services/contacts-service';
-import { schedulingService, type SchedulingSlotBillingType } from '@/modules/scheduling/services/scheduling-service';
+import { schedulingService } from '@/modules/scheduling/services/scheduling-service';
 import {
   addDays,
   getDefaultProfessionalPhone,
@@ -21,6 +21,7 @@ import {
 } from './scheduling-date-utils';
 import { useSchedulingPageState } from './useSchedulingPageState';
 import { useSchedulingReportsViewModel } from './useSchedulingReportsViewModel';
+import { useSchedulingReservationActionsViewModel } from './useSchedulingReservationActionsViewModel';
 import { useSchedulingReservationViewModel } from './useSchedulingReservationViewModel';
 import { useSchedulingRosterViewModel } from './useSchedulingRosterViewModel';
 
@@ -223,25 +224,6 @@ export function useSchedulingPageViewModel() {
     enabled: !!tenant?.id && !!categoriesQuery.data?.length,
   });
 
-  const rescheduleAvailabilityQuery = useQuery({
-    queryKey: [
-      'scheduling-reschedule-availability',
-      tenant?.id,
-      selectedSlotDetails?.professionalId,
-      rescheduleReservationForm.targetDate,
-    ],
-    queryFn: () =>
-      schedulingService.getAvailability(
-        tenant!.id,
-        selectedSlotDetails!.professionalId,
-        rescheduleReservationForm.targetDate,
-      ),
-    enabled:
-      !!tenant?.id &&
-      !!selectedSlotDetails?.professionalId &&
-      rescheduleReservationOpen,
-  });
-
   const createProfessionalMutation = useMutation({
     mutationFn: () =>
       schedulingService.createProfessional(tenant!.id, {
@@ -429,211 +411,6 @@ export function useSchedulingPageViewModel() {
     },
   });
 
-  const updateSlotMutation = useMutation({
-    mutationFn: (payload: {
-      slotId: string;
-      action:
-      | 'BLOCK'
-      | 'UNBLOCK'
-      | 'CANCEL_RESERVATION'
-      | 'UPDATE_RESERVATION'
-      | 'MARK_COMPLETED'
-      | 'MARK_NO_SHOW';
-      contactId?: string;
-      categoryId?: string;
-      notes?: string;
-    }) => {
-      const professionalId = selectedSlotDetails?.professionalId ?? selectedProfessionalId;
-
-      if (!tenant?.id || !professionalId) {
-        return Promise.reject(new Error('Selecione um profissional antes de atualizar a agenda.'));
-      }
-
-      return schedulingService.updateSlot(
-        tenant.id,
-        professionalId,
-        payload.slotId,
-        {
-          date: selectedDate,
-          action: payload.action,
-          contactId: payload.contactId,
-          categoryId: payload.categoryId,
-          notes: payload.notes,
-        },
-        activeBranchId,
-      );
-    },
-    onSuccess: async (_, payload) => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-availability', tenant?.id, selectedProfessionalId, selectedDate],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-calendar-range', tenant?.id],
-          exact: false,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-category-availability', tenant?.id],
-          exact: false,
-        }),
-      ]);
-      setSlotDetailsOpen(false);
-      setSelectedSlotDetails(null);
-      toast({
-        title:
-          payload.action === 'BLOCK'
-            ? 'horário bloqueado'
-            : payload.action === 'UNBLOCK'
-              ? 'horário desbloqueado'
-              : payload.action === 'CANCEL_RESERVATION'
-                ? 'Reserva cancelada'
-                : payload.action === 'MARK_COMPLETED'
-                  ? 'Atendimento concluido'
-                  : payload.action === 'MARK_NO_SHOW'
-                    ? 'No-show registrado'
-                    : 'Reserva atualizada',
-        description: 'A agenda foi atualizada com sucesso.',
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Falha ao atualizar horário',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível atualizar este horário agora.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const rescheduleReservationMutation = useMutation({
-    mutationFn: () =>
-      schedulingService.rescheduleReservation(
-        tenant!.id,
-        selectedSlotDetails!.professionalId,
-        selectedSlotDetails!.id,
-        {
-          sourceDate: selectedDate,
-          targetDate: rescheduleReservationForm.targetDate,
-          targetSlotId: rescheduleReservationForm.targetSlotId,
-        },
-        activeBranchId,
-      ),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-availability', tenant?.id, selectedProfessionalId, selectedDate],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [
-            'scheduling-availability',
-            tenant?.id,
-            selectedProfessionalId,
-            rescheduleReservationForm.targetDate,
-          ],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-calendar-range', tenant?.id],
-          exact: false,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-category-availability', tenant?.id],
-          exact: false,
-        }),
-      ]);
-      setRescheduleReservationOpen(false);
-      setSlotDetailsOpen(false);
-      setSelectedSlotDetails(null);
-      setRescheduleReservationForm({
-        targetDate: selectedDate,
-        targetSlotId: '',
-      });
-      toast({
-        title: 'Reserva remarcada',
-        description: 'O horário foi movido e a agenda foi sincronizada.',
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Falha ao remarcar reserva',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível remarcar este horário agora.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const createSlotPaymentLinkMutation = useMutation({
-    mutationFn: (billingType: SchedulingSlotBillingType) => {
-      if (!tenant?.id || !selectedSlotDetails) {
-        return Promise.reject(new Error('Selecione um horário com reserva.'));
-      }
-
-      return schedulingService.createSlotPaymentLink(
-        tenant.id,
-        selectedSlotDetails.professionalId,
-        selectedSlotDetails.id,
-        selectedDate,
-        billingType,
-        activeBranchId,
-      );
-    },
-    onSuccess: async (slot) => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-availability', tenant?.id, selectedProfessionalId, selectedDate],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-calendar-range', tenant?.id],
-          exact: false,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['scheduling-category-availability', tenant?.id],
-          exact: false,
-        }),
-      ]);
-
-      setSelectedSlotDetails((prev) => {
-        if (!prev || prev.id !== slot.id) {
-          return prev;
-        }
-
-        return {
-          ...prev,
-          status: slot.status ?? prev.status,
-          payment: slot.payment ?? prev.payment,
-          reservedFor: slot.reservedFor ?? prev.reservedFor,
-          reservedAt: slot.reservedAt ?? prev.reservedAt,
-          startsAt: slot.startsAt ?? prev.startsAt,
-          endsAt: slot.endsAt ?? prev.endsAt,
-          customPrice: slot.customPrice ?? prev.customPrice,
-        };
-      });
-
-      const url = slot.payment?.linkUrl;
-      toast({
-        title: 'Link de pagamento criado',
-        description: url
-          ? 'O link foi copiado para a área de transferência quando possível.'
-          : 'Pagamento associado ao horário.',
-      });
-
-      if (url && typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        void navigator.clipboard.writeText(url).catch(() => {});
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: 'Falha ao gerar link',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível criar o link de pagamento agora.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
-
   const professionals = professionalsQuery.data ?? [];
   const categories = categoriesQuery.data ?? [];
   const contacts = contactsQuery.data?.data ?? [];
@@ -684,16 +461,20 @@ export function useSchedulingPageViewModel() {
   }, [categories, categoryAssignmentsQuery.data, professionals]);
   const selectedProfessionalCategories =
     selectedProfessionalId ? professionalCategoryMap[selectedProfessionalId] ?? [] : [];
-  const rescheduleAvailableSlots = sortSlots(
-    (rescheduleAvailabilityQuery.data ?? []).filter(
-      (slot) =>
-        slot.status === 'AVAILABLE' &&
-        !(
-          rescheduleReservationForm.targetDate === selectedDate &&
-          slot.id === selectedSlotDetails?.id
-        ),
-    ),
-  );
+  const reservationActionsVm = useSchedulingReservationActionsViewModel({
+    tenantId: tenant?.id,
+    activeBranchId,
+    selectedDate,
+    selectedProfessionalId,
+    selectedSlotDetails,
+    setSelectedSlotDetails,
+    setSlotDetailsOpen,
+    setRescheduleReservationOpen,
+    rescheduleReservationOpen,
+    rescheduleReservationForm,
+    setRescheduleReservationForm,
+    editReservationForm,
+  });
   const rosterVm = useSchedulingRosterViewModel({
     tenantId: tenant?.id,
     tenantOperatingHours: tenant?.operatingHours,
@@ -859,7 +640,7 @@ export function useSchedulingPageViewModel() {
     setSelectedSlotDetails,
     slotDetailsOpen,
     setSlotDetailsOpen,
-    rescheduleAvailableSlots,
+    rescheduleAvailableSlots: reservationActionsVm.rescheduleAvailableSlots,
     professionals,
     categories,
     contacts,
@@ -885,7 +666,7 @@ export function useSchedulingPageViewModel() {
     categoriesQuery,
     contactsQuery,
     availabilityQuery,
-    rescheduleAvailabilityQuery,
+    rescheduleAvailabilityQuery: reservationActionsVm.rescheduleAvailabilityQuery,
     categoryProfessionalsQuery,
     categoryAvailabilityQuery,
     calendarRangeQuery,
@@ -900,11 +681,11 @@ export function useSchedulingPageViewModel() {
     bulkProgress: rosterVm.bulkProgress,
     assignCategoriesMutation: rosterVm.assignCategoriesMutation,
     reserveSlotMutation: reservationVm.reserveSlotMutation,
-    updateSlotMutation,
-    rescheduleReservationMutation,
+    updateSlotMutation: reservationActionsVm.updateSlotMutation,
+    rescheduleReservationMutation: reservationActionsVm.rescheduleReservationMutation,
     generateReportMutation: reportsVm.generateReportMutation,
     syncReportSummaryMutation: reportsVm.syncReportSummaryMutation,
-    createSlotPaymentLinkMutation,
+    createSlotPaymentLinkMutation: reservationActionsVm.createSlotPaymentLinkMutation,
     downloadCurrentReport: reportsVm.downloadCurrentReport,
     openAssignCategories: rosterVm.openAssignCategories,
     toggleAssignmentCategory: rosterVm.toggleAssignmentCategory,
@@ -1080,16 +861,16 @@ export function useSchedulingPageViewModel() {
     },
     submitReserveSlot: reservationVm.submitReserveSlot,
     blockSlot(slotId: string) {
-      updateSlotMutation.mutate({ slotId, action: 'BLOCK' });
+      reservationActionsVm.updateSlotMutation.mutate({ slotId, action: 'BLOCK' });
     },
     unblockSlot(slotId: string) {
-      updateSlotMutation.mutate({ slotId, action: 'UNBLOCK' });
+      reservationActionsVm.updateSlotMutation.mutate({ slotId, action: 'UNBLOCK' });
     },
     cancelReservation(slotId: string) {
-      updateSlotMutation.mutate({ slotId, action: 'CANCEL_RESERVATION' });
+      reservationActionsVm.updateSlotMutation.mutate({ slotId, action: 'CANCEL_RESERVATION' });
     },
     updateReservation(slotId: string) {
-      updateSlotMutation.mutate({
+      reservationActionsVm.updateSlotMutation.mutate({
         slotId,
         action: 'UPDATE_RESERVATION',
         contactId:
@@ -1102,14 +883,14 @@ export function useSchedulingPageViewModel() {
       });
     },
     markReservationCompleted(slotId: string) {
-      updateSlotMutation.mutate({
+      reservationActionsVm.updateSlotMutation.mutate({
         slotId,
         action: 'MARK_COMPLETED',
         notes: editReservationForm.notes.trim() || undefined,
       });
     },
     markReservationNoShow(slotId: string) {
-      updateSlotMutation.mutate({
+      reservationActionsVm.updateSlotMutation.mutate({
         slotId,
         action: 'MARK_NO_SHOW',
         notes: editReservationForm.notes.trim() || undefined,
@@ -1136,7 +917,7 @@ export function useSchedulingPageViewModel() {
         return;
       }
 
-      rescheduleReservationMutation.mutate();
+      reservationActionsVm.rescheduleReservationMutation.mutate();
     },
   };
 }

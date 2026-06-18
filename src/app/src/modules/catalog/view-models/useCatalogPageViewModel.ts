@@ -1,18 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/components/ui/use-toast';
 import { catalogService } from '@/modules/catalog/services/catalog-service';
 import { inventoryService } from '@/modules/inventory/services/inventory-service';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
-import type { AsyncOperationItem } from '@/shared/ui/AsyncOperationsPanel';
 import {
   formatCurrencyInput,
   parseCurrencyInput,
 } from '@/shared/lib/masks';
-import { formatCurrency } from '@/shared/lib/formatters';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import type { CatalogAsyncJob, CatalogCategory, CatalogItem } from '@/shared/types';
+import type { CatalogCategory, CatalogItem } from '@/shared/types';
 import { requiresInventoryControl } from '../utils/formatters';
+import { useCatalogJobsViewModel } from './useCatalogJobsViewModel';
 
 const DEFAULT_CATEGORY_FORM = {
   name: '',
@@ -59,26 +58,6 @@ const DEFAULT_ITEM_FORM = {
     }>;
   }>,
 };
-
-const DEFAULT_REPORT_FILTERS = {
-  query: '',
-  types: [] as Array<'SERVICE' | 'PRODUCT' | 'RENTAL'>,
-  categoryIds: [] as string[],
-  includeInactive: false,
-};
-
-const DEFAULT_IMPORT_FORM = {
-  rawText: '',
-  defaultType: 'PRODUCT' as 'PRODUCT' | 'SERVICE' | 'RENTAL',
-  defaultCategoryName: '',
-  defaultSource: 'IMPORT' as 'MANUAL' | 'IMPORT' | 'ERP_SNAPSHOT',
-  defaultTags: '',
-  syncInventory: true,
-};
-
-function isActiveJob(job?: CatalogAsyncJob | null) {
-  return job?.status === 'QUEUED' || job?.status === 'PROCESSING';
-}
 
 function splitTags(value: string) {
   return value
@@ -227,17 +206,18 @@ export function useCatalogPageViewModel() {
   const [createItemOpen, setCreateItemOpen] = useState(false);
   const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
-  const [reportsOpen, setReportsOpenState] = useState(false);
-  const [importOpen, setImportOpenState] = useState(false);
   const [deleteCategoryTarget, setDeleteCategoryTarget] = useState<CatalogCategory | null>(null);
   const [deleteItemTarget, setDeleteItemTarget] = useState<CatalogItem | null>(null);
   const [categoryForm, setCategoryForm] = useState(DEFAULT_CATEGORY_FORM);
   const [itemForm, setItemForm] = useState(DEFAULT_ITEM_FORM);
-  const [reportFilters, setReportFilters] = useState(DEFAULT_REPORT_FILTERS);
-  const [importForm, setImportForm] = useState(DEFAULT_IMPORT_FORM);
-  const [currentReportJobId, setCurrentReportJobId] = useState<string | null>(null);
-  const [currentImportJobId, setCurrentImportJobId] = useState<string | null>(null);
-  const handledJobsRef = useRef<Record<string, string>>({});
+
+  const jobs = useCatalogJobsViewModel({
+    onImportSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
+      await queryClient.invalidateQueries({ queryKey: ['catalog-categories'] });
+      await queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+    },
+  });
 
   const categoriesQuery = useQuery({
     queryKey: ['catalog-categories', tenant?.id],
@@ -253,29 +233,6 @@ export function useCatalogPageViewModel() {
         type: typeFilter === 'ALL' ? undefined : typeFilter,
         includeInactive: showInactive,
       }),
-  });
-
-  const jobsQuery = useQuery({
-    queryKey: ['catalog-async-jobs', tenant?.id],
-    queryFn: () => catalogService.listAsyncJobs(tenant!.id),
-    enabled: Boolean(tenant?.id),
-    refetchOnWindowFocus: false,
-    refetchInterval: (query) => {
-      const jobs = (query.state.data ?? []) as CatalogAsyncJob[];
-      return jobs.some((job) => isActiveJob(job)) ? 3000 : false;
-    },
-  });
-
-  const pollingJobId = currentReportJobId ?? currentImportJobId ?? null;
-
-  const focusedJobQuery = useQuery({
-    queryKey: ['catalog-async-job', tenant?.id, pollingJobId],
-    enabled: Boolean(tenant?.id && pollingJobId),
-    queryFn: () => catalogService.getAsyncJob(tenant!.id, pollingJobId!),
-    refetchInterval: (query) => {
-      const job = query.state.data as CatalogAsyncJob | undefined;
-      return job && isActiveJob(job) ? 2500 : false;
-    },
   });
 
   // Fetch inventory items linked to the catalog item being edited (for SKU divergence detection)
@@ -297,132 +254,6 @@ export function useCatalogPageViewModel() {
       ),
     staleTime: 30_000,
   });
-
-  function resolveJobFromList(jobId: string | null) {
-    return jobId ? ((jobsQuery.data ?? []).find((job) => job.id === jobId) ?? null) : null;
-  }
-
-  const activeReportJob = useMemo(() => {
-    if (!currentReportJobId) {
-      return null;
-    }
-
-    if (focusedJobQuery.data?.id === currentReportJobId) {
-      return focusedJobQuery.data;
-    }
-
-    return resolveJobFromList(currentReportJobId);
-  }, [currentReportJobId, focusedJobQuery.data, jobsQuery.data]);
-
-  const activeImportJob = useMemo(() => {
-    if (!currentImportJobId) {
-      return null;
-    }
-
-    if (focusedJobQuery.data?.id === currentImportJobId) {
-      return focusedJobQuery.data;
-    }
-
-    return resolveJobFromList(currentImportJobId);
-  }, [currentImportJobId, focusedJobQuery.data, jobsQuery.data]);
-
-  const activeJobItems = useMemo<AsyncOperationItem[]>(
-    () =>
-      (jobsQuery.data ?? [])
-        .filter((job) => isActiveJob(job))
-        .map((job) => ({
-          id: job.id,
-          title:
-            job.type === 'IMPORT_CATALOG_ITEMS'
-              ? 'Importação de catalogo'
-              : 'Exportação de catalogo',
-          description:
-            job.type === 'IMPORT_CATALOG_ITEMS'
-              ? 'Estamos ajustando a planilha ao modelo do produto e criando itens em segundo plano.'
-              : 'Estamos consolidando os itens e categorias para montar o CSV.',
-          status: job.status,
-          progress: job.progress,
-          processedItems: job.processedItems,
-          totalItems: job.totalItems,
-        })),
-    [jobsQuery.data],
-  );
-
-  useEffect(() => {
-    if (!activeReportJob || handledJobsRef.current[activeReportJob.id] === activeReportJob.status) {
-      return;
-    }
-
-    if (activeReportJob.status === 'COMPLETED') {
-      handledJobsRef.current[activeReportJob.id] = activeReportJob.status;
-      setCurrentReportJobId(null);
-
-      void catalogService
-        .downloadAsyncJobFile(tenant!.id, activeReportJob.id, activeReportJob.fileName ?? undefined)
-        .then(() => {
-          toast({
-            title: 'CSV do catalogo exportado',
-            description:
-              Number(activeReportJob.resultSummary?.totalItems ?? 0) > 0
-                ? `${Number(activeReportJob.resultSummary?.totalItems ?? 0)} itens foram incluidos no arquivo.`
-                : 'O arquivo foi gerado sem itens para os filtros escolhidos.',
-          });
-        })
-        .catch((error) => {
-          toast({
-            title: 'CSV pronto, mas falhou o download',
-            description: getFriendlyErrorMessage(error, {
-              fallbackMessage: 'Tente gerar novamente ou atualizar a pagina.',
-            }),
-            variant: 'destructive',
-          });
-        });
-    }
-
-    if (activeReportJob.status === 'FAILED') {
-      handledJobsRef.current[activeReportJob.id] = activeReportJob.status;
-      setCurrentReportJobId(null);
-      toast({
-        title: 'Falha ao exportar catalogo',
-        description:
-          activeReportJob.errorMessage ?? 'não foi possível gerar o CSV do catalogo.',
-        variant: 'destructive',
-      });
-    }
-  }, [activeReportJob, tenant]);
-
-  useEffect(() => {
-    if (!activeImportJob || handledJobsRef.current[activeImportJob.id] === activeImportJob.status) {
-      return;
-    }
-
-    if (activeImportJob.status === 'COMPLETED') {
-      handledJobsRef.current[activeImportJob.id] = activeImportJob.status;
-      setCurrentImportJobId(null);
-      void queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
-      void queryClient.invalidateQueries({ queryKey: ['catalog-categories'] });
-      void queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
-      toast({
-        title: 'Importação concluida',
-        description:
-          Number(activeImportJob.resultSummary?.created ?? 0) > 0 ||
-            Number(activeImportJob.resultSummary?.updated ?? 0) > 0
-            ? `${Number(activeImportJob.resultSummary?.created ?? 0)} itens criados e ${Number(activeImportJob.resultSummary?.updated ?? 0)} atualizados.`
-            : 'A importação terminou sem alterar itens.',
-      });
-    }
-
-    if (activeImportJob.status === 'FAILED') {
-      handledJobsRef.current[activeImportJob.id] = activeImportJob.status;
-      setCurrentImportJobId(null);
-      toast({
-        title: 'Falha ao importar catalogo',
-        description:
-          activeImportJob.errorMessage ?? 'não foi possível processar a base agora.',
-        variant: 'destructive',
-      });
-    }
-  }, [activeImportJob, queryClient]);
 
   const filteredItems = useMemo(() => {
     const normalized = search.trim().toLowerCase();
@@ -661,99 +492,9 @@ export function useCatalogPageViewModel() {
     },
   });
 
-  const generateReportMutation = useMutation({
-    mutationFn: (overrideFilters?: typeof DEFAULT_REPORT_FILTERS) => {
-      const filters = overrideFilters ?? reportFilters;
-
-      return catalogService.startReportJob(tenant!.id, {
-        query: filters.query.trim() || undefined,
-        types: filters.types,
-        categoryIds: filters.categoryIds,
-        includeInactive: filters.includeInactive,
-      });
-    },
-    onSuccess: async (job) => {
-      setCurrentReportJobId(job.id);
-      setReportsOpenState(false);
-      await queryClient.invalidateQueries({ queryKey: ['catalog-async-jobs', tenant?.id] });
-      toast({
-        title: 'Relatorio enfileirado',
-        description:
-          'Vamos processar o catalogo em segundo plano e iniciar o download quando o CSV ficar pronto.',
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Falha ao iniciar exportação',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const syncReportSummaryMutation = useMutation({
-    mutationFn: (overrideFilters?: typeof DEFAULT_REPORT_FILTERS) => {
-      const filters = overrideFilters ?? reportFilters;
-
-      return catalogService.generateReportSync(tenant!.id, {
-        query: filters.query.trim() || undefined,
-        types: filters.types,
-        categoryIds: filters.categoryIds,
-        includeInactive: filters.includeInactive,
-      });
-    },
-    onSuccess: (data) => {
-      const s = data.summary;
-      const valueLabel = formatCurrency(s.estimatedBaseValue) ?? 'R$ 0,00';
-      toast({
-        title: 'Resumo do catálogo (instantâneo)',
-        description: `${s.totalItems} itens · ${s.activeItems} ativos · ${s.inactiveItems} inativos · serviços ${s.services} · produtos ${s.products} · locações ${s.rentals} · valor base estimado ${valueLabel}`,
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Não foi possível obter o resumo',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'Tente novamente ou use o fluxo de CSV em segundo plano.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const importItemsMutation = useMutation({
-    mutationFn: () =>
-      catalogService.startImportJob(tenant!.id, {
-        rawText: importForm.rawText,
-        defaultType: importForm.defaultType,
-        defaultCategoryName: importForm.defaultCategoryName.trim() || undefined,
-        defaultSource: importForm.defaultSource,
-        defaultTags: splitTags(importForm.defaultTags),
-        syncInventory: importForm.syncInventory,
-      }),
-    onSuccess: async (job) => {
-      setCurrentImportJobId(job.id);
-      setImportOpenState(false);
-      setImportForm(DEFAULT_IMPORT_FORM);
-      await queryClient.invalidateQueries({ queryKey: ['catalog-async-jobs', tenant?.id] });
-      toast({
-        title: 'Importação enfileirada',
-        description:
-          'Vamos processar a planilha em segundo plano e atualizar o catalogo sem travar a operação.',
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Falha ao iniciar importação',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível enfileirar a importação agora.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
+  const generateReportMutation = jobs.generateReportMutation;
+  const syncReportSummaryMutation = jobs.syncReportSummaryMutation;
+  const importItemsMutation = jobs.importItemsMutation;
 
   return {
     tenant,
@@ -766,23 +507,16 @@ export function useCatalogPageViewModel() {
     setTypeFilter,
     showInactive,
     setShowInactive,
-    reportsOpen,
-    setReportsOpen(open: boolean) {
-      setReportsOpenState(open);
-    },
-    importOpen,
-    setImportOpen(open: boolean) {
-      setImportOpenState(open);
-      if (!open && !isActiveJob(activeImportJob)) {
-        setImportForm(DEFAULT_IMPORT_FORM);
-      }
-    },
+    reportsOpen: jobs.reportsOpen,
+    setReportsOpen: jobs.setReportsOpen,
+    importOpen: jobs.importOpen,
+    setImportOpen: jobs.setImportOpen,
     categoriesQuery,
     itemsQuery,
-    jobsQuery,
-    activeJobItems,
-    activeReportJob,
-    activeImportJob,
+    jobsQuery: jobs.jobsQuery,
+    activeJobItems: jobs.activeJobItems,
+    activeReportJob: jobs.activeReportJob,
+    activeImportJob: jobs.activeImportJob,
     linkedInventoryItems: linkedInventoryQuery.data ?? [],
     filteredItems: paginatedItems,
     totalFilteredItems: filteredItems.length,
@@ -814,14 +548,11 @@ export function useCatalogPageViewModel() {
     setCategoryForm,
     itemForm,
     setItemForm,
-    reportFilters,
-    setReportFilters,
-    importForm,
-    setImportForm,
-    importPreviewCount: importForm.rawText
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean).length,
+    reportFilters: jobs.reportFilters,
+    setReportFilters: jobs.setReportFilters,
+    importForm: jobs.importForm,
+    setImportForm: jobs.setImportForm,
+    importPreviewCount: jobs.importPreviewCount,
     setItemBasePrice(value: string) {
       setItemForm((current) => ({
         ...current,

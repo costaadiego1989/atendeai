@@ -66,7 +66,6 @@ export function useInventoryPageViewModel() {
   const [currentReportJobId, setCurrentReportJobId] = useState<string | null>(null);
   const handledJobsRef = useRef<Record<string, string>>({});
   const [localSyncItems, setLocalSyncItems] = useState<AsyncOperationItem[]>([]);
-  const syncProgressIntervalsRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
   const [lastSyncResult, setLastSyncResult] = useState<{ connectionId: string; success: boolean; timestamp: number } | null>(null);
   const prefillCatalogItemId = searchParams.get('catalogItemId') ?? '';
   const prefillName = searchParams.get('name') ?? '';
@@ -238,29 +237,13 @@ export function useInventoryPageViewModel() {
       title: `Sincronizando ${providerName}`,
       description: 'Buscando itens do fornecedor e atualizando o estoque em segundo plano.',
       status: 'PROCESSING',
-      progress: 0,
+      // progress intentionally omitted — real value comes from server poll
     };
 
     setLocalSyncItems((prev) => [...prev.filter((i) => i.id !== item.id), item]);
-
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress = Math.min(currentProgress + Math.random() * 8 + 2, 88);
-      setLocalSyncItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, progress: Math.round(currentProgress) } : i)),
-      );
-    }, 800);
-
-    syncProgressIntervalsRef.current.set(connectionId, interval);
   }, []);
 
   const stopLocalSyncTracking = useCallback((connectionId: string, success: boolean) => {
-    const interval = syncProgressIntervalsRef.current.get(connectionId);
-    if (interval) {
-      clearInterval(interval);
-      syncProgressIntervalsRef.current.delete(connectionId);
-    }
-
     setLocalSyncItems((prev) =>
       prev.map((i) =>
         i.id === `sync-${connectionId}`
