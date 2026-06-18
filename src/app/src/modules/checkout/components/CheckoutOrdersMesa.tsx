@@ -298,9 +298,9 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
       <CardHeader className="space-y-4 border-b border-border/60 bg-muted/10">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <CardTitle className="text-base font-semibold">Operacao de pedidos</CardTitle>
+            <CardTitle className="text-base font-semibold">Operação de pedidos</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              Controle preparo, separacao, expedicao e entrega por etapa.
+              Controle preparo, separação, expedição e entrega por etapa.
             </p>
           </div>
           <Badge variant="outline" className="w-fit rounded-full px-3 py-1">
@@ -327,7 +327,7 @@ export const CheckoutOrdersMesa: React.FC<CheckoutOrdersMesaProps> = ({
       <CardContent className="p-0">
         {isLoading ? (
           <div className="flex justify-center py-20 text-sm text-muted-foreground animate-pulse">
-            Carregando pedidos da operacao...
+            Carregando pedidos da operação...
           </div>
         ) : orders.length === 0 ? (
           <EmptyState

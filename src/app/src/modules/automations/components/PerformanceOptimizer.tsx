@@ -308,7 +308,7 @@ function generateMockRules(): OptimizationRule[] {
     },
     {
       id: 'rule-2',
-      name: 'Batch Processing',
+      name: 'Processamento em Lote',
       description: 'Processa múltiplas execuções em lote para reduzir overhead',
       category: 'network',
       severity: 'high',
@@ -319,7 +319,7 @@ function generateMockRules(): OptimizationRule[] {
     },
     {
       id: 'rule-3',
-      name: 'Memory Pool',
+      name: 'Pool de Memória',
       description: 'Reutiliza objetos de memória para reduzir alocação',
       category: 'memory',
       severity: 'low',
@@ -330,7 +330,7 @@ function generateMockRules(): OptimizationRule[] {
     },
     {
       id: 'rule-4',
-      name: 'Circuit Breaker',
+      name: 'Disjuntor de Falhas',
       description: 'Previne falhas em cascata durante erros de sistema',
       category: 'security',
       severity: 'critical',

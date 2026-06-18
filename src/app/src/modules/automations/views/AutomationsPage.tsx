@@ -69,10 +69,7 @@ export default function AutomationsPage() {
       <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start justify-between w-full">
           <div>
-            <h1 className="page-title flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" />
-              Automações
-            </h1>
+            <h1 className="page-title">Automações</h1>
             <p className="page-description mt-1">
               Crie regras automáticas para mensagens, tags, tarefas e mais.
             </p>

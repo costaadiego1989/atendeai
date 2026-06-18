@@ -68,17 +68,17 @@ export default function CheckoutPage() {
 
       <CheckoutKPIs summary={vm.summary} deltas={vm.summaryDeltas} />
 
-      <Tabs defaultValue="operacao" className="space-y-5">
+      <Tabs defaultValue="operação" className="space-y-5">
         <PageTabsList
           tabs={[
-            { value: 'operacao', label: 'Operação', icon: ShoppingCart },
+            { value: 'operação', label: 'Operação', icon: ShoppingCart },
             { value: 'funil', label: 'Funil', icon: TrendingDown },
             { value: 'logistica', label: 'Logística', icon: Truck },
-            { value: 'inteligencia', label: 'Inteligência', icon: BarChart3 },
+            { value: 'inteligência', label: 'Inteligência', icon: BarChart3 },
           ]}
         />
 
-        <TabsContent value="operacao">
+        <TabsContent value="operação">
           <CheckoutOrdersMesa
             activeTab={vm.activeTab}
             onTabChange={(v) => vm.setActiveTab(v as CheckoutTab)}
@@ -170,7 +170,7 @@ export default function CheckoutPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="inteligencia" className="space-y-6">
+        <TabsContent value="inteligência" className="space-y-6">
           <CheckoutRevenueChart data={vm.dailyRevenueSeries} />
 
           <CheckoutAnalyticsTabs

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,7 +25,6 @@ import {
   Phone,
   Mail,
   Tag,
-  X,
 } from 'lucide-react';
 import { Automation, StepType } from '../types';
 import { STEP_LABELS } from '../types';
@@ -359,29 +359,19 @@ export function TestAutomationModal({
   };
 
   return (
-    <div className={`fixed inset-0 z-50 ${isOpen ? 'block' : 'hidden'}`}>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
-      
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Card className="w-full max-w-6xl max-h-[90vh] overflow-hidden">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Play className="h-5 w-5 text-primary" />
-                  Testar Automação: {automation.name}
-                </CardTitle>
-                <CardDescription>
-                  Execute esta automação com dados de teste para validar seu comportamento
-                </CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6 pb-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Play className="h-5 w-5 text-primary" />
+            Testar automação: {automation.name}
+          </DialogTitle>
+          <DialogDescription>
+            Execute esta automação com dados de teste para validar seu comportamento
+          </DialogDescription>
+        </DialogHeader>
 
-          <CardContent className="max-h-[calc(90vh-120px)] overflow-y-auto">
+        <div className="overflow-y-auto max-h-[calc(90vh-100px)] px-6 pb-6">
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Test Configuration */}
               <div className="space-y-6">
@@ -673,9 +663,8 @@ export function TestAutomationModal({
                 )}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
