@@ -1,5 +1,5 @@
 import { apiClient, BASE_URL } from '@/shared/api/client';
-import { triggerFileDownload } from '@/shared/lib/file-download';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type { SalesPaymentLinksPage } from '@/shared/types';
 import { withBranchQuery } from './sales-service-helpers';
 import type {
@@ -25,7 +25,7 @@ export const salesPaymentLinksService = {
     if (params.dateTo) searchParams.set('dateTo', params.dateTo);
 
     const suffix = searchParams.toString() ? `?${searchParams.toString()}` : '';
-    triggerFileDownload(`${BASE_URL}/sales/links/report.csv${suffix}`, 'sales-Cobranças.csv');
+    return authenticatedDownload(`/sales/links/report.csv${suffix}`, 'sales-Cobranças.csv');
   },
 
   createPaymentLink(input: CreateSalesPaymentLinkInput) {
