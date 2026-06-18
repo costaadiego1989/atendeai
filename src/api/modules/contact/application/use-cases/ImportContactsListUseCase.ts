@@ -7,6 +7,7 @@ import {
 import { Contact } from '../../domain/entities/Contact';
 import { ContactName } from '../../domain/value-objects/ContactName';
 import { ContactStageVO } from '../../domain/value-objects/ContactStage';
+import { PhoneNumber } from '../../domain/value-objects/PhoneNumber';
 import { ContactImportParser } from '../services/ContactImportParser';
 import { ContactDomainEventPublisher } from '../services/ContactDomainEventPublisher';
 import {
@@ -40,7 +41,9 @@ export class ImportContactsListUseCase implements IImportContactsListUseCase {
 
     for (const row of rows) {
       try {
-        if (!row.phone || row.phone.length < 10) {
+        // C5 fix: validate using digit-count (E.164 range 8–15) via PhoneNumber VO.
+        // Also normalize the phone (strip spaces, dashes, parens, "+") before use.
+        if (!PhoneNumber.isValid(row.phone)) {
           skipped += 1;
           items.push({
             lineNumber: row.lineNumber,
@@ -52,9 +55,11 @@ export class ImportContactsListUseCase implements IImportContactsListUseCase {
           continue;
         }
 
+        const normalizedPhone = PhoneNumber.normalize(row.phone);
+
         const existing = await this.contactRepository.findByPhone(
           tenantId.toString(),
-          row.phone,
+          normalizedPhone,
         );
 
         if (existing) {
@@ -94,7 +99,7 @@ export class ImportContactsListUseCase implements IImportContactsListUseCase {
           tenantId,
           branchId: input.branchId,
           name: ContactName.create(row.name),
-          phone: row.phone,
+          phone: normalizedPhone,
           document: row.document,
           email: row.email,
           notes: row.notes,

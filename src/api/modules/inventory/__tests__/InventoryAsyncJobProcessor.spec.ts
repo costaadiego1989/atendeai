@@ -1,5 +1,5 @@
 import { InventoryAsyncJobProcessor } from '../infrastructure/queue/InventoryAsyncJobProcessor';
-import { InventoryAsyncJobsService } from '../application/services/InventoryAsyncJobsService';
+import { InventoryAsyncJobsService } from '../infrastructure/persistence/repositories/InventoryAsyncJobsService';
 import {
   GenerateInventoryReportUseCase,
   GenerateInventoryReportOutput,

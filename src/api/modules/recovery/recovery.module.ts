@@ -30,7 +30,7 @@ import { PrismaRecoveryRepository } from './infrastructure/persistence/repositor
 import { RecoverySchemaBootstrapService } from './application/services/RecoverySchemaBootstrapService';
 import { RecoveryCaseMessagingService } from './application/services/RecoveryCaseMessagingService';
 import { GenerateRecoveryReportUseCase } from './application/use-cases/GenerateRecoveryReportUseCase';
-import { RecoveryAsyncJobsService } from './application/services/RecoveryAsyncJobsService';
+import { RecoveryAsyncJobsService } from './infrastructure/persistence/repositories/RecoveryAsyncJobsService';
 import { RecoveryReportCsvBuilder } from './application/services/RecoveryReportCsvBuilder';
 import { RecoveryAsyncJobProcessor } from './infrastructure/queue/RecoveryAsyncJobProcessor';
 import { ScheduleRecoveryRecurringChargeUseCase } from './application/use-cases/ScheduleRecoveryRecurringChargeUseCase';

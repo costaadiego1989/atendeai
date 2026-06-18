@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -16,6 +17,7 @@ import { InventoryItemDetailSheet } from '../components/InventoryItemDetailSheet
 import { InventoryReportsSheet } from '../components/InventoryReportsSheet';
 
 export default function InventoryPage() {
+  usePageTitle('Estoque');
   const navigate = useNavigate();
   const vm = useInventoryPageViewModel();
   const allItems = vm.itemsQuery.data ?? [];
@@ -103,6 +105,7 @@ export default function InventoryPage() {
           <InventoryItemsTab
             items={vm.filteredItems}
             isLoading={vm.itemsQuery.isLoading}
+            isError={vm.itemsQuery.isError}
             search={vm.search}
             onSearchChange={vm.setSearch}
             statusFilter={vm.statusFilter}

@@ -1,4 +1,5 @@
-import { apiClient, BASE_URL } from '@/shared/api/client';
+import { apiClient } from '@/shared/api/client';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type {
   AvailabilitySlot,
   CategoryAvailability,
@@ -835,12 +836,9 @@ export const schedulingService = {
     jobId: string,
     fallbackFileName?: string,
   ): Promise<void> {
-    const anchor = document.createElement('a');
-    anchor.href = `${BASE_URL}/tenants/${tenantId}/scheduling/jobs/${jobId}/download`;
-    anchor.download = fallbackFileName ?? `agenda-${jobId}.csv`;
-
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    return authenticatedDownload(
+      `/tenants/${tenantId}/scheduling/jobs/${jobId}/download`,
+      fallbackFileName ?? `agenda-${jobId}.csv`,
+    );
   },
 };

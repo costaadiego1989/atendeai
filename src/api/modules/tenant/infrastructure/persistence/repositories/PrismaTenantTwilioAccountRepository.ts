@@ -5,6 +5,11 @@ import {
   ITenantTwilioAccountRepository,
   TenantTwilioAccount,
 } from '../../../domain/repositories/ITenantTwilioAccountRepository';
+import { encrypt, decrypt } from '@shared/crypto/field-encryption';
+
+function isEncrypted(v: string): boolean {
+  return (v.match(/:/g) ?? []).length === 2;
+}
 
 @Injectable()
 export class PrismaTenantTwilioAccountRepository implements ITenantTwilioAccountRepository {
@@ -27,6 +32,7 @@ export class PrismaTenantTwilioAccountRepository implements ITenantTwilioAccount
   }
 
   async upsert(account: TenantTwilioAccount): Promise<void> {
+    const encryptedToken = encrypt(account.authToken);
     await this.prisma.$executeRaw(Prisma.sql`
       INSERT INTO tenant_schema.tenant_twilio_accounts (
         tenant_id,
@@ -40,7 +46,7 @@ export class PrismaTenantTwilioAccountRepository implements ITenantTwilioAccount
       VALUES (
         ${account.tenantId}::uuid,
         ${account.accountSid},
-        ${account.authToken},
+        ${encryptedToken},
         ${account.status},
         ${account.friendlyName},
         NOW(),
@@ -56,10 +62,12 @@ export class PrismaTenantTwilioAccountRepository implements ITenantTwilioAccount
   }
 
   private mapRow(row: any): TenantTwilioAccount {
+    const raw: string = row.auth_token;
+    const authToken = isEncrypted(raw) ? decrypt(raw) : raw;
     return {
       tenantId: row.tenant_id,
       accountSid: row.account_sid,
-      authToken: row.auth_token,
+      authToken,
       status: row.status,
       friendlyName: row.friendly_name,
     };

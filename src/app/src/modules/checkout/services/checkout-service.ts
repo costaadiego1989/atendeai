@@ -1,4 +1,5 @@
-import { apiClient, BASE_URL } from '@/shared/api/client';
+import { apiClient } from '@/shared/api/client';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type {
   CommerceAbandonmentTouch,
   CommerceCarrier,
@@ -168,13 +169,10 @@ export const checkoutService = {
     if (params?.dateTo) searchParams.set('dateTo', params.dateTo);
 
     const suffix = searchParams.toString() ? `?${searchParams.toString()}` : '';
-    const anchor = document.createElement('a');
-    anchor.href = `${BASE_URL}/tenants/${tenantId}/commerce/orders/report.csv${suffix}`;
-    anchor.download = 'checkout.csv';
-    anchor.rel = 'noopener';
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    return authenticatedDownload(
+      `/tenants/${tenantId}/commerce/orders/report.csv${suffix}`,
+      'checkout.csv',
+    );
   },
 
   getOrderDetails(tenantId: string, orderId: string): Promise<CheckoutOrderDetails> {

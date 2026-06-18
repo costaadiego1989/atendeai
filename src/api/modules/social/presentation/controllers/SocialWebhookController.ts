@@ -91,10 +91,8 @@ export class SocialWebhookController {
   private verifyWebhookSignature(req: RawBodyRequest<Request>): void {
     const appSecret = this.configService.get<string>('META_APP_SECRET');
     if (!appSecret) {
-      this.logger.warn(
-        'META_APP_SECRET not configured — skipping signature verification',
-      );
-      return;
+      this.logger.error('META_APP_SECRET not configured — blocking webhook');
+      throw new ForbiddenException('META_APP_SECRET not configured');
     }
 
     const signature = req.headers['x-hub-signature-256'] as string | undefined;

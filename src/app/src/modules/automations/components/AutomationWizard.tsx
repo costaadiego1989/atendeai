@@ -356,6 +356,7 @@ function StepsStep({ data, onChange, errors }: WizardStepProps) {
               size="sm"
               onClick={() => removeStep(index)}
               className="text-destructive hover:text-destructive"
+              aria-label={`Remover passo ${index + 1}`}
             >
               <X className="h-4 w-4" />
             </Button>

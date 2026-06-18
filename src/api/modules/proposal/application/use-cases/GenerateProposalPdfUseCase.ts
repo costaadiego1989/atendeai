@@ -15,8 +15,11 @@ export class GenerateProposalPdfUseCase {
     private readonly storageService: FileStorageService,
   ) {}
 
-  async execute(proposalId: string): Promise<string> {
-    const proposal = await this.proposalRepository.findById(proposalId);
+  async execute(proposalId: string, tenantId: string): Promise<string> {
+    const proposal = await this.proposalRepository.findById(
+      proposalId,
+      tenantId,
+    );
     if (!proposal) throw new ProposalNotFoundError(proposalId);
 
     const pdfBuffer = await this.generatePdfBuffer(proposal);

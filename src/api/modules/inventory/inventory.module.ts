@@ -18,7 +18,7 @@ import {
 } from './application/facades/InventoryFacade';
 import { GenerateInventoryReportUseCase } from './application/use-cases/GenerateInventoryReportUseCase';
 import { InventoryReportCsvBuilder } from './application/services/InventoryReportCsvBuilder';
-import { InventoryAsyncJobsService } from './application/services/InventoryAsyncJobsService';
+import { InventoryAsyncJobsService } from './infrastructure/persistence/repositories/InventoryAsyncJobsService';
 import { InventoryAsyncJobProcessor } from './infrastructure/queue/InventoryAsyncJobProcessor';
 import { INVENTORY_CREDENTIAL_CIPHER } from './application/ports/ICredentialCipher';
 import { AesGcmCredentialCipher } from './infrastructure/security/AesGcmCredentialCipher';

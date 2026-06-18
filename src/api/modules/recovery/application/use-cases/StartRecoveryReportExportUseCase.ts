@@ -5,7 +5,7 @@ import { IUseCase } from '@shared/application/IUseCase';
 import {
   RecoveryAsyncJobsService,
   RecoveryAsyncJobView,
-} from '../services/RecoveryAsyncJobsService';
+} from '../../infrastructure/persistence/repositories/RecoveryAsyncJobsService';
 
 export interface StartRecoveryReportExportInput {
   tenantId: string;

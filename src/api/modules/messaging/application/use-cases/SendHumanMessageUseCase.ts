@@ -33,6 +33,7 @@ export class SendHumanMessageUseCase implements ISendHumanMessageUseCase {
   async execute(input: SendHumanMessageInput): Promise<SendHumanMessageOutput> {
     const conversation = await this.conversationRepository.findById(
       input.conversationId,
+      input.tenantId,
     );
     if (!conversation) {
       throw new EntityNotFoundException('Conversation', input.conversationId);
@@ -83,6 +84,7 @@ export class SendHumanMessageUseCase implements ISendHumanMessageUseCase {
 
     await this.messageQueue.addJob({
       messageId: message.id.toString(),
+      tenantId: input.tenantId,
     });
     await this.eventBus.publish(
       new MessageQueuedIntegrationEvent({

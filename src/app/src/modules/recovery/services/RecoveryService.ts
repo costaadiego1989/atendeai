@@ -1,4 +1,5 @@
-import { apiClient, BASE_URL } from '@/shared/api/client';
+import { apiClient } from '@/shared/api/client';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type {
   RecoveryAsyncJob,
   RecoveryCase,
@@ -600,12 +601,9 @@ export const recoveryService = {
     jobId: string,
     fallbackFileName?: string,
   ): Promise<void> {
-    const anchor = document.createElement('a');
-    anchor.href = `${BASE_URL}/tenants/${tenantId}/recovery/jobs/${jobId}/download`;
-    anchor.download = fallbackFileName ?? `cobranças-${jobId}.csv`;
-
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    return authenticatedDownload(
+      `/tenants/${tenantId}/recovery/jobs/${jobId}/download`,
+      fallbackFileName ?? `cobranças-${jobId}.csv`,
+    );
   },
 };

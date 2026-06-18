@@ -76,7 +76,10 @@ export class MessagingFacade implements IMessagingFacade {
     conversationId?: string | null;
   }): Promise<{ conversationId: string; messageId: string }> {
     let conversation = input.conversationId
-      ? await this.conversationRepository.findById(input.conversationId)
+      ? await this.conversationRepository.findById(
+          input.conversationId,
+          input.tenantId,
+        )
       : await this.conversationRepository.findLatestByContact(
           input.tenantId,
           input.contactId,
@@ -131,6 +134,7 @@ export class MessagingFacade implements IMessagingFacade {
     }
     await this.messageQueue.addJob({
       messageId: message.id.toString(),
+      tenantId: input.tenantId,
     });
     await this.eventBus.publish(
       new MessageQueuedIntegrationEvent({
@@ -160,7 +164,10 @@ export class MessagingFacade implements IMessagingFacade {
     conversationId?: string | null;
   }): Promise<{ conversationId: string } | null> {
     let conversation = input.conversationId
-      ? await this.conversationRepository.findById(input.conversationId)
+      ? await this.conversationRepository.findById(
+          input.conversationId,
+          input.tenantId,
+        )
       : await this.conversationRepository.findLatestByContact(
           input.tenantId,
           input.contactId,
@@ -245,6 +252,7 @@ export class MessagingFacade implements IMessagingFacade {
 
     await this.messageQueue.addJob({
       messageId: message.id.toString(),
+      tenantId: input.tenantId,
     });
 
     await this.eventBus.publish(

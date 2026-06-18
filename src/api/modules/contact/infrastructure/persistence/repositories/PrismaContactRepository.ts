@@ -11,40 +11,49 @@ export class PrismaContactRepository implements IContactRepository {
 
   async save(contact: Contact): Promise<void> {
     const data = ContactMapper.toPersistence(contact);
-    await this.prisma.contact.upsert({
-      where: { id: data.id },
-      create: {
-        id: data.id,
-        tenantId: data.tenantId,
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        stage: data.stage,
-        tags: data.tags,
-        notes: data.notes,
-        lastInteraction: data.lastInteraction,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      },
-      update: {
-        tenantId: data.tenantId,
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        stage: data.stage,
-        tags: data.tags,
-        notes: data.notes,
-        lastInteraction: data.lastInteraction,
-        prospectingOptOut: data.prospectingOptOut,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      },
-    });
-    await this.prisma.$executeRaw(Prisma.sql`
+
+    // C4 fix: wrap the upsert AND the branch_id update in a single transaction
+    // so both succeed or both roll back — no orphaned contacts without branchId.
+    await this.prisma.$transaction([
+      // C1 fix: include `document` in both create and update payloads.
+      this.prisma.contact.upsert({
+        where: { id: data.id },
+        create: {
+          id: data.id,
+          tenantId: data.tenantId,
+          name: data.name,
+          phone: data.phone,
+          document: data.document, // C1
+          email: data.email,
+          stage: data.stage,
+          tags: data.tags,
+          notes: data.notes,
+          lastInteraction: data.lastInteraction,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        },
+        update: {
+          tenantId: data.tenantId,
+          name: data.name,
+          phone: data.phone,
+          document: data.document, // C1
+          email: data.email,
+          stage: data.stage,
+          tags: data.tags,
+          notes: data.notes,
+          lastInteraction: data.lastInteraction,
+          prospectingOptOut: data.prospectingOptOut,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        },
+      }),
+      // C4 fix: branch_id update is now inside the same transaction.
+      this.prisma.$executeRaw(Prisma.sql`
         UPDATE contact_schema.contacts
         SET branch_id = ${data.branchId}::uuid
         WHERE id = ${data.id}::uuid
-      `);
+      `),
+    ]);
   }
 
   async findById(tenantId: string, id: string): Promise<Contact | null> {
@@ -59,10 +68,10 @@ export class PrismaContactRepository implements IContactRepository {
     if (!raw) return null;
 
     const branchById = await this.findBranchIdsByContactIds([raw.id]);
+    // C2 fix: pass raw.document through instead of hardcoding null.
     return ContactMapper.toDomain({
       ...raw,
       branchId: branchById.get(raw.id) ?? null,
-      document: null,
     });
   }
 
@@ -73,10 +82,10 @@ export class PrismaContactRepository implements IContactRepository {
     if (!raw) return null;
 
     const branchById = await this.findBranchIdsByContactIds([raw.id]);
+    // C2 fix: pass raw.document through instead of hardcoding null.
     return ContactMapper.toDomain({
       ...raw,
       branchId: branchById.get(raw.id) ?? null,
-      document: null,
     });
   }
 
@@ -138,11 +147,11 @@ export class PrismaContactRepository implements IContactRepository {
       ${branchClause}
     `;
 
+    // C2 fix: do NOT hardcode document: null — let the mapper read it from the row.
     return {
       data: rows.map((item) =>
         ContactMapper.toDomain({
           ...item,
-          document: null,
         }),
       ),
       total: Number(totalRows[0]?.total ?? 0),
@@ -187,7 +196,30 @@ export class PrismaContactRepository implements IContactRepository {
     });
   }
 
+  // C3 fix: tenantId added to prevent cross-tenant data leaks.
   async findAllByPhone(
+    tenantId: string,
+    phone: string,
+  ): Promise<Array<{ tenantId: string; contactId: string }>> {
+    const rows = await this.prisma.$queryRaw<
+      Array<{ tenant_id: string; id: string }>
+    >(
+      Prisma.sql`
+        SELECT tenant_id, id
+        FROM contact_schema.contacts
+        WHERE phone = ${phone}
+          AND tenant_id = ${tenantId}::uuid
+        LIMIT 20
+      `,
+    );
+    return rows.map((r) => ({ tenantId: r.tenant_id, contactId: r.id }));
+  }
+
+  /**
+   * Cross-tenant lookup for system-level events (e.g. Meta opt-out webhooks).
+   * Must NOT be used in any tenant-scoped flow.
+   */
+  async findAllByPhoneAcrossAllTenants(
     phone: string,
   ): Promise<Array<{ tenantId: string; contactId: string }>> {
     const rows = await this.prisma.$queryRaw<

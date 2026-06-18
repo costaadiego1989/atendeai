@@ -42,16 +42,27 @@ export class BubbleWhatsAdapter implements IMessagingGateway {
     },
   ): boolean {
     const secret = config.webhookSecret ?? config.credentials.webhookSecret;
+
+    // Fail-closed: no secret configured means we cannot validate — reject.
     if (!secret) {
-      return true;
+      return false;
     }
 
-    if (!signature || !secret) return false;
+    if (!signature) return false;
 
     const hmac = crypto.createHmac('sha256', secret);
     const digest = hmac.update(JSON.stringify(body)).digest('hex');
 
-    return signature === digest;
+    // Use constant-time comparison to prevent HMAC timing side-channel.
+    try {
+      return crypto.timingSafeEqual(
+        Buffer.from(signature, 'utf8'),
+        Buffer.from(digest, 'utf8'),
+      );
+    } catch {
+      // Buffers differ in length — definitely not equal.
+      return false;
+    }
   }
 
   parseInboundMessage(

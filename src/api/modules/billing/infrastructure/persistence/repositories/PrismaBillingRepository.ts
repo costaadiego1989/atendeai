@@ -9,6 +9,7 @@ import {
   BillingModuleRecord,
   BusinessNicheRecord,
   SubscriptionModuleRecord,
+  UsageIncrement,
 } from '@modules/billing/domain/repositories/IBillingRepository';
 import { BillingMapper } from '../mappers/BillingMapper';
 import { PlanType } from '@modules/billing/domain/value-objects/Quotas';
@@ -204,6 +205,32 @@ export class PrismaBillingRepository implements IBillingRepository {
         contactsUsed: data.contactsUsed,
         updatedAt: data.updatedAt,
       },
+    });
+  }
+
+  async atomicIncrementUsage(increment: UsageIncrement): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.usageRecord.upsert({
+        where: {
+          tenantId_periodStart: {
+            tenantId: increment.tenantId,
+            periodStart: increment.periodStart,
+          },
+        },
+        create: {
+          tenantId: increment.tenantId,
+          periodStart: increment.periodStart,
+          periodEnd: increment.periodEnd,
+          messagesUsed: increment.messagesIncrement,
+          aiTokensUsed: increment.aiTokensIncrement,
+          contactsUsed: increment.contactsIncrement,
+        },
+        update: {
+          messagesUsed: { increment: increment.messagesIncrement },
+          aiTokensUsed: { increment: increment.aiTokensIncrement },
+          contactsUsed: { increment: increment.contactsIncrement },
+        },
+      });
     });
   }
 

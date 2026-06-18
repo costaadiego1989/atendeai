@@ -8,7 +8,10 @@ import {
   Query,
   Patch,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { CreateProposalUseCase } from '@modules/proposal/application/use-cases/CreateProposalUseCase';
 import { UpdateProposalUseCase } from '@modules/proposal/application/use-cases/UpdateProposalUseCase';
 import { DeleteProposalUseCase } from '@modules/proposal/application/use-cases/DeleteProposalUseCase';
@@ -17,6 +20,8 @@ import { ListProposalsUseCase } from '@modules/proposal/application/use-cases/Li
 import { GenerateProposalPdfUseCase } from '@modules/proposal/application/use-cases/GenerateProposalPdfUseCase';
 import { ScheduleProposalDeliveryUseCase } from '@modules/proposal/application/use-cases/ScheduleProposalDeliveryUseCase';
 import { SendProposalToConversationUseCase } from '@modules/proposal/application/use-cases/SendProposalToConversationUseCase';
+import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
+import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
 
 type ProposalItemInput = {
   name: string;
@@ -143,6 +148,7 @@ function toUpdateProposalInput(body: Record<string, unknown>) {
   };
 }
 
+@UseGuards(JwtCookieGuard, TenantGuard)
 @Controller('proposals')
 export class ProposalController {
   constructor(
@@ -157,15 +163,16 @@ export class ProposalController {
   ) {}
 
   @Post()
-  async create(@Body() body: Record<string, unknown>) {
+  async create(@Body() body: Record<string, unknown>, @Req() req: Request) {
     const dto = toCreateProposalInput(body);
+    const tenantId = (req as any).user?.tenantId as string;
     const result = await this.createProposalUseCase.execute({
       ...dto,
       validUntil: dto.validUntil ? new Date(dto.validUntil) : null,
     });
 
     // Automatically generate PDF after creation
-    await this.generateProposalPdfUseCase.execute(result.id);
+    await this.generateProposalPdfUseCase.execute(result.id, tenantId);
 
     return { success: true, ...result };
   }
@@ -176,28 +183,40 @@ export class ProposalController {
   }
 
   @Get(':id')
-  async get(@Param('id') id: string) {
-    return this.getProposalUseCase.execute(id);
+  async get(@Param('id') id: string, @Req() req: Request) {
+    const tenantId = (req as any).user?.tenantId as string;
+    return this.getProposalUseCase.execute(id, tenantId);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() body: Record<string, unknown>) {
+  async update(
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>,
+    @Req() req: Request,
+  ) {
+    const tenantId = (req as any).user?.tenantId as string;
     const dto = toUpdateProposalInput(body);
-    const result = await this.updateProposalUseCase.execute(id, {
-      ...dto,
-      validUntil: dto.validUntil ? new Date(dto.validUntil) : null,
-    });
+    const result = await this.updateProposalUseCase.execute(
+      id,
+      {
+        ...dto,
+        validUntil: dto.validUntil ? new Date(dto.validUntil) : null,
+      },
+      tenantId,
+    );
     return { success: true, ...result };
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return this.deleteProposalUseCase.execute(id);
+  async delete(@Param('id') id: string, @Req() req: Request) {
+    const tenantId = (req as any).user?.tenantId as string;
+    return this.deleteProposalUseCase.execute(id, tenantId);
   }
 
   @Post(':id/pdf')
-  async generatePdf(@Param('id') id: string) {
-    const pdfUrl = await this.generateProposalPdfUseCase.execute(id);
+  async generatePdf(@Param('id') id: string, @Req() req: Request) {
+    const tenantId = (req as any).user?.tenantId as string;
+    const pdfUrl = await this.generateProposalPdfUseCase.execute(id, tenantId);
     return { success: true, pdfUrl };
   }
 
@@ -205,19 +224,26 @@ export class ProposalController {
   async schedule(
     @Param('id') id: string,
     @Body('scheduledAt') scheduledAt: string,
+    @Req() req: Request,
   ) {
+    const tenantId = (req as any).user?.tenantId as string;
     const date = new Date(scheduledAt);
     await this.scheduleProposalDeliveryUseCase.execute({
       proposalId: id,
       scheduledAt: date,
+      tenantId,
     });
 
     return { success: true, scheduledAt: date };
   }
 
   @Post(':id/send')
-  async send(@Param('id') id: string) {
-    const result = await this.sendProposalToConversationUseCase.execute(id);
+  async send(@Param('id') id: string, @Req() req: Request) {
+    const tenantId = (req as any).user?.tenantId as string;
+    const result = await this.sendProposalToConversationUseCase.execute(
+      id,
+      tenantId,
+    );
     return { success: true, ...result };
   }
 }

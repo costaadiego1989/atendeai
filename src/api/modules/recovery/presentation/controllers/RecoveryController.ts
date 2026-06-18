@@ -18,7 +18,7 @@ import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuar
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
 import { CreateRecoveryCaseUseCase } from '../../application/use-cases/CreateRecoveryCaseUseCase';
-import { RecoveryAsyncJobsService } from '../../application/services/RecoveryAsyncJobsService';
+import { RecoveryAsyncJobsService } from '../../infrastructure/persistence/repositories/RecoveryAsyncJobsService';
 import { GenerateRecoveryPaymentLinkUseCase } from '../../application/use-cases/GenerateRecoveryPaymentLinkUseCase';
 import { GenerateRecoveryReportUseCase } from '../../application/use-cases/GenerateRecoveryReportUseCase';
 import { GetRecoveryCaseUseCase } from '../../application/use-cases/GetRecoveryCaseUseCase';

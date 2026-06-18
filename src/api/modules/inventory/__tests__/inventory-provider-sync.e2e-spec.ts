@@ -7,7 +7,7 @@ import request from 'supertest';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
-import { InventoryAsyncJobStatus } from '../application/services/InventoryAsyncJobsService';
+import { InventoryAsyncJobStatus } from '../infrastructure/persistence/repositories/InventoryAsyncJobsService';
 import { getQueueToken } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 

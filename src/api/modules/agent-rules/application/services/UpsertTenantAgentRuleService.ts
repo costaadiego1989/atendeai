@@ -31,8 +31,7 @@ export class UpsertTenantAgentRuleService {
     );
     const rule = this.buildRule(input, moduleId, customPrompt, existingRule);
 
-    await this.repository.save(rule);
-    await this.repository.saveHistory({
+    await this.repository.saveWithHistory(rule, {
       tenantId: rule.tenantId,
       branchId: rule.branchId ?? null,
       moduleId: rule.moduleId,

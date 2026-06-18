@@ -169,6 +169,18 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
+  async countOwners(tenantId: string): Promise<number> {
+    const [row] = await this.prisma.$queryRaw<
+      Array<{ count: bigint }>
+    >(Prisma.sql`
+        SELECT COUNT(*) AS count
+        FROM tenant_schema.users
+        WHERE tenant_id = ${tenantId}::uuid
+          AND role = 'OWNER'
+      `);
+    return Number(row?.count ?? 0);
+  }
+
   async delete(id: string, tenantId: string): Promise<void> {
     await this.prisma.$executeRaw(Prisma.sql`
         DELETE FROM tenant_schema.users

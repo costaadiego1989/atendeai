@@ -1,4 +1,4 @@
-import { InventoryAsyncJobsService } from '../application/services/InventoryAsyncJobsService';
+import { InventoryAsyncJobsService } from '../infrastructure/persistence/repositories/InventoryAsyncJobsService';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 

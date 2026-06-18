@@ -7,8 +7,11 @@ export interface IConversationRepository {
     conversation: Conversation,
     options?: { tx?: Prisma.TransactionClient },
   ): Promise<void>;
-  findById(id: string): Promise<Conversation | null>;
-  findByMessageId(messageId: string): Promise<Conversation | null>;
+  findById(id: string, tenantId: string): Promise<Conversation | null>;
+  findByMessageId(
+    messageId: string,
+    tenantId: string,
+  ): Promise<Conversation | null>;
   findByExternalMessageId(
     externalMessageId: string,
     tenantId: string,

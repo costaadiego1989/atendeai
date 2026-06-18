@@ -6,7 +6,7 @@ import {
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
 import { ProspectReportCsvBuilder } from '../../application/services/ProspectReportCsvBuilder';
-import { ProspectingAsyncJobsService } from '../../application/services/ProspectingAsyncJobsService';
+import { ProspectingAsyncJobsService } from '../../infrastructure/persistence/repositories/ProspectingAsyncJobsService';
 import { GenerateProspectCampaignReportUseCase } from '../../application/use-cases/GenerateProspectCampaignReportUseCase';
 import { GenerateProspectSearchReportUseCase } from '../../application/use-cases/GenerateProspectSearchReportUseCase';
 import { StructuredLogEmitter } from '@shared/infrastructure/observability/StructuredLogEmitter';

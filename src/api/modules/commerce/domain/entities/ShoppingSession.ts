@@ -10,6 +10,7 @@ import {
   CreateSessionItemInput,
   ReconstructSessionItemInput,
 } from './SessionItem';
+import { DiscountExceedsTotalException } from '../errors/DiscountExceedsTotalException';
 
 interface ShoppingSessionProps {
   tenantId: string;
@@ -165,9 +166,18 @@ export class ShoppingSession extends AggregateRoot<ShoppingSessionProps> {
       this.props.discountAmount = discountOverride;
     }
 
-    this.props.totalAmount = subtotal
-      .add(this.props.freightAmount)
-      .subtract(this.props.discountAmount);
+    const gross = subtotal.add(this.props.freightAmount);
+    const discount = this.props.discountAmount;
+
+    // COM4 fix: domain invariant — discount cannot exceed subtotal + freight
+    if (discount.amount > gross.amount) {
+      throw new DiscountExceedsTotalException(discount.amount, gross.amount);
+    }
+
+    this.props.totalAmount = Money.create(
+      Math.max(0, gross.amount - discount.amount),
+      currency,
+    );
   }
 
   computeCheckoutTotals(): {
@@ -183,7 +193,17 @@ export class ShoppingSession extends AggregateRoot<ShoppingSessionProps> {
     );
     const freight = this.props.freightAmount;
     const discount = this.props.discountAmount;
-    const total = subtotal.add(freight).subtract(discount);
+    const gross = subtotal.add(freight);
+
+    // COM4 fix: domain invariant — discount cannot exceed subtotal + freight
+    if (discount.amount > gross.amount) {
+      throw new DiscountExceedsTotalException(discount.amount, gross.amount);
+    }
+
+    const total = Money.create(
+      Math.max(0, gross.amount - discount.amount),
+      currency,
+    );
 
     return { subtotal, freight, discount, total };
   }

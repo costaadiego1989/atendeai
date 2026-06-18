@@ -786,4 +786,33 @@ export class PrismaSalesRepository implements ISalesRepository {
     });
     return this.mapCoupon(updated);
   }
+
+  /**
+   * COM1 fix: Single atomic UPDATE that only increments when
+   * used_count < max_uses AND active = true. Returns the updated record
+   * or null if the coupon is exhausted / inactive / not found.
+   */
+  async atomicIncrementCouponUsage(tenantId: string, id: string) {
+    const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(
+      Prisma.sql`
+        UPDATE sales_schema.sales_coupons
+        SET used_count = used_count + 1,
+            updated_at = now()
+        WHERE id = ${id}::uuid
+          AND tenant_id = ${tenantId}::uuid
+          AND active = true
+          AND (max_uses = 0 OR used_count < max_uses)
+        RETURNING id
+      `,
+    );
+
+    if (rows.length === 0) return null;
+
+    // Fetch the full updated record to return the same shape as incrementCouponUsage
+    const updated = await this.prisma.salesCoupon.findFirst({
+      where: { id, tenantId },
+      include: { targets: true },
+    });
+    return updated ? this.mapCoupon(updated) : null;
+  }
 }

@@ -45,7 +45,9 @@ export class ProposalPublicLinkService {
       return null;
     }
 
-    const proposal = await this.proposalRepository.findById(payload.proposalId);
+    const proposal = await this.proposalRepository.findByIdPublic(
+      payload.proposalId,
+    );
     if (!proposal) {
       return null;
     }

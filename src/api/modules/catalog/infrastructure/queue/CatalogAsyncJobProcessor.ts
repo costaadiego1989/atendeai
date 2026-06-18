@@ -5,7 +5,7 @@ import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
-import { CatalogAsyncJobsService } from '../../application/services/CatalogAsyncJobsService';
+import { CatalogAsyncJobsService } from '../../infrastructure/persistence/repositories/CatalogAsyncJobsService';
 import { CatalogReportCsvBuilder } from '../../application/services/CatalogReportCsvBuilder';
 import { GenerateCatalogReportUseCase } from '../../application/use-cases/GenerateCatalogReportUseCase';
 import { ImportCatalogItemsUseCase } from '../../application/use-cases/ImportCatalogItemsUseCase';

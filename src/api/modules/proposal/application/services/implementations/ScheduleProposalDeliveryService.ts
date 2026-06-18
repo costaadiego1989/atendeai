@@ -13,8 +13,12 @@ export class ScheduleProposalDeliveryService {
     @InjectQueue('proposal-delivery') private readonly deliveryQueue: Queue,
   ) {}
 
-  async execute(id: string, scheduledAt: Date): Promise<void> {
-    const proposal = await this.proposalRepository.findById(id);
+  async execute(
+    id: string,
+    scheduledAt: Date,
+    tenantId: string,
+  ): Promise<void> {
+    const proposal = await this.proposalRepository.findById(id, tenantId);
     if (!proposal) throw new ProposalNotFoundError(id);
 
     if (scheduledAt <= new Date()) {
@@ -27,7 +31,7 @@ export class ScheduleProposalDeliveryService {
     const delay = scheduledAt.getTime() - Date.now();
     await this.deliveryQueue.add(
       'send-proposal',
-      { proposalId: id },
+      { proposalId: id, tenantId },
       { delay: delay > 0 ? delay : 0, jobId: `send-proposal-${id}` },
     );
   }

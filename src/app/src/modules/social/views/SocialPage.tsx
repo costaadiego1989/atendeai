@@ -115,6 +115,7 @@ export function SocialPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
+                    aria-label="Pesquisar por autor, publicação ou contexto verbal"
                     placeholder="Pesquisar por autor, publicação ou contexto verbal..."
                     className="pl-9"
                   />
@@ -147,34 +148,48 @@ export function SocialPage() {
                 </div>
                 <ScrollArea className="flex-1 p-0">
                   <div className="divide-y divide-border/50">
-                    {vm.state.comments.map(c => (
-                      <button
-                        key={c.id}
-                        onClick={() => vm.actions.setSelectedCommentId(c.id)}
-                        className={`w-full text-left p-5 hover:bg-muted/30 transition-all cursor-pointer flex gap-4 ${vm.state.selectedCommentId === c.id ? 'bg-muted/40 border-l-4 border-l-primary/70 pr-4' : 'border-l-4 border-l-transparent'}`}
-                      >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
-                          {(c.authorUsername?.[0] || 'U').toUpperCase()}
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center justify-between">
-                          <p className="text-sm font-bold truncate tracking-tight">@{c.authorUsername || 'usuário'}</p>
-                            <span className="text-xs text-muted-foreground">{new Date(c.receivedAt).toLocaleString('pt-BR')}</span>
+                    {vm.state.isCommentsLoading ? (
+                      <div className="flex justify-center py-10">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : vm.state.isCommentsError ? (
+                      <div className="p-6 text-center">
+                        <p className="text-sm font-semibold text-destructive">Erro ao carregar interações</p>
+                      </div>
+                    ) : vm.state.comments.length === 0 ? (
+                      <div className="p-8 text-center text-sm text-muted-foreground">
+                        Nenhuma interação encontrada.
+                      </div>
+                    ) : (
+                      vm.state.comments.map(c => (
+                        <button
+                          key={c.id}
+                          onClick={() => vm.actions.setSelectedCommentId(c.id)}
+                          className={`w-full text-left p-5 hover:bg-muted/30 transition-all cursor-pointer flex gap-4 ${vm.state.selectedCommentId === c.id ? 'bg-muted/40 border-l-4 border-l-primary/70 pr-4' : 'border-l-4 border-l-transparent'}`}
+                        >
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
+                            {(c.authorUsername?.[0] || 'U').toUpperCase()}
                           </div>
-                          <p className="text-sm text-foreground/90 py-1">{c.text}</p>
-                          <div className="flex items-center gap-2 mt-2 pt-2">
-                            {c.status === 'PENDING' ? (
-                              <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10 text-[10px]">Aguardando Ação</Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 text-[10px] gap-1">
-                                <Sparkles className="w-3 h-3" /> IA Respondido
-                              </Badge>
-                            )}
-                            <Button variant="ghost" size="sm" className="h-6 text-xs px-2 ml-auto text-primary/80 hover:text-primary">Responder</Button>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold truncate tracking-tight">@{c.authorUsername || 'usuário'}</p>
+                              <span className="text-xs text-muted-foreground">{new Date(c.receivedAt).toLocaleString('pt-BR')}</span>
+                            </div>
+                            <p className="text-sm text-foreground/90 py-1">{c.text}</p>
+                            <div className="flex items-center gap-2 mt-2 pt-2">
+                              {c.status === 'PENDING' ? (
+                                <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10 text-[10px]">Aguardando Ação</Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 text-[10px] gap-1">
+                                  <Sparkles className="w-3 h-3" /> IA Respondido
+                                </Badge>
+                              )}
+                              <Button variant="ghost" size="sm" className="h-6 text-xs px-2 ml-auto text-primary/80 hover:text-primary">Responder</Button>
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      ))
+                    )}
                   </div>
                 </ScrollArea>
               </Card>
@@ -222,6 +237,7 @@ export function SocialPage() {
                     </ScrollArea>
                     <div className="p-4 border-t bg-muted/10 gap-2 flex">
                       <Input
+                        aria-label="Responder no comentário público"
                         placeholder="Responder no comentário público..."
                         className="h-9 bg-background shadow-sm"
                         value={vm.state.replyDraft}
@@ -368,7 +384,7 @@ export function SocialPage() {
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#f09433] via-[#dc2743] to-[#bc1888] p-[2px]">
                       <div className="w-full h-full bg-background rounded-full flex items-center justify-center p-1">
-                        <img src="/logo.png" alt="ig" className="rounded-full w-full h-full object-cover" />
+                        <img src="/logo.png" alt="Ícone do Instagram" className="rounded-full w-full h-full object-cover" />
                       </div>
                     </div>
                     <div>

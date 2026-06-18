@@ -1,4 +1,4 @@
-import { Bug, Filter, Lightbulb, Rocket, Search, SendHorizonal, Wrench } from 'lucide-react';
+import { Bug, Filter, Lightbulb, Loader2, Rocket, Search, SendHorizonal, Wrench } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -182,49 +182,16 @@ export default function SupportPage() {
 
           <Card className="glass-card overflow-hidden">
             <CardContent className="space-y-3 p-5">
-              {vm.feedbacks.map((feedback) => (
-                <div
-                  key={feedback.id}
-                  className="rounded-2xl border border-border/60 bg-background/50 p-4 transition-all hover:bg-muted/20"
-                >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        {feedback.type === 'BUG' ? (
-                          <Bug className="h-4 w-4 text-rose-500" />
-                        ) : feedback.type === 'SUGGESTION' ? (
-                          <Lightbulb className="h-4 w-4 text-amber-500" />
-                        ) : (
-                          <Rocket className="h-4 w-4 text-emerald-500" />
-                        )}
-                        <p className="text-sm font-bold text-foreground">{feedback.title}</p>
-                        <Badge variant="secondary">{typeLabel(feedback.type)}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{feedback.description}</p>
-                      <div className="flex flex-wrap gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                        <span className="rounded-full bg-secondary/50 px-2.5 py-1">
-                          {new Date(feedback.createdAt).toLocaleString('pt-BR')}
-                        </span>
-                        {feedback.pagePath && (
-                          <span className="rounded-full bg-secondary/50 px-2.5 py-1">
-                            {feedback.pagePath}
-                          </span>
-                        )}
-                        {feedback.appModule && (
-                          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">
-                            {feedbackModuleLabel(feedback.appModule)}
-                          </span>
-                        )}
-                        <span className="rounded-full bg-secondary/50 px-2.5 py-1">
-                          {feedback.userName}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+              {vm.feedbacksQuery.isLoading ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ))}
-
-              {!vm.feedbacks.length && (
+              ) : vm.feedbacksQuery.isError ? (
+                <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+                  <p className="text-sm font-semibold text-destructive">Erro ao carregar feedbacks</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tente atualizar a página.</p>
+                </div>
+              ) : vm.feedbacks.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-border/60 p-12 text-center">
                   <Wrench className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
                   <p className="text-lg font-bold text-foreground">Nenhum feedback encontrado</p>
@@ -232,6 +199,48 @@ export default function SupportPage() {
                     Ajuste os filtros ou envie o primeiro feedback usando o formulário ao lado.
                   </p>
                 </div>
+              ) : (
+                vm.feedbacks.map((feedback) => (
+                  <div
+                    key={feedback.id}
+                    className="rounded-2xl border border-border/60 bg-background/50 p-4 transition-all hover:bg-muted/20"
+                  >
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          {feedback.type === 'BUG' ? (
+                            <Bug className="h-4 w-4 text-rose-500" />
+                          ) : feedback.type === 'SUGGESTION' ? (
+                            <Lightbulb className="h-4 w-4 text-amber-500" />
+                          ) : (
+                            <Rocket className="h-4 w-4 text-emerald-500" />
+                          )}
+                          <p className="text-sm font-bold text-foreground">{feedback.title}</p>
+                          <Badge variant="secondary">{typeLabel(feedback.type)}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{feedback.description}</p>
+                        <div className="flex flex-wrap gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                          <span className="rounded-full bg-secondary/50 px-2.5 py-1">
+                            {new Date(feedback.createdAt).toLocaleString('pt-BR')}
+                          </span>
+                          {feedback.pagePath && (
+                            <span className="rounded-full bg-secondary/50 px-2.5 py-1">
+                              {feedback.pagePath}
+                            </span>
+                          )}
+                          {feedback.appModule && (
+                            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">
+                              {feedbackModuleLabel(feedback.appModule)}
+                            </span>
+                          )}
+                          <span className="rounded-full bg-secondary/50 px-2.5 py-1">
+                            {feedback.userName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
             </CardContent>
           </Card>

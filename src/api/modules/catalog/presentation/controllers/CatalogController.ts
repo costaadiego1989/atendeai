@@ -44,7 +44,7 @@ import {
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
 import { GenerateCatalogReportUseCase } from '../../application/use-cases/GenerateCatalogReportUseCase';
-import { CatalogAsyncJobsService } from '../../application/services/CatalogAsyncJobsService';
+import { CatalogAsyncJobsService } from '../../infrastructure/persistence/repositories/CatalogAsyncJobsService';
 
 @Controller('tenants/:tenantId/catalog')
 @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)

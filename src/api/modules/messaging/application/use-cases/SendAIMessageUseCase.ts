@@ -11,6 +11,7 @@ import { ConversationIntelligenceService } from '../services/ConversationIntelli
 
 export interface SendAIMessageInput {
   conversationId: string;
+  tenantId: string;
   text: string;
   type: string;
 }
@@ -28,6 +29,7 @@ export class SendAIMessageUseCase {
   async execute(input: SendAIMessageInput): Promise<void> {
     const conversation = await this.conversationRepository.findById(
       input.conversationId,
+      input.tenantId,
     );
     if (!conversation) {
       throw new EntityNotFoundException('Conversation', input.conversationId);
@@ -53,6 +55,7 @@ export class SendAIMessageUseCase {
 
     await this.messageQueue.addJob({
       messageId: message.id.toString(),
+      tenantId: input.tenantId,
     });
   }
 }

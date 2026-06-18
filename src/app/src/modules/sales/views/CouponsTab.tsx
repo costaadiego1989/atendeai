@@ -137,10 +137,10 @@ export function CouponsTab() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pl-4 border-l border-border/50">
-                  <Button variant="ghost" size="icon" onClick={() => vm.openEditSheet(coupon.id)}>
+                  <Button aria-label="Editar cupom" variant="ghost" size="icon" onClick={() => vm.openEditSheet(coupon.id)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => vm.deleteMutation.mutate(coupon.id)} className="text-muted-foreground hover:text-destructive">
+                  <Button aria-label="Excluir cupom" variant="ghost" size="icon" onClick={() => vm.deleteMutation.mutate(coupon.id)} className="text-muted-foreground hover:text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

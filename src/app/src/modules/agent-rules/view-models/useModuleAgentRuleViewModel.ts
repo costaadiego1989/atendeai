@@ -185,6 +185,7 @@ export function useModuleAgentRuleViewModel(config: AgentRuleModuleConfig) {
     scope: ruleQuery.data?.scope ?? (activeBranchId ? 'BRANCH' : 'TENANT'),
     inheritedFromTenant: ruleQuery.data?.inheritedFromTenant ?? false,
     isLoading: ruleQuery.isLoading,
+    isError: ruleQuery.isError,
     isSaving: saveMutation.isPending,
     save: () => saveMutation.mutate(),
     applyTrainingExample,

@@ -47,6 +47,15 @@ export interface ISupportFeedbackRepository {
     status: SupportFeedbackStatus,
   ): Promise<void>;
   createReply(input: CreateReplyInput): Promise<SupportFeedbackReply>;
+  /**
+   * Atomically updates the feedback status and inserts the reply in one transaction.
+   * Only updates status when `newStatus` is provided.
+   */
+  updateStatusAndCreateReply(
+    feedbackId: string,
+    newStatus: SupportFeedbackStatus | null,
+    reply: CreateReplyInput,
+  ): Promise<SupportFeedbackReply>;
   listReplies(feedbackId: string): Promise<SupportFeedbackReply[]>;
 }
 

@@ -4,13 +4,11 @@ import {
   BILLING_REPOSITORY,
 } from '../../domain/repositories/IBillingRepository';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
-import { UsageRecord } from '../../domain/entities/UsageRecord';
 import {
   IRecordUsageUseCase,
   RecordUsageInput,
   UsageType,
 } from './interfaces/IRecordUsageUseCase';
-import { TenantId } from '../../../../shared/domain/TenantId';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 
 @Injectable()
@@ -39,31 +37,18 @@ export class RecordUsageUseCase implements IRecordUsageUseCase {
       throw new EntityNotFoundException('Subscription', input.tenantId);
     }
 
-    let usage = await this.billingRepository.getUsage(
-      input.tenantId,
-      subscription.billingCycleStart,
-    );
+    const messagesIncrement = input.type === UsageType.MESSAGE ? 1 : 0;
+    const aiTokensIncrement =
+      input.type === UsageType.AI_TOKEN ? input.amount || 0 : 0;
+    const contactsIncrement = input.type === UsageType.CONTACT ? 1 : 0;
 
-    if (!usage) {
-      usage = UsageRecord.create(
-        TenantId.create(input.tenantId),
-        subscription.billingCycleStart,
-        subscription.billingCycleEnd,
-      );
-    }
-
-    switch (input.type) {
-      case UsageType.MESSAGE:
-        usage.recordMessage();
-        break;
-      case UsageType.AI_TOKEN:
-        usage.recordTokens(input.amount || 0);
-        break;
-      case UsageType.CONTACT:
-        usage.recordContact();
-        break;
-    }
-
-    await this.billingRepository.saveUsage(usage);
+    await this.billingRepository.atomicIncrementUsage({
+      tenantId: input.tenantId,
+      periodStart: subscription.billingCycleStart,
+      periodEnd: subscription.billingCycleEnd,
+      messagesIncrement,
+      aiTokensIncrement,
+      contactsIncrement,
+    });
   }
 }

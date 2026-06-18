@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -12,10 +12,8 @@ import {
 } from '@/modules/recovery/services/RecoveryService';
 import { getFriendlyErrorMessage } from '@/shared/api/error-message';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import type { AsyncOperationItem } from '@/shared/ui/AsyncOperationsPanel';
 import type {
   Contact,
-  RecoveryAsyncJob,
   RecoverySource,
   RecoveryStatus,
 } from '@/shared/types';
@@ -26,9 +24,7 @@ import {
   DEFAULT_GUIDANCE_FORM,
   DEFAULT_OUTREACH_FORM,
   DEFAULT_PAYMENT_LINK_FORM,
-  DEFAULT_REPORT_FILTERS,
   DEFAULT_STATUS_FORM,
-  isActiveRecoveryJob,
   matchesRecoverySearch,
   RECOVERY_GUIDANCE_SENT_TAG,
   RECOVERY_PAGE_SIZE,
@@ -39,7 +35,7 @@ import {
   splitRecoveryTags,
 } from './useRecoveryViewModelHelper';
 import { parseCurrencyInput } from '@/shared/lib/masks';
-import { formatCurrency } from '@/shared/lib/formatters';
+import { useRecoveryReportJobsViewModel } from './useRecoveryReportJobsViewModel';
 
 export function useRecoveryPageViewModel() {
   const tenant = useAuthStore((state) => state.tenant);
@@ -59,7 +55,6 @@ export function useRecoveryPageViewModel() {
   const [guidanceOpen, setGuidanceOpen] = useState(false);
   const [paymentLinkOpen, setPaymentLinkOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
-  const [reportsOpen, setReportsOpenState] = useState(false);
   const [recurringOpen, setRecurringOpenState] = useState(false);
   const [playbooksOpen, setPlaybooksOpenState] = useState(false);
   const [sentOutreachCaseIds, setSentOutreachCaseIds] = useState<string[]>([]);
@@ -71,7 +66,6 @@ export function useRecoveryPageViewModel() {
   const [guidanceForm, setGuidanceForm] = useState(DEFAULT_GUIDANCE_FORM);
   const [paymentLinkForm, setPaymentLinkForm] = useState(DEFAULT_PAYMENT_LINK_FORM);
   const [statusForm, setStatusForm] = useState(DEFAULT_STATUS_FORM);
-  const [reportFilters, setReportFilters] = useState(DEFAULT_REPORT_FILTERS);
   const [recurringForm, setRecurringForm] = useState({
     intervalDays: '30',
     maxOccurrences: '6',
@@ -80,10 +74,15 @@ export function useRecoveryPageViewModel() {
     messageTemplate: '',
   });
   const [recurringCancelReason, setRecurringCancelReason] = useState('');
-  const [currentReportJobId, setCurrentReportJobId] = useState<string | null>(null);
-  const handledReportJobsRef = useRef<Record<string, string>>({});
 
   const periodRange = useMemo(() => buildRecoveryPeriodRange(periodFilter), [periodFilter, refreshKey]);
+
+  const reportsVm = useRecoveryReportJobsViewModel({
+    tenantId: tenant?.id,
+    activeBranchId,
+    periodRange,
+    reportFilters: { statuses: [], sources: [], search: '' },
+  });
 
   const casesQuery = useQuery({
     queryKey: [
@@ -144,27 +143,6 @@ export function useRecoveryPageViewModel() {
         limit: 200,
         branchId: activeBranchId ?? undefined,
       }),
-  });
-
-  const jobsQuery = useQuery({
-    queryKey: ['recovery-async-jobs', tenant?.id],
-    queryFn: () => recoveryService.listAsyncJobs(tenant!.id),
-    enabled: Boolean(tenant?.id),
-    refetchOnWindowFocus: false,
-    refetchInterval: (query) => {
-      const jobs = (query.state.data ?? []) as RecoveryAsyncJob[];
-      return jobs.some((job) => isActiveRecoveryJob(job)) ? 3000 : false;
-    },
-  });
-
-  const focusedJobQuery = useQuery({
-    queryKey: ['recovery-async-job', tenant?.id, currentReportJobId],
-    enabled: Boolean(tenant?.id && currentReportJobId),
-    queryFn: () => recoveryService.getAsyncJob(tenant!.id, currentReportJobId!),
-    refetchInterval: (query) => {
-      const job = query.state.data as RecoveryAsyncJob | undefined;
-      return job && isActiveRecoveryJob(job) ? 2500 : false;
-    },
   });
 
   const playbooksQuery = useQuery({
@@ -259,90 +237,6 @@ export function useRecoveryPageViewModel() {
     page * RECOVERY_PAGE_SIZE,
   );
   const summary = buildRecoverySummary(filteredCases);
-
-  function resolveRecoveryReportJobFromList(jobId: string | null) {
-    return jobId ? ((jobsQuery.data ?? []).find((job) => job.id === jobId) ?? null) : null;
-  }
-
-  const recoveryActiveReportJob = useMemo(() => {
-    if (!currentReportJobId) {
-      return null;
-    }
-
-    if (focusedJobQuery.data?.id === currentReportJobId) {
-      return focusedJobQuery.data;
-    }
-
-    return resolveRecoveryReportJobFromList(currentReportJobId);
-  }, [currentReportJobId, focusedJobQuery.data, jobsQuery.data]);
-
-  const recoveryActiveJobItems = useMemo<AsyncOperationItem[]>(
-    () =>
-      (jobsQuery.data ?? [])
-        .filter((job) => isActiveRecoveryJob(job))
-        .map((job) => ({
-          id: job.id,
-          title: 'Exportação de cobranças',
-          description:
-            'Estamos consolidando a carteira e preparando o CSV em segundo plano.',
-          status: job.status,
-          progress: job.progress,
-          processedItems: job.processedItems,
-          totalItems: job.totalItems,
-        })),
-    [jobsQuery.data],
-  );
-
-  useEffect(() => {
-    if (
-      !recoveryActiveReportJob ||
-      handledReportJobsRef.current[recoveryActiveReportJob.id] === recoveryActiveReportJob.status
-    ) {
-      return;
-    }
-
-    if (recoveryActiveReportJob.status === 'COMPLETED') {
-      handledReportJobsRef.current[recoveryActiveReportJob.id] = recoveryActiveReportJob.status;
-      setCurrentReportJobId(null);
-
-      void recoveryService
-        .downloadAsyncJobFile(
-          tenant!.id,
-          recoveryActiveReportJob.id,
-          recoveryActiveReportJob.fileName ?? undefined,
-        )
-        .then(() => {
-          toast({
-            title: 'CSV de cobranças exportado',
-            description:
-              Number(recoveryActiveReportJob.resultSummary?.totalCases ?? 0) > 0
-                ? `${Number(recoveryActiveReportJob.resultSummary?.totalCases ?? 0)} casos foram incluidos no arquivo.`
-                : 'O arquivo foi gerado sem casos para os filtros escolhidos.',
-          });
-        })
-        .catch((error) => {
-          toast({
-            title: 'CSV pronto, mas falhou o download',
-            description: getFriendlyErrorMessage(error, {
-              fallbackMessage: 'Tente gerar novamente ou atualizar a pagina.',
-            }),
-            variant: 'destructive',
-          });
-        });
-    }
-
-    if (recoveryActiveReportJob.status === 'FAILED') {
-      handledReportJobsRef.current[recoveryActiveReportJob.id] = recoveryActiveReportJob.status;
-      setCurrentReportJobId(null);
-      toast({
-        title: 'Falha ao exportar cobranças',
-        description:
-          recoveryActiveReportJob.errorMessage ??
-          'não foi possível gerar o CSV da carteira.',
-        variant: 'destructive',
-      });
-    }
-  }, [recoveryActiveReportJob, tenant]);
 
   const invalidateCases = async () => {
     await queryClient.invalidateQueries({
@@ -640,70 +534,6 @@ export function useRecoveryPageViewModel() {
     },
   });
 
-  const generateReportMutation = useMutation({
-    mutationFn: () =>
-      recoveryService.startReportJob(tenant!.id, {
-        branchId: activeBranchId ?? undefined,
-        statuses: reportFilters.statuses,
-        sources: reportFilters.sources,
-        search: reportFilters.search.trim() || undefined,
-        dateFrom: periodRange.dateFrom,
-        dateTo: periodRange.dateTo,
-      }),
-    onSuccess: async (job) => {
-      setCurrentReportJobId(job.id);
-      setReportsOpenState(false);
-      await queryClient.invalidateQueries({ queryKey: ['recovery-async-jobs', tenant?.id] });
-      await queryClient.invalidateQueries({
-        queryKey: ['recovery-async-job', tenant?.id, job.id],
-      });
-      toast({
-        title: 'Relatorio enfileirado',
-        description:
-          'Vamos processar a carteira em segundo plano e iniciar o download quando o CSV ficar pronto.',
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Falha ao iniciar exportação',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'não foi possível enfileirar o relatorio agora.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const syncReportSummaryMutation = useMutation({
-    mutationFn: () =>
-      recoveryService.generateReportSync(tenant!.id, {
-        branchId: activeBranchId ?? undefined,
-        statuses: reportFilters.statuses,
-        sources: reportFilters.sources,
-        search: reportFilters.search.trim() || undefined,
-        dateFrom: periodRange.dateFrom,
-        dateTo: periodRange.dateTo,
-      }),
-    onSuccess: (data) => {
-      const s = data.summary;
-      const casesCount = s.totalCases ?? 0;
-      const openLabel = formatCurrency(s.totalOpenAmount) ?? '—';
-      toast({
-        title: 'Resumo da carteira (instantâneo)',
-        description: `${casesCount} casos · valor em aberto estimado ${openLabel}`,
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Não foi possível obter o resumo',
-        description: getFriendlyErrorMessage(error, {
-          fallbackMessage: 'Tente novamente ou use o fluxo de CSV em segundo plano.',
-        }),
-        variant: 'destructive',
-      });
-    },
-  });
-
   const scheduleRecurringChargeMutation = useMutation({
     mutationFn: async () => {
       const intervalDays = Number(recurringForm.intervalDays);
@@ -826,15 +656,13 @@ export function useRecoveryPageViewModel() {
     filteredCases,
     pageCases,
     summary,
-    jobsQuery,
-    reportsOpen,
-    setReportsOpen(open: boolean) {
-      setReportsOpenState(open);
-    },
-    reportFilters,
-    setReportFilters,
-    recoveryActiveReportJob,
-    recoveryActiveJobItems,
+    jobsQuery: reportsVm.jobsQuery,
+    reportsOpen: reportsVm.reportsOpen,
+    setReportsOpen: reportsVm.setReportsOpen,
+    reportFilters: reportsVm.reportFilters,
+    setReportFilters: reportsVm.setReportFilters,
+    recoveryActiveReportJob: reportsVm.recoveryActiveReportJob,
+    recoveryActiveJobItems: reportsVm.recoveryActiveJobItems,
     selectedCaseId,
     selectedCase,
     outreachFlowExhausted,
@@ -927,8 +755,8 @@ export function useRecoveryPageViewModel() {
     statusForm,
     setStatusForm,
     updateStatusMutation,
-    generateReportMutation,
-    syncReportSummaryMutation,
+    generateReportMutation: reportsVm.generateReportMutation,
+    syncReportSummaryMutation: reportsVm.syncReportSummaryMutation,
 
     playbooksOpen,
     setPlaybooksOpen(open: boolean) {

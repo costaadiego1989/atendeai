@@ -7,7 +7,7 @@ import {
   ProspectingAsyncJobStatus,
   ProspectingAsyncJobType,
   ProspectingAsyncJobView,
-} from '../../domain/repositories/IProspectAsyncJobRepository';
+} from '../../../domain/repositories/IProspectAsyncJobRepository';
 
 export {
   ProspectingAsyncJobStatus,

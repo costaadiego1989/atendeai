@@ -153,6 +153,37 @@ export class PrismaSupportFeedbackRepository implements ISupportFeedbackReposito
     `);
   }
 
+  async updateStatusAndCreateReply(
+    feedbackId: string,
+    newStatus: SupportFeedbackStatus | null,
+    reply: CreateReplyInput,
+  ): Promise<SupportFeedbackReply> {
+    return this.prisma.$transaction(async (tx) => {
+      if (newStatus !== null) {
+        await tx.$executeRaw(Prisma.sql`
+          UPDATE support_schema.feedbacks
+          SET status = ${newStatus}, updated_at = NOW()
+          WHERE id = ${feedbackId}::uuid
+        `);
+      }
+
+      const rows = await tx.$queryRaw<any[]>(Prisma.sql`
+        INSERT INTO support_schema.feedback_replies (
+          feedback_id, author_name, message, sent_via, message_id
+        ) VALUES (
+          ${reply.feedbackId}::uuid,
+          ${reply.authorName},
+          ${reply.message},
+          ${reply.sentVia ?? null},
+          ${reply.messageId ?? null}::uuid
+        )
+        RETURNING id, feedback_id, author_name, message, sent_via, message_id, created_at
+      `);
+
+      return this.mapReplyRow(rows[0]);
+    });
+  }
+
   async createReply(input: CreateReplyInput): Promise<SupportFeedbackReply> {
     const rows = await this.prisma.$queryRaw<any[]>(Prisma.sql`
       INSERT INTO support_schema.feedback_replies (

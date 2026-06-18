@@ -1,3 +1,4 @@
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import {
   BookMarked,
   Bot,
@@ -47,6 +48,7 @@ import type { RecoverySource, RecoveryStatus } from '@/shared/types';
 import { TableSkeleton } from '@/shared/ui/Skeletons';
 
 export default function RecoveryPage() {
+  usePageTitle('Cobranças');
   const vm = useRecoveryPageViewModel();
 
   return (

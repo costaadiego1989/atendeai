@@ -1,4 +1,5 @@
-import { apiClient, BASE_URL } from '@/shared/api/client';
+import { apiClient } from '@/shared/api/client';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type {
   InventoryAsyncJob,
   InventoryConnection,
@@ -220,12 +221,9 @@ export const inventoryService = {
     jobId: string,
     fallbackFileName?: string,
   ): Promise<void> {
-    const anchor = document.createElement('a');
-    anchor.href = `${BASE_URL}/tenants/${tenantId}/inventory/jobs/${jobId}/download`;
-    anchor.download = fallbackFileName ?? `estoque-${jobId}.csv`;
-
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    return authenticatedDownload(
+      `/tenants/${tenantId}/inventory/jobs/${jobId}/download`,
+      fallbackFileName ?? `estoque-${jobId}.csv`,
+    );
   },
 };

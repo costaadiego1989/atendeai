@@ -1,11 +1,21 @@
-import { Controller, Post, Param, Req, Res, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Param,
+  Req,
+  Res,
+  Logger,
+  UseGuards,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
+import { TwilioWebhookGuard } from '@modules/voice/guards/TwilioWebhookGuard';
 
 /**
  * Handles Twilio voice webhooks for call flow control.
- * These endpoints are public (called by Twilio) — no auth guard.
+ * Protected by TwilioWebhookGuard — validates Twilio request signatures.
  */
+@UseGuards(TwilioWebhookGuard)
 @Controller('voice/webhook')
 export class VoiceWebhookController {
   private readonly logger = new Logger(VoiceWebhookController.name);

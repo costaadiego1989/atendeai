@@ -32,6 +32,18 @@ export class SalesFacadeAdapter implements ISalesFacade {
     await this.salesCouponRepository.incrementCouponUsage(tenantId, couponId);
   }
 
+  async atomicIncrementCouponUsage(
+    tenantId: string,
+    couponId: string,
+  ): Promise<CouponRecord | null> {
+    const coupon = await this.salesCouponRepository.atomicIncrementCouponUsage(
+      tenantId,
+      couponId,
+    );
+
+    return coupon ? this.toCouponRecord(coupon) : null;
+  }
+
   private toCouponRecord(coupon: SalesCouponRecord): CouponRecord {
     return {
       id: coupon.id,
@@ -42,6 +54,9 @@ export class SalesFacadeAdapter implements ISalesFacade {
       maxUses: coupon.maxUses ?? null,
       currentUses: coupon.usedCount,
       active: coupon.active,
+      startsAt: coupon.startsAt,
+      expiresAt: coupon.expiresAt ?? null,
+      minimumOrder: coupon.minimumOrder ?? null,
     };
   }
 }

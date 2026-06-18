@@ -217,6 +217,15 @@ export interface ISalesCouponRepository {
     tenantId: string,
     id: string,
   ): Promise<SalesCouponRecord | null>;
+  /**
+   * COM1: Atomically increments used_count only when used_count < max_uses AND
+   * active = true. Returns updated record, or null if the coupon is exhausted /
+   * inactive / not found. Callers must treat null as CouponMaxUsesReachedException.
+   */
+  atomicIncrementCouponUsage(
+    tenantId: string,
+    id: string,
+  ): Promise<SalesCouponRecord | null>;
 }
 
 export interface ISalesRepository

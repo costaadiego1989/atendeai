@@ -5,7 +5,7 @@ import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
-import { ContactAsyncJobsService } from '../../application/services/ContactAsyncJobsService';
+import { ContactAsyncJobsService } from '../../infrastructure/persistence/repositories/ContactAsyncJobsService';
 import { ContactReportCsvBuilder } from '../../application/services/ContactReportCsvBuilder';
 import { IGenerateContactsReportUseCase } from '../../application/use-cases/interfaces/IGenerateContactsReportUseCase';
 import { IImportContactsListUseCase } from '../../application/use-cases/interfaces/IImportContactsListUseCase';

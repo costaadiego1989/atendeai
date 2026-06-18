@@ -5,7 +5,7 @@ import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
-import { SchedulingAsyncJobsService } from '../../application/services/SchedulingAsyncJobsService';
+import { SchedulingAsyncJobsService } from '../../infrastructure/persistence/repositories/SchedulingAsyncJobsService';
 import { SchedulingReportCsvBuilder } from '../../application/services/SchedulingReportCsvBuilder';
 import { GenerateSchedulingReportUseCase } from '../../application/use-cases/GenerateSchedulingReportUseCase';
 

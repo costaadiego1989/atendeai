@@ -17,6 +17,7 @@ describe('Commerce Coupon E2E', () => {
   };
   const salesRepo = {
     findCouponByCode: jest.fn(),
+    atomicIncrementCouponUsage: jest.fn(),
   };
 
   beforeAll(async () => {
@@ -70,6 +71,19 @@ describe('Commerce Coupon E2E', () => {
       expiresAt: new Date(2030, 1, 1),
       maxUses: 100,
       usedCount: 0,
+      minimumOrder: 50,
+    });
+    // atomicIncrementCouponUsage must return non-null to not throw
+    salesRepo.atomicIncrementCouponUsage.mockResolvedValue({
+      id: 'coupon-1',
+      code: 'OFF15',
+      discountType: 'PERCENTAGE',
+      discountValue: 15,
+      active: true,
+      startsAt: new Date(2020, 1, 1),
+      expiresAt: new Date(2030, 1, 1),
+      maxUses: 100,
+      usedCount: 1,
       minimumOrder: 50,
     });
 

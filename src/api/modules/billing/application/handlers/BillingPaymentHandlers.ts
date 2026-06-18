@@ -93,6 +93,19 @@ export class BillingPaymentHandlers implements OnModuleInit {
           }
 
           if (planUpgradeRequest) {
+            // Idempotency: skip if we already processed an upgrade for this billing
+            // cycle — a re-delivered event must not trigger a second plan change.
+            if (
+              subscription.status === 'ACTIVE' &&
+              subscription.plan === planUpgradeRequest.targetPlan &&
+              subscription.isInCurrentCycle(confirmedAt)
+            ) {
+              this.logger.warn(
+                `[BillingPaymentHandlers] duplicate payment.confirmed (upgrade) skipped tenant=${tenantId} plan=${planUpgradeRequest.targetPlan}`,
+              );
+              return;
+            }
+
             const oldPlan = subscription.plan;
             const targetPlanDefinition =
               await this.billingRepository.findPlanByCode(
@@ -173,6 +186,10 @@ export class BillingPaymentHandlers implements OnModuleInit {
             subscription.status === 'ACTIVE' &&
             subscription.isInCurrentCycle(confirmedAt)
           ) {
+            // Idempotency: event was already processed for this billing cycle.
+            this.logger.warn(
+              `[BillingPaymentHandlers] duplicate payment.confirmed skipped tenant=${tenantId} paymentId=${payload.paymentId}`,
+            );
             return;
           }
 

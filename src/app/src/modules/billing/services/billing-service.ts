@@ -1,5 +1,5 @@
-import { apiClient, BASE_URL } from '@/shared/api/client';
-import { triggerFileDownload } from '@/shared/lib/file-download';
+import { apiClient } from '@/shared/api/client';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type {
   BillingPlan,
   BillingSubscriptionCatalog,
@@ -74,8 +74,8 @@ export const billingService = {
     return mapUsageData(response);
   },
 
-  downloadUsageExportCsv(tenantId: string, fallbackFileName = 'uso-periodo-atual.csv'): void {
-    triggerFileDownload(`${BASE_URL}/tenants/${tenantId}/usage/export.csv`, fallbackFileName);
+  downloadUsageExportCsv(tenantId: string, fallbackFileName = 'uso-periodo-atual.csv'): Promise<void> {
+    return authenticatedDownload(`/tenants/${tenantId}/usage/export.csv`, fallbackFileName);
   },
 
   async listPlans(tenantId: string): Promise<BillingPlan[]> {

@@ -90,6 +90,7 @@ export function createProposalRepositoryMock(): jest.Mocked<IProposalRepository>
   return {
     save: jest.fn(),
     findById: jest.fn(),
+    findByIdPublic: jest.fn(),
     findByTenantId: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -103,7 +104,14 @@ export class InMemoryProposalRepository implements IProposalRepository {
     this.store.set(proposal.id, proposal);
   }
 
-  async findById(id: string): Promise<Proposal | null> {
+  async findById(id: string, tenantId: string): Promise<Proposal | null> {
+    const proposal = this.store.get(id);
+    if (!proposal) return null;
+    if (proposal.tenantId !== tenantId) return null;
+    return proposal;
+  }
+
+  async findByIdPublic(id: string): Promise<Proposal | null> {
     return this.store.get(id) ?? null;
   }
 

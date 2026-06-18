@@ -105,7 +105,7 @@ describe('PrismaConversationRepository (integration)', () => {
 
     await repository.save(conversation);
 
-    const result = await repository.findById(conversation.id.toString());
+    const result = await repository.findById(conversation.id.toString(), tenantId);
 
     expect(result).not.toBeNull();
     expect(result?.status).toBe('ACTIVE');
@@ -135,7 +135,7 @@ describe('PrismaConversationRepository (integration)', () => {
       message.externalId!,
       tenantId,
     );
-    const byMessageId = await repository.findByMessageId(message.id.toString());
+    const byMessageId = await repository.findByMessageId(message.id.toString(), tenantId);
 
     expect(byContact).not.toBeNull();
     expect(byExternalId?.id.toString()).toBe(conversation.id.toString());

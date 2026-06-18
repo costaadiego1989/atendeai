@@ -10,6 +10,7 @@ import { FollowUpService } from '../services/FollowUpService';
 
 interface EscalationPayload {
   conversationId: string;
+  tenantId: string;
   escalationMessage: string;
 }
 
@@ -40,6 +41,7 @@ export class AIEscalationRequestedHandler implements OnModuleInit {
     const payload = event.payload as unknown as EscalationPayload;
     const conversation = await this.conversationRepository.findById(
       payload.conversationId,
+      payload.tenantId,
     );
 
     if (!conversation) {
@@ -59,6 +61,7 @@ export class AIEscalationRequestedHandler implements OnModuleInit {
     if (payload.escalationMessage) {
       await this.sendAiMessageUseCase.execute({
         conversationId: payload.conversationId,
+        tenantId: payload.tenantId,
         text: payload.escalationMessage,
         type: 'TEXT',
       });

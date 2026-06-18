@@ -10,11 +10,10 @@ import {
   CommerceShippingPolicyRecord,
   ICommerceRepository,
 } from '../../domain/ports/ICommerceRepository';
-
 import {
-  SALES_REPOSITORY,
-  ISalesCouponRepository,
-} from '@modules/sales/domain/repositories/ISalesRepository';
+  SALES_FACADE,
+  ISalesFacade,
+} from '@modules/sales/application/facades/ISalesFacade';
 
 export interface UpdateShoppingSessionFulfillmentInput {
   tenantId: string;
@@ -30,8 +29,8 @@ export class UpdateShoppingSessionFulfillmentUseCase {
   constructor(
     @Inject(COMMERCE_REPOSITORY)
     private readonly commerceRepository: ICommerceRepository,
-    @Inject(SALES_REPOSITORY)
-    private readonly salesRepository: ISalesCouponRepository,
+    @Inject(SALES_FACADE)
+    private readonly salesFacade: ISalesFacade,
   ) {}
 
   async execute(input: UpdateShoppingSessionFulfillmentInput) {
@@ -123,7 +122,7 @@ export class UpdateShoppingSessionFulfillmentUseCase {
   ): Promise<number> {
     if (!couponCode) return 0;
 
-    const coupon = await this.salesRepository.findCouponByCode(
+    const coupon = await this.salesFacade.findCouponByCode(
       tenantId,
       couponCode,
     );

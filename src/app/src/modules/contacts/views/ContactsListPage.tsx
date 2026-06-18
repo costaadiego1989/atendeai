@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Card, CardContent } from '@/components/ui/card';
 import { Contact2, Download, Filter } from 'lucide-react';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -16,6 +17,7 @@ import { ContactReportsSheet } from '../components/ContactReportsSheet';
 import { ImportContactsSheet } from '../components/ImportContactsSheet';
 
 export default function ContactsListPage() {
+  usePageTitle('Contatos');
   const vm = useContactsListViewModel();
 
   return (
@@ -96,6 +98,11 @@ export default function ContactsListPage() {
           {vm.contactsQuery.isLoading ? (
             <div className="p-6">
               <TableSkeleton cols={5} />
+            </div>
+          ) : vm.contactsQuery.isError ? (
+            <div className="p-12 text-center">
+              <p className="text-sm font-semibold text-destructive">Erro ao carregar contatos</p>
+              <p className="text-xs text-muted-foreground mt-1">Tente atualizar a página ou verifique sua conexão.</p>
             </div>
           ) : !vm.contacts.length ? (
             <div className="p-12">

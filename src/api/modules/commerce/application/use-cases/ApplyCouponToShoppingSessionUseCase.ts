@@ -9,9 +9,10 @@ import {
   ICommerceRepository,
 } from '../../domain/ports/ICommerceRepository';
 import {
-  SALES_REPOSITORY,
-  ISalesCouponRepository,
-} from '@modules/sales/domain/repositories/ISalesRepository';
+  SALES_FACADE,
+  ISalesFacade,
+} from '@modules/sales/application/facades/ISalesFacade';
+import { CouponMaxUsesReachedException } from '../../domain/errors/CouponMaxUsesReachedException';
 
 export interface ApplyCouponToShoppingSessionInput {
   tenantId: string;
@@ -24,8 +25,8 @@ export class ApplyCouponToShoppingSessionUseCase {
   constructor(
     @Inject(COMMERCE_REPOSITORY)
     private readonly commerceRepository: ICommerceRepository,
-    @Inject(SALES_REPOSITORY)
-    private readonly salesRepository: ISalesCouponRepository,
+    @Inject(SALES_FACADE)
+    private readonly salesFacade: ISalesFacade,
   ) {}
 
   async execute(input: ApplyCouponToShoppingSessionInput) {
@@ -37,7 +38,7 @@ export class ApplyCouponToShoppingSessionUseCase {
       throw new NotFoundException('Shopping session not found');
     }
 
-    const coupon = await this.salesRepository.findCouponByCode(
+    const coupon = await this.salesFacade.findCouponByCode(
       input.tenantId,
       input.code,
     );
@@ -57,16 +58,39 @@ export class ApplyCouponToShoppingSessionUseCase {
       throw new BadRequestException('Coupon has expired');
     }
 
-    if (coupon.maxUses > 0 && coupon.usedCount >= coupon.maxUses) {
+    // Fast-fail pre-check (non-authoritative — still racy but avoids unnecessary
+    // DB round-trips for clearly exhausted coupons)
+    if (
+      coupon.maxUses != null &&
+      coupon.maxUses > 0 &&
+      coupon.currentUses >= coupon.maxUses
+    ) {
       throw new BadRequestException('Coupon usage limit reached');
     }
 
-    if (coupon.minimumOrder && session.subtotalAmount < coupon.minimumOrder) {
+    if (
+      coupon.minimumOrder != null &&
+      session.subtotalAmount < coupon.minimumOrder
+    ) {
       throw new BadRequestException(
         `Minimum order amount of BRL ${coupon.minimumOrder} not met`,
       );
     }
 
+    // COM1 fix: atomically increment only when used_count < max_uses AND active.
+    // Returns null if the race was lost (coupon exhausted between pre-check and here).
+    if (coupon.maxUses != null && coupon.maxUses > 0) {
+      const incremented = await this.salesFacade.atomicIncrementCouponUsage(
+        input.tenantId,
+        coupon.id,
+      );
+      if (!incremented) {
+        throw new CouponMaxUsesReachedException(coupon.id);
+      }
+    }
+
+    // Compute discount against current session subtotal only — never persist a
+    // stale absolute amount. The session state update below stores the live value.
     let discountAmount = 0;
     if (coupon.discountType === 'FIXED_AMOUNT') {
       discountAmount = coupon.discountValue;
@@ -74,8 +98,9 @@ export class ApplyCouponToShoppingSessionUseCase {
       discountAmount = (session.subtotalAmount * coupon.discountValue) / 100;
     }
 
-    const totalAmount =
-      session.subtotalAmount + (session.freightAmount ?? 0) - discountAmount;
+    const gross = session.subtotalAmount + (session.freightAmount ?? 0);
+    // COM4: floor total to 0 (domain entity enforces throw on discount > gross)
+    const totalAmount = Math.max(0, gross - discountAmount);
 
     return await this.commerceRepository.updateSessionState({
       tenantId: input.tenantId,

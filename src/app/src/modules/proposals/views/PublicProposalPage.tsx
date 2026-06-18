@@ -591,6 +591,8 @@ export default function PublicProposalPage() {
                         </div>
                         <canvas
                           ref={canvasRef}
+                          role="img"
+                          aria-label="Área de assinatura digital"
                           width={640}
                           height={180}
                           className="h-40 w-full rounded-2xl border border-white/10 bg-[#0d1625] touch-none"

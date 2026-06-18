@@ -230,6 +230,46 @@ export const apiClient = {
       method: 'DELETE',
     });
   },
+
+  /**
+   * Fetch a file through the authenticated client (credentials included, 401
+   * triggers the same token-refresh / redirect logic as other calls) and
+   * return a Blob so the caller can use URL.createObjectURL for a real
+   * browser download. Using this instead of a bare <a href> means:
+   *  - The auth cookie is sent (protected endpoints don't return 401 silently).
+   *  - HTTP errors surface as thrown HttpError instances.
+   *  - The caller can key a success/error toast off the actual result.
+   */
+  async downloadBlob(path: string): Promise<Blob> {
+    const response = await fetch(`${BASE_URL}${path}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (response.status === 401) {
+      if (shouldAttemptRefresh(path) && (await tryRefreshSession())) {
+        // Retry once after token refresh
+        const retryResponse = await fetch(`${BASE_URL}${path}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (!retryResponse.ok) {
+          throw new HttpError({ status: retryResponse.status, message: `Erro ao baixar arquivo (${retryResponse.status})` });
+        }
+        return retryResponse.blob();
+      }
+      if (shouldRedirectToLoginOnUnauthorized()) {
+        window.location.href = '/login?reason=session-expired';
+        return new Promise<Blob>(() => {});
+      }
+    }
+
+    if (!response.ok) {
+      throw new HttpError({ status: response.status, message: `Erro ao baixar arquivo (${response.status})` });
+    }
+
+    return response.blob();
+  },
 };
 
 const PLATFORM_ADMIN_KEY_HEADER = 'x-platform-admin-key';

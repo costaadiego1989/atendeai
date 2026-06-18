@@ -1,5 +1,5 @@
-import { apiClient, BASE_URL } from '@/shared/api/client';
-import { triggerFileDownload } from '@/shared/lib/file-download';
+import { apiClient } from '@/shared/api/client';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type { ProspectingAsyncJob } from '@/shared/types';
 import { prospectingAdsService } from './prospecting-ads-service';
 import { prospectingCampaignService } from './prospecting-campaign-service';
@@ -34,8 +34,8 @@ export const prospectingService = {
     return apiClient.get<ProspectingAsyncJob>(`/prospecting/reports/jobs/${jobId}`);
   },
   async downloadAsyncJobFile(jobId: string, fallbackFileName?: string): Promise<void> {
-    triggerFileDownload(
-      `${BASE_URL}/prospecting/reports/jobs/${jobId}/download`,
+    return authenticatedDownload(
+      `/prospecting/reports/jobs/${jobId}/download`,
       fallbackFileName ?? `prospecting-${jobId}.csv`,
     );
   },

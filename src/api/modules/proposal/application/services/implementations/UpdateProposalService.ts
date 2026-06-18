@@ -26,8 +26,12 @@ export class UpdateProposalService {
     private readonly proposalRepository: IProposalRepository,
   ) {}
 
-  async execute(id: string, data: UpdateProposalData): Promise<Proposal> {
-    const proposal = await this.proposalRepository.findById(id);
+  async execute(
+    id: string,
+    data: UpdateProposalData,
+    tenantId: string,
+  ): Promise<Proposal> {
+    const proposal = await this.proposalRepository.findById(id, tenantId);
     if (!proposal) throw new ProposalNotFoundError(id);
 
     if (data.title) {

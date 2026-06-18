@@ -53,6 +53,7 @@ import TeamPage from '@/modules/users/views/TeamPage';
 import { PlatformAdminNavGate } from '@/shared/ui/PlatformAdminNavGate';
 import PlatformTenantsPage from '@/modules/platform-admin/views/PlatformTenantsPage';
 import NotFound from './pages/NotFound';
+import DataDeletionPage from './pages/DataDeletionPage';
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -95,6 +96,7 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/first-access-password" element={<FirstAccessPasswordPage />} />
       <Route path="/proposal/:token" element={<PublicProposalPage />} />
+      <Route path="/data-deletion" element={<DataDeletionPage />} />
       <Route
         path="/redefinir-senha"
         element={<Navigate to="/reset-password" replace />}

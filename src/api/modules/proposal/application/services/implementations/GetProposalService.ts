@@ -10,8 +10,8 @@ export class GetProposalService {
     private readonly proposalRepository: IProposalRepository,
   ) {}
 
-  async execute(id: string): Promise<Proposal> {
-    const proposal = await this.proposalRepository.findById(id);
+  async execute(id: string, tenantId: string): Promise<Proposal> {
+    const proposal = await this.proposalRepository.findById(id, tenantId);
     if (!proposal) throw new ProposalNotFoundError(id);
     return proposal;
   }

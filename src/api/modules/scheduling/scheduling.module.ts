@@ -52,7 +52,7 @@ import { PrismaSchedulingGoogleCalendarEventLinkRepository } from './infrastruct
 import { SCHEDULING_GOOGLE_CALENDAR_CONNECTION_REPOSITORY } from './domain/ports/ISchedulingGoogleCalendarConnectionRepository';
 import { SCHEDULING_GOOGLE_CALENDAR_EVENT_LINK_REPOSITORY } from './domain/ports/ISchedulingGoogleCalendarEventLinkRepository';
 import { SchedulingReportCsvBuilder } from './application/services/SchedulingReportCsvBuilder';
-import { SchedulingAsyncJobsService } from './application/services/SchedulingAsyncJobsService';
+import { SchedulingAsyncJobsService } from './infrastructure/persistence/repositories/SchedulingAsyncJobsService';
 import { SchedulingAsyncJobProcessor } from './infrastructure/queue/SchedulingAsyncJobProcessor';
 import { SchedulingReservationExpirationProcessor } from './infrastructure/queue/SchedulingReservationExpirationProcessor';
 import { SchedulingRecurrenceDateService } from './application/services/SchedulingRecurrenceDateService';

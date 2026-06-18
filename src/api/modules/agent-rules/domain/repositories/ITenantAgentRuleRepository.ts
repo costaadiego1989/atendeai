@@ -40,6 +40,14 @@ export interface ITenantAgentRuleRepository {
   ): Promise<TenantAgentRule | null>;
   save(rule: TenantAgentRule): Promise<void>;
   saveHistory(history: TenantAgentRuleHistory): Promise<void>;
+  /**
+   * Atomically persists the rule and its history entry in a single transaction.
+   * Prefer this over separate save() + saveHistory() calls to avoid partial writes.
+   */
+  saveWithHistory(
+    rule: TenantAgentRule,
+    history: TenantAgentRuleHistory,
+  ): Promise<void>;
   listRecentHistory(params: {
     tenantId: string;
     moduleId: AgentModule;

@@ -1,4 +1,5 @@
 import { PageTabsList } from '@/components/PageTabs';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -13,6 +14,7 @@ import { AsyncOperationsPanel } from '@/shared/ui/AsyncOperationsPanel';
 import { CalendarDays, Download, ScissorsSquare, Users } from 'lucide-react';
 
 export default function SchedulingPage() {
+  usePageTitle('Agendamento');
   const vm = useSchedulingPageViewModel();
 
   return (
