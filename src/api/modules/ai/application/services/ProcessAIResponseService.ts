@@ -3,11 +3,8 @@ import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExcepti
 import { AI_ENGINE, IAIEngine } from '../ports/IAIEngine';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import {
-  AIQuotaDeniedIntegrationEvent,
-  AIResponseFailedIntegrationEvent,
-  AIResponseGeneratedIntegrationEvent,
   AISafetyBlockedIntegrationEvent,
-  AIEscalationRequestedIntegrationEvent,
+  AIResponseFailedIntegrationEvent,
 } from '../integration-events/publishers/AIIntegrationEvents';
 import {
   ProcessAIResponseInput,
@@ -21,8 +18,6 @@ import {
   CHAT_HISTORY_REPOSITORY,
   IChatHistoryRepository,
 } from '../ports/IChatHistoryRepository';
-import { ICheckQuotaUseCase } from '../../../billing/application/use-cases/interfaces/ICheckQuotaUseCase';
-import { UsageType } from '../../../billing/application/use-cases/interfaces/IRecordUsageUseCase';
 import { AIResponseProcessor } from './AIResponseProcessor';
 import { HumanHandoffPolicy } from './HumanHandoffPolicy';
 import {
@@ -30,22 +25,12 @@ import {
   IAdvanceCommerceConversation,
 } from '../ports/IAdvanceCommerceConversation';
 import { AISessionService } from './AISessionService';
-import { AIContextAggregator } from './AIContextAggregator';
 import {
   CONTACT_REPOSITORY,
   IContactRepository,
 } from '@modules/contact/domain/repositories/IContactRepository';
-import { TenantAgentRuleService } from '@modules/agent-rules/application/services/TenantAgentRuleService';
-import { MediaUnderstandingService } from './MediaUnderstandingService';
-import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
-import {
-  MANUAL_AUTOMATION_FACADE,
-  IManualAutomationFacade,
-  ManualAutomationSummary,
-} from '../ports/IManualAutomationFacade';
-
 import { AiSafetyGate } from './AiSafetyGate';
-import { Tenant } from '../../../tenant/domain/entities/Tenant';
+import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
 import {
   IRAGResponseCache,
   RAG_RESPONSE_CACHE,
@@ -54,6 +39,13 @@ import {
   EMBEDDING_PROVIDER,
   IEmbeddingProvider,
 } from '../ports/IEmbeddingProvider';
+
+import { AIQuotaGuard } from './AIQuotaGuard';
+import { AISystemPromptAssembler } from './AISystemPromptAssembler';
+import { AITurnPersistenceService } from './AITurnPersistenceService';
+import { AIHandoffService } from './AIHandoffService';
+import { AIAutomationDispatcher } from './AIAutomationDispatcher';
+import { AIUserMessageResolver } from './AIUserMessageResolver';
 
 @Injectable()
 export class ProcessAIResponseService {
@@ -70,29 +62,26 @@ export class ProcessAIResponseService {
     private readonly tenantRepository: ITenantRepository,
     @Inject(CHAT_HISTORY_REPOSITORY)
     private readonly chatHistoryRepository: IChatHistoryRepository,
-    @Inject(ICheckQuotaUseCase)
-    private readonly checkQuotaUseCase: ICheckQuotaUseCase,
     private readonly responseProcessor: AIResponseProcessor,
     private readonly humanHandoffPolicy: HumanHandoffPolicy,
     @Inject(ADVANCE_COMMERCE_CONVERSATION)
     private readonly advanceCommerceConversationUseCase: IAdvanceCommerceConversation,
     private readonly aiSessionService: AISessionService,
-    private readonly contextAggregator: AIContextAggregator,
     @Inject(CONTACT_REPOSITORY)
     private readonly contactRepository: IContactRepository,
-    private readonly tenantAgentRuleService: TenantAgentRuleService,
     private readonly aiSafetyGate: AiSafetyGate,
-    @Optional()
-    private readonly mediaUnderstandingService?: MediaUnderstandingService,
+    private readonly quotaGuard: AIQuotaGuard,
+    private readonly promptAssembler: AISystemPromptAssembler,
+    private readonly turnPersistence: AITurnPersistenceService,
+    private readonly handoffService: AIHandoffService,
+    private readonly automationDispatcher: AIAutomationDispatcher,
+    private readonly userMessageResolver: AIUserMessageResolver,
     @Optional()
     @Inject(RAG_RESPONSE_CACHE)
     private readonly ragResponseCache?: IRAGResponseCache,
     @Optional()
     @Inject(EMBEDDING_PROVIDER)
     private readonly embeddingProvider?: IEmbeddingProvider,
-    @Optional()
-    @Inject(MANUAL_AUTOMATION_FACADE)
-    private readonly manualAutomationFacade?: IManualAutomationFacade,
   ) {}
 
   async process(
@@ -119,11 +108,21 @@ export class ProcessAIResponseService {
       throw new EntityNotFoundException('Tenant', input.tenantId);
     }
 
-    const userMessage = await this.resolveUserMessage(input);
+    // 1. Resolve user message (handles media types)
+    const userMessage = await this.userMessageResolver.resolve(input);
 
+    // 2. Safety gate
     const safetyDecision = this.aiSafetyGate.evaluateUserMessage(userMessage);
     if (safetyDecision.blocked) {
-      await this.publishSafetyBlocked(input, safetyDecision.pattern);
+      await this.eventBus.publish(
+        new AISafetyBlockedIntegrationEvent({
+          conversationId: input.conversationId,
+          tenantId: input.tenantId,
+          contactId: input.contactId,
+          matchedPattern: safetyDecision.pattern,
+          reason: 'USER_MESSAGE_BLOCKED',
+        }),
+      );
       return {
         success: false,
         error: 'SAFETY_BLOCKED',
@@ -131,46 +130,17 @@ export class ProcessAIResponseService {
       };
     }
 
-    const quotaCheck = await this.checkQuotaUseCase.execute({
-      tenantId: input.tenantId,
-      type: UsageType.AI_TOKEN,
-    });
-
-    if (!quotaCheck.canProceed) {
-      await this.publishQuotaDenied(input, quotaCheck);
-      if (quotaCheck.status === 'NO_SUBSCRIPTION') {
-        await this.publishFallbackFailed(
-          input,
-          'Estou em configuração. Tente novamente em breve.',
-        );
-        return {
-          success: false,
-          error: 'NO_SUBSCRIPTION',
-          message: 'Conta em configuração. Tente novamente em instantes.',
-        };
-      }
-      if (quotaCheck.status !== 'ACTIVE') {
-        await this.publishFallbackFailed(
-          input,
-          'Assinatura inativa. Entre em contato com o suporte.',
-        );
-        return {
-          success: false,
-          error: 'SUBSCRIPTION_INACTIVE',
-          message: 'Assinatura inativa.',
-        };
-      }
-      await this.publishFallbackFailed(
-        input,
-        'Limite de uso atingido. Tente novamente mais tarde.',
-      );
+    // 3. Quota check
+    const quotaResult = await this.quotaGuard.check(input);
+    if (!quotaResult.canProceed) {
       return {
         success: false,
-        error: 'QUOTA_EXCEEDED',
-        message: 'Limite de uso atingido.',
+        error: quotaResult.error,
+        message: quotaResult.message,
       };
     }
 
+    // 4. Session + history
     const aiSession = await this.aiSessionService.getOrCreateSession(
       input.tenantId,
       input.contactId,
@@ -194,6 +164,7 @@ export class ProcessAIResponseService {
     const resolvedBranchId = await this.resolveBranchId(input);
 
     try {
+      // 5. Commerce advance
       await this.advanceCommerceConversationUseCase.execute({
         tenantId: input.tenantId,
         branchId: resolvedBranchId,
@@ -203,36 +174,20 @@ export class ProcessAIResponseService {
         userMessage,
       });
 
-      const { systemPrompt, diagnostics } =
-        await this.contextAggregator.aggregate(
-          tenant,
-          input.conversationId,
+      // 6. Assemble system prompt
+      const { prompt: systemPrompt, diagnostics } =
+        await this.promptAssembler.assemble({
+          tenantId: input.tenantId,
+          conversationId: input.conversationId,
+          branchId: resolvedBranchId,
           userMessage,
-          contextHistory.length === 0,
-        );
+          moduleId: input.moduleId || 'messaging',
+          contextHints: input.contextHints,
+          isFirstInteraction: contextHistory.length === 0,
+          tenant,
+        });
 
-      let promptWithAgentRule = await this.applyMessagingAgentRule(
-        input.tenantId,
-        systemPrompt,
-        input.moduleId || 'messaging',
-        resolvedBranchId,
-      );
-
-      if (input.contextHints?.length) {
-        promptWithAgentRule =
-          promptWithAgentRule +
-          '\n\n[OPÇÕES PRÉ-DEFINIDAS DO WIDGET — use como contexto de intenção do visitante]:\n' +
-          input.contextHints.map((h) => `- ${h}`).join('\n');
-      }
-
-      promptWithAgentRule = await this.appendManualAutomationsContext(
-        input.tenantId,
-        promptWithAgentRule,
-      );
-
-      promptWithAgentRule =
-        this.aiSafetyGate.appendPlatformLimits(promptWithAgentRule);
-
+      // 7. RAG cache check
       const ragCacheEnabled =
         !!diagnostics.tenantPDFContextFound &&
         !!this.ragResponseCache &&
@@ -254,24 +209,25 @@ export class ProcessAIResponseService {
             `[RAGCache] serving cached response tenant=${input.tenantId} conversation=${input.conversationId}`,
           );
 
-          await this.persistTurn(
+          await this.turnPersistence.persist({
             input,
-            aiSession.id,
-            cachedResponse,
-            {
+            sessionId: aiSession.id,
+            processedText: cachedResponse,
+            aiResponse: {
               tokensUsed: 0,
               intent: 'RAG_CACHED',
               sentiment: 'NEUTRAL',
               confidence: 1,
             },
-            { ...diagnostics, ragCacheHit: true },
+            diagnostics: { ...diagnostics, ragCacheHit: true },
             userMessage,
-          );
+          });
 
           return { success: true };
         }
       }
 
+      // 8. AI engine call
       const response = await traceAsync(
         'ai.ProcessAIResponseService.generateAssistantTurn',
         {
@@ -280,7 +236,7 @@ export class ProcessAIResponseService {
         },
         async () =>
           this.aiEngine.generateResponse({
-            systemPrompt: promptWithAgentRule,
+            systemPrompt,
             userMessage,
             contextHistory,
             maxTokens: tenant.aiConfig?.maxTokensPerResponse || 1000,
@@ -291,6 +247,7 @@ export class ProcessAIResponseService {
           }),
       );
 
+      // 9. Handoff policy
       const handoffDecision = this.humanHandoffPolicy.evaluate({
         userMessage,
         response,
@@ -298,16 +255,17 @@ export class ProcessAIResponseService {
       });
 
       if (handoffDecision.shouldHandoff) {
-        return this.handleHandoff(
+        return this.handoffService.execute({
           input,
           tenant,
           response,
-          handoffDecision,
-          aiSession.id,
+          decision: handoffDecision,
+          sessionId: aiSession.id,
           userMessage,
-        );
+        });
       }
 
+      // 10. Response processing + automation extraction
       const processedText = await this.responseProcessor.process(
         response.text,
         {
@@ -318,22 +276,18 @@ export class ProcessAIResponseService {
         },
       );
 
-      const { cleanedText, automationIds } = this.extractAutomationMarkers(processedText);
-      if (automationIds.length > 0) {
-        await this.dispatchAITriggeredAutomations(
-          input.tenantId,
-          input.contactId,
-          input.conversationId,
-          automationIds,
-        );
-      }
+      const { finalText: cleanedText, dispatchedCount } =
+        await this.automationDispatcher.extractAndDispatch({
+          tenantId: input.tenantId,
+          contactId: input.contactId,
+          conversationId: input.conversationId,
+          text: processedText,
+        });
+
       const finalText = cleanedText.trim() || processedText;
 
-      if (
-        ragCacheEnabled &&
-        queryEmbedding &&
-        response.finishReason === 'stop'
-      ) {
+      // 11. RAG cache store
+      if (ragCacheEnabled && queryEmbedding && response.finishReason === 'stop') {
         await this.ragResponseCache!.cacheResponse(
           input.tenantId,
           queryEmbedding,
@@ -341,189 +295,24 @@ export class ProcessAIResponseService {
         );
       }
 
-      await this.persistTurn(
+      // 12. Persist turn
+      await this.turnPersistence.persist({
         input,
-        aiSession.id,
-        finalText,
-        response,
-        { ...diagnostics, ragCacheHit: false, automationsDispatched: automationIds.length },
+        sessionId: aiSession.id,
+        processedText: finalText,
+        aiResponse: response,
+        diagnostics: {
+          ...diagnostics,
+          ragCacheHit: false,
+          automationsDispatched: dispatchedCount,
+        },
         userMessage,
-      );
+      });
 
       return { success: true };
     } catch (error: unknown) {
       return this.handleFailure(input, error);
     }
-  }
-
-  private async publishSafetyBlocked(
-    input: ProcessAIResponseInput,
-    matchedPattern: string,
-  ) {
-    await this.eventBus.publish(
-      new AISafetyBlockedIntegrationEvent({
-        conversationId: input.conversationId,
-        tenantId: input.tenantId,
-        contactId: input.contactId,
-        matchedPattern,
-        reason: 'USER_MESSAGE_BLOCKED',
-      }),
-    );
-  }
-
-  private async persistTurn(
-    input: ProcessAIResponseInput,
-    sessionId: string,
-    processedText: string,
-    aiResponse: {
-      tokensUsed?: number;
-      intent?: string;
-      sentiment?: string;
-      confidence?: number;
-    },
-    diagnostics: Record<string, unknown>,
-    userMessage: string,
-  ) {
-    await this.chatHistoryRepository.saveMessage(input.conversationId, {
-      role: 'user',
-      content: userMessage,
-      timestamp: new Date(),
-    });
-    await this.chatHistoryRepository.saveMessage(input.conversationId, {
-      role: 'assistant',
-      content: processedText,
-      timestamp: new Date(),
-    });
-
-    await this.aiSessionService.recordMessage(
-      input.tenantId,
-      sessionId,
-      'user',
-      userMessage,
-    );
-    await this.aiSessionService.recordMessage(
-      input.tenantId,
-      sessionId,
-      'assistant',
-      processedText,
-      aiResponse.tokensUsed,
-      { ...diagnostics, engineResponse: aiResponse },
-    );
-
-    await this.eventBus.publish(
-      new AIResponseGeneratedIntegrationEvent({
-        conversationId: input.conversationId,
-        tenantId: input.tenantId,
-        contactId: input.contactId,
-        aiSessionId: sessionId,
-        response: { type: 'TEXT', text: processedText },
-        intent: aiResponse.intent || 'GENERAL',
-        sentiment: aiResponse.sentiment || 'NEUTRAL',
-        confidence: aiResponse.confidence ?? 0,
-        tokensUsed: aiResponse.tokensUsed ?? 0,
-      }),
-    );
-  }
-
-  private async handleHandoff(
-    input: ProcessAIResponseInput,
-    tenant: Tenant,
-    response: { confidence?: number; text?: string },
-    decision: { reason?: string; shouldHandoff: boolean },
-    sessionId: string,
-    userMessage: string,
-  ) {
-    const escalationMessage =
-      tenant.aiConfig?.escalationMessage || 'Encaminhando para um humano...';
-
-    await this.chatHistoryRepository.saveMessage(input.conversationId, {
-      role: 'assistant',
-      content: escalationMessage,
-      timestamp: new Date(),
-    });
-
-    await this.aiSessionService.closeSession(
-      input.tenantId,
-      sessionId,
-      'HANDOFF',
-    );
-
-    await this.eventBus.publish(
-      new AIEscalationRequestedIntegrationEvent({
-        conversationId: input.conversationId,
-        tenantId: input.tenantId,
-        contactId: input.contactId,
-        reason: decision.reason || 'HANDOFF_REQUIRED',
-        confidence: response.confidence ?? 0,
-        lastMessage: userMessage,
-        escalationMessage,
-      }),
-    );
-
-    return {
-      success: false,
-      error: 'HANDOFF_REQUIRED',
-      message: 'Escalated to human.',
-    };
-  }
-
-  private async handleFailure(input: ProcessAIResponseInput, error: unknown) {
-    const fallback = 'Estou com instabilidades, tente novamente em breve.';
-    const msg = error instanceof Error ? error.message : String(error);
-
-    this.logger.warn(
-      `[${ProcessAIResponseService.name}] falha_ai tenant=${input.tenantId} conversation=${input.conversationId} provider=deepseek_or_downstream detail=${msg}`,
-    );
-
-    await this.eventBus.publish(
-      new AIResponseFailedIntegrationEvent({
-        conversationId: input.conversationId,
-        tenantId: input.tenantId,
-        contactId: input.contactId,
-        reason: msg,
-        provider: 'deepseek',
-        fallbackMessage: fallback,
-      }),
-    );
-
-    return { success: false, error: 'AI_PROVIDER_ERROR', message: msg };
-  }
-
-  private async publishFallbackFailed(
-    input: ProcessAIResponseInput,
-    fallbackMessage: string,
-  ) {
-    await this.eventBus.publish(
-      new AIResponseFailedIntegrationEvent({
-        conversationId: input.conversationId,
-        tenantId: input.tenantId,
-        contactId: input.contactId,
-        reason: 'QUOTA_DENIED',
-        provider: 'internal',
-        fallbackMessage,
-      }),
-    );
-  }
-
-  private async publishQuotaDenied(
-    input: ProcessAIResponseInput,
-    quotaCheck: {
-      status: string;
-      used: number;
-      quota: number;
-    },
-  ) {
-    await this.eventBus.publish(
-      new AIQuotaDeniedIntegrationEvent({
-        conversationId: input.conversationId,
-        tenantId: input.tenantId,
-        contactId: input.contactId,
-        usageType: UsageType.AI_TOKEN,
-        status: quotaCheck.status,
-        used: quotaCheck.used,
-        quota: quotaCheck.quota,
-      }),
-    );
   }
 
   private async resolveBranchId(
@@ -547,173 +336,28 @@ export class ProcessAIResponseService {
     }
   }
 
-  private async applyMessagingAgentRule(
-    tenantId: string,
-    systemPrompt: string,
-    moduleId: string,
-    branchId?: string | null,
-  ): Promise<string> {
-    try {
-      const agentRule = await this.tenantAgentRuleService.getRule(
-        tenantId,
-        moduleId,
-        'SYSTEM',
-        tenantId,
-        branchId,
-      );
-
-      const customPrompt = agentRule?.isActive
-        ? agentRule.customPrompt?.trim()
-        : '';
-      if (!customPrompt) {
-        return systemPrompt;
-      }
-
-      const scopeLabel =
-        agentRule?.branchId && !agentRule?.inheritedFromTenant
-          ? 'DA FILIAL'
-          : 'DO TENANT';
-
-      if (agentRule?.fallbackToGlobal === false) {
-        return [
-          systemPrompt,
-          `[ATENCAO: AS DIRETRIZES ${scopeLabel} ABAIXO DEVEM TER PRIORIDADE SOBRE O TOM PADRAO.]`,
-          `[DIRETRIZES PERSONALIZADAS DE CONVERSAS]:`,
-          customPrompt,
-        ].join('\n\n');
-      }
-
-      return [
-        systemPrompt,
-        `[DIRETRIZES PERSONALIZADAS DE CONVERSAS ${scopeLabel}]:`,
-        customPrompt,
-      ].join('\n\n');
-    } catch (e: unknown) {
-      this.logger.warn(
-        `apply_messaging_agent_rule_failed tenant=${tenantId} module=${moduleId} branch=${branchId ?? 'none'} detail=${e instanceof Error ? e.message : String(e)}`,
-      );
-      return systemPrompt;
-    }
-  }
-
-  private toUserMessage(content: ProcessAIResponseInput['content']): string {
-    const text = content.text?.trim();
-    const type = content.type?.toUpperCase();
-
-    if (!type || type === 'TEXT') {
-      return text || '';
-    }
-
-    const labels: Record<string, string> = {
-      IMAGE: 'imagem',
-      AUDIO: 'audio',
-      VIDEO: 'video',
-      DOCUMENT: 'documento',
-    };
-    const label = labels[type] || 'arquivo';
-    const parts = [`Cliente enviou ${label} pelo WhatsApp.`];
-
-    if (text) {
-      parts.push(`Mensagem: ${text}`);
-    }
-    if (content.url) {
-      parts.push(`Arquivo: ${content.url}`);
-    }
-
-    return parts.join('\n');
-  }
-
-  private async resolveUserMessage(
+  private async handleFailure(
     input: ProcessAIResponseInput,
-  ): Promise<string> {
-    const type = input.content.type?.toUpperCase();
-    const isMedia = ['IMAGE', 'AUDIO', 'VIDEO', 'DOCUMENT'].includes(
-      type ?? '',
+    error: unknown,
+  ): Promise<ProcessAIResponseOutput> {
+    const fallback = 'Estou com instabilidades, tente novamente em breve.';
+    const msg = error instanceof Error ? error.message : String(error);
+
+    this.logger.warn(
+      `[${ProcessAIResponseService.name}] falha_ai tenant=${input.tenantId} conversation=${input.conversationId} provider=deepseek_or_downstream detail=${msg}`,
     );
 
-    if (!isMedia || !input.content.url || !this.mediaUnderstandingService) {
-      return this.toUserMessage(input.content);
-    }
-
-    return this.mediaUnderstandingService.buildAiMessage({
-      tenantId: input.tenantId,
-      conversationId: input.conversationId,
-      type: type as 'IMAGE' | 'AUDIO' | 'VIDEO' | 'DOCUMENT',
-      url: input.content.url,
-      text: input.content.text,
-      mimeType: input.content.mimeType,
-    });
-  }
-
-  private async appendManualAutomationsContext(
-    tenantId: string,
-    prompt: string,
-  ): Promise<string> {
-    if (!this.manualAutomationFacade) return prompt;
-
-    try {
-      const active = await this.manualAutomationFacade.listActive(tenantId);
-      if (active.length === 0) return prompt;
-
-      const lines = active.map(
-        (a: ManualAutomationSummary) =>
-          `- [USE_AUTOMATION:${a.id}] → "${a.name}"${a.description ? ` — ${a.description}` : ''}`,
-      );
-
-      return (
-        prompt +
-        '\n\n[AUTOMAÇÕES DISPONÍVEIS — inclua o marcador entre colchetes quando for o caso de uso correto]:\n' +
-        lines.join('\n') +
-        '\n(O marcador é removido automaticamente antes de chegar ao contato.)'
-      );
-    } catch (err: unknown) {
-      this.logger.warn(
-        `appendManualAutomationsContext: could not load automations — ${String(err)}`,
-      );
-      return prompt;
-    }
-  }
-
-  private extractAutomationMarkers(text: string): {
-    cleanedText: string;
-    automationIds: string[];
-  } {
-    const ids: string[] = [];
-    const cleanedText = text.replace(
-      /\[USE_AUTOMATION:([0-9a-f-]{36})\]/gi,
-      (_, id: string) => {
-        ids.push(id);
-        return '';
-      },
+    await this.eventBus.publish(
+      new AIResponseFailedIntegrationEvent({
+        conversationId: input.conversationId,
+        tenantId: input.tenantId,
+        contactId: input.contactId,
+        reason: msg,
+        provider: 'deepseek',
+        fallbackMessage: fallback,
+      }),
     );
-    return { cleanedText, automationIds: ids };
-  }
 
-  private async dispatchAITriggeredAutomations(
-    tenantId: string,
-    contactId: string,
-    conversationId: string,
-    automationIds: string[],
-  ): Promise<void> {
-    if (!this.manualAutomationFacade) return;
-
-    for (const automationId of automationIds) {
-      try {
-        await this.manualAutomationFacade.dispatch(
-          tenantId,
-          automationId,
-          contactId,
-          conversationId,
-          'AI',
-        );
-        this.logger.log(
-          `AI triggered automation ${automationId} for contact ${contactId}`,
-        );
-      } catch (err: unknown) {
-        this.logger.warn(
-          `dispatchAITriggeredAutomations: failed for automation ${automationId} — ${String(err)}`,
-        );
-      }
-    }
+    return { success: false, error: 'AI_PROVIDER_ERROR', message: msg };
   }
 }
