@@ -95,6 +95,33 @@ export class ProcessAlertReminderUseCase {
 
     const updatedAt = new Date().toISOString();
 
+    // Persist state BEFORE sending so that a concurrent worker arriving after
+    // this point will hit the lastTriggeredAt dedup guard and exit early.
+    // This is the "mark-then-act" pattern for at-least-once queue semantics.
+    const updatedReminder: AlertReminder =
+      reminder.frequency === 'ONCE'
+        ? {
+            ...reminder,
+            timezone: zone,
+            status: 'SENT',
+            lastTriggeredAt: updatedAt,
+            nextTriggerAt: undefined,
+            updatedAt,
+          }
+        : {
+            ...reminder,
+            timezone: zone,
+            lastTriggeredAt: updatedAt,
+            nextTriggerAt: computeNextDailyTriggerAfterLastRunUtc(
+              reminder.timeOfDay!,
+              new Date(updatedAt),
+              zone,
+            ),
+            updatedAt,
+          };
+
+    await this.reminderRepository.save(updatedReminder);
+
     if (!skipOutbound) {
       const text = renderAlertReminderBody(this.runtime.messageBodyTemplate(), {
         title: reminder.title,
@@ -121,30 +148,6 @@ export class ProcessAlertReminderUseCase {
         text,
       });
     }
-
-    const updatedReminder: AlertReminder =
-      reminder.frequency === 'ONCE'
-        ? {
-            ...reminder,
-            timezone: zone,
-            status: 'SENT',
-            lastTriggeredAt: updatedAt,
-            nextTriggerAt: undefined,
-            updatedAt,
-          }
-        : {
-            ...reminder,
-            timezone: zone,
-            lastTriggeredAt: updatedAt,
-            nextTriggerAt: computeNextDailyTriggerAfterLastRunUtc(
-              reminder.timeOfDay!,
-              new Date(updatedAt),
-              zone,
-            ),
-            updatedAt,
-          };
-
-    await this.reminderRepository.save(updatedReminder);
 
     if (updatedReminder.status === 'ACTIVE' && updatedReminder.nextTriggerAt) {
       await this.reminderQueue.addJob({

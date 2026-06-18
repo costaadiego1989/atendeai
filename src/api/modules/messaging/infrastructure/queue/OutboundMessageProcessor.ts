@@ -34,7 +34,7 @@ export class OutboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
 
     this.worker = new Worker(
       'outbound-messages',
-      async (job: Job<{ messageId: string }>) => {
+      async (job: Job<{ messageId: string; tenantId: string }>) => {
         this.logger.log(
           JSON.stringify(
             buildQueueTelemetry('outbound-messages', job, 'processing', {
@@ -44,6 +44,7 @@ export class OutboundMessageProcessor implements OnModuleInit, OnModuleDestroy {
         );
         await this.processOutboundUseCase.execute({
           messageId: job.data.messageId,
+          tenantId: job.data.tenantId ?? '',
           queueJobId:
             job.id === undefined || job.id === null
               ? ''

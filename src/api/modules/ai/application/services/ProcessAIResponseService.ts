@@ -54,6 +54,13 @@ export class ProcessAIResponseService {
   private readonly logger = new Logger(ProcessAIResponseService.name);
 
   private static readonly RAG_CACHE_THRESHOLD = 0.95;
+  /** Maximum number of past messages sent as context to the LLM.
+   *  Caps the token spend for long-running conversations without requiring
+   *  a full token-counting library.  Configurable via AI_CONTEXT_WINDOW_TURNS
+   *  env var (each turn = 1 user + 1 assistant message → 2 entries).
+   *  Default: 20 turns = 40 messages.
+   */
+  private static readonly DEFAULT_CONTEXT_WINDOW_TURNS = 20;
 
   constructor(
     @Inject(AI_ENGINE)
@@ -171,7 +178,15 @@ export class ProcessAIResponseService {
     const history = await this.chatHistoryRepository.getHistory(
       input.conversationId,
     );
-    const contextHistory = history
+    // Token-budget windowing: slice to the most recent N messages so we don't
+    // blow the context window on long conversations (audit finding: lrange 0 -1
+    // sends the full 30-day history).  We keep whole turns (user+assistant pairs)
+    // by taking an even number of tail messages.
+    const maxMessages =
+      ProcessAIResponseService.DEFAULT_CONTEXT_WINDOW_TURNS * 2;
+    const windowedHistory =
+      history.length > maxMessages ? history.slice(-maxMessages) : history;
+    const contextHistory = windowedHistory
       .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
       .map((msg) => ({
         role: msg.role as 'user' | 'assistant',

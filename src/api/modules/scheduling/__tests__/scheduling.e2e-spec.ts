@@ -17,7 +17,7 @@ import {
 } from '@modules/payment/domain/ports/IPaymentGateway';
 import { GoogleCalendarOAuthService } from '../infrastructure/services/GoogleCalendarOAuthService';
 import { buildSchedulingPaymentReference } from '../application/services/SchedulingPaymentReference';
-import { SchedulingAsyncJobStatus } from '../application/services/SchedulingAsyncJobsService';
+import { SchedulingAsyncJobStatus } from '../infrastructure/persistence/repositories/SchedulingAsyncJobsService';
 
 describe('SchedulingController (e2e)', () => {
   jest.setTimeout(60000);

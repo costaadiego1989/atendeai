@@ -60,8 +60,9 @@ export class ProposalService {
   async update(
     id: string,
     data: Partial<CreateProposalData>,
+    tenantId: string,
   ): Promise<Proposal> {
-    const proposal = await this.getById(id);
+    const proposal = await this.getById(id, tenantId);
 
     if (data.title) {
       (proposal as any)._props.title = ProposalTitle.create(data.title);
@@ -94,8 +95,8 @@ export class ProposalService {
     await this.proposalRepository.delete(id);
   }
 
-  async getById(id: string): Promise<Proposal> {
-    const proposal = await this.proposalRepository.findById(id);
+  async getById(id: string, tenantId: string): Promise<Proposal> {
+    const proposal = await this.proposalRepository.findById(id, tenantId);
     if (!proposal) throw new ProposalNotFoundError(id);
     return proposal;
   }
@@ -104,8 +105,12 @@ export class ProposalService {
     return this.proposalRepository.findByTenantId(tenantId);
   }
 
-  async scheduleDelivery(id: string, scheduledAt: Date): Promise<void> {
-    const proposal = await this.getById(id);
+  async scheduleDelivery(
+    id: string,
+    scheduledAt: Date,
+    tenantId: string,
+  ): Promise<void> {
+    const proposal = await this.getById(id, tenantId);
 
     if (scheduledAt <= new Date()) {
       throw new ProposalInvalidScheduleDateError();

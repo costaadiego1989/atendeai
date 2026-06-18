@@ -8,7 +8,7 @@ import * as cookieParser from 'cookie-parser';
 import * as request from 'supertest';
 import { randomUUID } from 'crypto';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
-import { ContactAsyncJobStatus } from '../../contact/application/services/ContactAsyncJobsService';
+import { ContactAsyncJobStatus } from '../../contact/infrastructure/persistence/repositories/ContactAsyncJobsService';
 
 describe('ContactController (e2e)', () => {
   jest.setTimeout(60000);

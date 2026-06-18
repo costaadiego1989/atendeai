@@ -38,6 +38,7 @@ export class ProcessGatherWebhookUseCase {
 
     // Fetch call to resolve tenantId — findById with tenantId would require tenantId
     // in the webhook; instead we do a non-scoped find then immediately scope all mutations.
+    // tenant-safe: Twilio webhook bootstrap — resolves tenantId, all mutations below are tenant-scoped
     const callRecord = await this.prisma.voiceCall.findUnique({
       where: { id: callId },
     });
@@ -50,7 +51,11 @@ export class ProcessGatherWebhookUseCase {
         timestamp: new Date().toISOString(),
       };
       // V1 fix: atomic JSON append — no read-modify-write race
-      await this.voiceCallRepo.appendTranscript(callId, callRecord.tenantId, entry);
+      await this.voiceCallRepo.appendTranscript(
+        callId,
+        callRecord.tenantId,
+        entry,
+      );
     }
 
     const lower = speechResult.toLowerCase();

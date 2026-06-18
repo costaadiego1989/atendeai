@@ -44,6 +44,7 @@ export class AIResponseGeneratedHandler implements OnModuleInit {
     try {
       await this.sendAiMessageUseCase.execute({
         conversationId,
+        tenantId: (data.tenantId as string) ?? '',
         text: fallback,
         type: 'TEXT',
       });
@@ -63,6 +64,7 @@ export class AIResponseGeneratedHandler implements OnModuleInit {
 
     await this.sendAiMessageUseCase.execute({
       conversationId: data.conversationId,
+      tenantId: data.tenantId,
       text: data.response?.text || '',
       type: data.response?.type || 'TEXT',
     });

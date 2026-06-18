@@ -107,7 +107,7 @@ describe('ProcessOutboundMessageUseCase', () => {
       exhaustedRetries: false,
     });
 
-    await sut.execute({ messageId: messageId.toString() });
+    await sut.execute({ messageId: messageId.toString(), tenantId: conversation.tenantId.toString() });
 
     expect(retryService.sendWithRetry).toHaveBeenCalledWith(
       messagingGateway,
@@ -191,7 +191,7 @@ describe('ProcessOutboundMessageUseCase', () => {
     });
 
     await expect(
-      sut.execute({ messageId: messageId.toString() }),
+      sut.execute({ messageId: messageId.toString(), tenantId: conversation.tenantId.toString() }),
     ).rejects.toThrow('Failed to send message after 1 attempt(s): API Down');
 
     expect(message.deliveryStatus).toBe('FAILED');
@@ -222,7 +222,7 @@ describe('ProcessOutboundMessageUseCase', () => {
     messagingGatewayRegistry.resolve.mockReturnValue(null);
     tenantFacade.getChannelConfig.mockResolvedValue(null);
 
-    await sut.execute({ messageId: messageId.toString() });
+    await sut.execute({ messageId: messageId.toString(), tenantId: conversation.tenantId.toString() });
 
     expect(message.deliveryStatus).toBe('FAILED');
     expect(conversationRepository.save).toHaveBeenCalledWith(conversation);
@@ -278,7 +278,7 @@ describe('ProcessOutboundMessageUseCase', () => {
       status: 'ACTIVE',
     });
 
-    await sut.execute({ messageId: messageId.toString() });
+    await sut.execute({ messageId: messageId.toString(), tenantId: conversation.tenantId.toString() });
 
     expect(message.deliveryStatus).toBe('FAILED');
     expect(conversationRepository.save).toHaveBeenCalledWith(conversation);

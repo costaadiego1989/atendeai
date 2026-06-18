@@ -16,7 +16,7 @@ import { Response } from 'express';
 import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
-import { ProspectingAsyncJobsService } from '../../application/services/ProspectingAsyncJobsService';
+import { ProspectingAsyncJobsService } from '../../infrastructure/persistence/repositories/ProspectingAsyncJobsService';
 import {
   GenerateProspectCampaignReportDTO,
   GenerateProspectSearchReportDTO,

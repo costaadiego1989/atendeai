@@ -3,7 +3,10 @@ import {
   IVoiceCallRepository,
   VOICE_CALL_REPOSITORY,
 } from '../ports/IVoiceCallRepository';
-import { VoiceCallStatus, VoiceCallOutcome } from '../../domain/entities/VoiceCall';
+import {
+  VoiceCallStatus,
+  VoiceCallOutcome,
+} from '../../domain/entities/VoiceCall';
 
 export interface ProcessCallOutcomeCommand {
   callId: string;
@@ -32,11 +35,12 @@ const STATUS_MAP: Record<string, VoiceCallStatus> = {
  * Maps a terminal VoiceCallStatus to a default VoiceCallOutcome when no outcome
  * was already set by the gather flow.
  */
-const TERMINAL_OUTCOME_MAP: Partial<Record<VoiceCallStatus, VoiceCallOutcome>> = {
-  NO_ANSWER: 'NO_ANSWER',
-  BUSY: 'NO_ANSWER', // BUSY is functionally "not answered"
-  FAILED: 'ERROR',
-};
+const TERMINAL_OUTCOME_MAP: Partial<Record<VoiceCallStatus, VoiceCallOutcome>> =
+  {
+    NO_ANSWER: 'NO_ANSWER',
+    BUSY: 'NO_ANSWER', // BUSY is functionally "not answered"
+    FAILED: 'ERROR',
+  };
 
 const TERMINAL_STATUSES: VoiceCallStatus[] = [
   'COMPLETED',
@@ -54,9 +58,12 @@ export class ProcessCallOutcomeUseCase {
     private readonly voiceCallRepo: IVoiceCallRepository,
   ) {}
 
-  async execute(command: ProcessCallOutcomeCommand): Promise<ProcessCallOutcomeResult> {
+  async execute(
+    command: ProcessCallOutcomeCommand,
+  ): Promise<ProcessCallOutcomeResult> {
     const { callId, twilioStatus, duration, recordingUrl } = command;
-    const mappedStatus: VoiceCallStatus = STATUS_MAP[twilioStatus] ?? 'COMPLETED';
+    const mappedStatus: VoiceCallStatus =
+      STATUS_MAP[twilioStatus] ?? 'COMPLETED';
 
     this.logger.log(
       `Call ${callId} outcome: twilioStatus=${twilioStatus} → ${mappedStatus}`,
@@ -83,7 +90,8 @@ export class ProcessCallOutcomeUseCase {
     duration: number,
     recordingUrl?: string | null,
   ): Promise<ProcessCallOutcomeResult> {
-    const mappedStatus: VoiceCallStatus = STATUS_MAP[twilioStatus] ?? 'COMPLETED';
+    const mappedStatus: VoiceCallStatus =
+      STATUS_MAP[twilioStatus] ?? 'COMPLETED';
 
     this.logger.log(
       `Call ${callId} (tenant ${tenantId}) outcome: ${twilioStatus} → ${mappedStatus}`,
@@ -99,14 +107,19 @@ export class ProcessCallOutcomeUseCase {
 
     // Idempotent: if call is already in a terminal status and the incoming status
     // is COMPLETED again, treat it as a no-op
-    if (TERMINAL_STATUSES.includes(call.status) && mappedStatus === 'COMPLETED') {
+    if (
+      TERMINAL_STATUSES.includes(call.status) &&
+      mappedStatus === 'COMPLETED'
+    ) {
       this.logger.log(
         `Call ${callId} already in terminal status ${call.status} — skipping duplicate COMPLETED webhook`,
       );
       return { updated: false };
     }
 
-    const extra: Partial<Pick<typeof call, 'duration' | 'recordingUrl' | 'outcome'>> = {};
+    const extra: Partial<
+      Pick<typeof call, 'duration' | 'recordingUrl' | 'outcome'>
+    > = {};
     if (duration) extra.duration = duration;
     if (recordingUrl) extra.recordingUrl = recordingUrl;
 
@@ -116,7 +129,12 @@ export class ProcessCallOutcomeUseCase {
       if (defaultOutcome) extra.outcome = defaultOutcome;
     }
 
-    await this.voiceCallRepo.updateStatus(callId, tenantId, mappedStatus, extra);
+    await this.voiceCallRepo.updateStatus(
+      callId,
+      tenantId,
+      mappedStatus,
+      extra,
+    );
     return { updated: true };
   }
 }

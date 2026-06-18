@@ -30,6 +30,7 @@ export class UpdateConversationStatusUseCase implements IUpdateConversationStatu
   ): Promise<UpdateConversationStatusOutput> {
     const conversation = await this.conversationRepository.findById(
       input.conversationId,
+      input.tenantId,
     );
 
     if (!conversation) {

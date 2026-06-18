@@ -35,6 +35,8 @@ import {
 
 export interface ProcessOutboundMessageInput {
   messageId: string;
+  /** tenantId scopes the conversation lookup to prevent cross-tenant reads. */
+  tenantId: string;
   /** Id do job BullMQ quando o envio vem da fila `outbound-messages`. */
   queueJobId?: string;
 }
@@ -61,6 +63,7 @@ export class ProcessOutboundMessageUseCase {
   async execute(input: ProcessOutboundMessageInput): Promise<void> {
     const conversation = await this.conversationRepository.findByMessageId(
       input.messageId,
+      input.tenantId,
     );
     if (!conversation) {
       this.structuredLog.emit({

@@ -7,7 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import * as cookieParser from 'cookie-parser';
 import * as request from 'supertest';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
-import { InventoryAsyncJobStatus } from '../application/services/InventoryAsyncJobsService';
+import { InventoryAsyncJobStatus } from '../infrastructure/persistence/repositories/InventoryAsyncJobsService';
 
 describe('InventoryController (e2e)', () => {
   jest.setTimeout(60000);

@@ -52,10 +52,7 @@ export class RedeemCouponUseCase {
       }
     } else {
       // Unlimited coupon — safe to use plain increment
-      updated = await this.repo.incrementCouponUsage(
-        input.tenantId,
-        coupon.id,
-      );
+      updated = await this.repo.incrementCouponUsage(input.tenantId, coupon.id);
     }
 
     return {

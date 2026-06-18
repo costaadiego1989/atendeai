@@ -88,9 +88,9 @@ export class PrismaConversationRepository implements IConversationRepository {
     await this.prisma.$transaction(persistConversation);
   }
 
-  async findById(id: string): Promise<Conversation | null> {
-    const raw = await this.prisma.conversation.findUnique({
-      where: { id },
+  async findById(id: string, tenantId: string): Promise<Conversation | null> {
+    const raw = await this.prisma.conversation.findFirst({
+      where: { id, tenantId },
       include: {
         messages: {
           orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
@@ -100,9 +100,13 @@ export class PrismaConversationRepository implements IConversationRepository {
     return raw ? MessagingMapper.toDomain(raw) : null;
   }
 
-  async findByMessageId(messageId: string): Promise<Conversation | null> {
+  async findByMessageId(
+    messageId: string,
+    tenantId: string,
+  ): Promise<Conversation | null> {
     const raw = await this.prisma.conversation.findFirst({
       where: {
+        tenantId,
         messages: {
           some: { id: messageId },
         },

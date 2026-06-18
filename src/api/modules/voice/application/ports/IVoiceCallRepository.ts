@@ -1,4 +1,8 @@
-import { VoiceCall, VoiceCallStatus, VoiceCallOutcome } from '../../domain/entities/VoiceCall';
+import {
+  VoiceCall,
+  VoiceCallStatus,
+  VoiceCallOutcome,
+} from '../../domain/entities/VoiceCall';
 
 export interface TranscriptEntry {
   role: 'agent' | 'customer';
@@ -9,12 +13,19 @@ export interface TranscriptEntry {
 
 export interface IVoiceCallRepository {
   findById(id: string, tenantId: string): Promise<VoiceCall | null>;
-  save(call: Omit<VoiceCall, 'id' | 'createdAt' | 'updatedAt'>): Promise<VoiceCall>;
+  save(
+    call: Omit<VoiceCall, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<VoiceCall>;
   updateStatus(
     callId: string,
     tenantId: string,
     status: VoiceCallStatus,
-    extra?: Partial<Pick<VoiceCall, 'duration' | 'recordingUrl' | 'outcome' | 'externalCallId'>>,
+    extra?: Partial<
+      Pick<
+        VoiceCall,
+        'duration' | 'recordingUrl' | 'outcome' | 'externalCallId'
+      >
+    >,
   ): Promise<void>;
   appendTranscript(
     callId: string,

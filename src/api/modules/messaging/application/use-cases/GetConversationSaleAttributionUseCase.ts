@@ -27,6 +27,7 @@ export class GetConversationSaleAttributionUseCase implements IGetConversationSa
   ): Promise<ConversationSaleAttributionDTO | null> {
     const conversation = await this.conversationRepository.findById(
       input.conversationId,
+      input.tenantId,
     );
     if (!conversation) {
       throw new EntityNotFoundException('Conversation', input.conversationId);

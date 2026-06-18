@@ -39,27 +39,31 @@ export class TwilioWebhookGuard implements CanActivate {
       this.logger.error(
         'TWILIO_AUTH_TOKEN is not set — cannot validate Twilio webhook signature',
       );
-      throw new ForbiddenException('Webhook signature validation misconfigured');
+      throw new ForbiddenException(
+        'Webhook signature validation misconfigured',
+      );
     }
 
     const signature =
       (req.headers['x-twilio-signature'] as string | undefined) ?? '';
 
     if (!signature) {
-      this.logger.warn('Twilio webhook request missing X-Twilio-Signature header');
+      this.logger.warn(
+        'Twilio webhook request missing X-Twilio-Signature header',
+      );
       throw new ForbiddenException('Missing Twilio signature');
     }
 
     const url = this.reconstructUrl(req);
     const params: Record<string, string> =
-      req.body && typeof req.body === 'object' ? (req.body as Record<string, string>) : {};
+      req.body && typeof req.body === 'object'
+        ? (req.body as Record<string, string>)
+        : {};
 
     const expected = this.computeSignature(authToken, url, params);
 
     if (!this.timingSafeEqual(expected, signature)) {
-      this.logger.warn(
-        `Twilio signature mismatch for ${req.method} ${url}`,
-      );
+      this.logger.warn(`Twilio signature mismatch for ${req.method} ${url}`);
       throw new ForbiddenException('Invalid Twilio signature');
     }
 
@@ -106,7 +110,10 @@ export class TwilioWebhookGuard implements CanActivate {
       return false;
     }
     try {
-      return crypto.timingSafeEqual(Buffer.from(a, 'base64'), Buffer.from(b, 'base64'));
+      return crypto.timingSafeEqual(
+        Buffer.from(a, 'base64'),
+        Buffer.from(b, 'base64'),
+      );
     } catch {
       return false;
     }

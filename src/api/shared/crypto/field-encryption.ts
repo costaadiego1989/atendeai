@@ -92,7 +92,10 @@ export function decrypt(ciphertext: string, key?: Buffer): string {
 
   const decipher = createDecipheriv(ALGORITHM, derivedKey, iv);
   decipher.setAuthTag(tag);
-  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+  const decrypted = Buffer.concat([
+    decipher.update(encrypted),
+    decipher.final(),
+  ]);
   return decrypted.toString('utf8');
 }
 

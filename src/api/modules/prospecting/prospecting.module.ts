@@ -101,7 +101,7 @@ import { SelectGoogleAdsAccountUseCase } from './application/use-cases/SelectGoo
 import { DisconnectGoogleAdsConnectionUseCase } from './application/use-cases/DisconnectGoogleAdsConnectionUseCase';
 import { GenerateProspectSearchReportUseCase } from './application/use-cases/GenerateProspectSearchReportUseCase';
 import { GenerateProspectCampaignReportUseCase } from './application/use-cases/GenerateProspectCampaignReportUseCase';
-import { ProspectingAsyncJobsService } from './application/services/ProspectingAsyncJobsService';
+import { ProspectingAsyncJobsService } from './infrastructure/persistence/repositories/ProspectingAsyncJobsService';
 import { ProspectReportCsvBuilder } from './application/services/ProspectReportCsvBuilder';
 import { ProspectingAsyncJobProcessor } from './infrastructure/queue/ProspectingAsyncJobProcessor';
 import { MetaWebhookController } from './presentation/controllers/MetaWebhookController';

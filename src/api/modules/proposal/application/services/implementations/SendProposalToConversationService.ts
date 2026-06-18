@@ -21,8 +21,12 @@ export class SendProposalToConversationService {
 
   async execute(
     proposalId: string,
+    tenantId: string,
   ): Promise<{ conversationId: string; messageId: string; publicUrl: string }> {
-    const proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(
+      proposalId,
+      tenantId,
+    );
     if (!proposal) {
       throw new ProposalNotFoundError(proposalId);
     }

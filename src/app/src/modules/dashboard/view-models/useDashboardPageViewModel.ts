@@ -313,7 +313,9 @@ export function useDashboardPageViewModel() {
 
   const exportUsageCsv = useCallback(() => {
     if (tenant?.id) {
-      billingService.downloadUsageExportCsv(tenant.id);
+      billingService.downloadUsageExportCsv(tenant.id).catch(() => {
+        // caller can observe errors via the returned Promise if needed
+      });
     }
   }, [tenant?.id]);
 

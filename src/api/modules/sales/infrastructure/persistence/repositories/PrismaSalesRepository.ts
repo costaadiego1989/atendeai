@@ -792,10 +792,7 @@ export class PrismaSalesRepository implements ISalesRepository {
    * used_count < max_uses AND active = true. Returns the updated record
    * or null if the coupon is exhausted / inactive / not found.
    */
-  async atomicIncrementCouponUsage(
-    tenantId: string,
-    id: string,
-  ) {
+  async atomicIncrementCouponUsage(tenantId: string, id: string) {
     const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(
       Prisma.sql`
         UPDATE sales_schema.sales_coupons

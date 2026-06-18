@@ -124,6 +124,65 @@ export class PrismaTenantAgentRuleRepository implements ITenantAgentRuleReposito
     });
   }
 
+  async saveWithHistory(
+    rule: TenantAgentRule,
+    history: TenantAgentRuleHistory,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.tenantAgentRule.findFirst({
+        where: {
+          tenantId: rule.tenantId,
+          moduleId: rule.moduleId,
+          branchId: rule.branchId ?? null,
+        },
+        select: { id: true },
+      });
+
+      if (existing) {
+        await tx.tenantAgentRule.update({
+          where: { id: existing.id, tenantId: rule.tenantId },
+          data: {
+            customPrompt: rule.customPrompt,
+            isActive: rule.isActive,
+            fallbackToGlobal: rule.fallbackToGlobal,
+            revision: rule.revision,
+            notes: rule.notes ?? null,
+            updatedByUserId: rule.updatedByUserId ?? null,
+            updatedByUserName: rule.updatedByUserName ?? null,
+          },
+        });
+      } else {
+        await tx.tenantAgentRule.create({
+          data: {
+            tenantId: rule.tenantId,
+            branchId: rule.branchId ?? null,
+            moduleId: rule.moduleId,
+            customPrompt: rule.customPrompt,
+            isActive: rule.isActive,
+            fallbackToGlobal: rule.fallbackToGlobal,
+            revision: rule.revision,
+            notes: rule.notes ?? null,
+            updatedByUserId: rule.updatedByUserId ?? null,
+            updatedByUserName: rule.updatedByUserName ?? null,
+          },
+        });
+      }
+
+      await tx.tenantAgentRuleHistory.create({
+        data: {
+          tenantId: history.tenantId,
+          branchId: history.branchId ?? null,
+          moduleId: history.moduleId,
+          customPrompt: history.customPrompt,
+          revision: history.revision,
+          createdAt: history.createdAt,
+          updatedByUserId: history.updatedByUserId ?? null,
+          updatedByUserName: history.updatedByUserName ?? null,
+        },
+      });
+    });
+  }
+
   async listRecentHistory(params: {
     tenantId: string;
     moduleId: AgentModule;

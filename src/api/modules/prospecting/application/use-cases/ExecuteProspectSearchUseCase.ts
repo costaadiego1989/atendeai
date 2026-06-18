@@ -102,10 +102,13 @@ export class ExecuteProspectSearchUseCase implements IExecuteProspectSearchUseCa
       );
     }
 
-    search.markAsRunning();
-    await this.searchRepository.save(search);
-
     try {
+      // markAsRunning is inside the try so a crash during search propagates
+      // to the catch block, which calls markAsFailed + save — preventing the
+      // search from being stuck in RUNNING state forever.
+      search.markAsRunning();
+      await this.searchRepository.save(search);
+
       const sourceResults = await source.search({
         businessTypeQuery: search.businessTypeQuery,
         city: search.city,

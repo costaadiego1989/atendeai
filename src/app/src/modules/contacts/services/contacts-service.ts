@@ -1,4 +1,5 @@
-import { apiClient, BASE_URL } from '@/shared/api/client';
+import { apiClient } from '@/shared/api/client';
+import { authenticatedDownload } from '@/shared/lib/file-download';
 import type {
   ContactAsyncJob,
   Contact,
@@ -436,12 +437,9 @@ export const contactsService = {
     jobId: string,
     fallbackFileName?: string,
   ): Promise<void> {
-    const anchor = document.createElement('a');
-    anchor.href = `${BASE_URL}/tenants/${tenantId}/contacts/jobs/${jobId}/download`;
-    anchor.download = fallbackFileName ?? `contatos-${jobId}.csv`;
-
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    return authenticatedDownload(
+      `/tenants/${tenantId}/contacts/jobs/${jobId}/download`,
+      fallbackFileName ?? `contatos-${jobId}.csv`,
+    );
   },
 };

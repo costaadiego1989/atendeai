@@ -7,7 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { GlobalExceptionFilter } from '@shared/infrastructure/http/filters/GlobalExceptionFilter';
-import { CatalogAsyncJobStatus } from '../application/services/CatalogAsyncJobsService';
+import { CatalogAsyncJobStatus } from '../infrastructure/persistence/repositories/CatalogAsyncJobsService';
 
 describe('CatalogController (e2e)', () => {
   jest.setTimeout(60000);

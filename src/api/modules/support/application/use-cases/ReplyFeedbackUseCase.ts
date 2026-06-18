@@ -47,12 +47,7 @@ export class ReplyFeedbackUseCase {
       throw new NotFoundException('Feedback not found');
     }
 
-    // Update status to REVIEWED if currently OPEN
-    if (feedback.status === 'OPEN') {
-      await this.repository.updateStatus(input.feedbackId, 'REVIEWED');
-    }
-
-    // Try to send WhatsApp message to the feedback author
+    // Try to send WhatsApp message to the feedback author (best-effort, outside transaction)
     let messageSent = false;
     let messageId: string | undefined;
 
@@ -86,14 +81,19 @@ export class ReplyFeedbackUseCase {
       messageSent = false;
     }
 
-    // Save the reply
-    const reply = await this.repository.createReply({
-      feedbackId: input.feedbackId,
-      authorName: input.authorName,
-      message: input.message,
-      sentVia: messageSent ? 'WHATSAPP' : undefined,
-      messageId,
-    });
+    // Atomically update status and save reply in a single transaction
+    const newStatus = feedback.status === 'OPEN' ? 'REVIEWED' : null;
+    const reply = await this.repository.updateStatusAndCreateReply(
+      input.feedbackId,
+      newStatus as any,
+      {
+        feedbackId: input.feedbackId,
+        authorName: input.authorName,
+        message: input.message,
+        sentVia: messageSent ? 'WHATSAPP' : undefined,
+        messageId,
+      },
+    );
 
     return { reply, messageSent };
   }

@@ -7,7 +7,8 @@ export class SendProposalToConversationUseCase {
 
   async execute(
     proposalId: string,
+    tenantId: string,
   ): Promise<{ conversationId: string; messageId: string; publicUrl: string }> {
-    return this.sendProposalToConversationService.execute(proposalId);
+    return this.sendProposalToConversationService.execute(proposalId, tenantId);
   }
 }

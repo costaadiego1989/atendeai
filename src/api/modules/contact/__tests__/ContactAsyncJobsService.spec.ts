@@ -1,4 +1,4 @@
-import { ContactAsyncJobsService } from '../application/services/ContactAsyncJobsService';
+import { ContactAsyncJobsService } from '../infrastructure/persistence/repositories/ContactAsyncJobsService';
 import { PrismaService } from '@shared/infrastructure/database/PrismaService';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
 

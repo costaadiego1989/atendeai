@@ -326,10 +326,18 @@ export function useBillingPageViewModel() {
       return;
     }
 
-    billingService.downloadUsageExportCsv(tenant.id);
-    toast({
-      title: 'Exportação iniciada',
-      description: 'O arquivo CSV do período atual será baixado pelo navegador.',
+    billingService.downloadUsageExportCsv(tenant.id).then(() => {
+      toast({
+        title: 'Exportação concluída',
+        description: 'O arquivo CSV foi baixado com sucesso.',
+      });
+    }).catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Não foi possível exportar o CSV.';
+      toast({
+        title: 'Falha na exportação',
+        description: message,
+        variant: 'destructive',
+      });
     });
   };
 

@@ -38,7 +38,12 @@ export class PrismaVoiceCallRepository implements IVoiceCallRepository {
     callId: string,
     tenantId: string,
     status: VoiceCallStatus,
-    extra?: Partial<Pick<VoiceCall, 'duration' | 'recordingUrl' | 'outcome' | 'externalCallId'>>,
+    extra?: Partial<
+      Pick<
+        VoiceCall,
+        'duration' | 'recordingUrl' | 'outcome' | 'externalCallId'
+      >
+    >,
   ): Promise<void> {
     await this.prisma.voiceCall.update({
       where: { id: callId, tenantId },
@@ -57,6 +62,7 @@ export class PrismaVoiceCallRepository implements IVoiceCallRepository {
     tenantId: string,
     entry: TranscriptEntry,
   ): Promise<void> {
+    // tenant-safe: WHERE clause includes AND tenant_id = ${tenantId} (Prisma.sql parameterized)
     await this.prisma.$queryRaw(
       Prisma.sql`
         UPDATE voice_schema.voice_calls

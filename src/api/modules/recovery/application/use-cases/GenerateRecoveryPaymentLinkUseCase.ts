@@ -13,6 +13,7 @@ import {
 } from '../../domain/ports/IRecoveryRepository';
 import { buildRecoveryPaymentReference } from '../services/RecoveryPaymentReference';
 import { RecoveryCaseMessagingService } from '../services/RecoveryCaseMessagingService';
+import { isTerminalStatus } from '../../domain/RecoveryCaseStatus';
 
 export interface GenerateRecoveryPaymentLinkCommand {
   tenantId: string;
@@ -39,6 +40,13 @@ export class GenerateRecoveryPaymentLinkUseCase {
 
     if (!recoveryCase) {
       throw new EntityNotFoundException('RecoveryCase', command.caseId);
+    }
+
+    // Do not contact a case that is already resolved or opted-out — LGPD compliance.
+    if (isTerminalStatus(recoveryCase.status)) {
+      throw new ValidationErrorException(
+        `Caso de recovery está em status terminal (${recoveryCase.status}) e não pode ser contatado`,
+      );
     }
 
     if (!recoveryCase.amountDue) {

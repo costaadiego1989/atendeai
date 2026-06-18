@@ -32,7 +32,17 @@ export class PrismaProposalRepository implements IProposalRepository {
     });
   }
 
-  async findById(id: string): Promise<Proposal | null> {
+  async findById(id: string, tenantId: string): Promise<Proposal | null> {
+    const raw = await this.prisma.proposal.findFirst({
+      where: { id, tenantId },
+    });
+
+    if (!raw) return null;
+
+    return ProposalMapper.toDomain(raw);
+  }
+
+  async findByIdPublic(id: string): Promise<Proposal | null> {
     const raw = await this.prisma.proposal.findUnique({
       where: { id },
     });

@@ -3,8 +3,12 @@ import { UpdateProposalService } from '../services/implementations/UpdateProposa
 export class UpdateProposalUseCase {
   constructor(private readonly updateProposalService: UpdateProposalService) {}
 
-  async execute(id: string, data: any) {
-    const proposal = await this.updateProposalService.execute(id, data);
+  async execute(id: string, data: any, tenantId: string) {
+    const proposal = await this.updateProposalService.execute(
+      id,
+      data,
+      tenantId,
+    );
     return { id: proposal.id };
   }
 }

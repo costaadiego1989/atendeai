@@ -12,6 +12,7 @@ import { ProposalPublicLinkService } from '@modules/proposal/application/service
 
 export interface SendProposalJobPayload {
   proposalId: string;
+  tenantId: string;
 }
 
 @Processor('proposal-delivery')
@@ -33,8 +34,11 @@ export class ProposalAsyncJobProcessor extends WorkerHost {
       return;
     }
 
-    const { proposalId } = job.data;
-    const proposal = await this.proposalRepository.findById(proposalId);
+    const { proposalId, tenantId } = job.data;
+    const proposal = await this.proposalRepository.findById(
+      proposalId,
+      tenantId,
+    );
 
     if (!proposal) {
       this.logger.error(`Proposal ${proposalId} not found for delivery`);

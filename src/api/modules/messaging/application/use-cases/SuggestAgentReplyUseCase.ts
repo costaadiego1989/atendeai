@@ -29,6 +29,7 @@ export class SuggestAgentReplyUseCase implements ISuggestAgentReplyUseCase {
   ): Promise<SuggestAgentReplyOutput> {
     const conversation = await this.conversationRepository.findById(
       input.conversationId,
+      input.tenantId,
     );
     if (!conversation) {
       throw new NotFoundException('Conversation not found');

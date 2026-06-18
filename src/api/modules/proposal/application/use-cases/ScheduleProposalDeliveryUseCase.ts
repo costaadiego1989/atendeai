@@ -3,6 +3,7 @@ import { ScheduleProposalDeliveryService } from '../services/implementations/Sch
 export interface ScheduleProposalRequest {
   proposalId: string;
   scheduledAt: Date;
+  tenantId: string;
 }
 
 export class ScheduleProposalDeliveryUseCase {
@@ -14,6 +15,7 @@ export class ScheduleProposalDeliveryUseCase {
     await this.scheduleProposalDeliveryService.execute(
       request.proposalId,
       request.scheduledAt,
+      request.tenantId,
     );
   }
 }

@@ -221,8 +221,17 @@ export class RedisSchedulingStore
     await this.redis.del(key);
 
     if (serializedEntries.length > 0) {
-      await this.redis.hset(key, ...serializedEntries);
-      await this.redis.expire(key, this.getSlotTtlSeconds(input.date));
+      // Use a pipeline so del + hset + expire are sent as a single atomic batch.
+      // This prevents a window where a concurrent reader sees an empty key
+      // between the del and the subsequent hset.
+      const pipeline = this.redis.pipeline();
+      pipeline.del(key);
+      pipeline.hset(key, ...serializedEntries);
+      pipeline.expire(key, this.getSlotTtlSeconds(input.date));
+      await pipeline.exec();
+    } else {
+      // Nothing to write — just ensure the old key is gone.
+      await this.redis.del(key);
     }
 
     return nextSlots;

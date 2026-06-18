@@ -38,7 +38,12 @@ export class AsaasWebhookGuard implements CanActivate {
 
     const hash = crypto.createHmac('sha256', secret).update(body).digest('hex');
 
-    if (signature !== hash) {
+    const sigBuffer = Buffer.from(signature, 'hex');
+    const hashBuffer = Buffer.from(hash, 'hex');
+    const isValid =
+      sigBuffer.byteLength === hashBuffer.byteLength &&
+      crypto.timingSafeEqual(sigBuffer, hashBuffer);
+    if (!isValid) {
       this.logger.error(
         `Invalid Asaas webhook signature. Received: ${signature}`,
       );

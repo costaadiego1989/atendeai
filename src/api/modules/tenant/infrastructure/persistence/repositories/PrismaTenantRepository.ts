@@ -11,6 +11,27 @@ import { TenantMapper } from '../mappers/TenantMapper.js';
 import { CNPJ } from '../../../domain/value-objects/CNPJ.js';
 import { Address } from '../../../domain/value-objects/Address.js';
 import { UniqueEntityID } from '../../../../../shared/domain/UniqueEntityID.js';
+import { encryptJson, decryptJson } from '@shared/crypto/field-encryption';
+
+function decryptWhatsappCredentials(
+  raw: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  if (!raw) return {};
+  if (typeof raw['encrypted'] === 'string') {
+    try {
+      return decryptJson<Record<string, unknown>>(raw['encrypted'] as string);
+    } catch {
+      return raw;
+    }
+  }
+  return raw;
+}
+
+function encryptWhatsappCredentials(
+  credentials: Record<string, unknown>,
+): Record<string, unknown> {
+  return { encrypted: encryptJson(credentials) };
+}
 
 @Injectable()
 export class PrismaTenantRepository implements ITenantRepository {
@@ -95,7 +116,7 @@ export class PrismaTenantRepository implements ITenantRepository {
               ${data.whatsappConfig.tenantId}::uuid,
               ${data.whatsappConfig.credentials.token || ''},
               ${data.whatsappConfig.provider},
-              ${JSON.stringify(data.whatsappConfig.credentials)}::jsonb,
+              ${JSON.stringify(encryptWhatsappCredentials(data.whatsappConfig.credentials))}::jsonb,
               ${data.whatsappConfig.whatsappNumber},
               ${data.whatsappConfig.webhookSecret},
               ${data.whatsappConfig.status},
@@ -1095,7 +1116,7 @@ export class PrismaTenantRepository implements ITenantRepository {
       id: raw.id,
       tenantId: raw.tenant_id,
       provider: raw.provider,
-      credentials: (raw.credentials || {}) as Record<string, unknown>,
+      credentials: decryptWhatsappCredentials(raw.credentials),
       whatsappNumber: raw.whatsapp_number,
       webhookSecret: raw.webhook_secret,
       status: raw.status,
@@ -1154,7 +1175,7 @@ export class PrismaTenantRepository implements ITenantRepository {
           id: raw.id,
           tenantId: raw.tenant_id,
           provider: raw.provider,
-          credentials: (raw.credentials || {}) as Record<string, unknown>,
+          credentials: decryptWhatsappCredentials(raw.credentials),
           whatsappNumber: raw.whatsapp_number,
           webhookSecret: raw.webhook_secret,
           status: raw.status,

@@ -23,7 +23,7 @@ export class PrismaContactRepository implements IContactRepository {
           tenantId: data.tenantId,
           name: data.name,
           phone: data.phone,
-          document: data.document,   // C1
+          document: data.document, // C1
           email: data.email,
           stage: data.stage,
           tags: data.tags,
@@ -36,7 +36,7 @@ export class PrismaContactRepository implements IContactRepository {
           tenantId: data.tenantId,
           name: data.name,
           phone: data.phone,
-          document: data.document,   // C1
+          document: data.document, // C1
           email: data.email,
           stage: data.stage,
           tags: data.tags,

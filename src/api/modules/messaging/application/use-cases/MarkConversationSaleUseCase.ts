@@ -52,6 +52,7 @@ export class MarkConversationSaleUseCase implements IMarkConversationSaleUseCase
 
     const conversation = await this.conversationRepository.findById(
       input.conversationId,
+      input.tenantId,
     );
     if (!conversation) {
       throw new EntityNotFoundException('Conversation', input.conversationId);

@@ -5,11 +5,29 @@ import { SocialAccount } from '../../domain/entities/SocialAccount';
 import { SocialComment } from '../../domain/entities/SocialComment';
 import { SocialAutoReplyRule } from '../../domain/entities/SocialAutoReplyRule';
 import { UniqueEntityID } from '../../../../shared/domain/UniqueEntityID';
+import { encrypt, decrypt } from '@shared/crypto/field-encryption';
+
+/**
+ * Detect whether a string is already encrypted by this layer.
+ * The envelope format is `iv:tag:ciphertext` — exactly 2 colons.
+ */
+function isEncrypted(v: string | null | undefined): boolean {
+  if (!v) return false;
+  return (v.match(/:/g) ?? []).length === 2;
+}
 
 @Injectable()
 export class PrismaSocialRepository implements ISocialRepository {
   constructor(private readonly prisma: PrismaService) {}
   async saveAccount(account: SocialAccount): Promise<void> {
+    // Encrypt OAuth tokens at the persistence boundary (T1 fix).
+    const encryptedAccessToken = account.accessToken
+      ? encrypt(account.accessToken)
+      : account.accessToken;
+    const encryptedRefreshToken = account.refreshToken
+      ? encrypt(account.refreshToken)
+      : account.refreshToken;
+
     await this.prisma.$executeRawUnsafe(
       `INSERT INTO social_schema.social_accounts
         (id, tenant_id, platform, external_account_id, username, display_name, profile_picture_url,
@@ -32,8 +50,8 @@ export class PrismaSocialRepository implements ISocialRepository {
       account.username,
       account.displayName,
       account.profilePictureUrl,
-      account.accessToken,
-      account.refreshToken,
+      encryptedAccessToken,
+      encryptedRefreshToken,
       account.tokenExpiresAt,
       account.pageId,
       account.webhookSecret,
@@ -558,11 +576,13 @@ export class PrismaSocialRepository implements ISocialRepository {
     accessToken: string,
     tokenExpiresAt: Date,
   ): Promise<void> {
+    // Encrypt the refreshed token before persisting.
+    const encryptedAccessToken = encrypt(accessToken);
     await this.prisma.$executeRawUnsafe(
       `UPDATE social_schema.social_accounts
        SET access_token = $1, token_expires_at = $2, status = 'ACTIVE', updated_at = NOW()
        WHERE id = $3 AND tenant_id = $4`,
-      accessToken,
+      encryptedAccessToken,
       tokenExpiresAt,
       accountId,
       tenantId,
@@ -570,6 +590,18 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   private mapAccount(raw: any): SocialAccount {
+    // Backward-compat decrypt: rows written before this fix are stored as plaintext.
+    const accessToken = raw.access_token
+      ? isEncrypted(raw.access_token)
+        ? decrypt(raw.access_token)
+        : raw.access_token
+      : raw.access_token;
+    const refreshToken = raw.refresh_token
+      ? isEncrypted(raw.refresh_token)
+        ? decrypt(raw.refresh_token)
+        : raw.refresh_token
+      : raw.refresh_token;
+
     return SocialAccount.reconstitute(
       {
         tenantId: raw.tenant_id,
@@ -578,8 +610,8 @@ export class PrismaSocialRepository implements ISocialRepository {
         username: raw.username,
         displayName: raw.display_name,
         profilePictureUrl: raw.profile_picture_url,
-        accessToken: raw.access_token,
-        refreshToken: raw.refresh_token,
+        accessToken,
+        refreshToken,
         tokenExpiresAt: raw.token_expires_at,
         pageId: raw.page_id,
         webhookSecret: raw.webhook_secret,

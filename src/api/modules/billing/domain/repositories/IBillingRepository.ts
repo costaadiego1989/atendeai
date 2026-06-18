@@ -75,6 +75,15 @@ export interface BillingAuditLogRecord {
   metadata?: any;
 }
 
+export interface UsageIncrement {
+  tenantId: string;
+  periodStart: Date;
+  periodEnd: Date;
+  messagesIncrement: number;
+  aiTokensIncrement: number;
+  contactsIncrement: number;
+}
+
 export interface IBillingRepository {
   findSubscription(tenantId: string): Promise<Subscription | null>;
   saveSubscription(sub: Subscription): Promise<void>;
@@ -83,6 +92,7 @@ export interface IBillingRepository {
   findLatestUsage(tenantId: string): Promise<UsageRecord | null>;
   getUsage(tenantId: string, start: Date): Promise<UsageRecord | null>;
   saveUsage(usage: UsageRecord): Promise<void>;
+  atomicIncrementUsage(increment: UsageIncrement): Promise<void>;
   saveAuditLog(log: BillingAuditLogRecord): Promise<void>;
   listNiches(): Promise<BusinessNicheRecord[]>;
   listModules(): Promise<BillingModuleRecord[]>;

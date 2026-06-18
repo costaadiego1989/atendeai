@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import {
   CreateAutomationDto,
@@ -18,7 +19,10 @@ import { CreateAutomationUseCase } from '../../application/use-cases/CreateAutom
 import { UpdateAutomationUseCase } from '../../application/use-cases/UpdateAutomationUseCase';
 import { ListAutomationsUseCase } from '../../application/use-cases/ListAutomationsUseCase';
 import { DeleteAutomationUseCase } from '../../application/use-cases/DeleteAutomationUseCase';
+import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
+import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
 
+@UseGuards(JwtCookieGuard, TenantGuard)
 @Controller('tenants/:tenantId/automations')
 export class AutomationController {
   constructor(
