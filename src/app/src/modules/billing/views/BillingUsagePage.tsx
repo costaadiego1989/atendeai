@@ -1,4 +1,5 @@
 import {
+import { usePageTitle } from '@/shared/lib/usePageTitle';
   AlertTriangle,
   Bot,
   CalendarClock,
@@ -52,6 +53,7 @@ interface AdvisorQuestionRowProps {
 }
 
 function AdvisorQuestionRow({ question, onChange }: AdvisorQuestionRowProps) {
+  usePageTitle('Faturamento');
   return (
     <div className="rounded-xl border border-border/60 bg-card/60 p-4">
       <div className="mb-3">

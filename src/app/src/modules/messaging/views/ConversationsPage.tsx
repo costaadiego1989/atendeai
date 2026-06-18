@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { ModuleAgentRuleButton } from '@/modules/agent-rules/components/ModuleAgentRuleButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +46,7 @@ import {
 import { Megaphone } from 'lucide-react';
 
 export default function ConversationsPage() {
+  usePageTitle('Conversas');
   const vm = useConversationsPageViewModel();
   const messagesViewportRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -297,7 +299,7 @@ export default function ConversationsPage() {
                 ) : null}
               </div>
 
-              <div ref={messagesViewportRef} className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+              <div ref={messagesViewportRef} role="log" aria-live="polite" aria-label="Histórico de mensagens" className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
                 {vm.messagesQuery.isLoading ? (
                   <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

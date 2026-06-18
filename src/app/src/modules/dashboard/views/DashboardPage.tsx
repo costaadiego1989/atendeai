@@ -1,4 +1,5 @@
 import {
+import { usePageTitle } from '@/shared/lib/usePageTitle';
   Activity,
   Archive,
   BarChart3,
@@ -56,6 +57,7 @@ const dashboardIconMap = {
 };
 
 export default function DashboardPage() {
+  usePageTitle('Dashboard');
   const vm = useDashboardPageViewModel();
 
   if (vm.isLoading) {

@@ -1,4 +1,5 @@
 import {
+import { usePageTitle } from '@/shared/lib/usePageTitle';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -25,6 +26,7 @@ import { CatalogImportSheet } from '../components/CatalogImportSheet';
 import { CatalogReportsSheet } from '../components/CatalogReportsSheet';
 
 export default function CatalogPage() {
+  usePageTitle('Catálogo');
   const vm = useCatalogPageViewModel();
 
   const items = vm.filteredItems;
