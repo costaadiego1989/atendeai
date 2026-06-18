@@ -233,6 +233,7 @@ export function useSocialPageViewModel() {
       comments: commentsQuery.data?.data || [],
       commentsTotal: commentsQuery.data?.total || 0,
       isCommentsLoading: commentsQuery.isLoading,
+      isCommentsError: commentsQuery.isError,
       commentThread: commentThreadQuery.data,
       isCommentThreadLoading: commentThreadQuery.isLoading,
       rules: rulesQuery.data || [],

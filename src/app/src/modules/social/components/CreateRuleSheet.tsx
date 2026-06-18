@@ -132,8 +132,8 @@ export function CreateRuleSheet({ open, onOpenChange, vm }: CreateRuleSheetProps
 
             <div className="space-y-4 border rounded-xl p-4 bg-muted/20">
               <div className="flex items-center gap-2">
-                <input type="checkbox" defaultChecked className="rounded text-primary" />
-                <Label className="font-semibold text-sm cursor-pointer">Responder Publicamente ao Comentário</Label>
+                <input type="checkbox" id="action-reply-comment" defaultChecked className="rounded text-primary" aria-label="Responder publicamente ao comentário" />
+                <Label htmlFor="action-reply-comment" className="font-semibold text-sm cursor-pointer">Responder Publicamente ao Comentário</Label>
               </div>
               <div className="pl-6 space-y-3">
                 <div className="space-y-2">
@@ -180,8 +180,8 @@ export function CreateRuleSheet({ open, onOpenChange, vm }: CreateRuleSheetProps
 
             <div className="space-y-4 border rounded-xl p-4 bg-muted/20">
               <div className="flex items-center gap-2">
-                <input type="checkbox" defaultChecked className="rounded text-primary" />
-                <Label className="font-semibold text-sm cursor-pointer border-b border-transparent">Chamar no Direct (Inbox)</Label>
+                <input type="checkbox" id="action-send-inbox" defaultChecked className="rounded text-primary" aria-label="Chamar no Direct (Inbox)" />
+                <Label htmlFor="action-send-inbox" className="font-semibold text-sm cursor-pointer border-b border-transparent">Chamar no Direct (Inbox)</Label>
               </div>
               <div className="pl-6 space-y-3">
                 <div className="grid grid-cols-2 gap-4">

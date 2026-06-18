@@ -27,6 +27,7 @@ import type { InventoryItemRecord } from '@/shared/types';
 interface InventoryItemsTabProps {
   items: InventoryItemRecord[];
   isLoading: boolean;
+  isError?: boolean;
   search: string;
   onSearchChange: (value: string) => void;
   statusFilter: string;
@@ -44,6 +45,7 @@ interface InventoryItemsTabProps {
 export function InventoryItemsTab({
   items,
   isLoading,
+  isError,
   search,
   onSearchChange,
   statusFilter,
@@ -106,6 +108,13 @@ export function InventoryItemsTab({
             Carregando snapshots de estoque...
           </CardContent>
         </Card>
+      ) : isError ? (
+        <Card className="glass-card">
+          <CardContent className="p-8 text-center">
+            <p className="text-sm font-semibold text-destructive">Erro ao carregar itens</p>
+            <p className="text-xs text-muted-foreground mt-1">Tente atualizar a página.</p>
+          </CardContent>
+        </Card>
       ) : items.length === 0 ? (
         <EmptyState
           icon={Warehouse}
@@ -137,8 +146,16 @@ export function InventoryItemsTab({
                 {items.map((item) => (
                   <TableRow
                     key={item.id}
+                    role="button"
+                    tabIndex={0}
                     className="cursor-pointer"
                     onClick={() => onSelectItem(item)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        onSelectItem(item);
+                      }
+                    }}
                   >
                     <TableCell>
                       <div>

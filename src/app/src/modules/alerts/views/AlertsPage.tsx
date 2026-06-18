@@ -1,4 +1,4 @@
-import { Bell, Clock3, PauseCircle, PlayCircle, Send, Trash2, Search, Filter } from 'lucide-react';
+import { Bell, Clock3, Loader2, PauseCircle, PlayCircle, Send, Trash2, Search, Filter } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,8 +53,9 @@ export default function AlertsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Nome do alerta</Label>
+              <Label htmlFor="alert-title">Nome do alerta</Label>
               <Input
+                id="alert-title"
                 value={vm.form.title}
                 onChange={(event) =>
                   vm.setForm((current) => ({ ...current, title: event.target.value }))
@@ -64,8 +65,9 @@ export default function AlertsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Mensagem</Label>
+              <Label htmlFor="alert-message">Mensagem</Label>
               <Textarea
+                id="alert-message"
                 rows={5}
                 value={vm.form.message}
                 onChange={(event) =>
@@ -76,14 +78,14 @@ export default function AlertsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Frequência</Label>
+              <Label htmlFor="alert-frequency">Frequência</Label>
               <Select
                 value={vm.form.frequency}
                 onValueChange={(value: 'ONCE' | 'DAILY') =>
                   vm.setForm((current) => ({ ...current, frequency: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger id="alert-frequency">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -95,8 +97,9 @@ export default function AlertsPage() {
 
             {vm.form.frequency === 'ONCE' ? (
               <div className="space-y-2">
-                <Label>Data e horário</Label>
+                <Label htmlFor="alert-scheduled-at">Data e horário</Label>
                 <Input
+                  id="alert-scheduled-at"
                   type="datetime-local"
                   value={vm.form.scheduledAt ?? ''}
                   onChange={(event) =>
@@ -109,8 +112,9 @@ export default function AlertsPage() {
               </div>
             ) : (
               <div className="space-y-2">
-                <Label>horário diario</Label>
+                <Label htmlFor="alert-time-of-day">horário diario</Label>
                 <Input
+                  id="alert-time-of-day"
                   type="time"
                   value={vm.form.timeOfDay ?? '09:00'}
                   onChange={(event) =>
@@ -180,73 +184,16 @@ export default function AlertsPage() {
               <CardTitle className="text-base uppercase tracking-widest text-muted-foreground font-bold">Agenda de alertas</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {vm.reminders.map((reminder) => (
-                <div
-                  key={reminder.id}
-                  className="rounded-2xl border border-border/60 bg-background/50 hover:bg-background/80 transition-colors p-5"
-                >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-foreground">{reminder.title}</p>
-                        <Badge variant={reminder.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                          {statusLabel(reminder.status)}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{reminder.message}</p>
-                      <div className="flex flex-wrap gap-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
-                        <span className="rounded-full bg-secondary/50 px-3 py-1">
-                          {reminder.frequency === 'ONCE' ? 'Disparo Único' : 'Recorrência Diária'}
-                        </span>
-                        {reminder.nextTriggerAt && (
-                          <span className="rounded-full bg-primary/5 px-3 py-1 text-primary">
-                            Próximo: {new Date(reminder.nextTriggerAt).toLocaleString('pt-BR')}
-                          </span>
-                        )}
-                        {reminder.lastTriggeredAt && (
-                          <span className="rounded-full bg-secondary px-3 py-1">
-                            Último envio: {new Date(reminder.lastTriggeredAt).toLocaleString('pt-BR')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {reminder.status !== 'SENT' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          onClick={() =>
-                            vm.toggleReminder(reminder.id, reminder.status === 'ACTIVE')
-                          }
-                        >
-                          {reminder.status === 'ACTIVE' ? (
-                            <>
-                              <PauseCircle className="h-4 w-4" />
-                              Pausar
-                            </>
-                          ) : (
-                            <>
-                              <PlayCircle className="h-4 w-4" />
-                              Retomar
-                            </>
-                          )}
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-10 w-10 p-0 text-muted-foreground hover:text-destructive"
-                        onClick={() => vm.removeReminder(reminder.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+              {vm.remindersQuery.isLoading ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ))}
-
-              {!vm.reminders.length && (
+              ) : vm.remindersQuery.isError ? (
+                <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+                  <p className="text-sm font-semibold text-destructive">Erro ao carregar alertas</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tente atualizar a página.</p>
+                </div>
+              ) : vm.reminders.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-border/60 p-12 text-center">
                   <Send className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
                   <p className="text-lg font-bold text-foreground">Nenhum alerta disponível</p>
@@ -257,6 +204,73 @@ export default function AlertsPage() {
                     Limpar filtros
                   </Button>
                 </div>
+              ) : (
+                vm.reminders.map((reminder) => (
+                  <div
+                    key={reminder.id}
+                    className="rounded-2xl border border-border/60 bg-background/50 hover:bg-background/80 transition-colors p-5"
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-foreground">{reminder.title}</p>
+                          <Badge variant={reminder.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                            {statusLabel(reminder.status)}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{reminder.message}</p>
+                        <div className="flex flex-wrap gap-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+                          <span className="rounded-full bg-secondary/50 px-3 py-1">
+                            {reminder.frequency === 'ONCE' ? 'Disparo Único' : 'Recorrência Diária'}
+                          </span>
+                          {reminder.nextTriggerAt && (
+                            <span className="rounded-full bg-primary/5 px-3 py-1 text-primary">
+                              Próximo: {new Date(reminder.nextTriggerAt).toLocaleString('pt-BR')}
+                            </span>
+                          )}
+                          {reminder.lastTriggeredAt && (
+                            <span className="rounded-full bg-secondary px-3 py-1">
+                              Último envio: {new Date(reminder.lastTriggeredAt).toLocaleString('pt-BR')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {reminder.status !== 'SENT' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() =>
+                              vm.toggleReminder(reminder.id, reminder.status === 'ACTIVE')
+                            }
+                          >
+                            {reminder.status === 'ACTIVE' ? (
+                              <>
+                                <PauseCircle className="h-4 w-4" />
+                                Pausar
+                              </>
+                            ) : (
+                              <>
+                                <PlayCircle className="h-4 w-4" />
+                                Retomar
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        <Button
+                          aria-label="Excluir lembrete"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 w-10 p-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => vm.removeReminder(reminder.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
             </CardContent>
           </Card>

@@ -39,7 +39,7 @@ export function SocialSettingsSheet({ open, onOpenChange }: SocialSettingsSheetP
                   <Label className="text-sm font-semibold">Parada de Emergência</Label>
                   <p className="text-xs text-muted-foreground mr-4">Suspende todas as respostas automatizadas imediatamente.</p>
                 </div>
-                <Switch />
+                <Switch aria-label="Ativar parada de emergência" />
               </div>
 
               <div className="flex items-center justify-between p-3 border rounded-xl bg-card hover:bg-muted/10 transition-colors">
@@ -69,7 +69,7 @@ export function SocialSettingsSheet({ open, onOpenChange }: SocialSettingsSheetP
                   <Label className="text-sm font-semibold">Alertas de Crise</Label>
                   <p className="text-xs text-muted-foreground mr-4">Avisar gerentes se muitos comentários negativos ocorrerem.</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch defaultChecked aria-label="Ativar alertas de crise" />
               </div>
            </div>
         </div>

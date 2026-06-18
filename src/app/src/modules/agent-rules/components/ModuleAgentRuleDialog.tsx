@@ -54,6 +54,17 @@ export function ModuleAgentRuleDialog({ vm }: Props) {
 
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-6">
+            {vm.isLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : vm.isError ? (
+              <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+                <p className="text-sm font-semibold text-destructive">Erro ao carregar regra</p>
+                <p className="text-xs text-muted-foreground mt-1">Feche e tente novamente.</p>
+              </div>
+            ) : (
+              <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className={cn(
                 "flex flex-col justify-between rounded-xl border p-4 transition-all",
@@ -72,6 +83,7 @@ export function ModuleAgentRuleDialog({ vm }: Props) {
                       className="peer sr-only"
                       checked={vm.isActive}
                       onChange={(e) => vm.setIsActive(e.target.checked)}
+                      aria-label="Ativar regra de instruções customizadas"
                     />
                     <div className="peer h-5 w-9 rounded-full bg-muted-foreground/30 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
                   </label>
@@ -95,6 +107,7 @@ export function ModuleAgentRuleDialog({ vm }: Props) {
                       className="peer sr-only"
                       checked={vm.fallbackToGlobal}
                       onChange={(e) => vm.setFallbackToGlobal(e.target.checked)}
+                      aria-label="Ativar fallback para instruções globais da empresa"
                     />
                     <div className="peer h-5 w-9 rounded-full bg-muted-foreground/30 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
                   </label>
@@ -258,6 +271,8 @@ export function ModuleAgentRuleDialog({ vm }: Props) {
                 </div>
               )}
             </div>
+            </>
+            )}
           </div>
         </ScrollArea>
 

@@ -127,10 +127,10 @@ export function PromotionsTab() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pl-4 border-l border-border/50">
-                  <Button variant="ghost" size="icon" onClick={() => vm.openEditSheet(promo.id)}>
+                  <Button aria-label="Editar promoção" variant="ghost" size="icon" onClick={() => vm.openEditSheet(promo.id)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => vm.deleteMutation.mutate(promo.id)} className="text-muted-foreground hover:text-destructive">
+                  <Button aria-label="Excluir promoção" variant="ghost" size="icon" onClick={() => vm.deleteMutation.mutate(promo.id)} className="text-muted-foreground hover:text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
