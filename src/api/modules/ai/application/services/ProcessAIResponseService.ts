@@ -38,6 +38,12 @@ import {
 import { TenantAgentRuleService } from '@modules/agent-rules/application/services/TenantAgentRuleService';
 import { MediaUnderstandingService } from './MediaUnderstandingService';
 import { traceAsync } from '@shared/infrastructure/observability/DomainTrace';
+import {
+  MANUAL_AUTOMATION_FACADE,
+  IManualAutomationFacade,
+  ManualAutomationSummary,
+} from '../ports/IManualAutomationFacade';
+
 import { AiSafetyGate } from './AiSafetyGate';
 import { Tenant } from '../../../tenant/domain/entities/Tenant';
 import {
@@ -52,14 +58,7 @@ import {
 @Injectable()
 export class ProcessAIResponseService {
   private readonly logger = new Logger(ProcessAIResponseService.name);
-
   private static readonly RAG_CACHE_THRESHOLD = 0.95;
-  /** Maximum number of past messages sent as context to the LLM.
-   *  Caps the token spend for long-running conversations without requiring
-   *  a full token-counting library.  Configurable via AI_CONTEXT_WINDOW_TURNS
-   *  env var (each turn = 1 user + 1 assistant message → 2 entries).
-   *  Default: 20 turns = 40 messages.
-   */
   private static readonly DEFAULT_CONTEXT_WINDOW_TURNS = 20;
 
   constructor(
@@ -91,6 +90,9 @@ export class ProcessAIResponseService {
     @Optional()
     @Inject(EMBEDDING_PROVIDER)
     private readonly embeddingProvider?: IEmbeddingProvider,
+    @Optional()
+    @Inject(MANUAL_AUTOMATION_FACADE)
+    private readonly manualAutomationFacade?: IManualAutomationFacade,
   ) {}
 
   async process(
@@ -178,10 +180,6 @@ export class ProcessAIResponseService {
     const history = await this.chatHistoryRepository.getHistory(
       input.conversationId,
     );
-    // Token-budget windowing: slice to the most recent N messages so we don't
-    // blow the context window on long conversations (audit finding: lrange 0 -1
-    // sends the full 30-day history).  We keep whole turns (user+assistant pairs)
-    // by taking an even number of tail messages.
     const maxMessages =
       ProcessAIResponseService.DEFAULT_CONTEXT_WINDOW_TURNS * 2;
     const windowedHistory =
@@ -196,8 +194,6 @@ export class ProcessAIResponseService {
     const resolvedBranchId = await this.resolveBranchId(input);
 
     try {
-      // Commerce advancement runs INSIDE the try so any state-machine/checkout
-      // failure degrades to the friendly fallback instead of escaping unhandled.
       await this.advanceCommerceConversationUseCase.execute({
         tenantId: input.tenantId,
         branchId: resolvedBranchId,
@@ -229,10 +225,14 @@ export class ProcessAIResponseService {
           input.contextHints.map((h) => `- ${h}`).join('\n');
       }
 
+      promptWithAgentRule = await this.appendManualAutomationsContext(
+        input.tenantId,
+        promptWithAgentRule,
+      );
+
       promptWithAgentRule =
         this.aiSafetyGate.appendPlatformLimits(promptWithAgentRule);
 
-      // RAG cache check: only when PDF context was used
       const ragCacheEnabled =
         !!diagnostics.tenantPDFContextFound &&
         !!this.ragResponseCache &&
@@ -318,7 +318,17 @@ export class ProcessAIResponseService {
         },
       );
 
-      // Cache the response if RAG was involved and response completed normally
+      const { cleanedText, automationIds } = this.extractAutomationMarkers(processedText);
+      if (automationIds.length > 0) {
+        await this.dispatchAITriggeredAutomations(
+          input.tenantId,
+          input.contactId,
+          input.conversationId,
+          automationIds,
+        );
+      }
+      const finalText = cleanedText.trim() || processedText;
+
       if (
         ragCacheEnabled &&
         queryEmbedding &&
@@ -327,16 +337,16 @@ export class ProcessAIResponseService {
         await this.ragResponseCache!.cacheResponse(
           input.tenantId,
           queryEmbedding,
-          processedText,
+          finalText,
         );
       }
 
       await this.persistTurn(
         input,
         aiSession.id,
-        processedText,
+        finalText,
         response,
-        { ...diagnostics, ragCacheHit: false },
+        { ...diagnostics, ragCacheHit: false, automationsDispatched: automationIds.length },
         userMessage,
       );
 
@@ -633,5 +643,77 @@ export class ProcessAIResponseService {
       text: input.content.text,
       mimeType: input.content.mimeType,
     });
+  }
+
+  private async appendManualAutomationsContext(
+    tenantId: string,
+    prompt: string,
+  ): Promise<string> {
+    if (!this.manualAutomationFacade) return prompt;
+
+    try {
+      const active = await this.manualAutomationFacade.listActive(tenantId);
+      if (active.length === 0) return prompt;
+
+      const lines = active.map(
+        (a: ManualAutomationSummary) =>
+          `- [USE_AUTOMATION:${a.id}] → "${a.name}"${a.description ? ` — ${a.description}` : ''}`,
+      );
+
+      return (
+        prompt +
+        '\n\n[AUTOMAÇÕES DISPONÍVEIS — inclua o marcador entre colchetes quando for o caso de uso correto]:\n' +
+        lines.join('\n') +
+        '\n(O marcador é removido automaticamente antes de chegar ao contato.)'
+      );
+    } catch (err: unknown) {
+      this.logger.warn(
+        `appendManualAutomationsContext: could not load automations — ${String(err)}`,
+      );
+      return prompt;
+    }
+  }
+
+  private extractAutomationMarkers(text: string): {
+    cleanedText: string;
+    automationIds: string[];
+  } {
+    const ids: string[] = [];
+    const cleanedText = text.replace(
+      /\[USE_AUTOMATION:([0-9a-f-]{36})\]/gi,
+      (_, id: string) => {
+        ids.push(id);
+        return '';
+      },
+    );
+    return { cleanedText, automationIds: ids };
+  }
+
+  private async dispatchAITriggeredAutomations(
+    tenantId: string,
+    contactId: string,
+    conversationId: string,
+    automationIds: string[],
+  ): Promise<void> {
+    if (!this.manualAutomationFacade) return;
+
+    for (const automationId of automationIds) {
+      try {
+        await this.manualAutomationFacade.dispatch(
+          tenantId,
+          automationId,
+          contactId,
+          conversationId,
+          'AI',
+        );
+        this.logger.log(
+          `AI triggered automation ${automationId} for contact ${contactId}`,
+        );
+      } catch (err: unknown) {
+        this.logger.warn(
+          `dispatchAITriggeredAutomations: failed for automation ${automationId} — ${String(err)}`,
+        );
+      }
+    }
   }
 }

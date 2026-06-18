@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { EventBusModule } from '@shared/infrastructure/event-bus/EventBusModule';
 import { DatabaseModule } from '@shared/infrastructure/database/DatabaseModule';
 import { MessagingModule } from '@modules/messaging/messaging.module';
 import { ContactModule } from '@modules/contact/contact.module';
 import { AIModule } from '@modules/ai/ai.module';
 import { TaskModule } from '@modules/task/task.module';
+import { MANUAL_AUTOMATION_FACADE } from '@modules/ai/application/ports/IManualAutomationFacade';
+import { ManualAutomationFacade } from './application/services/ManualAutomationFacade';
 
 // Use cases
 import { CreateAutomationUseCase } from './application/use-cases/CreateAutomationUseCase';
@@ -62,7 +64,7 @@ const STEP_HANDLER_CLASSES = [
   imports: [
     DatabaseModule,
     EventBusModule,
-    MessagingModule,
+    forwardRef(() => MessagingModule),
     ContactModule,
     AIModule,
     TaskModule,
@@ -99,7 +101,18 @@ const STEP_HANDLER_CLASSES = [
     TriggerAutomationUseCase,
     // Event listener
     AutomationEventListener,
+    // Manual automation facade — bridges to AIModule
+    ManualAutomationFacade,
+    {
+      provide: MANUAL_AUTOMATION_FACADE,
+      useExisting: ManualAutomationFacade,
+    },
   ],
-  exports: [TriggerAutomationUseCase, ExecuteAutomationUseCase],
+  exports: [
+    TriggerAutomationUseCase,
+    ExecuteAutomationUseCase,
+    AUTOMATION_REPOSITORY,
+    MANUAL_AUTOMATION_FACADE,
+  ],
 })
 export class AutomationModule {}

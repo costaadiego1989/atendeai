@@ -1,7 +1,3 @@
-/**
- * Automation types — aligned with backend domain entities and DTOs.
- */
-
 export enum TriggerType {
   CONTACT_CREATED = 'contact_created',
   TAG_ADDED = 'tag_added',
@@ -13,6 +9,7 @@ export enum TriggerType {
   CART_ABANDONED = 'cart_abandoned',
   WEBHOOK_RECEIVED = 'webhook_received',
   SCHEDULED = 'scheduled',
+  MANUAL = 'manual',
 }
 
 export enum StepType {
@@ -70,7 +67,6 @@ export interface UpdateAutomationInput {
   isActive?: boolean;
 }
 
-/** Human-readable labels for trigger types */
 export const TRIGGER_LABELS: Record<TriggerType, string> = {
   [TriggerType.CONTACT_CREATED]: 'Contato criado',
   [TriggerType.TAG_ADDED]: 'Tag adicionada',
@@ -82,9 +78,9 @@ export const TRIGGER_LABELS: Record<TriggerType, string> = {
   [TriggerType.CART_ABANDONED]: 'Carrinho abandonado',
   [TriggerType.WEBHOOK_RECEIVED]: 'Webhook recebido',
   [TriggerType.SCHEDULED]: 'Agendado (cron)',
+  [TriggerType.MANUAL]: 'Disparo manual / IA',
 };
 
-/** Human-readable labels for step types */
 export const STEP_LABELS: Record<StepType, string> = {
   [StepType.SEND_MESSAGE]: 'Enviar mensagem',
   [StepType.WAIT_DELAY]: 'Aguardar',

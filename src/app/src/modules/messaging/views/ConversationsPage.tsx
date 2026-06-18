@@ -35,6 +35,7 @@ import { ConversationListItem } from '../components/ConversationListItem';
 import { SaleAttributionDialog } from '../components/SaleAttributionDialog';
 import { ConversationChargeDialog } from '../components/ConversationChargeDialog';
 import { ConversationContextPanel } from '../components/ConversationContextPanel';
+import { AutomationPickerButton } from '../components/AutomationPickerButton';
 import {
   formatConversationPhone,
   isProspectConversation,
@@ -385,6 +386,18 @@ export default function ConversationsPage() {
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
+                  {vm.selectedConversation.status === 'PENDING_HUMAN' &&
+                    !vm.assistantAutopilotEnabled &&
+                    vm.tenant?.id && (
+                      <AutomationPickerButton
+                        tenantId={vm.tenant.id}
+                        conversationId={vm.selectedConversation.id}
+                        onDispatched={(automation) => {
+                          // toast would go here — toast hook not in scope of this page, VM handles it
+                          void automation;
+                        }}
+                      />
+                    )}
                   <Input
                     value={vm.draftMessage}
                     onChange={(event) => vm.setDraftMessage(event.target.value)}
