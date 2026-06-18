@@ -15,5 +15,7 @@ export interface IUserRepository {
     email: string;
     phone: string;
   } | null>;
+  /** Returns the number of users with role OWNER in the given tenant. */
+  countOwners(tenantId: string): Promise<number>;
   delete(id: string, tenantId: string): Promise<void>;
 }

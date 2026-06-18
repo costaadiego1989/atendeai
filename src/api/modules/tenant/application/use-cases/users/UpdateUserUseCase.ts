@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -40,6 +41,18 @@ export class UpdateUserUseCase implements IUseCase<UpdateUserInput, void> {
       const existingUser = await this.userRepo.findByEmail(input.email);
       if (existingUser && existingUser.id.toValue() !== user.id.toValue()) {
         throw new ConflictException('A user with this email already exists.');
+      }
+    }
+
+    // Server-side last-owner guard: prevent demoting the only remaining OWNER.
+    // The client performs the same check against its cache, but that data can
+    // be stale under concurrent edits — this is the authoritative enforcement.
+    if (input.role && input.role !== 'OWNER' && user.role.value === 'OWNER') {
+      const ownerCount = await this.userRepo.countOwners(input.tenantId);
+      if (ownerCount <= 1) {
+        throw new BadRequestException(
+          'Não é possível rebaixar o último OWNER do tenant.',
+        );
       }
     }
 
