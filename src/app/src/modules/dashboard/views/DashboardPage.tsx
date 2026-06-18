@@ -1,5 +1,5 @@
-import {
 import { usePageTitle } from '@/shared/lib/usePageTitle';
+import {
   Activity,
   Archive,
   BarChart3,
