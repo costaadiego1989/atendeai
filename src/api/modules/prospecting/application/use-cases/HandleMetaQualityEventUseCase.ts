@@ -33,7 +33,7 @@ export class HandleMetaQualityEventUseCase implements IHandleMetaQualityEventUse
   ): Promise<HandleMetaQualityEventOutput> {
     const normalizedPhone = input.phone.replace(/\D/g, '');
     const contacts =
-      await this.contactRepository.findAllByPhone(normalizedPhone);
+      await this.contactRepository.findAllByPhoneAcrossAllTenants(normalizedPhone);
 
     if (contacts.length === 0) return { processed: 0 };
 

@@ -12,6 +12,7 @@ import {
 } from '../../domain/ports/ICommerceRepository';
 import { ShoppingSessionNotFoundError } from '../../domain/errors/ShoppingSessionNotFoundError';
 import { InvalidSessionStateError } from '../../domain/errors/InvalidSessionStateError';
+import { SessionAlreadyProcessingException } from '../../domain/errors/SessionAlreadyProcessingException';
 import {
   IPaymentFacade,
   PAYMENT_FACADE,
@@ -117,8 +118,34 @@ export class CheckoutShoppingSessionUseCase {
       );
     }
 
+    // COM3 fix: atomically claim the session for checkout.
+    // Only one concurrent request can transition BUILDING_CART → CHECKING_OUT.
+    const claimed = await this.commerceRepository.atomicTransitionToCheckingOut(
+      input.tenantId,
+      input.sessionId,
+    );
+    if (!claimed) {
+      throw new SessionAlreadyProcessingException(input.sessionId);
+    }
+
     const { subtotal, freight, discount, total } =
       sessionAggregate.computeCheckoutTotals();
+
+    // COM2 fix: checkout-time authoritative stock decrement.
+    // Only inventory-backed items carry physical stock.
+    const inventoryItems = session.items
+      .filter((i) => i.source === 'INVENTORY' && i.inventoryItemId)
+      .map((i) => ({
+        inventoryItemId: i.inventoryItemId as string,
+        quantity: i.quantity,
+      }));
+
+    if (inventoryItems.length > 0) {
+      await this.commerceRepository.decrementStockForCheckout(
+        input.tenantId,
+        inventoryItems,
+      );
+    }
 
     const orderId = randomUUID();
     const paymentReference = buildCommercePaymentReference({

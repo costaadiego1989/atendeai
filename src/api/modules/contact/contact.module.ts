@@ -30,7 +30,7 @@ import { ContactController } from './presentation/controllers/ContactController'
 import { AuthModule } from '../auth/auth.module';
 import { CONTACT_TIMELINE_REPOSITORY } from './application/ports/IContactTimelineRepository';
 import { PrismaContactTimelineRepository } from './infrastructure/persistence/repositories/PrismaContactTimelineRepository';
-import { ContactAsyncJobsService } from './application/services/ContactAsyncJobsService';
+import { ContactAsyncJobsService } from './infrastructure/persistence/repositories/ContactAsyncJobsService';
 import { ContactDomainEventPublisher } from './application/services/ContactDomainEventPublisher';
 import { ContactImportParser } from './application/services/ContactImportParser';
 import { ContactReportCsvBuilder } from './application/services/ContactReportCsvBuilder';

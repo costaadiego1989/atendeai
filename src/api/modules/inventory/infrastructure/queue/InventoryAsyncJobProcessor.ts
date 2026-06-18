@@ -5,7 +5,7 @@ import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
-import { InventoryAsyncJobsService } from '../../application/services/InventoryAsyncJobsService';
+import { InventoryAsyncJobsService } from '../../infrastructure/persistence/repositories/InventoryAsyncJobsService';
 import { InventoryReportCsvBuilder } from '../../application/services/InventoryReportCsvBuilder';
 import { GenerateInventoryReportUseCase } from '../../application/use-cases/GenerateInventoryReportUseCase';
 import { SyncInventoryConnectionUseCase } from '../../application/use-cases/SyncInventoryConnectionUseCase';

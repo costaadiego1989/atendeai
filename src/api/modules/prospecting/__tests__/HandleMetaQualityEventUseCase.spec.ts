@@ -46,7 +46,8 @@ describe('HandleMetaQualityEventUseCase', () => {
       findAllByTenant: jest.fn(),
       delete: jest.fn(),
       findAllByPhone: jest.fn(),
-    };
+      findAllByPhoneAcrossAllTenants: jest.fn(),
+    } as unknown as jest.Mocked<IContactRepository>;
 
     contactFacade = {
       identifyContact: jest.fn(),
@@ -55,7 +56,7 @@ describe('HandleMetaQualityEventUseCase', () => {
       upsertProspectContact: jest.fn(),
       findContactIdsForReengagementAudience: jest.fn(),
       markProspectingOptOut: jest.fn().mockResolvedValue(undefined),
-    };
+    } as any;
 
     executionRepository = {
       save: jest.fn(),
@@ -68,7 +69,7 @@ describe('HandleMetaQualityEventUseCase', () => {
       findLatestByContactIds: jest.fn(),
       findActiveByContact: jest.fn().mockResolvedValue([]),
       countContactedTodayByCampaign: jest.fn().mockResolvedValue(0),
-    };
+    } as any;
 
     useCase = new HandleMetaQualityEventUseCase(
       contactRepository,
@@ -81,7 +82,7 @@ describe('HandleMetaQualityEventUseCase', () => {
     const campaign = makeCampaign();
     const execution = makeExecution(campaign);
 
-    contactRepository.findAllByPhone.mockResolvedValue([
+    (contactRepository.findAllByPhoneAcrossAllTenants as jest.Mock).mockResolvedValue([
       { tenantId: campaign.tenantId.toString(), contactId: 'contact-1' },
     ]);
     executionRepository.findActiveByContact.mockResolvedValue([execution]);
@@ -99,7 +100,7 @@ describe('HandleMetaQualityEventUseCase', () => {
   });
 
   it('returns processed: 0 and does nothing when contact not found', async () => {
-    contactRepository.findAllByPhone.mockResolvedValue([]);
+    (contactRepository.findAllByPhoneAcrossAllTenants as jest.Mock).mockResolvedValue([]);
 
     const result = await useCase.execute({ phone: '99999999999' });
 
@@ -109,7 +110,7 @@ describe('HandleMetaQualityEventUseCase', () => {
   });
 
   it('marks opt-out without stopping executions when no active executions exist', async () => {
-    contactRepository.findAllByPhone.mockResolvedValue([
+    (contactRepository.findAllByPhoneAcrossAllTenants as jest.Mock).mockResolvedValue([
       { tenantId: '123e4567-e89b-12d3-a456-426614174000', contactId: 'contact-1' },
     ]);
     executionRepository.findActiveByContact.mockResolvedValue([]);
@@ -122,15 +123,15 @@ describe('HandleMetaQualityEventUseCase', () => {
   });
 
   it('normalizes phone by stripping non-digit characters', async () => {
-    contactRepository.findAllByPhone.mockResolvedValue([]);
+    (contactRepository.findAllByPhoneAcrossAllTenants as jest.Mock).mockResolvedValue([]);
 
     await useCase.execute({ phone: '+55 (11) 99999-8888' });
 
-    expect(contactRepository.findAllByPhone).toHaveBeenCalledWith('5511999998888');
+    expect(contactRepository.findAllByPhoneAcrossAllTenants).toHaveBeenCalledWith('5511999998888');
   });
 
   it('processes multiple tenants for same phone number', async () => {
-    contactRepository.findAllByPhone.mockResolvedValue([
+    (contactRepository.findAllByPhoneAcrossAllTenants as jest.Mock).mockResolvedValue([
       { tenantId: 'tenant-a', contactId: 'contact-a' },
       { tenantId: 'tenant-b', contactId: 'contact-b' },
     ]);

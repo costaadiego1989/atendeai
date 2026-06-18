@@ -52,7 +52,7 @@ import {
   SetProfessionalAvailabilityDTO,
   UpdateAvailabilitySlotDTO,
 } from '../dtos/SchedulingDTOs';
-import { SchedulingAsyncJobsService } from '../../application/services/SchedulingAsyncJobsService';
+import { SchedulingAsyncJobsService } from '../../infrastructure/persistence/repositories/SchedulingAsyncJobsService';
 import { GenerateSchedulingReportUseCase } from '../../application/use-cases/GenerateSchedulingReportUseCase';
 
 @Controller('tenants/:tenantId/scheduling')

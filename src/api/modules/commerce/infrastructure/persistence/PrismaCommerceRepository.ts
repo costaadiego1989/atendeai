@@ -26,6 +26,7 @@ import {
   CommerceAbandonmentConfigRecord,
   UpsertCommerceAbandonmentConfigInput,
 } from '../../domain/ports/ICommerceRepository';
+import { InsufficientStockException } from '../../domain/errors/InsufficientStockException';
 
 @Injectable()
 export class PrismaCommerceRepository implements ICommerceRepository {
@@ -1159,6 +1160,57 @@ export class PrismaCommerceRepository implements ICommerceRepository {
         AND active = TRUE
     `);
     return Number(rows[0]?.count ?? 0);
+  }
+
+  /**
+   * COM3 fix: Atomically claims a session for checkout by transitioning its
+   * status from BUILDING_CART (or ACTIVE) to CHECKING_OUT with a single
+   * conditional UPDATE. Returns true if this request owns the transition,
+   * false if another request already claimed it.
+   */
+  async atomicTransitionToCheckingOut(
+    tenantId: string,
+    sessionId: string,
+  ): Promise<boolean> {
+    const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(
+      Prisma.sql`
+        UPDATE commerce_schema.shopping_sessions
+        SET status = 'CHECKING_OUT',
+            updated_at = now()
+        WHERE tenant_id = ${tenantId}::uuid
+          AND id = ${sessionId}::uuid
+          AND status IN ('BUILDING_CART', 'ACTIVE')
+        RETURNING id
+      `,
+    );
+    return rows.length > 0;
+  }
+
+  /**
+   * COM2 fix: Checkout-time authoritative stock decrement.
+   * Each item is decremented atomically only when available_quantity >= qty.
+   * Throws InsufficientStockException for the first item that cannot be decremented.
+   */
+  async decrementStockForCheckout(
+    tenantId: string,
+    items: Array<{ inventoryItemId: string; quantity: number }>,
+  ): Promise<void> {
+    for (const item of items) {
+      const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(
+        Prisma.sql`
+          UPDATE inventory_schema.inventory_items
+          SET available_quantity = available_quantity - ${item.quantity}
+          WHERE tenant_id = ${tenantId}::uuid
+            AND id = ${item.inventoryItemId}::uuid
+            AND available_quantity >= ${item.quantity}
+          RETURNING id
+        `,
+      );
+
+      if (rows.length === 0) {
+        throw new InsufficientStockException(item.inventoryItemId);
+      }
+    }
   }
 }
 

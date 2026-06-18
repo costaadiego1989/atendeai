@@ -440,6 +440,22 @@ export interface ICommerceRepository {
     itemId: string,
   ): Promise<CommerceInventoryLookupreçord | null>;
   countActiveCatalogItems(tenantId: string): Promise<number>;
+  /**
+   * COM3: Atomically transitions session status from BUILDING_CART/ACTIVE to
+   * CHECKING_OUT. Returns true if transition succeeded, false if already claimed.
+   */
+  atomicTransitionToCheckingOut(
+    tenantId: string,
+    sessionId: string,
+  ): Promise<boolean>;
+  /**
+   * COM2: Atomically decrements available_quantity for each inventory item.
+   * Throws InsufficientStockException if any item has insufficient stock.
+   */
+  decrementStockForCheckout(
+    tenantId: string,
+    items: Array<{ inventoryItemId: string; quantity: number }>,
+  ): Promise<void>;
 }
 
 export const COMMERCE_REPOSITORY = Symbol('COMMERCE_REPOSITORY');

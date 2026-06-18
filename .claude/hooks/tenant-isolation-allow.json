@@ -1,0 +1,13 @@
+{
+  "models": ["tenant"],
+  "files": [
+    "src/api/modules/messaging/infrastructure/persistence/repositories/PrismaWidgetConfigRepository.ts",
+    "src/api/modules/messaging/infrastructure/persistence/repositories/PrismaWidgetSessionRepository.ts",
+    "src/api/modules/commerce/infrastructure/persistence/PrismaCommerceRepository.ts",
+    "src/api/modules/contact/infrastructure/persistence/repositories/PrismaContactRepository.ts",
+    "src/api/modules/recovery/infrastructure/persistence/repositories/RecoveryAsyncJobsService.ts",
+    "src/api/modules/sales/infrastructure/persistence/repositories/PrismaSalesRepository.ts",
+    "src/api/modules/voice/application/use-cases/ProcessGatherWebhookUseCase.ts",
+    "src/api/modules/voice/infrastructure/persistence/repositories/PrismaVoiceCallRepository.ts"
+  ]
+}

@@ -35,7 +35,7 @@ import {
 import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuard';
 import { TenantGuard } from '@shared/infrastructure/auth/guards/TenantGuard';
 import { ContactStage } from '../../domain/value-objects/ContactStage';
-import { ContactAsyncJobsService } from '../../application/services/ContactAsyncJobsService';
+import { ContactAsyncJobsService } from '../../infrastructure/persistence/repositories/ContactAsyncJobsService';
 import { ContactImportParser } from '../../application/services/ContactImportParser';
 
 @Controller('tenants/:tenantId/contacts')

@@ -5,7 +5,7 @@ import { IUseCase } from '@shared/application/IUseCase';
 import {
   CatalogAsyncJobsService,
   CatalogAsyncJobView,
-} from '../services/CatalogAsyncJobsService';
+} from '../../infrastructure/persistence/repositories/CatalogAsyncJobsService';
 import { CatalogImportParser } from '../services/CatalogImportParser';
 
 export interface EnqueueCatalogImportJobCommand {

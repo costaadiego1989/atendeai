@@ -15,7 +15,19 @@ export interface IContactRepository {
     },
   ): Promise<{ data: Contact[]; total: number }>;
   delete(tenantId: string, id: string): Promise<void>;
+  /**
+   * C3 fix: tenant-scoped lookup. Returns only contacts for the given tenant.
+   * Use this for all tenant-aware operations.
+   */
   findAllByPhone(
+    tenantId: string,
+    phone: string,
+  ): Promise<Array<{ tenantId: string; contactId: string }>>;
+  /**
+   * Cross-tenant lookup for system-level events (e.g. Meta opt-out webhooks).
+   * Must NOT be used in any tenant-scoped flow.
+   */
+  findAllByPhoneAcrossAllTenants(
     phone: string,
   ): Promise<Array<{ tenantId: string; contactId: string }>>;
 }

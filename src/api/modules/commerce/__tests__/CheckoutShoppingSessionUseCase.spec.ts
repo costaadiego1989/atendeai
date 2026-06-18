@@ -62,6 +62,8 @@ describe('CheckoutShoppingSessionUseCase', () => {
   beforeEach(() => {
     commerceRepo = {
       findSessionById: jest.fn(),
+      atomicTransitionToCheckingOut: jest.fn().mockResolvedValue(true),
+      decrementStockForCheckout: jest.fn().mockResolvedValue(undefined),
       createOrder: jest.fn(),
       updateOrderPaymentLink: jest.fn(),
       updateOrderStatus: jest.fn(),

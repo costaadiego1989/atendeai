@@ -5,7 +5,7 @@ import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
-import { RecoveryAsyncJobsService } from '../../application/services/RecoveryAsyncJobsService';
+import { RecoveryAsyncJobsService } from '../../infrastructure/persistence/repositories/RecoveryAsyncJobsService';
 import { RecoveryReportCsvBuilder } from '../../application/services/RecoveryReportCsvBuilder';
 import { GenerateRecoveryReportUseCase } from '../../application/use-cases/GenerateRecoveryReportUseCase';
 

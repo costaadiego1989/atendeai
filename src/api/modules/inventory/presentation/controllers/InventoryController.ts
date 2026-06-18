@@ -28,7 +28,7 @@ import {
   SyncInventoryItemDTO,
 } from '../dtos/InventoryDTOs';
 import { GenerateInventoryReportUseCase } from '../../application/use-cases/GenerateInventoryReportUseCase';
-import { InventoryAsyncJobsService } from '../../application/services/InventoryAsyncJobsService';
+import { InventoryAsyncJobsService } from '../../infrastructure/persistence/repositories/InventoryAsyncJobsService';
 
 @Controller('tenants/:tenantId/inventory')
 @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
