@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -26,7 +28,6 @@ import {
   User,
   Calendar,
   MessageSquare,
-  X,
 } from 'lucide-react';
 import { Automation, CreateAutomationInput } from '../types';
 
@@ -213,24 +214,17 @@ function VersionModal({
   onRestore: (version: AutomationVersion) => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Versão {version.version}
-              </CardTitle>
-              <CardDescription>{version.reason}</CardDescription>
-            </div>
-            <Button variant="ghost" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="overflow-y-auto max-h-[60vh]">
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6 pb-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Eye className="h-5 w-5" />
+            Versão {version.version}
+          </DialogTitle>
+          <DialogDescription>{version.reason}</DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-y-auto max-h-[60vh] px-6 pb-2">
           <div className="space-y-6">
             {/* Metadata */}
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -284,7 +278,7 @@ function VersionModal({
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 pb-4">
               <Button onClick={() => onRestore(version)}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Restaurar esta versão
@@ -294,9 +288,9 @@ function VersionModal({
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -393,7 +387,7 @@ export function AutomationHistory({
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `automacao-${automation.id}-historico.json`;
+    link.download = `automação-${automation.id}-histórico.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -447,30 +441,24 @@ export function AutomationHistory({
       )}
 
       {/* Restore Confirmation Modal */}
-      {showRestoreConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Restaurar Versão?</CardTitle>
-              <CardDescription>
-                Tem certeza que deseja restaurar a versão {showRestoreConfirm.version}? 
-                Isso substituirá a versão atual.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                <Button onClick={confirmRestore} className="bg-red-600 hover:bg-red-700">
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Restaurar
-                </Button>
-                <Button variant="outline" onClick={() => setShowRestoreConfirm(null)}>
-                  Cancelar
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <AlertDialog open={!!showRestoreConfirm} onOpenChange={(open) => { if (!open) setShowRestoreConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restaurar versão?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja restaurar a versão {showRestoreConfirm?.version}?
+              Isso substituirá a versão atual.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRestore} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Restaurar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

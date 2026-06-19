@@ -432,7 +432,7 @@ function getTriggerHelp(type: TriggerType): string {
     [TriggerType.TAG_ADDED]: 'Disparado quando uma tag específica é adicionada a um contato. Útil para segmentação.',
     [TriggerType.MESSAGE_RECEIVED]: 'Acionado quando qualquer mensagem é recebida. Pode ser filtrada por canal.',
     [TriggerType.PAYMENT_OVERDUE]: 'Disparado quando pagamentos não são realizados no prazo. Ideal para cobranças.',
-    [TriggerType.SCHEDULED]: 'Executa em horários específicos usando sintaxe cron. Re configuração avançada.',
+    [TriggerType.SCHEDULED]: 'Executa em horários específicos usando sintaxe cron. Requer configuração avançada.',
   };
   return helps[type] || '';
 }

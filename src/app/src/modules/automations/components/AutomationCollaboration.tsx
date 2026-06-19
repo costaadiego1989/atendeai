@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -89,7 +90,7 @@ function PermissionBadge({ permission }: { permission: string }) {
   };
 
   const labels = {
-    view: 'Apenas visualização',
+    view: 'Visualização',
     edit: 'Edição',
   };
 
@@ -120,22 +121,19 @@ function ShareModal({ isOpen, onOpenChange, automation, currentMembers, onShare 
   };
 
   return (
-    <div className={`fixed inset-0 z-50 ${isOpen ? 'block' : 'hidden'}`}>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
-      
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Share2 className="h-5 w-5" />
-              Compartilhar Automação
-            </CardTitle>
-            <CardDescription>
-              Convide membros da equipe para colaborar nesta automação
-            </CardDescription>
-          </CardHeader>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" />
+            Compartilhar automação
+          </DialogTitle>
+          <DialogDescription>
+            Convide membros da equipe para colaborar nesta automação
+          </DialogDescription>
+        </DialogHeader>
 
-          <CardContent className="space-y-4">
+        <div className="space-y-4">
             {/* Email Input */}
             <div>
               <label className="text-sm font-medium mb-2 block">Emails dos colaboradores</label>
@@ -208,10 +206,9 @@ function ShareModal({ isOpen, onOpenChange, automation, currentMembers, onShare 
                 Cancelar
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
