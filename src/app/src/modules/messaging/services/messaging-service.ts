@@ -302,4 +302,15 @@ export const messagingService = {
   ): Promise<{ id: string; lifecycleStatus: string }> {
     return apiClient.delete(`/tenants/${tenantId}/conversations/${conversationId}/sale-attribution`);
   },
+
+  async triggerAutomation(
+    tenantId: string,
+    conversationId: string,
+    automationId: string,
+  ): Promise<{ executionIds: string[] }> {
+    return apiClient.post(
+      `/tenants/${tenantId}/conversations/${conversationId}/trigger-automation`,
+      { automationId },
+    );
+  },
 };

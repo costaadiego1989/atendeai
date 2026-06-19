@@ -73,3 +73,9 @@ export class UpdateConversationSaleAttributionDTO {
   @MaxLength(4000)
   notes?: string | null;
 }
+
+export class TriggerAutomationDTO {
+  @IsUUID()
+  @IsNotEmpty()
+  automationId: string;
+}

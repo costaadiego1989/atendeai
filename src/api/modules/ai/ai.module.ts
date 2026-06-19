@@ -61,6 +61,12 @@ import { AgentRulesModule } from '@modules/agent-rules/agent-rules.module';
 import { ContactModule } from '@modules/contact/contact.module';
 import { MediaUnderstandingService } from './application/services/MediaUnderstandingService';
 import { ProcessAIResponseService } from './application/services/ProcessAIResponseService';
+import { AIQuotaGuard } from './application/services/AIQuotaGuard';
+import { AISystemPromptAssembler } from './application/services/AISystemPromptAssembler';
+import { AITurnPersistenceService } from './application/services/AITurnPersistenceService';
+import { AIHandoffService } from './application/services/AIHandoffService';
+import { AIAutomationDispatcher } from './application/services/AIAutomationDispatcher';
+import { AIUserMessageResolver } from './application/services/AIUserMessageResolver';
 import {
   AUDIO_TRANSCRIPTION_PROVIDER,
   DOCUMENT_TEXT_EXTRACTOR,
@@ -256,6 +262,12 @@ import {
       inject: [ConfigService],
     },
     ProcessAIResponseService,
+    AIQuotaGuard,
+    AISystemPromptAssembler,
+    AITurnPersistenceService,
+    AIHandoffService,
+    AIAutomationDispatcher,
+    AIUserMessageResolver,
     {
       provide: CHAT_HISTORY_REPOSITORY,
       useClass: RedisChatHistoryRepository,

@@ -23,6 +23,12 @@ export enum TriggerType {
   WEBHOOK_RECEIVED = 'webhook_received',
   /** Scheduled (cron-based) */
   SCHEDULED = 'scheduled',
+  /**
+   * Manual trigger — automation is not fired by a domain event.
+   * It can be dispatched explicitly by a human agent from the chat UI,
+   * or by the AI when it detects a matching use case.
+   */
+  MANUAL = 'manual',
 }
 
 export interface TriggerConfig {

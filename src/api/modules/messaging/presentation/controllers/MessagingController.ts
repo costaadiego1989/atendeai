@@ -45,6 +45,7 @@ import {
   EnsureConversationForContactDTO,
   MarkConversationSaleAttributionDTO,
   SendMessageDTO,
+  TriggerAutomationDTO,
   UpdateConversationSaleAttributionDTO,
   UpdateConversationStatusDTO,
 } from '../dtos/MessagingDTOs';
@@ -54,6 +55,16 @@ import {
   FILE_STORAGE_SERVICE,
   FileStorageService,
 } from '@shared/domain/services/FileStorageService';
+import { TriggerAutomationUseCase } from '@modules/automation/application/use-cases/TriggerAutomationUseCase';
+import {
+  AUTOMATION_REPOSITORY,
+  IAutomationRepository,
+} from '@modules/automation/application/ports/IAutomationRepository';
+import { TriggerType } from '@modules/automation/domain/value-objects/TriggerType';
+import {
+  CONVERSATION_REPOSITORY,
+  IConversationRepository,
+} from '../../domain/repositories/IConversationRepository';
 
 @Controller('tenants/:tenantId/conversations')
 @UseGuards(JwtCookieGuard, TenantGuard)
@@ -83,6 +94,11 @@ export class MessagingController {
     private readonly updateConversationSaleAttributionUseCase: IUpdateConversationSaleAttributionUseCase,
     @Inject(FILE_STORAGE_SERVICE)
     private readonly storageService: FileStorageService,
+    @Inject(AUTOMATION_REPOSITORY)
+    private readonly automationRepository: IAutomationRepository,
+    private readonly triggerAutomationUseCase: TriggerAutomationUseCase,
+    @Inject(CONVERSATION_REPOSITORY)
+    private readonly conversationRepository: IConversationRepository,
   ) {}
 
   @Get()
@@ -284,6 +300,48 @@ export class MessagingController {
       tenantId,
       conversationId: id,
     });
+  }
+
+  @Post(':id/trigger-automation')
+  async triggerAutomation(
+    @Param('tenantId') tenantId: string,
+    @Param('id') conversationId: string,
+    @Body() dto: TriggerAutomationDTO,
+  ) {
+    const automation = await this.automationRepository.findById(
+      tenantId,
+      dto.automationId,
+    );
+
+    if (!automation) {
+      throw new BadRequestException(
+        'Automation not found or does not belong to this tenant.',
+      );
+    }
+
+    if (automation.trigger.type !== TriggerType.MANUAL) {
+      throw new BadRequestException(
+        `Automation "${automation.name}" cannot be triggered manually. Only MANUAL automations are allowed here.`,
+      );
+    }
+
+    const conversation = await this.conversationRepository.findById(
+      conversationId,
+      tenantId,
+    );
+
+    if (!conversation) {
+      throw new BadRequestException('Conversation not found.');
+    }
+
+    const executionIds = await this.triggerAutomationUseCase.execute(
+      tenantId,
+      TriggerType.MANUAL,
+      { conversationId, automationId: dto.automationId },
+      conversation.contactId.toString(),
+    );
+
+    return { executionIds };
   }
 
   private detectAttachmentType(
