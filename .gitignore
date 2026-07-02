@@ -82,3 +82,7 @@ docs
 
 # code-review approval marker (local gate state)
 .specs/.review-approved.json
+
+# swarm / ruvector tooling artifacts
+.swarm/
+ruvector.db
