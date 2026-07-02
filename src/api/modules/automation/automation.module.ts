@@ -7,6 +7,7 @@ import { AIModule } from '@modules/ai/ai.module';
 import { TaskModule } from '@modules/task/task.module';
 import { MANUAL_AUTOMATION_FACADE } from '@modules/ai/application/ports/IManualAutomationFacade';
 import { ManualAutomationFacade } from './application/services/ManualAutomationFacade';
+import { AuthModule } from '@modules/auth/auth.module';
 
 // Use cases
 import { CreateAutomationUseCase } from './application/use-cases/CreateAutomationUseCase';
@@ -64,6 +65,7 @@ const STEP_HANDLER_CLASSES = [
   imports: [
     DatabaseModule,
     EventBusModule,
+    AuthModule,
     forwardRef(() => MessagingModule),
     ContactModule,
     AIModule,
