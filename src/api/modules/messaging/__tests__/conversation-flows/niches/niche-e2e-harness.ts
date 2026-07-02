@@ -52,7 +52,7 @@ export async function bootNicheHarness(): Promise<{
   ctx: LiveTestContext;
   snapshot: any;
 }> {
-  const ctx = await createLiveTestApp({ useRealPaymentGateway: true });
+  const ctx = await createLiveTestApp();
   const snapshot = await saveTenantSnapshot(ctx.prisma, TENANT_ID);
   await ensureBillingReady(ctx.prisma, TENANT_ID);
   await ensureWhatsAppReady(ctx.prisma, TENANT_ID);
