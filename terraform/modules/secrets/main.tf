@@ -247,6 +247,16 @@ resource "aws_ssm_parameter" "twilio_auth_token" {
   tags = var.tags
 }
 
+# --- Melhor Envio ---
+resource "aws_ssm_parameter" "melhor_envio_token_prod" {
+  name        = "${local.name_prefix}/MELHOR_ENVIO_TOKEN_PROD"
+  description = "Melhor Envio Production API Token"
+  type        = "SecureString"
+  value       = "CHANGE_ME_MANUALLY"
+  lifecycle { ignore_changes = [value] }
+  tags = var.tags
+}
+
 # --- AWS S3 (for media/uploads) ---
 resource "aws_ssm_parameter" "aws_s3_access_key_id" {
   name        = "${local.name_prefix}/AWS_ACCESS_KEY_ID"

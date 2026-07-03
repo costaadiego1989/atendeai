@@ -222,6 +222,10 @@ locals {
       name  = "ALERT_IDEMPOTENCY_RECENT_SECONDS"
       value = "90"
     },
+    {
+      name  = "MELHOR_ENVIO_SANDBOX"
+      value = "false"
+    },
   ]
 
   api_secrets = [
@@ -340,6 +344,10 @@ locals {
     {
       name      = "AWS_SECRET_ACCESS_KEY"
       valueFrom = "${var.ssm_parameter_prefix}/AWS_SECRET_ACCESS_KEY"
+    },
+    {
+      name      = "MELHOR_ENVIO_TOKEN_PROD"
+      valueFrom = "${var.ssm_parameter_prefix}/MELHOR_ENVIO_TOKEN_PROD"
     },
   ]
 
