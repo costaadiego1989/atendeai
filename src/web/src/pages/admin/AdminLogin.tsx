@@ -21,7 +21,7 @@ export default function AdminLogin() {
     // Validate key by making a test request
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/platform/support/feedbacks?limit=1`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1"}/platform/support/feedbacks?limit=1`,
         { headers: { "x-platform-admin-key": key.trim() } },
       );
 

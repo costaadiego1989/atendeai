@@ -33,12 +33,14 @@ import { PublicProposalService } from './application/services/implementations/Pu
 import { ContactModule } from '../contact/contact.module';
 import { SalesModule } from '../sales/sales.module';
 import { TenantModule } from '../tenant/tenant.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     BullModule.registerQueue({
       name: 'proposal-delivery',
     }),
+    AuthModule,
     StorageModule,
     MessagingModule,
     ContactModule,

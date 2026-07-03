@@ -128,6 +128,37 @@ export async function updateBusinessForNiche(
       },
     },
   });
+
+  // Ensure aiConfig exists with appropriate threshold
+  await prisma.aIConfig.upsert({
+    where: { tenantId },
+    create: {
+      tenantId,
+      systemPrompt: `Você é o assistente virtual de ${niche.label}. Responda sempre em português, com base apenas nas informações fornecidas. Nunca invente preços ou serviços.`,
+      tone: 'FRIENDLY',
+      language: 'pt-BR',
+      maxTokensPerResponse: 500,
+      confidenceThreshold: 0.3,
+      businessRules: [
+        'Sempre responda em português brasileiro',
+        'Use apenas informações fornecidas no contexto',
+        'Nunca invente preços ou produtos',
+        'Ofereça link de pagamento quando cliente confirmar compra',
+        'Se o cliente pedir para voltar ao menu, apresente as opções novamente',
+      ],
+      salesInstructions: 'Identifique intenção de compra e ofereça link de pagamento via PIX.',
+    },
+    update: {
+      confidenceThreshold: 0.3,
+      businessRules: [
+        'Sempre responda em português brasileiro',
+        'Use apenas informações fornecidas no contexto',
+        'Nunca invente preços ou produtos',
+        'Ofereça link de pagamento quando cliente confirmar compra',
+        'Se o cliente pedir para voltar ao menu, apresente as opções novamente',
+      ],
+    },
+  });
 }
 
 /**

@@ -42,7 +42,10 @@ export class MelhorEnvioCarrierShippingAdapter implements ICarrierShippingAdapte
     this.baseUrl = isSandbox
       ? 'https://sandbox.melhorenvio.com.br'
       : 'https://api.melhorenvio.com.br';
-    this.token = this.configService.get<string>('MELHOR_ENVIO_TOKEN', '');
+    this.token = isSandbox
+      ? this.configService.get<string>('MELHOR_ENVIO_TOKEN', '')
+      : this.configService.get<string>('MELHOR_ENVIO_TOKEN_PROD', '') ||
+        this.configService.get<string>('MELHOR_ENVIO_TOKEN', '');
   }
 
   async quoteShipping(
