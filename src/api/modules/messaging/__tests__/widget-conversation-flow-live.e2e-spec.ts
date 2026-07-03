@@ -342,6 +342,108 @@ describeLive('Widget Chat — Full Conversation Flow Live E2E', () => {
     });
   });
 
+  describe('Contact Created as LEAD + Conversation in Panel', () => {
+    let contactPhone: string;
+
+    beforeAll(() => {
+      // ProcessWidgetMessageUseCase generates phone as wgt_ + sha256(visitorId)[:15]
+      const hash = require('crypto').createHash('sha256').update(visitorId).digest('hex').slice(0, 15);
+      contactPhone = `wgt_${hash}`;
+    });
+
+    it('should create contact with stage LEAD when widget session starts', async () => {
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId: TENANT_ID, phone: { startsWith: 'wgt_' } },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.stage).toBe('LEAD');
+      console.log(`[WIDGET] Contact created: ${contact!.id}, stage: ${contact!.stage}, phone: ${contact!.phone}`);
+    });
+
+    it('should create an ACTIVE conversation with channel WEB_CHAT', async () => {
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId: TENANT_ID, phone: { startsWith: 'wgt_' } },
+        orderBy: { createdAt: 'desc' },
+      });
+      expect(contact).not.toBeNull();
+
+      const conversation = await prisma.conversation.findFirst({
+        where: {
+          tenantId: TENANT_ID,
+          contactId: contact!.id,
+          channel: 'WEB_CHAT',
+        },
+        orderBy: { startedAt: 'desc' },
+      });
+
+      expect(conversation).not.toBeNull();
+      expect(conversation!.status).toBe('ACTIVE');
+      expect(conversation!.channel).toBe('WEB_CHAT');
+      console.log(`[WIDGET] Conversation: ${conversation!.id}, status: ${conversation!.status}, channel: ${conversation!.channel}`);
+    });
+
+    it('should have conversation visible in panel (messages exist)', async () => {
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId: TENANT_ID, phone: { startsWith: 'wgt_' } },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      const conversation = await prisma.conversation.findFirst({
+        where: {
+          tenantId: TENANT_ID,
+          contactId: contact!.id,
+          channel: 'WEB_CHAT',
+        },
+        orderBy: { startedAt: 'desc' },
+      });
+
+      const messages = await prisma.message.findMany({
+        where: { conversationId: conversation!.id },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      const inbound = messages.filter((m: any) => m.direction === 'INBOUND');
+      const outbound = messages.filter((m: any) => m.direction === 'OUTBOUND');
+
+      expect(inbound.length).toBeGreaterThan(0);
+      expect(outbound.length).toBeGreaterThan(0);
+      console.log(`[WIDGET] Messages in conversation: ${messages.length} (${inbound.length} in, ${outbound.length} out)`);
+    });
+
+    it('should have lastMessageAt updated on conversation', async () => {
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId: TENANT_ID, phone: { startsWith: 'wgt_' } },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      const conversation = await prisma.conversation.findFirst({
+        where: {
+          tenantId: TENANT_ID,
+          contactId: contact!.id,
+          channel: 'WEB_CHAT',
+        },
+        orderBy: { startedAt: 'desc' },
+      });
+
+      expect(conversation!.lastMessageAt).not.toBeNull();
+      expect(conversation!.lastMessageDirection).toBeDefined();
+      expect(conversation!.lastMessagePreview).toBeDefined();
+      expect(conversation!.lastMessagePreview!.length).toBeGreaterThan(0);
+    });
+
+    it('should link contact to correct tenant (isolation)', async () => {
+      const contact = await prisma.contact.findFirst({
+        where: { tenantId: TENANT_ID, phone: { startsWith: 'wgt_' } },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      expect(contact).not.toBeNull();
+      expect(contact!.tenantId).toBe(TENANT_ID);
+    });
+  });
+
   describe('Widget Tenant Isolation', () => {
     it('should reject messages with wrong token', async () => {
       await request(app.getHttpServer())
