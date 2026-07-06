@@ -1,4 +1,32 @@
+import { z } from 'zod';
+
+export interface StructuredAIRequest<T extends z.ZodType> {
+  schema: T;
+  systemPrompt: string;
+  userMessage: string;
+  contextHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  maxTokens?: number;
+  temperature?: number;
+}
+
+export interface TextAIRequest {
+  systemPrompt: string;
+  userMessage: string;
+  contextHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  maxTokens?: number;
+  temperature?: number;
+}
+
 export interface IAIEngine {
+  /** Structured output — validated by Zod schema, auto-retry on parse failure */
+  generateStructuredResponse<T extends z.ZodType>(
+    request: StructuredAIRequest<T>,
+  ): Promise<z.infer<T>>;
+
+  /** Text output — for free-form text generation */
+  generateTextResponse(request: TextAIRequest): Promise<string>;
+
+  /** @deprecated Use generateStructuredResponse or generateTextResponse */
   generateResponse(request: AIRequest): Promise<AIResponse>;
 }
 

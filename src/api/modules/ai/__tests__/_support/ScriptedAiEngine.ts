@@ -4,7 +4,10 @@ import {
   IAIEngine,
   IntentType,
   SentimentType,
+  StructuredAIRequest,
+  TextAIRequest,
 } from '../../application/ports/IAIEngine';
+import { z } from 'zod';
 
 /**
  * Deterministic, programmable AI engine for conversation E2E tests.
@@ -67,6 +70,32 @@ export class ScriptedAiEngine implements IAIEngine {
 
   get lastRequest(): AIRequest | undefined {
     return this.requests[this.requests.length - 1];
+  }
+
+  async generateStructuredResponse<T extends z.ZodType>(
+    request: StructuredAIRequest<T>,
+  ): Promise<z.infer<T>> {
+    const turn = this.queue.shift() ?? this.fallback;
+    if (turn.throws) throw turn.throws;
+    const text = turn.text ?? this.fallback.text ?? '{}';
+    try {
+      return request.schema.parse(JSON.parse(text));
+    } catch {
+      return JSON.parse(text);
+    }
+  }
+
+  async generateTextResponse(request: TextAIRequest): Promise<string> {
+    this.requests.push({
+      systemPrompt: request.systemPrompt,
+      userMessage: request.userMessage,
+      contextHistory: request.contextHistory ?? [],
+      maxTokens: request.maxTokens ?? 500,
+      temperature: request.temperature,
+    });
+    const turn = this.queue.shift() ?? this.fallback;
+    if (turn.throws) throw turn.throws;
+    return turn.text ?? this.fallback.text ?? '';
   }
 
   async generateResponse(request: AIRequest): Promise<AIResponse> {

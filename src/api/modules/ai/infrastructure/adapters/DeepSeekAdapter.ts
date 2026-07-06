@@ -4,7 +4,10 @@ import {
   IAIEngine,
   IntentType,
   SentimentType,
+  StructuredAIRequest,
+  TextAIRequest,
 } from '@modules/ai/application/ports/IAIEngine';
+import { z } from 'zod';
 import {
   Injectable,
   InternalServerErrorException,
@@ -67,6 +70,20 @@ export class DeepSeekAdapter implements IAIEngine {
     );
     this.estimatedUsdPerMillionTokens =
       Number.isFinite(rawPrice) && rawPrice >= 0 ? rawPrice : 0;
+  }
+
+  async generateStructuredResponse<T extends z.ZodType>(
+    _request: StructuredAIRequest<T>,
+  ): Promise<z.infer<T>> {
+    throw new Error(
+      'DeepSeekAdapter does not support generateStructuredResponse. Use LangChainAdapter instead.',
+    );
+  }
+
+  async generateTextResponse(_request: TextAIRequest): Promise<string> {
+    throw new Error(
+      'DeepSeekAdapter does not support generateTextResponse. Use LangChainAdapter instead.',
+    );
   }
 
   async generateResponse(request: AIRequest): Promise<AIResponse> {

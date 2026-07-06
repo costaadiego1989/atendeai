@@ -6,7 +6,8 @@ import { REDIS_CLIENT } from '@shared/infrastructure/redis/RedisModule';
 import { ProcessAIResponseUseCase } from '@modules/ai/application/use-cases/ProcessAIResponseUseCase';
 import { IProcessAIResponseUseCase } from '@modules/ai/application/use-cases/interfaces/IProcessAIResponseUseCase';
 import { AI_ENGINE } from '@modules/ai/application/ports/IAIEngine';
-import { DeepSeekAdapter } from '@modules/ai/infrastructure/adapters/DeepSeekAdapter';
+import { LangChainAdapter } from '@modules/ai/infrastructure/adapters/LangChainAdapter';
+import { LangChainModule } from '@shared/infrastructure/langchain/langchain.module';
 import { CHAT_HISTORY_REPOSITORY } from '@modules/ai/application/ports/IChatHistoryRepository';
 import { RedisChatHistoryRepository } from '@modules/ai/infrastructure/persistence/RedisChatHistoryRepository';
 import { TenantModule } from '@modules/tenant/tenant.module';
@@ -109,6 +110,7 @@ import {
 @Module({
   imports: [
     ConfigModule,
+    LangChainModule,
     BullModule.registerQueue({ name: 'pdf-processing' }),
     TenantModule,
     forwardRef(() => SalesModule),
@@ -212,7 +214,7 @@ import {
     },
     {
       provide: AI_ENGINE,
-      useClass: DeepSeekAdapter,
+      useClass: LangChainAdapter,
     },
     {
       provide: AI_SESSION_REPOSITORY,
