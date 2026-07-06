@@ -16,7 +16,8 @@ export class OpenAIEmbeddingAdapter implements IEmbeddingProvider {
   private readonly httpClient;
 
   constructor(private readonly configService: ConfigService) {
-    this.apiKey = this.configService.get<string>('OPENAI_API_KEY') || '';
+    this.apiKey =
+      this.configService.get<string>('OFICIAL_OPENAI_API_KEY') || '';
     this.model =
       this.configService.get<string>('OPENAI_EMBEDDING_MODEL') ||
       'text-embedding-3-small';
