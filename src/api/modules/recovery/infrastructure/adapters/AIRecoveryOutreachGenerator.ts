@@ -16,7 +16,7 @@ export class AIRecoveryOutreachGenerator implements IRecoveryOutreachGenerator {
 
   async generate(input: RecoveryOutreachInput): Promise<string> {
     try {
-      const response = await this.aiEngine.generateResponse({
+      const text = await this.aiEngine.generateTextResponse({
         systemPrompt: `Voce escreve a primeira abordagem de recovery por WhatsApp.
 Retorne APENAS o texto da mensagem final, sem markdown e sem explicações.
 
@@ -28,7 +28,6 @@ Regras:
 - Se houver valor em aberto, cite de forma natural.
 - Se houver prazo, use isso para gerar urgencia leve.
 - Mensagem curta, pronta para envio no WhatsApp.`,
-        contextHistory: [],
         userMessage: JSON.stringify({
           debtorName: input.debtorName,
           debtorCompanyName: input.debtorCompanyName ?? null,
@@ -46,7 +45,7 @@ Regras:
         temperature: 0.3,
       });
 
-      const normalizedText = response.text.trim();
+      const normalizedText = text.trim();
       if (normalizedText) {
         return normalizedText;
       }

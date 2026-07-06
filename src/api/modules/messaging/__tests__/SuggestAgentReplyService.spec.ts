@@ -42,6 +42,8 @@ describe('SuggestAgentReplyService', () => {
         confidence: 0.9,
         finishReason: 'stop',
       }),
+      generateStructuredResponse: jest.fn(),
+      generateTextResponse: jest.fn().mockResolvedValue('Resposta IA'),
     } as unknown as jest.Mocked<IAIEngine>;
 
     tenantAgentRuleService = {
@@ -88,7 +90,7 @@ describe('SuggestAgentReplyService', () => {
 
     expect(result.text).toContain('sendo configurada');
     expect(result.text).not.toContain('Limite de uso da IA atingido');
-    expect(aiEngine.generateResponse).not.toHaveBeenCalled();
+    expect(aiEngine.generateTextResponse).not.toHaveBeenCalled();
   });
 
   it('should return inactive subscription message when subscription is not active', async () => {
@@ -107,7 +109,7 @@ describe('SuggestAgentReplyService', () => {
 
     expect(result.text).toContain('inativa');
     expect(result.text).not.toContain('Limite de uso da IA atingido');
-    expect(aiEngine.generateResponse).not.toHaveBeenCalled();
+    expect(aiEngine.generateTextResponse).not.toHaveBeenCalled();
   });
 
   it('should return inactive subscription message when subscription is CANCELED', async () => {
@@ -125,7 +127,7 @@ describe('SuggestAgentReplyService', () => {
     );
 
     expect(result.text).toContain('inativa');
-    expect(aiEngine.generateResponse).not.toHaveBeenCalled();
+    expect(aiEngine.generateTextResponse).not.toHaveBeenCalled();
   });
 
   it('should return quota exceeded message when usage >= quota', async () => {
@@ -143,7 +145,7 @@ describe('SuggestAgentReplyService', () => {
     );
 
     expect(result.text).toContain('Limite de uso da IA atingido');
-    expect(aiEngine.generateResponse).not.toHaveBeenCalled();
+    expect(aiEngine.generateTextResponse).not.toHaveBeenCalled();
   });
 
   it('should call AI engine when quota check passes', async () => {
@@ -161,7 +163,7 @@ describe('SuggestAgentReplyService', () => {
     );
 
     expect(result.text).toBe('Resposta IA');
-    expect(aiEngine.generateResponse).toHaveBeenCalled();
+    expect(aiEngine.generateTextResponse).toHaveBeenCalled();
   });
 
   describe('ADR D2 — branch resolution (regression)', () => {

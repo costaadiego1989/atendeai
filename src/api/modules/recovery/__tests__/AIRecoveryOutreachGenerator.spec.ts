@@ -8,18 +8,17 @@ describe('AIRecoveryOutreachGenerator', () => {
   beforeEach(() => {
     aiEngine = {
       generateResponse: jest.fn(),
+      generateStructuredResponse: jest.fn(),
+      generateTextResponse: jest.fn(),
     };
 
     sut = new AIRecoveryOutreachGenerator(aiEngine);
   });
 
   it('should return the AI-generated outreach text when available', async () => {
-    aiEngine.generateResponse.mockResolvedValue({
-      text: 'Oi, Carla. Identifiquei uma pendencia e posso te ajudar a regularizar por aqui.',
-      tokensUsed: 35,
-      confidence: 0.92,
-      finishReason: 'stop',
-    });
+    aiEngine.generateTextResponse.mockResolvedValue(
+      'Oi, Carla. Identifiquei uma pendencia e posso te ajudar a regularizar por aqui.',
+    );
 
     const result = await sut.generate({
       tenantId: 'tenant-1',
@@ -35,7 +34,7 @@ describe('AIRecoveryOutreachGenerator', () => {
     });
 
     expect(result).toContain('Carla');
-    expect(aiEngine.generateResponse).toHaveBeenCalledWith(
+    expect(aiEngine.generateTextResponse).toHaveBeenCalledWith(
       expect.objectContaining({
         userMessage: expect.stringContaining('Locação do equipamento XPTO'),
       }),
@@ -43,7 +42,7 @@ describe('AIRecoveryOutreachGenerator', () => {
   });
 
   it('should fall back to a deterministic first message when AI fails', async () => {
-    aiEngine.generateResponse.mockRejectedValue(new Error('provider down'));
+    aiEngine.generateTextResponse.mockRejectedValue(new Error('provider down'));
 
     const result = await sut.generate({
       tenantId: 'tenant-1',

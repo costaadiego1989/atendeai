@@ -46,12 +46,16 @@ describe('Suggest AI Agent Reply (e2e)', () => {
     generateResponse: jest.fn(
       async (request): Promise<AIResponse> => ({
         text: `Rascunho Inteligente IA: Próximo Passo Mapeado`,
-        tokensUsed: 20, // Test deduction of 20 * 3 = 60
+        tokensUsed: 20,
         confidence: 0.99,
         finishReason: 'stop',
         intent: 'GENERAL',
         sentiment: 'NEUTRAL',
       }),
+    ),
+    generateStructuredResponse: jest.fn(),
+    generateTextResponse: jest.fn(
+      async () => `Rascunho Inteligente IA: Próximo Passo Mapeado`,
     ),
   };
 
