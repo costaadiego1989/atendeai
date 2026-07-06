@@ -25,7 +25,7 @@ describe('OpenAIEmbeddingAdapter', () => {
     configService = {
       get: jest.fn((key: string) => {
         const vals: Record<string, string> = {
-          OPENAI_API_KEY: 'test-key',
+          OFICIAL_OPENAI_API_KEY: 'test-key',
           OPENAI_EMBEDDING_MODEL: 'text-embedding-3-small',
           OPENAI_EMBEDDING_DIMENSIONS: '1536',
         };

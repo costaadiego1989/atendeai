@@ -80,24 +80,23 @@ export class SuggestProspectCampaignMessageUseCase implements ISuggestProspectCa
         // Ignora erro do db
       }
 
-      const response = await this.aiEngine.generateResponse({
-        systemPrompt: basePrompt.join(' '),
-        contextHistory: [],
-        userMessage: JSON.stringify({
-          tenantName: tenantName ?? null,
-          objective: input.objective,
-          audienceType: input.audienceType,
-          channels: input.channels,
-          stageFilter: input.stageFilter ?? null,
-          searchTerm: input.searchTerm ?? null,
-          selectedCount: input.selectedCount,
-          selectedContacts: input.selectedContacts.slice(0, 10),
-        }),
-        maxTokens: 260,
-        temperature: 0.55,
-      });
-
-      const text = response.text.trim();
+      const text = (
+        await this.aiEngine.generateTextResponse({
+          systemPrompt: basePrompt.join(' '),
+          userMessage: JSON.stringify({
+            tenantName: tenantName ?? null,
+            objective: input.objective,
+            audienceType: input.audienceType,
+            channels: input.channels,
+            stageFilter: input.stageFilter ?? null,
+            searchTerm: input.searchTerm ?? null,
+            selectedCount: input.selectedCount,
+            selectedContacts: input.selectedContacts.slice(0, 10),
+          }),
+          maxTokens: 260,
+          temperature: 0.55,
+        })
+      ).trim();
       if (text) {
         return { messageTemplate: text };
       }

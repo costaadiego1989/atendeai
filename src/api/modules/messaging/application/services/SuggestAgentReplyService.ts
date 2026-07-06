@@ -130,24 +130,21 @@ export class SuggestAgentReplyService {
     ].join('\n');
 
     try {
-      const response = await this.aiEngine.generateResponse({
+      const text = await this.aiEngine.generateTextResponse({
         systemPrompt: basePrompt.join('\n'),
         userMessage,
-        contextHistory: [],
         maxTokens: 100,
         temperature: 0.3,
       });
 
-      if (response.tokensUsed && response.tokensUsed > 0) {
-        await this.recordUsageUseCase.execute({
-          tenantId,
-          type: UsageType.AI_TOKEN,
-          amount: toBillableAiTokens(response.tokensUsed),
-        });
-      }
+      await this.recordUsageUseCase.execute({
+        tenantId,
+        type: UsageType.AI_TOKEN,
+        amount: toBillableAiTokens(50),
+      });
 
       return {
-        text: response.text.trim().replace(/^"|"$/g, ''),
+        text: text.trim().replace(/^"|"$/g, ''),
       };
     } catch (err) {
       return {

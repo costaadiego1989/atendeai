@@ -5,6 +5,7 @@ import {
   RecoveryGuidanceInput,
   RecoveryGuidanceOutput,
 } from '../../application/ports/IRecoveryGuidanceGenerator';
+import { RecoveryGuidanceSchema } from '../../domain/schemas/RecoveryGuidanceSchema';
 
 @Injectable()
 export class AIRecoveryGuidanceGenerator implements IRecoveryGuidanceGenerator {
@@ -19,10 +20,9 @@ export class AIRecoveryGuidanceGenerator implements IRecoveryGuidanceGenerator {
     input: RecoveryGuidanceInput,
   ): Promise<RecoveryGuidanceOutput> {
     try {
-      const response = await this.aiEngine.generateResponse({
+      const result = await this.aiEngine.generateStructuredResponse({
+        schema: RecoveryGuidanceSchema,
         systemPrompt: `Voce e um assistente operacional de recovery por WhatsApp.
-Responda APENAS em JSON valido com este formato:
-{"suggestedReply":"...","suggestedNextAction":"..."}
 
 Regras:
 - suggestedReply deve ser curta, educada, persuasiva e pronta para enviar.
@@ -31,9 +31,7 @@ Regras:
 - Se status for NEGOTIATING, foque em esclarecer, negociar e avancar para pagamento.
 - Se status for PROMISE_TO_PAY, foque em confirmar prazo, combinar acompanhamento e reduzir risco de esquecimento.
 - Se status for NO_RESPONSE, foque em reengajar de forma respeitosa.
-- Use o contexto da cobrança quando houver para deixar a resposta especifica.
-- Nunca inclua markdown, comentarios ou texto fora do JSON.`,
-        contextHistory: [],
+- Use o contexto da cobrança quando houver para deixar a resposta especifica.`,
         userMessage: JSON.stringify({
           debtorName: input.debtorName,
           debtorCompanyName: input.debtorCompanyName ?? null,
@@ -52,17 +50,10 @@ Regras:
         temperature: 0.2,
       });
 
-      const parsed = this.parseGuidance(response.text);
-      if (parsed) {
-        return parsed;
-      }
-
-      this.logger.warn({
-        message: 'AI recovery guidance fallback triggered',
-        adapter: AIRecoveryGuidanceGenerator.name,
-        reason: 'invalid_ai_response_format',
-        status: input.status,
-      });
+      return {
+        suggestedReply: result.suggestedReply.trim(),
+        suggestedNextAction: result.suggestedNextAction.trim(),
+      };
     } catch (error) {
       this.logger.warn({
         message: 'AI recovery guidance fallback triggered',
@@ -74,32 +65,6 @@ Regras:
     }
 
     return this.buildFallbackGuidance(input);
-  }
-
-  private parseGuidance(text: string): RecoveryGuidanceOutput | null {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return null;
-    }
-
-    try {
-      const parsed = JSON.parse(
-        jsonMatch[0],
-      ) as Partial<RecoveryGuidanceOutput>;
-      if (
-        typeof parsed.suggestedReply === 'string' &&
-        typeof parsed.suggestedNextAction === 'string'
-      ) {
-        return {
-          suggestedReply: parsed.suggestedReply.trim(),
-          suggestedNextAction: parsed.suggestedNextAction.trim(),
-        };
-      }
-    } catch {
-      return null;
-    }
-
-    return null;
   }
 
   private buildFallbackGuidance(

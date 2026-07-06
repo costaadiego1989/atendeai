@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { AIModule } from '@modules/ai/ai.module';
 import { TwilioTelephonyAdapter } from './infrastructure/adapters/TwilioTelephonyAdapter';
 import { ElevenLabsTTSAdapter } from './infrastructure/adapters/ElevenLabsTTSAdapter';
 import { DeepgramSTTAdapter } from './infrastructure/adapters/DeepgramSTTAdapter';
@@ -18,7 +19,11 @@ import { SuggestVoiceScriptUseCase } from './application/use-cases/SuggestVoiceS
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: 'voice-calls' }), AuthModule],
+  imports: [
+    BullModule.registerQueue({ name: 'voice-calls' }),
+    AuthModule,
+    forwardRef(() => AIModule),
+  ],
   controllers: [VoiceWebhookController, VoiceConfigController],
   providers: [
     {
