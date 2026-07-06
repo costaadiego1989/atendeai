@@ -3,9 +3,7 @@ import { z } from 'zod';
 export const SaleValidationSchema = z.object({
   approved: z
     .boolean()
-    .describe(
-      'true se há evidência clara de venda concretizada na conversa',
-    ),
+    .describe('true se há evidência clara de venda concretizada na conversa'),
   reason: z
     .string()
     .min(1)

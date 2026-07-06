@@ -32,7 +32,10 @@ export class ConversationSaleAiValidationService {
   async validate(
     input: ConversationSaleAiValidationInput,
   ): Promise<ConversationSaleAiValidationResult> {
-    const transcript = await this.buildTranscript(input.tenantId, input.conversationId);
+    const transcript = await this.buildTranscript(
+      input.tenantId,
+      input.conversationId,
+    );
     const amountLine =
       input.claimedSaleAmount != null &&
       Number.isFinite(input.claimedSaleAmount)
@@ -82,11 +85,11 @@ export class ConversationSaleAiValidationService {
   }
 
   private async buildTranscript(
-    tenantId: string,
+    _tenantId: string,
     conversationId: string,
   ): Promise<string> {
     const rows = await this.prisma.message.findMany({
-      where: { conversationId, tenantId },
+      where: { conversationId },
       orderBy: { createdAt: 'desc' },
       take: ConversationSaleAiValidationService.MESSAGE_LIMIT,
       select: {
