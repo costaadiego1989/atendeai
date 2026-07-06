@@ -21,13 +21,12 @@ export class DraftTenantAdminMessageUseCase {
       input.intent === 'QUOTA_WARNING'
         ? `Tenant context:\n${input.tenantSummary}\nWrite a polite quota alert.`
         : `Tenant context:\n${input.tenantSummary}\nOperator instruction: ${input.operatorHint ?? ''}`;
-    const res = await this.ai.generateResponse({
+    const text = await this.ai.generateTextResponse({
       systemPrompt: system,
-      contextHistory: [],
       userMessage: user,
       maxTokens: 400,
       temperature: 0.4,
     });
-    return { text: res.text.trim() };
+    return { text: text.trim() };
   }
 }

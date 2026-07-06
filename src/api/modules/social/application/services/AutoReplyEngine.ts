@@ -274,14 +274,14 @@ export class AutoReplyEngine {
           const prompt =
             config.aiPrompt ??
             'Responda de forma amigável e objetiva em português.';
-          const response = await this.aiEngine.generateResponse({
-            systemPrompt: prompt,
-            contextHistory: [],
-            userMessage: commentText,
-            maxTokens: 180,
-            temperature: 0.4,
-          });
-          const content = response.text?.trim();
+          const content = (
+            await this.aiEngine.generateTextResponse({
+              systemPrompt: prompt,
+              userMessage: commentText,
+              maxTokens: 180,
+              temperature: 0.4,
+            })
+          ).trim();
           if (content) return this.limitLength(content, config.maxLength);
         } catch {
           // fallback determinístico abaixo
