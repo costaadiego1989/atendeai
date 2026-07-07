@@ -14,6 +14,7 @@ import { JwtCookieGuard } from '@shared/infrastructure/auth/guards/JwtCookieGuar
 import { RolesGuard } from '@shared/infrastructure/auth/guards/RolesGuard';
 import { Roles } from '@shared/infrastructure/auth/decorators/roles.decorator';
 import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { StartMetaInstagramConnectionUseCase } from '../../application/use-cases/StartMetaInstagramConnectionUseCase';
 import { CompleteMetaInstagramConnectionUseCase } from '../../application/use-cases/CompleteMetaInstagramConnectionUseCase';
 
@@ -22,7 +23,18 @@ export class InstagramMetaConnectionController {
   constructor(
     private readonly startMetaInstagramConnectionUseCase: StartMetaInstagramConnectionUseCase,
     private readonly completeMetaInstagramConnectionUseCase: CompleteMetaInstagramConnectionUseCase,
+    private readonly configService: ConfigService,
   ) {}
+
+  private get frontendOrigin(): string {
+    return (
+      this.configService.get<string>('FRONTEND_URL') ||
+      this.configService
+        .get<string>('META_OAUTH_SUCCESS_URL')
+        ?.replace(/\/app\/.*$/, '') ||
+      '*'
+    );
+  }
 
   @Post('start')
   @HttpCode(HttpStatus.OK)
@@ -104,7 +116,7 @@ export class InstagramMetaConnectionController {
                       branchId: ${JSON.stringify(branchId)},
                       accounts: ${JSON.stringify(accounts)}
                     },
-                    '*'
+                    ${JSON.stringify(this.frontendOrigin)}
                   );
                 }
               } catch (error) {}
