@@ -7,6 +7,7 @@
     "scripts",
     "scripts/**/*",
     "**/*spec.ts",
+    "**/__tests__/**",
     "src/app",
     "src/app/**/*"
   ]
