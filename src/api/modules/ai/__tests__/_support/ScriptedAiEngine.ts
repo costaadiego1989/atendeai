@@ -75,6 +75,13 @@ export class ScriptedAiEngine implements IAIEngine {
   async generateStructuredResponse<T extends z.ZodType>(
     request: StructuredAIRequest<T>,
   ): Promise<z.infer<T>> {
+    this.requests.push({
+      systemPrompt: request.systemPrompt,
+      userMessage: request.userMessage,
+      contextHistory: request.contextHistory ?? [],
+      maxTokens: request.maxTokens ?? 500,
+      temperature: request.temperature,
+    });
     const turn = this.queue.shift() ?? this.fallback;
     if (turn.throws) throw turn.throws;
     const text = turn.text ?? this.fallback.text ?? '{}';
