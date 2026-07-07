@@ -396,6 +396,29 @@ export function SocialPage() {
                 </div>
                 ))}
 
+                <div className="p-6 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] mx-4 my-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <p className="text-sm font-medium text-foreground">
+                      Requisitos para conectar Instagram
+                    </p>
+                  </div>
+                  <ul className="ml-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                    <li>
+                      A conta do Instagram precisa ser <strong>Profissional ou Empresa</strong> (não pessoal).
+                    </li>
+                    <li>
+                      Ela precisa estar vinculada a uma <strong>Página do Facebook</strong> que você administra.
+                    </li>
+                    <li>
+                      No popup da Meta, marque a empresa, a Página e a conta do Instagram — senão a lista volta vazia.
+                    </li>
+                    <li>
+                      Para converter: Instagram → Configurações → Conta → Mudar para conta profissional.
+                    </li>
+                  </ul>
+                </div>
+
                 <div className="p-8 text-center bg-muted/20">
                   <p className="text-sm text-muted-foreground font-medium mb-4">Mais plataformas em breve (Alpha)</p>
                   <Button variant="secondary" className="gap-2 opacity-50" disabled>
