@@ -1,6 +1,8 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { EntityNotFoundException } from '@shared/domain/exceptions/DomainExceptions';
-import { AI_ENGINE, IAIEngine } from '../ports/IAIEngine';
+import { AI_ENGINE, IAIEngine, AIResponse } from '../ports/IAIEngine';
+import { ConversationClassificationSchema } from '../../domain/schemas/ConversationClassificationSchema';
+import type { BaseAgentResponse } from '../../domain/agents/schemas/BaseAgentResponseSchema';
 import { EVENT_BUS, IEventBus } from '@shared/application/ports/IEventBus';
 import {
   AISafetyBlockedIntegrationEvent,
@@ -46,6 +48,20 @@ import { AITurnPersistenceService } from './AITurnPersistenceService';
 import { AIHandoffService } from './AIHandoffService';
 import { AIAutomationDispatcher } from './AIAutomationDispatcher';
 import { AIUserMessageResolver } from './AIUserMessageResolver';
+import { OutputGuardrailService } from './OutputGuardrailService';
+import {
+  ToolExecutionService,
+  ToolExecutionContext,
+} from './ToolExecutionService';
+import {
+  IConversationPhaseStore,
+  CONVERSATION_PHASE_STORE,
+} from '../../infrastructure/persistence/RedisConversationPhaseStore';
+import type { BusinessType } from '../../domain/value-objects/ConversationPhase';
+import {
+  AgentRouter,
+  AgentRoutingResult,
+} from '../../domain/agents/AgentRouter';
 
 @Injectable()
 export class ProcessAIResponseService {
@@ -76,6 +92,12 @@ export class ProcessAIResponseService {
     private readonly handoffService: AIHandoffService,
     private readonly automationDispatcher: AIAutomationDispatcher,
     private readonly userMessageResolver: AIUserMessageResolver,
+    private readonly outputGuardrail: OutputGuardrailService,
+    private readonly toolExecutionService: ToolExecutionService,
+    private readonly agentRouter: AgentRouter,
+    @Optional()
+    @Inject(CONVERSATION_PHASE_STORE)
+    private readonly phaseStore?: IConversationPhaseStore,
     @Optional()
     @Inject(RAG_RESPONSE_CACHE)
     private readonly ragResponseCache?: IRAGResponseCache,
@@ -108,10 +130,8 @@ export class ProcessAIResponseService {
       throw new EntityNotFoundException('Tenant', input.tenantId);
     }
 
-    // 1. Resolve user message (handles media types)
     const userMessage = await this.userMessageResolver.resolve(input);
 
-    // 2. Safety gate
     const safetyDecision = this.aiSafetyGate.evaluateUserMessage(userMessage);
     if (safetyDecision.blocked) {
       await this.eventBus.publish(
@@ -130,7 +150,6 @@ export class ProcessAIResponseService {
       };
     }
 
-    // 3. Quota check
     const quotaResult = await this.quotaGuard.check(input);
     if (!quotaResult.canProceed) {
       return {
@@ -140,7 +159,6 @@ export class ProcessAIResponseService {
       };
     }
 
-    // 4. Session + history
     const aiSession = await this.aiSessionService.getOrCreateSession(
       input.tenantId,
       input.contactId,
@@ -164,7 +182,6 @@ export class ProcessAIResponseService {
     const resolvedBranchId = await this.resolveBranchId(input);
 
     try {
-      // 5. Commerce advance
       await this.advanceCommerceConversationUseCase.execute({
         tenantId: input.tenantId,
         branchId: resolvedBranchId,
@@ -174,7 +191,19 @@ export class ProcessAIResponseService {
         userMessage,
       });
 
-      // 6. Assemble system prompt
+      const businessType = (tenant.businessType as BusinessType) || 'generic';
+      const phaseState = this.phaseStore
+        ? await this.phaseStore.get(input.conversationId)
+        : null;
+      const currentPhase = phaseState?.currentPhase;
+
+      const routing: AgentRoutingResult = this.agentRouter.route({
+        businessType,
+        currentPhase: currentPhase ?? null,
+        lastIntent: null,
+      });
+      const selectedAgent = routing.agent;
+
       const { prompt: systemPrompt, diagnostics } =
         await this.promptAssembler.assemble({
           tenantId: input.tenantId,
@@ -185,9 +214,11 @@ export class ProcessAIResponseService {
           contextHints: input.contextHints,
           isFirstInteraction: contextHistory.length === 0,
           tenant,
+          currentPhase,
+          businessType,
+          agentPromptTemplate: selectedAgent.systemPromptTemplate,
         });
 
-      // 7. RAG cache check
       const ragCacheEnabled =
         !!diagnostics.tenantPDFContextFound &&
         !!this.ragResponseCache &&
@@ -227,27 +258,36 @@ export class ProcessAIResponseService {
         }
       }
 
-      // 8. AI engine call
-      const response = await traceAsync(
+      const classified = await traceAsync(
         'ai.ProcessAIResponseService.generateAssistantTurn',
         {
           'tenant.id': input.tenantId,
           'ai.conversation_id': input.conversationId,
+          'ai.agent_id': selectedAgent.id,
+          'ai.routing_reason': routing.reason,
         },
         async () =>
-          this.aiEngine.generateResponse({
+          this.aiEngine.generateStructuredResponse({
+            schema: selectedAgent.responseSchema,
             systemPrompt,
             userMessage,
             contextHistory,
             maxTokens: tenant.aiConfig?.maxTokensPerResponse || 1000,
-            trace: {
-              tenantId: input.tenantId,
-              conversationId: input.conversationId,
-            },
+            temperature: 0.7,
           }),
       );
 
-      // 9. Handoff policy
+      const agentResponse = classified as BaseAgentResponse;
+
+      const response: AIResponse = {
+        text: agentResponse.reply,
+        tokensUsed: 0,
+        confidence: agentResponse.confidence,
+        finishReason: 'stop',
+        intent: agentResponse.intent,
+        sentiment: agentResponse.sentiment,
+      };
+
       const handoffDecision = this.humanHandoffPolicy.evaluate({
         userMessage,
         response,
@@ -265,16 +305,47 @@ export class ProcessAIResponseService {
         });
       }
 
-      // 10. Response processing + automation extraction
-      const processedText = await this.responseProcessor.process(
-        response.text,
-        {
-          tenantId: tenant.id.toString(),
-          branchId: resolvedBranchId,
-          contactId: input.contactId,
-          conversationId: input.conversationId,
-        },
-      );
+      const guardrailResult = this.outputGuardrail.evaluate(response.text);
+      if (!guardrailResult.safe) {
+        this.logger.warn(
+          `output_guardrail_violations conversation=${input.conversationId} count=${guardrailResult.violations.length}`,
+        );
+      }
+      const guardedText = guardrailResult.sanitized;
+
+      const toolContext: ToolExecutionContext = {
+        tenantId: input.tenantId,
+        contactId: input.contactId,
+        conversationId: input.conversationId,
+        branchId: resolvedBranchId,
+      };
+
+      let toolResultText = '';
+      const rawToolCalls = (agentResponse as any).tool_calls as
+        | Array<{ name: string; args: Record<string, unknown> }>
+        | undefined;
+      if (rawToolCalls && rawToolCalls.length > 0) {
+        for (const tc of rawToolCalls) {
+          const toolResult = await this.toolExecutionService.execute(
+            { name: tc.name, args: tc.args },
+            toolContext,
+          );
+          if (toolResult.success) {
+            toolResultText += toolResult.data
+              ? ` ${JSON.stringify(toolResult.data)}`
+              : '';
+          } else if (toolResult.fallbackMessage) {
+            toolResultText += ` ${toolResult.fallbackMessage}`;
+          }
+        }
+      }
+
+      const processedText = await this.responseProcessor.process(guardedText, {
+        tenantId: tenant.id.toString(),
+        branchId: resolvedBranchId,
+        contactId: input.contactId,
+        conversationId: input.conversationId,
+      });
 
       const { finalText: cleanedText, dispatchedCount } =
         await this.automationDispatcher.extractAndDispatch({
@@ -284,9 +355,23 @@ export class ProcessAIResponseService {
           text: processedText,
         });
 
-      const finalText = cleanedText.trim() || processedText;
+      const finalText =
+        (cleanedText.trim() || processedText) +
+        (toolResultText ? toolResultText.trim() : '');
 
-      // 11. RAG cache store
+      if (this.phaseStore && agentResponse.phase) {
+        const transitioned = await this.phaseStore.transition(
+          input.conversationId,
+          agentResponse.phase,
+          businessType,
+        );
+        if (!transitioned) {
+          this.logger.debug(
+            `phase_transition_invalid conversation=${input.conversationId} from=${currentPhase} to=${agentResponse.phase}`,
+          );
+        }
+      }
+
       if (
         ragCacheEnabled &&
         queryEmbedding &&
@@ -299,7 +384,6 @@ export class ProcessAIResponseService {
         );
       }
 
-      // 12. Persist turn
       await this.turnPersistence.persist({
         input,
         sessionId: aiSession.id,
@@ -309,6 +393,8 @@ export class ProcessAIResponseService {
           ...diagnostics,
           ragCacheHit: false,
           automationsDispatched: dispatchedCount,
+          agentId: selectedAgent.id,
+          routingReason: routing.reason,
         },
         userMessage,
       });

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const ConversationClassificationSchema = z.object({
+export const BaseAgentResponseSchema = z.object({
   reply: z
     .string()
     .min(1)
@@ -19,9 +19,7 @@ export const ConversationClassificationSchema = z.object({
   phase: z
     .string()
     .optional()
-    .describe(
-      'Fase atual da conversa (ex: GREETING, QUALIFICATION, CHECKOUT). Determinada pelo contexto do negócio.',
-    ),
+    .describe('Fase sugerida para próximo estado da conversa'),
   phaseConfidence: z
     .number()
     .min(0)
@@ -30,6 +28,4 @@ export const ConversationClassificationSchema = z.object({
     .describe('Confiança na classificação de fase (0.0 a 1.0)'),
 });
 
-export type ConversationClassification = z.infer<
-  typeof ConversationClassificationSchema
->;
+export type BaseAgentResponse = z.infer<typeof BaseAgentResponseSchema>;

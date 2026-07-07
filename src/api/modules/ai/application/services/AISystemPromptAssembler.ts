@@ -9,6 +9,40 @@ import {
   ManualAutomationSummary,
 } from '../ports/IManualAutomationFacade';
 
+const PHASE_INSTRUCTIONS: Record<string, string> = {
+  GREETING:
+    'Cumprimente o cliente de forma amigável. Identifique a necessidade principal.',
+  QUALIFICATION:
+    'Faça perguntas para entender melhor o que o cliente precisa. Identifique o produto/serviço adequado.',
+  PRODUCT_DISCOVERY:
+    'Apresente opções relevantes. Destaque benefícios e diferenciais.',
+  QUOTE: 'Informe valores, condições de pagamento e prazos. Seja transparente.',
+  CHECKOUT: 'Guie o cliente para finalizar a compra. Confirme itens e valores.',
+  CONFIRMATION: 'Confirme o pedido/agendamento. Informe próximos passos.',
+  SUPPORT: 'Resolva dúvidas ou problemas. Seja empático e objetivo.',
+  COMPLAINT:
+    'Escute com atenção. Peça desculpas se cabível. Ofereça solução concreta.',
+  SCHEDULING:
+    'Auxilie com data, horário e profissional. Confirme disponibilidade.',
+  FOLLOW_UP: 'Verifique satisfação. Ofereça reagendamento se necessário.',
+  ORDER_TAKING:
+    'Registre itens do pedido. Confirme quantidades e personalizações.',
+  CUSTOMIZATION: 'Pergunte sobre personalizações (tamanho, sabor, extras).',
+  DELIVERY_TRACKING: 'Informe status da entrega. Forneça previsão atualizada.',
+  DEBT_IDENTIFICATION:
+    'Identifique o débito com respeito. Apresente valores atualizados.',
+  NEGOTIATION:
+    'Ofereça condições de pagamento. Busque acordo viável para ambas as partes.',
+  PROMISE_TO_PAY: 'Confirme o acordo. Registre data e valor prometido.',
+  SERVICE_SELECTION: 'Apresente serviços disponíveis. Ajude a escolher.',
+  PROFESSIONAL_SELECTION:
+    'Apresente profissionais disponíveis com especialidades.',
+  CASE_ASSESSMENT:
+    'Colete informações sobre o caso. Identifique área do direito.',
+  PROPOSAL: 'Apresente proposta de honorários e escopo do trabalho.',
+  ONBOARDING: 'Oriente sobre documentos necessários e próximos passos.',
+};
+
 export interface AssemblePromptInput {
   tenantId: string;
   conversationId: string;
@@ -18,6 +52,9 @@ export interface AssemblePromptInput {
   contextHints?: string[];
   isFirstInteraction: boolean;
   tenant: Tenant;
+  currentPhase?: string;
+  businessType?: string;
+  agentPromptTemplate?: string;
 }
 
 export interface AssemblePromptResult {
@@ -47,9 +84,25 @@ export class AISystemPromptAssembler {
         input.isFirstInteraction,
       );
 
+    let basePrompt = systemPrompt;
+
+    // T12: If agent provides a prompt template, resolve placeholders and prepend
+    if (input.agentPromptTemplate) {
+      const phaseInstructions =
+        PHASE_INSTRUCTIONS[input.currentPhase ?? ''] ?? '';
+      const resolved = input.agentPromptTemplate
+        .replace(
+          /\{\{tenantName\}\}/g,
+          input.tenant.companyName?.value ?? input.tenantId,
+        )
+        .replace(/\{\{currentPhase\}\}/g, input.currentPhase ?? 'GREETING')
+        .replace(/\{\{phaseInstructions\}\}/g, phaseInstructions);
+      basePrompt = resolved + '\n\n' + systemPrompt;
+    }
+
     let prompt = await this.applyMessagingAgentRule(
       input.tenantId,
-      systemPrompt,
+      basePrompt,
       input.moduleId,
       input.branchId,
     );
@@ -61,10 +114,37 @@ export class AISystemPromptAssembler {
         input.contextHints.map((h) => `- ${h}`).join('\n');
     }
 
+    prompt = this.appendPhaseContext(
+      prompt,
+      input.currentPhase,
+      input.businessType,
+    );
     prompt = await this.appendManualAutomationsContext(input.tenantId, prompt);
     prompt = this.aiSafetyGate.appendPlatformLimits(prompt);
 
     return { prompt, diagnostics };
+  }
+
+  private appendPhaseContext(
+    prompt: string,
+    currentPhase?: string,
+    businessType?: string,
+  ): string {
+    if (!currentPhase) return prompt;
+
+    const phaseInstructions = PHASE_INSTRUCTIONS[currentPhase];
+    const section = [
+      `\n\n[FASE ATUAL DA CONVERSA: ${currentPhase}]`,
+      businessType ? `Tipo de negócio: ${businessType}` : '',
+      phaseInstructions
+        ? `Instruções para esta fase: ${phaseInstructions}`
+        : '',
+      'Inclua o campo "phase" na resposta com a fase que melhor descreve o próximo estado da conversa.',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    return prompt + section;
   }
 
   private async applyMessagingAgentRule(
