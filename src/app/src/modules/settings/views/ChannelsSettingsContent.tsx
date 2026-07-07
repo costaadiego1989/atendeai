@@ -194,22 +194,27 @@ export function ChannelsSettingsContent() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   className="gap-2"
-                  onClick={() => vm.connectMetaWhatsAppMutation.mutate()}
+                  onClick={() =>
+                    vm.registerMutation.mutate({
+                      phoneNumber: vm.normalizedPhoneNumber,
+                      branchId: vm.selectedBranchId ?? undefined,
+                    })
+                  }
                   disabled={
-                    vm.connectMetaWhatsAppMutation.isPending ||
+                    vm.registerMutation.isPending ||
                     !vm.normalizedPhoneNumber.trim()
                   }
                 >
-                  <ExternalLink className="h-4 w-4" />
-                  {vm.connectMetaWhatsAppMutation.isPending
-                    ? 'Conectando via Meta...'
-                    : 'Conectar via Meta Business'}
+                  <MessageSquare className="h-4 w-4" />
+                  {vm.registerMutation.isPending
+                    ? 'Registrando número...'
+                    : 'Conectar WhatsApp'}
                 </Button>
                 <Button
                   variant="outline"
                   className="gap-2"
-                  onClick={() => vm.refreshMetaWhatsAppStatusMutation.mutate()}
-                  disabled={vm.refreshMetaWhatsAppStatusMutation.isPending}
+                  onClick={() => vm.refreshMutation.mutate()}
+                  disabled={vm.refreshMutation.isPending}
                 >
                   <RefreshCcw className="h-4 w-4" />
                   Atualizar status
