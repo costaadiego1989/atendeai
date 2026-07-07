@@ -53,7 +53,7 @@ describe('MetaInstagramOAuthService.buildAuthorizationUrl', () => {
 
     expect(url.searchParams.get('config_id')).toBeNull();
     expect(url.searchParams.get('scope')).toBe(
-      'pages_show_list,business_management,instagram_basic',
+      'pages_show_list,business_management,instagram_basic,instagram_manage_comments,instagram_manage_messages',
     );
   });
 });

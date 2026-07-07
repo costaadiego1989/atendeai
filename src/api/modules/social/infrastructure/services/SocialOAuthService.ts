@@ -11,6 +11,7 @@ import {
   SOCIAL_ACCOUNT_FACADE,
   ISocialAccountFacade,
 } from '../../application/ports/ISocialAccountFacade';
+import { MetaTokenExchangeService } from './MetaTokenExchangeService';
 
 interface FacebookPage {
   id: string;
@@ -33,6 +34,7 @@ export class SocialOAuthService {
     private readonly configService: ConfigService,
     @Inject(SOCIAL_ACCOUNT_FACADE)
     private readonly socialAccountFacade: ISocialAccountFacade,
+    private readonly tokenExchangeService: MetaTokenExchangeService,
   ) {}
 
   private get appId(): string {
@@ -97,13 +99,27 @@ export class SocialOAuthService {
       return `${this.successUrl}?instagram_error=token_exchange_failed`;
     }
 
+    let accessToken = shortToken;
+    try {
+      const longLived =
+        await this.tokenExchangeService.exchangeForLongLivedToken(shortToken);
+      accessToken = longLived.accessToken;
+      this.logger.log(
+        `Long-lived token obtained for tenant ${tenantId}, expires in ${longLived.expiresInSeconds}s`,
+      );
+    } catch (err) {
+      this.logger.warn(
+        `Long-lived token exchange failed for tenant ${tenantId}, using short-lived: ${this.extractMessage(err)}`,
+      );
+    }
+
     let pages: FacebookPage[];
     try {
       const response = await axios.get<{ data: FacebookPage[] }>(
         `${this.graphBaseUrl}/me/accounts`,
         {
           params: {
-            access_token: shortToken,
+            access_token: accessToken,
             fields: 'id,name,instagram_business_account',
           },
         },
@@ -133,7 +149,7 @@ export class SocialOAuthService {
         `${this.graphBaseUrl}/${igAccountId}`,
         {
           params: {
-            access_token: shortToken,
+            access_token: accessToken,
             fields: 'id,username,name,profile_picture_url',
           },
         },
@@ -151,7 +167,7 @@ export class SocialOAuthService {
         tenantId,
         platform: 'INSTAGRAM',
         externalAccountId: igAccountId,
-        accessToken: shortToken,
+        accessToken,
         pageId,
         username: igInfo.username,
         displayName: igInfo.name,

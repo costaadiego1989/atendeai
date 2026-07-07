@@ -38,7 +38,13 @@ export class MetaInstagramOAuthService {
     } else {
       params.set(
         'scope',
-        ['pages_show_list', 'business_management', 'instagram_basic'].join(','),
+        [
+          'pages_show_list',
+          'business_management',
+          'instagram_basic',
+          'instagram_manage_comments',
+          'instagram_manage_messages',
+        ].join(','),
       );
     }
 
@@ -193,7 +199,7 @@ export class MetaInstagramOAuthService {
   }
 
   getGraphApiVersion(): string {
-    return this.configService.get<string>('META_GRAPH_API_VERSION') || 'v20.0';
+    return this.configService.get<string>('META_GRAPH_API_VERSION') || 'v21.0';
   }
 
   getLoginConfigId(): string {
