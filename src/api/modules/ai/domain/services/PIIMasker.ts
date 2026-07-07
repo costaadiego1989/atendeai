@@ -1,3 +1,4 @@
+import { Injectable, Optional } from '@nestjs/common';
 import { PIIDetector, PIIMatch } from './PIIDetector';
 
 export interface MaskingResult {
@@ -35,10 +36,11 @@ const MASK_PATTERNS: Record<PIIMatch['type'], (value: string) => string> = {
   },
 };
 
+@Injectable()
 export class PIIMasker {
   private readonly detector: PIIDetector;
 
-  constructor(detector?: PIIDetector) {
+  constructor(@Optional() detector?: PIIDetector) {
     this.detector = detector ?? new PIIDetector();
   }
 

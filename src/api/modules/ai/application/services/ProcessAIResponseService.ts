@@ -182,14 +182,20 @@ export class ProcessAIResponseService {
     const resolvedBranchId = await this.resolveBranchId(input);
 
     try {
-      await this.advanceCommerceConversationUseCase.execute({
-        tenantId: input.tenantId,
-        branchId: resolvedBranchId,
-        conversationId: input.conversationId,
-        contactId: input.contactId,
-        businessType: tenant.businessType,
-        userMessage,
-      });
+      try {
+        await this.advanceCommerceConversationUseCase.execute({
+          tenantId: input.tenantId,
+          branchId: resolvedBranchId,
+          conversationId: input.conversationId,
+          contactId: input.contactId,
+          businessType: tenant.businessType,
+          userMessage,
+        });
+      } catch (commerceErr: unknown) {
+        this.logger.warn(
+          `advance_commerce_non_fatal conversation=${input.conversationId} detail=${commerceErr instanceof Error ? commerceErr.message : String(commerceErr)}`,
+        );
+      }
 
       const businessType = (tenant.businessType as BusinessType) || 'generic';
       const phaseState = this.phaseStore

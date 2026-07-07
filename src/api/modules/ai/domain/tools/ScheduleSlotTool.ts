@@ -9,10 +9,7 @@ export const ScheduleSlotToolSchema = z.object({
     .string()
     .optional()
     .describe('ID do profissional (opcional)'),
-  slotId: z
-    .string()
-    .optional()
-    .describe('ID do slot específico (opcional)'),
+  slotId: z.string().optional().describe('ID do slot específico (opcional)'),
   categoryId: z
     .string()
     .optional()

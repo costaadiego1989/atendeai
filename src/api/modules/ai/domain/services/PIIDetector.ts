@@ -1,9 +1,12 @@
+import { Injectable } from '@nestjs/common';
+
 export interface PIIMatch {
   type: 'cpf' | 'credit_card' | 'email' | 'phone';
   value: string;
   index: number;
 }
 
+@Injectable()
 export class PIIDetector {
   private static readonly CPF_FORMATTED = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/g;
   private static readonly CPF_UNFORMATTED = /\b\d{11}\b/g;
@@ -22,9 +25,21 @@ export class PIIDetector {
     const matches: PIIMatch[] = [];
     const cnpjPositions = this.getCnpjPositions(text);
 
-    this.findAll(text, PIIDetector.CPF_FORMATTED, 'cpf', matches, cnpjPositions);
+    this.findAll(
+      text,
+      PIIDetector.CPF_FORMATTED,
+      'cpf',
+      matches,
+      cnpjPositions,
+    );
     this.findUnformattedCPF(text, matches, cnpjPositions);
-    this.findAll(text, PIIDetector.CREDIT_CARD, 'credit_card', matches, cnpjPositions);
+    this.findAll(
+      text,
+      PIIDetector.CREDIT_CARD,
+      'credit_card',
+      matches,
+      cnpjPositions,
+    );
     this.findEmails(text, matches);
     this.findPhones(text, matches);
 

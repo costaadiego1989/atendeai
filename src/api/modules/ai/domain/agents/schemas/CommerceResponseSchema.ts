@@ -6,10 +6,7 @@ export const CommerceResponseSchema = BaseAgentResponseSchema.extend({
     .array(z.string())
     .optional()
     .describe('Itens mencionados ou adicionados ao pedido'),
-  orderTotal: z
-    .number()
-    .optional()
-    .describe('Valor total do pedido atual'),
+  orderTotal: z.number().optional().describe('Valor total do pedido atual'),
   deliveryEstimate: z
     .string()
     .optional()

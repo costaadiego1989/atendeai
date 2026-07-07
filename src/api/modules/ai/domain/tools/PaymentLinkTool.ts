@@ -5,10 +5,7 @@ export const PaymentLinkToolSchema = z.object({
     .string()
     .min(1)
     .describe('Nome do produto ou serviço para gerar link de pagamento'),
-  value: z
-    .number()
-    .positive()
-    .describe('Valor em reais (ex: 99.90)'),
+  value: z.number().positive().describe('Valor em reais (ex: 99.90)'),
 });
 
 export type PaymentLinkToolInput = z.infer<typeof PaymentLinkToolSchema>;

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { PIIDetector } from '../../domain/services/PIIDetector';
 import { PIIMasker } from '../../domain/services/PIIMasker';
 
@@ -33,7 +33,10 @@ export class OutputGuardrailService {
   private readonly detector: PIIDetector;
   private readonly masker: PIIMasker;
 
-  constructor(detector?: PIIDetector, masker?: PIIMasker) {
+  constructor(
+    @Optional() detector?: PIIDetector,
+    @Optional() masker?: PIIMasker,
+  ) {
     this.detector = detector ?? new PIIDetector();
     this.masker = masker ?? new PIIMasker(this.detector);
   }
@@ -42,7 +45,6 @@ export class OutputGuardrailService {
     const violations: GuardrailViolation[] = [];
     let sanitized = text;
 
-    // PII check
     const piiMatches = this.detector.getMatches(text);
     if (piiMatches.length > 0) {
       for (const match of piiMatches) {
@@ -55,7 +57,6 @@ export class OutputGuardrailService {
       sanitized = maskResult.masked;
     }
 
-    // External URL check
     const urlRegex = new RegExp(EXTERNAL_URL_PATTERN.source, 'gi');
     let urlMatch: RegExpExecArray | null;
     while ((urlMatch = urlRegex.exec(text)) !== null) {
@@ -66,7 +67,6 @@ export class OutputGuardrailService {
       sanitized = sanitized.replace(urlMatch[0], '[link removido]');
     }
 
-    // Toxic content check
     for (const pattern of TOXIC_PATTERNS) {
       const regex = new RegExp(pattern.source, 'gi');
       if (regex.test(text)) {

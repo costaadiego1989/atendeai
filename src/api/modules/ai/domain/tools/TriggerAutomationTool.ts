@@ -7,4 +7,6 @@ export const TriggerAutomationToolSchema = z.object({
     .describe('ID (UUID) da automação a ser disparada'),
 });
 
-export type TriggerAutomationToolInput = z.infer<typeof TriggerAutomationToolSchema>;
+export type TriggerAutomationToolInput = z.infer<
+  typeof TriggerAutomationToolSchema
+>;
