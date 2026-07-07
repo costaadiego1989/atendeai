@@ -31,7 +31,7 @@ export interface TwilioChannelCallContext {
 
 interface CreateTwilioSenderInput {
   senderId: string;
-  wabaId: string;
+  wabaId?: string;
   verificationMethod?: 'sms' | 'voice';
   callbackUrl?: string;
   statusCallbackUrl?: string;
@@ -104,7 +104,7 @@ export class TwilioManagementAcl {
         {
           sender_id: input.senderId,
           configuration: {
-            waba_id: input.wabaId,
+            ...(input.wabaId ? { waba_id: input.wabaId } : {}),
             verification_method: input.verificationMethod || 'sms',
             account_type: 'ISV',
           },
