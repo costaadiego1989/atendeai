@@ -137,8 +137,8 @@ export class RegisterTwilioWhatsAppSenderDTO {
   phoneNumber: string;
 
   @IsString()
-  @IsNotEmpty()
-  wabaId: string;
+  @IsOptional()
+  wabaId?: string;
 
   @IsString()
   @IsOptional()
