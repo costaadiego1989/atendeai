@@ -19,7 +19,7 @@ import { test, expect, Page } from '@playwright/test';
  *   npx playwright test --config e2e/meta-integration/playwright.config.ts
  */
 
-const APP_URL = process.env.E2E_BASE_URL || 'http://localhost:5173';
+const APP_URL = process.env.E2E_BASE_URL || 'http://localhost:8080';
 const API_URL = process.env.E2E_API_URL || 'http://localhost:3000';
 
 // Test credentials — set via env or fill here for local testing
