@@ -92,6 +92,20 @@
 - **Risk:** HIGH (toca todo sistema de conversa/IA)
 - **Next:** Phase 1 — install deps, shared infra, FakeChatModel, parsers, factories
 
+### AI-MULTI-AGENT — Multi-Agent Architecture per Domain (2026-07-06)
+
+- **Folder:** `.specs/features/ai-multi-agent-architecture/`
+- **Scope:** Arquitetura multi-agente — cada domínio de negócio tem agente especializado (Sales, Recovery, Scheduling, Commerce, Support). AgentRouter decide qual agente responde baseado em businessType + intent + phase.
+- **Decisões-chave:**
+  - 5 agentes: Sales (default), Recovery, Scheduling, Commerce, Support (intent-triggered)
+  - Roteamento determinístico: tenantOverride > intent > phase > businessType > default
+  - Cada agente tem: systemPromptTemplate, tools subset, responseSchema (Zod), phases
+  - JSON estruturado para determinismo (StructuredOutputChainFactory + Zod validation)
+  - Guardrails universais (PII/toxic) aplicados DEPOIS do agente — não per-agent
+  - Legacy AIResponseProcessor + AIAutomationDispatcher mantidos como fallback
+- **Status:** T1-T12 ✅ COMPLETE (212 tests green)
+- **Files:** `src/api/modules/ai/domain/agents/` (schemas, definitions, registry, router)
+
 ## Quick tasks log
 
 | Date       | Slug                         | Summary                                      |

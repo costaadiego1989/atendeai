@@ -11,3 +11,13 @@ export type {
   TextOutputChainInput,
   TextOutputChainOptions,
 } from './TextOutputChainFactory';
+
+export { ToolCallingChainFactory } from './ToolCallingChainFactory';
+export type {
+  ToolCallingChain,
+  ToolCallingChainInput,
+  ToolCallingChainOutput,
+  ToolCallingChainOptions,
+  ToolDefinition,
+  ToolCallResult,
+} from './ToolCallingChainFactory';

@@ -68,6 +68,15 @@ import { AITurnPersistenceService } from './application/services/AITurnPersisten
 import { AIHandoffService } from './application/services/AIHandoffService';
 import { AIAutomationDispatcher } from './application/services/AIAutomationDispatcher';
 import { AIUserMessageResolver } from './application/services/AIUserMessageResolver';
+import { OutputGuardrailService } from './application/services/OutputGuardrailService';
+import { ToolExecutionService } from './application/services/ToolExecutionService';
+import { AgentRouter } from './domain/agents/AgentRouter';
+import { PIIDetector } from './domain/services/PIIDetector';
+import { PIIMasker } from './domain/services/PIIMasker';
+import {
+  CONVERSATION_PHASE_STORE,
+  RedisConversationPhaseStore,
+} from './infrastructure/persistence/RedisConversationPhaseStore';
 import {
   AUDIO_TRANSCRIPTION_PROVIDER,
   DOCUMENT_TEXT_EXTRACTOR,
@@ -270,6 +279,16 @@ import {
     AIHandoffService,
     AIAutomationDispatcher,
     AIUserMessageResolver,
+    PIIDetector,
+    PIIMasker,
+    OutputGuardrailService,
+    ToolExecutionService,
+    AgentRouter,
+    {
+      provide: CONVERSATION_PHASE_STORE,
+      useFactory: (redis: Redis) => new RedisConversationPhaseStore(redis),
+      inject: [REDIS_CLIENT],
+    },
     {
       provide: CHAT_HISTORY_REPOSITORY,
       useClass: RedisChatHistoryRepository,
