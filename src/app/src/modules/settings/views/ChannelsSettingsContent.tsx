@@ -195,19 +195,19 @@ export function ChannelsSettingsContent() {
                 <Button
                   className="gap-2"
                   onClick={() =>
-                    vm.registerMutation.mutate({
+                    vm.startEmbeddedSignupMutation.mutate({
                       phoneNumber: vm.normalizedPhoneNumber,
                       branchId: vm.selectedBranchId ?? undefined,
                     })
                   }
                   disabled={
-                    vm.registerMutation.isPending ||
+                    vm.startEmbeddedSignupMutation.isPending ||
                     !vm.normalizedPhoneNumber.trim()
                   }
                 >
                   <MessageSquare className="h-4 w-4" />
-                  {vm.registerMutation.isPending
-                    ? 'Registrando número...'
+                  {vm.startEmbeddedSignupMutation.isPending
+                    ? 'Conectando...'
                     : 'Conectar WhatsApp'}
                 </Button>
                 <Button
