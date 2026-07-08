@@ -16,7 +16,7 @@ export interface RegisterTwilioWhatsAppSenderInput {
   tenantId: string;
   branchId?: string;
   phoneNumber: string;
-  wabaId: string;
+  wabaId?: string;
   verificationMethod?: 'sms' | 'voice';
   profileName?: string;
   about?: string;
@@ -86,7 +86,7 @@ export class RegisterTwilioWhatsAppSenderUseCase implements IUseCase<
     const sender = await this.twilioManagementAcl.createSender(
       {
         senderId: `whatsapp:+${normalizedPhone}`,
-        wabaId: input.wabaId,
+        wabaId: input.wabaId || undefined,
         verificationMethod: input.verificationMethod || 'sms',
         account: twilioCredentials,
         callbackUrl: this.resolveWebhookUrl(),
@@ -120,7 +120,7 @@ export class RegisterTwilioWhatsAppSenderUseCase implements IUseCase<
             authToken: twilioAccount.authToken,
             senderSid: sender.sid,
             senderId: sender.senderId,
-            wabaId: sender.configuration?.wabaId || input.wabaId,
+            wabaId: sender.configuration?.wabaId || input.wabaId || '',
             senderStatus: sender.status,
           },
           webhookSecret: null,
@@ -143,7 +143,7 @@ export class RegisterTwilioWhatsAppSenderUseCase implements IUseCase<
           authToken: twilioAccount.authToken,
           senderSid: sender.sid,
           senderId: sender.senderId,
-          wabaId: sender.configuration?.wabaId || input.wabaId,
+          wabaId: sender.configuration?.wabaId || input.wabaId || '',
         },
         whatsappNumber: normalizedPhone,
         webhookSecret: null,

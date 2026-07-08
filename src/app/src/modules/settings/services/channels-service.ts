@@ -3,7 +3,7 @@ import type { WhatsAppConnection } from '@/shared/types';
 
 export interface RegisterTwilioSenderInput {
   phoneNumber: string;
-  wabaId: string;
+  wabaId?: string;
   branchId?: string;
   verificationMethod?: 'sms' | 'voice';
   profileName?: string;
