@@ -109,7 +109,7 @@ describe('ConfigureInstagramUseCase', () => {
     expect(result).toEqual(
       expect.objectContaining({
         instagramAccountId: '17841400000000000',
-        status: 'PENDING_VERIFICATION',
+        status: 'ACTIVE',
       }),
     );
     expect(tenant.instagramConfig?.metaAccessToken).toBe('meta-platform-token');
