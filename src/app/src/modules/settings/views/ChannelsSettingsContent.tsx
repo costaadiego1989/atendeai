@@ -1,4 +1,4 @@
-import { Bot, ExternalLink, Linkedin, Link2, MessageSquare, RefreshCcw, ShieldAlert } from 'lucide-react';
+import { Bot, ExternalLink, Instagram, Link2, MessageSquare, RefreshCcw, ShieldAlert, Unlink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -250,48 +250,79 @@ export function ChannelsSettingsContent() {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Bot className="h-4 w-4 text-primary" />
-                Configurar Instagram
+                <Instagram className="h-4 w-4 text-primary" />
+                Instagram
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-xl border border-border/60 p-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Conta do escopo {vm.selectedScope?.label ?? 'selecionado'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Vincule o identificador da conta do Instagram que responderá por esta operação.
-                  </p>
-                </div>
-                <StatusBadge
-                  status={vm.selectedScope?.instagramConnected ? 'ACTIVE' : 'INACTIVE'}
-                />
-              </div>
+              {vm.selectedScope?.instagramConnected ? (
+                <>
+                  <div className="flex items-center justify-between rounded-xl border border-border/60 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#f09433] via-[#dc2743] to-[#bc1888] p-[2px]">
+                        <div className="w-full h-full bg-background rounded-full flex items-center justify-center">
+                          <Instagram className="h-4 w-4 text-foreground" />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {vm.selectedScope?.instagramAccountId
+                            ? `ID: ${vm.selectedScope.instagramAccountId}`
+                            : 'Conta conectada'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Escopo: {vm.selectedScope?.label}
+                        </p>
+                      </div>
+                    </div>
+                    <StatusBadge status="ACTIVE" />
+                  </div>
 
-              <div className="space-y-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
-                <div className="flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4 text-amber-500" />
-                  <p className="text-sm font-medium text-foreground">
-                    Antes de conectar — a conta precisa estar pronta
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => vm.startInstagramMetaConnectionMutation.mutate()}
+                      disabled={vm.startInstagramMetaConnectionMutation.isPending}
+                    >
+                      <RefreshCcw className="h-4 w-4" />
+                      {vm.startInstagramMetaConnectionMutation.isPending
+                        ? 'Conectando...'
+                        : 'Trocar conta'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => vm.disconnectInstagramMutation.mutate()}
+                      disabled={vm.disconnectInstagramMutation.isPending}
+                    >
+                      <Unlink className="h-4 w-4" />
+                      {vm.disconnectInstagramMutation.isPending
+                        ? 'Desconectando...'
+                        : 'Desconectar'}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Conecte sua conta Instagram Business para habilitar engajamento automático e resposta a comentários via IA.
                   </p>
-                </div>
-                <ul className="ml-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
-                  <li>
-                    A conta do Instagram precisa ser Profissional/Empresa (não pessoal).
-                  </li>
-                  <li>
-                    Ela precisa estar vinculada a uma Página do Facebook que você administra.
-                  </li>
-                  <li>
-                    No popup da Meta, marque a empresa, a Página e a conta do Instagram (opt-in de tudo) — senão a lista volta vazia ("Nenhuma conta encontrada").
-                  </li>
-                </ul>
-              </div>
 
-              <div className="space-y-2">
-                <Label>Conectar conta com a Meta</Label>
-                <div className="flex flex-wrap gap-2">
+                  <div className="space-y-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
+                    <div className="flex items-center gap-2">
+                      <ShieldAlert className="h-4 w-4 text-amber-500" />
+                      <p className="text-sm font-medium text-foreground">
+                        Pré-requisitos
+                      </p>
+                    </div>
+                    <ul className="ml-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                      <li>Conta Instagram Profissional/Empresa (não pessoal)</li>
+                      <li>Vinculada a uma Página do Facebook que você administra</li>
+                      <li>No popup da Meta, marque a empresa, Página e conta do Instagram</li>
+                    </ul>
+                  </div>
+
                   <Button
                     className="gap-2"
                     onClick={() => vm.startInstagramMetaConnectionMutation.mutate()}
@@ -302,56 +333,43 @@ export function ChannelsSettingsContent() {
                       ? 'Conectando via Meta...'
                       : 'Conectar com Meta Business'}
                   </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Fluxo oficial da Meta: você faz login no Meta Business, concede acesso e o sistema lista as contas de Instagram Business disponíveis para escolha.
-                </p>
-              </div>
 
-              {vm.instagramAccounts.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Contas encontradas neste login</Label>
-                  <Select
-                    value={vm.instagramAccountId}
-                    onValueChange={vm.setInstagramAccountId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a conta do Instagram" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vm.instagramAccounts.map((account) => (
-                        <SelectItem
-                          key={account.instagramAccountId}
-                          value={account.instagramAccountId}
-                        >
-                          {account.username
-                            ? `@${account.username}`
-                            : account.pageName || account.instagramAccountId}
-                          {account.pageName ? ` • ${account.pageName}` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  {vm.instagramAccounts.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Contas encontradas</Label>
+                      <Select
+                        value={vm.instagramAccountId}
+                        onValueChange={vm.setInstagramAccountId}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a conta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {vm.instagramAccounts.map((account) => (
+                            <SelectItem
+                              key={account.instagramAccountId}
+                              value={account.instagramAccountId}
+                            >
+                              {account.username
+                                ? `@${account.username}`
+                                : account.pageName || account.instagramAccountId}
+                              {account.pageName ? ` • ${account.pageName}` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        className="gap-2"
+                        onClick={() => vm.configureInstagramMutation.mutate(vm.instagramAccountId)}
+                        disabled={vm.configureInstagramMutation.isPending || !vm.instagramAccountId.trim()}
+                      >
+                        <Link2 className="h-4 w-4" />
+                        {vm.configureInstagramMutation.isPending ? 'Salvando...' : 'Vincular conta'}
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  className="gap-2"
-                  onClick={() =>
-                    vm.configureInstagramMutation.mutate(vm.instagramAccountId)
-                  }
-                  disabled={
-                    vm.configureInstagramMutation.isPending ||
-                    !vm.instagramAccountId.trim()
-                  }
-                >
-                  <Link2 className="h-4 w-4" />
-                  {vm.configureInstagramMutation.isPending
-                    ? 'Salvando conta...'
-                    : 'Salvar conta Meta'}
-                </Button>
-              </div>
             </CardContent>
           </Card>
 

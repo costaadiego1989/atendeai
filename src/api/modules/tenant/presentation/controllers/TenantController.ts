@@ -40,6 +40,7 @@ import { IGetTenantProfileSectionsUseCase } from '../../application/use-cases/in
 import { IGetTenantOnboardingChecklistUseCase } from '../../application/use-cases/interfaces/IGetTenantOnboardingChecklistUseCase';
 import { UpsertTenantPDFResumeUseCase } from '../../application/use-cases/UpsertTenantPDFResumeUseCase';
 import { ListTenantPDFResumesUseCase } from '../../application/use-cases/ListTenantPDFResumesUseCase';
+import { DisconnectInstagramUseCase } from '../../application/use-cases/DisconnectInstagramUseCase';
 
 @Controller('tenants')
 @TenantParam('id')
@@ -66,6 +67,7 @@ export class TenantController {
     private readonly deletePromotionUseCase: DeletePromotionUseCase,
     private readonly upsertTenantPDFResumeUseCase: UpsertTenantPDFResumeUseCase,
     private readonly listTenantPDFResumesUseCase: ListTenantPDFResumesUseCase,
+    private readonly disconnectInstagramUseCase: DisconnectInstagramUseCase,
   ) {}
 
   @Post()
@@ -110,6 +112,23 @@ export class TenantController {
     return this.configureInstagramUseCase.execute({
       ...body,
       tenantId: id,
+      requestingUserId: user?.sub,
+      requestingUserEmail: user?.email,
+    });
+  }
+
+  @Delete(':id/instagram-config')
+  @UseGuards(JwtCookieGuard, RolesGuard, TenantGuard)
+  @Roles('OWNER', 'ADMIN')
+  async deleteInstagramConfig(
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    const user = (req as any).user;
+    const branchId = (req.query as any)?.branchId;
+    return this.disconnectInstagramUseCase.execute({
+      tenantId: id,
+      branchId: branchId || undefined,
       requestingUserId: user?.sub,
       requestingUserEmail: user?.email,
     });

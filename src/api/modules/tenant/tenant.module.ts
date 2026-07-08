@@ -14,6 +14,7 @@ import { IRefreshMetaWhatsAppStatusUseCase } from './application/use-cases/inter
 import { MetaWhatsAppEmbeddedSignupService } from './infrastructure/services/MetaWhatsAppEmbeddedSignupService';
 import { ConfigureInstagramUseCase } from './application/use-cases/ConfigureInstagramUseCase';
 import { IConfigureInstagramUseCase } from './application/use-cases/interfaces/IConfigureInstagramUseCase';
+import { DisconnectInstagramUseCase } from './application/use-cases/DisconnectInstagramUseCase';
 import { ConfigureAIUseCase } from './application/use-cases/ConfigureAIUseCase';
 import { IConfigureAIUseCase } from './application/use-cases/interfaces/IConfigureAIUseCase';
 import { UpdateBusinessDataUseCase } from './application/use-cases/UpdateBusinessDataUseCase';
@@ -154,6 +155,7 @@ const TENANT_USE_CASE_PROVIDERS = [
     provide: IConfigureInstagramUseCase,
     useClass: ConfigureInstagramUseCase,
   },
+  DisconnectInstagramUseCase,
   {
     provide: IConfigureAIUseCase,
     useClass: ConfigureAIUseCase,

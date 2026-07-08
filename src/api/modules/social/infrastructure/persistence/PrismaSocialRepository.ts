@@ -7,10 +7,6 @@ import { SocialAutoReplyRule } from '../../domain/entities/SocialAutoReplyRule';
 import { UniqueEntityID } from '../../../../shared/domain/UniqueEntityID';
 import { encrypt, decrypt } from '@shared/crypto/field-encryption';
 
-/**
- * Detect whether a string is already encrypted by this layer.
- * The envelope format is `iv:tag:ciphertext` — exactly 2 colons.
- */
 function isEncrypted(v: string | null | undefined): boolean {
   if (!v) return false;
   return (v.match(/:/g) ?? []).length === 2;
@@ -18,9 +14,27 @@ function isEncrypted(v: string | null | undefined): boolean {
 
 @Injectable()
 export class PrismaSocialRepository implements ISocialRepository {
+  private readonly logger = new (require('@nestjs/common').Logger)(
+    PrismaSocialRepository.name,
+  );
+
   constructor(private readonly prisma: PrismaService) {}
+
+  private async safeQuery<T>(fallback: T, query: string, ...params: any[]): Promise<T> {
+    try {
+      return await this.prisma.$queryRawUnsafe<any>(query, ...params);
+    } catch (error: any) {
+      const msg = error?.message || '';
+      if (/relation.*does not exist|schema.*does not exist/i.test(msg)) {
+        this.logger.warn(
+          `Social schema not available, returning fallback: ${msg.slice(0, 120)}`,
+        );
+        return fallback;
+      }
+      throw error;
+    }
+  }
   async saveAccount(account: SocialAccount): Promise<void> {
-    // Encrypt OAuth tokens at the persistence boundary (T1 fix).
     const encryptedAccessToken = account.accessToken
       ? encrypt(account.accessToken)
       : account.accessToken;
@@ -101,7 +115,8 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async listAccounts(tenantId: string): Promise<SocialAccount[]> {
-    const rows = await this.prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.safeQuery<any[]>(
+      [],
       `SELECT * FROM social_schema.social_accounts WHERE tenant_id = $1 ORDER BY connected_at DESC`,
       tenantId,
     );
@@ -235,11 +250,13 @@ export class PrismaSocialRepository implements ISocialRepository {
     const offset = ((filters.page || 1) - 1) * limit;
 
     const [rows, countRows] = await Promise.all([
-      this.prisma.$queryRawUnsafe<any[]>(
+      this.safeQuery<any[]>(
+        [],
         `SELECT * FROM social_schema.social_comments WHERE ${where} ORDER BY received_at DESC LIMIT ${limit} OFFSET ${offset}`,
         ...params,
       ),
-      this.prisma.$queryRawUnsafe<any[]>(
+      this.safeQuery<any[]>(
+        [{ count: 0 }],
         `SELECT COUNT(*)::int as count FROM social_schema.social_comments WHERE ${where}`,
         ...params,
       ),
@@ -391,7 +408,8 @@ export class PrismaSocialRepository implements ISocialRepository {
   }
 
   async listAllRules(tenantId: string): Promise<SocialAutoReplyRule[]> {
-    const rows = await this.prisma.$queryRawUnsafe<any[]>(
+    const rows = await this.safeQuery<any[]>(
+      [],
       `SELECT * FROM social_schema.social_auto_reply_rules WHERE tenant_id = $1 ORDER BY priority DESC, created_at DESC`,
       tenantId,
     );
@@ -527,7 +545,8 @@ export class PrismaSocialRepository implements ISocialRepository {
     connectedAccounts: number;
   }> {
     const [comments, rules, accounts] = await Promise.all([
-      this.prisma.$queryRawUnsafe<any[]>(
+      this.safeQuery<any[]>(
+        [{ total: 0, pending: 0, replied: 0, auto_replied: 0 }],
         `SELECT
           COUNT(*)::int as total,
           COUNT(*) FILTER (WHERE status = 'PENDING')::int as pending,
@@ -536,11 +555,13 @@ export class PrismaSocialRepository implements ISocialRepository {
          FROM social_schema.social_comments WHERE tenant_id = $1`,
         tenantId,
       ),
-      this.prisma.$queryRawUnsafe<any[]>(
+      this.safeQuery<any[]>(
+        [{ count: 0 }],
         `SELECT COUNT(*)::int as count FROM social_schema.social_auto_reply_rules WHERE tenant_id = $1 AND is_active = true`,
         tenantId,
       ),
-      this.prisma.$queryRawUnsafe<any[]>(
+      this.safeQuery<any[]>(
+        [{ count: 0 }],
         `SELECT COUNT(*)::int as count FROM social_schema.social_accounts WHERE tenant_id = $1 AND status = 'ACTIVE'`,
         tenantId,
       ),
