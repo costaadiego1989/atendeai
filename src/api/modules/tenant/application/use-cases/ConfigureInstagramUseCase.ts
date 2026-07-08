@@ -99,6 +99,7 @@ export class ConfigureInstagramUseCase implements IConfigureInstagramUseCase {
       instagramAccountId: input.instagramAccountId,
       webhookSecret: platformWebhookSecret,
     });
+    config.activate();
 
     tenant.configureInstagram(config);
     await this.tenantRepo.save(tenant);
