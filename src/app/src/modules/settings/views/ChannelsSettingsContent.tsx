@@ -1,4 +1,4 @@
-import { Bot, ExternalLink, Instagram, Link2, MessageSquare, RefreshCcw, ShieldAlert, Unlink } from 'lucide-react';
+import { Bot, ExternalLink, Instagram, Linkedin, Link2, MessageSquare, RefreshCcw, ShieldAlert, Unlink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
