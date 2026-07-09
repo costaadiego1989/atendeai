@@ -1759,6 +1759,24 @@ model KnowledgeSource {
   @@schema("ai_schema")
 }
 
+// --- Dashboard Chat ---
+model DashboardChatMessage {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  threadId  String   @map("thread_id") @db.VarChar(255)
+  role      String   @db.VarChar(20) // user | assistant | tool
+  content   String   @db.Text
+  toolCalls Json?    @map("tool_calls")
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([tenantId, threadId, createdAt], name: "idx_dashboard_chat_tenant_thread")
+  @@index([tenantId, userId], name: "idx_dashboard_chat_tenant_user")
+  @@map("dashboard_chat_messages")
+  @@schema("ai_schema")
+}
+
 // --- Automations Self-Service ---
 model Automation {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

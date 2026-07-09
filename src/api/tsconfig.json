@@ -31,6 +31,12 @@
       ],
       "@nestjs/bullmq/lib/*": [
         "node_modules/@nestjs/bullmq/dist/*"
+      ],
+      "@langchain/langgraph/prebuilt": [
+        "node_modules/@langchain/langgraph/dist/prebuilt/index.d.ts"
+      ],
+      "@langchain/langgraph": [
+        "node_modules/@langchain/langgraph/dist/index.d.ts"
       ]
     }
   },
@@ -44,6 +50,7 @@
     "**/*.e2e-spec.ts"
   ],
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "typings/**/*.d.ts"
   ]
 }
