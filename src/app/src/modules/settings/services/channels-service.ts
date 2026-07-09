@@ -89,6 +89,14 @@ export const channelsService = {
     return apiClient.put(`/tenants/${tenantId}/instagram-config`, input);
   },
 
+  async disconnectInstagram(
+    tenantId: string,
+    branchId?: string | null,
+  ): Promise<{ success: boolean }> {
+    const query = branchId ? `?branchId=${encodeURIComponent(branchId)}` : '';
+    return apiClient.delete(`/tenants/${tenantId}/instagram-config${query}`);
+  },
+
   async startInstagramMetaConnection(
     branchId?: string | null,
   ): Promise<{ authorizationUrl: string }> {

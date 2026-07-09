@@ -363,6 +363,29 @@ export function useChannelsSettingsViewModel() {
     },
   });
 
+  const disconnectInstagramMutation = useMutation({
+    mutationFn: () =>
+      channelsService.disconnectInstagram(tenantId as string, selectedBranchId),
+    onSuccess: async () => {
+      await invalidateChannelsData();
+      setInstagramAccountId('');
+      setInstagramAccounts([]);
+      toast({
+        title: 'Instagram desconectado',
+        description: 'A conta foi removida deste escopo.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Falha ao desconectar',
+        description: getFriendlyErrorMessage(error, {
+          fallbackMessage: 'Não foi possível desconectar o Instagram agora.',
+        }),
+        variant: 'destructive',
+      });
+    },
+  });
+
   const startInstagramMetaConnectionMutation = useMutation({
     mutationFn: () =>
       channelsService.startInstagramMetaConnection(selectedBranchId),
@@ -499,6 +522,7 @@ export function useChannelsSettingsViewModel() {
     refreshMutation,
     // Instagram
     configureInstagramMutation,
+    disconnectInstagramMutation,
     startInstagramMetaConnectionMutation,
     phoneNumber,
     setPhoneNumber(value: string) {

@@ -16,6 +16,7 @@ import {
   TenantPlanChanged,
   WhatsAppConfigured,
   InstagramConfigured,
+  InstagramDisconnected,
   AIConfigUpdated,
 } from '../events/TenantEvents.js';
 
@@ -275,6 +276,12 @@ export class Tenant extends AggregateRoot<TenantProps> {
     this.addDomainEvent(
       new InstagramConfigured(this.id, config.instagramAccountId),
     );
+  }
+
+  public disconnectInstagram(): void {
+    this.props.instagramConfig = null;
+    this.updatedAt = new Date();
+    this.addDomainEvent(new InstagramDisconnected(this.id));
   }
 
   public configureAI(config: AIConfig): void {

@@ -46,6 +46,12 @@ export class InstagramConfigured extends DomainEvent {
   }
 }
 
+export class InstagramDisconnected extends DomainEvent {
+  constructor(aggregateId: UniqueEntityID) {
+    super(aggregateId);
+  }
+}
+
 export class AIConfigUpdated extends DomainEvent {
   constructor(aggregateId: UniqueEntityID) {
     super(aggregateId);
