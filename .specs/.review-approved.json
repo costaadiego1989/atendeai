@@ -1,5 +1,1 @@
-{
-  "branch": "test/widget-chat-e2e",
-  "reviewedSha": "d7f0d4c42264b6c572eff820c9ccaed8396a5ab6",
-  "approvedAt": "2026-07-03T01:51:27.667Z"
-}
+﻿{"branch":"fix/dashboard-widget-lint","reviewedSha":"eddc5a8b8ddf52327a204076931b6fc571f17a43","approvedAt":"2026-07-09T01:00:00Z"}
