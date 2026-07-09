@@ -28,6 +28,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { KPICard } from '@/shared/ui/KPICard';
 import { DashboardOperationsPanel } from '@/modules/dashboard/components/DashboardOperationsPanel';
 import { DashboardPipelineChart } from '@/modules/dashboard/components/DashboardPipelineChart';
+import { DashboardChatWidget } from '@/modules/dashboard/components/DashboardChat';
 import { DashboardRecoveryChart } from '@/modules/dashboard/components/DashboardRecoveryChart';
 import { DashboardRevenueChart } from '@/modules/dashboard/components/DashboardRevenueChart';
 import { DashboardUsagePanel } from '@/modules/dashboard/components/DashboardUsagePanel';
@@ -482,6 +483,11 @@ export default function DashboardPage() {
           recentCharges={vm.recentCharges}
         />
       </div>
+
+      <DashboardChatWidget
+        tenantId={vm.tenant?.id || ''}
+        businessType={vm.tenant?.businessType || 'GENERIC'}
+      />
     </div>
   );
 }

@@ -115,6 +115,20 @@ import {
   AUTOMATION_AI_REPLY_FACADE,
   AutomationAiReplyFacade,
 } from './application/facades/AutomationAiReplyFacade';
+import { DashboardAgentFactory } from './domain/dashboard-agent/DashboardAgentFactory';
+import { DashboardToolRegistry } from './domain/dashboard-agent/DashboardToolRegistry';
+import { DashboardPromptBuilder } from './domain/dashboard-agent/DashboardPromptBuilder';
+import { StreamDashboardChatUseCase } from './application/use-cases/StreamDashboardChatUseCase';
+import { DashboardChatController } from './presentation/controllers/DashboardChatController';
+import { PrismaDashboardChatRepository } from './infrastructure/persistence/PrismaDashboardChatRepository';
+import {
+  DASHBOARD_METRICS_PROVIDER,
+  ATTENDANCE_METRICS_PROVIDER,
+  SCHEDULING_METRICS_PROVIDER,
+  CATALOG_METRICS_PROVIDER,
+  RECOVERY_METRICS_PROVIDER,
+  CONTACT_METRICS_PROVIDER,
+} from './application/ports/dashboard';
 
 @Module({
   imports: [
@@ -309,8 +323,50 @@ import {
       provide: AUTOMATION_AI_REPLY_FACADE,
       useClass: AutomationAiReplyFacade,
     },
+    DashboardAgentFactory,
+    DashboardToolRegistry,
+    DashboardPromptBuilder,
+    StreamDashboardChatUseCase,
+    PrismaDashboardChatRepository,
+    {
+      provide: DASHBOARD_METRICS_PROVIDER,
+      useValue: {
+        getRevenue: async () => ({ totalRevenue: 0, count: 0, averageTicket: 0 }),
+      },
+    },
+    {
+      provide: ATTENDANCE_METRICS_PROVIDER,
+      useValue: {
+        getStatus: async () => ({ activeConversations: 0, inQueue: 0, waitingHuman: 0, avgResponseTimeSeconds: 0, avgAiResponseTimeSeconds: 0, byChannel: [] }),
+      },
+    },
+    {
+      provide: SCHEDULING_METRICS_PROVIDER,
+      useValue: {
+        getMetrics: async () => ({ occupancyRate: 0, totalSlots: 0, bookedSlots: 0, availableSlots: 0, noShows: 0, cancellations: 0, nextAppointments: [] }),
+      },
+    },
+    {
+      provide: CATALOG_METRICS_PROVIDER,
+      useValue: {
+        getMetrics: async () => ({ topProducts: [], lowStockItems: [], pendingOrders: 0, averageOrderValue: 0, totalProducts: 0 }),
+      },
+    },
+    {
+      provide: RECOVERY_METRICS_PROVIDER,
+      useValue: {
+        getMetrics: async () => ({ totalOpen: 0, totalRecovered: 0, conversionRate: 0, topDebtors: [], scheduledCollections: 0 }),
+      },
+    },
+    {
+      provide: CONTACT_METRICS_PROVIDER,
+      useValue: {
+        getMetrics: async () => ({ totalContacts: 0, newInPeriod: 0, byFunnelStage: [], mostEngaged: [] }),
+        searchContacts: async () => [],
+      },
+    },
   ],
-  controllers: [],
+  controllers: [DashboardChatController],
   exports: [
     AI_ENGINE,
     AUTOMATION_AI_REPLY_FACADE,
