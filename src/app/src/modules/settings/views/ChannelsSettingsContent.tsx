@@ -195,18 +195,24 @@ export function ChannelsSettingsContent() {
                 <Button
                   className="gap-2"
                   onClick={() =>
-                    vm.startEmbeddedSignupMutation.mutate({
-                      phoneNumber: vm.normalizedPhoneNumber,
-                      branchId: vm.selectedBranchId ?? undefined,
-                    })
+                    vm.isMetaCloud
+                      ? vm.connectMetaWhatsAppMutation.mutate()
+                      : vm.startEmbeddedSignupMutation.mutate({
+                          phoneNumber: vm.normalizedPhoneNumber,
+                          branchId: vm.selectedBranchId ?? undefined,
+                        })
                   }
                   disabled={
-                    vm.startEmbeddedSignupMutation.isPending ||
+                    (vm.isMetaCloud
+                      ? vm.connectMetaWhatsAppMutation.isPending
+                      : vm.startEmbeddedSignupMutation.isPending) ||
                     !vm.normalizedPhoneNumber.trim()
                   }
                 >
                   <MessageSquare className="h-4 w-4" />
-                  {vm.startEmbeddedSignupMutation.isPending
+                  {(vm.isMetaCloud
+                    ? vm.connectMetaWhatsAppMutation.isPending
+                    : vm.startEmbeddedSignupMutation.isPending)
                     ? 'Conectando...'
                     : 'Conectar WhatsApp'}
                 </Button>
